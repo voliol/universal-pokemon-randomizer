@@ -115,7 +115,7 @@ public interface RomHandler {
 
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon
-    public Pokemon random2EvosPokemon();
+    public Pokemon random2EvosPokemon(boolean noSplitEvos);
 
     // Randomizer: types
 
@@ -393,7 +393,7 @@ public interface RomHandler {
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange);
+            boolean forceChange, boolean noConverge, boolean forceGrowth);
 
     // stats stuff
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary);

@@ -32,9 +32,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Iterator;
 
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
@@ -144,6 +146,86 @@ public class Randomizer {
         if (settings.isUpdateBaseStats()) {
             romHandler.updatePokemonStats();
         }
+        
+        if (settings.isEvosRandomizeFirst()) {
+            // Applied before everything so everything that "Follows evolutions" follows the randomized ones if 
+            // "randomize evolutions first" is selected.
+            // Otherwise, applied after type to pick new evos based on new types.
+            if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
+                romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
+                        settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosNoConverge(), 
+                        settings.isEvosForceGrowth());
+    
+                log.println("--Randomized Evolutions--");
+                List<Pokemon> allPokes = romHandler.getPokemon();
+                for (Pokemon pk : allPokes) {
+                    if (pk != null) {
+                        int numEvos = pk.evolutionsFrom.size();
+                        if (numEvos > 0) {
+                            StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
+                            for (int i = 1; i < numEvos; i++) {
+                                if (i == numEvos - 1) {
+                                    evoStr.append(" and " + pk.evolutionsFrom.get(i).to.name);
+                                } else {
+                                    evoStr.append(", " + pk.evolutionsFrom.get(i).to.name);
+                                }
+                            }
+                            log.println(pk.name + " now evolves into " + evoStr.toString());
+                        }
+                    }
+                }
+                log.println();
+                
+//                log.println("--Family tree for emerald randomizer--");
+//                for (Pokemon pk : allPokes) {
+//                    if (pk != null) {
+//                        List<Pokemon> evoQueue = new ArrayList<Pokemon>();
+//                        evoQueue.add(pk);
+//                        List<Pokemon> evoVisited = new ArrayList<Pokemon>();
+//                        while (evoQueue.size() > 0) {
+//                            Pokemon pkCurrent = evoQueue.get(0);
+//                            for (Evolution evo : pkCurrent.evolutionsFrom) {
+//                                if (!evoVisited.contains(evo.to) && !evoQueue.contains(evo.to)) {
+//                                    evoQueue.add(evo.to);
+//                                }
+//                            }
+//                            for (Evolution prevo : pkCurrent.evolutionsTo) {
+//                                if (!evoVisited.contains(prevo.from) && !evoQueue.contains(prevo.from)) {
+//                                    evoQueue.add(prevo.from);
+//                                }
+//                            }
+//                            evoVisited.add(pkCurrent);
+//                            evoQueue.remove(0);
+//                        }
+//                        if (evoVisited.size() > 1) {
+//                            StringBuilder evoStr = new StringBuilder();
+//                            // evoStr.append(pk.number + ": ");
+//                            evoStr.append("{");
+//                            evoStr.append(evoVisited.get(0).number + ",");
+//                            evoStr.append(evoVisited.get(1).number);
+//                            for (int i = 2; i < evoVisited.size(); i++) {
+//                                    evoStr.append("," + evoVisited.get(i).number);
+//                                }
+//                            evoStr.append("},");
+//                            log.println(evoStr.toString());
+//                        }
+//                        else {
+//                            // log.println(pk.number + ": ");  
+//                            log.println("{" + evoVisited.get(0).number + "},");  
+//                        }           
+//                        if (pk.number == 251) {
+//                            for (int i = 0; i < 25; i++)
+//                                log.println("{0},");
+//                        }
+//                    }
+//                    else {
+//                        log.println("-");
+//                    }
+//                }
+//    
+//                log.println();
+            }
+        }
 
         // Base stats changing
         switch (settings.getBaseStatisticsMod()) {
@@ -178,6 +260,87 @@ public class Randomizer {
         default:
             break;
         }
+        
+        if (!settings.isEvosRandomizeFirst()) {
+            // Random Evos
+            // Applied before everything so everything that "Follows evolutions" follows the randomized ones if 
+            // "randomize evolutions first" is selected.
+            // Otherwise, applied after type to pick new evos based on new types.
+            if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
+                romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
+                        settings.isEvosMaxThreeStages(), settings.isEvosForceChange(), settings.isEvosNoConverge(),
+                        settings.isEvosForceGrowth());
+    
+                log.println("--Randomized Evolutions--");
+                List<Pokemon> allPokes = romHandler.getPokemon();
+                for (Pokemon pk : allPokes) {
+                    if (pk != null) {
+                        int numEvos = pk.evolutionsFrom.size();
+                        if (numEvos > 0) {
+                            StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
+                            for (int i = 1; i < numEvos; i++) {
+                                if (i == numEvos - 1) {
+                                    evoStr.append(" and " + pk.evolutionsFrom.get(i).to.name);
+                                } else {
+                                    evoStr.append(", " + pk.evolutionsFrom.get(i).to.name);
+                                }
+                            }
+                            log.println(pk.name + " now evolves into " + evoStr.toString());
+                        }
+                    }
+                }
+                log.println();
+                
+                log.println("--Family tree for emerald randomizer--");
+                for (Pokemon pk : allPokes) {
+                    if (pk != null) {
+                        List<Pokemon> evoQueue = new ArrayList<Pokemon>();
+                        evoQueue.add(pk);
+                        List<Pokemon> evoVisited = new ArrayList<Pokemon>();
+                        while (evoQueue.size() > 0) {
+                            Pokemon pkCurrent = evoQueue.get(0);
+                            for (Evolution evo : pkCurrent.evolutionsFrom) {
+                                if (!evoVisited.contains(evo.to) && !evoQueue.contains(evo.to)) {
+                                    evoQueue.add(evo.to);
+                                }
+                            }
+                            for (Evolution prevo : pkCurrent.evolutionsTo) {
+                                if (!evoVisited.contains(prevo.from) && !evoQueue.contains(prevo.from)) {
+                                    evoQueue.add(prevo.from);
+                                }
+                            }
+                            evoVisited.add(pkCurrent);
+                            evoQueue.remove(0);
+                        }
+                        if (evoVisited.size() > 1) {
+                            StringBuilder evoStr = new StringBuilder();
+                            // evoStr.append(pk.number + ": ");
+                            evoStr.append("{");
+                            evoStr.append(evoVisited.get(0).number + ",");
+                            evoStr.append(evoVisited.get(1).number);
+                            for (int i = 2; i < evoVisited.size(); i++) {
+                                    evoStr.append("," + evoVisited.get(i).number);
+                                }
+                            evoStr.append("},");
+                            log.println(evoStr.toString());
+                        }
+                        else {
+                            // log.println(pk.number + ": ");  
+                            log.println("{" + evoVisited.get(0).number + "},");  
+                        }           
+                        if (pk.number == 251) {
+                            for (int i = 0; i < 25; i++)
+                                log.println("{0},");
+                        }
+                    }
+                    else {
+                        log.println("-");
+                    }
+                }
+    
+                log.println();
+            }
+        }
 
         // Wild Held Items?
         if (settings.isRandomizeWildPokemonHeldItems()) {
@@ -190,34 +353,6 @@ public class Randomizer {
                 checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
                         pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
             }
-        }
-
-        // Random Evos
-        // Applied after type to pick new evos based on new types.
-        if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
-            romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange());
-
-            log.println("--Randomized Evolutions--");
-            List<Pokemon> allPokes = romHandler.getPokemon();
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    int numEvos = pk.evolutionsFrom.size();
-                    if (numEvos > 0) {
-                        StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).to.name);
-                        for (int i = 1; i < numEvos; i++) {
-                            if (i == numEvos - 1) {
-                                evoStr.append(" and " + pk.evolutionsFrom.get(i).to.name);
-                            } else {
-                                evoStr.append(", " + pk.evolutionsFrom.get(i).to.name);
-                            }
-                        }
-                        log.println(pk.name + " now evolves into " + evoStr.toString());
-                    }
-                }
-            }
-
-            log.println();
         }
 
         // Trade evolutions removal
@@ -511,6 +646,15 @@ public class Randomizer {
         } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM) {
             romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems());
         }
+        
+        
+        // testing for movement of Pokémon data across the dex, or rather Pokémon data internally
+        // List<Pokemon> allPokes = romHandler.getPokemon();
+        // Pokemon poke1 = allPokes.get(3);
+        // Pokemon poke2 = allPokes.get(5);
+        // allPokes.get(3).number = poke2.number;
+        // allPokes.get(5).number = poke1.number;
+        // doesn't work; you can delete this
 
         // Signature...
         romHandler.applySignature();
@@ -657,9 +801,9 @@ public class Randomizer {
                 }
                 List<Pokemon> starters = new ArrayList<Pokemon>();
                 for (int i = 0; i < starterCount; i++) {
-                    Pokemon pkmn = romHandler.random2EvosPokemon();
+                    Pokemon pkmn = romHandler.random2EvosPokemon(settings.isStartersNoSplit());
                     while (starters.contains(pkmn)) {
-                        pkmn = romHandler.random2EvosPokemon();
+                        pkmn = romHandler.random2EvosPokemon(settings.isStartersNoSplit());
                     }
                     log.println("Set starter " + (i + 1) + " to " + pkmn.name);
                     starters.add(pkmn);

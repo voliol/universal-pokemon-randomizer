@@ -327,18 +327,19 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> twoEvoPokes;
 
     @Override
-    public Pokemon random2EvosPokemon() {
+    public Pokemon random2EvosPokemon(boolean noSplitEvos) {
         if (twoEvoPokes == null) {
             // Prepare the list
             twoEvoPokes = new ArrayList<Pokemon>();
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
-                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0) {
+                if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0 
+                        && (pk.evolutionsFrom.size() == 1 || !noSplitEvos)) {
                     // Potential candidate
                     for (Evolution ev : pk.evolutionsFrom) {
                         // If any of the targets here evolve, the original
                         // Pokemon has 2+ stages.
-                        if (ev.to.evolutionsFrom.size() > 0) {
+                        if (ev.to.evolutionsFrom.size() > 0 && (pk.evolutionsFrom.size() == 1 || !noSplitEvos)) {
                             twoEvoPokes.add(pk);
                             break;
                         }
@@ -2775,7 +2776,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean limitToThreeStages,
-            boolean forceChange) {
+            boolean forceChange, boolean noConverge, boolean forceGrowth) {
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
         int stageLimit = limitToThreeStages ? 3 : 10;
@@ -2810,7 +2811,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             newEvoPairs.clear();
 
             // Shuffle pokemon list so the results aren't overly predictable.
-            Collections.shuffle(pokemonPool, this.random);
+            Collections.shuffle(pokemonPool, this.random);    
 
             for (Pokemon fromPK : pokemonPool) {
                 List<Evolution> oldEvos = originalEvos.get(fromPK);
@@ -2871,6 +2872,25 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pk.evolutionsTo.remove(tempEvo);
 
                         if (exceededLimit) {
+                            continue;
+                        }
+                        
+                        boolean alreadyUsed = false;
+                        // Prevent evolution to already used newEvo
+                        if (noConverge) {
+                            for (EvolutionPair newEvoPair : newEvoPairs) {
+                                if (pk == newEvoPair.to) {
+                                    alreadyUsed = true;
+                                }
+                            }
+                        }
+                        
+                        if (alreadyUsed) {
+                            continue;
+                        }
+                        
+                        // Prevent stat total from decreasing
+                        if (forceGrowth && pk.bstForPowerLevels() < fromPK.bstForPowerLevels()) {
                             continue;
                         }
 
