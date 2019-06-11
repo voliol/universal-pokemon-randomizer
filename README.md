@@ -7,7 +7,8 @@ Homepage: http://pokehacks.dabomstew.com/randomizer/
 **Notice: New binary releases of the randomizer have been indefinitely suspended since 2016. The original repository remains available to distribute source code and facilitiate forks, at https://github.com/Dabomstew/universal-pokemon-randomizer. This fork is something I (Voliol) originally made for personal use, but then figured I might as well put up on the internet. The changes made are described in detail at the end of this file.**
 
 # For Program Users
-- by Voliol
+-by Voliol
+
 I would advise you to read this file, especially the "Fair Warning" and 
 "Compiling the Program" parts. However, there is also another file detailing the
 usage of the program and giving credit to those who originally made it a possibility.
@@ -20,7 +21,8 @@ best practices. Individual commits may well break randomization, so you might ha
 to look back in the history a little before you find something usable.
 
 # Compiling the Program
-- by Voliol
+-by Voliol
+
 I do not plan to host any binaries (readymade programs that do not need to be 
 compiled before being used) for this fork. This means that if you by chance want 
 to try it out you will have to compile it by yourself. You do this by downloading 
@@ -34,6 +36,7 @@ Fork as you like, as long as you obey the terms of the included license.
 
 # Pull Requests
 -by Voliol
+
 I am yet not very familiar with the nature of GitHub, and exactly how 
 Pull Requests work. However, if you do create one I'll look into it and see both
 how it works and whether I am interested in such a collaboration. Being part of 
