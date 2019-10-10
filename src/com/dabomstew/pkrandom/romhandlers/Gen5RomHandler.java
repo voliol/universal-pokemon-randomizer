@@ -2346,7 +2346,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     
     @Override
     public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal) {
-        // not implemented for gen IV
+        // not implemented for gen V
     }
 
     @Override

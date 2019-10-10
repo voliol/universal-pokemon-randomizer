@@ -2033,7 +2033,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return true;
     }
     
-    // not implemented for gen I
     @Override
     public boolean canChangeDex() {
         if (romEntry.getValue("ChangedPokedexSupport") > 0) {
@@ -2951,8 +2950,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
  
     @Override
     public BufferedImage getMascotImage() {
-        // Pokemon mascot = randomPokemon();
-        Pokemon mascot = pokemonList.get(245);
+        Pokemon mascot = randomPokemon();
         while (mascot.number == Gen2Constants.unownIndex) {
             // Unown is banned as handling it would add a ton of extra effort.
             mascot = randomPokemon();

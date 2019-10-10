@@ -2526,7 +2526,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // Palette?
         int[] palette;
-        int[] colors = new int[4]; 
         if (romEntry.getValue("MonPaletteIndicesOffset") > 0 && romEntry.getValue("SGBPalettesOffset") > 0) {
             int palIndex = rom[romEntry.getValue("MonPaletteIndicesOffset") + mascot.number] & 0xFF;
             int palOffset = romEntry.getValue("SGBPalettesOffset") + palIndex * 8;
@@ -2537,9 +2536,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             }
             palette = new int[4];
             for (int i = 0; i < 4; i++) {
-                int color = readWord(palOffset + i * 2);
-                palette[i] = GFXFunctions.conv16BitColorToARGB(color);
-                colors[i] = readWord(palOffset + i * 2);
+                palette[i] = GFXFunctions.conv16BitColorToARGB(readWord(palOffset + i * 2));
             }
         } else {
             palette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };

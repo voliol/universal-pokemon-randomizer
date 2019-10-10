@@ -3127,7 +3127,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /**
-     * Check whether adding an from one Pokemon to another will cause
+     * Check whether adding an evolution from one Pokemon to another will cause
      * an evolution cycle.
      * 
      * @param from
