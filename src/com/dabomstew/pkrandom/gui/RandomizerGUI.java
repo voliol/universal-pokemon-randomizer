@@ -292,6 +292,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                 Short.MAX_VALUE)
+                        .addComponent(dexPanel,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                Short.MAX_VALUE)
                         .addComponent(miscTweaksPanel,
                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                 javax.swing.GroupLayout.DEFAULT_SIZE,
@@ -407,6 +411,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                                 javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(
                                                 miscTweaksPanel,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(
+                                                dexPanel,
                                                 javax.swing.GroupLayout.PREFERRED_SIZE,
                                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                                 javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -946,6 +957,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peSimilarStrengthCB.setEnabled(false);
         this.peRandomizeFirstCB.setSelected(false);
         this.peRandomizeFirstCB.setEnabled(false);
+        
+        this.dxChangeCB.setEnabled(false);
+        this.dxChangeCB.setSelected(false);
+        this.dxChangeCB.setVisible(true);
 
         for (JCheckBox cb : tweakCheckboxes) {
             cb.setVisible(true);
@@ -1222,6 +1237,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peUnchangedRB.setEnabled(true);
             this.peUnchangedRB.setSelected(true);
             this.peRandomRB.setEnabled(true);
+            
+            this.dxChangeCB.setEnabled(romHandler.canChangeDex());
+            this.dxChangeCB.setVisible(romHandler.canChangeDex());
 
             int mtsAvailable = this.romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
@@ -1801,11 +1819,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.fiShuffleRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE);
         this.fiUnchangedRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
         this.fiBanBadCB.setSelected(settings.isBanBadRandomFieldItems());
-
+        
         this.currentRestrictions = settings.getCurrentRestrictions();
         if (this.currentRestrictions != null) {
             this.currentRestrictions.limitToGen(this.romHandler.generationOfPokemon());
         }
+        
+        this.dxChangeCB.setSelected(settings.isChangeDex());
 
         int mtsSelected = settings.getCurrentMiscTweaks();
         int mtCount = MiscTweak.allTweaks.size();
@@ -1934,6 +1954,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
 
         settings.setCurrentRestrictions(currentRestrictions);
+        
+        settings.setChangeDex(dxChangeCB.isSelected());
 
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
@@ -2770,6 +2792,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         miscTweaksInnerPanel = new javax.swing.JPanel();
         miscTweaksPanel = new javax.swing.JPanel();
         mtNoneAvailableLabel = new javax.swing.JLabel();
+        dexPanel = new javax.swing.JPanel();
+        dxChangeCB = new javax.swing.JCheckBox();
         versionLabel = new javax.swing.JLabel();
         websiteLinkLabel = new javax.swing.JLabel();
         gameMascotLabel = new javax.swing.JLabel();
@@ -4568,6 +4592,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.fieldItemsInnerPanel.TabConstraints.tabTitle"), fieldItemsInnerPanel); // NOI18N
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
         miscTweaksPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.miscTweaksPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         mtNoneAvailableLabel.setText(bundle.getString("RandomizerGUI.mtNoneAvailableLabel.text")); // NOI18N
@@ -4605,6 +4631,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(miscTweaksPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
+        
+        // dexPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.dexPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        
+        
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.miscTweaksInnerPanel.TabConstraints.tabTitle"), miscTweaksInnerPanel); // NOI18N
 
@@ -4682,6 +4713,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 .addComponent(randomizerOptionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 465, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+        
+        abilitiesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("RandomizerGUI.abilitiesPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -4876,6 +4909,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton wpRandomRB;
     private javax.swing.JRadioButton wpUnchangedRB;
     private javax.swing.JCheckBox wpUseTimeCB;
+    private javax.swing.JPanel dexPanel;
+    private javax.swing.JCheckBox dxChangeCB;
     // End of variables declaration//GEN-END:variables
     /* @formatter:on */
 }

@@ -59,6 +59,8 @@ public interface RomHandler {
     public boolean loadRom(String filename);
 
     public boolean saveRom(String filename);
+    
+    public void savePokedex(List<Pokemon> newDex);
 
     public String loadedFilename();
 
@@ -411,6 +413,20 @@ public interface RomHandler {
     // any HMs required to obtain 4 badges
     // (excluding Gameshark codes or early drink in RBY)
     public List<Integer> getEarlyRequiredHMMoves();
+    
+    // Pokedex order
+    
+    public boolean canChangeDex();
+    
+    public List<Pokemon> recursiveAddEvosToList(Pokemon pk, List<Pokemon> pokeList);
+    
+    public List<Integer> getStaticLegendaryIndexes();
+    
+    // Palettes/colors
+    
+    public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal);
+    
+    public void  logForEmeraldColors(final PrintStream log);
 
     // Misc
 
@@ -435,7 +451,7 @@ public interface RomHandler {
     public int generationOfPokemon();
 
     public void writeCheckValueToROM(int value);
-
+    
     // code tweaks
 
     public int miscTweaksAvailable();

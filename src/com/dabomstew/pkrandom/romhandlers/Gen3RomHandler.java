@@ -40,6 +40,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -679,6 +680,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         savePokemonStats();
         saveMoves();
     }
+    
+    public void savePokedex(List<Pokemon> newDex) {
+        // the (easy) way to go seems to be to change the Hoenn dex, so of course I do that
+        // now I'm not sure on the limiters, and whether going too far overwrites any important data...
+        int emeraldHoennDexOffset = 3268536;
+        for(int i=0; i<newDex.size(); i++) {
+            int dexValue = newDex.get(i).number;
+            writeDexValue(emeraldHoennDexOffset+i*2, dexValue);
+        }
+    }
 
     private void loadPokedex() {
         int pdOffset = romEntry.getValue("PokedexOrder");
@@ -1062,6 +1073,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         rom[offset + 1] = (byte) ((value >> 8) & 0xFF);
         rom[offset + 2] = (byte) ((value >> 16) & 0xFF);
         rom[offset + 3] = (byte) (((value >> 24) & 0xFF));
+    }
+    
+    private void writeDexValue(int offset, int value) {
+        rom[offset] = (byte) (value & 0xFF);
+        rom[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
     @Override
@@ -2901,6 +2917,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public boolean hasDVs() {
         return false;
     }
+    
+    // not implemented for gen III
+    @Override
+    public boolean canChangeDex() {
+        return false;
+    }
 
     @Override
     public int generationOfPokemon() {
@@ -2954,6 +2976,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else {
             return Gen3Constants.rseEarlyRequiredHMMoves;
         }
+    }
+    
+    @Override
+    public List<Integer> getStaticLegendaryIndexes() {
+        // it's stored as an int[] in the romEntry, we want it as a List so we can check whether a specific item is in it.
+        int[] staticLegendariesArray = romEntry.arrayEntries.get("StaticLegendaries");
+        List<Integer> staticLegendariesList = new ArrayList<Integer>();
+        for (int i : staticLegendariesArray) {
+            staticLegendariesList.add(i);
+        }
+        return staticLegendariesList;
     }
 
     @Override
@@ -3074,6 +3107,52 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public boolean isROMHack() {
         return this.isRomHack;
+    }
+    
+    @Override
+    public void logForEmeraldColors(final PrintStream log) {
+      log.println("--Family tree for emerald randomizer--");
+      // goes through all pokes in internal order
+      for (int i = 1; i < 412; i++) {
+          // normal pokemon
+          if (i <= 251 || 277 <= i) {
+              List<Pokemon> evoLine = new ArrayList<Pokemon>(); 
+              Pokemon pk = pokemonList.get(internalToPokedex[i]);
+              Boolean firstInLine = false;
+              // finds the first pokemon in the line
+              while (!firstInLine) {
+                  if (pk.evolutionsTo.size() != 0) {
+                      pk = pk.evolutionsTo.get(0).from;
+                  }
+                  else {
+                      firstInLine = true;
+                  }
+              }
+              evoLine = recursiveAddEvosToList(pk, evoLine);
+              String lineString = evoLine.stream().map(x -> String.valueOf(pokedexToInternal[x.number])).collect(Collectors.joining(", "));
+              if (i != 411) {
+                  log.printf("{%s},", lineString);
+              }
+              // no comma for the line of the last indexed pokemon (Chimecho)
+              else {
+                  log.printf("{%s}", lineString);
+              }
+          }
+          // the 25 empty "missingno slots"   
+          else { 
+              log.print("{0},");
+          }
+          
+          log.println("");
+      }
+    }
+    
+    @Override
+    public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal) {
+        // not implemented for gen III
+        // there is a good one out there already (randomizer with an option for random palettes),
+        // though it's for emerald only...
+        // http://artemis251.fobby.net/downloads/emerald/
     }
 
     @Override

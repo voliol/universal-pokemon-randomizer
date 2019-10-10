@@ -223,6 +223,8 @@ public class Settings {
 
     private FieldItemsMod fieldItemsMod = FieldItemsMod.UNCHANGED;
     private boolean banBadRandomFieldItems;
+    
+    private boolean changeDex;
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
@@ -378,6 +380,9 @@ public class Settings {
             }
         } catch (IOException e) {
         }
+        
+        // 28 pokedex/regional dex
+        out.write(makeByteSelected(changeDex));
 
         // @ 31 misc tweaks
         try {
@@ -581,6 +586,9 @@ public class Settings {
             restrictions = new GenRestrictions(genLimit);
         }
         settings.setCurrentRestrictions(restrictions);
+        
+        // pokedex
+        settings.setChangeDex(restoreState(data[28], 0));
 
         int codeTweaks = FileFunctions.readFullInt(data, 31);
 
@@ -710,6 +718,9 @@ public class Settings {
         if (!rh.hasPhysicalSpecialSplit()) {
             this.setRandomizeMoveCategory(false);
         }
+        
+        if (!rh.canChangeDex());
+            this.setChangeDex(false);
 
         // done
         return feedback;
@@ -1552,6 +1563,15 @@ public class Settings {
 
     public Settings setBanBadRandomFieldItems(boolean banBadRandomFieldItems) {
         this.banBadRandomFieldItems = banBadRandomFieldItems;
+        return this;
+    }
+    
+    public boolean isChangeDex() {
+        return changeDex;
+    }
+    
+    public Settings setChangeDex(boolean changeDex) {
+        this.changeDex = changeDex;
         return this;
     }
 

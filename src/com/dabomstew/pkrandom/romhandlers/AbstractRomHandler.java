@@ -333,13 +333,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             twoEvoPokes = new ArrayList<Pokemon>();
             List<Pokemon> allPokes = this.getPokemon();
             for (Pokemon pk : allPokes) {
+                // boolean bool1 = (pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0);
+                // boolean bool2 = (pk.evolutionsFrom.size() == 1 || !noSplitEvos);
                 if (pk != null && pk.evolutionsTo.size() == 0 && pk.evolutionsFrom.size() > 0 
-                        && (pk.evolutionsFrom.size() == 1 || !noSplitEvos)) {
+                        && !(pk.evolutionsFrom.size() > 1 && noSplitEvos)) {
                     // Potential candidate
                     for (Evolution ev : pk.evolutionsFrom) {
                         // If any of the targets here evolve, the original
                         // Pokemon has 2+ stages.
-                        if (ev.to.evolutionsFrom.size() > 0 && (pk.evolutionsFrom.size() == 1 || !noSplitEvos)) {
+                        if (ev.to.evolutionsFrom.size() > 0 && !(ev.to.evolutionsFrom.size() > 1 && noSplitEvos)) {
                             twoEvoPokes.add(pk);
                             break;
                         }
@@ -401,6 +403,31 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 evTo.secondaryType = randomType();
                             }
                         }
+                    }
+                    Evolution evolution = null;
+                    for (Evolution evo : evTo.evolutionsTo) {
+                        if (evo.from == evFrom) {
+                            evolution = evo;
+                        }
+                    }
+                    if (evolution == null) {
+                        throw new RandomizationException("ERROR: Couldn't randomize types - evolved Pokémon has no prevolution");
+                    }
+                    else if (evolution.type.usesStone()) {
+                        // Todo: get a proper type according to the stone used
+                        // (e.g. Fire from a Fire Stone, Electric from a Thunder Stone),
+                        // then check whether the evFrom has that type.
+                        // If it doesn't have that type, change out the secondary type for it.
+                        // Some stones have an obvious type connection:
+                        //  Fire Stone => Fire
+                        //  Water Stone => Water
+                        //  Thunder Stone => Electric
+                        //  Leaf Stone => Grass
+                        //  Dusk Stone => Ghost, and sometimes Dark
+                        //  (Ice Stone => Ice)
+                        // Others are more unclear, i.e. Moon, Sun, Shiny and Dawn Stones.
+                        // Dawn Stone might have a connection to gender-specific stone evolutions.
+                        Type stoneType = randomType();
                     }
                 }
             });
@@ -2889,8 +2916,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                             continue;
                         }
                         
-                        // Prevent stat total from decreasing
-                        if (forceGrowth && pk.bstForPowerLevels() < fromPK.bstForPowerLevels()) {
+                        // Prevent stat total from not increasing
+                        if (forceGrowth && pk.bstForPowerLevels() <= fromPK.bstForPowerLevels()) {
                             continue;
                         }
 
@@ -2982,6 +3009,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
         }
+    }
+    
+    @Override
+    public List<Pokemon> recursiveAddEvosToList(Pokemon pk, List<Pokemon> pokeList) {
+        pokeList.add(pk);
+        for (Evolution evo : pk.evolutionsFrom) {
+            pokeList = recursiveAddEvosToList(evo.to, pokeList);
+        }
+        return pokeList;
     }
 
     /* Private methods/structs used internally by the above methods */
@@ -3091,7 +3127,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /**
-     * Check whether adding an evolution from one Pokemon to another will cause
+     * Check whether adding an from one Pokemon to another will cause
      * an evolution cycle.
      * 
      * @param from

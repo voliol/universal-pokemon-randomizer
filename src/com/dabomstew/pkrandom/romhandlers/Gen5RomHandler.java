@@ -449,6 +449,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(e);
         }
     }
+    
+    // not implemented for gen V
+    public void savePokedex(List<Pokemon> newDex) {
+    }
 
     private void saveMoves() {
         for (int i = 1; i <= Gen5Constants.moveCount; i++) {
@@ -2251,6 +2255,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public boolean hasDVs() {
         return false;
     }
+    
+    // not implemented for gen V
+    @Override
+    public boolean canChangeDex() {
+        return false;
+    }
 
     @Override
     public int generationOfPokemon() {
@@ -2316,6 +2326,27 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else {
             return Gen5Constants.bw1EarlyRequiredHMMoves;
         }
+    }
+    
+    @Override
+    public List<Integer> getStaticLegendaryIndexes() {
+        // it's stored as an int[] in the romEntry, we want it as a List so we can check whether a specific item is in it.
+        int[] staticLegendariesArray = romEntry.arrayEntries.get("StaticLegendaries");
+        List<Integer> staticLegendariesList = new ArrayList<Integer>();
+        for (int i : staticLegendariesArray) {
+            staticLegendariesList.add(i);
+        }
+        return staticLegendariesList;
+    }
+    
+    @Override
+    public void logForEmeraldColors(final PrintStream log) {
+        // irrelevant, of course, just here for structure
+    }
+    
+    @Override
+    public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal) {
+        // not implemented for gen IV
     }
 
     @Override

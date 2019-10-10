@@ -418,6 +418,48 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         savePokemonStats();
         saveMoves();
     }
+    
+    @Override
+    // not implemented for gen I, turned out to be a mess
+    public void savePokedex(List<Pokemon> newDex) {
+        
+        // how many Pokemon are in the dex?
+        rom[5028] = (byte) (newDex.size()+1 & 0xFF);
+        
+        
+/*        int orderOffset = romEntry.getValue("PokemonStatsOffset");
+        for (int i=0; i<newDex.size(); i++) {
+            int natDexIndex = newDex.get(i).number;
+            int natDexOffset = orderOffset+(natDexIndex-1)*28;
+            rom[natDexOffset] = (byte) (i+1 & 0xFF);
+        }
+        // The Pokemon not in newDex have their dex value set to "0" so they don't appear
+        for (Pokemon pk : pokemonList) {
+            if (!newDex.contains(pk) && pk != null) {
+                int natDexIndex = pk.number;
+                int natDexOffset = orderOffset+(natDexIndex-1)*28;
+                rom[natDexOffset] = (byte) (0 & 0xFF);
+            }
+        }
+    
+        // The rom Pokedex info is ordered according to the in-game Pokemon indexes.
+        // This goes through each Pokemon in the newDex, gets the in-game Pokemon indexes, 
+        // and writes whatever index that Pokemon is in the newDex to the correct location in the rom
+        for (int i=0; i<newDex.size(); i++) {
+            int natDexIndex = pokeNumToRBYTable[newDex.get(i).number];
+            int natDexOffset = orderOffset+natDexIndex;
+            rom[natDexOffset] = (byte) (i+1 & 0xFF);
+        }
+        // The Pokemon not in newDex have their dex value set to "0" so they don't appear
+        for (Pokemon pk : pokemonList) {
+            if (!newDex.contains(pk) && pk != null) {
+                int natDexIndex = pokeNumToRBYTable[pk.number];
+                int natDexOffset = orderOffset+natDexIndex;
+                rom[natDexOffset] = (byte) (0 & 0xFF);
+            }
+        }*/
+        
+    }
 
     private String[] readMoveNames() {
         int moveCount = romEntry.getValue("MoveCount");
@@ -1699,6 +1741,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // just cut
         return Gen1Constants.earlyRequiredHMs;
     }
+    
+    @Override
+    public List<Integer> getStaticLegendaryIndexes() {
+        // it's stored as an int[] in the romEntry, we want it as a List so we can check whether a specific item is in it.
+        int[] staticLegendariesArray = romEntry.arrayEntries.get("StaticLegendaries");
+        List<Integer> staticLegendariesList = new ArrayList<Integer>();
+        for (int i : staticLegendariesArray) {
+            staticLegendariesList.add(i);
+        }
+        return staticLegendariesList;
+    }
 
     @Override
     public void applySignature() {
@@ -2097,6 +2150,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public boolean hasDVs() {
         return true;
     }
+    
+    // not implemented for gen I
+    @Override
+    public boolean canChangeDex() {
+        return false;
+    }
 
     @Override
     public int generationOfPokemon() {
@@ -2310,6 +2369,133 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public void logForEmeraldColors(final PrintStream log) {
+        // irrelevant, of course, just here for structure
+    }
+    
+    @Override
+    public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal) {
+        // ToDo: bugtest this
+        int paletteIndicesOffset = romEntry.getValue("MonPaletteIndicesOffset");
+        List<Pokemon> changedPalettePokes = new ArrayList<Pokemon>();
+        
+        for (Pokemon pk : pokemonList) { 
+            if (pk != null) {
+                
+                if (evolutionSanity) {
+                    if (!changedPalettePokes.contains(pk)) {
+                        List<Pokemon> familyList = new ArrayList<Pokemon>();
+                        // identifies the family of the Pokémon
+                        Boolean firstInLine = false;
+                        while (!firstInLine) {
+                            if (pk.evolutionsTo.size() != 0) {
+                               pk = pk.evolutionsTo.get(0).from;
+                            }
+                            else {
+                                firstInLine = true;
+                            }
+                        }
+                        familyList = recursiveAddEvosToList(pk, familyList);
+                        
+                        int familyColor = 0;
+                        // colors follow types for basic Pokémon, and their evolutions get the same color
+                        if (typeSpecific) {
+                            familyColor = getRandomTypedColor(familyList.get(0).primaryType.name());
+                        }
+                        
+                        // colors follow evo-lines, but don't follow types
+                        else {
+                            familyColor = this.random.nextInt(10) + 16;
+                        }
+                        
+                        // goes through the members of the family and change their palette
+                        for (Pokemon pk2 : familyList) {
+                            rom[paletteIndicesOffset + pk2.number] = (byte) familyColor;
+                        }
+                    }
+                }
+                
+                else {
+                    // colors follow types, but not (necessarily) evo-lines
+                    if (typeSpecific) {
+                        rom[paletteIndicesOffset + pk.number] = (byte) getRandomTypedColor(pk.primaryType.name());
+                    }
+                    
+                    // completely random colors
+                    else {
+                        rom[paletteIndicesOffset + pk.number] = (byte) (this.random.nextInt(10) + 16);
+                    }  
+                }
+            }
+        }
+    }
+    
+    private int getRandomTypedColor(String type){
+        // all in all, pokémon use palettes 18-26(dec)/10-19(hex)
+        if (type == "NORMAL") {
+            // Brown, Pink, Gray 
+            return Arrays.asList(21, 23, 24).get(this.random.nextInt(3)); 
+        }
+        else if (type == "FIGHTING") {
+            // Brown, Gray 
+            return Arrays.asList(21, 25).get(this.random.nextInt(2)); 
+        }
+        else if (type == "FLYING") {
+            // LightBlue
+            return 19; 
+        }
+        else if (type == "POISON") {
+            // Purple
+            return 20; 
+        }
+        else if (type == "GROUND") {
+            // Brown
+            return 21; 
+        }
+        else if (type == "ROCK") {
+            // Gray
+            return 25; 
+        }
+        else if (type == "BUG") {
+            // Green, Yellow
+            return Arrays.asList(22, 24).get(this.random.nextInt(2)); 
+        }
+        else if (type == "GHOST") {
+            // Purple
+            return 20; 
+        }
+        else if (type == "FIRE") {
+            // Red
+            return 18; 
+        }
+        else if (type == "WATER") {
+            // LightBlue, DarkBlue
+            return Arrays.asList(17, 19).get(this.random.nextInt(2)); 
+        }
+        else if (type == "GRASS") {
+            // Green
+            return 22; 
+        }
+        else if (type == "ELECTRIC") {
+            // Yellow
+            return 24; 
+        }
+        else if (type == "PSYCHIC") {
+            // Mew-color, Yellow
+            return Arrays.asList(16, 24).get(this.random.nextInt(2)); 
+        }
+        else if (type == "ICE") {
+            // LightBlue
+            return 17; 
+        }
+        else if (type == "DRAGON") {
+            // DarkBlue, Brown
+            return Arrays.asList(19, 21).get(this.random.nextInt(2)); 
+        }
+        return 0;
+    }
+    
+    @Override
     public BufferedImage getMascotImage() {
         Pokemon mascot = randomPokemon();
         int idx = pokeNumToRBYTable[mascot.number];
@@ -2340,6 +2526,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // Palette?
         int[] palette;
+        int[] colors = new int[4]; 
         if (romEntry.getValue("MonPaletteIndicesOffset") > 0 && romEntry.getValue("SGBPalettesOffset") > 0) {
             int palIndex = rom[romEntry.getValue("MonPaletteIndicesOffset") + mascot.number] & 0xFF;
             int palOffset = romEntry.getValue("SGBPalettesOffset") + palIndex * 8;
@@ -2350,7 +2537,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             }
             palette = new int[4];
             for (int i = 0; i < 4; i++) {
-                palette[i] = GFXFunctions.conv16BitColorToARGB(readWord(palOffset + i * 2));
+                int color = readWord(palOffset + i * 2);
+                palette[i] = GFXFunctions.conv16BitColorToARGB(color);
+                colors[i] = readWord(palOffset + i * 2);
             }
         } else {
             palette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };

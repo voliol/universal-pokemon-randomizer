@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -344,6 +345,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public void savingRom() {
         savePokemonStats();
         saveMoves();
+    }
+    
+    @Override
+    public void savePokedex(List<Pokemon> newDex) {
+        int newdexOffset = romEntry.getValue("NewdexOffset");
+        for(int i=0; i<newDex.size(); i++) {
+            int dexValue = newDex.get(i).number;
+            rom[newdexOffset+i] = (byte) (dexValue & 0xFF);
+        }
+        // fills in the remaining spots with "00"
+        for(int i=newDex.size(); i<251; i++) {
+            rom[newdexOffset+i] = (byte) (0x00);
+        }
     }
 
     private void loadPokemonStats() {
@@ -2018,6 +2032,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public boolean hasDVs() {
         return true;
     }
+    
+    // not implemented for gen I
+    @Override
+    public boolean canChangeDex() {
+        if (romEntry.getValue("ChangedPokedexSupport") > 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     @Override
     public int generationOfPokemon() {
@@ -2172,10 +2197,762 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // just cut
         return Gen2Constants.earlyRequiredHMMoves;
     }
-
+    
+    @Override
+    public List<Integer> getStaticLegendaryIndexes() {
+        // it's stored as an int[] in the romEntry, we want it as a List so we can check whether a specific item is in it.
+        int[] staticLegendariesArray = romEntry.arrayEntries.get("StaticLegendaries");
+        List<Integer> staticLegendariesList = new ArrayList<Integer>();
+        for (int i : staticLegendariesArray) {
+            staticLegendariesList.add(i);
+        }
+        return staticLegendariesList;
+    }
+    
+    @Override
+    public void logForEmeraldColors(final PrintStream log) {
+        // irrelevant, of course, just here for structure
+    }
+    
+    @Override
+    public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal) {
+        
+        int paletteOffset = romEntry.getValue("PokemonPalettes");
+        List<Pokemon> changedPalettePokes = new ArrayList<Pokemon>();
+        
+        if (shinyFromNormal) {
+            // sets the shinies of all pokemon to their original non-shiny colors
+            for (int i = 0; i < 251; i++) {
+                writeWord(paletteOffset+8*i+4, readWord(paletteOffset+8*i));
+                writeWord(paletteOffset+8*i+6, readWord(paletteOffset+8*i+2));
+            }
+        }
+        
+        if (typeSpecific) {
+            // randomizes the colors
+            for (Pokemon pk : pokemonList) {
+                if (pk != null) {
+                    if (evolutionSanity) {
+                        if (!changedPalettePokes.contains(pk)) {
+                            List<Pokemon> familyList = new ArrayList<Pokemon>();
+                            // all pokemon in an evolutionary family have similar palettes
+                            if (evolutionSanity) {
+                                Boolean firstInLine = false;
+                                while (!firstInLine) {
+                                    if (pk.evolutionsTo.size() != 0) {
+                                       pk = pk.evolutionsTo.get(0).from;
+                                    }
+                                    else {
+                                        firstInLine = true;
+                                    }
+                                }
+                                familyList = recursiveAddEvosToList(pk, familyList);
+                                for (Pokemon pk2 : familyList) {
+                                    if (pk2.evolutionsTo.size() == 0) {
+                                        // if it's basic/1-stage, deal with it like if no family colors
+                                        int brightColor = getRandomTypedBrightColor(pk.primaryType.name());
+                                        int darkColor = 12684;
+                                        if (pk.secondaryType != null) {
+                                            darkColor = getRandomTypedDarkColor(pk.secondaryType.name());
+                                        }
+                                        else {
+                                            darkColor = getRandomTypedDarkColor(pk.primaryType.name());
+                                        }
+                                        writeWord(paletteOffset+8*pk.number, brightColor);
+                                        writeWord(paletteOffset+8*pk.number+2, darkColor);
+                                        changedPalettePokes.add(pokemonList.get(pk.number));
+                                    }
+                                    else {
+                                        // otherwise it "inherits" some from its previous stage
+                                        int brightColor = 22197;
+                                        int darkColor = 12684;
+                                        if (pk2.primaryType != pk2.evolutionsTo.get(0).from.primaryType) {
+                                            // if its primary type differs, copy/inherit only the darkColor
+                                            brightColor = getRandomTypedBrightColor(pk2.primaryType.name());
+                                            darkColor = readWord(paletteOffset+8*pk2.evolutionsTo.get(0).from.number+2);
+                                        }
+                                        else if (pk2.secondaryType != pk2.evolutionsTo.get(0).from.secondaryType) {
+                                            // if its secondary type differs, copy/inherit only the brightColor
+                                            brightColor = readWord(paletteOffset+8*pk2.evolutionsTo.get(0).from.number);
+                                            if (pk2.secondaryType != null) {
+                                                darkColor = getRandomTypedDarkColor(pk2.secondaryType.name());
+                                            }
+                                            else {
+                                                darkColor = getRandomTypedDarkColor(pk2.primaryType.name());
+                                            }
+                                        }
+                                        else {
+                                            // if both types are the same, copy/inherit both colors from the previous stage
+                                            brightColor = readWord(paletteOffset+8*pk2.evolutionsTo.get(0).from.number);
+                                            darkColor = readWord(paletteOffset+8*pk2.evolutionsTo.get(0).from.number+2);
+                                        }
+                                        writeWord(paletteOffset+8*pk2.number, brightColor);
+                                        writeWord(paletteOffset+8*pk2.number+2, darkColor);
+                                        changedPalettePokes.add(pokemonList.get(pk2.number));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // no family colors
+                    else {
+                        int brightColor = getRandomTypedBrightColor(pk.primaryType.name());
+                        int darkColor = 12684;
+                        if (pk.secondaryType != null) {
+                            darkColor = getRandomTypedDarkColor(pk.secondaryType.name());
+                        }
+                        else {
+                            darkColor = getRandomTypedDarkColor(pk.primaryType.name());
+                        }
+                        writeWord(paletteOffset+8*pk.number, brightColor);
+                        writeWord(paletteOffset+8*pk.number+2, darkColor);
+                        changedPalettePokes.add(pokemonList.get(pk.number));
+                    }
+                }
+            }
+            
+        }
+        else {
+            // extracts all the pokémon palettes
+            List<Integer> brightColors = new ArrayList<Integer>();
+            List<Integer> darkColors = new ArrayList<Integer>();
+            for (int i = 0; i < 251; i++) {
+                brightColors.add(readWord(paletteOffset+8*i));
+                darkColors.add(readWord(paletteOffset+8*i+2));
+            }
+            
+            // randomizes the colors
+            for (Pokemon pk : pokemonList) {
+                if (!changedPalettePokes.contains(pk) && pk != null) {
+                    List<Integer> familyInts = new ArrayList<Integer>();
+                    // all pokemon in an evolutionary family have the same palette
+                    if (evolutionSanity) {
+                        Boolean firstInLine = false;
+                        while (!firstInLine) {
+                            if (pk.evolutionsTo.size() != 0) {
+                               pk = pk.evolutionsTo.get(0).from;
+                            }
+                            else {
+                                firstInLine = true;
+                            }
+                        }
+                        familyInts = recursiveAddEvoNumbersToList(pk, familyInts);
+                    }
+                    // completely random
+                    else {
+                        familyInts.add(pk.number);
+                    }
+                    Collections.shuffle(brightColors, this.random);
+                    Collections.shuffle(darkColors, this.random);
+                    for (int j : familyInts) {
+                        writeWord(paletteOffset+8*j, brightColors.get(0));
+                        writeWord(paletteOffset+8*j+2, darkColors.get(0));
+                        changedPalettePokes.add(pokemonList.get(j));
+                    }
+                }
+            }
+        }
+    }
+    
+    private List<Integer> recursiveAddEvoNumbersToList(Pokemon pk, List<Integer> pokeNumList) {
+        pokeNumList.add(pk.number);
+        for (Evolution evo : pk.evolutionsFrom) {
+            pokeNumList = recursiveAddEvoNumbersToList(evo.to, pokeNumList);
+        }
+        return pokeNumList;
+    }
+    
+    private int getRandomTypedBrightColor(String type) {
+        List<Integer> normalBrightColors = new ArrayList<Integer>();
+        normalBrightColors.add(14206);
+        normalBrightColors.add(24063);
+        normalBrightColors.add(12639);
+        normalBrightColors.add(7901);
+        normalBrightColors.add(18911);
+        normalBrightColors.add(18911);
+        normalBrightColors.add(21983);
+        normalBrightColors.add(21983);
+        normalBrightColors.add(12126);
+        normalBrightColors.add(9086);
+        normalBrightColors.add(8599);
+        normalBrightColors.add(9653);
+        normalBrightColors.add(6412);
+        normalBrightColors.add(18783);
+        normalBrightColors.add(24187);
+        normalBrightColors.add(3473);
+        normalBrightColors.add(5625);
+        normalBrightColors.add(6680);
+        normalBrightColors.add(4408);
+        normalBrightColors.add(20968);
+        normalBrightColors.add(14939);
+        normalBrightColors.add(4791);
+        normalBrightColors.add(26047);
+        normalBrightColors.add(25119);
+        normalBrightColors.add(12126);
+        normalBrightColors.add(13053);
+        normalBrightColors.add(16879);
+        normalBrightColors.add(13788);
+        normalBrightColors.add(23068);
+        normalBrightColors.add(7167);
+        normalBrightColors.add(7671);
+        normalBrightColors.add(8887);
+        normalBrightColors.add(18939);
+        normalBrightColors.add(14748);
+        List<Integer> fightingBrightColors = new ArrayList<Integer>();
+        fightingBrightColors.add(9820);
+        fightingBrightColors.add(10782);
+        fightingBrightColors.add(11828);
+        fightingBrightColors.add(11824);
+        fightingBrightColors.add(11861);
+        fightingBrightColors.add(5590);
+        fightingBrightColors.add(12789);
+        fightingBrightColors.add(18935);
+        fightingBrightColors.add(18938);
+        fightingBrightColors.add(3639);
+        List<Integer> flyingBrightColors = new ArrayList<Integer>();
+        flyingBrightColors.add(32562);
+        flyingBrightColors.add(19948);
+        flyingBrightColors.add(32369);
+        flyingBrightColors.add(31383);
+        flyingBrightColors.add(30290);
+        flyingBrightColors.add(14076);
+        flyingBrightColors.add(32632);
+        flyingBrightColors.add(24278);
+        flyingBrightColors.add(32661);
+        flyingBrightColors.add(25454);
+        List<Integer> poisonBrightColors = new ArrayList<Integer>();
+        poisonBrightColors.add(21780);
+        poisonBrightColors.add(197309);
+        poisonBrightColors.add(31377);
+        poisonBrightColors.add(21787);
+        poisonBrightColors.add(22806);
+        poisonBrightColors.add(20690);
+        poisonBrightColors.add(21778);
+        poisonBrightColors.add(24923);
+        poisonBrightColors.add(20573);
+        poisonBrightColors.add(20573);
+        poisonBrightColors.add(24856);
+        poisonBrightColors.add(25945);
+        poisonBrightColors.add(21778);
+        poisonBrightColors.add(12219);
+        List<Integer> groundBrightColors = new ArrayList<Integer>();
+        groundBrightColors.add(6742);
+        groundBrightColors.add(599);
+        groundBrightColors.add(3377);
+        groundBrightColors.add(3377);
+        groundBrightColors.add(8722);
+        groundBrightColors.add(12916);
+        groundBrightColors.add(12916);
+        groundBrightColors.add(13752);
+        groundBrightColors.add(14935);
+        groundBrightColors.add(1804);
+        List<Integer> rockBrightColors = new ArrayList<Integer>();
+        rockBrightColors.add(15922);
+        rockBrightColors.add(18993);
+        rockBrightColors.add(15922);
+        rockBrightColors.add(20977);
+        rockBrightColors.add(17775);
+        rockBrightColors.add(17775);
+        rockBrightColors.add(11828);
+        rockBrightColors.add(11995);
+        rockBrightColors.add(11767);
+        rockBrightColors.add(11767);
+        rockBrightColors.add(18933);
+        rockBrightColors.add(8562);
+        rockBrightColors.add(32127);
+        rockBrightColors.add(29327);
+        rockBrightColors.add(912);
+        List<Integer> bugBrightColors = new ArrayList<Integer>();
+        bugBrightColors.add(1007);
+        bugBrightColors.add(5690);
+        bugBrightColors.add(3898);
+        bugBrightColors.add(7007);
+        bugBrightColors.add(847);
+        bugBrightColors.add(8826);
+        bugBrightColors.add(4831);
+        bugBrightColors.add(5820);
+        bugBrightColors.add(8539);
+        bugBrightColors.add(11081);
+        bugBrightColors.add(5855);
+        bugBrightColors.add(19754);
+        List<Integer> ghostBrightColors = new ArrayList<Integer>();
+        ghostBrightColors.add(31006);
+        ghostBrightColors.add(31006);
+        ghostBrightColors.add(31006);
+        ghostBrightColors.add(19678);
+        ghostBrightColors.add(27316);
+        ghostBrightColors.add(22002);
+        ghostBrightColors.add(32275);
+        List<Integer> steelBrightColors = new ArrayList<Integer>();
+        steelBrightColors.add(26427);
+        steelBrightColors.add(23252);
+        steelBrightColors.add(25911);
+        steelBrightColors.add(27121);
+        steelBrightColors.add(8474);
+        steelBrightColors.add(25169);
+        List<Integer> fireBrightColors = new ArrayList<Integer>();
+        fireBrightColors.add(4543);
+        fireBrightColors.add(6430);
+        fireBrightColors.add(383);
+        fireBrightColors.add(7583);
+        fireBrightColors.add(10047);
+        fireBrightColors.add(7935);
+        fireBrightColors.add(7934);
+        fireBrightColors.add(639);
+        fireBrightColors.add(926);
+        fireBrightColors.add(671);
+        fireBrightColors.add(1375);
+        fireBrightColors.add(735);
+        fireBrightColors.add(895);
+        fireBrightColors.add(5023);
+        fireBrightColors.add(4767);
+        fireBrightColors.add(14205);
+        fireBrightColors.add(9466);
+        fireBrightColors.add(350);
+        fireBrightColors.add(415);
+        fireBrightColors.add(9823);
+        fireBrightColors.add(472);
+        fireBrightColors.add(3327);
+        List<Integer> waterBrightColors = new ArrayList<Integer>();
+        waterBrightColors.add(32364);
+        waterBrightColors.add(31178);
+        waterBrightColors.add(32104);
+        waterBrightColors.add(26229);
+        waterBrightColors.add(27152);
+        waterBrightColors.add(27152);
+        waterBrightColors.add(32395);
+        waterBrightColors.add(32395);
+        waterBrightColors.add(31209);
+        waterBrightColors.add(31175);
+        waterBrightColors.add(27081);
+        waterBrightColors.add(31240);
+        waterBrightColors.add(32464);
+        waterBrightColors.add(21959);
+        waterBrightColors.add(27180);
+        waterBrightColors.add(19114);
+        waterBrightColors.add(13864);
+        waterBrightColors.add(30121);
+        waterBrightColors.add(25066);
+        waterBrightColors.add(26256);
+        waterBrightColors.add(29358);
+        waterBrightColors.add(30192);
+        waterBrightColors.add(32101);
+        waterBrightColors.add(32491);
+        List<Integer> grassBrightColors = new ArrayList<Integer>();
+        grassBrightColors.add(12268);
+        grassBrightColors.add(12268);
+        grassBrightColors.add(20460);
+        grassBrightColors.add(3819);
+        grassBrightColors.add(415);
+        grassBrightColors.add(3295);
+        grassBrightColors.add(8180);
+        grassBrightColors.add(8173);
+        grassBrightColors.add(3919);
+        grassBrightColors.add(1862);
+        grassBrightColors.add(25569);
+        grassBrightColors.add(13053);
+        grassBrightColors.add(6971);
+        grassBrightColors.add(3853);
+        grassBrightColors.add(6427);
+        grassBrightColors.add(6891);
+        grassBrightColors.add(5855);
+        grassBrightColors.add(925);
+        grassBrightColors.add(1002);
+        List<Integer> electricBrightColors = new ArrayList<Integer>();
+        electricBrightColors.add(5981);
+        electricBrightColors.add(8031);
+        electricBrightColors.add(6143);
+        electricBrightColors.add(4095);
+        electricBrightColors.add(927);
+        electricBrightColors.add(15133);
+        electricBrightColors.add(5981);
+        electricBrightColors.add(7832);
+        electricBrightColors.add(3071);
+        electricBrightColors.add(8511);
+        electricBrightColors.add(8511);
+        electricBrightColors.add(6143);
+        electricBrightColors.add(1023);
+        electricBrightColors.add(30580);
+        List<Integer> psychicBrightColors = new ArrayList<Integer>();
+        psychicBrightColors.add(2619);
+        psychicBrightColors.add(3708);
+        psychicBrightColors.add(3708);
+        psychicBrightColors.add(17759);
+        psychicBrightColors.add(17759);
+        psychicBrightColors.add(4863);
+        psychicBrightColors.add(831);
+        psychicBrightColors.add(697);
+        psychicBrightColors.add(32127);
+        psychicBrightColors.add(19677);
+        psychicBrightColors.add(26262);
+        psychicBrightColors.add(32255);
+        psychicBrightColors.add(14058);
+        psychicBrightColors.add(14058);
+        psychicBrightColors.add(27129);
+        psychicBrightColors.add(18911);
+        psychicBrightColors.add(16879);
+        psychicBrightColors.add(25388);
+        psychicBrightColors.add(4831);
+        psychicBrightColors.add(29241);
+        List<Integer> iceBrightColors = new ArrayList<Integer>();
+        iceBrightColors.add(32435);
+        iceBrightColors.add(32435);
+        iceBrightColors.add(32427);
+        iceBrightColors.add(23313);
+        iceBrightColors.add(14935);
+        List<Integer> dragonBrightColors = new ArrayList<Integer>();
+        dragonBrightColors.add(8028);
+        dragonBrightColors.add(32369);
+        dragonBrightColors.add(4664);
+        dragonBrightColors.add(11081);
+        List<Integer> darkBrightColors = new ArrayList<Integer>();
+        darkBrightColors.add(19948);
+        darkBrightColors.add(497);
+        darkBrightColors.add(11611);
+        darkBrightColors.add(15545);
+        darkBrightColors.add(27983);
+        if (type == "NORMAL") {
+            return normalBrightColors.get(this.random.nextInt(normalBrightColors.size()));
+        }
+        else if (type == "FIGHTING") {
+            return fightingBrightColors.get(this.random.nextInt(fightingBrightColors.size()));
+        }
+        else if (type == "FLYING") {
+            return flyingBrightColors.get(this.random.nextInt(flyingBrightColors.size()));
+        }
+        else if (type == "POISON") {
+            return poisonBrightColors.get(this.random.nextInt(poisonBrightColors.size()));
+        }
+        else if (type == "GROUND") {
+            return groundBrightColors.get(this.random.nextInt(groundBrightColors.size()));
+        }
+        else if (type == "ROCK") {
+            return rockBrightColors.get(this.random.nextInt(rockBrightColors.size()));
+        }
+        else if (type == "BUG") {
+            return bugBrightColors.get(this.random.nextInt(bugBrightColors.size()));
+        }
+        else if (type == "GHOST") {
+            return ghostBrightColors.get(this.random.nextInt(ghostBrightColors.size()));
+        }
+        else if (type == "STEEL") {
+            return steelBrightColors.get(this.random.nextInt(steelBrightColors.size()));
+        }
+        else if (type == "FIRE") {
+            return fireBrightColors.get(this.random.nextInt(fireBrightColors.size()));
+        }
+        else if (type == "WATER") {
+            return waterBrightColors.get(this.random.nextInt(waterBrightColors.size()));
+        }
+        else if (type == "GRASS") {
+            return grassBrightColors.get(this.random.nextInt(grassBrightColors.size()));
+        }
+        else if (type == "ELECTRIC") {
+            return electricBrightColors.get(this.random.nextInt(electricBrightColors.size()));
+        }
+        else if (type == "PSYCHIC") {
+            return psychicBrightColors.get(this.random.nextInt(psychicBrightColors.size()));
+        }
+        else if (type == "ICE") {
+            return iceBrightColors.get(this.random.nextInt(iceBrightColors.size()));
+        }
+        else if (type == "DRAGON") {
+            return dragonBrightColors.get(this.random.nextInt(dragonBrightColors.size()));
+        }
+        else if (type == "DARK") {
+            return darkBrightColors.get(this.random.nextInt(darkBrightColors.size()));
+        }
+        return 0;
+    }
+    
+    private int getRandomTypedDarkColor(String type) {
+        List<Integer> normalDarkColors = new ArrayList<Integer>();
+        normalDarkColors.add(2323);
+        normalDarkColors.add(2323);
+        normalDarkColors.add(2323);
+        normalDarkColors.add(306);
+        normalDarkColors.add(308);
+        normalDarkColors.add(6678);
+        normalDarkColors.add(237);
+        normalDarkColors.add(237);
+        normalDarkColors.add(2258);
+        normalDarkColors.add(3306);
+        normalDarkColors.add(6412);
+        normalDarkColors.add(6418);
+        normalDarkColors.add(21791);
+        normalDarkColors.add(1222);
+        normalDarkColors.add(4330);
+        normalDarkColors.add(2321);
+        normalDarkColors.add(4408);
+        normalDarkColors.add(20968);
+        normalDarkColors.add(9517);
+        normalDarkColors.add(2350);
+        normalDarkColors.add(237);
+        normalDarkColors.add(5302);
+        normalDarkColors.add(17631);
+        normalDarkColors.add(6396);
+        normalDarkColors.add(14476);
+        normalDarkColors.add(8423);
+        normalDarkColors.add(13639);
+        normalDarkColors.add(11569);
+        normalDarkColors.add(10553);
+        normalDarkColors.add(24970);
+        normalDarkColors.add(16548);
+        normalDarkColors.add(6318);
+        normalDarkColors.add(13510);
+        normalDarkColors.add(8370);
+        List<Integer> fightingDarkColors = new ArrayList<Integer>();
+        fightingDarkColors.add(5361);
+        fightingDarkColors.add(4302);
+        fightingDarkColors.add(4457);
+        fightingDarkColors.add(4457);
+        fightingDarkColors.add(15887);
+        fightingDarkColors.add(18555);
+        fightingDarkColors.add(3313);
+        fightingDarkColors.add(19720);
+        List<Integer> flyingDarkColors = new ArrayList<Integer>();
+        flyingDarkColors.add(17669);
+        flyingDarkColors.add(24005);
+        flyingDarkColors.add(28274);
+        flyingDarkColors.add(15652);
+        flyingDarkColors.add(25959);
+        flyingDarkColors.add(24841);
+        flyingDarkColors.add(20712);
+        flyingDarkColors.add(31754);
+        flyingDarkColors.add(21966);
+        flyingDarkColors.add(26187);
+        List<Integer> poisonDarkColors = new ArrayList<Integer>();
+        poisonDarkColors.add(14509);
+        poisonDarkColors.add(16465);
+        poisonDarkColors.add(16554);
+        poisonDarkColors.add(11403);
+        poisonDarkColors.add(9510);
+        poisonDarkColors.add(13608);
+        poisonDarkColors.add(13608);
+        poisonDarkColors.add(14348);
+        poisonDarkColors.add(14731);
+        poisonDarkColors.add(12332);
+        poisonDarkColors.add(12332);
+        poisonDarkColors.add(16528);
+        poisonDarkColors.add(14507);
+        poisonDarkColors.add(5769);
+        poisonDarkColors.add(20686);
+        poisonDarkColors.add(15652);
+        List<Integer> groundDarkColors = new ArrayList<Integer>();
+        groundDarkColors.add(1260);
+        groundDarkColors.add(237);
+        groundDarkColors.add(3223);
+        groundDarkColors.add(3223);
+        groundDarkColors.add(4432);
+        groundDarkColors.add(4432);
+        groundDarkColors.add(4391);
+        groundDarkColors.add(4391);
+        groundDarkColors.add(4307);
+        groundDarkColors.add(10570);
+        groundDarkColors.add(6351);
+        List<Integer> rockDarkColors = new ArrayList<Integer>();
+        rockDarkColors.add(7528);
+        rockDarkColors.add(7528);
+        rockDarkColors.add(7528);
+        rockDarkColors.add(11465);
+        rockDarkColors.add(4391);
+        rockDarkColors.add(4391);
+        rockDarkColors.add(8558);
+        rockDarkColors.add(8558);
+        rockDarkColors.add(8557);
+        rockDarkColors.add(7622);
+        rockDarkColors.add(13564);
+        rockDarkColors.add(6351);
+        List<Integer> bugDarkColors = new ArrayList<Integer>();
+        bugDarkColors.add(6860);
+        bugDarkColors.add(457);
+        bugDarkColors.add(8660);
+        bugDarkColors.add(823);
+        bugDarkColors.add(5339);
+        bugDarkColors.add(5339);
+        bugDarkColors.add(5769);
+        bugDarkColors.add(7412);
+        bugDarkColors.add(16484);
+        List<Integer> ghostDarkColors = new ArrayList<Integer>();
+        ghostDarkColors.add(23569);
+        ghostDarkColors.add(16396);
+        ghostDarkColors.add(16393);
+        ghostDarkColors.add(17705);
+        ghostDarkColors.add(5804);
+        List<Integer> steelDarkColors = new ArrayList<Integer>();
+        steelDarkColors.add(19755);
+        steelDarkColors.add(25135);
+        steelDarkColors.add(25135);
+        steelDarkColors.add(21034);
+        steelDarkColors.add(7217);
+        steelDarkColors.add(12556);
+        steelDarkColors.add(13575);
+        steelDarkColors.add(10468);
+        List<Integer> fireDarkColors = new ArrayList<Integer>();
+        fireDarkColors.add(5302);
+        fireDarkColors.add(7282);
+        fireDarkColors.add(15654);
+        fireDarkColors.add(8373);
+        fireDarkColors.add(280);
+        fireDarkColors.add(3288);
+        fireDarkColors.add(3455);
+        fireDarkColors.add(3455);
+        fireDarkColors.add(6391);
+        fireDarkColors.add(2229);
+        fireDarkColors.add(3487);
+        fireDarkColors.add(5375);
+        fireDarkColors.add(3391);
+        fireDarkColors.add(6463);
+        fireDarkColors.add(3223);
+        fireDarkColors.add(15626);
+        fireDarkColors.add(11351);
+        fireDarkColors.add(21);
+        fireDarkColors.add(3559);
+        List<Integer> waterDarkColors = new ArrayList<Integer>();
+        waterDarkColors.add(8790);
+        waterDarkColors.add(8790);
+        waterDarkColors.add(3736);
+        waterDarkColors.add(23846);
+        waterDarkColors.add(15528);
+        waterDarkColors.add(15528);
+        waterDarkColors.add(15558);
+        waterDarkColors.add(11820);
+        waterDarkColors.add(31443);
+        waterDarkColors.add(11831);
+        waterDarkColors.add(32105);
+        waterDarkColors.add(11828);
+        waterDarkColors.add(23913);
+        waterDarkColors.add(4412);
+        waterDarkColors.add(10552);
+        waterDarkColors.add(13864);
+        waterDarkColors.add(1266);
+        waterDarkColors.add(29005);
+        waterDarkColors.add(29005);
+        waterDarkColors.add(16580);
+        waterDarkColors.add(13573);
+        waterDarkColors.add(19651);
+        waterDarkColors.add(18964);
+        waterDarkColors.add(20558);
+        List<Integer> grassDarkColors = new ArrayList<Integer>();
+        grassDarkColors.add(6495);
+        grassDarkColors.add(17823);
+        grassDarkColors.add(19775);
+        grassDarkColors.add(7685);
+        grassDarkColors.add(6580);
+        grassDarkColors.add(643);
+        grassDarkColors.add(2571);
+        grassDarkColors.add(10293);
+        grassDarkColors.add(8742);
+        grassDarkColors.add(7622);
+        grassDarkColors.add(7752);
+        grassDarkColors.add(8781);
+        grassDarkColors.add(682);
+        List<Integer> electricDarkColors = new ArrayList<Integer>();
+        electricDarkColors.add(415);
+        electricDarkColors.add(5656);
+        electricDarkColors.add(380);
+        electricDarkColors.add(535);
+        electricDarkColors.add(7899);
+        electricDarkColors.add(218);
+        electricDarkColors.add(19626);
+        electricDarkColors.add(1365);
+        electricDarkColors.add(3407);
+        List<Integer> psychicDarkColors = new ArrayList<Integer>();
+        psychicDarkColors.add(8394);
+        psychicDarkColors.add(10508);
+        psychicDarkColors.add(10508);
+        psychicDarkColors.add(8373);
+        psychicDarkColors.add(12626);
+        psychicDarkColors.add(405);
+        psychicDarkColors.add(16561);
+        psychicDarkColors.add(13564);
+        psychicDarkColors.add(15438);
+        psychicDarkColors.add(20656);
+        psychicDarkColors.add(26983);
+        psychicDarkColors.add(6324);
+        psychicDarkColors.add(6324);
+        psychicDarkColors.add(18607);
+        psychicDarkColors.add(2231);
+        psychicDarkColors.add(8423);
+        psychicDarkColors.add(12809);
+        psychicDarkColors.add(16732);
+        psychicDarkColors.add(19508);
+        List<Integer> iceDarkColors = new ArrayList<Integer>();
+        iceDarkColors.add(18792);
+        iceDarkColors.add(16744);
+        iceDarkColors.add(31187);
+        List<Integer> dragonDarkColors = new ArrayList<Integer>();
+        dragonDarkColors.add(25032);
+        dragonDarkColors.add(24005);
+        dragonDarkColors.add(17739);
+        dragonDarkColors.add(7412);
+        dragonDarkColors.add(11615);
+        List<Integer> darkDarkColors = new ArrayList<Integer>();
+        darkDarkColors.add(17669);
+        darkDarkColors.add(5350);
+        darkDarkColors.add(17639);
+        darkDarkColors.add(11495);
+        darkDarkColors.add(8388);
+        darkDarkColors.add(17545);
+        darkDarkColors.add(16633);
+        if (type == "NORMAL") {
+            return normalDarkColors.get(this.random.nextInt(normalDarkColors.size()));
+        }
+        else if (type == "FIGHTING") {
+            return fightingDarkColors.get(this.random.nextInt(fightingDarkColors.size()));
+        }
+        else if (type == "FLYING") {
+            return flyingDarkColors.get(this.random.nextInt(flyingDarkColors.size()));
+        }
+        else if (type == "POISON") {
+            return poisonDarkColors.get(this.random.nextInt(poisonDarkColors.size()));
+        }
+        else if (type == "GROUND") {
+            return groundDarkColors.get(this.random.nextInt(groundDarkColors.size()));
+        }
+        else if (type == "ROCK") {
+            return rockDarkColors.get(this.random.nextInt(rockDarkColors.size()));
+        }
+        else if (type == "BUG") {
+            return bugDarkColors.get(this.random.nextInt(bugDarkColors.size()));
+        }
+        else if (type == "GHOST") {
+            return ghostDarkColors.get(this.random.nextInt(ghostDarkColors.size()));
+        }
+        else if (type == "STEEL") {
+            return steelDarkColors.get(this.random.nextInt(steelDarkColors.size()));
+        }
+        else if (type == "FIRE") {
+            return fireDarkColors.get(this.random.nextInt(fireDarkColors.size()));
+        }
+        else if (type == "WATER") {
+            return waterDarkColors.get(this.random.nextInt(waterDarkColors.size()));
+        }
+        else if (type == "GRASS") {
+            return grassDarkColors.get(this.random.nextInt(grassDarkColors.size()));
+        }
+        else if (type == "ELECTRIC") {
+            return electricDarkColors.get(this.random.nextInt(electricDarkColors.size()));
+        }
+        else if (type == "PSYCHIC") {
+            return psychicDarkColors.get(this.random.nextInt(psychicDarkColors.size()));
+        }
+        else if (type == "ICE") {
+            return iceDarkColors.get(this.random.nextInt(iceDarkColors.size()));
+        }
+        else if (type == "DRAGON") {
+            return dragonDarkColors.get(this.random.nextInt(dragonDarkColors.size()));
+        }
+        else if (type == "DARK") {
+            return darkDarkColors.get(this.random.nextInt(darkDarkColors.size()));
+        }
+        return 0;
+    }
+ 
     @Override
     public BufferedImage getMascotImage() {
-        Pokemon mascot = randomPokemon();
+        // Pokemon mascot = randomPokemon();
+        Pokemon mascot = pokemonList.get(245);
         while (mascot.number == Gen2Constants.unownIndex) {
             // Unown is banned as handling it would add a ton of extra effort.
             mascot = randomPokemon();

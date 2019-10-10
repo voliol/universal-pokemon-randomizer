@@ -441,6 +441,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(e);
         }
     }
+    
+    
+    // not implemented for gen IV
+    public void savePokedex(List<Pokemon> newDex) {
+        // well this was a pain trying, as the gen IV handler doesn't seem to interact directly with the rom as any decent handler should
+        // either way, the regional dex should be at two indexes I call "RegionalDexOffset1" and "RegionalDexOffset2"
+        // (I have no idea why there are two of them, it might just be a HGSS thing)
+        // the method for doing this should still be close to the one used by the gen II rom handler
+        // I suppose you might have to find a variable for the total amount of pokés in the dex as well change it
+        // hopefully there's enough space after them as well so you don't have to repoint...
+    }
 
     private void saveMoves() {
         for (int i = 1; i <= Gen4Constants.moveCount; i++) {
@@ -2508,6 +2519,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public boolean hasDVs() {
         return false;
     }
+    
+    // not implemented for gen IV
+    @Override
+    public boolean canChangeDex() {
+        return false;
+    }
 
     @Override
     public int generationOfPokemon() {
@@ -2573,6 +2590,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } else {
             return Gen4Constants.dpptEarlyRequiredHMMoves;
         }
+    }
+    
+    @Override
+    public List<Integer> getStaticLegendaryIndexes() {
+        // it's stored as an int[] in the romEntry, we want it as a List so we can check whether a specific item is in it.
+        int[] staticLegendariesArray = romEntry.arrayEntries.get("StaticLegendaries");
+        List<Integer> staticLegendariesList = new ArrayList<Integer>();
+        for (int i : staticLegendariesArray) {
+            staticLegendariesList.add(i);
+        }
+        return staticLegendariesList;
     }
 
     @Override
@@ -2656,6 +2684,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } else {
             return validPokemon.get(random.nextInt(validPokemon.size()));
         }
+    }
+    
+    @Override
+    public void logForEmeraldColors(final PrintStream log) {
+        // irrelevant, of course, just here for structure
+    }
+    
+    @Override
+    public void randomizePalettes(boolean typeSpecific, boolean evolutionSanity, boolean shinyFromNormal) {
+        // not implemented for gen IV
     }
 
     @Override

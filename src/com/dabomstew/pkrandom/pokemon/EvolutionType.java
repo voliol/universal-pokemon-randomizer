@@ -63,4 +63,8 @@ public enum EvolutionType {
                 || (this == LEVEL_CREATE_EXTRA) || (this == LEVEL_IS_EXTRA) || (this == LEVEL_MALE_ONLY)
                 || (this == LEVEL_FEMALE_ONLY);
     }
+        
+    public boolean usesStone() {
+        return (this == STONE) || (this == STONE_MALE_ONLY) || (this == STONE_FEMALE_ONLY);
+    }
 }

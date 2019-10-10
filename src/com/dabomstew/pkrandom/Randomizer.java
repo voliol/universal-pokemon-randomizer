@@ -147,6 +147,11 @@ public class Randomizer {
             romHandler.updatePokemonStats();
         }
         
+
+        if (settings.isStandardizeEXPCurves()) {
+            romHandler.standardizeEXPCurves();
+        }
+        
         if (settings.isEvosRandomizeFirst()) {
             // Applied before everything so everything that "Follows evolutions" follows the randomized ones if 
             // "randomize evolutions first" is selected.
@@ -175,56 +180,13 @@ public class Randomizer {
                     }
                 }
                 log.println();
-                
-//                log.println("--Family tree for emerald randomizer--");
-//                for (Pokemon pk : allPokes) {
-//                    if (pk != null) {
-//                        List<Pokemon> evoQueue = new ArrayList<Pokemon>();
-//                        evoQueue.add(pk);
-//                        List<Pokemon> evoVisited = new ArrayList<Pokemon>();
-//                        while (evoQueue.size() > 0) {
-//                            Pokemon pkCurrent = evoQueue.get(0);
-//                            for (Evolution evo : pkCurrent.evolutionsFrom) {
-//                                if (!evoVisited.contains(evo.to) && !evoQueue.contains(evo.to)) {
-//                                    evoQueue.add(evo.to);
-//                                }
-//                            }
-//                            for (Evolution prevo : pkCurrent.evolutionsTo) {
-//                                if (!evoVisited.contains(prevo.from) && !evoQueue.contains(prevo.from)) {
-//                                    evoQueue.add(prevo.from);
-//                                }
-//                            }
-//                            evoVisited.add(pkCurrent);
-//                            evoQueue.remove(0);
-//                        }
-//                        if (evoVisited.size() > 1) {
-//                            StringBuilder evoStr = new StringBuilder();
-//                            // evoStr.append(pk.number + ": ");
-//                            evoStr.append("{");
-//                            evoStr.append(evoVisited.get(0).number + ",");
-//                            evoStr.append(evoVisited.get(1).number);
-//                            for (int i = 2; i < evoVisited.size(); i++) {
-//                                    evoStr.append("," + evoVisited.get(i).number);
-//                                }
-//                            evoStr.append("},");
-//                            log.println(evoStr.toString());
-//                        }
-//                        else {
-//                            // log.println(pk.number + ": ");  
-//                            log.println("{" + evoVisited.get(0).number + "},");  
-//                        }           
-//                        if (pk.number == 251) {
-//                            for (int i = 0; i < 25; i++)
-//                                log.println("{0},");
-//                        }
-//                    }
-//                    else {
-//                        log.println("-");
-//                    }
-//                }
-//    
-//                log.println();
+
             }
+        }
+        
+        // for being used in conjunction with artemis251's emerald randomizer's color randomization
+        if (romHandler.generationOfPokemon() == 3) {
+            romHandler.logForEmeraldColors(log);
         }
 
         // Base stats changing
@@ -237,10 +199,6 @@ public class Randomizer {
             break;
         default:
             break;
-        }
-
-        if (settings.isStandardizeEXPCurves()) {
-            romHandler.standardizeEXPCurves();
         }
 
         // Abilities? (new 1.0.2)
@@ -289,55 +247,6 @@ public class Randomizer {
                         }
                     }
                 }
-                log.println();
-                
-                log.println("--Family tree for emerald randomizer--");
-                for (Pokemon pk : allPokes) {
-                    if (pk != null) {
-                        List<Pokemon> evoQueue = new ArrayList<Pokemon>();
-                        evoQueue.add(pk);
-                        List<Pokemon> evoVisited = new ArrayList<Pokemon>();
-                        while (evoQueue.size() > 0) {
-                            Pokemon pkCurrent = evoQueue.get(0);
-                            for (Evolution evo : pkCurrent.evolutionsFrom) {
-                                if (!evoVisited.contains(evo.to) && !evoQueue.contains(evo.to)) {
-                                    evoQueue.add(evo.to);
-                                }
-                            }
-                            for (Evolution prevo : pkCurrent.evolutionsTo) {
-                                if (!evoVisited.contains(prevo.from) && !evoQueue.contains(prevo.from)) {
-                                    evoQueue.add(prevo.from);
-                                }
-                            }
-                            evoVisited.add(pkCurrent);
-                            evoQueue.remove(0);
-                        }
-                        if (evoVisited.size() > 1) {
-                            StringBuilder evoStr = new StringBuilder();
-                            // evoStr.append(pk.number + ": ");
-                            evoStr.append("{");
-                            evoStr.append(evoVisited.get(0).number + ",");
-                            evoStr.append(evoVisited.get(1).number);
-                            for (int i = 2; i < evoVisited.size(); i++) {
-                                    evoStr.append("," + evoVisited.get(i).number);
-                                }
-                            evoStr.append("},");
-                            log.println(evoStr.toString());
-                        }
-                        else {
-                            // log.println(pk.number + ": ");  
-                            log.println("{" + evoVisited.get(0).number + "},");  
-                        }           
-                        if (pk.number == 251) {
-                            for (int i = 0; i < 25; i++)
-                                log.println("{0},");
-                        }
-                    }
-                    else {
-                        log.println("-");
-                    }
-                }
-    
                 log.println();
             }
         }
@@ -647,14 +556,28 @@ public class Randomizer {
             romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems());
         }
         
+        // Palettes
+        // Todo: implement gui for this
+        //if (settings.isRandomizePalettes) {
+        //    romHandler.randomizePalettes(settings.isPalettesFollowTypes(), settings.isPalettesFollowEvolutions(), 
+        //            settings.isShinyPalletesFromNormal);
+        //}
+        romHandler.randomizePalettes(true, true, false);
         
-        // testing for movement of Pokémon data across the dex, or rather Pokémon data internally
-        // List<Pokemon> allPokes = romHandler.getPokemon();
-        // Pokemon poke1 = allPokes.get(3);
-        // Pokemon poke2 = allPokes.get(5);
-        // allPokes.get(3).number = poke2.number;
-        // allPokes.get(5).number = poke1.number;
-        // doesn't work; you can delete this
+        // Adjusting the pokedex/regional dex (only supported for Gen II's newdex)
+        // Todo: find a place for dxChangeCB, most of the other gui issues have already been dealt with.
+        //if (settings.isChangeDex()) {
+        List<Pokemon> dexList = getNewDexOrder();
+        
+        romHandler.savePokedex(dexList);
+        log.println("The Pokedex has been adjusted to the Pokemon found in the game and their locations.");
+        log.println("--Pokédex (new order)--");
+        log.println("| Num | Pokémon    |");
+        log.println("--------------------");
+        for(int i=0; i<dexList.size(); i++) {
+            log.printf("| %03d | %-10s |" + NEWLINE, i+1, dexList.get(i).name);
+        }
+        //}
 
         // Signature...
         romHandler.applySignature();
@@ -793,7 +716,7 @@ public class Randomizer {
                 romHandler.setStarters(starters);
                 log.println();
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS) {
-                // Randomise
+                // Randomize
                 log.println("--Random 2-Evolution Starters--");
                 int starterCount = 3;
                 if (romHandler.isYellow()) {
@@ -947,6 +870,318 @@ public class Randomizer {
             }
             log.println();
         }
+    }
+    
+    private List<Pokemon> getNewDexOrder() {
+        List<Pokemon> dexList = new ArrayList<Pokemon>();
+        // Adds the new starters to the dex.
+        // They have already been written to the new rom, so they are simply read again.
+        List<Pokemon> starters = new ArrayList<Pokemon>(romHandler.getStarters());
+        for (Pokemon st : starters) {
+            Pokemon pk = st;
+            Boolean firstInLine = false;
+            // finds the first pokemon in the line
+            while (!firstInLine) {
+                if (pk.evolutionsTo.size() != 0) {
+                   pk = pk.evolutionsTo.get(0).from;
+                }
+                else {
+                    firstInLine = true;
+                }
+            }
+            // doesn't add if it's already in
+            if (!dexList.contains(pk)) {
+                // recursive function that adds all pokemon in the line
+                dexList = romHandler.recursiveAddEvosToList(pk, dexList);
+            }
+        }
+        // wild Pokemon, after encounter list
+        // Todo: check here what order the gen II encounters are read in. Why aren't route 29 Pokémon first?
+        List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+        for (EncounterSet enset : encounters) {
+            for (Encounter en : enset.encounters) {
+                Pokemon pk = en.pokemon;
+                Boolean firstInLine = false;
+                while (!firstInLine) {
+                    if (pk.evolutionsTo.size() != 0) {
+                       pk = pk.evolutionsTo.get(0).from;
+                    }
+                    else {
+                        firstInLine = true;
+                    }
+                }
+                if (!dexList.contains(pk)) {
+                    dexList = romHandler.recursiveAddEvosToList(pk, dexList);
+                }
+            }
+        }
+        // event Pokemon, they are done before trainer-exclusive Pokemon as trainer-exclusives
+        // have to know that they aren't exclusive if they can be obtained via events
+        List<Pokemon> eventPokemon = new ArrayList<Pokemon>();
+        // in-game trades
+        List<IngameTrade> trades = romHandler.getIngameTrades();
+        for (IngameTrade igt : trades) {
+            Pokemon pk = igt.givenPokemon;
+            Boolean firstInLine = false;
+            while (!firstInLine) {
+                if (pk.evolutionsTo.size() != 0) {
+                   pk = pk.evolutionsTo.get(0).from;
+                }
+                else {
+                    firstInLine = true;
+                }
+            }
+            if (!dexList.contains(pk) && !eventPokemon.contains(pk)) {
+                eventPokemon = romHandler.recursiveAddEvosToList(pk, eventPokemon);
+            }
+        }
+        // static Pokemon
+        List<Pokemon> legendaryEventPokemon = new ArrayList<Pokemon>();
+        // gets the indexes for which static Pokemon slots are normally used for legendary Pokemon
+        List<Integer> legendaryIndexes = romHandler.getStaticLegendaryIndexes();
+        List<Pokemon> statics = romHandler.getStaticPokemon();
+        int i = 0;
+        for (Pokemon st : statics) {
+            Pokemon pk = st;
+            Boolean firstInLine = false;
+            while (!firstInLine) {
+                if (pk.evolutionsTo.size() != 0) {
+                   pk = pk.evolutionsTo.get(0).from;
+                }
+                else {
+                    firstInLine = true;
+                }
+            }
+            if (!dexList.contains(pk) && !eventPokemon.contains(pk) && !legendaryEventPokemon.contains(pk)) {
+                if (!legendaryIndexes.contains(i)) { 
+                    eventPokemon = romHandler.recursiveAddEvosToList(pk, eventPokemon);
+                }
+                else {
+                    legendaryEventPokemon = romHandler.recursiveAddEvosToList(pk, legendaryEventPokemon);
+                }
+            }
+            i += 1;
+        }
+        // trainer-exclusive Pokemon (Normal Trainers)
+        List<Pokemon> tempTrainerPokemon = new ArrayList<Pokemon>();
+        List<Trainer> trainers = romHandler.getTrainers();
+        for (Trainer t : trainers) {
+            if (t.tag == null) {
+                for (TrainerPokemon tpk : t.pokemon) {
+                    Pokemon pk = tpk.pokemon;
+                    // no evolutions for trainer-exclusive pokémon, you shouldn't be able to get them either way...
+                    if (!dexList.contains(pk) && !eventPokemon.contains(pk) && !legendaryEventPokemon.contains(pk)) {
+                        dexList.add(pk);
+                        tempTrainerPokemon.add(pk);
+                    }
+                }
+            }
+        }
+        // adds the non-legendary event Pokemon (i.e. trades + statics) to the dex
+        for (Pokemon pk : eventPokemon) {
+            dexList.add(pk);
+        }
+        // trainer-exclusive Pokemon (Special Trainers e.g. gym leaders and your rival(s))
+        // lots of lists, they are added to newDex later in that order,
+        // the very first one is there to offload the line that so that checks 
+        // whether a Pokemon isn't already in one of the other lists.
+        List<Pokemon> allSpecialTrainerPokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym1Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym2Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym3Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym4Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym5Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym6Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym7Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym8Pokemon = new ArrayList<Pokemon>();
+        // these gym tags are used in the Johto games/remakes and also in BW2
+        List<Pokemon> gym9Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym10Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym11Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym12Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym13Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym14Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym15Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> gym16Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> themedPokemon = new ArrayList<Pokemon>();
+        List<Pokemon> rivalPokemon = new ArrayList<Pokemon>();
+        // FRIEND tag is used for Bianca and Lucas/Dawn tag battles
+        List<Pokemon> friendPokemon = new ArrayList<Pokemon>();
+        List<Pokemon> elite1Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> elite2Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> elite3Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> elite4Pokemon = new ArrayList<Pokemon>();
+        List<Pokemon> championPokemon = new ArrayList<Pokemon>();
+        List<Pokemon> uberPokemon = new ArrayList<Pokemon>();
+        for (Trainer t : trainers) {
+            if (t.tag != null) {
+                for (TrainerPokemon tpk : t.pokemon) {
+                    Pokemon pk = tpk.pokemon;
+                    if (!dexList.contains(pk) && !legendaryEventPokemon.contains(pk) && !allSpecialTrainerPokemon.contains(pk)) {
+                        allSpecialTrainerPokemon.add(pk);
+                        if (t.tag == "GYM1") {
+                            gym1Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM2") {
+                            gym2Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM3") {
+                            gym3Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM4") {
+                            gym4Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM5") {
+                            gym5Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM6") {
+                            gym6Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM7") {
+                            gym7Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM8") {
+                            gym8Pokemon.add(pk);
+                        }
+                        // Giovanni is the same as GYM8, 
+                        // note that no compatibility with Kanto games is in, 
+                        // this is just for future-proofing.
+                        else if (t.tag.startsWith("GIO")) {
+                            gym8Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM9") {
+                            gym9Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM10") {
+                            gym10Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM11") {
+                            gym11Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM12") {
+                            gym12Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM13") {
+                            gym13Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM14") {
+                            gym14Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM15") {
+                            gym15Pokemon.add(pk);
+                        }
+                        else if (t.tag == "GYM16") {
+                            gym16Pokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("THEMED")) {
+                            themedPokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("RIVAL")) {
+                            rivalPokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("FRIEND")) {
+                            friendPokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("ELITE1")) {
+                            elite1Pokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("ELITE2")) {
+                            elite2Pokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("ELITE3")) {
+                            elite3Pokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("ELITE4")) {
+                            elite4Pokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("CHAMPION")) {
+                            championPokemon.add(pk);
+                        }
+                        else if (t.tag.startsWith("UBER")) {
+                            uberPokemon.add(pk);
+                        }
+                    }
+                }
+            }
+        }
+        // adds the special trainer-exclusive Pokemon to the dex, in order
+        for (Pokemon pk : gym1Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym2Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym3Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym4Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym5Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym6Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym7Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym8Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym9Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym10Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym11Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym12Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym13Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym14Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym15Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : gym16Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : themedPokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : rivalPokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : elite1Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : elite2Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : elite3Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : elite4Pokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : championPokemon) {
+            dexList.add(pk);
+        }
+        for (Pokemon pk : uberPokemon) {
+            dexList.add(pk);
+        }
+        // finally, adds the legendary event Pokemon to the dex
+        for (Pokemon pk : legendaryEventPokemon) {
+            dexList.add(pk);
+        }
+        return dexList;
     }
 
     private static int addToCV(int checkValue, int... values) {
