@@ -52,3 +52,18 @@ arises.
  - The export log contains a section meant to make it compatible with the 
   emerald-randomizer's family pallete swaps. However, it does not fully work 
   as intended, due to issues with the in-game indexes of gen III Pokémon.
+
+## What is this Branch? ##
+-by Voliol
+This is a branch where I put various uncompleted features, because honestly, I have too little time and dealing with GUI is a pain.
+Feel free to take these features, finish them, and put them in your own fork. Actually, that is encouraged, I would love someone realising the potential of these edits. I've put some time into some of them, after all.
+Here's some kind of (poorly formatted) list of the features here that are NOT in my main branch, and also what they are missing. "GUI missing" means that they are not fully implemented into the randomizer's GUI, not that they look bad in-game:
+
+- Set the Gen II Newdex to resemble a "real" Pokédex according to the actual Pokémon found in the game. Respects (random) evolutions, event Pokémon and legendaries. Works with all Generation II games but the Japanese (and Korean) ones. GUI missing, and the encounters are not read in an optimal order (following in-game progression), possibly bugs with unavailable encounters being read. 
+The framework for setting the Pokédex order works for multiple (all?) Gens, but implementing it into the game requires different solutions for each Gen, with Gen II being relatively simple, due to having a "regional dex" that fits all possible Pokémon in the game, and no other features that relates to the "regional dex" (like a diploma). 
+
+- Randomize the colors/palettes in Gen II and Gen I (when played on a GBC). GUI missing. Might not fully work on Yellow, have not tested.
+
+- When randomizing evolutions in Emerald, the log contains a section that can be pasted into artemis251's Emerald Randomizer, that can then be used for random palettes following random evolution-lines in Gen III. Has no GUI and would preferably be somehow built-in.
+
+- Some framework +notes added for a feature where stone-evos would get a type according to the stone. It needs to know which item ID's corresponds to which stone.
