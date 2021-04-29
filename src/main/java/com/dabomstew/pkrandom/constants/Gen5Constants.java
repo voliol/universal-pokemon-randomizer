@@ -52,6 +52,17 @@ public class Gen5Constants {
 
     public static final int bw1StarterTextOffset = 18, bw1CherenText1Offset = 26, bw1CherenText2Offset = 53;
 
+    public static final int bw1StriatonCityGymTextOffset = 2, bw1StriatonCityGymText2Offset = 8,
+        bw1NacreneCityGymTextOffset = 1, bw1CasteliaCityBurghTextOffset = 0,
+        bw1CasteliaCityBurghText2Offset = 5, bw1CasteliaCityBurghText3Offset = 11,
+        bw1CherenBurghTextOffset = 1, bw1NimbasaCityTextOffset = 18, 
+        bw1JuniperElesaTextOffset = 2, bw1DriftveilCityTextOffset = 1,
+        bw1MistraltonCityTextOffset = 8, bw1MonkeyGiverTextOffset = 4,
+        bw1PinwheelForestTextOffset = 28, bw1CelestialTowerTextOffset = 6;
+    
+    public static final int bw1CasteliaCityItemTextOffset = 3, bw1CasteliaCityItemText2Offset = 7,
+        bw1CasteliaCityItemText3Offset = 11, bw1CasteliaCityPraiseTextOffset = 6;
+
     public static final byte[] bw2NewStarterScript = { 0x28, 0x00, (byte) 0xA1, 0x40, 0x04, 0x00, (byte) 0xDE, 0x00,
             0x00, 0x00, (byte) 0xFD, 0x01, 0x05, 0x00 };
 
@@ -95,7 +106,16 @@ public class Gen5Constants {
 
     public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
 
-    public static final int waterStoneIndex = 84;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82,
+        thunderStoneIndex = 83, waterStoneIndex = 84, leafStoneIndex = 85, shinyStoneIndex = 107,
+        duskStoneIndex = 108, dawnStoneIndex = 109;
+
+    public static final List<Integer> availableStones = Arrays.asList(
+        Gen5Constants.moonStoneIndex, Gen5Constants.fireStoneIndex,
+        Gen5Constants.waterStoneIndex, Gen5Constants.thunderStoneIndex,
+        Gen5Constants.leafStoneIndex, Gen5Constants.sunStoneIndex,
+        Gen5Constants.shinyStoneIndex, Gen5Constants.duskStoneIndex,
+        Gen5Constants.dawnStoneIndex);
 
     public static final int highestAbilityIndex = 164;
 
@@ -206,7 +226,7 @@ public class Gen5Constants {
         }
     }
 
-    public static ItemList allowedItems, nonBadItems;
+    public static ItemList allowedItems, nonBadItems, trainerItemList;
 
     static {
         setupAllowedItems();
@@ -240,6 +260,29 @@ public class Gen5Constants {
         nonBadItems.banRange(0x9F, 54); // berries DansGame
         nonBadItems.banRange(0x100, 4); // pokemon specific
         nonBadItems.banRange(0x104, 5); // contest scarves
+
+        trainerItemList = new ItemList(638);
+        trainerItemList.banRange(0, 639);
+        trainerItemList.allowSingles(154, 155, 157); // LEPPA BERRY, ORAN BERRY, LUM BERRY
+        trainerItemList.allowSingles(158, 201, 202); // SITRUS BERRY, LIECHI BERRY, GANLON BERRY
+        trainerItemList.allowSingles(203, 204, 205); // SALAC BERRY, PETAYA BERRY, APICOT BERRY
+        trainerItemList.allowSingles(206, 207, 208); // LANSAT BERRY, STARF BERRY, ENIGMA BERRY
+        trainerItemList.allowSingles(209, 210, 211); // MICLE BERRY, CUSTAP BERRY, JABOCA BERRY
+        trainerItemList.allowSingles(213, 214, 217); // BRIGHTPOWDER, WHITE HERB, QUICK CLAW
+        trainerItemList.allowSingles(220, 221, 222); // CHOICE BAND, KING's ROCK, SILVERPOWDER
+        trainerItemList.allowSingles(230, 232, 233); // FOCUS BAND, SCOPE LENS, METAL COAT
+        trainerItemList.allowSingles(234, 237, 238); // LEFTOVERS, SOFT SAND, HARD STONE
+        trainerItemList.allowSingles(239, 240, 241); // MIRACLE SEED, BLACKGLASSES, BLACK BELT
+        trainerItemList.allowSingles(242, 243, 244); // MAGNET, MYSTIC WATER, SHARP BEAK
+        trainerItemList.allowSingles(245, 246, 247); // POISON BARB, NEVERMELTICE, SPELL TAG
+        trainerItemList.allowSingles(248, 249, 250); // TWISTEDSPOON, CHARCOAL, DRAGON FANG
+        trainerItemList.allowSingles(251, 254, 255); // SILK SCARF, SEA INCENSE, LAX INCENSE
+        trainerItemList.allowSingles(212, 265, 266); // ROWAP BERRY, WIDE LENS, MUSCLE BAND
+        trainerItemList.allowSingles(267, 268, 269); // WISE GLASSES, EXPERT BELT, LIGHT CLAY
+        trainerItemList.allowSingles(270, 271, 275); // LIFE ORB, POWER HERB, FOCUS SASH
+        trainerItemList.allowSingles(276, 277, 286); // ZOOM LENS, METRONOME, GRIP CLAW
+        trainerItemList.allowSingles(287, 288, 295); // CHOICE SCARF, STICKY BARB, SHED SHELL
+        trainerItemList.allowSingles(296, 297, 200); // BIG ROOT, CHOICE SPECS, CHILAN BERRY
     }
 
     /* @formatter:off */
@@ -371,11 +414,11 @@ public class Gen5Constants {
     public static void tagTrainersBW(List<Trainer> trs) {
         // We use different Gym IDs to cheat the system for the 3 n00bs
         // Chili, Cress, and Cilan
-        // Cilan can be GYM1, then Chili is GYM9 and Cress GYM10
-        // Also their *trainers* are GYM11 lol
+        // Their *trainers* are GYM1
+        // We use this so their team contains GYM1 Type plus superior type
 
         // Gym Trainers
-        tag(trs, "GYM11", 0x09, 0x0A);
+        tag(trs, "GYM1", 0x09, 0x0A);
         tag(trs, "GYM2", 0x56, 0x57, 0x58);
         tag(trs, "GYM3", 0xC4, 0xC6, 0xC7, 0xC8);
         tag(trs, "GYM4", 0x42, 0x43, 0x44, 0x45);
@@ -385,9 +428,6 @@ public class Gen5Constants {
         tag(trs, "GYM8", 0x109, 0x10A, 0x10F, 0x10E, 0x110, 0x10B, 0x113, 0x112);
 
         // Gym Leaders
-        tag(trs, 0x0C, "GYM1"); // Cilan
-        tag(trs, 0x0B, "GYM9"); // Chili
-        tag(trs, 0x0D, "GYM10"); // Cress
         tag(trs, 0x15, "GYM2"); // Lenora
         tag(trs, 0x16, "GYM3"); // Burgh
         tag(trs, 0x17, "GYM4"); // Elesa
@@ -396,6 +436,11 @@ public class Gen5Constants {
         tag(trs, 0x83, "GYM7"); // Brycen
         tag(trs, 0x84, "GYM8"); // Iris or Drayden
         tag(trs, 0x85, "GYM8"); // Iris or Drayden
+
+        // N00bs
+        tag(trs, 0x0C, "CILAN"); // Cilan
+        tag(trs, 0x0B, "CHILI"); // Chili
+        tag(trs, 0x0D, "CRESS"); // Cress
 
         // Elite 4
         tag(trs, 0xE4, "ELITE1"); // Shauntal
@@ -411,11 +456,11 @@ public class Gen5Constants {
         tag(trs, 0x197, "CHAMPION"); // Alder
 
         // Ubers?
-        tag(trs, 0x21E, "UBER"); // Game Freak Guy
-        tag(trs, 0x237, "UBER"); // Cynthia
-        tag(trs, 0xE8, "UBER"); // Ghetsis
-        tag(trs, 0x24A, "UBER"); // N-White
-        tag(trs, 0x24B, "UBER"); // N-Black
+        tag(trs, 0x21E, "UBER1"); // Game Freak Guy
+        tag(trs, 0x237, "UBER2"); // Cynthia
+        tag(trs, 0xE8, "UBER3"); // Ghetsis
+        tag(trs, 0x24A, "UBER4"); // N-White
+        tag(trs, 0x24B, "UBER5"); // N-Black
 
         // Rival - Cheren
         tagRivalBW(trs, "RIVAL1", 0x35);
@@ -512,39 +557,39 @@ public class Gen5Constants {
         // Uber-Trainers
         // There are *fourteen* ubers of 17 allowed (incl. the champion)
         // It's a rather stacked game...
-        tag(trs, 0x246, "UBER"); // Alder
-        tag(trs, 0x1c8, "UBER"); // Cynthia
-        tag(trs, 0xca, "UBER"); // Benga/BlackTower
-        tag(trs, 0xc9, "UBER"); // Benga/WhiteTreehollow
-        tag(trs, 0x5, "UBER"); // N/Zekrom
-        tag(trs, 0x6, "UBER"); // N/Reshiram
-        tag(trs, 0x30e, "UBER"); // N/Spring
-        tag(trs, 0x30f, "UBER"); // N/Summer
-        tag(trs, 0x310, "UBER"); // N/Autumn
-        tag(trs, 0x311, "UBER"); // N/Winter
-        tag(trs, 0x159, "UBER"); // Ghetsis
-        tag(trs, 0x8c, "UBER"); // Game Freak Guy
-        tag(trs, 0x24f, "UBER"); // Game Freak Leftovers Guy
+        tag(trs, 0x246, "UBER1"); // Alder
+        tag(trs, 0x1c8, "UBER2"); // Cynthia
+        tag(trs, 0xca, "UBER3"); // Benga/BlackTower
+        tag(trs, 0xc9, "UBER4"); // Benga/WhiteTreehollow
+        tag(trs, 0x5, "UBER5"); // N/Zekrom
+        tag(trs, 0x6, "UBER6"); // N/Reshiram
+        tag(trs, 0x30e, "UBER7"); // N/Spring
+        tag(trs, 0x30f, "UBER8"); // N/Summer
+        tag(trs, 0x310, "UBER9"); // N/Autumn
+        tag(trs, 0x311, "UBER10"); // N/Winter
+        tag(trs, 0x159, "UBER11"); // Ghetsis
+        tag(trs, 0x8c, "UBER12"); // Game Freak Guy
+        tag(trs, 0x24f, "UBER13"); // Game Freak Leftovers Guy
 
     }
 
     private static void tagRivalBW(List<Trainer> allTrainers, String tag, int offset) {
-        allTrainers.get(offset - 1).tag = tag + "-0";
-        allTrainers.get(offset).tag = tag + "-1";
-        allTrainers.get(offset + 1).tag = tag + "-2";
+        allTrainers.get(offset - 1).setTag(tag + "-0");
+        allTrainers.get(offset).setTag(tag + "-1");
+        allTrainers.get(offset + 1).setTag(tag + "-2");
 
     }
 
     private static void tag(List<Trainer> allTrainers, int number, String tag) {
         if (allTrainers.size() > (number - 1)) {
-            allTrainers.get(number - 1).tag = tag;
+            allTrainers.get(number - 1).setTag(tag);
         }
     }
 
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
         for (int num : numbers) {
             if (allTrainers.size() > (num - 1)) {
-                allTrainers.get(num - 1).tag = tag;
+                allTrainers.get(num - 1).setTag(tag);
             }
         }
     }

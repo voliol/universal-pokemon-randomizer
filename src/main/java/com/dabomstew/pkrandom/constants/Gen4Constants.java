@@ -88,7 +88,15 @@ public class Gen4Constants {
 
     public static final int evolutionMethodCount = 26;
 
-    public static final int waterStoneIndex = 84, leafStoneIndex = 85, dawnStoneIndex = 109;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82, thunderStoneIndex = 83, 
+        waterStoneIndex = 84, leafStoneIndex = 85, shinyStoneIndex = 107, duskStoneIndex = 108, dawnStoneIndex = 109;
+
+    public static final List<Integer> availableStones = Arrays.asList(
+        Gen4Constants.moonStoneIndex, Gen4Constants.fireStoneIndex,
+        Gen4Constants.waterStoneIndex, Gen4Constants.thunderStoneIndex,
+        Gen4Constants.leafStoneIndex, Gen4Constants.sunStoneIndex,
+        Gen4Constants.shinyStoneIndex, Gen4Constants.duskStoneIndex,
+        Gen4Constants.dawnStoneIndex);
 
     public static final int highestAbilityIndex = 123;
 
@@ -149,7 +157,7 @@ public class Gen4Constants {
     // HGSS: just cut
     public static final List<Integer> hgssEarlyRequiredHMMoves = Arrays.asList(15);
 
-    public static ItemList allowedItems, nonBadItems;
+    public static ItemList allowedItems, nonBadItems, trainerItemList;
 
     static {
         setupAllowedItems();
@@ -177,6 +185,29 @@ public class Gen4Constants {
         nonBadItems.banRange(0x9F, 54); // berries DansGame
         nonBadItems.banRange(0x100, 4); // pokemon specific
         nonBadItems.banRange(0x104, 5); // contest scarves
+
+        trainerItemList = new ItemList(536);
+        trainerItemList.banRange(0, 537);
+        trainerItemList.allowSingles(154, 155, 157); // LEPPA BERRY, ORAN BERRY, LUM BERRY
+        trainerItemList.allowSingles(158, 201, 202); // SITRUS BERRY, LIECHI BERRY, GANLON BERRY
+        trainerItemList.allowSingles(203, 204, 205); // SALAC BERRY, PETAYA BERRY, APICOT BERRY
+        trainerItemList.allowSingles(206, 207, 208); // LANSAT BERRY, STARF BERRY, ENIGMA BERRY
+        trainerItemList.allowSingles(209, 210, 211); // MICLE BERRY, CUSTAP BERRY, JABOCA BERRY
+        trainerItemList.allowSingles(213, 214, 217); // BRIGHTPOWDER, WHITE HERB, QUICK CLAW
+        trainerItemList.allowSingles(220, 221, 222); // CHOICE BAND, KING's ROCK, SILVERPOWDER
+        trainerItemList.allowSingles(230, 232, 233); // FOCUS BAND, SCOPE LENS, METAL COAT
+        trainerItemList.allowSingles(234, 237, 238); // LEFTOVERS, SOFT SAND, HARD STONE
+        trainerItemList.allowSingles(239, 240, 241); // MIRACLE SEED, BLACKGLASSES, BLACK BELT
+        trainerItemList.allowSingles(242, 243, 244); // MAGNET, MYSTIC WATER, SHARP BEAK
+        trainerItemList.allowSingles(245, 246, 247); // POISON BARB, NEVERMELTICE, SPELL TAG
+        trainerItemList.allowSingles(248, 249, 250); // TWISTEDSPOON, CHARCOAL, DRAGON FANG
+        trainerItemList.allowSingles(251, 254, 255); // SILK SCARF, SEA INCENSE, LAX INCENSE
+        trainerItemList.allowSingles(212, 265, 266); // ROWAP BERRY, WIDE LENS, MUSCLE BAND
+        trainerItemList.allowSingles(267, 268, 269); // WISE GLASSES, EXPERT BELT, LIGHT CLAY
+        trainerItemList.allowSingles(270, 271, 275); // LIFE ORB, POWER HERB, FOCUS SASH
+        trainerItemList.allowSingles(276, 277, 286); // ZOOM LENS, METRONOME, GRIP CLAW
+        trainerItemList.allowSingles(287, 288, 295); // CHOICE SCARF, STICKY BARB, SHED SHELL
+        trainerItemList.allowSingles(296, 297, 200); // BIG ROOT, CHOICE SPECS, CHILAN BERRY
     }
 
     public static final Type[] typeTable = constructTypeTable();
@@ -428,7 +459,7 @@ public class Gen4Constants {
         tag(trs, 0xf4, "CHAMPION");
 
         // Red
-        tag(trs, 0x104, "UBER");
+        tag(trs, 0x104, "UBER1");
 
         // Gym Rematches
         tag(trs, 0x2c8, "GYM1");
@@ -495,40 +526,40 @@ public class Gen4Constants {
     }
 
     private static void tag(List<Trainer> allTrainers, int number, String tag) {
-        allTrainers.get(number - 1).tag = tag;
+        allTrainers.get(number - 1).setTag(tag);
     }
 
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
         for (int num : numbers) {
-            allTrainers.get(num - 1).tag = tag;
+            allTrainers.get(num - 1).setTag(tag);
         }
     }
 
     private static void tagRivalConsecutive(List<Trainer> allTrainers, String tag, int offsetFire) {
-        allTrainers.get(offsetFire - 1).tag = tag + "-0";
-        allTrainers.get(offsetFire).tag = tag + "-1";
-        allTrainers.get(offsetFire - 2).tag = tag + "-2";
+        allTrainers.get(offsetFire - 1).setTag(tag + "-0");
+        allTrainers.get(offsetFire).setTag(tag + "-1");
+        allTrainers.get(offsetFire - 2).setTag(tag + "-2");
 
     }
 
     private static void tagFriendConsecutive(List<Trainer> allTrainers, String tag, int offsetGrass) {
-        allTrainers.get(offsetGrass - 1).tag = tag + "-1";
-        allTrainers.get(offsetGrass).tag = tag + "-2";
-        allTrainers.get(offsetGrass + 1).tag = tag + "-0";
+        allTrainers.get(offsetGrass - 1).setTag(tag + "-1");
+        allTrainers.get(offsetGrass).setTag(tag + "-2");
+        allTrainers.get(offsetGrass + 1).setTag(tag + "-0");
 
     }
 
     private static void tagFriendConsecutive2(List<Trainer> allTrainers, String tag, int offsetWater) {
-        allTrainers.get(offsetWater - 1).tag = tag + "-0";
-        allTrainers.get(offsetWater).tag = tag + "-1";
-        allTrainers.get(offsetWater + 1).tag = tag + "-2";
+        allTrainers.get(offsetWater - 1).setTag(tag + "-0");
+        allTrainers.get(offsetWater).setTag(tag + "-1");
+        allTrainers.get(offsetWater + 1).setTag(tag + "-2");
 
     }
 
     private static void tagAsDoubleRivalConsecutive(List<Trainer> allTrainers, int offsetFire) {
-        allTrainers.get(offsetFire - 1).isDoubleBattle = true;
-        allTrainers.get(offsetFire).isDoubleBattle = true;
-        allTrainers.get(offsetFire - 2).isDoubleBattle = true;
+        allTrainers.get(offsetFire - 1).setIsDoubleBattle(true);
+        allTrainers.get(offsetFire).setIsDoubleBattle(true);
+        allTrainers.get(offsetFire - 2).setIsDoubleBattle(true);
 
     }
 }

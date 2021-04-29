@@ -108,4 +108,40 @@ public class Evolution implements Comparable<Evolution> {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Evolution [from=" + this.from.name + ", to=" + this.to.name + ", method=" + this.type + ", extraInfo=" + this.extraInfo + "]";
+    }
+
+    public Pokemon getFrom() {
+        return from;
+    }
+
+    public void setFrom(Pokemon from) {
+        this.from = from;
+    }
+
+    public Pokemon getTo() {
+        return to;
+    }
+
+    public void setTo(Pokemon to) {
+        this.to = to;
+    }
+
+    public EvolutionType getType() {
+        return this.type;
+    }
+    public void setType(EvolutionType type) {
+        this.type = type;
+    }
+
+    public int getExtraInfo() {
+    	return this.extraInfo;
+    }
+    
+    public void setExtraInfo(int extraInfo) {
+    	this.extraInfo = extraInfo;
+    }
+
 }

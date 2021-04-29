@@ -93,11 +93,13 @@ public class GlobalConstants {
 
     public static final int[] ptSpecialIntros = { 377, 378, 379, 479, 480, 482, 483, 484, 485, 486, 487, 491, 492, 493 };
 
+    public static final List<Integer> SUPPORTED_GENERATIONS = Arrays.asList(1, 2, 3, 4, 5);
+
     public static final List<Integer> battleTrappingAbilities = Arrays.asList(23, 42, 71);
 
-    public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161, 150);
-    // Defeatist, Slow Start, Truant, Forecast, Zen Mode, Imposter
-    // To test: Illusion
+    public static final List<Integer> negativeAbilities = Arrays.asList(129, 112, 54, 59, 161, 150, 96, 100, 121, 103);
+    // Defeatist, Slow Start, Truant, Forecast, Zen Mode, Imposter, Normalize, Stall, Multitype, Klutz
+    // List found at https://projectpokemon.org/home/forums/topic/36919-abilities-amp-moves-by-index-number-id-4-powersaves-abilitymove-modifiers/
 
     public static final int WONDER_GUARD_INDEX = 25;
 
@@ -106,5 +108,9 @@ public class GlobalConstants {
     public static final int METRONOME_MOVE = 118;
 
     public static final int TRIPLE_KICK_INDEX = 167;
+
+    public static final int MAXIMUM_EVO_LEVEL = 40;
+
+    public static final int MAXIMUM_INTERMEDIATE_EVO_LEVEL = 30;
 
 }

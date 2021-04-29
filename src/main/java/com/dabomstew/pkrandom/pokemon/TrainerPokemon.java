@@ -28,6 +28,10 @@ public class TrainerPokemon {
     public Pokemon pokemon;
     public int level;
 
+    // Nickname is not actually supported by any mainline games
+    // This just assists with internal testing
+    private String nickname;
+
     public int move1;
     public int move2;
     public int move3;
@@ -44,6 +48,7 @@ public class TrainerPokemon {
     public TrainerPokemon(TrainerPokemon tp) {
         this.pokemon = tp.pokemon;
         this.level = tp.level;
+        this.nickname = tp.getNickname();
         this.move1 = tp.move1;
         this.move2 = tp.move2;
         this.move3 = tp.move3;
@@ -53,8 +58,36 @@ public class TrainerPokemon {
         this.ability = tp.ability;
     }
 
+    public Pokemon getPokemon() {
+    	return this.pokemon;
+    }
+
+    public void setPokemon(Pokemon pokemon) {
+    	this.pokemon = pokemon;
+    }
+
     public int getLevel() {
-        return level;
+    	return this.level;
+    }
+    
+    public void setLevel(int level) {
+    	this.level = level;
+    }
+
+    public String getNickname() {
+        return this.nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public int getHeldItem() {
+        return this.heldItem;
+    }
+
+    public void setHeldItem(int heldItem) {
+        this.heldItem = heldItem;
     }
 
     public String toString() {

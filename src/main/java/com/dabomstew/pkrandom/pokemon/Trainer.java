@@ -27,15 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Trainer implements Comparable<Trainer> {
-    public int offset;
-    public List<TrainerPokemon> pokemon = new ArrayList<TrainerPokemon>();
-    public String tag;
-    public boolean isDoubleBattle;
-    public boolean importantTrainer;
-    public int poketype;
-    public String name;
-    public int trainerclass;
-    public String fullDisplayName;
+    private int offset;
+    private List<TrainerPokemon> pokemon = new ArrayList<TrainerPokemon>();
+    private String tag;
+    private boolean isDoubleBattle;
+    private boolean importantTrainer;
+    private int poketype;
+    private String name;
+    private int trainerclass;
+    private String fullDisplayName;
 
     public Trainer(){};
 
@@ -52,6 +52,100 @@ public class Trainer implements Comparable<Trainer> {
         for(TrainerPokemon tpk : t.pokemon) {
             pokemon.add(new TrainerPokemon(tpk));
         }
+    }
+
+    public String stringOffset() {
+        return String.format("%X", this.offset);
+    }
+
+    public String getLogName() {
+        if (this.fullDisplayName != null) {
+            return this.fullDisplayName;
+        }
+        if (this.name != null) {
+            return this.name;
+        }
+        return "No_Name_Found";
+    }
+
+    public int getOffset() {
+        return this.offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public List<TrainerPokemon> getPokemon() {
+        return this.pokemon;
+    }
+
+    public void setPokemon(List<TrainerPokemon> pokemon) {
+        this.pokemon = pokemon;
+    }
+
+    public String getTag() {
+        return this.tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public boolean isIsDoubleBattle() {
+        return this.isDoubleBattle;
+    }
+
+    public boolean getIsDoubleBattle() {
+        return this.isDoubleBattle;
+    }
+
+    public void setIsDoubleBattle(boolean isDoubleBattle) {
+        this.isDoubleBattle = isDoubleBattle;
+    }
+
+    public boolean isImportantTrainer() {
+        return this.importantTrainer;
+    }
+
+    public boolean getImportantTrainer() {
+        return this.importantTrainer;
+    }
+
+    public void setImportantTrainer(boolean importantTrainer) {
+        this.importantTrainer = importantTrainer;
+    }
+
+    public int getPoketype() {
+        return this.poketype;
+    }
+
+    public void setPoketype(int poketype) {
+        this.poketype = poketype;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getTrainerclass() {
+        return this.trainerclass;
+    }
+
+    public void setTrainerclass(int trainerclass) {
+        this.trainerclass = trainerclass;
+    }
+
+    public String getFullDisplayName() {
+        return this.fullDisplayName;
+    }
+
+    public void setFullDisplayName(String fullDisplayName) {
+        this.fullDisplayName = fullDisplayName;
     }
 
     public String toString() {

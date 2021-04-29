@@ -27,8 +27,11 @@ package com.dabomstew.pkrandom.pokemon;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -89,6 +92,80 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
+    }
+    
+    // Select a type from the ones on this pokemon
+    public Type randomOfTypes(Random random) {
+        if (secondaryType == null) {
+            return primaryType;
+        }
+        
+        return random.nextBoolean() ? primaryType : secondaryType;
+    }
+    
+    public void assignTypeByReference(Pokemon ref, int typesDiffer, Supplier<Type> defaultFunction) {
+        switch(typesDiffer) {
+        case 0:
+            this.primaryType = ref.primaryType;
+            this.secondaryType = ref.secondaryType;
+            this.typeChanged = ref.typeChanged;
+            break;
+        case 1:           
+            this.primaryType = ref.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+            this.secondaryType = ref.typeChanged == 2 ? ref.secondaryType : this.secondaryType;
+            this.typeChanged = ref.typeChanged;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        case 2:
+            this.primaryType = ref.typeChanged == 1 ? ref.primaryType : 
+                    this.secondaryType != null ? this.primaryType : ref.secondaryType;
+            this.secondaryType = ref.typeChanged == 2 && this.secondaryType != null ? 
+                    defaultFunction.get() : this.secondaryType;
+            this.typeChanged = this.secondaryType != null ? ref.typeChanged : 1;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        case 3:
+            this.primaryType = ref.typeChanged == 1 ? this.primaryType : defaultFunction.get();
+            this.secondaryType = ref.typeChanged == 1 ? ref.primaryType : this.secondaryType;
+            this.typeChanged = ref.typeChanged == 1 ? 2 : 1;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        case 4:
+            this.primaryType = ref.typeChanged == 2 ? ref.secondaryType : 
+                    this.secondaryType != null ? ref.secondaryType: ref.primaryType;
+            this.secondaryType = ref.typeChanged == 1 && this.secondaryType != null ? 
+                    defaultFunction.get() : this.secondaryType;
+            this.typeChanged = ref.typeChanged == 1 && this.secondaryType != null ? 
+                    2 : 1;
+            while(this.primaryType == this.secondaryType) {
+                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+            }
+            break;
+        }
+    }
+
+    public Type getRandomWeakness(Random random, boolean useResistantType) {
+        return Type.randomWeakness(random, useResistantType, this.primaryType, this.secondaryType);
+    }
+
+    public boolean isWeakTo(Pokemon pkmn) {
+        boolean isWeak = Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.primaryType) ||
+            Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.secondaryType);
+        if (this.secondaryType != null && !isWeak) {
+            isWeak = Type.STRONG_AGAINST.get(this.secondaryType.ordinal()).contains(pkmn.primaryType) ||
+            Type.STRONG_AGAINST.get(this.secondaryType.ordinal()).contains(pkmn.secondaryType);
+        }
+        return isWeak;
     }
 
     public int minimumLevel() {
@@ -454,9 +531,21 @@ public class Pokemon implements Comparable<Pokemon> {
     public boolean isLegendary() {
         return legendaries.contains(this.number);
     }
+    
+    public boolean isBigPoke(boolean isGen1) {
+        if(isGen1) {
+            return gen1Bst() > 490 || Collections.max(Arrays.asList(hp, attack, defense, speed, special)) > 190;
+        } else {
+            return bst() > 590 || Collections.max(Arrays.asList(hp, attack, defense, speed, spatk, spdef)) > 190;
+        }
+    }
 
     public int bst() {
         return hp + attack + defense + spatk + spdef + speed;
+    }
+    
+    public int gen1Bst() {
+        return hp + attack + defense + special + speed;
     }
 
     public int bstForPowerLevels() {
@@ -506,5 +595,197 @@ public class Pokemon implements Comparable<Pokemon> {
     @Override
     public int compareTo(Pokemon o) {
         return number - o.number;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public Type getPrimaryType() {
+        return primaryType;
+    }
+
+    public void setPrimaryType(Type primaryType) {
+        this.primaryType = primaryType;
+    }
+
+    public Type getSecondaryType() {
+        return secondaryType;
+    }
+
+    public void setSecondaryType(Type secondaryType) {
+        this.secondaryType = secondaryType;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public int getAttack() {
+        return attack;
+    }
+
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
+
+    public int getDefense() {
+        return defense;
+    }
+
+    public void setDefense(int defense) {
+        this.defense = defense;
+    }
+
+    public int getSpatk() {
+        return spatk;
+    }
+
+    public void setSpatk(int spatk) {
+        this.spatk = spatk;
+    }
+
+    public int getSpdef() {
+        return spdef;
+    }
+
+    public void setSpdef(int spdef) {
+        this.spdef = spdef;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public int getSpecial() {
+        return special;
+    }
+
+    public void setSpecial(int special) {
+        this.special = special;
+    }
+
+    public int getAbility1() {
+        return ability1;
+    }
+
+    public void setAbility1(int ability1) {
+        this.ability1 = ability1;
+    }
+
+    public int getAbility2() {
+        return ability2;
+    }
+
+    public void setAbility2(int ability2) {
+        this.ability2 = ability2;
+    }
+
+    public int getAbility3() {
+        return ability3;
+    }
+
+    public void setAbility3(int ability3) {
+        this.ability3 = ability3;
+    }
+
+    public int getCatchRate() {
+        return catchRate;
+    }
+
+    public void setCatchRate(int catchRate) {
+        this.catchRate = catchRate;
+    }
+
+    public int getExpYield() {
+        return expYield;
+    }
+
+    public void setExpYield(int expYield) {
+        this.expYield = expYield;
+    }
+
+    public int getGuaranteedHeldItem() {
+        return guaranteedHeldItem;
+    }
+
+    public void setGuaranteedHeldItem(int guaranteedHeldItem) {
+        this.guaranteedHeldItem = guaranteedHeldItem;
+    }
+
+    public int getCommonHeldItem() {
+        return commonHeldItem;
+    }
+
+    public void setCommonHeldItem(int commonHeldItem) {
+        this.commonHeldItem = commonHeldItem;
+    }
+
+    public int getRareHeldItem() {
+        return rareHeldItem;
+    }
+
+    public void setRareHeldItem(int rareHeldItem) {
+        this.rareHeldItem = rareHeldItem;
+    }
+
+    public int getDarkGrassHeldItem() {
+        return darkGrassHeldItem;
+    }
+
+    public void setDarkGrassHeldItem(int darkGrassHeldItem) {
+        this.darkGrassHeldItem = darkGrassHeldItem;
+    }
+
+    public int getGenderRatio() {
+        return genderRatio;
+    }
+
+    public void setGenderRatio(int genderRatio) {
+        this.genderRatio = genderRatio;
+    }
+
+    public List<Evolution> getEvolutionsFrom() {
+        return evolutionsFrom;
+    }
+
+    public List<Evolution> getFilteredEvolutionsFrom() {
+        // Filter out evolutions with a duplicate names
+        HashSet<String> nameSet = new HashSet<String>();
+        return evolutionsFrom.stream()
+               .filter(e -> nameSet.add(e.to.name))
+               .collect(Collectors.toList());
+    }
+
+    public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {
+        this.evolutionsFrom = evolutionsFrom;
+    }
+
+    public List<Evolution> getEvolutionsTo() {
+        return evolutionsTo;
+    }
+
+    public void setEvolutionsTo(List<Evolution> evolutionsTo) {
+        this.evolutionsTo = evolutionsTo;
     }
 }

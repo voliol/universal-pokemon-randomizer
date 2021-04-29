@@ -158,7 +158,12 @@ public class Gen3Constants {
 
     public static final int evolutionMethodCount = 15;
 
-    public static final int sunStoneIndex = 93, moonStoneIndex = 94, waterStoneIndex = 97;
+    public static final int sunStoneIndex = 93, moonStoneIndex = 94, fireStoneIndex = 95, thunderStoneIndex = 96,
+        waterStoneIndex = 97, leafStoneIndex = 98;
+    public static final List<Integer> availableStones = Arrays.asList(
+        Gen3Constants.moonStoneIndex, Gen3Constants.fireStoneIndex,
+        Gen3Constants.waterStoneIndex, Gen3Constants.thunderStoneIndex,
+        Gen3Constants.leafStoneIndex, Gen3Constants.sunStoneIndex);
 
     public static final int highestAbilityIndex = 77;
 
@@ -250,7 +255,7 @@ public class Gen3Constants {
         }
     }
 
-    public static ItemList allowedItems, nonBadItems;
+    public static ItemList allowedItems, nonBadItems, trainerItemList;
 
     static {
         setupAllowedItems();
@@ -283,6 +288,22 @@ public class Gen3Constants {
         nonBadItems.banRange(0x8F, 33); // berries
         nonBadItems.banRange(0xDE, 4); // pokemon specific
         nonBadItems.banRange(0xFE, 5); // contest scarves
+
+        trainerItemList = new ItemList(376);
+        trainerItemList.banRange(0, 377);
+        trainerItemList.allowSingles(138, 139, 141); // LEPPA BERRY, ORAN BERRY, LUM BERRY
+        trainerItemList.allowSingles(142, 168, 169); // SITRUS BERRY, LIECHI BERRY, GANLON BERRY
+        trainerItemList.allowSingles(170, 171, 172); // SALAC BERRY, PETAYA BERRY, APICOT BERRY
+        trainerItemList.allowSingles(173, 174, 175); // LANSAT BERRY, STARF BERRY, ENIGMA BERRY 
+        trainerItemList.allowSingles(179, 180, 183); // BRIGHTPOWDER, WHITE HERB, QUICK CLAW
+        trainerItemList.allowSingles(186, 187, 188); // CHOICE BAND, KING's ROCK, SILVERPOWDER
+        trainerItemList.allowSingles(196, 198, 199); // FOCUS BAND, SCOPE LENS, METAL COAT
+        trainerItemList.allowSingles(200, 203, 204); // LEFTOVERS, SOFT SAND, HARD STONE
+        trainerItemList.allowSingles(205, 206, 207); // MIRACLE SEED, BLACKGLASSES, BLACK BELT
+        trainerItemList.allowSingles(208, 209, 210); // MAGNET, MYSTIC WATER, SHARP BEAK
+        trainerItemList.allowSingles(211, 212, 213); // POISON BARB, NEVERMELTICE, SPELL TAG
+        trainerItemList.allowSingles(214, 215, 216); // TWISTEDSPOON, CHARCOAL, DRAGON FANG
+        trainerItemList.allowSingles(217, 220, 221); // SILK SCARF, SEA INCENSE, LAX INCENSE
     }
 
     public static void trainerTagsRS(List<Trainer> trs, int romType) {
@@ -453,7 +474,7 @@ public class Gen3Constants {
         tag(trs, "THEMED:SHELLY", 0x20, 0x21);
 
         // Steven
-        tag(trs, 0x324, "UBER");
+        tag(trs, 0x324, "UBER1");
 
     }
 
@@ -545,12 +566,12 @@ public class Gen3Constants {
     }
 
     private static void tag(List<Trainer> trainers, int trainerNum, String tag) {
-        trainers.get(trainerNum - 1).tag = tag;
+        trainers.get(trainerNum - 1).setTag(tag);
     }
 
     private static void tag(List<Trainer> allTrainers, String tag, int... numbers) {
         for (int num : numbers) {
-            allTrainers.get(num - 1).tag = tag;
+            allTrainers.get(num - 1).setTag(tag);
         }
     }
 

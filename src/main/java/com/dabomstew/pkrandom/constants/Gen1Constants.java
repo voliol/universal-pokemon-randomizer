@@ -1,7 +1,9 @@
 package com.dabomstew.pkrandom.constants;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -39,6 +41,14 @@ public class Gen1Constants {
             bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsLevel1MovesOffset = 15, bsGrowthCurveOffset = 19,
             bsTMHMCompatOffset = 20;
 
+    public static final int moonStoneIndex = 10, fireStoneIndex = 32, thunderStoneIndex = 33, waterStoneIndex = 34,
+            leafStoneIndex = 47;
+    
+    public static final List<Integer> availableStones = Arrays.asList(
+                Gen1Constants.moonStoneIndex, Gen1Constants.fireStoneIndex,
+                Gen1Constants.waterStoneIndex, Gen1Constants.thunderStoneIndex,
+                Gen1Constants.leafStoneIndex);
+
     public static final int mewIndex = 151, marowakIndex = 105;
 
     public static final int encounterTableEnd = 0xFFFF, encounterTableSize = 10, yellowSuperRodTableSize = 4;
@@ -55,10 +65,6 @@ public class Gen1Constants {
 
     public static final List<Integer> singularTrainers = Arrays.asList(28, 32, 33, 34, 35, 36, 37, 38, 39, 43, 45, 46);
 
-    public static final List<Integer> bannedMovesWithXAccBanned = Arrays.asList(49, 82, 147);
-
-    public static final List<Integer> bannedMovesWithoutXAccBanned = Arrays.asList(49, 82, 32, 90, 12, 147);
-
     public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100);
 
     public static final List<Integer> earlyRequiredHMs = Arrays.asList(15);
@@ -69,6 +75,26 @@ public class Gen1Constants {
             22, 25, 26, 30, 40, 43, 44, 45, 47 });
 
     public static final int towerMapsStartIndex = 0x90, towerMapsEndIndex = 0x94;
+
+    public static final Map<String, Integer> bannedMoves = constructBannedList();
+
+    public static final Map<String, Integer> extendedBannedMoves = constructExtendedBansList();
+
+    private static Map<String, Integer> constructBannedList() {
+        Map<String, Integer> bList = new HashMap();
+        bList.put("SONICBOOM", 49);
+        bList.put("DRAGON RAGE", 82);
+        bList.put("SPORE", 147);
+        return bList;
+    }
+
+    private static Map<String, Integer> constructExtendedBansList() {
+        Map<String, Integer> exList = constructBannedList();
+        exList.put("GUILLOTINE", 12);
+        exList.put("HORN DRILL", 32);
+        exList.put("FISSURE", 90);
+        return exList;
+    }
 
     public static final Type[] typeTable = constructTypeTable();
 
@@ -313,10 +339,10 @@ public class Gen1Constants {
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {
-            if (t.trainerclass == classNum) {
+            if (t.getTrainerclass() == classNum) {
                 currnum++;
                 if (currnum == number) {
-                    t.tag = tag;
+                    t.setTag(tag);
                     return;
                 }
             }

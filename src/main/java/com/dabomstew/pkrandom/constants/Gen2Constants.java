@@ -1,7 +1,9 @@
 package com.dabomstew.pkrandom.constants;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -49,6 +51,13 @@ public class Gen2Constants {
             bsCatchRateOffset = 9, bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12, bsPicDimensionsOffset = 17,
             bsGrowthCurveOffset = 22, bsTMHMCompatOffset = 24, bsMTCompatOffset = 31;
 
+    public static final int moonStoneIndex = 8, fireStoneIndex = 22, thunderStoneIndex = 23,
+            waterStoneIndex = 24, leafStoneIndex = 34, sunStoneIndex = 169;
+    public static final List<Integer> availableStones = Arrays.asList(
+                Gen2Constants.moonStoneIndex, Gen2Constants.fireStoneIndex,
+                Gen2Constants.waterStoneIndex, Gen2Constants.thunderStoneIndex,
+                Gen2Constants.leafStoneIndex, Gen2Constants.sunStoneIndex);
+
     public static final String[] starterNames = new String[] { "CYNDAQUIL", "TOTODILE", "CHIKORITA" };
 
     public static final int fishingGroupCount = 12, pokesPerFishingGroup = 11, fishingGroupEntryLength = 3,
@@ -82,11 +91,21 @@ public class Gen2Constants {
     // ban thief from levelup moves
     public static final List<Integer> bannedLevelupMoves = Arrays.asList(168);
 
-    public static final List<Integer> brokenMoves = Arrays.asList(49, 82, 32, 90, 12);
-
     public static final int tmBlockOneIndex = 191, tmBlockOneSize = 4, tmBlockTwoIndex = 196, tmBlockTwoSize = 24,
             tmBlockThreeIndex = 221, tmBlockThreeSize = 22;
 
+    public static final Map<String, Integer> brokenMoves = constructBanList();
+
+    private static Map<String, Integer> constructBanList() {
+        Map<String, Integer> bList = new HashMap();
+        bList.put("GUILLOTINE", 12);
+        bList.put("HORN DRILL", 32);
+        bList.put("SONICBOOM", 49);
+        bList.put("DRAGON RAGE", 82);
+        bList.put("FISSURE", 90);
+        return bList;
+    }
+    
     public static final int luckyEggIndex = 0x7E;
 
     private static Type[] constructTypeTable() {
@@ -215,7 +234,7 @@ public class Gen2Constants {
         tbc(allTrainers, 13, 0, "ELITE3");
         tbc(allTrainers, 14, 0, "ELITE4");
         tbc(allTrainers, 16, 0, "CHAMPION");
-        tbc(allTrainers, 63, 0, "UBER");
+        tbc(allTrainers, 63, 0, "UBER1");
 
         // Silver
         // Order in rom is BAYLEEF, QUILAVA, CROCONAW teams
@@ -378,10 +397,10 @@ public class Gen2Constants {
         int currnum = -1;
         for (Trainer t : allTrainers) {
             // adjusted to not change the above but use 0-indexing properly
-            if (t.trainerclass == classNum - 1) {
+            if (t.getTrainerclass() == classNum - 1) {
                 currnum++;
                 if (currnum == number) {
-                    t.tag = tag;
+                    t.setTag(tag);
                     return;
                 }
             }
