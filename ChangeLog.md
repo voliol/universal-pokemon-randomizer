@@ -92,3 +92,6 @@
 * Elite 4, Champion, and Uber class trainers can be buffed to only use Legendary and BIG Pokemon (BIG is 590+ BST (490+ Gen1) or 190+ in one stat)
    * Generally not advised until Gen 3 since the pool of Pokemon will be really small (7 in Gen 1, 16 Gen 2, 30+ Gen 3 and higher)
    * This also works with type theming (global or gym) and global swap
+
+## 1.9.1
+* Fix Randomize Movesets being stuck on UNCHANGED

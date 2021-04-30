@@ -453,43 +453,10 @@ public class SettingsTest extends AbstractUIBase {
      */
     @Test(timeout = 4000)
     public void TestGlobalSwap() throws IOException {
-        int settingsReloadCount = 0;
         JRadioButtonFixture unchangedTrainerRBFixture = getRadioButtonByName("tpUnchangedRB");
         JRadioButtonFixture globalSwapRBFixture = getRadioButtonByName("tpGlobalSwapRB");
-        // Sanity check - should evaluate to false
-        Settings settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Global Swap RB should be false", globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
-        assertTrue("Trainers should be set to UNCHANGED but was not", settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
-        // Sanity check - Should not fail with 0 options
-        String setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertTrue("Global Swap RB was not false after reloading settings " + settingsReloadCount, globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
-        assertTrue("Trainers was not UNCHANGED after reloading settings " + settingsReloadCount, settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
-        settingsReloadCount++;
-
-        // Turn Global Swap on
-        clickRBAndWait(globalSwapRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Global Swap RB should be true", globalSwapRBFixture.requireSelected() == globalSwapRBFixture);
-        assertTrue("Trainers should be set to GLOBAL_MAPPING but was not", settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
-        // Reloading settings
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertTrue("Global Swap RB was not true after reloading settings " + settingsReloadCount, globalSwapRBFixture.requireSelected() == globalSwapRBFixture);
-        assertTrue("Trainers was not GLOBAL_MAPPING after reloading settings " + settingsReloadCount, settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
-        settingsReloadCount++;
-
-        // Turn Unchanged on
-        clickRBAndWait(unchangedTrainerRBFixture);
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Global Swap RB should be false", globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
-        assertTrue("Trainers should be set to UNCHANGED but was not", settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
-        // Reloading settings
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);        
-        assertTrue("Global Swap RB was not false after reloading settings " + settingsReloadCount, globalSwapRBFixture.requireNotSelected() == globalSwapRBFixture);
-        assertTrue("Trainers was not UNCHANGED after reloading settings " + settingsReloadCount, settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
-        settingsReloadCount++;
+        TestRadioButton(unchangedTrainerRBFixture, globalSwapRBFixture, (trainersMod) -> trainersMod == Settings.TrainersMod.UNCHANGED,
+            (trainersMod) -> trainersMod == Settings.TrainersMod.GLOBAL_MAPPING, (settings) -> settings.getTrainersMod(), "Trainers");
     }
 
     @Test(timeout = 10000)
@@ -684,6 +651,48 @@ public class SettingsTest extends AbstractUIBase {
     }
 
     /**
+     * Selecting "RANDOM_PREFER_SAME_TYPE" toggles the radio button group
+     * Selecting "UNCHANGED" toggles the radio button group away from RANDOM_PREFER_SAME_TYPE
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestMovesetsRandomSameType() throws IOException {
+        JRadioButtonFixture unchangedMovesetRBFixture = getRadioButtonByName("pmsUnchangedRB");
+        JRadioButtonFixture randomTypeRBFixture = getRadioButtonByName("pmsRandomTypeRB");
+        TestRadioButton(unchangedMovesetRBFixture, randomTypeRBFixture, (movesetsMod) -> movesetsMod == Settings.MovesetsMod.UNCHANGED,
+        (movesetsMod) -> movesetsMod == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE, (settings) -> settings.getMovesetsMod(), "Movesets");
+    }
+
+    /**
+     * Selecting "COMPLETELY_RANDOM" toggles the radio button group
+     * Selecting "UNCHANGED" toggles the radio button group away from COMPLETELY_RANDOM
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestMovesetsRandomCompletely() throws IOException {
+        JRadioButtonFixture unchangedMovesetRBFixture = getRadioButtonByName("pmsUnchangedRB");
+        JRadioButtonFixture randomTypeRBFixture = getRadioButtonByName("pmsRandomTotalRB");
+        TestRadioButton(unchangedMovesetRBFixture, randomTypeRBFixture, (movesetsMod) -> movesetsMod == Settings.MovesetsMod.UNCHANGED,
+        (movesetsMod) -> movesetsMod == Settings.MovesetsMod.COMPLETELY_RANDOM, (settings) -> settings.getMovesetsMod(), "Movesets");
+    }
+
+    /**
+     * Selecting "METRONOME_ONLY" toggles the radio button group
+     * Selecting "UNCHANGED" toggles the radio button group away from METRONOME_ONLY
+     * Verifies settings can be stored and loaded with no error and preserve state
+     * @throws IOException
+     */
+    @Test(timeout = 4000)
+    public void TestMovesetsMetronome() throws IOException {
+        JRadioButtonFixture unchangedMovesetRBFixture = getRadioButtonByName("pmsUnchangedRB");
+        JRadioButtonFixture randomTypeRBFixture = getRadioButtonByName("pmsMetronomeOnlyRB");
+        TestRadioButton(unchangedMovesetRBFixture, randomTypeRBFixture, (movesetsMod) -> movesetsMod == Settings.MovesetsMod.UNCHANGED,
+        (movesetsMod) -> movesetsMod == Settings.MovesetsMod.METRONOME_ONLY, (settings) -> settings.getMovesetsMod(), "Movesets");
+    }
+
+    /**
      * Captures a common sequence of a checkbox being enabled or disabled based on radio button selection
      * 
      * @param defaultRB - The radio button fixture that disables the checkbox (must be the one that's on by default)
@@ -693,7 +702,7 @@ public class SettingsTest extends AbstractUIBase {
      * @param defaultRBCondition - The enum value that represents the defaultRb in radio button group
      * @param triggerRBCondition - The enum value that represents the triggerRB in the radio button group
      * @param settingsRBFunction - The method in Settings.java that refers to the state of the enum
-     * @param buttonGroup - The name of the radio button group. Used for descriptive error messages.
+     * @param buttonGroup - The name of the radio button group. Used for descriptive error messages
      * @throws IOException
      */
     private void TestCheckboxBasedOnRadioButton(JRadioButtonFixture defaultRB, JRadioButtonFixture triggerRB, JCheckBoxFixture checkboxToTest, Predicate<Settings> settingsCheckboxFunction,
@@ -761,6 +770,56 @@ public class SettingsTest extends AbstractUIBase {
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
         assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+    }
+
+    /**
+     * Captures a common sequence of a radio button selection
+     * 
+     * @param defaultRB - The radio button that begins on by default
+     * @param radioButtonToTest - The radio button that is being tested
+     * @param defaultRBCondition - The enum value that represents the defaultRb in radio button group 
+     * @param settingsRBCondition - The enum value that represents the radioButtonToTest in radio button group
+     * @param settingsRBFunction - The method in Settings.java that refers to the state of the enum
+     * @param buttonGroup - The name of the radio button group. Used for descriptive error messages
+     * @throws IOException
+     */
+    private void TestRadioButton(JRadioButtonFixture defaultRB, JRadioButtonFixture radioButtonToTest, Predicate<Enum> defaultRBCondition, Predicate<Enum> settingsRBCondition,
+        Function<Settings, Enum> settingsRBFunction, String buttonGroup) throws IOException {
+        int settingsReloadCount = 0;
+        // Sanity check - should evaluate to false
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertTrue(radioButtonToTest.text() + " should be false", radioButtonToTest.requireNotSelected() == radioButtonToTest);
+        assertTrue(buttonGroup + " should be set to " + defaultRB.text() + " but was not", defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        // Sanity check - Should not fail with 0 options
+        String setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(radioButtonToTest.text() + " was not false after reloading settings " + settingsReloadCount, radioButtonToTest.requireNotSelected() == radioButtonToTest);
+        assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+
+        // Turn radio button on
+        clickRBAndWait(radioButtonToTest);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(radioButtonToTest.text() + " should be true", radioButtonToTest.requireSelected() == radioButtonToTest);
+        assertTrue(buttonGroup + " should be set to " + radioButtonToTest.text() + " but was not", settingsRBCondition.test(settingsRBFunction.apply(settings)));
+        // Reloading settings
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(radioButtonToTest.text() + " was not true after reloading settings " + settingsReloadCount, radioButtonToTest.requireSelected() == radioButtonToTest);
+        assertTrue(buttonGroup + " was not " + radioButtonToTest.text() + " after reloading settings " + settingsReloadCount, settingsRBCondition.test(settingsRBFunction.apply(settings)));
+        settingsReloadCount++;
+
+        // Turn Unchanged on
+        clickRBAndWait(defaultRB);
+        settings = this.mainWindow.getCurrentSettings();
+        assertTrue(radioButtonToTest.text() + " should be false", radioButtonToTest.requireNotSelected() == radioButtonToTest);
+        assertTrue(buttonGroup + " should be set to " + defaultRB.text() + " but was not", defaultRBCondition.test(settingsRBFunction.apply(settings)));
+        // Reloading settings
+        setttingsString = settings.toString();
+        settings = Settings.fromString(setttingsString);        
+        assertTrue(radioButtonToTest.text() + " was not false after reloading settings " + settingsReloadCount, radioButtonToTest.requireNotSelected() == radioButtonToTest);
         assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
         settingsReloadCount++;
     }

@@ -1570,7 +1570,7 @@ public class Settings {
     }
 
     public Settings setMovesetsMod(MovesetsMod movesetsMod) {
-        settingsMap.putValue(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING, movesetsMod);
+        settingsMap.putValue(SettingsConstants.MOVESETS_MOD, movesetsMod);
         return this;
     }
 

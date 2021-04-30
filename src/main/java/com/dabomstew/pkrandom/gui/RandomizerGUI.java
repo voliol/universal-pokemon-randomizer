@@ -4091,6 +4091,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         pokeMovesetsButtonGroup.add(pmsUnchangedRB);
         pmsUnchangedRB.setSelected(true);
+        pmsUnchangedRB.setName(bundle.getString("RandomizerGUI.pmsUnchangedRB.name")); // NOI18N
         pmsUnchangedRB.setText(bundle.getString("RandomizerGUI.pmsUnchangedRB.text")); // NOI18N
         pmsUnchangedRB.setToolTipText(bundle.getString("RandomizerGUI.pmsUnchangedRB.toolTipText")); // NOI18N
         pmsUnchangedRB.addActionListener(new java.awt.event.ActionListener() {
@@ -4100,6 +4101,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         pokeMovesetsButtonGroup.add(pmsRandomTypeRB);
+        pmsRandomTypeRB.setName(bundle.getString("RandomizerGUI.pmsRandomTypeRB.name")); // NOI18N
         pmsRandomTypeRB.setText(bundle.getString("RandomizerGUI.pmsRandomTypeRB.text")); // NOI18N
         pmsRandomTypeRB.setToolTipText(bundle.getString("RandomizerGUI.pmsRandomTypeRB.toolTipText")); // NOI18N
         pmsRandomTypeRB.addActionListener(new java.awt.event.ActionListener() {
@@ -4109,6 +4111,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         pokeMovesetsButtonGroup.add(pmsRandomTotalRB);
+        pmsRandomTotalRB.setName(bundle.getString("RandomizerGUI.pmsRandomTotalRB.name")); // NOI18N
         pmsRandomTotalRB.setText(bundle.getString("RandomizerGUI.pmsRandomTotalRB.text")); // NOI18N
         pmsRandomTotalRB.setToolTipText(bundle.getString("RandomizerGUI.pmsRandomTotalRB.toolTipText")); // NOI18N
         pmsRandomTotalRB.addActionListener(new java.awt.event.ActionListener() {
@@ -4118,6 +4121,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         });
 
         pokeMovesetsButtonGroup.add(pmsMetronomeOnlyRB);
+        pmsMetronomeOnlyRB.setName(bundle.getString("RandomizerGUI.pmsMetronomeOnlyRB.name")); // NOI18N
         pmsMetronomeOnlyRB.setText(bundle.getString("RandomizerGUI.pmsMetronomeOnlyRB.text")); // NOI18N
         pmsMetronomeOnlyRB.setToolTipText(bundle.getString("RandomizerGUI.pmsMetronomeOnlyRB.toolTipText")); // NOI18N
         pmsMetronomeOnlyRB.addActionListener(new java.awt.event.ActionListener() {
