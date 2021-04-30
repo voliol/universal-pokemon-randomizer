@@ -189,7 +189,7 @@ public class SettingsUpdater {
                 oldTweaks |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
             }
             if ((dataBlock[2] & (1 << 5)) != 0) {
-                oldTweaks |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
+                oldTweaks |= MiscTweak.RANDOMIZE_HIDDEN_GROTTOS.getValue();
             }
             FileFunctions.writeFullInt(dataBlock, 27, oldTweaks);
 
