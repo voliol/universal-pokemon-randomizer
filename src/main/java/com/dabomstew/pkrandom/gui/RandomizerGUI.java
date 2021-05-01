@@ -1912,6 +1912,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spBaseEvoCB.setSelected(settings.isStartersBaseEvoOnly());
         this.spExactEvoCB.setSelected(settings.isStartersExactEvo());
         this.spRandomSlider.setValue(settings.getStartersMinimumEvos());
+        this.spSETriangleCB.setSelected(settings.isStartersSETriangle());
 
         int[] customStarters = settings.getCustomStarters();
         this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);

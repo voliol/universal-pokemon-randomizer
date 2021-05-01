@@ -33,68 +33,69 @@ public class SettingsTest extends AbstractUIBase {
     public void TestGen5Separation() throws IOException {
         JCheckBoxFixture updateMovesCBFixture = getCheckBoxByName("goUpdateMovesCheckBox");
         JCheckBoxFixture updateMovesLegacyCBFixture = getCheckBoxByName("goUpdateMovesLegacyCheckBox");
-        Settings settings = this.mainWindow.getCurrentSettings();
         // Sanity check - Should initialize to False
-        assertFalse("Update Moves started as selected", settings.isUpdateMoves());
-        assertFalse("Update Moves Legacy started as selected", settings.isUpdateMovesLegacy());
-        // Sanity check - Should not fail with 0 options
-        String setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Update Moves was selected after reloading settings 0", settings.isUpdateMoves());
-        assertFalse("Update Moves Legacy was selected after reloading settings 0", settings.isUpdateMovesLegacy());
+        checkboxEnabledButNotSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledButNotSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
+        // Sanity check - Should be able to save and reload from state
+        String setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Sanity check - Should restore back to initial form state
+        checkboxEnabledButNotSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledButNotSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
+
 
         // Toggle Gen 5
         updateMovesLegacyCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Update Moves was selected even though it was not clicked", settings.isUpdateMoves());
-        assertTrue("Update Moves Legacy was not selected even though it was clicked", settings.isUpdateMovesLegacy());
-        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
-        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Update Moves was selected after reloading settings 1", settings.isUpdateMoves());
-        assertTrue("Update Moves Legacy was not selected after reloading settings 1", settings.isUpdateMovesLegacy());
+        // Legacy should be True while Moves is False
+        checkboxEnabledButNotSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledAndSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
+        // Should be able to save and reload from state
+        setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Should restore from settings string
+        checkboxEnabledButNotSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledAndSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
 
         // Toggle Gen 5 + Gen 6
         updateMovesCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Update Moves was not selected even though it was clicked", settings.isUpdateMoves());
-        assertTrue("Update Moves Legacy was not selected even though state was not changed", settings.isUpdateMovesLegacy());
-        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
-        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertTrue("Update Moves was not selected after reloading settings 2", settings.isUpdateMoves());
-        assertTrue("Update Moves Legacy was not selected after reloading settings 2", settings.isUpdateMovesLegacy());
+        // Legacy and Moves should be True
+        checkboxEnabledAndSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledAndSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
+        // Should be able to save and reload from state
+        setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Should restore from settings string
+        checkboxEnabledAndSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledAndSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
 
         // Toggle Gen 5 off leaving Gen 6
         updateMovesLegacyCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Update Moves was not selected even though state was not changed", settings.isUpdateMoves());
-        assertFalse("Update Moves Legacy was selected even though it was toggled off", settings.isUpdateMovesLegacy());
-        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
-        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertTrue("Update Moves was not selected after reloading settings 3", settings.isUpdateMoves());
-        assertFalse("Update Moves Legacy was selected after reloading settings 3", settings.isUpdateMovesLegacy());
+        // Moves should be True and Legacy should be False
+        checkboxEnabledAndSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledButNotSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
+        // Should be able to save and reload from state
+        setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Should restore from settings string
+        checkboxEnabledAndSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledButNotSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
 
         //Toggle Gen 6 off leaving nothing
         updateMovesCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Update Moves was selected even though it was toggled off", settings.isUpdateMoves());
-        assertFalse("Update Moves Legacy was selected even though state was not changed", settings.isUpdateMovesLegacy());
-        assertTrue("Update Moves is disabled but was expected to be enabled", updateMovesCBFixture.requireVisible().isEnabled());
-        assertTrue("Update Moves Legacy is disabled but was expected to be enabled", updateMovesLegacyCBFixture.requireVisible().isEnabled());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Update Moves was selected after reloading settings 4", settings.isUpdateMoves());
-        assertFalse("Update Moves Legacy was selected after reloading settings 4", settings.isUpdateMovesLegacy());
+        // Legacy and Moves should be False
+        checkboxEnabledButNotSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledButNotSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
+        // Should be able to save and reload from state
+        setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Should restore from settings string
+        checkboxEnabledButNotSelected(updateMovesCBFixture, (settings) -> settings.isUpdateMoves());
+        checkboxEnabledButNotSelected(updateMovesLegacyCBFixture, (settings) -> settings.isUpdateMovesLegacy());
     }
 
     /**
-     * Selecting USE_RESISTANT_TYPE evaluates to true Not selecting evaluates to
-     * false
+     * Selecting USE_RESISTANT_TYPE evaluates to true
+     * Not selecting evaluates to false
      * 
      * @throws IOException
      */
@@ -104,30 +105,32 @@ public class SettingsTest extends AbstractUIBase {
         Settings settings = this.mainWindow.getCurrentSettings();
         // Sanity check - should evaluate to false
         assertTrue("Misc Tweaks should not be set yet", settings.getCurrentMiscTweaks() == 0);
+        checkboxEnabledButNotSelected(resistantTypeCBFixture, (setts) -> 
+            (setts.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
         // Sanity check - Should not fail with 0 options
         String setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);
         assertTrue("Misc Tweaks were selected after reloading settings 0", settings.getCurrentMiscTweaks() == 0);
+        checkboxEnabledButNotSelected(resistantTypeCBFixture, (setts) -> 
+            (setts.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
 
         // Turn USE_RESISTANT_TYPE to true
         resistantTypeCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("USE_RESISTANT_TYPE should evaluate to true", 
-            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
+        checkboxEnabledAndSelected(resistantTypeCBFixture, (setts) -> 
+            (setts.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);
-        assertTrue("USE_RESISTANT_TYPE should be selected after reloading settings 1", 
-            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
+        checkboxEnabledAndSelected(resistantTypeCBFixture, (setts) -> 
+            (setts.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
 
         // Turn USE_RESISTANT_TYPE to false
         resistantTypeCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("USE_RESISTANT_TYPE should evaluate to false", 
-            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
+        checkboxEnabledButNotSelected(resistantTypeCBFixture, (setts) -> 
+            (setts.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);
-        assertFalse("USE_RESISTANT_TYPE should be selected after reloading settings 2", 
-            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
+        checkboxEnabledButNotSelected(resistantTypeCBFixture, (setts) -> 
+            (setts.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0);
     }
 
     /**
@@ -275,31 +278,33 @@ public class SettingsTest extends AbstractUIBase {
     @Test(timeout = 4000)
     public void TestTrainerRandomHeldItem() throws IOException {
         JCheckBoxFixture randomHeldItemCBFixture = getCheckBoxByName("tpRandomHeldItemCB");
-        Settings settings = this.mainWindow.getCurrentSettings();
         // Sanity check - Should initialize to False
-        assertFalse("Trainer Random Held Item should not be set yet", settings.isTrainersRandomHeldItem());
-        // Sanity check - Should not fail with 0 options
-        String setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Trainer Random Held Item was selected after reloading settings 0", settings.isTrainersRandomHeldItem());
+        checkboxEnabledButNotSelected(randomHeldItemCBFixture, (settings) -> settings.isTrainersRandomHeldItem());
+        // Sanity check - Should be able to save and reload from state
+        String setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Sanity check - Should restore back to initial form state
+        checkboxEnabledButNotSelected(randomHeldItemCBFixture, (settings) -> settings.isTrainersRandomHeldItem());
 
         // Toggle on
         randomHeldItemCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertTrue("Trainer Random Held Item was not selected even though it was clicked", settings.isTrainersRandomHeldItem());
-        assertTrue("Trainer Random Held Item is disabled but was expected to be enabled", randomHeldItemCBFixture.requireVisible().isEnabled());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertTrue("Trainer Random Held Item was not selected after reloading settings 1", settings.isTrainersRandomHeldItem());
+        // Should be True now
+        checkboxEnabledAndSelected(randomHeldItemCBFixture, (settings) -> settings.isTrainersRandomHeldItem());
+        // Should be able to save and reload from state
+        setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Should restore from settings string
+        checkboxEnabledAndSelected(randomHeldItemCBFixture, (settings) -> settings.isTrainersRandomHeldItem());
 
         //Toggle off
         randomHeldItemCBFixture.requireVisible().requireEnabled().click();
-        settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Trainer Random Held Item was selected even though it was toggled off", settings.isTrainersRandomHeldItem());
-        assertTrue("Trainer Random Held Item is disabled but was expected to be enabled", randomHeldItemCBFixture.requireVisible().isEnabled());
-        setttingsString = settings.toString();
-        settings = Settings.fromString(setttingsString);
-        assertFalse("Trainer Random Held Item was selected after reloading settings 2", settings.isTrainersRandomHeldItem());
+        // Should be False now
+        checkboxEnabledButNotSelected(randomHeldItemCBFixture, (settings) -> settings.isTrainersRandomHeldItem());
+        // Should be able to save and reload from state
+        setttingsString = this.mainWindow.getCurrentSettings().toString();
+        Settings.fromString(setttingsString);
+        // Should restore from settings string
+        checkboxEnabledButNotSelected(randomHeldItemCBFixture, (settings) -> settings.isTrainersRandomHeldItem());
     }
 
      /**
@@ -330,12 +335,11 @@ public class SettingsTest extends AbstractUIBase {
         // Selecting Type Theme trainer should not enable Gym Type Theme
         clickRBAndWait(typeThemeTrainerRBFixture);
         Settings settings = this.mainWindow.getCurrentSettings();
-        assertFalse("Gym Type Theme should be unset still", settings.isGymTypeTheme());
-        assertFalse("Gym Type Theme should be disabled still", gymTypeThemeCBFixture.isEnabled());
+        checkboxNotEnabledAndNotSelected(gymTypeThemeCBFixture, (setts) -> setts.isGymTypeTheme());
         assertTrue("Trainers should be set to TYPE THEMED but was not", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
         String setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertFalse("Gym Type Theme was not false after reloading settings TYPE THEME", settings.isGymTypeTheme());
+        checkboxNotEnabledAndNotSelected(gymTypeThemeCBFixture, (setts) -> setts.isGymTypeTheme());
         assertTrue("Trainers was not TYPE THEME after reloading settings TYPE THEME", settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
     }
 
@@ -368,62 +372,57 @@ public class SettingsTest extends AbstractUIBase {
         int settingsReloadCount = 0;
         // Sanity check - should evaluate to false
         Settings settings = this.mainWindow.getCurrentSettings();
-        assertFalse(minimumCatchRateCBFixture.text() + " should not be set yet", settings.isUseMinimumCatchRate());
-        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        checkboxEnabledButNotSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         // Sanity check - Should not fail with 0 options
         String setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertFalse(minimumCatchRateCBFixture.text() + " was not false after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        checkboxEnabledButNotSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         settingsReloadCount++;
 
         // Turn Minimum Catch Rate on
         minimumCatchRateCBFixture.requireVisible().requireEnabled().click();
         settings = this.mainWindow.getCurrentSettings();
-        assertTrue(minimumCatchRateCBFixture.text() + " should be set now", settings.isUseMinimumCatchRate());
-        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        checkboxEnabledAndSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertTrue(minimumCatchRateCBFixture.text() + " was not true after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        checkboxEnabledAndSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         settingsReloadCount++;
 
         // Turn Random RB on
         randomWildPokemonRBFixture.requireVisible().requireEnabled().click();
         settings = this.mainWindow.getCurrentSettings();
-        assertTrue(minimumCatchRateCBFixture.text() + " should still be set", settings.isUseMinimumCatchRate());
-        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        checkboxEnabledAndSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon should be set to " + randomWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertTrue(minimumCatchRateCBFixture.text() + " was not true after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        checkboxEnabledAndSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon was not " + randomWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
         settingsReloadCount++;
 
         // Turn Unchanged RB on
         unchangedWildPokemonRBFixture.requireVisible().requireEnabled().click();
         settings = this.mainWindow.getCurrentSettings();
-        assertTrue(minimumCatchRateCBFixture.text() + " should still be set", settings.isUseMinimumCatchRate());
-        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        checkboxEnabledAndSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertTrue(minimumCatchRateCBFixture.text() + " was not true after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        checkboxEnabledAndSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         settingsReloadCount++;
 
         // Turn Minimum Catch Rate off
         minimumCatchRateCBFixture.requireVisible().requireEnabled().click();
         settings = this.mainWindow.getCurrentSettings();
-        assertFalse(minimumCatchRateCBFixture.text() + " should not be set", settings.isUseMinimumCatchRate());
-        assertTrue(minimumCatchRateCBFixture.text() + " should be enabled", minimumCatchRateCBFixture.isEnabled());
+        checkboxEnabledButNotSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon should be set to " + unchangedWildPokemonRBFixture.text() + " but was not", settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         // Sanity check - Should not fail with 0 options
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
-        assertFalse(minimumCatchRateCBFixture.text() + " was not false after reloading settings " + settingsReloadCount, settings.isUseMinimumCatchRate());
+        checkboxEnabledButNotSelected(minimumCatchRateCBFixture, (setts) -> setts.isUseMinimumCatchRate());
         assertTrue("Wild Pokemon was not " + unchangedWildPokemonRBFixture.text() + " after reloading settings " + settingsReloadCount, settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         settingsReloadCount++;
     }
@@ -712,11 +711,14 @@ public class SettingsTest extends AbstractUIBase {
         Settings settings = this.mainWindow.getCurrentSettings();
         assertFalse(checkboxToTest.text() + " should not be set yet", settingsCheckboxFunction.test(settings));
         assertFalse(checkboxToTest.text() + " should not be enabled yet", checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected yet", checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " should be set to " + defaultRB.text() + " but was not", defaultRBCondition.test(settingsRBFunction.apply(settings)));
         // Sanity check - Should not fail with 0 options
         String setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
         assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertFalse(checkboxToTest.text() + " should not be enabled after reloading settings " + settingsReloadCount, checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected after reloading settings " + settingsReloadCount, checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
         settingsReloadCount++;
 
@@ -725,10 +727,13 @@ public class SettingsTest extends AbstractUIBase {
         settings = this.mainWindow.getCurrentSettings();
         assertFalse(checkboxToTest.text() + " should not be set yet", settingsCheckboxFunction.test(settings));
         assertTrue(checkboxToTest.text() + " should be enabled now", checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected yet", checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " but was not", triggerRBCondition.test(settingsRBFunction.apply(settings)));
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
         assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled after reloading settings " + settingsReloadCount, checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected after reloading settings " + settingsReloadCount, checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " was not " + triggerRB.text() + " after reloading settings " + settingsReloadCount, triggerRBCondition.test(settingsRBFunction.apply(settings)));
         settingsReloadCount++;
 
@@ -737,10 +742,13 @@ public class SettingsTest extends AbstractUIBase {
         settings = this.mainWindow.getCurrentSettings();
         assertTrue(checkboxToTest.text() + " should be set now", settingsCheckboxFunction.test(settings));
         assertTrue(checkboxToTest.text() + " should be enabled as state did not change", checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should  be selected now", checkboxToTest.requireSelected() == checkboxToTest);
         assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " as state did not change", triggerRBCondition.test(settingsRBFunction.apply(settings)));
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
         assertTrue(checkboxToTest.text() + " was not true after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled after reloading settings " +settingsReloadCount, checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should  be selected after reloading settings " + settingsReloadCount, checkboxToTest.requireSelected() == checkboxToTest);
         assertTrue(buttonGroup + " was not " + triggerRB.text() + " after reloading settings " + settingsReloadCount, triggerRBCondition.test(settingsRBFunction.apply(settings)));
         settingsReloadCount++;
 
@@ -749,10 +757,13 @@ public class SettingsTest extends AbstractUIBase {
         settings = this.mainWindow.getCurrentSettings();
         assertFalse(checkboxToTest.text() + " should be unset now", settingsCheckboxFunction.test(settings));
         assertTrue(checkboxToTest.text() + " should be enabled as state did not change", checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected now", checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " as state did not change", triggerRBCondition.test(settingsRBFunction.apply(settings)));
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
         assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertTrue(checkboxToTest.text() + " should be enabled after reloading settings " + settingsReloadCount, checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected after reloading settings " + settingsReloadCount, checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " was not " + triggerRB.text() + " after reloading settings " + settingsReloadCount, triggerRBCondition.test(settingsRBFunction.apply(settings)));
         settingsReloadCount++;
 
@@ -761,15 +772,19 @@ public class SettingsTest extends AbstractUIBase {
         settings = this.mainWindow.getCurrentSettings();
         assertTrue(checkboxToTest.text() + " should be set now", settingsCheckboxFunction.test(settings));
         assertTrue(checkboxToTest.text() + " should be enabled as state did not change", checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should  be selected now", checkboxToTest.requireSelected() == checkboxToTest);
         assertTrue(buttonGroup + " should be set to " + triggerRB.text() + " as state did not change", triggerRBCondition.test(settingsRBFunction.apply(settings)));
         clickRBAndWait(defaultRB);
         settings = this.mainWindow.getCurrentSettings();
         assertFalse(checkboxToTest.text() + " should be unset now", settingsCheckboxFunction.test(settings));
         assertFalse(checkboxToTest.text() + " should be disabled now", checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected now", checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " should be set to " + defaultRB.text()+ " but was not", defaultRBCondition.test(settingsRBFunction.apply(settings)));
         setttingsString = settings.toString();
         settings = Settings.fromString(setttingsString);        
         assertFalse(checkboxToTest.text() + " was not false after reloading settings " + settingsReloadCount, settingsCheckboxFunction.test(settings));
+        assertFalse(checkboxToTest.text() + " should not be enabled after reloading settings " + settingsReloadCount, checkboxToTest.isEnabled());
+        assertTrue(checkboxToTest.text() + " should not be selected after reloading settings " + settingsReloadCount, checkboxToTest.requireNotSelected() == checkboxToTest);
         assertTrue(buttonGroup + " was not " + defaultRB.text() + " after reloading settings " + settingsReloadCount, defaultRBCondition.test(settingsRBFunction.apply(settings)));
         settingsReloadCount++;
     }
@@ -840,5 +855,44 @@ public class SettingsTest extends AbstractUIBase {
     private void clickCBAndWait(JCheckBoxFixture cbFixture) {
         cbFixture.requireVisible().requireEnabled().click();
         await().until(() -> this.mainWindow.isUIUpdated());
+    }
+
+    /**
+     * Checks if a checkbox is both disabled and unselected, and confirms the settings state is also false
+     * @param cbFixture - The checkbox being tested
+     * @param settingsCheckboxFunction - The method in Settings.java that refers to the state of the checkbox
+     * @throws IOException
+     */
+    private void checkboxNotEnabledAndNotSelected(JCheckBoxFixture cbFixture, Predicate<Settings> settingsCheckboxFunction) throws IOException {
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertFalse(cbFixture.text() + " was true", settingsCheckboxFunction.test(settings));
+        assertFalse(cbFixture.text() + " was enabled", cbFixture.isEnabled());
+        assertTrue(cbFixture.text() + " was selected", cbFixture.requireNotSelected() == cbFixture);
+    }
+
+    /**
+     * Checks if a checkbox is enabled but unselected, and confirms the settings state is also false
+     * @param cbFixture - The checkbox being tested
+     * @param settingsCheckboxFunction - The method in Settings.java that refers to the state of the checkbox
+     * @throws IOException
+     */
+    private void checkboxEnabledButNotSelected(JCheckBoxFixture cbFixture, Predicate<Settings> settingsCheckboxFunction) throws IOException {
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertFalse(cbFixture.text() + " was true", settingsCheckboxFunction.test(settings));
+        assertTrue(cbFixture.text() + " was not enabled", cbFixture.isEnabled());
+        assertTrue(cbFixture.text() + " was selected", cbFixture.requireNotSelected() == cbFixture);
+    }
+
+    /**
+     * Checks if a checkbox is enabled and selected, and confirms the settings state is also true
+     * @param cbFixture - The checkbox being tested
+     * @param settingsCheckboxFunction - The method in Settings.java that refers to the state of the checkbox
+     * @throws IOException
+     */
+    private void checkboxEnabledAndSelected(JCheckBoxFixture cbFixture, Predicate<Settings> settingsCheckboxFunction) throws IOException {
+        Settings settings = this.mainWindow.getCurrentSettings();
+        assertTrue(cbFixture.text() + " was false", settingsCheckboxFunction.test(settings));
+        assertTrue(cbFixture.text() + " was not enabled", cbFixture.isEnabled());
+        assertTrue(cbFixture.text() + " was selected", cbFixture.requireSelected() == cbFixture);
     }
 }

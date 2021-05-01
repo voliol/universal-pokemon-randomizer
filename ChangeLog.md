@@ -95,3 +95,6 @@
 
 ## 1.9.1
 * Fix Randomize Movesets being stuck on UNCHANGED
+* Hidden Hallows/Hollows have been renamed to Hidden Grottos
+* Fix SE Triangle not restoring state to GUI on settings load
+   * Also fix UI unit tests to verify that the UI state is also updated on reload instead of just the settings being valid
