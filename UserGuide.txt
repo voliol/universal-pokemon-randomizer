@@ -1,4 +1,4 @@
-Universal Pokemon Randomizer 1.9.0
+Universal Pokemon Randomizer 1.9.1
 by Dabomstew, 2012-16
 by brentspector, 2019-21
 
@@ -209,11 +209,11 @@ This project and the majority of the libraries used are under the GNU GPL v3,
 attached as LICENSE.txt.
 
 Source code can be obtained from:
-https://github.com/Dabomstew/universal-pokemon-randomizer
+https://github.com/brentspector/universal-pokemon-randomizer
 
 Other libraries used are under more liberal licenses, compatible with the GPL.
 
 Useful/Interesting Links
 ------------------------
 If you have bugs, suggestions, or other concerns to tell me, contact me at
-http://pokehacks.dabomstew.com/randomizer/comments.php
+brent.spector@yahoo.com
