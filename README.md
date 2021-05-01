@@ -38,6 +38,8 @@ chance that the functionality in here will break and/or be removed.
 
 Binaries are hosted at `https://github.com/brentspector/universal-pokemon-randomizer/releases`
 
+A development guide can be found at [DEVGUIDE.md](./DEVGUIDE.md)
+
 As this is a Maven project, you will need to create a build/run configuration which
 accomplishes the equivalent of `mvn clean package`, or just run it from the command
 line. This will build a jar for you under the `target` folder which contains any

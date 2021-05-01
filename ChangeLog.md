@@ -92,3 +92,25 @@
 * Elite 4, Champion, and Uber class trainers can be buffed to only use Legendary and BIG Pokemon (BIG is 590+ BST (490+ Gen1) or 190+ in one stat)
    * Generally not advised until Gen 3 since the pool of Pokemon will be really small (7 in Gen 1, 16 Gen 2, 30+ Gen 3 and higher)
    * This also works with type theming (global or gym) and global swap
+
+## 1.9.1
+* Fix Randomize Movesets being stuck on UNCHANGED
+* Hidden Hallows/Hollows have been renamed to Hidden Grottos
+* Fix SE Triangle not restoring state to GUI on settings load
+   * Also fix UI unit tests to verify that the UI state is also updated on reload instead of just the settings being valid
+* Fix Gen 3 Hacks to be more or less supported
+   * When new types are added (like Fairy) it will be given the HACK type. If more than 1 type is added, then all new types will be set to HACK, and in-game will be treated as 1 of the new types
+   * When new abilities are added, log generation will state the ability as `-----`. Randomizing abilities will only use abilities from the vanilla game
+   * Randomizing types with "follow evolutions" will do whatever it can, but some data is not aligned so types may just be random instead
+   * Randomizing evolutions may fail due to data not being aligned
+   * Starter pokemon options will do whatever it can, but some data is not aligned and options may appear to be non-functional
+   * Randomizing moves will probably work, but log generation will not provide any move name details beyond those from Gen 5. Hack types are shown as `???`
+   * Similarly, randomizing movesets will probably work, but log generation will not provide any move name details beyond those from Gen 5
+   * Trainer randomization will don whatever it can, but some data is not aligned and options may appear to be non-functional
+   * Wild pokemon appears to be supported (please report bugs if found)
+   * Static pokemon are generally NOT supported
+   * Similar to move randomization, TM and Move Tutor randomization will probably work, but log generation will not provide any move name details beyond those from Gen 5.
+* Game breaking moves are no longer shown as being removed in the log if that option was not set
+* Fix rival selecting weaker starter when using SE Triangle
+   * A side-effect of this is that the valid pool can be drained a lot quicker. This will throw "Exhausted starter pool" errors a lot more frequently.
+* Fix deprecated DatatypeConverter for Base64 to allow compatability with Java 8 and newer Java versions

@@ -428,7 +428,7 @@
 
 		<!--====================================================================================-->
 
-		<#if gameBreakingMoves??>
+		<#if gameBreakingMoves?? && gameBreakingMoves>
 				<h2 id="gbm">Removed Game-Breaking Moves</h2>
 				<ul>
 				<#list romHandler.getGameBreakingMoves()?keys as name>

@@ -1,4 +1,4 @@
-Universal Pokemon Randomizer 1.9.0
+Universal Pokemon Randomizer 1.9.1
 by Dabomstew, 2012-16
 by brentspector, 2019-21
 
@@ -133,10 +133,10 @@ that are desired.
 * Balanced - Removes trade evolutions, removes broken moves, randomizes starters
   within reason, randomizes trainers within reason, randomizes wild pokemon 
   within reason, randomizes static pokemon, randomize given pokemon in trades, and
-  randomize hidden hallows (gen 5).
+  randomize hidden grottos (gen 5).
 * Classic - Fewer changes than Balanced. Removes trade evolutions, randomizes
   starters within reason and requires a super effective triangle, and
-  randomizes hidden hallows (gen 5).
+  randomizes hidden grottos (gen 5).
 * Fresh Experience - Randomizes the game in ways that freshen up the experience
   without impacting the vanilla aspects of the game. Removes trade evolutions,
   randomizes starters within reason, global swap trainer pokemon, type theme
@@ -153,7 +153,7 @@ that are desired.
   remove trade evolutions, lowers evolution requirements, randomizes starters with
   no restrictions, randomizes trainers within reason, randomizes wild pokemon,
   randomizes static pokemon, randomizes TMs and Move Tutors, randomizes given
-  and asked pokemon in trades, randomizes field items, randomizes hidden hallows
+  and asked pokemon in trades, randomizes field items, randomizes hidden grottos
   (gen 5), and bans Lucky Egg.
 * Super Randomizer Race - Like Randomizer Race, but even more random. Randomizes
   pokemon BST, randomizes pokemon abilities, randomizes pokemon types, randomizes
@@ -209,11 +209,11 @@ This project and the majority of the libraries used are under the GNU GPL v3,
 attached as LICENSE.txt.
 
 Source code can be obtained from:
-https://github.com/Dabomstew/universal-pokemon-randomizer
+https://github.com/brentspector/universal-pokemon-randomizer
 
 Other libraries used are under more liberal licenses, compatible with the GPL.
 
 Useful/Interesting Links
 ------------------------
 If you have bugs, suggestions, or other concerns to tell me, contact me at
-http://pokehacks.dabomstew.com/randomizer/comments.php
+brent.spector@yahoo.com

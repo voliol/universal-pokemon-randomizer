@@ -45,7 +45,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak ALLOW_PIKACHU_EVOLUTION = new MiscTweak("pikachuEvo", 0);
     public static final MiscTweak NATIONAL_DEX_AT_START = new MiscTweak("nationalDex", 0);
     public static final MiscTweak UPDATE_TYPE_EFFECTIVENESS = new MiscTweak("typeEffectiveness", 0);
-    public static final MiscTweak RANDOMIZE_HIDDEN_HOLLOWS = new MiscTweak("hiddenHollows", 0);
+    public static final MiscTweak RANDOMIZE_HIDDEN_GROTTOS = new MiscTweak("hiddenGrottos", 0);
     public static final MiscTweak LOWER_CASE_POKEMON_NAMES = new MiscTweak("lowerCaseNames", 0);
     public static final MiscTweak RANDOMIZE_CATCHING_TUTORIAL = new MiscTweak("catchingTutorial", 0);
     public static final MiscTweak BAN_LUCKY_EGG = new MiscTweak("luckyEgg", 1);

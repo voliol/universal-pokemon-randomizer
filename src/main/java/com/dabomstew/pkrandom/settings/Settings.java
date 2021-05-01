@@ -55,7 +55,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION =190;
+    public static final int VERSION =191;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 46;
 
@@ -1570,7 +1570,7 @@ public class Settings {
     }
 
     public Settings setMovesetsMod(MovesetsMod movesetsMod) {
-        settingsMap.putValue(SettingsConstants.MOVESETS_FORCE_GOOD_DAMAGING, movesetsMod);
+        settingsMap.putValue(SettingsConstants.MOVESETS_MOD, movesetsMod);
         return this;
     }
 
