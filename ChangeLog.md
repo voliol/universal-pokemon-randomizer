@@ -98,3 +98,16 @@
 * Hidden Hallows/Hollows have been renamed to Hidden Grottos
 * Fix SE Triangle not restoring state to GUI on settings load
    * Also fix UI unit tests to verify that the UI state is also updated on reload instead of just the settings being valid
+* Fix Gen 3 Hacks to be more or less supported
+   * When new types are added (like Fairy) it will be given the HACK type. If more than 1 type is added, then all new types will be set to HACK, and in-game will be treated as 1 of the new types
+   * When new abilities are added, log generation will state the ability as `-----`. Randomizing abilities will only use abilities from the vanilla game
+   * Randomizing types with "follow evolutions" will do whatever it can, but some data is not aligned so types may just be random instead
+   * Randomizing evolutions may fail due to data not being aligned
+   * Starter pokemon options will do whatever it can, but some data is not aligned and options may appear to be non-functional
+   * Randomizing moves will probably work, but log generation will not provide any move name details beyond those from Gen 5. Hack types are shown as `???`
+   * Similarly, randomizing movesets will probably work, but log generation will not provide any move name details beyond those from Gen 5
+   * Trainer randomization will don whatever it can, but some data is not aligned and options may appear to be non-functional
+   * Wild pokemon appears to be supported (please report bugs if found)
+   * Static pokemon are generally NOT supported
+   * Similar to move randomization, TM and Move Tutor randomization will probably work, but log generation will not provide any move name details beyond those from Gen 5.
+* Game breaking moves are automatically removed

@@ -620,9 +620,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
-                pkmn.primaryType = allTypes.get(pkmn.primaryType.ordinal());
+                int ordinal = pkmn.primaryType.ordinal();
+                // Give ordinal value if possible
+                // Otherwise give it the last type
+                if (ordinal < allTypes.size()) {
+                    pkmn.primaryType = allTypes.get(ordinal);
+                } else {
+                    pkmn.primaryType = allTypes.get(allTypes.size()-1);
+                }
                 if (pkmn.secondaryType != null) {
-                    pkmn.secondaryType = allTypes.get(pkmn.secondaryType.ordinal());
+                    ordinal = pkmn.secondaryType.ordinal();
+                    if (ordinal < allTypes.size()) {
+                        pkmn.secondaryType = allTypes.get(ordinal);
+                    } else {
+                        pkmn.secondaryType = allTypes.get(allTypes.size()-1);
+                    }
+                    
                 }
             }
         }

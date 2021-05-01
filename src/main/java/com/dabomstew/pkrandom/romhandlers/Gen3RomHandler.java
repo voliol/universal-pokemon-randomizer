@@ -62,6 +62,7 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 
 import compressors.DSDecmp;
 
@@ -339,6 +340,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private String[][] mapNames;
     private boolean isRomHack;
     private boolean isGen1;
+    private boolean enableHackType;
+    private byte hackByte;
     private int[] internalToPokedex, pokedexToInternal;
     private int pokedexCount;
     private String[] pokeNames;
@@ -857,8 +860,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         pkmn.spatk = rom[offset + Gen3Constants.bsSpAtkOffset] & 0xFF;
         pkmn.spdef = rom[offset + Gen3Constants.bsSpDefOffset] & 0xFF;
         // Type
-        pkmn.primaryType = Gen3Constants.typeTable[rom[offset + Gen3Constants.bsPrimaryTypeOffset] & 0xFF];
-        pkmn.secondaryType = Gen3Constants.typeTable[rom[offset + Gen3Constants.bsSecondaryTypeOffset] & 0xFF];
+        pkmn.primaryType = getTypeTableValue(offset + Gen3Constants.bsPrimaryTypeOffset) ;
+        pkmn.secondaryType = getTypeTableValue(offset + Gen3Constants.bsSecondaryTypeOffset);
         // Only one type?
         if (pkmn.secondaryType == pkmn.primaryType) {
             pkmn.secondaryType = null;
@@ -888,6 +891,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         pkmn.genderRatio = rom[offset + Gen3Constants.bsGenderRatioOffset] & 0xFF;
     }
 
+    private Type getTypeTableValue(int offset) {
+        Type type = Gen3Constants.typeTable[rom[offset] & 0xFF];
+        if (type == null && isROMHack()) {
+            enableHackType = true;
+            hackByte = (byte) (rom[offset] & 0xFF);
+            type = Type.HACK;
+        }
+        return type;
+    }
+
     private void saveBasicPokeStats(Pokemon pkmn, int offset) {
         rom[offset + Gen3Constants.bsHPOffset] = (byte) pkmn.hp;
         rom[offset + Gen3Constants.bsAttackOffset] = (byte) pkmn.attack;
@@ -895,11 +908,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         rom[offset + Gen3Constants.bsSpeedOffset] = (byte) pkmn.speed;
         rom[offset + Gen3Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
         rom[offset + Gen3Constants.bsSpDefOffset] = (byte) pkmn.spdef;
-        rom[offset + Gen3Constants.bsPrimaryTypeOffset] = Gen3Constants.typeToByte(pkmn.primaryType);
+        rom[offset + Gen3Constants.bsPrimaryTypeOffset] = getTypeToByte(pkmn.primaryType);
         if (pkmn.secondaryType == null) {
             rom[offset + Gen3Constants.bsSecondaryTypeOffset] = rom[offset + Gen3Constants.bsPrimaryTypeOffset];
         } else {
-            rom[offset + Gen3Constants.bsSecondaryTypeOffset] = Gen3Constants.typeToByte(pkmn.secondaryType);
+            rom[offset + Gen3Constants.bsSecondaryTypeOffset] = getTypeToByte(pkmn.secondaryType);
         }
         rom[offset + Gen3Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
         rom[offset + Gen3Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
@@ -922,6 +935,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         rom[offset + Gen3Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
+    }
+
+    private byte getTypeToByte(Type type) {
+        if (type == Type.HACK) {
+            return hackByte;
+        }
+        return Gen3Constants.typeToByte(type);
     }
 
     private void loadPokemonNames() {
@@ -2623,7 +2643,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public String abilityName(int number) {
-        return abilityNames[number];
+        return number < abilityNames.length ? abilityNames[number] : abilityName(0);
     }
 
     @Override
@@ -3240,6 +3260,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeWord(getRomEntry().getValue("PCPotionOffset"), this.getNonBadItems().randomNonTM(this.random));
             ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.RANDOMIZE_PC_POTION.getTweakName(), true);
         }
+    }
+
+    @Override
+    public boolean isTypeInGame(Type type) {
+        if (type.isHackOnly == false) {
+            return true;
+        }
+        if (isROMHack() && enableHackType && type == Type.HACK) {
+            return true;
+        } 
+        return false;
     }
 
     @Override
