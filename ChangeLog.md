@@ -113,3 +113,4 @@
 * Game breaking moves are no longer shown as being removed in the log if that option was not set
 * Fix rival selecting weaker starter when using SE Triangle
    * A side-effect of this is that the valid pool can be drained a lot quicker. This will throw "Exhausted starter pool" errors a lot more frequently.
+* Fix deprecated DatatypeConverter for Base64 to allow compatability with Java 8 and newer Java versions

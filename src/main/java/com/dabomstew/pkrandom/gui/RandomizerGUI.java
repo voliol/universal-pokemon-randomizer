@@ -44,6 +44,7 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.xml.bind.DatatypeConverter;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -1835,7 +1835,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 throw e;
             }
         }
-        byte[] data = DatatypeConverter.parseBase64Binary(config);
+        byte[] data = Base64.getDecoder().decode(config);
 
         int nameLength = data[Settings.LENGTH_OF_SETTINGS_DATA] & 0xFF;
         if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 9 + nameLength) {
