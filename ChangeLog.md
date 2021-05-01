@@ -110,4 +110,4 @@
    * Wild pokemon appears to be supported (please report bugs if found)
    * Static pokemon are generally NOT supported
    * Similar to move randomization, TM and Move Tutor randomization will probably work, but log generation will not provide any move name details beyond those from Gen 5.
-* Game breaking moves are automatically removed
+* Game breaking moves are no longer shown as being removed in the log if that option was not set

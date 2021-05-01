@@ -1915,10 +1915,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spSETriangleCB.setSelected(settings.isStartersSETriangle());
 
         int[] customStarters = settings.getCustomStarters();
-        this.spCustomPoke1Chooser.setSelectedIndex(customStarters[0] - 1);
-        this.spCustomPoke2Chooser.setSelectedIndex(customStarters[1] - 1);
+        this.spCustomPoke1Chooser.setSelectedIndex(Math.max(0, customStarters[0] - 1));
+        this.spCustomPoke2Chooser.setSelectedIndex(Math.max(0, customStarters[1] - 1));
         if (!romHandler.isYellow()) {
-            this.spCustomPoke3Chooser.setSelectedIndex(customStarters[2] - 1);
+            this.spCustomPoke3Chooser.setSelectedIndex(Math.max(0, customStarters[2] - 1));
         }
 
         this.peUnchangedRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
