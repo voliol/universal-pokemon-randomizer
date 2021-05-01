@@ -111,3 +111,5 @@
    * Static pokemon are generally NOT supported
    * Similar to move randomization, TM and Move Tutor randomization will probably work, but log generation will not provide any move name details beyond those from Gen 5.
 * Game breaking moves are no longer shown as being removed in the log if that option was not set
+* Fix rival selecting weaker starter when using SE Triangle
+   * A side-effect of this is that the valid pool can be drained a lot quicker. This will throw "Exhausted starter pool" errors a lot more frequently.

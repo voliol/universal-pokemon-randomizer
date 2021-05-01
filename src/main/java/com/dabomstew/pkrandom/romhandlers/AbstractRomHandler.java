@@ -506,12 +506,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         "ERROR: Not enough starter choices available. Please " + "reduce the filtering and try again.");
             }
         }
-        Pokemon chosen = starterPokes.randomPokemon(this.random, true);
-        if (chosen == null) {
+        try {
+            return starterPokes.randomPokemon(this.random, true);
+        } catch (Exception exc) {
             throw new RandomizationException(
                     "ERROR: Valid list of starters has been consumed. Please " + "reduce the filtering and try again.");
         }
-        return chosen;
     }
 
     @Override
