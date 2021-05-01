@@ -1341,29 +1341,35 @@
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="spHeldItemsCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="spUniqueTypesCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" attributes="0">
+                              <Group type="102" alignment="0" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="spBSTLimitCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="spBaseEvoCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="spHeldItemsCB" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                          <Component id="spHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="spUniqueTypesCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" attributes="0">
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="spBSTLimitCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              <Component id="spBaseEvoCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                                          <Component id="spBSTLimitSlider" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="spBSTLimitSlider" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="10" max="32767" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="spHeldItemsBanBadCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="spNoSplitCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="spSETriangleCB" pref="203" max="32767" attributes="0"/>
+                                      <Component id="spNoSplitCB" min="-2" max="-2" attributes="0"/>
                                       <Component id="spExactEvoCB" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <EmptySpace min="-2" pref="82" max="-2" attributes="0"/>
+                                  <Component id="spSETriangleCB" pref="152" max="32767" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace pref="13" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1374,6 +1380,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="spUnchangedRB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="spHeldItemsCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="spHeldItemsBanBadCB" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
@@ -1382,15 +1389,12 @@
                                       <Component id="spCustomPoke1Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="spCustomPoke2Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="spCustomPoke3Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="spHeldItemsBanBadCB" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="spExactEvoCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spSETriangleCB" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" attributes="0">
-                                          <Group type="103" groupAlignment="3" attributes="0">
-                                              <Component id="spNoSplitCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                                              <Component id="spSETriangleCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                                          </Group>
+                                          <Component id="spNoSplitCB" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Component id="spUniqueTypesCB" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
@@ -2340,21 +2344,24 @@
                           <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
-                                  <Component id="tpBuffEliteCB" max="32767" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Component id="tpNoEarlyShedinjaCB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
-                                          <Component id="tpTypeWeightingCB" max="32767" attributes="0"/>
-                                          <Component id="tpRivalCarriesStarterCB" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="tpPowerLevelsCB" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="tpNoLegendariesCB" alignment="0" max="32767" attributes="0"/>
-                                      </Group>
-                                      <Component id="tpNoEarlyShedinjaCB" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="tpRivalCarriesTeamCB" alignment="0" max="32767" attributes="0"/>
                                       <Component id="tpRandomHeldItemCB" pref="232" max="32767" attributes="0"/>
                                       <Component id="tpGymTypeThemeCB" max="32767" attributes="0"/>
+                                      <Group type="102" attributes="0">
+                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                              <Component id="tpTypeWeightingCB" max="32767" attributes="0"/>
+                                              <Component id="tpRivalCarriesStarterCB" alignment="0" max="32767" attributes="0"/>
+                                              <Component id="tpPowerLevelsCB" alignment="0" max="32767" attributes="0"/>
+                                              <Component id="tpNoLegendariesCB" alignment="0" max="32767" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                      </Group>
+                                      <Component id="tpBuffEliteCB" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -2365,7 +2372,7 @@
                                       <Component id="tpLevelModifierCB" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="tpLevelModifierSlider" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="127" max="32767" attributes="0"/>
+                                  <EmptySpace min="-2" pref="127" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -2401,23 +2408,22 @@
                               <Component id="tpForceFullyEvolvedSlider" min="-2" max="-2" attributes="0"/>
                               <Component id="tpGlobalSwapRB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tpNoEarlyShedinjaCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="tpLevelModifierCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="tpLevelModifierSlider" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="tpRandomHeldItemCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="tpGymTypeThemeCB" min="-2" max="-2" attributes="0"/>
-                              </Group>
+                              <Component id="tpLevelModifierCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="tpGymTypeThemeCB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="tpBuffEliteCB" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="15" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="tpLevelModifierSlider" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="tpRandomHeldItemCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="tpBuffEliteCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="tpNoEarlyShedinjaCB" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="27" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>

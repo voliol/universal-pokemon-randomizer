@@ -73,48 +73,50 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         typeCheckboxList = new javax.swing.JList<>();
         cancelButton = new javax.swing.JButton();
-        deselectAll = new javax.swing.JButton();
-        selectAll = new javax.swing.JButton();
+        deselectAllButton = new javax.swing.JButton();
+        selectAllButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
+        setTitle(bundle.getString("TypeFilterDialog.typeFilterDialog.title")); // NOI18N
+        setName(bundle.getString("TypeFilterDialog.typeFilterDialog.name")); // NOI18N
 
         includeTypeHeader.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         includeTypeHeader.setText(bundle.getString("TypeFilterDialog.includeTypeHeader.text")); // NOI18N
+        includeTypeHeader.setName(bundle.getString("TypeFilterDialog.includeTypeHeader.name")); // NOI18N
 
         okButton.setText(bundle.getString("TypeFilterDialog.okButton.text")); // NOI18N
-        okButton.setName("okButton");
+        okButton.setName(bundle.getString("TypeFilterDialog.okButton.name")); // NOI18N
         okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed(evt);
             }
         });
 
+        typeCheckboxList.setName(bundle.getString("TypeFilterDialog.typeCheckboxList.name")); // NOI18N
         jScrollPane1.setViewportView(typeCheckboxList);
 
-        typeCheckboxList.setName("typeCheckboxList");
-
         cancelButton.setText(bundle.getString("TypeFilterDialog.cancelButton.text")); // NOI18N
-        cancelButton.setName("cancelButton");
+        cancelButton.setName(bundle.getString("TypeFilterDialog.cancelButton.name")); // NOI18N
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
             }
         });
 
-        deselectAll.setText(bundle.getString("TypeFilterDialog.deselectAll.text")); // NOI18N
-        deselectAll.setName("deselectAllButton");
-        deselectAll.addActionListener(new java.awt.event.ActionListener() {
+        deselectAllButton.setText(bundle.getString("TypeFilterDialog.deselectAllButton.text")); // NOI18N
+        deselectAllButton.setName(bundle.getString("TypeFilterDialog.deselectAllButton.name")); // NOI18N
+        deselectAllButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deselectAllActionPerformed(evt);
+                deselectAllButtonActionPerformed(evt);
             }
         });
 
-        selectAll.setText(bundle.getString("TypeFilterDialog.selectAll.text")); // NOI18N
-        selectAll.setName("selectAllButton");
-        selectAll.addActionListener(new java.awt.event.ActionListener() {
+        selectAllButton.setText(bundle.getString("TypeFilterDialog.selectAllButton.text")); // NOI18N
+        selectAllButton.setName(bundle.getString("TypeFilterDialog.selectAllButton.name")); // NOI18N
+        selectAllButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectAllActionPerformed(evt);
+                selectAllButtonActionPerformed(evt);
             }
         });
 
@@ -133,8 +135,8 @@ public class TypeFilterDialog extends javax.swing.JDialog {
                     .addComponent(includeTypeHeader, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(deselectAll, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(selectAll, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(deselectAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(selectAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -149,9 +151,9 @@ public class TypeFilterDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(101, 101, 101)
-                        .addComponent(selectAll)
+                        .addComponent(selectAllButton)
                         .addGap(36, 36, 36)
-                        .addComponent(deselectAll)
+                        .addComponent(deselectAllButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(okButton)
@@ -264,23 +266,23 @@ public class TypeFilterDialog extends javax.swing.JDialog {
         this.setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
-    private void selectAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllActionPerformed
+    private void selectAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllButtonActionPerformed
         typeCheckboxArray.forEach(cb -> cb.setSelected(true));
         typeCheckboxList.repaint();
-    }//GEN-LAST:event_selectAllActionPerformed
+    }//GEN-LAST:event_selectAllButtonActionPerformed
 
-    private void deselectAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectAllActionPerformed
+    private void deselectAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectAllButtonActionPerformed
         typeCheckboxArray.forEach(cb -> cb.setSelected(false));
         typeCheckboxList.repaint();
-    }//GEN-LAST:event_deselectAllActionPerformed
+    }//GEN-LAST:event_deselectAllButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
-    private javax.swing.JButton deselectAll;
+    private javax.swing.JButton deselectAllButton;
     private javax.swing.JLabel includeTypeHeader;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton okButton;
-    private javax.swing.JButton selectAll;
+    private javax.swing.JButton selectAllButton;
     private javax.swing.JList<JCheckBox> typeCheckboxList;
     // End of variables declaration//GEN-END:variables
 }
