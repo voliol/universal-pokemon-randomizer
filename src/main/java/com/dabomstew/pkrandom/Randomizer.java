@@ -588,18 +588,22 @@ public class Randomizer {
     private void selectRandomStarter(int starterCount, List<Pokemon> starters, 
             Supplier<Pokemon> randomPicker) {
         Set<Type> typesUsed = new HashSet<Type>();
-        starters.add(randomPicker.get());
-        for (int i = 1; i < starterCount; i++) {
-            Pokemon pkmn = randomPicker.get();
+        // Initialize the list
+        for (int i = 0; i < starterCount; i++) {
+            starters.add(randomPicker.get());
+        }
+        // Make sure the starters meet criteria
+        for (int i = 0; i < starterCount; i++) {
+            Pokemon pkmn = starters.get(i);
             while (starters.contains(pkmn) || 
                    (settings.isStartersUniqueTypes() &&
                    (typesUsed.contains(pkmn.primaryType) || 
                     pkmn.secondaryType != null && typesUsed.contains(pkmn.secondaryType)) ||
                     (settings.isStartersSETriangle() &&
-                    (!starters.get(i-1).isWeakTo(pkmn))))) {
+                    (!starters.get((i+1)%3).isWeakTo(pkmn))))) {
                 pkmn = randomPicker.get();
             }
-            starters.add(pkmn);
+            starters.set(i, pkmn);
             typesUsed.add(pkmn.primaryType);
             if(pkmn.secondaryType != null) {
                 typesUsed.add(pkmn.secondaryType);

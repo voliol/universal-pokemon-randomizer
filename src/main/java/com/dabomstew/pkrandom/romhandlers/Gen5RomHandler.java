@@ -1297,7 +1297,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public int miscTweaksAvailable() {
         int available = 0;
         if (getRomEntry().romType == Gen5Constants.Type_BW2) {
-            available |= MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getValue();
+            available |= MiscTweak.RANDOMIZE_HIDDEN_GROTTOS.getValue();
         }
         if (getRomEntry().tweakFiles.get("FastestTextTweak") != null) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
@@ -1312,8 +1312,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void applyMiscTweak(MiscTweak tweak) {
-        if (tweak == MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS) {
-            randomizeHiddenHollowPokemon();
+        if (tweak == MiscTweak.RANDOMIZE_HIDDEN_GROTTOS) {
+            randomizeHiddenGrottoPokemon();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
@@ -1375,14 +1375,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void randomizeHiddenHollowPokemon() {
+    private void randomizeHiddenGrottoPokemon() {
         if (getRomEntry().romType != Gen5Constants.Type_BW2) {
             return;
         }
         int[] allowedUnovaPokemon = Gen5Constants.bw2HiddenHollowUnovaPokemon;
         int randomSize = Gen5Constants.nonUnovaPokemonCount + allowedUnovaPokemon.length;
         try {
-            NARCArchive hhNARC = this.readNARC(getRomEntry().getString("HiddenHollows"));
+            NARCArchive hhNARC = this.readNARC(getRomEntry().getString("HiddenGrottos"));
             for (byte[] hhEntry : hhNARC.files) {
                 for (int version = 0; version < 2; version++) {
                     for (int rarityslot = 0; rarityslot < 3; rarityslot++) {
@@ -1400,8 +1400,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
                 // the rest of the file is items
             }
-            this.writeNARC(getRomEntry().getString("HiddenHollows"), hhNARC);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.RANDOMIZE_HIDDEN_HOLLOWS.getTweakName(), true);
+            this.writeNARC(getRomEntry().getString("HiddenGrottos"), hhNARC);
+            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(MiscTweak.RANDOMIZE_HIDDEN_GROTTOS.getTweakName(), true);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
