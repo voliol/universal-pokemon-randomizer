@@ -1,0 +1,59 @@
+Unit Tests
+Gen 4/Gen 5 multiple LEVEL_ITEM_DAY should ensure items are different
+Docker for building JAR and making into EXE
+Custom ROM Options Pane to restrict Pokemon Size (only randomize the pokemon from 1 to given limit like 160)
+Replace evo with same stage evo (base for base, middle stage for middle stage)
+Randomize headbutt tree encounters in HGSS (works in gen 2 not gen 4)
+RandomizerGUI romLoaded state matches new Settings object
+Trainer Options to new class
+Starter Options to new class
+Evolution Options to new class
+randomizable_809 ROM support for Fairy type (maybe just set fairy to 0x17, ideally parse a types table and align)
+Move ROMEntry to separate Class
+Move RomHandler state to Model Class
+Change Settings toString and fromString to refer to a separate list. Try to make saving options easier when adding new options
+Gen4 Trades should use new pokemon (still uses old pokemon)
+Gen4 leader TM should use new names
+Trainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
+Signature Move - All leaders have a signature move on all pokes (same as TM?)
+Type by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
+RSE Gen 3 - Patch both Arco and Mach
+Redo code to use PokemonSet
+TM text updates for Gen 5 (use new names)
+Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)
+Select full team instead of only starter (is it possible to prestock a pc?)
+Shift abilities to left or right instead of randomizing (thus activating hidden abilities)
+Enable patching randomization formulas
+Evolution level randomized into a range based on the resulting BST
+Randomize attack effects (romHandler.saveMoves)
+Move prefixes (DEFDN-Leer)
+Add PokemonEmerald Party Randomizer
+
+All versions to 200
+Update settings updater
+Verify docs
+Update premade settings
+Move options around so non-visible options are at bottom (particularly trainer and starter)
+Build exe and zip into github
+
+Java output to excel
+
+1 Effect (1 status, 2 stats, 10 weather, 13 special)
+16 = 19
+20 - 5
+21 = 2
+24 = -1
+30 = 83
+31 = 83
+32 = 88
+
+21, 22, 23 - Stat slot (1= atk, 2 = def, 3=sp a, 5 = speed, 6 = acc, 7 = eva, 8 everything)
+24, 25, 26 - Stages
+27 - Chance stats
+
+8 - Status inflicted?  (1 prz, 2 slp, 4 burn, 3 freeze, 5 poison, 6 confuse, 7 attract)
+10 - Chance status
+11 - 1 (Turns? attract 3, confuse 2)
+
+6 - Priority
+15 - Flinch chance
