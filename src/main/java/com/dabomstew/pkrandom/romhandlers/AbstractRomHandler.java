@@ -3174,6 +3174,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.getTemplateData().put("logEvolutions", true);
         List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
         int stageLimit = limitToThreeStages ? 3 : 10;
+        boolean forceLv1 = true;
 
         // Cache old evolutions for data later
         Map<Pokemon, List<Evolution>> originalEvos = new HashMap<Pokemon, List<Evolution>>();
@@ -3209,6 +3210,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             for (Pokemon fromPK : pokemonPool) {
                 List<Evolution> oldEvos = originalEvos.get(fromPK);
+                if (oldEvos.size() == 0) {
+                    oldEvos.add(new Evolution(fromPK, randomPokemon(), true, EvolutionType.LEVEL, 1));
+                }
                 for (Evolution ev : oldEvos) {
                     // Pick a Pokemon as replacement
                     replacements.clear();
@@ -3238,49 +3242,46 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
 
                         // Prevent evolution that causes cycle (mandatory)
-                        if (evoCycleCheck(fromPK, pk)) {
+                        if (!forceLv1 && evoCycleCheck(fromPK, pk)) {
                             continue;
                         }
 
                         // Prevent evolution that exceeds stage limit
-                        Evolution tempEvo = new Evolution(fromPK, pk, false, EvolutionType.NONE, 0);
-                        fromPK.evolutionsFrom.add(tempEvo);
-                        pk.evolutionsTo.add(tempEvo);
-                        boolean exceededLimit = false;
+                        if (!forceLv1) {
+                            Evolution tempEvo = new Evolution(fromPK, pk, false, EvolutionType.NONE, 0);
+                            fromPK.evolutionsFrom.add(tempEvo);
+                            pk.evolutionsTo.add(tempEvo);
+                            boolean exceededLimit = false;
 
-                        Set<Pokemon> related = relatedPokemon(fromPK);
+                            Set<Pokemon> related = relatedPokemon(fromPK);
 
-                        for (Pokemon pk2 : related) {
-                            int numPreEvos = numPreEvolutions(pk2, stageLimit);
-                            if (numPreEvos >= stageLimit) {
-                                exceededLimit = true;
-                                break;
-                            } else if (numPreEvos == stageLimit - 1 && pk2.evolutionsFrom.size() == 0
-                                    && originalEvos.get(pk2).size() > 0) {
-                                exceededLimit = true;
-                                break;
+                            for (Pokemon pk2 : related) {
+                                int numPreEvos = numPreEvolutions(pk2, stageLimit);
+                                if (numPreEvos >= stageLimit) {
+                                    exceededLimit = true;
+                                    break;
+                                } else if (numPreEvos == stageLimit - 1 && pk2.evolutionsFrom.size() == 0
+                                        && originalEvos.get(pk2).size() > 0) {
+                                    exceededLimit = true;
+                                    break;
+                                }
+                            }
+
+                            fromPK.evolutionsFrom.remove(tempEvo);
+                            pk.evolutionsTo.remove(tempEvo);
+
+                            if (exceededLimit) {
+                                continue;
                             }
                         }
 
-                        fromPK.evolutionsFrom.remove(tempEvo);
-                        pk.evolutionsTo.remove(tempEvo);
-
-                        if (exceededLimit) {
-                            continue;
-                        }
-
-                        boolean alreadyUsed = false;
                         // Prevent evolution to already used newEvo
                         if (noConverge) {
                             for (EvolutionPair newEvoPair : newEvoPairs) {
                                 if (pk == newEvoPair.to) {
-                                    alreadyUsed = true;
+                                    continue;
                                 }
                             }
-                        }
-
-                        if (alreadyUsed) {
-                            continue;
                         }
 
                         // Prevent stat total from decreasing
@@ -3330,7 +3331,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
 
-                    if (!alreadyPicked.containsAll(replacements) && !similarStrength) {
+                    if (!alreadyPicked.containsAll(replacements) && (!forceLv1 || !similarStrength)) {
                         replacements.removeAll(alreadyPicked);
                     }
 
@@ -3354,6 +3355,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (changeMethods) {
                         generateEvolutionType(newEvo);
                         updateExtraInfo(newEvo);
+                    } else if (forceLv1) {
+                        newEvo.setType(EvolutionType.LEVEL);
+                        newEvo.setExtraInfo(1);
                     }
                     fromPK.evolutionsFrom.add(newEvo);
                     picked.evolutionsTo.add(newEvo);
