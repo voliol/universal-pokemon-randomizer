@@ -3210,7 +3210,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             for (Pokemon fromPK : pokemonPool) {
                 List<Evolution> oldEvos = originalEvos.get(fromPK);
-                if (oldEvos.size() == 0) {
+                if (forceLv1 && oldEvos.size() == 0) {
                     oldEvos.add(new Evolution(fromPK, randomPokemon(), true, EvolutionType.LEVEL, 1));
                 }
                 for (Evolution ev : oldEvos) {
