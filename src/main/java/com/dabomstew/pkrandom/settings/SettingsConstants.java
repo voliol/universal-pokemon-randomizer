@@ -53,6 +53,7 @@ public class SettingsConstants {
     public static final String EVOS_FORCE_CHANGE = "evosForceChange";
     public static final String EVOS_NO_CONVERGE = "evosNoConverge";
     public static final String EVOS_FORCE_GROWTH = "evosForceGrowth";
+    public static final String EVOS_LV_1 = "evosLv1";
     public static final String STARTERS_MOD = "startersMod";
     public static final String CUSTOM_STARTERS = "customStarters";
     public static final String RANDOMIZE_STARTERS_HELD_ITEMS = "randomizeStartersHeldItems";
@@ -82,14 +83,17 @@ public class SettingsConstants {
     public static final String TRAINERS_MOD = "trainersMod";
     public static final String RIVAL_CARRIES_STARTER_THROUGHOUT = "rivalCarriesStarterThroughout";
     public static final String RIVAL_CARRIES_TEAM_THROUGHOUT = "rivalCarriesTeamThroughout";
-    public static final String TRAINERS_USE_POKEMON_OF_SIMILAR_STRENGTH = "trainersUsePokemonOfSimilarStrength";
-    public static final String TRAINERS_MATCH_TYPING_DISTRIBUTION = "trainersMatchTypingDistribution";
+    public static final String TRAINERS_USE_POKEMON_OF_SIMILAR_STRENGTH =
+            "trainersUsePokemonOfSimilarStrength";
+    public static final String TRAINERS_MATCH_TYPING_DISTRIBUTION =
+            "trainersMatchTypingDistribution";
     public static final String TRAINERS_BLOCK_LEGENDARIES = "trainersBlockLegendaries";
     public static final String TRAINERS_BLOCK_EARLY_WONDER_GUARD = "trainersBlockEarlyWonderGuard";
     public static final String RANDOMIZE_TRAINER_NAMES = "randomizeTrainerNames";
     public static final String RANDOMIZE_TRAINER_CLASS_NAMES = "randomizeTrainerClassNames";
     public static final String TRAINERS_FORCE_FULLY_EVOLVED = "trainersForceFullyEvolved";
-    public static final String TRAINERS_FORCE_FULLY_EVOLVED_LEVEL = "trainersForceFullyEvolvedLevel";
+    public static final String TRAINERS_FORCE_FULLY_EVOLVED_LEVEL =
+            "trainersForceFullyEvolvedLevel";
     public static final String TRAINERS_LEVEL_MODIFIED = "trainersLevelModified";
     public static final String TRAINERS_LEVEL_MODIFIER = "trainersLevelModifier";
     public static final String TRAINERS_RANDOM_HELD_ITEM = "trainersRandomHeldItem";
@@ -102,7 +106,8 @@ public class SettingsConstants {
     public static final String USE_MINIMUM_CATCH_RATE = "useMinimumCatchRate";
     public static final String MINIMUM_CATCH_RATE_LEVEL = "minimumCatchRateLevel";
     public static final String RANDOMIZE_WILD_POKEMON_HELD_ITEMS = "randomizeWildPokemonHeldItems";
-    public static final String BAN_BAD_RANDOM_WILD_POKEMON_HELD_ITEMS = "banBadRandomWildPokemonHeldItems";
+    public static final String BAN_BAD_RANDOM_WILD_POKEMON_HELD_ITEMS =
+            "banBadRandomWildPokemonHeldItems";
     public static final String ALLOW_LOW_LEVEL_EVOLVED_TYPES = "allowLowLevelEvolvedTypes";
     public static final String STATIC_POKEMON_MOD = "staticPokemonMod";
     public static final String TMS_MOD = "tmsMod";
@@ -119,7 +124,8 @@ public class SettingsConstants {
     public static final String TUTORS_GOOD_DAMAGING_PERCENT = "tutorsGoodDamagingPercent";
     public static final String MOVE_TUTORS_COMPATIBILITY_MOD = "moveTutorsCompatibilityMod";
     public static final String IN_GAME_TRADES_MOD = "inGameTradesMod";
-    public static final String RANDOMIZE_IN_GAME_TRADES_NICKNAMES = "randomizeInGameTradesNicknames";
+    public static final String RANDOMIZE_IN_GAME_TRADES_NICKNAMES =
+            "randomizeInGameTradesNicknames";
     public static final String RANDOMIZE_IN_GAME_TRADES_OTS = "randomizeInGameTradesOTs";
     public static final String RANDOMIZE_IN_GAME_TRADES_IVS = "randomizeInGameTradesIVs";
     public static final String RANDOMIZE_IN_GAME_TRADES_ITEMS = "randomizeInGameTradesItems";
@@ -127,13 +133,22 @@ public class SettingsConstants {
     public static final String BAN_BAD_RANDOM_FIELD_ITEMS = "banBadRandomFieldItems";
     public static final String CURRENT_MISC_TWEAKS = "currentMiscTweaks";
 
-    public static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
-    public static final int BST_MINIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.spBSTLimitSlider.minimum"));
-    public static final int BST_MAXIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.spBSTLimitSlider.maximum"));
-    public static final int FULLY_EVOLVED_MINIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.minimum"));
-    public static final int FULLY_EVOLVED_MAXIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.maximum"));
-    public static final int LEVEL_MODIFIER_MINIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.tpLevelModifierSlider.minimum"));
-    public static final int LEVEL_MODIFIER_MAXIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.tpLevelModifierSlider.maximum"));
-    public static final int MINIMUM_CATCH_MINIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.wpCatchRateSlider.minimum"));
-    public static final int MINIMUM_CATCH_MAXIMUM_INT = Integer.parseInt(bundle.getString("RandomizerGUI.wpCatchRateSlider.maximum"));
+    public static final ResourceBundle bundle =
+            ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
+    public static final int BST_MINIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.spBSTLimitSlider.minimum"));
+    public static final int BST_MAXIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.spBSTLimitSlider.maximum"));
+    public static final int FULLY_EVOLVED_MINIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.minimum"));
+    public static final int FULLY_EVOLVED_MAXIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.maximum"));
+    public static final int LEVEL_MODIFIER_MINIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.tpLevelModifierSlider.minimum"));
+    public static final int LEVEL_MODIFIER_MAXIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.tpLevelModifierSlider.maximum"));
+    public static final int MINIMUM_CATCH_MINIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.wpCatchRateSlider.minimum"));
+    public static final int MINIMUM_CATCH_MAXIMUM_INT =
+            Integer.parseInt(bundle.getString("RandomizerGUI.wpCatchRateSlider.maximum"));
 }

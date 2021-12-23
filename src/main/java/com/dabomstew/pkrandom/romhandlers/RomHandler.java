@@ -45,409 +45,421 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public interface RomHandler {
 
-    public abstract class Factory {
+        public abstract class Factory {
 
-        public abstract RomHandler create(Random random);
+                public abstract RomHandler create(Random random);
 
-        public abstract boolean isLoadable(String filename);
-    }
+                public abstract boolean isLoadable(String filename);
+        }
 
-    // Basic load/save to filenames
-    public boolean loadRom(String filename);
+        // Basic load/save to filenames
+        public boolean loadRom(String filename);
 
-    public boolean saveRom(String filename);
+        public boolean saveRom(String filename);
 
-    public String loadedFilename();
+        public String loadedFilename();
 
-    // Log stuff with template
-    public void setTemplate(Template template, Map templateData);
-    public Map getTemplateData();
-    public Template getTemplate();
+        // Log stuff with template
+        public void setTemplate(Template template, Map templateData);
 
-    // Get a List of Pokemon objects in this game.
-    // 0 = null 1-whatever = the Pokemon.
-    public List<Pokemon> getPokemon();
+        public Map getTemplateData();
 
-    // Setup Gen Restrictions.
-    public void setPokemonPool(GenRestrictions restrictions);
+        public Template getTemplate();
 
-    public void removeEvosForPokemonPool();
+        // Get a List of Pokemon objects in this game.
+        // 0 = null 1-whatever = the Pokemon.
+        public List<Pokemon> getPokemon();
 
-    // Randomizer: Starters
-    // Get starters, they should be ordered with Pokemon
-    // following the one it is SE against.
-    // E.g. Grass, Fire, Water or Fire, Water, Grass etc.
-    public List<Pokemon> getStarters();
+        // Setup Gen Restrictions.
+        public void setPokemonPool(GenRestrictions restrictions);
 
-    // Change the starter data in the ROM.
-    // Optionally also change the starter used by the rival in
-    // the level 5 battle, if there is one.
-    public boolean setStarters(List<Pokemon> newStarters);
+        public void removeEvosForPokemonPool();
 
-    // Tells whether this ROM has the ability to have starters changed.
-    // Was for before CUE's compressors were found and arm9 was untouchable.
-    public boolean canChangeStarters();
+        // Randomizer: Starters
+        // Get starters, they should be ordered with Pokemon
+        // following the one it is SE against.
+        // E.g. Grass, Fire, Water or Fire, Water, Grass etc.
+        public List<Pokemon> getStarters();
 
-    // Randomizer: Pokemon stats
-    // Run the stats shuffler on each Pokemon.
-    public void shufflePokemonStats(boolean evolutionSanity);
-    
-    // Shuffle all pokemon base stat totals.
-    public void shuffleAllPokemonBSTs(boolean evolutionSanity, boolean randomVariance);
+        // Change the starter data in the ROM.
+        // Optionally also change the starter used by the rival in
+        // the level 5 battle, if there is one.
+        public boolean setStarters(List<Pokemon> newStarters);
 
-    // Randomise stats following evolutions for proportions or not (see
-    // tooltips)
-    public void randomizePokemonStatsWithinBST(boolean evolutionSanity);
+        // Tells whether this ROM has the ability to have starters changed.
+        // Was for before CUE's compressors were found and arm9 was untouchable.
+        public boolean canChangeStarters();
 
-    // Allows more variety in Pokemon strength
-    public void randomizePokemonStatsUnrestricted(boolean evolutionSanity);
+        // Randomizer: Pokemon stats
+        // Run the stats shuffler on each Pokemon.
+        public void shufflePokemonStats(boolean evolutionSanity);
 
-    // Ranomise stats following evolution for proportions or not. Determine
-    // multiplier randomly to allow for more variety in evolution strength.
-    public void randomizeCompletelyPokemonStats(boolean evolutionSanity);
-    
-    // Update base stats to gen6
-    public void updatePokemonStats();
+        // Shuffle all pokemon base stat totals.
+        public void shuffleAllPokemonBSTs(boolean evolutionSanity, boolean randomVariance);
 
-    // Give a random Pokemon who's in this game
-    public Pokemon randomPokemon();
+        // Randomise stats following evolutions for proportions or not (see
+        // tooltips)
+        public void randomizePokemonStatsWithinBST(boolean evolutionSanity);
 
-    // Give a random non-legendary Pokemon who's in this game
-    // Business rules for who's legendary are in Pokemon class
-    public Pokemon randomNonLegendaryPokemon();
+        // Allows more variety in Pokemon strength
+        public void randomizePokemonStatsUnrestricted(boolean evolutionSanity);
 
-    // Give a random legendary Pokemon who's in this game
-    // Business rules for who's legendary are in Pokemon class
-    public Pokemon randomLegendaryPokemon();
+        // Ranomise stats following evolution for proportions or not. Determine
+        // multiplier randomly to allow for more variety in evolution strength.
+        public void randomizeCompletelyPokemonStats(boolean evolutionSanity);
 
-    // Return the longest number of stages in the evolution chain
-    // Useful for starter evolution length
-    public int evolutionChainSize(Pokemon pk);
+        // Update base stats to gen6
+        public void updatePokemonStats();
 
-    // Give a random Pokemon who is eligible as a starter
-    public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly,
-        int bstLimit, int minimumEvos, boolean exactEvos, List<Type> starterTypes);
+        // Give a random Pokemon who's in this game
+        public Pokemon randomPokemon();
 
-    // Randomizer: types
-    // return a random type valid in this game.
-    // straightforward except for gen1 where dark&steel are excluded.
-    public Type randomType();
+        // Give a random non-legendary Pokemon who's in this game
+        // Business rules for who's legendary are in Pokemon class
+        public Pokemon randomNonLegendaryPokemon();
 
-    public boolean isTypeInGame(Type type);
-    
-    public List<Type> getTypesInGame();
+        // Give a random legendary Pokemon who's in this game
+        // Business rules for who's legendary are in Pokemon class
+        public Pokemon randomLegendaryPokemon();
 
-    // randomise Pokemon types, with a switch on whether evolutions
-    // should follow the same types or not.
-    // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
-    public void randomizePokemonTypes(boolean evolutionSanity);
+        // Return the longest number of stages in the evolution chain
+        // Useful for starter evolution length
+        public int evolutionChainSize(Pokemon pk);
 
-    public void shufflePokemonTypes();
-    
-    public void randomizeRetainPokemonTypes(boolean evolutionSanity);
+        // Give a random Pokemon who is eligible as a starter
+        public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes,
+                        boolean baseOnly, int bstLimit, int minimumEvos, boolean exactEvos,
+                        List<Type> starterTypes);
 
-    // Randomizer: pokemon abilities
-    public int abilitiesPerPokemon();
+        // Randomizer: types
+        // return a random type valid in this game.
+        // straightforward except for gen1 where dark&steel are excluded.
+        public Type randomType();
 
-    public int highestAbilityIndex();
+        public boolean isTypeInGame(Type type);
 
-    public String abilityName(int number);
+        public List<Type> getTypesInGame();
 
-    public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard, boolean banTrappingAbilities,
-            boolean banNegativeAbilities);
+        // randomise Pokemon types, with a switch on whether evolutions
+        // should follow the same types or not.
+        // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
+        public void randomizePokemonTypes(boolean evolutionSanity);
 
-    // Randomizer: wild pokemon
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay);
+        public void shufflePokemonTypes();
 
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
+        public void randomizeRetainPokemonTypes(boolean evolutionSanity);
 
-    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
-            boolean matchTypingDistribution, boolean noLegendaries, boolean allowLowLevelEvolvedTypes);
+        // Randomizer: pokemon abilities
+        public int abilitiesPerPokemon();
 
-    public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
-            boolean usePowerLevels, boolean matchTypingDistribution, boolean noLegendaries,
-            boolean allowLowLevelEvolvedTypes);
+        public int highestAbilityIndex();
 
-    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries);
+        public String abilityName(int number);
 
-    public boolean hasTimeBasedEncounters();
+        public void randomizeAbilities(boolean evolutionSanity, boolean allowWonderGuard,
+                        boolean banTrappingAbilities, boolean banNegativeAbilities);
 
-    public List<Pokemon> bannedForWildEncounters();
+        // Randomizer: wild pokemon
+        public List<EncounterSet> getEncounters(boolean useTimeOfDay);
 
-    // Randomizer: trainer pokemon
-    public List<Trainer> getTrainers();
+        public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
-    public void setTrainers(List<Trainer> trainerData);
+        public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+                        boolean usePowerLevels, boolean matchTypingDistribution,
+                        boolean noLegendaries, boolean allowLowLevelEvolvedTypes);
 
-    public void modifyTrainerPokes(boolean randomHeldItem, int levelModifier);
+        public void area1to1Encounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed,
+                        boolean usePowerLevels, boolean matchTypingDistribution,
+                        boolean noLegendaries, boolean allowLowLevelEvolvedTypes);
 
-    public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency, boolean noLegendaries,
-          boolean noEarlyWonderGuard, boolean useResistantType, boolean typeTheme, boolean globalSwap,
-          boolean gymTypeTheme, boolean randomHeldItem, boolean buffElite, int levelModifier);
+        public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels,
+                        boolean noLegendaries);
 
-    public void rivalCarriesStarter(boolean noLegendaries);
+        public boolean hasTimeBasedEncounters();
 
-    public void rivalCarriesTeam();
+        public List<Pokemon> bannedForWildEncounters();
 
-    public void forceFullyEvolvedTrainerPokes(int minLevel);
+        // Randomizer: trainer pokemon
+        public List<Trainer> getTrainers();
 
-    // Randomizer: moves
-    public void randomizeMovePowers();
+        public void setTrainers(List<Trainer> trainerData);
 
-    public void randomizeMovePPs();
+        public void modifyTrainerPokes(boolean randomHeldItem, int levelModifier);
 
-    public void randomizeMoveAccuracies();
+        public void randomizeTrainerPokes(boolean usePowerLevels, boolean weightByFrequency,
+                        boolean noLegendaries, boolean noEarlyWonderGuard, boolean useResistantType,
+                        boolean typeTheme, boolean globalSwap, boolean gymTypeTheme,
+                        boolean randomHeldItem, boolean buffElite, int levelModifier);
 
-    public void randomizeMoveTypes();
+        public void rivalCarriesStarter(boolean noLegendaries);
 
-    public boolean hasPhysicalSpecialSplit();
+        public void rivalCarriesTeam();
 
-    public void randomizeMoveCategory();
+        public void forceFullyEvolvedTrainerPokes(int minLevel);
 
-    // Update all moves to gen5 definitions as much as possible
-    // e.g. change typing, power, accuracy, but don't try to
-    // stuff around with effects.
-    public void updateMovesToGen5();
+        // Randomizer: moves
+        public void randomizeMovePowers();
 
-    // same for gen6
-    public void updateMovesToGen6();
+        public void randomizeMovePPs();
 
-    // stuff for printing move changes
-    public void initMoveModernization();
+        public void randomizeMoveAccuracies();
 
-    public void printMoveModernization();
+        public void randomizeMoveTypes();
 
-    // return all the moves valid in this game.
-    public List<Move> getMoves();
+        public boolean hasPhysicalSpecialSplit();
 
-    // Randomizer: moves learnt
-    public Map<Pokemon, List<MoveLearnt>> getMovesLearnt();
+        public void randomizeMoveCategory();
 
-    public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets);
+        // Update all moves to gen5 definitions as much as possible
+        // e.g. change typing, power, accuracy, but don't try to
+        // stuff around with effects.
+        public void updateMovesToGen5();
 
-    public List<Integer> getMovesBannedFromLevelup();
+        // same for gen6
+        public void updateMovesToGen6();
 
-    public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceStartingMoves,
-                                     int forceStartingMoveCount, double goodDamagingProbability);
-    public void removeBrokenMoves();
+        // stuff for printing move changes
+        public void initMoveModernization();
 
-    public void orderDamagingMovesByDamage();
+        public void printMoveModernization();
 
-    public void metronomeOnlyMode();
+        // return all the moves valid in this game.
+        public List<Move> getMoves();
 
-    public boolean supportsFourStartingMoves();
+        // Randomizer: moves learnt
+        public Map<Pokemon, List<MoveLearnt>> getMovesLearnt();
 
-    // Randomizer: static pokemon (except starters)
-    public List<Pokemon> getStaticPokemon();
+        public void setMovesLearnt(Map<Pokemon, List<MoveLearnt>> movesets);
 
-    public boolean setStaticPokemon(List<Pokemon> staticPokemon);
+        public List<Integer> getMovesBannedFromLevelup();
 
-    public void randomizeStaticPokemon(boolean legendForLegend);
+        public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken,
+                        boolean forceStartingMoves, int forceStartingMoveCount,
+                        double goodDamagingProbability);
 
-    public boolean canChangeStaticPokemon();
+        public void removeBrokenMoves();
 
-    public List<Pokemon> bannedForStaticPokemon();
+        public void orderDamagingMovesByDamage();
 
-    // Randomizer: TMs/HMs
-    public List<Integer> getTMMoves();
+        public void metronomeOnlyMode();
 
-    public List<Integer> getHMMoves();
+        public boolean supportsFourStartingMoves();
 
-    public void setTMMoves(List<Integer> moveIndexes);
+        // Randomizer: static pokemon (except starters)
+        public List<Pokemon> getStaticPokemon();
 
-    public void randomizeTMMoves(boolean noBroken, boolean preserveField, double goodDamagingProbability);
+        public boolean setStaticPokemon(List<Pokemon> staticPokemon);
 
-    public int getTMCount();
+        public void randomizeStaticPokemon(boolean legendForLegend);
 
-    public int getHMCount();
+        public boolean canChangeStaticPokemon();
 
-    /**
-     * Get TM/HM compatibility data from this rom. The result should contain a
-     * boolean array for each Pokemon indexed as such:
-     *
-     * 0: blank (false) / 1 - (getTMCount()) : TM compatibility /
-     * (getTMCount()+1) - (getTMCount()+getHMCount()) - HM compatibility
-     *
-     * @return
-     */
-    public Map<Pokemon, boolean[]> getTMHMCompatibility();
+        public List<Pokemon> bannedForStaticPokemon();
 
-    public void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
+        // Randomizer: TMs/HMs
+        public List<Integer> getTMMoves();
 
-    public void randomizeTMHMCompatibility(boolean preferSameType);
+        public List<Integer> getHMMoves();
 
-    public void fullTMHMCompatibility();
+        public void setTMMoves(List<Integer> moveIndexes);
 
-    // tm/moveset sanity
-    public void ensureTMCompatSanity();
+        public void randomizeTMMoves(boolean noBroken, boolean preserveField,
+                        double goodDamagingProbability);
 
-    // new 170: full HM (but not TM) compat override
-    public void fullHMCompatibility();
+        public int getTMCount();
 
-    // Randomizer: move tutors
-    public boolean hasMoveTutors();
+        public int getHMCount();
 
-    public List<Integer> getMoveTutorMoves();
+        /**
+         * Get TM/HM compatibility data from this rom. The result should contain a boolean array for
+         * each Pokemon indexed as such:
+         *
+         * 0: blank (false) / 1 - (getTMCount()) : TM compatibility / (getTMCount()+1) -
+         * (getTMCount()+getHMCount()) - HM compatibility
+         *
+         * @return
+         */
+        public Map<Pokemon, boolean[]> getTMHMCompatibility();
 
-    public void setMoveTutorMoves(List<Integer> moves);
+        public void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField, double goodDamagingProbability);
+        public void randomizeTMHMCompatibility(boolean preferSameType);
 
-    public Map<Pokemon, boolean[]> getMoveTutorCompatibility();
+        public void fullTMHMCompatibility();
 
-    public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
+        // tm/moveset sanity
+        public void ensureTMCompatSanity();
 
-    public void randomizeMoveTutorCompatibility(boolean preferSameType);
+        // new 170: full HM (but not TM) compat override
+        public void fullHMCompatibility();
 
-    public void fullMoveTutorCompatibility();
+        // Randomizer: move tutors
+        public boolean hasMoveTutors();
 
-    // mt/moveset sanity
-    public void ensureMoveTutorCompatSanity();
+        public List<Integer> getMoveTutorMoves();
 
-    // Randomizer: trainer names
-    public boolean canChangeTrainerText();
+        public void setMoveTutorMoves(List<Integer> moves);
 
-    public List<String> getTrainerNames();
+        public void randomizeMoveTutorMoves(boolean noBroken, boolean preserveField,
+                        double goodDamagingProbability);
 
-    public void setTrainerNames(List<String> trainerNames);
+        public Map<Pokemon, boolean[]> getMoveTutorCompatibility();
 
-    public enum TrainerNameMode {
-        SAME_LENGTH, MAX_LENGTH, MAX_LENGTH_WITH_CLASS
-    };
+        public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    public TrainerNameMode trainerNameMode();
+        public void randomizeMoveTutorCompatibility(boolean preferSameType);
 
-    // Returns this with or without the class
-    public int maxTrainerNameLength();
+        public void fullMoveTutorCompatibility();
 
-    // Only relevant for gen2, which has fluid trainer name length but
-    // only a certain amount of space in the ROM bank.
-    public int maxSumOfTrainerNameLengths();
+        // mt/moveset sanity
+        public void ensureMoveTutorCompatSanity();
 
-    // Only needed if above mode is "MAX LENGTH WITH CLASS"
-    public List<Integer> getTCNameLengthsByTrainer();
+        // Randomizer: trainer names
+        public boolean canChangeTrainerText();
 
-    public void randomizeTrainerNames(CustomNamesSet customNames);
+        public List<String> getTrainerNames();
 
-    // Randomizer: trainer class names
-    public List<String> getTrainerClassNames();
+        public void setTrainerNames(List<String> trainerNames);
 
-    public void setTrainerClassNames(List<String> trainerClassNames);
+        public enum TrainerNameMode {
+                SAME_LENGTH, MAX_LENGTH, MAX_LENGTH_WITH_CLASS
+        };
 
-    public boolean fixedTrainerClassNamesLength();
+        public TrainerNameMode trainerNameMode();
 
-    public int maxTrainerClassNameLength();
+        // Returns this with or without the class
+        public int maxTrainerNameLength();
 
-    public void randomizeTrainerClassNames(CustomNamesSet customNames);
+        // Only relevant for gen2, which has fluid trainer name length but
+        // only a certain amount of space in the ROM bank.
+        public int maxSumOfTrainerNameLengths();
 
-    public List<Integer> getDoublesTrainerClasses();
+        // Only needed if above mode is "MAX LENGTH WITH CLASS"
+        public List<Integer> getTCNameLengthsByTrainer();
 
-    // Items
-    public ItemList getAllowedItems();
+        public void randomizeTrainerNames(CustomNamesSet customNames);
 
-    public ItemList getNonBadItems();
+        // Randomizer: trainer class names
+        public List<String> getTrainerClassNames();
 
-    public ItemList getTrainerItems();
+        public void setTrainerClassNames(List<String> trainerClassNames);
 
-    public void randomizeWildHeldItems(boolean banBadItems);
+        public boolean fixedTrainerClassNamesLength();
 
-    public String[] getItemNames();
+        public int maxTrainerClassNameLength();
 
-    public List<Integer> getStarterHeldItems();
+        public void randomizeTrainerClassNames(CustomNamesSet customNames);
 
-    public void setStarterHeldItems(List<Integer> items);
+        public List<Integer> getDoublesTrainerClasses();
 
-    public void randomizeStarterHeldItems(boolean banBadItems);
+        // Items
+        public ItemList getAllowedItems();
 
-    // Field Items
-    // TMs on the field
-    public List<Integer> getRequiredFieldTMs();
+        public ItemList getNonBadItems();
 
-    public List<Integer> getCurrentFieldTMs();
+        public ItemList getTrainerItems();
 
-    public void setFieldTMs(List<Integer> fieldTMs);
+        public void randomizeWildHeldItems(boolean banBadItems);
 
-    // Everything else
-    public List<Integer> getRegularFieldItems();
+        public String[] getItemNames();
 
-    public void setRegularFieldItems(List<Integer> items);
+        public List<Integer> getStarterHeldItems();
 
-    // Randomizer methods
-    public void shuffleFieldItems();
+        public void setStarterHeldItems(List<Integer> items);
 
-    public void randomizeFieldItems(boolean banBadItems);
+        public void randomizeStarterHeldItems(boolean banBadItems);
 
-    // Trades
-    public List<IngameTrade> getIngameTrades();
+        // Field Items
+        // TMs on the field
+        public List<Integer> getRequiredFieldTMs();
 
-    public void setIngameTrades(List<IngameTrade> trades);
+        public List<Integer> getCurrentFieldTMs();
 
-    public void randomizeIngameTrades(boolean randomizeRequest, boolean randomNickname, boolean randomOT,
-            boolean randomStats, boolean randomItem, CustomNamesSet customNames);
+        public void setFieldTMs(List<Integer> fieldTMs);
 
-    public boolean hasDVs();
+        // Everything else
+        public List<Integer> getRegularFieldItems();
 
-    public int maxTradeNicknameLength();
+        public void setRegularFieldItems(List<Integer> items);
 
-    public int maxTradeOTNameLength();
+        // Randomizer methods
+        public void shuffleFieldItems();
 
-    // Evos
-    public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos);
+        public void randomizeFieldItems(boolean banBadItems);
 
-    public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
+        // Trades
+        public List<IngameTrade> getIngameTrades();
 
-    public void randomizeEvolutions(boolean similarStrength, boolean sameType, boolean changeMethods,
-            boolean limitToThreeStages, boolean forceChange, boolean noConverge, boolean forceGrowth);
+        public void setIngameTrades(List<IngameTrade> trades);
 
-    public void updateExtraInfo(Evolution ev);
+        public void randomizeIngameTrades(boolean randomizeRequest, boolean randomNickname,
+                        boolean randomOT, boolean randomStats, boolean randomItem,
+                        CustomNamesSet customNames);
 
-    // stats stuff
-    public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
+        public boolean hasDVs();
 
-    public void standardizeEXPCurves();
+        public int maxTradeNicknameLength();
 
-    // (Mostly) unchanging lists of moves
-    public Map<String, Integer> getGameBreakingMoves();
+        public int maxTradeOTNameLength();
 
-    // includes game or gen-specific moves like Secret Power
-    // but NOT healing moves (Softboiled, Milk Drink)
-    public List<Integer> getFieldMoves();
+        // Evos
+        public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos);
 
-    // any HMs required to obtain 4 badges
-    // (excluding Gameshark codes or early drink in RBY)
-    public List<Integer> getEarlyRequiredHMMoves();
+        public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
 
-    // Misc
-    public boolean isYellow();
+        public void randomizeEvolutions(boolean similarStrength, boolean sameType,
+                        boolean changeMethods, boolean limitToThreeStages, boolean forceChange,
+                        boolean noConverge, boolean forceGrowth, boolean forceLv1);
 
-    public boolean isGen1();
+        public void updateExtraInfo(Evolution ev);
 
-    public String getROMName();
+        // stats stuff
+        public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
 
-    public String getROMCode();
+        public void standardizeEXPCurves();
 
-    public String getSupportLevel();
+        // (Mostly) unchanging lists of moves
+        public Map<String, Integer> getGameBreakingMoves();
 
-    public String getDefaultExtension();
+        // includes game or gen-specific moves like Secret Power
+        // but NOT healing moves (Softboiled, Milk Drink)
+        public List<Integer> getFieldMoves();
 
-    public int internalStringLength(String string);
+        // any HMs required to obtain 4 badges
+        // (excluding Gameshark codes or early drink in RBY)
+        public List<Integer> getEarlyRequiredHMMoves();
 
-    public void applySignature();
+        // Misc
+        public boolean isYellow();
 
-    public BufferedImage getMascotImage();
+        public boolean isGen1();
 
-    public boolean isROMHack();
+        public String getROMName();
 
-    public int generationOfPokemon();
+        public String getROMCode();
 
-    public void writeCheckValueToROM(int value);
+        public String getSupportLevel();
 
-    public void generateTableOfContents();
+        public String getDefaultExtension();
 
-    public void modifyTrainerText(Map taggedTypes);
+        public int internalStringLength(String string);
 
-    // code tweaks
-    public int miscTweaksAvailable();
+        public void applySignature();
 
-    public void applyMiscTweak(MiscTweak tweak);
+        public BufferedImage getMascotImage();
+
+        public boolean isROMHack();
+
+        public int generationOfPokemon();
+
+        public void writeCheckValueToROM(int value);
+
+        public void generateTableOfContents();
+
+        public void modifyTrainerText(Map taggedTypes);
+
+        // code tweaks
+        public int miscTweaksAvailable();
+
+        public void applyMiscTweak(MiscTweak tweak);
 }

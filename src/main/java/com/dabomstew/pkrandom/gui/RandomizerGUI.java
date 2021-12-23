@@ -121,13 +121,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private boolean autoUpdateEnabled;
     private boolean haveCheckedCustomNames;
     private boolean useScrollPaneMode;
-    private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/gui/emptyIcon.png"));
+    private ImageIcon emptyIcon =
+            new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/gui/emptyIcon.png"));
 
     java.util.ResourceBundle bundle;
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param args the command line arguments
      */
     public static void main(String args[]) {
         boolean autoupdate = false;
@@ -147,17 +147,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 onWindowsNativeLAF = true;
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                    ex);
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                    ex);
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                    ex);
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                    ex);
+            java.util.logging.Logger.getLogger(RandomizerGUI.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         }
 
         final boolean wn = onWindowsNativeLAF;
@@ -180,8 +180,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
         bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         testForRequiredConfigs();
-        checkHandlers = new RomHandler.Factory[] { new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
-                new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory() };
+        checkHandlers = new RomHandler.Factory[] {new Gen1RomHandler.Factory(),
+                new Gen2RomHandler.Factory(), new Gen3RomHandler.Factory(),
+                new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory()};
         autoUpdateEnabled = false;
         haveCheckedCustomNames = false;
         useScrollPaneMode = !onWindowsLAF;
@@ -201,7 +202,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         boolean canWrite = attemptWriteConfig();
         if (!canWrite) {
-            JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.cantWriteConfigFile"));
+            JOptionPane.showMessageDialog(null,
+                    bundle.getString("RandomizerGUI.cantWriteConfigFile"));
             autoUpdateEnabled = false;
         }
         setLocationRelativeTo(null);
@@ -558,7 +560,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             colGroups[tweak % numCols].addComponent(tweaks.get(tweak));
         }
         columnsGroup.addContainerGap();
-        gl.setHorizontalGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(columnsGroup));
+        gl.setHorizontalGroup(
+                gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(columnsGroup));
 
         // And rows
         SequentialGroup rowsGroup = gl.createSequentialGroup().addContainerGap();
@@ -575,7 +578,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             rowGroups[tweak / numCols].addComponent(tweaks.get(tweak));
         }
         rowsGroup.addContainerGap();
-        gl.setVerticalGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(rowsGroup));
+        gl.setVerticalGroup(
+                gl.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(rowsGroup));
         return gl;
     }
 
@@ -583,8 +587,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
      * Repurposed: now checks for converting old custom names format to new
      */
     private void checkCustomNames() {
-        String[] cnamefiles = new String[] { SysConstants.tnamesFile, SysConstants.tclassesFile,
-                SysConstants.nnamesFile };
+        String[] cnamefiles = new String[] {SysConstants.tnamesFile, SysConstants.tclassesFile,
+                SysConstants.nnamesFile};
 
         boolean foundFile = false;
         for (int file = 0; file < 3; file++) {
@@ -598,14 +602,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (foundFile) {
             int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
                     bundle.getString("RandomizerGUI.convertNameFilesDialog.text"),
-                    bundle.getString("RandomizerGUI.convertNameFilesDialog.title"), JOptionPane.YES_NO_OPTION);
+                    bundle.getString("RandomizerGUI.convertNameFilesDialog.title"),
+                    JOptionPane.YES_NO_OPTION);
             if (response == JOptionPane.YES_OPTION) {
                 try {
                     CustomNamesSet newNamesData = CustomNamesSet.importOldNames();
                     byte[] data = newNamesData.getBytes();
                     FileFunctions.writeBytesToFile(SysConstants.customNamesFile, data);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.convertNameFilesFailed"));
+                    JOptionPane.showMessageDialog(this,
+                            bundle.getString("RandomizerGUI.convertNameFilesFailed"));
                 }
             }
 
@@ -672,8 +678,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         try {
             Utils.testForRequiredConfigs();
         } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null,
-                    String.format(bundle.getString("RandomizerGUI.configFileMissing"), e.getMessage()));
+            JOptionPane.showMessageDialog(null, String
+                    .format(bundle.getString("RandomizerGUI.configFileMissing"), e.getMessage()));
             System.exit(1);
             return;
         }
@@ -685,8 +691,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.romHandler = null;
         this.currentRestrictions = null;
         this.starterTypes = null;
-        this.websiteLinkLabel.setText("<html><a href=\"" + SysConstants.WEBSITE_URL + "\">" + SysConstants.WEBSITE_URL
-                + "</a>");
+        this.websiteLinkLabel.setText("<html><a href=\"" + SysConstants.WEBSITE_URL + "\">"
+                + SysConstants.WEBSITE_URL + "</a>");
         initialFormState();
         this.romOpenChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
         this.romSaveChooser.setCurrentDirectory(new File(SysConstants.ROOT_PATH));
@@ -699,7 +705,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void initialFormState() {
         // Disable all rom components
         this.goRemoveTradeEvosCheckBox.setEnabled(false);
@@ -765,11 +771,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spCustomPoke2Chooser.setEnabled(false);
         this.spCustomPoke3Chooser.setEnabled(false);
         this.spCustomPoke1Chooser.setSelectedIndex(0);
-        this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
+        this.spCustomPoke1Chooser.setModel(new DefaultComboBoxModel(new String[] {"--"}));
         this.spCustomPoke2Chooser.setSelectedIndex(0);
-        this.spCustomPoke2Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
+        this.spCustomPoke2Chooser.setModel(new DefaultComboBoxModel(new String[] {"--"}));
         this.spCustomPoke3Chooser.setSelectedIndex(0);
-        this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(new String[] { "--" }));
+        this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(new String[] {"--"}));
         this.spCustomRB.setEnabled(false);
         this.spRandomRB.setEnabled(false);
         this.spUnchangedRB.setEnabled(false);
@@ -844,7 +850,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpGlobalSwapRB.setEnabled(false);
         this.tpPowerLevelsCB.setEnabled(false);
         this.tpRivalCarriesStarterCB.setEnabled(false);
-        this.tpRivalCarriesTeamCB.setEnabled(false);        
+        this.tpRivalCarriesTeamCB.setEnabled(false);
         this.tpTypeWeightingCB.setEnabled(false);
         this.tpNoLegendariesCB.setEnabled(false);
         this.tpNoEarlyShedinjaCB.setEnabled(false);
@@ -1012,6 +1018,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peNoConvergeCB.setSelected(false);
         this.peChangeMethodsCB.setEnabled(false);
         this.peChangeMethodsCB.setSelected(false);
+        this.peEvolveLv1CB.setEnabled(false);
+        this.peEvolveLv1CB.setSelected(false);
 
         for (JCheckBox cb : tweakCheckboxes) {
             cb.setVisible(true);
@@ -1036,33 +1044,34 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 Utils.validateRomFile(fh);
             } catch (Utils.InvalidROMException e) {
                 switch (e.getType()) {
-                case LENGTH:
-                    JOptionPane.showMessageDialog(this,
-                            String.format(bundle.getString("RandomizerGUI.tooShortToBeARom"), fh.getName()));
-                    return;
-                case ZIP_FILE:
-                    JOptionPane.showMessageDialog(this,
-                            String.format(bundle.getString("RandomizerGUI.openedZIPfile"), fh.getName()));
-                    return;
-                case RAR_FILE:
-                    JOptionPane.showMessageDialog(this,
-                            String.format(bundle.getString("RandomizerGUI.openedRARfile"), fh.getName()));
-                    return;
-                case IPS_FILE:
-                    JOptionPane.showMessageDialog(this,
-                            String.format(bundle.getString("RandomizerGUI.openedIPSfile"), fh.getName()));
-                    return;
-                case UNREADABLE:
-                    JOptionPane.showMessageDialog(this,
-                            String.format(bundle.getString("RandomizerGUI.unreadableRom"), fh.getName()));
-                    return;
+                    case LENGTH:
+                        JOptionPane.showMessageDialog(this, String.format(
+                                bundle.getString("RandomizerGUI.tooShortToBeARom"), fh.getName()));
+                        return;
+                    case ZIP_FILE:
+                        JOptionPane.showMessageDialog(this, String.format(
+                                bundle.getString("RandomizerGUI.openedZIPfile"), fh.getName()));
+                        return;
+                    case RAR_FILE:
+                        JOptionPane.showMessageDialog(this, String.format(
+                                bundle.getString("RandomizerGUI.openedRARfile"), fh.getName()));
+                        return;
+                    case IPS_FILE:
+                        JOptionPane.showMessageDialog(this, String.format(
+                                bundle.getString("RandomizerGUI.openedIPSfile"), fh.getName()));
+                        return;
+                    case UNREADABLE:
+                        JOptionPane.showMessageDialog(this, String.format(
+                                bundle.getString("RandomizerGUI.unreadableRom"), fh.getName()));
+                        return;
                 }
             }
 
             for (RomHandler.Factory rhf : checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
                     this.romHandler = rhf.create(RandomSource.instance());
-                    opDialog = new OperationDialog(bundle.getString("RandomizerGUI.loadingText"), this, true);
+                    opDialog = new OperationDialog(bundle.getString("RandomizerGUI.loadingText"),
+                            this, true);
                     Thread t = new Thread() {
                         @Override
                         public void run() {
@@ -1077,7 +1086,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                 RandomizerGUI.this.romHandler.loadRom(fh.getAbsolutePath());
                                 romLoaded = true;
                             } catch (Exception ex) {
-                                attemptToLogException(ex, "RandomizerGUI.loadFailed", "RandomizerGUI.loadFailedNoLog");
+                                attemptToLogException(ex, "RandomizerGUI.loadFailed",
+                                        "RandomizerGUI.loadFailedNoLog");
                             }
                             final boolean loadSuccess = romLoaded;
                             SwingUtilities.invokeLater(new Runnable() {
@@ -1126,9 +1136,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.pokeLimitCB.setSelected(false);
             this.pokeLimitBtn.setEnabled(false);
-            this.pokeLimitCB.setEnabled(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
-            this.pokeLimitCB.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
-            this.pokeLimitBtn.setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
+            this.pokeLimitCB
+                    .setEnabled(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
+            this.pokeLimitCB
+                    .setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
+            this.pokeLimitBtn
+                    .setVisible(!(romHandler instanceof Gen1RomHandler || romHandler.isROMHack()));
 
             this.brokenMovesCB.setSelected(false);
             this.brokenMovesCB.setEnabled(true);
@@ -1177,7 +1190,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
             this.spUniqueTypesCB.setSelected(false);
             this.spHeldItemsCB.setSelected(false);
-            boolean hasStarterHeldItems = (romHandler instanceof Gen2RomHandler || romHandler instanceof Gen3RomHandler);
+            boolean hasStarterHeldItems =
+                    (romHandler instanceof Gen2RomHandler || romHandler instanceof Gen3RomHandler);
             this.spHeldItemsCB.setEnabled(hasStarterHeldItems);
             this.spHeldItemsCB.setVisible(hasStarterHeldItems);
             this.spHeldItemsBanBadCB.setEnabled(false);
@@ -1338,7 +1352,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 ((AbstractDSRomHandler) this.romHandler).closeInnerRom();
             }
         } catch (Exception ex) {
-            attemptToLogException(ex, "RandomizerGUI.processFailed", "RandomizerGUI.processFailedNoLog");
+            attemptToLogException(ex, "RandomizerGUI.processFailed",
+                    "RandomizerGUI.processFailedNoLog");
             this.romHandler = null;
             this.initialFormState();
         }
@@ -1362,7 +1377,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void populateDropdowns() {
         List<Pokemon> currentStarters = romHandler.getStarters();
         List<Pokemon> allPokes = romHandler.getPokemon();
@@ -1376,7 +1391,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.spCustomPoke2Chooser.setSelectedIndex(allPokes.indexOf(currentStarters.get(1)) - 1);
         if (!romHandler.isYellow()) {
             this.spCustomPoke3Chooser.setModel(new DefaultComboBoxModel(pokeNames));
-            this.spCustomPoke3Chooser.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)) - 1);
+            this.spCustomPoke3Chooser
+                    .setSelectedIndex(allPokes.indexOf(currentStarters.get(2)) - 1);
         }
     }
 
@@ -1406,7 +1422,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spExactEvoCB.setEnabled(true);
             this.spRandomSlider.setEnabled(true);
             this.spSETriangleCB.setEnabled(true);
-            this.spNoSplitCB.setEnabled(true);           
+            this.spNoSplitCB.setEnabled(true);
             if (this.spSETriangleCB.isSelected()) {
                 this.spTypeFilterButton.setEnabled(false);
                 this.starterTypes = null;
@@ -1439,7 +1455,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spBSTLimitSlider.setEnabled(false);
             this.spBSTLimitSlider.setValue(this.spBSTLimitSlider.getMinimum());
         }
-        
+
         if (this.pbsChangesUnchangedRB.isSelected()) {
             this.pbsFollowEvolutionsCB.setEnabled(false);
             this.pbsFollowEvolutionsCB.setSelected(false);
@@ -1454,7 +1470,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.pbsStatsRandomizeFirstCB.setSelected(false);
         }
 
-        if (this.spHeldItemsCB.isSelected() && this.spHeldItemsCB.isVisible() && this.spHeldItemsCB.isEnabled()) {
+        if (this.spHeldItemsCB.isSelected() && this.spHeldItemsCB.isVisible()
+                && this.spHeldItemsCB.isEnabled()) {
             this.spHeldItemsBanBadCB.setEnabled(true);
         } else {
             this.spHeldItemsBanBadCB.setEnabled(false);
@@ -1541,7 +1558,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpRivalCarriesStarterCB.setSelected(false);
         }
 
-        if(this.tpRivalCarriesStarterCB.isSelected() && !this.tpUnchangedRB.isSelected()) {
+        if (this.tpRivalCarriesStarterCB.isSelected() && !this.tpUnchangedRB.isSelected()) {
             this.tpRivalCarriesTeamCB.setEnabled(true);
         } else {
             this.tpRivalCarriesTeamCB.setEnabled(false);
@@ -1562,7 +1579,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpARTypeThemedRB.setEnabled(true);
             this.wpARMatchTypingRB.setEnabled(true);
         } else if (this.wpGlobalRB.isSelected()) {
-            if (this.wpARCatchEmAllRB.isSelected() || this.wpARTypeThemedRB.isSelected() || this.wpARMatchTypingRB.isSelected()) {
+            if (this.wpARCatchEmAllRB.isSelected() || this.wpARTypeThemedRB.isSelected()
+                    || this.wpARMatchTypingRB.isSelected()) {
                 this.wpARNoneRB.setSelected(true);
             }
             this.wpARNoneRB.setEnabled(true);
@@ -1595,7 +1613,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.wpCatchRateSlider.setEnabled(true);
         }
 
-        if (this.wpHeldItemsCB.isSelected() && this.wpHeldItemsCB.isVisible() && this.wpHeldItemsCB.isEnabled()) {
+        if (this.wpHeldItemsCB.isSelected() && this.wpHeldItemsCB.isVisible()
+                && this.wpHeldItemsCB.isEnabled()) {
             this.wpHeldItemsBanBadCB.setEnabled(true);
         } else {
             this.wpHeldItemsBanBadCB.setEnabled(false);
@@ -1673,8 +1692,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
 
             if (getRomHandler().hasMoveTutors()
-                    && (!(this.pmsUnchangedRB.isSelected()) || !(this.mtmUnchangedRB.isSelected()) || !(this.mtcUnchangedRB
-                            .isSelected()))) {
+                    && (!(this.pmsUnchangedRB.isSelected()) || !(this.mtmUnchangedRB.isSelected())
+                            || !(this.mtcUnchangedRB.isSelected()))) {
                 this.mtLearningSanityCB.setEnabled(true);
             } else {
                 this.mtLearningSanityCB.setEnabled(false);
@@ -1735,14 +1754,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.pmsForceGoodDamagingSlider.setValue(this.pmsForceGoodDamagingSlider.getMinimum());
         }
 
-        if (this.fiRandomRB.isSelected() && this.fiRandomRB.isVisible() && this.fiRandomRB.isEnabled()) {
+        if (this.fiRandomRB.isSelected() && this.fiRandomRB.isVisible()
+                && this.fiRandomRB.isEnabled()) {
             this.fiBanBadCB.setEnabled(true);
         } else {
             this.fiBanBadCB.setEnabled(false);
             this.fiBanBadCB.setSelected(false);
         }
-        
-        if(this.peRandomRB.isSelected()) {
+
+        if (this.peRandomRB.isSelected()) {
             this.peForceChangeCB.setEnabled(true);
             this.peThreeStagesCB.setEnabled(true);
             this.peSameTypeCB.setEnabled(true);
@@ -1750,9 +1770,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peForceGrowthCB.setEnabled(true);
             this.peNoConvergeCB.setEnabled(true);
             this.peChangeMethodsCB.setEnabled(true);
+            this.peEvolveLv1CB.setEnabled(true);
         } else {
             this.peForceChangeCB.setEnabled(false);
-            this.peForceChangeCB.setSelected (false);
+            this.peForceChangeCB.setSelected(false);
             this.peThreeStagesCB.setEnabled(false);
             this.peThreeStagesCB.setSelected(false);
             this.peSameTypeCB.setEnabled(false);
@@ -1765,6 +1786,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peNoConvergeCB.setSelected(false);
             this.peChangeMethodsCB.setEnabled(false);
             this.peChangeMethodsCB.setSelected(false);
+            this.peEvolveLv1CB.setEnabled(false);
+            this.peEvolveLv1CB.setSelected(false);
         }
 
         uiUpdated = true;
@@ -1775,12 +1798,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
             return; // none loaded
         }
         if (raceModeCB.isSelected() && tpUnchangedRB.isSelected() && wpUnchangedRB.isSelected()) {
-            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.raceModeRequirements"));
+            JOptionPane.showMessageDialog(this,
+                    bundle.getString("RandomizerGUI.raceModeRequirements"));
             return;
         }
-        if (pokeLimitCB.isSelected()
-                && (this.currentRestrictions == null || this.currentRestrictions.nothingSelected())) {
-            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.pokeLimitNotChosen"));
+        if (pokeLimitCB.isSelected() && (this.currentRestrictions == null
+                || this.currentRestrictions.nothingSelected())) {
+            JOptionPane.showMessageDialog(this,
+                    bundle.getString("RandomizerGUI.pokeLimitNotChosen"));
             return;
         }
         romSaveChooser.setSelectedFile(null);
@@ -1788,14 +1813,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File fh = romSaveChooser.getSelectedFile();
             // Fix or add extension
-            List<String> extensions = new ArrayList<String>(Arrays.asList("sgb", "gbc", "gba", "nds"));
+            List<String> extensions =
+                    new ArrayList<String>(Arrays.asList("sgb", "gbc", "gba", "nds"));
             extensions.remove(this.romHandler.getDefaultExtension());
             fh = FileFunctions.fixFilename(fh, this.romHandler.getDefaultExtension(), extensions);
             boolean allowed = true;
             if (this.romHandler instanceof AbstractDSRomHandler) {
                 String currentFN = this.romHandler.loadedFilename();
                 if (currentFN.equals(fh.getAbsolutePath())) {
-                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.cantOverwriteDS"));
+                    JOptionPane.showMessageDialog(this,
+                            bundle.getString("RandomizerGUI.cantOverwriteDS"));
                     allowed = false;
                 }
             }
@@ -1810,7 +1837,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     CustomNamesSet cns = FileFunctions.getCustomNames();
                     performRandomization(fh.getAbsolutePath(), seed, cns);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.cantLoadCustomNames"));
+                    JOptionPane.showMessageDialog(this,
+                            bundle.getString("RandomizerGUI.cantLoadCustomNames"));
                 }
 
             }
@@ -1828,11 +1856,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
             Utils.validatePresetSupplementFiles(config, customNames);
         } catch (InvalidSupplementFilesException e) {
             switch (e.getType()) {
-            case CUSTOM_NAMES:
-                JOptionPane.showMessageDialog(null, bundle.getString("RandomizerGUI.presetFailTrainerNames"));
-                throw e;
-            default:
-                throw e;
+                case CUSTOM_NAMES:
+                    JOptionPane.showMessageDialog(null,
+                            bundle.getString("RandomizerGUI.presetFailTrainerNames"));
+                    throw e;
+                default:
+                    throw e;
             }
         }
         byte[] data = Base64.getDecoder().decode(config);
@@ -1841,7 +1870,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 9 + nameLength) {
             return null; // not valid length
         }
-        String name = new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
+        String name =
+                new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
         return name;
     }
 
@@ -1852,7 +1882,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     // Returns a field from this class for unit testing
     // This method should NOT be used for regular code
     protected JComponent getField(String field) {
-        switch(field) {
+        switch (field) {
             case "updateMoves":
                 return goUpdateMovesCheckBox;
             case "updateMovesLegacy":
@@ -1869,28 +1899,39 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tnRandomizeCB.setSelected(settings.isRandomizeTrainerNames());
         this.tcnRandomizeCB.setSelected(settings.isRandomizeTrainerClassNames());
 
-        this.pbsChangesRandomRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_WITHIN_BST);
-        this.pbsChangesShuffleOrderRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE_ORDER);
-        this.pbsChangesShuffleBSTRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE_BST);
-        this.pbsChangesShuffleAllRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE_ALL);
-        this.pbsChangesRandomUnrestrictedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_UNRESTRICTED);
-        this.pbsChangesRandomCompletelyRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_COMPLETELY);
-        this.pbsChangesUnchangedRB.setSelected(settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
+        this.pbsChangesRandomRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_WITHIN_BST);
+        this.pbsChangesShuffleOrderRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE_ORDER);
+        this.pbsChangesShuffleBSTRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE_BST);
+        this.pbsChangesShuffleAllRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.SHUFFLE_ALL);
+        this.pbsChangesRandomUnrestrictedRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_UNRESTRICTED);
+        this.pbsChangesRandomCompletelyRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.RANDOM_COMPLETELY);
+        this.pbsChangesUnchangedRB.setSelected(
+                settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED);
         this.pbsStandardEXPCurvesCB.setSelected(settings.isStandardizeEXPCurves());
         this.pbsFollowEvolutionsCB.setSelected(settings.isBaseStatsFollowEvolutions());
         this.pbsUpdateStatsCB.setSelected(settings.isUpdateBaseStats());
         this.pbsStatsRandomizeFirstCB.setSelected(settings.isStatsRandomizeFirst());
 
-        this.paUnchangedRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
-        this.paRandomizeRB.setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
+        this.paUnchangedRB
+                .setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED);
+        this.paRandomizeRB
+                .setSelected(settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE);
         this.paWonderGuardCB.setSelected(settings.isAllowWonderGuard());
         this.paFollowEvolutionsCB.setSelected(settings.isAbilitiesFollowEvolutions());
         this.paBanTrappingCB.setSelected(settings.isBanTrappingAbilities());
         this.paBanNegativeCB.setSelected(settings.isBanNegativeAbilities());
 
         this.ptShuffleRB.setSelected(settings.getTypesMod() == Settings.TypesMod.SHUFFLE);
-        this.ptRetainRandomRB.setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_RETAIN);
-        this.ptRandomTotalRB.setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
+        this.ptRetainRandomRB
+                .setSelected(settings.getTypesMod() == Settings.TypesMod.RANDOM_RETAIN);
+        this.ptRandomTotalRB
+                .setSelected(settings.getTypesMod() == Settings.TypesMod.COMPLETELY_RANDOM);
         this.ptUnchangedRB.setSelected(settings.getTypesMod() == Settings.TypesMod.UNCHANGED);
         this.ptTypesRandomizeFirstCB.setSelected(settings.isTypesRandomizeFirst());
         this.ptFollowEvosCB.setSelected(settings.isTypesFollowEvolutions());
@@ -1921,7 +1962,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spCustomPoke3Chooser.setSelectedIndex(Math.max(0, customStarters[2] - 1));
         }
 
-        this.peUnchangedRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
+        this.peUnchangedRB
+                .setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
         this.peRandomRB.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
         this.peSimilarStrengthCB.setSelected(settings.isEvosSimilarStrength());
         this.peSameTypeCB.setSelected(settings.isEvosSameTyping());
@@ -1930,6 +1972,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peForceGrowthCB.setSelected(settings.isEvosForceGrowth());
         this.peNoConvergeCB.setSelected(settings.isEvosNoConverge());
         this.peChangeMethodsCB.setSelected(settings.isEvosChangeMethod());
+        this.peEvolveLv1CB.setSelected(settings.isEvosLv1());
 
         this.mdRandomAccuracyCB.setSelected(settings.isRandomizeMoveAccuracies());
         this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());
@@ -1937,10 +1980,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.mdRandomPPCB.setSelected(settings.isRandomizeMovePPs());
         this.mdRandomTypeCB.setSelected(settings.isRandomizeMoveTypes());
 
-        this.pmsRandomTotalRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM);
-        this.pmsRandomTypeRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE);
-        this.pmsUnchangedRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
-        this.pmsMetronomeOnlyRB.setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY);
+        this.pmsRandomTotalRB
+                .setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM);
+        this.pmsRandomTypeRB.setSelected(
+                settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE);
+        this.pmsUnchangedRB
+                .setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED);
+        this.pmsMetronomeOnlyRB
+                .setSelected(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY);
         this.pmsGuaranteedMovesCB.setSelected(settings.isStartWithGuaranteedMoves());
         this.pmsGuaranteedMovesSlider.setValue(settings.getGuaranteedMoveCount());
         this.pmsReorderDamagingMovesCB.setSelected(settings.isReorderDamagingMoves());
@@ -1949,12 +1996,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         this.tpUnchangedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED);
         this.tpRandomRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.RANDOM);
-        this.tpTypeThemedRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
-        this.tpGlobalSwapRB.setSelected(settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
+        this.tpTypeThemedRB
+                .setSelected(settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED);
+        this.tpGlobalSwapRB
+                .setSelected(settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING);
         this.tpPowerLevelsCB.setSelected(settings.isTrainersUsePokemonOfSimilarStrength());
         this.tpRivalCarriesStarterCB.setSelected(settings.isRivalCarriesStarterThroughout());
         this.tpRivalCarriesTeamCB.setSelected(settings.isRivalCarriesTeamThroughout());
-        this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());        
+        this.tpTypeWeightingCB.setSelected(settings.isTrainersMatchTypingDistribution());
         this.tpNoLegendariesCB.setSelected(settings.isTrainersBlockLegendaries());
         this.tpNoEarlyShedinjaCB.setSelected(settings.isTrainersBlockEarlyWonderGuard());
         this.tpRandomHeldItemCB.setSelected(settings.isTrainersRandomHeldItem());
@@ -1965,75 +2014,87 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.tpLevelModifierSlider.setValue(settings.getTrainersLevelModifier());
         this.tpBuffEliteCB.setSelected(settings.isTrainersBuffElite());
 
-        this.wpARCatchEmAllRB
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
-        this.wpArea11RB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
-        this.wpARNoneRB.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.NONE);
-        this.wpARTypeThemedRB
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS);
-        this.wpARMatchTypingRB
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION);
-        this.wpGlobalRB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
+        this.wpARCatchEmAllRB.setSelected(settings
+                .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
+        this.wpArea11RB
+                .setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
+        this.wpARNoneRB.setSelected(
+                settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.NONE);
+        this.wpARTypeThemedRB.setSelected(settings
+                .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS);
+        this.wpARMatchTypingRB.setSelected(settings
+                .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION);
+        this.wpGlobalRB.setSelected(
+                settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
         this.wpRandomRB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
-        this.wpUnchangedRB.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
+        this.wpUnchangedRB
+                .setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
         this.wpUseTimeCB.setSelected(settings.isUseTimeBasedEncounters());
         this.wpAllowEvosCB.setSelected(settings.isAllowLowLevelEvolvedTypes());
 
         this.wpCatchRateCB.setSelected(settings.isUseMinimumCatchRate());
         this.wpCatchRateSlider.setValue(settings.getMinimumCatchRateLevel());
         this.wpNoLegendariesCB.setSelected(settings.isBlockWildLegendaries());
-        this.wpARSimilarStrengthRB
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
+        this.wpARSimilarStrengthRB.setSelected(settings
+                .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
         this.wpHeldItemsCB.setSelected(settings.isRandomizeWildPokemonHeldItems());
         this.wpHeldItemsBanBadCB.setSelected(settings.isBanBadRandomWildPokemonHeldItems());
 
-        this.stpUnchangedRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
-        this.stpRandomL4LRB.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
-        this.stpRandomTotalRB
-                .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM);
+        this.stpUnchangedRB
+                .setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
+        this.stpRandomL4LRB.setSelected(
+                settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
+        this.stpRandomTotalRB.setSelected(
+                settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM);
 
-        this.thcRandomTotalRB
-                .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
-        this.thcRandomTypeRB
-                .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE);
-        this.thcUnchangedRB
-                .setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.UNCHANGED);
+        this.thcRandomTotalRB.setSelected(settings
+                .getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.COMPLETELY_RANDOM);
+        this.thcRandomTypeRB.setSelected(settings
+                .getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE);
+        this.thcUnchangedRB.setSelected(
+                settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.UNCHANGED);
         this.tmmRandomRB.setSelected(settings.getTmsMod() == Settings.TMsMod.RANDOM);
         this.tmmUnchangedRB.setSelected(settings.getTmsMod() == Settings.TMsMod.UNCHANGED);
         this.tmLearningSanityCB.setSelected(settings.isTmLevelUpMoveSanity());
         this.tmKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTMs());
-        this.thcFullRB.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
+        this.thcFullRB.setSelected(
+                settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
         this.tmFullHMCompatCB.setSelected(settings.isFullHMCompat());
         this.tmForceGoodDamagingCB.setSelected(settings.isTmsForceGoodDamaging());
         this.tmForceGoodDamagingSlider.setValue(settings.getTmsGoodDamagingPercent());
 
-        this.mtcRandomTotalRB
-                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
-        this.mtcRandomTypeRB
-                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE);
-        this.mtcUnchangedRB
-                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.UNCHANGED);
-        this.mtmRandomRB.setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM);
-        this.mtmUnchangedRB.setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.UNCHANGED);
+        this.mtcRandomTotalRB.setSelected(settings
+                .getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.COMPLETELY_RANDOM);
+        this.mtcRandomTypeRB.setSelected(settings
+                .getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.RANDOM_PREFER_TYPE);
+        this.mtcUnchangedRB.setSelected(settings
+                .getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.UNCHANGED);
+        this.mtmRandomRB
+                .setSelected(settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM);
+        this.mtmUnchangedRB.setSelected(
+                settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.UNCHANGED);
         this.mtLearningSanityCB.setSelected(settings.isTutorLevelUpMoveSanity());
         this.mtKeepFieldMovesCB.setSelected(settings.isKeepFieldMoveTutors());
-        this.mtcFullRB
-                .setSelected(settings.getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.FULL);
+        this.mtcFullRB.setSelected(settings
+                .getMoveTutorsCompatibilityMod() == Settings.MoveTutorsCompatibilityMod.FULL);
         this.mtForceGoodDamagingCB.setSelected(settings.isTutorsForceGoodDamaging());
         this.mtForceGoodDamagingSlider.setValue(settings.getTutorsGoodDamagingPercent());
 
-        this.igtBothRB
-                .setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED);
-        this.igtGivenOnlyRB.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN);
+        this.igtBothRB.setSelected(settings
+                .getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED);
+        this.igtGivenOnlyRB.setSelected(
+                settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN);
         this.igtRandomItemCB.setSelected(settings.isRandomizeInGameTradesItems());
         this.igtRandomIVsCB.setSelected(settings.isRandomizeInGameTradesIVs());
         this.igtRandomNicknameCB.setSelected(settings.isRandomizeInGameTradesNicknames());
         this.igtRandomOTCB.setSelected(settings.isRandomizeInGameTradesOTs());
-        this.igtUnchangedRB.setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED);
+        this.igtUnchangedRB
+                .setSelected(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED);
 
         this.fiRandomRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM);
         this.fiShuffleRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.SHUFFLE);
-        this.fiUnchangedRB.setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
+        this.fiUnchangedRB
+                .setSelected(settings.getFieldItemsMod() == Settings.FieldItemsMod.UNCHANGED);
         this.fiBanBadCB.setSelected(settings.isBanBadRandomFieldItems());
 
         this.currentRestrictions = settings.getCurrentRestrictions();
@@ -2064,9 +2125,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setRandomizeTrainerNames(tnRandomizeCB.isSelected());
         settings.setRandomizeTrainerClassNames(tcnRandomizeCB.isSelected());
 
-        settings.setBaseStatisticsMod(pbsChangesUnchangedRB.isSelected(), pbsChangesShuffleOrderRB.isSelected(),
-                pbsChangesShuffleBSTRB.isSelected(), pbsChangesShuffleAllRB.isSelected(),
-                pbsChangesRandomRB.isSelected(), pbsChangesRandomUnrestrictedRB.isSelected(),
+        settings.setBaseStatisticsMod(pbsChangesUnchangedRB.isSelected(),
+                pbsChangesShuffleOrderRB.isSelected(), pbsChangesShuffleBSTRB.isSelected(),
+                pbsChangesShuffleAllRB.isSelected(), pbsChangesRandomRB.isSelected(),
+                pbsChangesRandomUnrestrictedRB.isSelected(),
                 pbsChangesRandomCompletelyRB.isSelected());
         settings.setStandardizeEXPCurves(pbsStandardEXPCurvesCB.isSelected());
         settings.setBaseStatsFollowEvolutions(pbsFollowEvolutionsCB.isSelected());
@@ -2079,8 +2141,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setBanTrappingAbilities(paBanTrappingCB.isSelected());
         settings.setBanNegativeAbilities(paBanNegativeCB.isSelected());
 
-        settings.setTypesMod(ptUnchangedRB.isSelected(), ptRetainRandomRB.isSelected(), 
-            ptRandomTotalRB.isSelected(), ptShuffleRB.isSelected());
+        settings.setTypesMod(ptUnchangedRB.isSelected(), ptRetainRandomRB.isSelected(),
+                ptRandomTotalRB.isSelected(), ptShuffleRB.isSelected());
         settings.setTypesRandomizeFirst(ptTypesRandomizeFirstCB.isSelected());
         settings.setTypesFollowEvos(ptFollowEvosCB.isSelected());
         settings.setRaceMode(raceModeCB.isSelected());
@@ -2089,7 +2151,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setMakeEvolutionsEasier(goCondenseEvosCheckBox.isSelected());
 
-        settings.setStartersMod(spUnchangedRB.isSelected(), spCustomRB.isSelected(), spRandomRB.isSelected());
+        settings.setStartersMod(spUnchangedRB.isSelected(), spCustomRB.isSelected(),
+                spRandomRB.isSelected());
         settings.setRandomizeStartersHeldItems(spHeldItemsCB.isSelected());
         settings.setBanBadRandomStarterHeldItems(spHeldItemsBanBadCB.isSelected());
         settings.setStartersUniqueTypes(spUniqueTypesCB.isSelected());
@@ -2101,8 +2164,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setStartersMinimumEvos(spRandomSlider.getValue());
         settings.setStartersSETriangle(spSETriangleCB.isSelected());
 
-        int[] customStarters = new int[] { spCustomPoke1Chooser.getSelectedIndex() + 1,
-                spCustomPoke2Chooser.getSelectedIndex() + 1, spCustomPoke3Chooser.getSelectedIndex() + 1 };
+        int[] customStarters = new int[] {spCustomPoke1Chooser.getSelectedIndex() + 1,
+                spCustomPoke2Chooser.getSelectedIndex() + 1,
+                spCustomPoke3Chooser.getSelectedIndex() + 1};
         settings.setCustomStarters(customStarters);
 
         settings.setEvolutionsMod(peUnchangedRB.isSelected(), peRandomRB.isSelected());
@@ -2113,6 +2177,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setEvosForceGrowth(peForceGrowthCB.isSelected());
         settings.setEvosNoConverge(peNoConvergeCB.isSelected());
         settings.setEvosChangeMethod(peChangeMethodsCB.isSelected());
+        settings.setEvosLv1(peEvolveLv1CB.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
         settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());
@@ -2129,8 +2194,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setMovesetsForceGoodDamaging(pmsForceGoodDamagingCB.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
 
-        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(), tpTypeThemedRB.isSelected(),
-            tpGlobalSwapRB.isSelected());
+        settings.setTrainersMod(tpUnchangedRB.isSelected(), tpRandomRB.isSelected(),
+                tpTypeThemedRB.isSelected(), tpGlobalSwapRB.isSelected());
         settings.setTrainersUsePokemonOfSimilarStrength(tpPowerLevelsCB.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCB.isSelected());
         settings.setRivalCarriesTeamThroughout(tpRivalCarriesTeamCB.isSelected());
@@ -2145,10 +2210,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTrainersLevelModifier(tpLevelModifierSlider.getValue());
         settings.setTrainersBuffElite(tpBuffEliteCB.isSelected());
 
-        settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(), wpArea11RB.isSelected(),
-                wpGlobalRB.isSelected());
-        settings.setWildPokemonRestrictionMod(wpARNoneRB.isSelected(), wpARSimilarStrengthRB.isSelected(),
-                wpARCatchEmAllRB.isSelected(), wpARTypeThemedRB.isSelected(), wpARMatchTypingRB.isSelected());
+        settings.setWildPokemonMod(wpUnchangedRB.isSelected(), wpRandomRB.isSelected(),
+                wpArea11RB.isSelected(), wpGlobalRB.isSelected());
+        settings.setWildPokemonRestrictionMod(wpARNoneRB.isSelected(),
+                wpARSimilarStrengthRB.isSelected(), wpARCatchEmAllRB.isSelected(),
+                wpARTypeThemedRB.isSelected(), wpARMatchTypingRB.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeCB.isSelected());
         settings.setUseMinimumCatchRate(wpCatchRateCB.isSelected());
         settings.setMinimumCatchRateLevel(wpCatchRateSlider.getValue());
@@ -2162,8 +2228,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setTmsMod(tmmUnchangedRB.isSelected(), tmmRandomRB.isSelected());
 
-        settings.setTmsHmsCompatibilityMod(thcUnchangedRB.isSelected(), thcRandomTypeRB.isSelected(),
-                thcRandomTotalRB.isSelected(), thcFullRB.isSelected());
+        settings.setTmsHmsCompatibilityMod(thcUnchangedRB.isSelected(),
+                thcRandomTypeRB.isSelected(), thcRandomTotalRB.isSelected(),
+                thcFullRB.isSelected());
         settings.setTmLevelUpMoveSanity(tmLearningSanityCB.isSelected());
         settings.setKeepFieldMoveTMs(tmKeepFieldMovesCB.isSelected());
         settings.setFullHMCompat(tmFullHMCompatCB.isSelected());
@@ -2171,20 +2238,23 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setTmsGoodDamagingPercent(tmForceGoodDamagingSlider.getValue());
 
         settings.setMoveTutorMovesMod(mtmUnchangedRB.isSelected(), mtmRandomRB.isSelected());
-        settings.setMoveTutorsCompatibilityMod(mtcUnchangedRB.isSelected(), mtcRandomTypeRB.isSelected(),
-                mtcRandomTotalRB.isSelected(), mtcFullRB.isSelected());
+        settings.setMoveTutorsCompatibilityMod(mtcUnchangedRB.isSelected(),
+                mtcRandomTypeRB.isSelected(), mtcRandomTotalRB.isSelected(),
+                mtcFullRB.isSelected());
         settings.setTutorLevelUpMoveSanity(mtLearningSanityCB.isSelected());
         settings.setKeepFieldMoveTutors(mtKeepFieldMovesCB.isSelected());
         settings.setTutorsForceGoodDamaging(mtForceGoodDamagingCB.isSelected());
         settings.setTutorsGoodDamagingPercent(mtForceGoodDamagingSlider.getValue());
 
-        settings.setInGameTradesMod(igtUnchangedRB.isSelected(), igtGivenOnlyRB.isSelected(), igtBothRB.isSelected());
+        settings.setInGameTradesMod(igtUnchangedRB.isSelected(), igtGivenOnlyRB.isSelected(),
+                igtBothRB.isSelected());
         settings.setRandomizeInGameTradesItems(igtRandomItemCB.isSelected());
         settings.setRandomizeInGameTradesIVs(igtRandomIVsCB.isSelected());
         settings.setRandomizeInGameTradesNicknames(igtRandomNicknameCB.isSelected());
         settings.setRandomizeInGameTradesOTs(igtRandomOTCB.isSelected());
 
-        settings.setFieldItemsMod(fiUnchangedRB.isSelected(), fiShuffleRB.isSelected(), fiRandomRB.isSelected());
+        settings.setFieldItemsMod(fiUnchangedRB.isSelected(), fiShuffleRB.isSelected(),
+                fiRandomRB.isSelected());
         settings.setBanBadRandomFieldItems(fiBanBadCB.isSelected());
 
         settings.setCurrentRestrictions(currentRestrictions);
@@ -2208,23 +2278,25 @@ public class RandomizerGUI extends javax.swing.JFrame {
         return settings;
     }
 
-    private void performRandomization(final String filename, final long seed, CustomNamesSet customNames) {
+    private void performRandomization(final String filename, final long seed,
+            CustomNamesSet customNames) {
         final Settings settings = createSettingsFromState(customNames);
         final boolean raceMode = settings.isRaceMode();
 
         Configuration cfg = new Configuration(new Version("2.3.30"));
-        
+
         cfg.setClassForTemplateLoading(RandomizerGUI.class, "/com/dabomstew/pkrandom/gui/");
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
         cfg.setBooleanFormat("c");
         cfg.setWhitespaceStripping(true);
-        
+
         Map<String, Object> templateData = new HashMap<String, Object>();
 
         try {
             final AtomicInteger finishedCV = new AtomicInteger(0);
-            opDialog = new OperationDialog(bundle.getString("RandomizerGUI.savingText"), this, true);
+            opDialog =
+                    new OperationDialog(bundle.getString("RandomizerGUI.savingText"), this, true);
             Thread t = new Thread() {
                 @Override
                 public void run() {
@@ -2238,14 +2310,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     try {
                         Template template = cfg.getTemplate("randomization_log.ftl");
                         RandomizerGUI.this.romHandler.setTemplate(template, templateData);
-                        finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler).randomize(filename,
-                                seed));
+                        finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler)
+                                .randomize(filename, seed));
                         succeededSave = true;
                     } catch (RandomizationException ex) {
                         attemptToLogException(ex, "RandomizerGUI.saveFailedMessage",
                                 "RandomizerGUI.saveFailedMessageNoLog", true);
                     } catch (Exception ex) {
-                        attemptToLogException(ex, "RandomizerGUI.saveFailedIO", "RandomizerGUI.saveFailedIONoLog");
+                        attemptToLogException(ex, "RandomizerGUI.saveFailedIO",
+                                "RandomizerGUI.saveFailedIONoLog");
                     }
                     if (succeededSave) {
                         SwingUtilities.invokeLater(new Runnable() {
@@ -2255,7 +2328,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
                                 if (raceMode) {
                                     JOptionPane.showMessageDialog(RandomizerGUI.this,
-                                            String.format(bundle.getString("RandomizerGUI.raceModeCheckValuePopup"),
+                                            String.format(bundle.getString(
+                                                    "RandomizerGUI.raceModeCheckValuePopup"),
                                                     finishedCV.get()));
                                 } else {
                                     int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
@@ -2263,17 +2337,21 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                             bundle.getString("RandomizerGUI.saveLogDialog.title"),
                                             JOptionPane.YES_NO_OPTION);
                                     if (response == JOptionPane.YES_OPTION) {
-                                                // Print ftl log
+                                        // Print ftl log
                                         try {
-                                            Writer file = new FileWriter (new File(filename + ".log.htm"));
-                                            romHandler.getTemplate().process(romHandler.getTemplateData(), file); 
+                                            Writer file =
+                                                    new FileWriter(new File(filename + ".log.htm"));
+                                            romHandler.getTemplate()
+                                                    .process(romHandler.getTemplateData(), file);
                                         } catch (IOException | TemplateException e) {
-                                            JOptionPane.showMessageDialog(RandomizerGUI.this,
-                                                    bundle.getString("RandomizerGUI.logSaveFailed"));
+                                            JOptionPane.showMessageDialog(RandomizerGUI.this, bundle
+                                                    .getString("RandomizerGUI.logSaveFailed"));
                                             return;
                                         }
                                         JOptionPane.showMessageDialog(RandomizerGUI.this,
-                                                String.format(bundle.getString("RandomizerGUI.logSaved"), filename));
+                                                String.format(
+                                                        bundle.getString("RandomizerGUI.logSaved"),
+                                                        filename));
                                     }
                                 }
                                 if (presetMode) {
@@ -2287,10 +2365,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                     try {
                                         String configString = getCurrentSettings().toString();
                                         // Show the preset maker
-                                        new PresetMakeDialog(RandomizerGUI.this, seed, configString);
+                                        new PresetMakeDialog(RandomizerGUI.this, seed,
+                                                configString);
                                     } catch (IOException ex) {
-                                        JOptionPane.showMessageDialog(RandomizerGUI.this,
-                                                bundle.getString("RandomizerGUI.cantLoadCustomNames"));
+                                        JOptionPane.showMessageDialog(RandomizerGUI.this, bundle
+                                                .getString("RandomizerGUI.cantLoadCustomNames"));
                                     }
 
                                     // Done
@@ -2340,14 +2419,17 @@ public class RandomizerGUI extends javax.swing.JFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File fh = romSaveChooser.getSelectedFile();
                 // Fix or add extension
-                List<String> extensions = new ArrayList<String>(Arrays.asList("sgb", "gbc", "gba", "nds"));
+                List<String> extensions =
+                        new ArrayList<String>(Arrays.asList("sgb", "gbc", "gba", "nds"));
                 extensions.remove(this.romHandler.getDefaultExtension());
-                fh = FileFunctions.fixFilename(fh, this.romHandler.getDefaultExtension(), extensions);
+                fh = FileFunctions.fixFilename(fh, this.romHandler.getDefaultExtension(),
+                        extensions);
                 boolean allowed = true;
                 if (this.romHandler instanceof AbstractDSRomHandler) {
                     String currentFN = this.romHandler.loadedFilename();
                     if (currentFN.equals(fh.getAbsolutePath())) {
-                        JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.cantOverwriteDS"));
+                        JOptionPane.showMessageDialog(this,
+                                bundle.getString("RandomizerGUI.cantOverwriteDS"));
                         allowed = false;
                     }
                 }
@@ -2369,11 +2451,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
     }
 
-    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey) {
+    private void attemptToLogException(Exception ex, String baseMessageKey,
+            String noLogMessageKey) {
         attemptToLogException(ex, baseMessageKey, noLogMessageKey, false);
     }
 
-    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey, boolean showMessage) {
+    private void attemptToLogException(Exception ex, String baseMessageKey, String noLogMessageKey,
+            boolean showMessage) {
 
         // Make sure the operation dialog doesn't show up over the error
         // dialog
@@ -2397,7 +2481,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     ps.println("ROM: " + romHandler.getROMName());
                     ps.println("Code: " + romHandler.getROMCode());
                     ps.println("Reported Support Level: " + romHandler.getSupportLevel());
-                    ps.println("Settings String: " + Settings.VERSION + getCurrentSettings().toString());
+                    ps.println("Settings String: " + Settings.VERSION
+                            + getCurrentSettings().toString());
                     ps.println("Random Seed: " + RandomSource.getSeed());
                     ps.println();
                 } catch (Exception ex2) {
@@ -2411,11 +2496,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this,
                         String.format(bundle.getString(baseMessageKey), ex.getMessage(), errlog));
             } else {
-                JOptionPane.showMessageDialog(this, String.format(bundle.getString(baseMessageKey), errlog));
+                JOptionPane.showMessageDialog(this,
+                        String.format(bundle.getString(baseMessageKey), errlog));
             }
         } catch (Exception logex) {
             if (showMessage) {
-                JOptionPane.showMessageDialog(this, String.format(bundle.getString(noLogMessageKey), ex.getMessage()));
+                JOptionPane.showMessageDialog(this,
+                        String.format(bundle.getString(noLogMessageKey), ex.getMessage()));
             } else {
                 JOptionPane.showMessageDialog(this, bundle.getString(noLogMessageKey));
             }
@@ -2452,9 +2539,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void toggleAutoUpdatesMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleAutoUpdatesMenuItemActionPerformed
         autoUpdateEnabled = !autoUpdateEnabled;
         if (autoUpdateEnabled) {
-            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.autoUpdateEnabled"));
+            JOptionPane.showMessageDialog(this,
+                    bundle.getString("RandomizerGUI.autoUpdateEnabled"));
         } else {
-            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.autoUpdateDisabled"));
+            JOptionPane.showMessageDialog(this,
+                    bundle.getString("RandomizerGUI.autoUpdateDisabled"));
         }
         attemptWriteConfig();
     }// GEN-LAST:event_toggleAutoUpdatesMenuItemActionPerformed
@@ -2466,10 +2555,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void toggleScrollPaneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_toggleScrollPaneMenuItemActionPerformed
         int response = JOptionPane.showConfirmDialog(RandomizerGUI.this,
                 bundle.getString("RandomizerGUI.displayModeChangeDialog.text"),
-                bundle.getString("RandomizerGUI.displayModeChangeDialog.title"), JOptionPane.YES_NO_OPTION);
+                bundle.getString("RandomizerGUI.displayModeChangeDialog.title"),
+                JOptionPane.YES_NO_OPTION);
         if (response == JOptionPane.YES_OPTION) {
             useScrollPaneMode = !useScrollPaneMode;
-            JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.displayModeChanged"));
+            JOptionPane.showMessageDialog(this,
+                    bundle.getString("RandomizerGUI.displayModeChanged"));
             attemptWriteConfig();
             System.exit(0);
         }
@@ -2496,24 +2587,30 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 initialFormState();
                 romLoaded();
                 Settings.TweakForROMFeedback feedback = settings.tweakForRom(this.romHandler);
-                if (feedback.isChangedStarter() && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
-                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.starterUnavailable"));
+                if (feedback.isChangedStarter()
+                        && settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
+                    JOptionPane.showMessageDialog(this,
+                            bundle.getString("RandomizerGUI.starterUnavailable"));
                 }
                 this.restoreStateFromSettings(settings);
 
                 if (settings.isUpdatedFromOldVersion()) {
                     // show a warning dialog, but load it
-                    JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsFileOlder"));
+                    JOptionPane.showMessageDialog(this,
+                            bundle.getString("RandomizerGUI.settingsFileOlder"));
                 }
 
-                JOptionPane.showMessageDialog(this,
-                        String.format(bundle.getString("RandomizerGUI.settingsLoaded"), fh.getName()));
+                JOptionPane.showMessageDialog(this, String
+                        .format(bundle.getString("RandomizerGUI.settingsLoaded"), fh.getName()));
             } catch (UnsupportedOperationException ex) {
-                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsFileNewer"));
+                JOptionPane.showMessageDialog(this,
+                        bundle.getString("RandomizerGUI.settingsFileNewer"));
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.invalidSettingsFile"));
+                JOptionPane.showMessageDialog(this,
+                        bundle.getString("RandomizerGUI.invalidSettingsFile"));
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsLoadFailed"));
+                JOptionPane.showMessageDialog(this,
+                        bundle.getString("RandomizerGUI.settingsLoadFailed"));
             }
         }
     }// GEN-LAST:event_loadQSButtonActionPerformed
@@ -2534,7 +2631,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 getCurrentSettings().write(fos);
                 fos.close();
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, bundle.getString("RandomizerGUI.settingsSaveFailed"));
+                JOptionPane.showMessageDialog(this,
+                        bundle.getString("RandomizerGUI.settingsSaveFailed"));
             }
         }
     }// GEN-LAST:event_saveQSButtonActionPerformed
@@ -2547,9 +2645,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
     }// GEN-LAST:event_pokeLimitBtnActionPerformed
 
-    private void spTypeFilterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spTypeFilterButtonActionPerformed
-        TypeFilterDialog tfd = new TypeFilterDialog(this, this.starterTypes,
-            this.romHandler.getTypesInGame());
+    private void spTypeFilterButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spTypeFilterButtonActionPerformed
+        TypeFilterDialog tfd =
+                new TypeFilterDialog(this, this.starterTypes, this.romHandler.getTypesInGame());
         if (tfd.pressedOK()) {
             this.starterTypes = tfd.getChoice();
             // If no types are selected and OK is pressed
@@ -2559,7 +2657,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
                 this.starterTypes = null;
             }
         }
-    }//GEN-LAST:event_spTypeFilterButtonActionPerformed
+    }// GEN-LAST:event_spTypeFilterButtonActionPerformed
 
     private void randomQSButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_randomQSButtonActionPerformed
         Settings rnd_settings = new Settings();
@@ -2776,32 +2874,32 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void pbsChangesUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesUnchangedRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_pbsChangesUnchangedRBActionPerformed
-    
-    private void ptShuffleRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ptShuffleRBActionPerformed
-        this.enableOrDisableSubControls();
-    }//GEN-LAST:event_ptShuffleRBActionPerformed
-    
-    private void pbsChangesShuffleOrderRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pbsChangesShuffleOrderRBActionPerformed
-        this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pbsChangesShuffleOrderRBActionPerformed
 
-    private void pbsChangesShuffleAllRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pbsChangesShuffleAllRBActionPerformed
+    private void ptShuffleRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_ptShuffleRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pbsChangesShuffleAllRBActionPerformed
+    }// GEN-LAST:event_ptShuffleRBActionPerformed
 
-    private void pbsChangesShuffleBSTRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pbsChangesShuffleBSTRBActionPerformed
+    private void pbsChangesShuffleOrderRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesShuffleOrderRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pbsChangesShuffleBSTRBActionPerformed
+    }// GEN-LAST:event_pbsChangesShuffleOrderRBActionPerformed
 
-    private void spBaseEvoCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spBaseEvoCBActionPerformed
+    private void pbsChangesShuffleAllRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesShuffleAllRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_spBaseEvoCBActionPerformed
+    }// GEN-LAST:event_pbsChangesShuffleAllRBActionPerformed
 
-    
+    private void pbsChangesShuffleBSTRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesShuffleBSTRBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_pbsChangesShuffleBSTRBActionPerformed
+
+    private void spBaseEvoCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spBaseEvoCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spBaseEvoCBActionPerformed
+
+
     private void pbsChangesRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesRandomRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_pbsChangesRandomRBActionPerformed
-    
+
     private void tpForceFullyEvolvedCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpForceFullyEvolvedCBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_tpForceFullyEvolvedCBActionPerformed
@@ -2825,50 +2923,50 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private void mtForceGoodDamagingCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mtForceGoodDamagingCBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_mtForceGoodDamagingCBActionPerformed
-    
-    private void ptUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ptUnchangedRBActionPerformed
-        this.enableOrDisableSubControls();
-    }//GEN-LAST:event_ptUnchangedRBActionPerformed
 
-    private void ptRetainRandomRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ptRetainRandomRBActionPerformed
+    private void ptUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_ptUnchangedRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_ptRetainRandomRBActionPerformed
+    }// GEN-LAST:event_ptUnchangedRBActionPerformed
 
-    private void ptRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ptRandomTotalRBActionPerformed
+    private void ptRetainRandomRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_ptRetainRandomRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_ptRandomTotalRBActionPerformed
+    }// GEN-LAST:event_ptRetainRandomRBActionPerformed
 
-    private void pbsFollowEvolutionsCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pbsFollowEvolutionsCBActionPerformed
+    private void ptRandomTotalRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_ptRandomTotalRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pbsFollowEvolutionsCBActionPerformed
+    }// GEN-LAST:event_ptRandomTotalRBActionPerformed
 
-    private void pbsChangesRandomUnrestrictedRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pbsChangesRandomUnrestrictedRBActionPerformed
+    private void pbsFollowEvolutionsCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsFollowEvolutionsCBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pbsChangesRandomUnrestrictedRBActionPerformed
+    }// GEN-LAST:event_pbsFollowEvolutionsCBActionPerformed
 
-    private void pbsChangesRandomCompletelyRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pbsChangesRandomCompletelyRBActionPerformed
+    private void pbsChangesRandomUnrestrictedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesRandomUnrestrictedRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pbsChangesRandomCompletelyRBActionPerformed
-    
-    private void wpARMatchTypingRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_wpARMatchTypingRBActionPerformed
-        this.enableOrDisableSubControls();
-    }//GEN-LAST:event_wpARMatchTypingRBActionPerformed
+    }// GEN-LAST:event_pbsChangesRandomUnrestrictedRBActionPerformed
 
-    private void pmsGuaranteedMovesCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pmsGuaranteedMovesCBActionPerformed
+    private void pbsChangesRandomCompletelyRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesRandomCompletelyRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_pmsGuaranteedMovesCBActionPerformed
-    
-    private void ptFollowEvosCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ptFollowEvosCBActionPerformed
-        this.enableOrDisableSubControls();
-    }//GEN-LAST:event_ptFollowEvosCBActionPerformed
+    }// GEN-LAST:event_pbsChangesRandomCompletelyRBActionPerformed
 
-    private void spBSTLimitCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spBSTLimitCBActionPerformed
+    private void wpARMatchTypingRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_wpARMatchTypingRBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_spBSTLimitCBActionPerformed
+    }// GEN-LAST:event_wpARMatchTypingRBActionPerformed
 
-    private void tpRivalCarriesStarterCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tpRivalCarriesStarterCBActionPerformed
+    private void pmsGuaranteedMovesCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pmsGuaranteedMovesCBActionPerformed
         this.enableOrDisableSubControls();
-    }//GEN-LAST:event_tpRivalCarriesStarterCBActionPerformed
+    }// GEN-LAST:event_pmsGuaranteedMovesCBActionPerformed
+
+    private void ptFollowEvosCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_ptFollowEvosCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_ptFollowEvosCBActionPerformed
+
+    private void spBSTLimitCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_spBSTLimitCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_spBSTLimitCBActionPerformed
+
+    private void tpRivalCarriesStarterCBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_tpRivalCarriesStarterCBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_tpRivalCarriesStarterCBActionPerformed
 
     /* @formatter:off */
     /**

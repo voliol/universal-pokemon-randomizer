@@ -37,8 +37,7 @@ public class Gen5Test {
     Map<Pokemon, List<MoveLearnt>> movesList;
 
     /**
-     * When altering starters, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering starters, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -53,8 +52,7 @@ public class Gen5Test {
     }
 
     /**
-     * When altering starters, make sure the ROM's text is updated when it is a
-     * Black 2/White 2 ROM
+     * When altering starters, make sure the ROM's text is updated when it is a Black 2/White 2 ROM
      * 
      * @throws IOException
      */
@@ -62,15 +60,15 @@ public class Gen5Test {
     public void TestBW2StarterText() throws IOException {
         Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
         resetDataModel(romhandler);
-        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black 2 (U)")).when(romhandler).getRomEntry();
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black 2 (U)")).when(romhandler)
+                .getRomEntry();
         romhandler.setStarters(pokemonList.subList(0, 3));
         verify(mockTextHandler, times(0)).bw1StarterTextModifications(any());
         verify(mockTextHandler, times(1)).bw2StarterTextModifications(any());
     }
 
     /**
-     * When altering statics, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering statics, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -86,8 +84,7 @@ public class Gen5Test {
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -99,19 +96,21 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1StriatonCityTextModifications(isNotNull());
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is altered when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is altered when it is a Black/White ROM
+     * 
      * @throws IOException
      */
     @Test
@@ -122,19 +121,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNull(), any());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1NacreneCityTextModifications(isNotNull(), any());
     }
 
     /**
-     * When altering starters, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering starters, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -148,8 +148,7 @@ public class Gen5Test {
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -161,19 +160,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityPraiseTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityPraiseTextModifications(isNotNull());
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -185,19 +185,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityBurghTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CasteliaCityBurghTextModifications(isNotNull());
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -209,19 +210,21 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CherenBurghTextModifications(isNotNull());
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is altered when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is altered when it is a Black/White ROM
+     * 
      * @throws IOException
      */
     @Test
@@ -232,19 +235,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1NimbasaCityTextModifications(isNull(), any());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1NimbasaCityTextModifications(isNotNull(), any());
-    }  
-    
+    }
+
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -256,19 +260,21 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1JuniperTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1JuniperTextModifications(isNotNull());
     }
 
     /**
-     * When altering trainers, make sure the ROM's text is altered when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is altered when it is a Black/White ROM
+     * 
      * @throws IOException
      */
     @Test
@@ -279,19 +285,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1DriftveilCityTextModifications(isNull(), any());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1DriftveilCityTextModifications(isNotNull(), any());
     }
-    
+
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -303,19 +310,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1MistraltonCityTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1MistraltonCityTextModifications(isNotNull());
-    }    
+    }
 
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -327,19 +335,20 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1PinwheelForestTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1PinwheelForestTextModifications(isNotNull());
-    }  
+    }
 
     /**
-     * When altering trainers, make sure the ROM's text is updated when it is a
-     * Black/White ROM
+     * When altering trainers, make sure the ROM's text is updated when it is a Black/White ROM
      * 
      * @throws IOException
      */
@@ -351,19 +360,21 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(0xFFFF).when(romhandler).readWord(any(), anyInt());
         doReturn(pokemonList.subList(0, 3)).when(romhandler).getStarters();
-        
+
         // Verify with random team
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CelestialTowerTextModifications(isNull());
 
         // Verify with type theming
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true, false, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, true,
+                false, false, 0);
         verify(mockTextHandler, times(1)).bw1CelestialTowerTextModifications(isNotNull());
-    }  
-            
+    }
+
     /**
-     * Test Gen5 change methods only includes methods available in Gen5
-     * Also verify no duplicate methods used, and no invalid evolutions
+     * Test Gen5 change methods only includes methods available in Gen5 Also verify no duplicate
+     * methods used, and no invalid evolutions
      * 
      * @throws IOException
      */
@@ -373,7 +384,7 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
         romhandler.getPokemon().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
@@ -381,9 +392,12 @@ public class Gen5Test {
             ArrayList<Integer> usedPokemon = new ArrayList<Integer>();
             ArrayList<Integer> usedMoves = new ArrayList<Integer>();
             pk.evolutionsFrom.forEach(evo -> {
-                assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
-                assertTrue(evo.type + " was not available in Gen 5", EvolutionType.isInGeneration(5, evo.type));
-                assertFalse(evo.type + " should be removed", EvolutionType.isOfType("Banned", evo.type));
+                assertTrue("Evolution is invalid - " + evo,
+                        evo.type != null && evo.type != EvolutionType.NONE);
+                assertTrue(evo.type + " was not available in Gen 5",
+                        EvolutionType.isInGeneration(5, evo.type));
+                assertFalse(evo.type + " should be removed",
+                        EvolutionType.isOfType("Banned", evo.type));
 
                 // Collect the method
                 if (EvolutionType.isOfType("Stone", evo.type)) {
@@ -401,26 +415,26 @@ public class Gen5Test {
 
             // Verify no duplicates
             HashSet<EvolutionType> uniqueMethods = new HashSet<EvolutionType>(usedMethods);
-            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()), 
-                uniqueMethods.size() == usedMethods.size());
+            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()),
+                    uniqueMethods.size() == usedMethods.size());
             HashSet<Integer> uniqueStones = new HashSet<Integer>(usedStones);
-            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()), 
+            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()),
                     uniqueStones.size() == usedStones.size());
             HashSet<Integer> uniqueItems = new HashSet<Integer>(usedItems);
-            assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()), 
+            assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()),
                     uniqueItems.size() == usedItems.size());
             HashSet<Integer> uniquePokemon = new HashSet<Integer>(usedPokemon);
-            assertTrue("Duplicate pokemon detected - " + Arrays.toString(usedPokemon.toArray()), 
+            assertTrue("Duplicate pokemon detected - " + Arrays.toString(usedPokemon.toArray()),
                     uniquePokemon.size() == usedPokemon.size());
             HashSet<Integer> uniqueMoves = new HashSet<Integer>(usedMoves);
-            assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()), 
+            assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()),
                     uniqueMoves.size() == usedMoves.size());
         });
     }
 
     /**
-     * Test Gen5 change methods is correctly affected by remvoe impossible evos
-     * Also verify no duplicate methods used, and no invalid evolutions
+     * Test Gen5 change methods is correctly affected by remvoe impossible evos Also verify no
+     * duplicate methods used, and no invalid evolutions
      * 
      * @throws IOException
      */
@@ -430,7 +444,7 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
         romhandler.removeTradeEvolutions(false, true);
         romhandler.getPokemon().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
@@ -438,20 +452,24 @@ public class Gen5Test {
             ArrayList<Integer> usedItems = new ArrayList<Integer>();
             ArrayList<Integer> usedPokemon = new ArrayList<Integer>();
             ArrayList<Integer> usedMoves = new ArrayList<Integer>();
-            HashMap<Integer, ArrayList<EvolutionType>> itemEvos = new HashMap<Integer, ArrayList<EvolutionType>>();
+            HashMap<Integer, ArrayList<EvolutionType>> itemEvos =
+                    new HashMap<Integer, ArrayList<EvolutionType>>();
             pk.evolutionsFrom.forEach(evo -> {
-                assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
-                assertTrue(evo.type + " was not available in Gen 5", EvolutionType.isInGeneration(5, evo.type));
-                assertFalse(evo.type + " should be removed", EvolutionType.isOfType("Trade", evo.type) 
-                || EvolutionType.isOfType("Banned", evo.type));
+                assertTrue("Evolution is invalid - " + evo,
+                        evo.type != null && evo.type != EvolutionType.NONE);
+                assertTrue(evo.type + " was not available in Gen 5",
+                        EvolutionType.isInGeneration(5, evo.type));
+                assertFalse(evo.type + " should be removed",
+                        EvolutionType.isOfType("Trade", evo.type)
+                                || EvolutionType.isOfType("Banned", evo.type));
 
                 // Collect the method
                 if (EvolutionType.isOfType("Stone", evo.type)) {
                     usedStones.add(evo.extraInfo);
                 } else if (EvolutionType.isOfType("Item", evo.type)) {
                     usedItems.add(evo.extraInfo);
-                    ArrayList<EvolutionType> etList = itemEvos.getOrDefault(evo.extraInfo, 
-                        new ArrayList<EvolutionType>());
+                    ArrayList<EvolutionType> etList =
+                            itemEvos.getOrDefault(evo.extraInfo, new ArrayList<EvolutionType>());
                     etList.add(evo.type);
                     itemEvos.put(evo.extraInfo, etList);
                 } else if (EvolutionType.isOfType("Party", evo.type)) {
@@ -465,16 +483,16 @@ public class Gen5Test {
 
             // Verify no duplicates
             HashSet<EvolutionType> uniqueMethods = new HashSet<EvolutionType>(usedMethods);
-            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()), 
-                uniqueMethods.size() == usedMethods.size());
+            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()),
+                    uniqueMethods.size() == usedMethods.size());
             HashSet<Integer> uniqueStones = new HashSet<Integer>(usedStones);
-            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()), 
+            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()),
                     uniqueStones.size() == usedStones.size());
             HashSet<Integer> uniquePokemon = new HashSet<Integer>(usedPokemon);
-            assertTrue("Duplicate pokemon detected - " + Arrays.toString(usedPokemon.toArray()), 
+            assertTrue("Duplicate pokemon detected - " + Arrays.toString(usedPokemon.toArray()),
                     uniquePokemon.size() == usedPokemon.size());
             HashSet<Integer> uniqueMoves = new HashSet<Integer>(usedMoves);
-            assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()), 
+            assertTrue("Duplicate move detected - " + Arrays.toString(usedMoves.toArray()),
                     uniqueMoves.size() == usedMoves.size());
 
             // Check if any item duplicates correspond to Night/Day Item
@@ -483,11 +501,11 @@ public class Gen5Test {
             // - More than 1 item may be duplicated
             // - An item can have more than 2 copies
             // - The only acceptable occurrence is if there is exactly 1 LEVEL_ITEM_NIGHT and
-            //   exactly 1 LEVEL_ITEM_DAY. 
+            // exactly 1 LEVEL_ITEM_DAY.
             HashSet<Integer> uniqueItems = new HashSet<Integer>(usedItems);
-            if(uniqueItems.size() != usedItems.size()) {
+            if (uniqueItems.size() != usedItems.size()) {
                 // Remove uniques, leaving only duplicates
-                for(Integer i : uniqueItems) {
+                for (Integer i : uniqueItems) {
                     usedItems.remove(usedItems.indexOf(i));
                 }
 
@@ -495,15 +513,18 @@ public class Gen5Test {
                 HashSet<Integer> dupsToCheck = new HashSet<Integer>(usedItems);
 
                 // Check each duplicate item if it conforms to acceptable criteria
-                for(Integer j : dupsToCheck) {
+                for (Integer j : dupsToCheck) {
                     // Get the list of evolution types that use this item
                     List<EvolutionType> typeWithItem = itemEvos.get(j);
 
-                    // Cannot be more than length 2 and must contain LEVEL_ITEM_DAY and LEVEL_ITEM_NIGHT
-                    assertTrue("Duplicate items detected - Item " + j + " is used by " 
-                        + Arrays.toString(typeWithItem.toArray()), 
-                        typeWithItem.size() == 2 && typeWithItem.contains(EvolutionType.LEVEL_ITEM_DAY)
-                        && typeWithItem.contains(EvolutionType.LEVEL_ITEM_NIGHT)); 
+                    // Cannot be more than length 2 and must contain LEVEL_ITEM_DAY and
+                    // LEVEL_ITEM_NIGHT
+                    assertTrue(
+                            "Duplicate items detected - Item " + j + " is used by "
+                                    + Arrays.toString(typeWithItem.toArray()),
+                            typeWithItem.size() == 2
+                                    && typeWithItem.contains(EvolutionType.LEVEL_ITEM_DAY)
+                                    && typeWithItem.contains(EvolutionType.LEVEL_ITEM_NIGHT));
                 }
             }
         });
@@ -511,6 +532,7 @@ public class Gen5Test {
 
     /**
      * Test trainer random held item gives pokemon valid items
+     * 
      * @throws IOException
      */
     @Test
@@ -519,11 +541,12 @@ public class Gen5Test {
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                true, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
-                assertTrue(tp.heldItem + " was not in Gen 5 allowed items.", 
-                    Gen5Constants.trainerItemList.isAllowed(tp.heldItem));
+                assertTrue(tp.heldItem + " was not in Gen 5 allowed items.",
+                        Gen5Constants.trainerItemList.isAllowed(tp.heldItem));
             }
         }
     }
@@ -542,14 +565,14 @@ public class Gen5Test {
             Pokemon pk = new Pokemon();
             pk.number = i;
             pk.name = "";
-            pk.primaryType = Type.values()[i%Type.values().length];
+            pk.primaryType = Type.values()[i % Type.values().length];
             pokemonList.add(pk);
             for (int j = 0; j < i % 3; j++) {
                 Evolution ev = new Evolution(pk, new Pokemon(), false, EvolutionType.LEVEL, 1);
                 pk.evolutionsFrom.add(ev);
             }
         }
-        for(String tag: new String[]{"GYM1", "CILAN", "CHILI", "CRESS"}) {
+        for (String tag : new String[] {"GYM1", "CILAN", "CHILI", "CRESS"}) {
             Trainer t = new Trainer();
             t.setTag(tag);
             TrainerPokemon tp1 = mock(TrainerPokemon.class);
@@ -569,10 +592,10 @@ public class Gen5Test {
             trainerList.add(t);
         }
         for (int i = 0; i < GET_FILE_LENGTH; i++) {
-            mlList.add(new byte[] { (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF });
+            mlList.add(new byte[] {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF});
         }
 
-        for(int i = 0; i < pokemonList.size(); i++) {
+        for (int i = 0; i < pokemonList.size(); i++) {
             ArrayList<MoveLearnt> pMoveList = new ArrayList<MoveLearnt>();
             MoveLearnt ml = new MoveLearnt();
             ml.move = 1;
@@ -615,5 +638,5 @@ public class Gen5Test {
         doNothing().when(romhandler).writeLong(any(), anyInt(), anyInt());
         doReturn(movesList).when(romhandler).getMovesLearnt();
     }
-    
+
 }
