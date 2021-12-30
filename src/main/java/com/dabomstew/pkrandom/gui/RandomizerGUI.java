@@ -1515,18 +1515,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.tpNoLegendariesCB.setSelected(false);
             this.tpNoEarlyShedinjaCB.setEnabled(false);
             this.tpNoEarlyShedinjaCB.setSelected(false);
-            this.tpForceFullyEvolvedCB.setEnabled(false);
-            this.tpForceFullyEvolvedCB.setSelected(false);
-            this.tpLevelModifierCB.setEnabled(false);
-            this.tpLevelModifierCB.setSelected(false);
             this.tpBuffEliteCB.setEnabled(false);
             this.tpBuffEliteCB.setSelected(false);
         } else {
             this.tpPowerLevelsCB.setEnabled(true);
             this.tpNoLegendariesCB.setEnabled(true);
             this.tpNoEarlyShedinjaCB.setEnabled(true);
-            this.tpForceFullyEvolvedCB.setEnabled(true);
-            this.tpLevelModifierCB.setEnabled(true);
             this.tpBuffEliteCB.setEnabled(true);
         }
 
@@ -1764,7 +1758,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         if (this.peRandomRB.isSelected()) {
             this.peForceChangeCB.setEnabled(true);
-            this.peThreeStagesCB.setEnabled(true);
             this.peSameTypeCB.setEnabled(true);
             this.peSimilarStrengthCB.setEnabled(true);
             this.peForceGrowthCB.setEnabled(true);
@@ -1774,8 +1767,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
         } else {
             this.peForceChangeCB.setEnabled(false);
             this.peForceChangeCB.setSelected(false);
-            this.peThreeStagesCB.setEnabled(false);
-            this.peThreeStagesCB.setSelected(false);
             this.peSameTypeCB.setEnabled(false);
             this.peSameTypeCB.setSelected(false);
             this.peSimilarStrengthCB.setEnabled(false);
@@ -1788,6 +1779,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peChangeMethodsCB.setSelected(false);
             this.peEvolveLv1CB.setEnabled(false);
             this.peEvolveLv1CB.setSelected(false);
+        }
+
+        if (this.peEvolveLv1CB.isSelected() || !this.peEvolveLv1CB.isEnabled()) {
+            this.peThreeStagesCB.setEnabled(false);
+            this.peThreeStagesCB.setSelected(false);
+        } else {
+            this.peThreeStagesCB.setEnabled(true);
         }
 
         uiUpdated = true;
@@ -2871,6 +2869,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_peRandomRBActionPerformed
 
+    private void peEvolveLv1CBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_peEvolveLv1CBActionPerformed
+        this.enableOrDisableSubControls();
+    }// GEN-LAST:event_peEvolveLv1CBActionPerformed
+
     private void pbsChangesUnchangedRBActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pbsChangesUnchangedRBActionPerformed
         this.enableOrDisableSubControls();
     }// GEN-LAST:event_pbsChangesUnchangedRBActionPerformed
@@ -3746,12 +3748,15 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         peSimilarStrengthCB.setText(bundle.getString("RandomizerGUI.peSimilarStrengthCB.text")); // NOI18N
         peSimilarStrengthCB.setToolTipText(bundle.getString("RandomizerGUI.peSimilarStrengthCB.toolTipText")); // NOI18N
+        peSimilarStrengthCB.setName(bundle.getString("RandomizerGUI.peSimilarStrengthCB.name")); // NOI18N
 
         peSameTypeCB.setText(bundle.getString("RandomizerGUI.peSameTypeCB.text")); // NOI18N
         peSameTypeCB.setToolTipText(bundle.getString("RandomizerGUI.peSameTypeCB.toolTipText")); // NOI18N
+        peSameTypeCB.setName(bundle.getString("RandomizerGUI.peSameTypeCB.name")); // NOI18N
 
         peThreeStagesCB.setText(bundle.getString("RandomizerGUI.peThreeStagesCB.text")); // NOI18N
         peThreeStagesCB.setToolTipText(bundle.getString("RandomizerGUI.peThreeStagesCB.toolTipText")); // NOI18N
+        peThreeStagesCB.setName(bundle.getString("RandomizerGUI.peThreeStagesCB.name")); // NOI18N
 
         peForceChangeCB.setText(bundle.getString("RandomizerGUI.peForceChangeCB.text")); // NOI18N
         peForceChangeCB.setToolTipText(bundle.getString("RandomizerGUI.peForceChangeCB.toolTipText")); // NOI18N
@@ -3769,6 +3774,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         peNoConvergeCB.setText(bundle.getString("RandomizerGUI.peNoConvergeCB.text")); // NOI18N
         peNoConvergeCB.setToolTipText(bundle.getString("RandomizerGUI.peNoConvergeCB.toolTipText")); // NOI18N
+        peNoConvergeCB.setName(bundle.getString("RandomizerGUI.peNoConvergeCB.name")); // NOI18N
 
         peForceGrowthCB.setText(bundle.getString("RandomizerGUI.peForceGrowthCB.text")); // NOI18N
         peForceGrowthCB.setToolTipText(bundle.getString("RandomizerGUI.peForceGrowthCB.toolTipText")); // NOI18N
@@ -3781,6 +3787,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         peEvolveLv1CB.setText(bundle.getString("RandomizerGUI.peEvolveLv1CB.text")); // NOI18N
         peEvolveLv1CB.setToolTipText(bundle.getString("RandomizerGUI.peEvolveLv1CB.toolTipText")); // NOI18N
         peEvolveLv1CB.setName(bundle.getString("RandomizerGUI.peEvolveLv1CB.name")); // NOI18N
+        peEvolveLv1CB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                peEvolveLv1CBActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pokemonEvolutionsPanelLayout = new javax.swing.GroupLayout(pokemonEvolutionsPanel);
         pokemonEvolutionsPanel.setLayout(pokemonEvolutionsPanelLayout);
@@ -4449,6 +4460,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         tpForceFullyEvolvedCB.setText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.text")); // NOI18N
         tpForceFullyEvolvedCB.setToolTipText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.toolTipText")); // NOI18N
+        tpForceFullyEvolvedCB.setName(bundle.getString("RandomizerGUI.tpForceFullyEvolvedCB.name")); // NOI18N
         tpForceFullyEvolvedCB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tpForceFullyEvolvedCBActionPerformed(evt);
@@ -4463,9 +4475,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpForceFullyEvolvedSlider.setPaintTicks(true);
         tpForceFullyEvolvedSlider.setToolTipText(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.toolTipText")); // NOI18N
         tpForceFullyEvolvedSlider.setValue(30);
+        tpForceFullyEvolvedSlider.setName(bundle.getString("RandomizerGUI.tpForceFullyEvolvedSlider.name")); // NOI18N
 
         tpLevelModifierCB.setText(bundle.getString("RandomizerGUI.tpLevelModifierCB.text")); // NOI18N
         tpLevelModifierCB.setToolTipText(bundle.getString("RandomizerGUI.tpLevelModifierCB.toolTipText")); // NOI18N
+        tpLevelModifierCB.setName(bundle.getString("RandomizerGUI.tpLevelModifierCB.name")); // NOI18N
         tpLevelModifierCB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tpLevelModifierCBActionPerformed(evt);
@@ -4480,6 +4494,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         tpLevelModifierSlider.setPaintTicks(true);
         tpLevelModifierSlider.setToolTipText(bundle.getString("RandomizerGUI.tpLevelModifierSlider.toolTipText")); // NOI18N
         tpLevelModifierSlider.setValue(0);
+        tpLevelModifierSlider.setName(bundle.getString("RandomizerGUI.tpLevelModifierSlider.name")); // NOI18N
 
         tpRivalCarriesTeamCB.setText(bundle.getString("RandomizerGUI.tpRivalCarriesTeamCB.text")); // NOI18N
         tpRivalCarriesTeamCB.setToolTipText(bundle.getString("RandomizerGUI.tpRivalCarriesTeamCB.toolTipText")); // NOI18N

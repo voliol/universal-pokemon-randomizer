@@ -672,6 +672,7 @@ public class Randomizer {
 
     private void maybeLogTrainerChanges(final RomHandler romHandler) {
         if (settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
+                || settings.isTrainersForceFullyEvolved() || settings.isTrainersLevelModified()
                 || settings.isRivalCarriesStarterThroughout()
                 || settings.isTrainersRandomHeldItem()) {
             romHandler.getTemplateData().put("originalTrainers", originalTrainers);

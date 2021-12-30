@@ -1183,6 +1183,9 @@
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peSimilarStrengthCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peSimilarStrengthCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="peSameTypeCB">
@@ -1193,6 +1196,9 @@
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peSameTypeCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peSameTypeCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="peThreeStagesCB">
@@ -1202,6 +1208,9 @@
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peThreeStagesCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peThreeStagesCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -1246,6 +1255,9 @@
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peNoConvergeCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peNoConvergeCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="peForceGrowthCB">
@@ -1284,6 +1296,9 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peEvolveLv1CB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="peEvolveLv1CBActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
@@ -2547,6 +2562,9 @@
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpForceFullyEvolvedCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpForceFullyEvolvedCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tpForceFullyEvolvedCBActionPerformed"/>
@@ -2568,6 +2586,9 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpForceFullyEvolvedSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="value" type="int" value="30"/>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpForceFullyEvolvedSlider.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="tpLevelModifierCB">
@@ -2577,6 +2598,9 @@
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
                   <Events>
@@ -2599,6 +2623,9 @@
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierSlider.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="value" type="int" value="0"/>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.tpLevelModifierSlider.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="tpRivalCarriesTeamCB">

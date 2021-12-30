@@ -1,11 +1,9 @@
-Magikarp Mode (everything is magikarp, everyone has hyper beam, and all text is changed to MAGIKARP)
-Everything evolves at level 1 (constant evolution)
-Unit Tests use common data model
+* Everything evolves at level 1 (constant evolution)
+* Fix trainer level modifier to be enabled regardless of whether unchanged is selected for trainer mod
 Investigate AI level increase / change
 Investigate EV/IV application
 Investigate Shiny rate
 Remove Rotom from legendary pool
-Fix trainer level modifier to be enabled regardless of whether unchanged is selected for trainer mod
 Fix Platinum Battle Tower rival not sharing team when "Carries Team" is active (teams #923, #924 and #925)
 Fix AllowLowLevelEvolutions setting so it actually toggles the filtering
 Gen 4/Gen 5 multiple LEVEL_ITEM_DAY should ensure items are different
@@ -24,6 +22,7 @@ randomizable_809 ROM support for Fairy type (maybe just set fairy to 0x17, ideal
 Move ROMEntry to separate Class
 Move RomHandler state to Model Class
 Change Settings toString and fromString to refer to a separate list. Try to make saving options easier when adding new options
+Unit Tests use common data model
 Gen4 Trades should use new pokemon (still uses old pokemon)
 Gen4 leader TM should use new names
 TM text updates for Gen 5 (use new names)
@@ -32,6 +31,7 @@ Gym leader / E4 pokemon should have better movesets (2 moves same type max, 1 st
 Trainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 Signature Move - All leaders have a signature move on all pokes (same as TM?)
 Type by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
+Magikarp Mode (everything is magikarp, everyone has hyper beam, and all text is changed to MAGIKARP)
 RSE Gen 3 - Patch both Arco and Mach
 Redo code to use PokemonSet
 Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)

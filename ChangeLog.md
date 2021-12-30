@@ -125,3 +125,4 @@
 - All pokemon can evolve at level 1
   - If `Change Methods` is chosen, all pokemon will evolve with a random method and level evolutions will NOT be at 1
   - Evolution paths in the log will only display pokemon where nothing evolves into them
+- `Force Fully Evolved` and `Modify Trainer Level` are available to use regardless of trainer option selected

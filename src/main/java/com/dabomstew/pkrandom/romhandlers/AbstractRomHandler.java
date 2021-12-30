@@ -1444,7 +1444,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
-    // This is left empty so that subclasses can define if any test needs
+    // This is left empty so that subclasses can define if any text needs
     // to be modified based on the new gym types
     @Override
     public void modifyTrainerText(Map taggedTypes) {}

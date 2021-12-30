@@ -1511,6 +1511,73 @@ public class AbstractRomTest {
         }
     }
 
+    @Test
+    public void TestForceTrainerFullyEvolved() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        int forceEvoLevel = 30;
+        resetDataModel(romhandler);
+        romhandler.forceFullyEvolvedTrainerPokes(forceEvoLevel);
+        for (Trainer t : romhandler.getTrainers()) {
+            for (TrainerPokemon tp : t.getPokemon()) {
+                if (tp.getLevel() >= forceEvoLevel) {
+                    assertTrue(
+                            "Pokemon " + tp.getPokemon().getNumber() + " had level " + tp.getLevel()
+                                    + " but had evolutions remaining",
+                            tp.getPokemon().evolutionsFrom.size() == 0);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void TestTrainerLevelModified() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        int levelMod = 30;
+        resetDataModel(romhandler);
+        // Cache original trainers
+        ArrayList<Trainer> originalTrainers = new ArrayList<>();
+        for (Trainer t : romhandler.getTrainers()) {
+            originalTrainers.add(new Trainer(t));
+        }
+
+        // Without trainer randomization
+        romhandler.modifyTrainerPokes(false, levelMod);
+        for (int i = 0; i < romhandler.getTrainers().size(); i++) {
+            Trainer newT = romhandler.getTrainers().get(i);
+            Trainer oldT = originalTrainers.get(i);
+            for (int j = 0; j < newT.getPokemon().size(); j++) {
+                TrainerPokemon newTp = newT.getPokemon().get(j);
+                TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                assertTrue(
+                        "Pokemon " + newTp.getPokemon().getNumber() + " had level "
+                                + newTp.getLevel() + " but originally had " + oldTp.getLevel(),
+                        newTp.getLevel() > oldTp.getLevel());
+            }
+        }
+
+        // With trainer randomization
+        resetDataModel(romhandler);
+        // Cache original trainers
+        originalTrainers = new ArrayList<>();
+        for (Trainer t : romhandler.getTrainers()) {
+            originalTrainers.add(new Trainer(t));
+        }
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                false, false, levelMod);
+        for (int i = 0; i < romhandler.getTrainers().size(); i++) {
+            Trainer newT = romhandler.getTrainers().get(i);
+            Trainer oldT = originalTrainers.get(i);
+            for (int j = 0; j < newT.getPokemon().size(); j++) {
+                TrainerPokemon newTp = newT.getPokemon().get(j);
+                TrainerPokemon oldTp = oldT.getPokemon().get(j);
+                assertTrue(
+                        "Pokemon " + newTp.getPokemon().getNumber() + " had level "
+                                + newTp.getLevel() + " but originally had " + oldTp.getLevel(),
+                        newTp.getLevel() > oldTp.getLevel());
+            }
+        }
+    }
+
     /**
      * Function for granular modification of data model
      */
@@ -1520,18 +1587,21 @@ public class AbstractRomTest {
         startersList = new ArrayList();
         encountersList = new ArrayList();
 
-        for (int i = 0; i < Gen5Constants.pokemonCount + 1; i++) {
+        for (int i = 0, ii = -1; i < Gen5Constants.pokemonCount + 1; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
             pk.name = "";
             pk.primaryType = Type.values()[i % 17];
             pokemonList.add(pk);
             for (int j = 0; j < i % 2; j++) {
-                Evolution ev = new Evolution(pk, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                Pokemon evPk = new Pokemon();
+                evPk.number = ii--;
+                Evolution ev = new Evolution(pk, evPk, false, EvolutionType.LEVEL, 1);
                 pk.evolutionsFrom.add(ev);
                 if (i % 3 == 0) {
-                    Evolution ev2 =
-                            new Evolution(ev.to, new Pokemon(), false, EvolutionType.LEVEL, 1);
+                    Pokemon evPk2 = new Pokemon();
+                    evPk.number = ii--;
+                    Evolution ev2 = new Evolution(ev.to, evPk2, false, EvolutionType.LEVEL, 1);
                     ev.to.evolutionsFrom.add(ev2);
                 }
             }
@@ -1546,6 +1616,7 @@ public class AbstractRomTest {
                 TrainerPokemon tp = new TrainerPokemon();
                 tp.pokemon = pokemonList.get(t.getPokemon().size());
                 tp.setNickname("number" + t.getPokemon().size());
+                tp.setLevel(new Random().nextInt(45) + 5);
                 t.getPokemon().add(tp);
             }
             trainerList.add(t);
@@ -1558,6 +1629,7 @@ public class AbstractRomTest {
                 TrainerPokemon tp = new TrainerPokemon();
                 tp.pokemon = pokemonList.get(new Random().nextInt(pokemonList.size()));
                 tp.setNickname("number" + t.getPokemon().size());
+                tp.setLevel(new Random().nextInt(45) + 5);
                 t.getPokemon().add(tp);
             }
             trainerList.add(t);
