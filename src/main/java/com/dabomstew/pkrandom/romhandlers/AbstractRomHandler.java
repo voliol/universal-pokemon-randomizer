@@ -4049,6 +4049,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Skip the weakest mons of the next team
+                    // Accounts for when next team is larger or smaller
+                    // Simple subtraction results in IndexOutOfBounds
                     int listOffset = 0;
                     while (tpkNextList.size() > tpkList.size() + listOffset) {
                         listOffset++;
