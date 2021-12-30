@@ -1,9 +1,9 @@
 * Everything evolves at level 1 (constant evolution)
 * Fix trainer level modifier to be enabled regardless of whether unchanged is selected for trainer mod
-Investigate AI level increase / change
-Investigate EV/IV application
-Investigate Shiny rate
-Remove Rotom from legendary pool
+* Investigate AI level increase / change
+* Investigate EV/IV application - Based on AI. No EVs.
+* Investigate Shiny rate - Instruction set sets rate at Rate/65535, with max rate being FF (255), thus max is 1/257 or ~0.3891% - https://www.reddit.com/r/PokemonROMhacks/comments/7hrnhi/guide_how_to_change_the_shiny_rate_in_platinum/
+* Remove Rotom from legendary pool
 Fix Platinum Battle Tower rival not sharing team when "Carries Team" is active (teams #923, #924 and #925)
 Fix AllowLowLevelEvolutions setting so it actually toggles the filtering
 Gen 4/Gen 5 multiple LEVEL_ITEM_DAY should ensure items are different
@@ -28,6 +28,11 @@ Gen4 leader TM should use new names
 TM text updates for Gen 5 (use new names)
 List new item locations (where can dragonscale be found)
 Gym leader / E4 pokemon should have better movesets (2 moves same type max, 1 status move, 1 move from outside last 4 learned)
+Change AI levels for Gen 3 - 5
+-- Gen 3 4 5 only. Set under TrainerPokemon as AILevel
+-- Gen 3 - 0 to 250 (probably could do 255)
+-- Gen 4 - 0 to 250 (probably could do 255)
+-- Gen 5 - 0 to 250 (probably could do 255)
 Trainer Class Names should be gender based (Rich Boy woman not allowed) (group all trainer names and determine a 1-1 swap)
 Signature Move - All leaders have a signature move on all pokes (same as TM?)
 Type by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
