@@ -16,6 +16,7 @@ import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
+import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
@@ -528,6 +529,48 @@ public class Gen5Test {
                 }
             }
         });
+    }
+
+    /**
+     * Test potential duplicates are removed
+     * 
+     * Stone evo is based on a static RomFunction and not tested here
+     * 
+     * @throws IOException
+     */
+    @Test
+    public void TestGen5UpdateExtraInfoRemovesDuplicates() throws IOException {
+        Random random = mock(Random.class);
+        doReturn(0, 1).when(random).nextInt(anyInt());
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(random));
+        doReturn(Gen4RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
+        doReturn(0, 1).when(romhandler).randomMove(any());
+        resetDataModel(romhandler);
+
+        // Level with move
+        Evolution ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false,
+                EvolutionType.LEVEL_WITH_MOVE, 0);
+        pokemonList.get(0).evolutionsFrom.add(ev);
+        romhandler.updateExtraInfo(ev);
+        assertTrue("Level with move expected 1 but got " + ev.extraInfo, ev.extraInfo == 1);
+
+        // Level with other
+        ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false,
+                EvolutionType.LEVEL_WITH_OTHER, 0);
+        pokemonList.get(0).evolutionsFrom.add(ev);
+        romhandler.updateExtraInfo(ev);
+        assertTrue("Level with other expected 1 but got " + ev.extraInfo, ev.extraInfo == 1);
+
+        // Level/Trade with item
+        ItemList mockItems = mock(ItemList.class);
+        doReturn(0, 1).when(mockItems).randomNonTM(any());
+        doReturn(mockItems).when(romhandler).getAllowedItems();
+        ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false,
+                EvolutionType.LEVEL_ITEM_DAY, 0);
+        pokemonList.get(0).evolutionsFrom.add(ev);
+        romhandler.updateExtraInfo(ev);
+        assertTrue("Level with other expected 1 but got " + ev.extraInfo, ev.extraInfo == 1);
     }
 
     /**

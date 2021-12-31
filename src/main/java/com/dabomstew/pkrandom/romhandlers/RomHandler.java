@@ -198,6 +198,8 @@ public interface RomHandler {
         public void forceFullyEvolvedTrainerPokes(int minLevel);
 
         // Randomizer: moves
+        public int randomMove(Pokemon pk);
+
         public void randomizeMovePowers();
 
         public void randomizeMovePPs();

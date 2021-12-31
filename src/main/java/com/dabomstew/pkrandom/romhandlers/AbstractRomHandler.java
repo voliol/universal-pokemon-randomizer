@@ -541,6 +541,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public int randomMove(Pokemon pk) {
+        return this.getMovesLearnt().get(pk)
+                .get(this.random.nextInt(this.getMovesLearnt().get(pk).size())).move;
+    }
+
+    @Override
     public void randomizePokemonTypes(boolean evolutionSanity) {
         List<Pokemon> allPokes = this.getPokemon();
         if (evolutionSanity) {
