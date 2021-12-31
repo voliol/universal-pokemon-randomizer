@@ -957,7 +957,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         for (EncounterSet area : scrambledEncounters) {
             PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon)
-                    .filterByMinimumLevel(area.maximumLevel());
+                    .filterByMinimumLevel(allowLowLevelEvolvedTypes ? 100 : area.maximumLevel());
             if (areaSet.size() == 0) {
                 throw new RandomizationException("ERROR: Current bans and level requirements "
                         + "have lead to no available pokemon. Please reduce the filtering and try again.");
@@ -1015,7 +1015,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         for (EncounterSet area : scrambledEncounters) {
             PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon)
-                    .filterByMinimumLevel(area.maximumLevel());
+                    .filterByMinimumLevel(allowLowLevelEvolvedTypes ? 100 : area.maximumLevel());
             if (areaSet.size() == 0) {
                 throw new RandomizationException("ERROR: Current bans and level requirements "
                         + "have lead to no available pokemon. Please reduce the filtering and try again.");
