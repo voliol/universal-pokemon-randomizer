@@ -73,11 +73,11 @@ public class Randomizer {
         this.romHandler.getTemplateData().put("gen1", romHandler instanceof Gen1RomHandler);
 
         // limit pokemon based on generation
-        if (settings.isLimitPokemon()) {
-            romHandler.setPokemonPool(settings.getCurrentRestrictions());
+        if (settings.isLimitPokemon() || settings.getRomOptions().isRandomizeSubset()) {
+            romHandler.setPokemonPool(settings.getCurrentRestrictions(), settings.getRomOptions());
             romHandler.removeEvosForPokemonPool();
         } else {
-            romHandler.setPokemonPool(null);
+            romHandler.setPokemonPool(null, null);
         }
 
         // Gen 5/6 Move stat updates & data changes

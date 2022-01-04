@@ -1850,7 +1850,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
-        for (Pokemon pkmn : getPokemon()) {
+        for (Pokemon pkmn : getMainPokemonList()) {
             if (pkmn != null) {
                 extraEvolutions.clear();
                 pkmn.evolutionsFrom.forEach(evo -> {
@@ -1861,9 +1861,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                 // instead
                                 if (pkmn.evolutionsFrom.stream()
                                         .anyMatch(evos -> evos.type.usesLevel())) {
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen5Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen5Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     evo.extraInfo = unusedStones
                                             .get(this.random.nextInt(unusedStones.size()));
@@ -1883,9 +1882,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                 // instead
                                 if (pkmn.evolutionsFrom.stream()
                                         .anyMatch(evos -> evos.type.usesLevel())) {
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen5Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen5Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     evo.extraInfo = unusedStones
                                             .get(this.random.nextInt(unusedStones.size()));
@@ -1922,9 +1920,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                 // We can't use happiness if it's been used - use a stone instead
                                 if (evo.from.evolutionsFrom.stream().anyMatch(
                                         ev -> EvolutionType.isOfType("Happiness", ev.type))) {
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen5Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen5Constants.availableStones, evo);
                                     Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                             EvolutionType.STONE, unusedStones
                                                     .get(this.random.nextInt(unusedStones.size())));
@@ -2105,8 +2102,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             case STONE_MALE_ONLY:
             case STONE_FEMALE_ONLY:
                 // Remove any stones already used
-                List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                        new ArrayList<Integer>(Gen5Constants.availableStones), ev);
+                List<Integer> unusedStones =
+                        RomFunctions.removeUsedStones(Gen5Constants.availableStones, ev);
                 ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
                 break;
             case TRADE_ITEM:

@@ -32,6 +32,7 @@ import freemarker.template.Template;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -70,8 +71,8 @@ public interface RomHandler {
         // 0 = null 1-whatever = the Pokemon.
         public List<Pokemon> getPokemon();
 
-        // Setup Gen Restrictions.
-        public void setPokemonPool(GenRestrictions restrictions);
+        // Setup Gen Restrictions and list restrictions.
+        public void setPokemonPool(GenRestrictions restrictions, RomOptions romOptions);
 
         public void removeEvosForPokemonPool();
 

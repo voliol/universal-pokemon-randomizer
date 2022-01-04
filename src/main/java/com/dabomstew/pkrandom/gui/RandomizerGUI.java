@@ -80,6 +80,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Randomizer;
+import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.settings.Settings;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.Utils;
@@ -1833,7 +1834,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
                 try {
                     CustomNamesSet cns = FileFunctions.getCustomNames();
-                    performRandomization(fh.getAbsolutePath(), seed, cns);
+                    RomOptions ro = FileFunctions.getRomOptions();
+                    performRandomization(fh.getAbsolutePath(), seed, ro, cns);
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this,
                             bundle.getString("RandomizerGUI.cantLoadCustomNames"));
@@ -1844,7 +1846,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }
 
     public Settings getCurrentSettings() throws IOException {
-        Settings settings = createSettingsFromState(FileFunctions.getCustomNames());
+        Settings settings = createSettingsFromState(FileFunctions.getRomOptions(),
+                FileFunctions.getCustomNames());
         return settings;
     }
 
@@ -2114,7 +2117,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.enableOrDisableSubControls();
     }
 
-    private Settings createSettingsFromState(CustomNamesSet customNames) {
+    private Settings createSettingsFromState(RomOptions romOptions, CustomNamesSet customNames) {
         Settings settings = new Settings();
         settings.setRomName(getRomHandler().getROMName());
         settings.setChangeImpossibleEvolutions(goRemoveTradeEvosCheckBox.isSelected());
@@ -2273,12 +2276,14 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         settings.setCustomNames(customNames);
 
+        settings.setRomOptions(romOptions);
+
         return settings;
     }
 
-    private void performRandomization(final String filename, final long seed,
+    private void performRandomization(final String filename, final long seed, RomOptions romOptions,
             CustomNamesSet customNames) {
-        final Settings settings = createSettingsFromState(customNames);
+        final Settings settings = createSettingsFromState(romOptions, customNames);
         final boolean raceMode = settings.isRaceMode();
 
         Configuration cfg = new Configuration(new Version("2.3.30"));
@@ -2435,7 +2440,12 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     // Apply the seed we were given
                     RandomSource.seed(seed);
                     presetMode = true;
-                    performRandomization(fh.getAbsolutePath(), seed, pld.getCustomNames());
+                    try {
+                        performRandomization(fh.getAbsolutePath(), seed,
+                                FileFunctions.getRomOptions(), pld.getCustomNames());
+                    } catch (IOException e) {
+
+                    }
                 } else {
                     this.romHandler = null;
                     initialFormState();

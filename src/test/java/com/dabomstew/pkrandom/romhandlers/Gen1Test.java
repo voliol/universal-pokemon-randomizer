@@ -30,7 +30,7 @@ public class Gen1Test {
         resetDataModel(romhandler);
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
-        romhandler.getPokemon().forEach(pk -> {
+        romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
             pk.evolutionsFrom.forEach(evo -> {
@@ -70,7 +70,7 @@ public class Gen1Test {
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
         romhandler.removeTradeEvolutions(false, true);
-        romhandler.getPokemon().forEach(pk -> {
+        romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
             pk.evolutionsFrom.forEach(evo -> {

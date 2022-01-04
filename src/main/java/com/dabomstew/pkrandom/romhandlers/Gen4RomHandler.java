@@ -2052,7 +2052,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void removeTradeEvolutions(boolean changeMoveEvos, boolean changeMethodEvos) {
         List<Evolution> tradeEvoFixed = new ArrayList<Evolution>();
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
-        for (Pokemon pkmn : getPokemon()) {
+        for (Pokemon pkmn : getMainPokemonList()) {
             if (pkmn != null) {
                 extraEvolutions.clear();
                 pkmn.evolutionsFrom.forEach(evo -> {
@@ -2063,9 +2063,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 // instead
                                 if (pkmn.evolutionsFrom.stream()
                                         .anyMatch(evos -> evos.type.usesLevel())) {
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen4Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen4Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     evo.extraInfo = unusedStones
                                             .get(this.random.nextInt(unusedStones.size()));
@@ -2085,9 +2084,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 // instead
                                 if (pkmn.evolutionsFrom.stream()
                                         .anyMatch(evos -> evos.type.usesLevel())) {
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen4Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen4Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     evo.extraInfo = unusedStones
                                             .get(this.random.nextInt(unusedStones.size()));
@@ -2107,9 +2105,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             case LEVEL_ELECTRIFIED_AREA:
                                 if (getRomEntry().romType == Gen4Constants.Type_HGSS) {
                                     // Check if we can change to a thunder stone, otherwise any.
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen4Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen4Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     if (unusedStones.contains(Gen4Constants.thunderStoneIndex)) {
                                         evo.extraInfo = Gen4Constants.thunderStoneIndex;
@@ -2123,9 +2120,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             case LEVEL_MOSS_ROCK:
                                 if (getRomEntry().romType == Gen4Constants.Type_HGSS) {
                                     // Check if we can change to a leaf stone, otherwise any.
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen4Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen4Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     if (unusedStones.contains(Gen4Constants.leafStoneIndex)) {
                                         evo.extraInfo = Gen4Constants.leafStoneIndex;
@@ -2139,9 +2135,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             case LEVEL_ICY_ROCK:
                                 if (getRomEntry().romType == Gen4Constants.Type_HGSS) {
                                     // Check if we can change to a dawn stone, otherwise any.
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen4Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen4Constants.availableStones, evo);
                                     evo.type = EvolutionType.STONE;
                                     if (unusedStones.contains(Gen4Constants.dawnStoneIndex)) {
                                         evo.extraInfo = Gen4Constants.dawnStoneIndex;
@@ -2171,9 +2166,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                 // We can't use happiness if it's been used - use a stone instead
                                 if (evo.from.evolutionsFrom.stream().anyMatch(
                                         ev -> EvolutionType.isOfType("Happiness", ev.type))) {
-                                    List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                                            new ArrayList<Integer>(Gen4Constants.availableStones),
-                                            evo);
+                                    List<Integer> unusedStones = RomFunctions
+                                            .removeUsedStones(Gen4Constants.availableStones, evo);
                                     Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                             EvolutionType.STONE, unusedStones
                                                     .get(this.random.nextInt(unusedStones.size())));
@@ -2374,8 +2368,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             case STONE_MALE_ONLY:
             case STONE_FEMALE_ONLY:
                 // Remove any stones already used
-                List<Integer> unusedStones = RomFunctions.removeUsedStones(
-                        new ArrayList<Integer>(Gen4Constants.availableStones), ev);
+                List<Integer> unusedStones =
+                        RomFunctions.removeUsedStones(Gen4Constants.availableStones, ev);
                 ev.extraInfo = unusedStones.get(this.random.nextInt(unusedStones.size()));
                 break;
             case TRADE_ITEM:

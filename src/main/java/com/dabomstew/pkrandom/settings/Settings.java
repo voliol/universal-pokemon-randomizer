@@ -42,6 +42,7 @@ import java.util.zip.CRC32;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.SettingsUpdater;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -63,6 +64,7 @@ public class Settings {
             ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
 
     private CustomNamesSet customNames;
+    private RomOptions romOptions;
 
     private String romName;
     private Integer generationOfRom = 1;
@@ -2264,6 +2266,15 @@ public class Settings {
 
     public Settings setCustomNames(CustomNamesSet customNames) {
         this.customNames = customNames;
+        return this;
+    }
+
+    public RomOptions getRomOptions() {
+        return romOptions;
+    }
+
+    public Settings setRomOptions(RomOptions romOptions) {
+        this.romOptions = romOptions;
         return this;
     }
 

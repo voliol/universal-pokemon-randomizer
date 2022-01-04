@@ -51,35 +51,37 @@ public class Utils {
             int sigLength = fis.read(sig);
             fis.close();
             if (sigLength < 10) {
-                throw new InvalidROMException(InvalidROMException.Type.LENGTH, String.format(
-                        "%s appears to be a blank or nearly blank file.", fh.getName()));
+                throw new InvalidROMException(InvalidROMException.Type.LENGTH, String
+                        .format("%s appears to be a blank or nearly blank file.", fh.getName()));
             }
             if (sig[0] == 0x50 && sig[1] == 0x4b && sig[2] == 0x03 && sig[3] == 0x04) {
-                throw new InvalidROMException(InvalidROMException.Type.ZIP_FILE, String.format(
-                        "%s is a ZIP archive, not a ROM.", fh.getName()));
+                throw new InvalidROMException(InvalidROMException.Type.ZIP_FILE,
+                        String.format("%s is a ZIP archive, not a ROM.", fh.getName()));
             }
-            if (sig[0] == 0x52 && sig[1] == 0x61 && sig[2] == 0x72 && sig[3] == 0x21 && sig[4] == 0x1A
-                    && sig[5] == 0x07) {
-                throw new InvalidROMException(InvalidROMException.Type.RAR_FILE, String.format(
-                        "%s is a RAR archive, not a ROM.", fh.getName()));
+            if (sig[0] == 0x52 && sig[1] == 0x61 && sig[2] == 0x72 && sig[3] == 0x21
+                    && sig[4] == 0x1A && sig[5] == 0x07) {
+                throw new InvalidROMException(InvalidROMException.Type.RAR_FILE,
+                        String.format("%s is a RAR archive, not a ROM.", fh.getName()));
             }
             if (sig[0] == 'P' && sig[1] == 'A' && sig[2] == 'T' && sig[3] == 'C' && sig[4] == 'H') {
-                throw new InvalidROMException(InvalidROMException.Type.IPS_FILE, String.format(
-                        "%s is a IPS patch, not a ROM.", fh.getName()));
+                throw new InvalidROMException(InvalidROMException.Type.IPS_FILE,
+                        String.format("%s is a IPS patch, not a ROM.", fh.getName()));
             }
         } catch (IOException ex) {
-            throw new InvalidROMException(InvalidROMException.Type.UNREADABLE, String.format(
-                    "Could not read %s from disk.", fh.getName()));
+            throw new InvalidROMException(InvalidROMException.Type.UNREADABLE,
+                    String.format("Could not read %s from disk.", fh.getName()));
         }
     }
 
     // RomHandlers implicitly rely on these - call this before creating settings
     // etc.
     public static void testForRequiredConfigs() throws FileNotFoundException {
-        String[] required = new String[] { "gameboy_jap.tbl", "rby_english.tbl", "rby_freger.tbl", "rby_espita.tbl",
-                "green_translation.tbl", "gsc_english.tbl", "gsc_freger.tbl", "gsc_espita.tbl", "gba_english.tbl",
-                "gba_jap.tbl", "Generation4.tbl", "Generation5.tbl", "gen1_offsets.ini", "gen2_offsets.ini",
-                "gen3_offsets.ini", "gen4_offsets.ini", "gen5_offsets.ini", SysConstants.customNamesFile };
+        String[] required = new String[] {"gameboy_jap.tbl", "rby_english.tbl", "rby_freger.tbl",
+                "rby_espita.tbl", "green_translation.tbl", "gsc_english.tbl", "gsc_freger.tbl",
+                "gsc_espita.tbl", "gba_english.tbl", "gba_jap.tbl", "Generation4.tbl",
+                "Generation5.tbl", "gen1_offsets.ini", "gen2_offsets.ini", "gen3_offsets.ini",
+                "gen4_offsets.ini", "gen5_offsets.ini", SysConstants.romOptionsFile,
+                SysConstants.customNamesFile};
         for (String filename : required) {
             if (!FileFunctions.configExists(filename)) {
                 throw new FileNotFoundException(filename);
@@ -108,9 +110,12 @@ public class Utils {
         }
 
         // Check the trainerclass & trainernames & nicknames crc
-        if (customNames == null && !FileFunctions.checkOtherCRC(data, 16, 4, SysConstants.customNamesFile, data.length - 4)) {
-            throw new InvalidSupplementFilesException(InvalidSupplementFilesException.Type.CUSTOM_NAMES,
-                    "Can't use this preset because you have a different set " + "of custom names to the creator.");
+        if (customNames == null && !FileFunctions.checkOtherCRC(data, 16, 4,
+                SysConstants.customNamesFile, data.length - 4)) {
+            throw new InvalidSupplementFilesException(
+                    InvalidSupplementFilesException.Type.CUSTOM_NAMES,
+                    "Can't use this preset because you have a different set "
+                            + "of custom names to the creator.");
         }
     }
 

@@ -570,6 +570,7 @@ public class LogTest {
     public void TestGen1TradeEvo() {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
@@ -578,6 +579,7 @@ public class LogTest {
     public void TestGen2TradeEvo() {
         RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
@@ -590,6 +592,7 @@ public class LogTest {
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler)
                     .getRomEntry();
             resetDataModel(romhandler, 250);
+            romhandler.setPokemonPool(null, null);
             romhandler.removeTradeEvolutions(true, false);
             assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(),
                     1);
@@ -609,6 +612,7 @@ public class LogTest {
         doReturn(mlList).when(mock_arch).getFiles();
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
@@ -625,6 +629,7 @@ public class LogTest {
         doReturn(mlList).when(mock_arch).getFiles();
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
         assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
     }
@@ -730,6 +735,7 @@ public class LogTest {
     public void TestTypeShuffle() {
         RomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.shufflePokemonTypes();
         assertEquals(romhandler.getTemplateData().get("shuffledTypes"), Type.getShuffledList());
         assertTrue("No types were found in the shuffled list.", Type.getShuffledList().size() > 0);
@@ -748,6 +754,7 @@ public class LogTest {
     public void TestRandomStarter() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
         assertEquals("random", romhandler.getTemplateData().get("logStarters"));
         romhandler.clearStarterPokes();
@@ -786,6 +793,7 @@ public class LogTest {
     public void TestCondensedLevels() {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL,
                 GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
         assertEquals(((TreeSet) romhandler.getTemplateData().get("condensedEvos")).size(), 1);
@@ -806,6 +814,7 @@ public class LogTest {
     public void TestTableOfContents() {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
+        romhandler.setPokemonPool(null, null);
         romhandler.generateTableOfContents();
         assertEquals(0, ((ArrayList) romhandler.getTemplateData().get("toc")).size());
         // Spot Check
@@ -850,10 +859,10 @@ public class LogTest {
             }
         }
         Pokemon evPk = new Pokemon();
-        Evolution ev = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.TRADE, 0);
-        Evolution ev2 = new Evolution(pokemonList.get(0), evPk, false, EvolutionType.LEVEL, 50);
-        pokemonList.get(0).evolutionsFrom.add(ev);
-        pokemonList.get(0).evolutionsFrom.add(ev2);
+        Evolution ev = new Evolution(pokemonList.get(1), evPk, false, EvolutionType.TRADE, 0);
+        Evolution ev2 = new Evolution(pokemonList.get(1), evPk, false, EvolutionType.LEVEL, 50);
+        pokemonList.get(1).evolutionsFrom.add(ev);
+        pokemonList.get(1).evolutionsFrom.add(ev2);
     }
 
     /**

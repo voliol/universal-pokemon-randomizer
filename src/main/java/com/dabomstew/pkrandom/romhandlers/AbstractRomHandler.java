@@ -34,6 +34,7 @@ import freemarker.template.Template;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -80,74 +81,106 @@ public abstract class AbstractRomHandler implements RomHandler {
         return this.template;
     }
 
-    public void setPokemonPool(GenRestrictions restrictions) {
+    public void setPokemonPool(GenRestrictions restrictions, RomOptions romOptions) {
         restrictionsSet = true;
         mainPokemonList = this.allPokemonWithoutNull();
+        if (romOptions != null && romOptions.isRandomizeSubset()) {
+            // Reduce the main pokemon list to
+            // Highest value of either the minPokemonNumber, or 0 (prevents going below 0)
+            // Lowest value of either the maxPokemonNumber, or pokemon available (prevents going
+            // above available)
+            try {
+                mainPokemonList = getPokemon().subList(
+                        Math.max(romOptions.getMinimumRandomizablePokemonNumber(), 1),
+                        Math.min(romOptions.getMaximumRandomizablePokemonNumber() + 1,
+                                getPokemon().size()));
+            } catch (IllegalArgumentException e) {
+                throw new RandomizationException(
+                        "Min pokemon number must be lower than max pokemon number! Please fix your rom options file.");
+            }
+        }
+
+
+
         if (restrictions != null) {
             mainPokemonList = new ArrayList<Pokemon>();
             List<Pokemon> allPokemon = this.getPokemon();
+            int highestNumber = allPokemon.size();
+            if (romOptions != null && romOptions.isRandomizeSubset()) {
+                // Reduce the main pokemon list to
+                // Highest value of either the minPokemonNumber, or 0 (prevents going below 0)
+                // Lowest value of either the maxPokemonNumber, or pokemon available (prevents going
+                // above available)
+                allPokemon = allPokemon.subList(
+                        Math.max(romOptions.getMinimumRandomizablePokemonNumber(), 1),
+                        Math.min(romOptions.getMaximumRandomizablePokemonNumber() + 1,
+                                allPokemon.size()));
+                highestNumber = allPokemon.get(allPokemon.size() - 1).number;
+            }
 
             if (restrictions.allow_gen1) {
-                addPokesFromRange(mainPokemonList, allPokemon, 1, 151);
-                if (restrictions.assoc_g1_g2 && allPokemon.size() > 251) {
-                    addEvosFromRange(mainPokemonList, 1, 151, 152, 251);
+                getMainPokemonList().addAll(getPokesFromRange(allPokemon, 1, 151));
+                if (restrictions.assoc_g1_g2 && highestNumber > 151) {
+                    addEvosFromRange(getMainPokemonList(), 1, 151, 152, 251);
                 }
-                if (restrictions.assoc_g1_g4 && allPokemon.size() > 493) {
-                    addEvosFromRange(mainPokemonList, 1, 151, 387, 493);
+                if (restrictions.assoc_g1_g4 && highestNumber > 386) {
+                    addEvosFromRange(getMainPokemonList(), 1, 151, 387, 493);
                 }
             }
 
-            if (restrictions.allow_gen2 && allPokemon.size() > 251) {
-                addPokesFromRange(mainPokemonList, allPokemon, 152, 251);
+            if (restrictions.allow_gen2 && highestNumber > 151) {
+                getMainPokemonList().addAll(getPokesFromRange(allPokemon, 152, 251));
                 if (restrictions.assoc_g2_g1) {
-                    addEvosFromRange(mainPokemonList, 152, 251, 1, 151);
+                    addEvosFromRange(getMainPokemonList(), 152, 251, 1, 151);
                 }
-                if (restrictions.assoc_g2_g3 && allPokemon.size() > 386) {
-                    addEvosFromRange(mainPokemonList, 152, 251, 252, 386);
+                if (restrictions.assoc_g2_g3 && highestNumber > 251) {
+                    addEvosFromRange(getMainPokemonList(), 152, 251, 252, 386);
                 }
-                if (restrictions.assoc_g2_g4 && allPokemon.size() > 493) {
-                    addEvosFromRange(mainPokemonList, 152, 251, 387, 493);
+                if (restrictions.assoc_g2_g4 && highestNumber > 386) {
+                    addEvosFromRange(getMainPokemonList(), 152, 251, 387, 493);
                 }
             }
 
-            if (restrictions.allow_gen3 && allPokemon.size() > 386) {
-                addPokesFromRange(mainPokemonList, allPokemon, 252, 386);
+            if (restrictions.allow_gen3 && highestNumber > 251) {
+                getMainPokemonList().addAll(getPokesFromRange(allPokemon, 252, 386));
                 if (restrictions.assoc_g3_g2) {
-                    addEvosFromRange(mainPokemonList, 252, 386, 152, 251);
+                    addEvosFromRange(getMainPokemonList(), 252, 386, 152, 251);
                 }
-                if (restrictions.assoc_g3_g4 && allPokemon.size() > 493) {
-                    addEvosFromRange(mainPokemonList, 252, 386, 387, 493);
+                if (restrictions.assoc_g3_g4 && highestNumber > 386) {
+                    addEvosFromRange(getMainPokemonList(), 252, 386, 387, 493);
                 }
             }
 
-            if (restrictions.allow_gen4 && allPokemon.size() > 493) {
-                addPokesFromRange(mainPokemonList, allPokemon, 387, 493);
+            if (restrictions.allow_gen4 && highestNumber > 386) {
+                getMainPokemonList().addAll(getPokesFromRange(allPokemon, 387, 493));
                 if (restrictions.assoc_g4_g1) {
-                    addEvosFromRange(mainPokemonList, 387, 493, 1, 151);
+                    addEvosFromRange(getMainPokemonList(), 387, 493, 1, 151);
                 }
                 if (restrictions.assoc_g4_g2) {
-                    addEvosFromRange(mainPokemonList, 387, 493, 152, 251);
+                    addEvosFromRange(getMainPokemonList(), 387, 493, 152, 251);
                 }
                 if (restrictions.assoc_g4_g3) {
-                    addEvosFromRange(mainPokemonList, 387, 493, 252, 386);
+                    addEvosFromRange(getMainPokemonList(), 387, 493, 252, 386);
                 }
             }
 
-            if (restrictions.allow_gen5 && allPokemon.size() > 649) {
-                addPokesFromRange(mainPokemonList, allPokemon, 494, 649);
+            if (restrictions.allow_gen5 && highestNumber > 493) {
+                getMainPokemonList().addAll(getPokesFromRange(allPokemon, 494, 649));
             }
 
-            if (mainPokemonList.size() == 0) {
+            if (getMainPokemonList().size() == 0) {
                 throw new RandomizationException(
                         "No pokemon are in the main list. Please reduce the GenRestrictions.");
             }
         }
 
+        mainPokemonList = getMainPokemonList().stream().distinct().collect(Collectors.toList());
+
         noLegendaryList = new ArrayList<Pokemon>();
         onlyLegendaryList = new ArrayList<Pokemon>();
         giratinaPicks = new ArrayList<Pokemon>();
 
-        for (Pokemon p : mainPokemonList) {
+        for (Pokemon p : getMainPokemonList()) {
             if (p.isLegendary()) {
                 onlyLegendaryList.add(p);
             } else {
@@ -162,37 +195,25 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private void addPokesFromRange(List<Pokemon> pokemonPool, List<Pokemon> allPokemon,
-            int range_min, int range_max) {
-        for (int i = range_min; i <= range_max; i++) {
-            if (!pokemonPool.contains(allPokemon.get(i))) {
-                pokemonPool.add(allPokemon.get(i));
-            }
-        }
+    private List<Pokemon> getPokesFromRange(List<Pokemon> allPokemon, int range_min,
+            int range_max) {
+        return allPokemon.stream()
+                .filter(p -> p.getNumber() >= range_min && p.getNumber() <= range_max)
+                .collect(Collectors.toList());
     }
 
     private void addEvosFromRange(List<Pokemon> pokemonPool, int first_min, int first_max,
             int second_min, int second_max) {
         Set<Pokemon> newPokemon = new TreeSet<Pokemon>();
-        for (Pokemon pk : pokemonPool) {
-            if (pk.number >= first_min && pk.number <= first_max) {
-                for (Evolution ev : pk.evolutionsFrom) {
-                    if (ev.to.number >= second_min && ev.to.number <= second_max) {
-                        if (!pokemonPool.contains(ev.to) && !newPokemon.contains(ev.to)) {
-                            newPokemon.add(ev.to);
-                        }
-                    }
-                }
+        getPokesFromRange(pokemonPool, first_min, first_max).forEach(p -> {
+            newPokemon.addAll(p.evolutionsFrom.stream()
+                    .filter(ev -> ev.to.number >= second_min && ev.to.number <= second_max)
+                    .map(ev -> ev.getTo()).collect(Collectors.toList()));
 
-                for (Evolution ev : pk.evolutionsTo) {
-                    if (ev.from.number >= second_min && ev.from.number <= second_max) {
-                        if (!pokemonPool.contains(ev.from) && !newPokemon.contains(ev.from)) {
-                            newPokemon.add(ev.from);
-                        }
-                    }
-                }
-            }
-        }
+            newPokemon.addAll(p.evolutionsTo.stream()
+                    .filter(ev -> ev.from.number >= second_min && ev.from.number <= second_max)
+                    .map(ev -> ev.getTo()).collect(Collectors.toList()));
+        });
 
         pokemonPool.addAll(newPokemon);
     }
@@ -210,7 +231,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             });
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getMainPokemonList();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.shuffleStats(this.random);
@@ -233,7 +254,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             });
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getMainPokemonList();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.randomizeStatsWithinBST(this.random);
@@ -257,7 +278,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             });
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getMainPokemonList();
             for (Pokemon pk : allPokes) {
                 if (pk != null) {
                     pk.randomizeStatsNoRestrictions(random, false);
@@ -270,7 +291,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeCompletelyPokemonStats(boolean evolutionSanity) {
         this.shuffleAllPokemonBSTs(false, true);
 
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getMainPokemonList();
         if (evolutionSanity) {
             int count = 0;
             double total = 0.0;
@@ -304,7 +325,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void shuffleAllPokemonBSTs(boolean evolutionSanity, boolean randomVariance) {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getMainPokemonList();
 
         if (evolutionSanity) {
             int count = 0;
@@ -448,7 +469,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     public Pokemon randomPokemon() {
         checkPokemonRestrictions();
-        return mainPokemonList.get(this.random.nextInt(mainPokemonList.size()));
+        return getMainPokemonList().get(this.random.nextInt(getMainPokemonList().size()));
     }
 
     @Override
@@ -492,7 +513,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     this.getTemplateData().put("logStarters", "2evo");
                     break;
             }
-            for (Pokemon pk : this.getPokemon()) {
+            for (Pokemon pk : this.getMainPokemonList()) {
                 if (pk != null) {
                     int length = evolutionChainSize(pk);
                     // Check if starter has correct evo count
@@ -548,7 +569,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizePokemonTypes(boolean evolutionSanity) {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getMainPokemonList();
         if (evolutionSanity) {
             // Type randomization with evolution sanity
             copyUpEvolutionsHelper(new BasePokemonAction() {
@@ -632,7 +653,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void shufflePokemonTypes() {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getMainPokemonList();
         List<Type> allTypes = new ArrayList<Type>(getTypesInGame());
         Collections.shuffle(allTypes, this.random);
         Type.setShuffledList(allTypes);
@@ -664,7 +685,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeRetainPokemonTypes(boolean evolutionSanity) {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getMainPokemonList();
         if (evolutionSanity) {
             // Type randomization with evolution sanity
             copyUpEvolutionsHelper(new BasePokemonAction() {
@@ -881,7 +902,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             });
         } else {
-            List<Pokemon> allPokes = this.getPokemon();
+            List<Pokemon> allPokes = this.getMainPokemonList();
             for (Pokemon pk : allPokes) {
                 if (pk == null) {
                     continue;
@@ -957,7 +978,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         PokemonSet globalSet =
-                new PokemonSet(mainPokemonList).filterList(this.bannedForWildEncounters());
+                new PokemonSet(getMainPokemonList()).filterList(this.bannedForWildEncounters());
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }
@@ -1015,7 +1036,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         PokemonSet globalSet =
-                new PokemonSet(mainPokemonList).filterList(this.bannedForWildEncounters());
+                new PokemonSet(getMainPokemonList()).filterList(this.bannedForWildEncounters());
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }
@@ -1076,7 +1097,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
 
         List<Pokemon> banned = this.bannedForWildEncounters();
-        PokemonSet globalSet = new PokemonSet(mainPokemonList).filterList(banned);
+        PokemonSet globalSet = new PokemonSet(getMainPokemonList()).filterList(banned);
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }
@@ -1190,11 +1211,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledTrainers, this.random);
 
         cachedReplacementLists = new PokemonSet();
-        cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+        cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : getMainPokemonList());
         cachedEliteReplacementLists = new PokemonSet();
-        cachedEliteReplacementLists.addAll(
-                mainPokemonList.stream().filter(pk -> pk.isBigPoke(isGen1()) || pk.isLegendary())
-                        .collect(Collectors.toList()));
+        cachedEliteReplacementLists.addAll(getMainPokemonList().stream()
+                .filter(pk -> pk.isBigPoke(isGen1()) || pk.isLegendary())
+                .collect(Collectors.toList()));
         typeWeightings = new TreeMap<Type, Integer>();
         totalTypeWeighting = 0;
 
@@ -1416,7 +1437,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> currentTrainers = this.getTrainers();
         if (cachedReplacementLists == null) {
             cachedReplacementLists = new PokemonSet();
-            cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+            cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : getMainPokemonList());
         }
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
@@ -2257,7 +2278,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // evolution tweaks
-        for (Pokemon pk : this.getPokemon()) {
+        for (Pokemon pk : this.getMainPokemonList()) {
             if (pk != null) {
                 for (Evolution ev : pk.evolutionsFrom) {
                     if (ev.type == EvolutionType.LEVEL_WITH_MOVE) {
@@ -2356,7 +2377,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 staticPokemon.put(oldName, newPK.name);
             }
         } else {
-            PokemonSet pokemonLeft = new PokemonSet(mainPokemonList);
+            PokemonSet pokemonLeft = new PokemonSet(getMainPokemonList());
             pokemonLeft.filterList(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
@@ -2411,7 +2432,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newPK = pokemonLeft.randomPokemon(this.random, true);
                 }
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(mainPokemonList);
+                    pokemonLeft.addAll(getMainPokemonList());
                     pokemonLeft.filterList(banned);
                 }
                 replacements.add(newPK);
@@ -3217,7 +3238,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
-        List<Pokemon> allPokemon = this.getPokemon();
+        List<Pokemon> allPokemon = this.getMainPokemonList();
         Set<Evolution> changedEvos = new TreeSet<Evolution>();
         // search for level evolutions
         for (Pokemon pk : allPokemon) {
@@ -3252,7 +3273,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             boolean noConverge, boolean forceGrowth, boolean forceLv1) {
         checkPokemonRestrictions();
         this.getTemplateData().put("logEvolutions", true);
-        List<Pokemon> pokemonPool = new ArrayList<Pokemon>(mainPokemonList);
+        List<Pokemon> pokemonPool = new ArrayList<Pokemon>(getMainPokemonList());
         int stageLimit = limitToThreeStages ? 3 : 10;
 
         // Cache old evolutions for data later
@@ -3774,7 +3795,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      *            evolutions.
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
-        List<Pokemon> allPokes = this.getPokemon();
+        List<Pokemon> allPokes = this.getMainPokemonList();
         for (Pokemon pk : allPokes) {
             if (pk != null) {
                 pk.temporaryFlag = false;
@@ -3828,7 +3849,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private List<Pokemon> pokemonOfType(Type type, boolean noLegendaries) {
         List<Pokemon> typedPokes = new ArrayList<Pokemon>();
-        for (Pokemon pk : mainPokemonList) {
+        for (Pokemon pk : getMainPokemonList()) {
             if (pk != null && (!noLegendaries || !pk.isLegendary())) {
                 if (pk.primaryType == type || pk.secondaryType == type) {
                     typedPokes.add(pk);
@@ -4373,8 +4394,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     /* Helper methods used by subclasses and/or this class */
     protected void checkPokemonRestrictions() {
         if (!restrictionsSet) {
-            setPokemonPool(null);
+            setPokemonPool(null, null);
         }
+    }
+
+    protected List<Pokemon> getMainPokemonList() {
+        return mainPokemonList;
     }
 
     protected void applyCamelCaseNames() {

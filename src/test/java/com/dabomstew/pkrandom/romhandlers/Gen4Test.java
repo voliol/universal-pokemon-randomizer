@@ -53,9 +53,10 @@ public class Gen4Test {
         doReturn(mock_arch).when(romhandler).readNARC(anyString());
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
+        romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
         // Stream the "evolutionsFrom" list to see if any evolutions are now HAPPINESS
-        assertTrue(pokemonList.get(0).evolutionsFrom.stream()
+        assertTrue(romhandler.getMainPokemonList().get(0).evolutionsFrom.stream()
                 .anyMatch(ev -> EvolutionType.HAPPINESS.equals(ev.type)));
     }
 
@@ -73,7 +74,7 @@ public class Gen4Test {
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
-        romhandler.getPokemon().forEach(pk -> {
+        romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
             ArrayList<Integer> usedItems = new ArrayList<Integer>();
@@ -135,7 +136,7 @@ public class Gen4Test {
         resetDataModel(romhandler);
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
         romhandler.removeTradeEvolutions(false, true);
-        romhandler.getPokemon().forEach(pk -> {
+        romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
             ArrayList<Integer> usedItems = new ArrayList<Integer>();
@@ -304,9 +305,9 @@ public class Gen4Test {
                 pk.evolutionsFrom.add(ev);
             }
         }
-        Evolution ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false,
+        Evolution ev = new Evolution(pokemonList.get(1), pokemonList.get(2), false,
                 EvolutionType.LEVEL_HIGH_BEAUTY, 0);
-        pokemonList.get(0).evolutionsFrom.add(ev);
+        pokemonList.get(1).evolutionsFrom.add(ev);
 
         while (trainerList.size() < GET_FILE_LENGTH) {
             Trainer t = new Trainer();

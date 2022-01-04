@@ -7,7 +7,8 @@
 * Fix Platinum Battle Tower rival not sharing team when "Carries Team" is active (teams #923, #924 and #925)
 * Fix AllowLowLevelEvolutions setting so it actually toggles the filtering
 * Gen 4/Gen 5 multiple LEVEL_ITEM_DAY should ensure items are different
-Custom ROM Options Pane to restrict Pokemon Size (only randomize the pokemon from 1 to given limit like 160)
+* (UI too difficult) Custom ROM Options Pane to restrict Pokemon Size (only randomize the pokemon from 1 to given limit like 160)
+Read from file to restrict Pokemon Size (only randomize the pokemon from given min to given max)
 Replace evo with same stage evo (base for base, middle stage for middle stage)
 Disable legendary evolutions when randomizing evolutions
 Randomize headbutt tree encounters in HGSS (works in gen 2 not gen 4, see https://github.com/Ajarmar/universal-pokemon-randomizer-zx/commit/c1f278fd13bf0ac23f9ed20f638b8c8754b4f348)

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
+import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
@@ -620,6 +620,7 @@ public class AbstractRomTest {
     public void TestNegativeAbilityRemoved() {
         RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
         resetDataModel(romhandler);
+        romhandler.setPokemonPool(null, null);
         romhandler.randomizeAbilities(false, false, false, true);
         for (Pokemon p : pokemonList) {
             assertFalse("" + p.getAbility1() + " was in negativeAbilities, but still found",
@@ -860,6 +861,7 @@ public class AbstractRomTest {
     public void TestMinimumEvos() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
+        romhandler.setPokemonPool(null, null);
         romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
         boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
         for (Pokemon pk : romhandler.getStarterPokes()) {
@@ -925,6 +927,7 @@ public class AbstractRomTest {
     public void TestExactEvos() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
+        romhandler.setPokemonPool(null, null);
         romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null);
         boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
         for (Pokemon pk : romhandler.getStarterPokes()) {
@@ -1074,11 +1077,12 @@ public class AbstractRomTest {
     public void TestStartersTypeRestriction() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
+        romhandler.setPokemonPool(null, null);
         // Test null first
         romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
         assertTrue("Starters list did not contain all available pokemon",
                 // Subtract due to randomStarterPokemon doing a pop operation and reducing by 1
-                romhandler.getStarterPokes().size() == pokemonList.size() - 1);
+                romhandler.getStarterPokes().size() == romhandler.getMainPokemonList().size() - 1);
 
         // Test with 1 type
         romhandler.clearStarterPokes();
@@ -1233,6 +1237,72 @@ public class AbstractRomTest {
     }
 
     /**
+     * Verifies RomOptions correctly limits mainPokemonList
+     */
+    @Test
+    public void TestRomOptions() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        RomOptions romOptions = new RomOptions();
+        romhandler.setPokemonPool(null, romOptions);
+        // Sanity check - Should start false and not limit main list
+        assertFalse("Rom Options started as true", romOptions.isRandomizeSubset());
+        assertTrue("Main Pokemon list was modified by default", romhandler.getMainPokemonList()
+                .containsAll(romhandler.getPokemon().subList(1, romhandler.getPokemon().size())));
+
+        romOptions.setRandomizeSubset(true);
+
+        // Valid min and max is respected
+        romOptions.setMinimumRandomizablePokemonNumber(4);
+        romOptions.setMaximumRandomizablePokemonNumber(romhandler.getPokemon().size() - 4);
+        romhandler.setPokemonPool(null, romOptions);
+        assertTrue("First element of main Pokemon list does not equal 4th index of pokemonList",
+                romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(4));
+        assertTrue(
+                "Last element of main Pokemon list does not equal 4th to last index of pokemonList",
+                romhandler.getMainPokemonList().get(romhandler.getMainPokemonList().size()
+                        - 1) == romhandler.getPokemon().get(romhandler.getPokemon().size() - 4));
+
+        // Min lower than 0 returns 0
+        romOptions.setMinimumRandomizablePokemonNumber(-20);
+        romOptions.setMaximumRandomizablePokemonNumber(romhandler.getPokemon().size() - 4);
+        romhandler.setPokemonPool(null, romOptions);
+        assertTrue("First element of main Pokemon list does not equal 2nd index of pokemonList",
+                romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(1));
+        assertTrue(
+                "Last element of main Pokemon list does not equal 4th to last index of pokemonList",
+                romhandler.getMainPokemonList().get(romhandler.getMainPokemonList().size()
+                        - 1) == romhandler.getPokemon().get(romhandler.getPokemon().size() - 4));
+
+        // Max higher than available returns available
+        romOptions.setMinimumRandomizablePokemonNumber(4);
+        romOptions.setMaximumRandomizablePokemonNumber(9999);
+        romhandler.setPokemonPool(null, romOptions);
+        assertTrue("First element of main Pokemon list does not equal 4th index of pokemonList",
+                romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(4));
+        assertTrue("Last element of main Pokemon list does not equal last index of pokemonList",
+                romhandler.getMainPokemonList().get(romhandler.getMainPokemonList().size()
+                        - 1) == romhandler.getPokemon().get(romhandler.getPokemon().size() - 1));
+
+    }
+
+    /**
+     * If a RomOptions is given such that the min is higher than max, it should throw an exception
+     * and stop execution
+     */
+    @Test(expected = RandomizationException.class)
+    public void TestRomOptionsThrowsException() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        RomOptions romOptions = new RomOptions();
+        romOptions.setRandomizeSubset(true);
+        romOptions.setMaximumRandomizablePokemonNumber(10);
+        romOptions.setMinimumRandomizablePokemonNumber(20);
+        romhandler.setPokemonPool(null, romOptions);
+        assertFalse("Exception was not thrown", true);
+    }
+
+    /**
      * If a GenRestrictions is given such that no pokemon exist in the main list at the end, it
      * should throw an exception and stop execution
      */
@@ -1241,7 +1311,72 @@ public class AbstractRomTest {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
         GenRestrictions restrictions = new GenRestrictions();
-        romhandler.setPokemonPool(restrictions);
+        romhandler.setPokemonPool(restrictions, null);
+        assertFalse("Exception was not thrown", true);
+    }
+
+    /**
+     * If both GenRestrictions and RomOptions are provided, the pool is appropriately modified
+     */
+    @Test
+    public void TestGenRestrictionsAndRomOptions() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        GenRestrictions restrictions = new GenRestrictions();
+        RomOptions romOptions = new RomOptions();
+        // Sanity check - Fully enabled genRestrictions and romOptions works
+        restrictions.makeEverythingSelected();
+        romOptions.setRandomizeSubset(true);
+        romOptions.setMinimumRandomizablePokemonNumber(0);
+        romOptions.setMaximumRandomizablePokemonNumber(9999);
+        romhandler.setPokemonPool(restrictions, romOptions);
+        assertTrue("Main pokemon list was modified and is missing pokemon",
+                romhandler.getMainPokemonList().containsAll(
+                        romhandler.getPokemon().subList(1, romhandler.getPokemon().size())));
+
+        // Subset of all pokemon is properly limited on fully enabled genRestrictions
+        romOptions.setMinimumRandomizablePokemonNumber(4);
+        romOptions.setMaximumRandomizablePokemonNumber(romhandler.getPokemon().size() - 4);
+        romhandler.setPokemonPool(restrictions, romOptions);
+        assertTrue("First element of main Pokemon list does not equal 4th index of pokemonList",
+                romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(4));
+        assertTrue(
+                "Last element of main Pokemon list does not equal 4th to last index of pokemonList",
+                romhandler.getMainPokemonList().get(romhandler.getMainPokemonList().size()
+                        - 1) == romhandler.getPokemon().get(romhandler.getPokemon().size() - 4));
+        // No duplicates in list
+        assertEquals(new HashSet<Pokemon>(romhandler.getMainPokemonList()).size(),
+                romhandler.getMainPokemonList().size());
+
+        // Disabled generation is removed from sublist
+        restrictions.allow_gen1 = false;
+        restrictions.assoc_g1_g2 = false;
+        restrictions.assoc_g1_g4 = false;
+        romhandler.setPokemonPool(restrictions, romOptions);
+        assertTrue("First element of main Pokemon list does not equal 152nd index of pokemonList",
+                romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(152));
+        assertTrue(
+                "Last element of main Pokemon list does not equal 4th to last index of pokemonList",
+                romhandler.getMainPokemonList().get(romhandler.getMainPokemonList().size()
+                        - 1) == romhandler.getPokemon().get(romhandler.getPokemon().size() - 4));
+        // No duplicates in list
+        assertEquals(new HashSet<Pokemon>(romhandler.getMainPokemonList()).size(),
+                romhandler.getMainPokemonList().size());
+
+        // Enabled only 1 generation
+        restrictions = new GenRestrictions();
+        restrictions.allow_gen1 = true;
+        romhandler.setPokemonPool(restrictions, romOptions);
+        System.out.println(
+                romhandler.getMainPokemonList().get(0) + ", " + romhandler.getPokemon().get(152));
+        assertTrue("First element of main Pokemon list does not equal 4th index of pokemonList",
+                romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(4));
+        assertTrue("Last element of main Pokemon list does not equal 151st index of pokemonList",
+                romhandler.getMainPokemonList().get(romhandler.getMainPokemonList().size()
+                        - 1) == romhandler.getPokemon().get(151));
+        // No duplicates in list
+        assertEquals(new HashSet<Pokemon>(romhandler.getMainPokemonList()).size(),
+                romhandler.getMainPokemonList().size());
     }
 
     /**
@@ -1306,14 +1441,16 @@ public class AbstractRomTest {
                             } else {
                                 allowedNumbers.removeAll(gen5Numbers);
                             }
-                            romhandler.setPokemonPool(restrictions);
+                            romhandler.setPokemonPool(restrictions, null);
                             romhandler.game1to1Encounters(false, false, true);
                             for (EncounterSet es : encounterCap.getValue()) {
                                 for (Encounter enc : es.getEncounters()) {
                                     assertFalse("A null encounter was found",
                                             enc.getPokemon() == null);
-                                    assertTrue(enc.getPokemon().getNumber()
-                                            + " was found with these restrictions " + restrictions,
+                                    assertTrue(
+                                            enc.getPokemon().getNumber()
+                                                    + " was not found with these restrictions "
+                                                    + restrictions,
                                             allowedNumbers.contains(enc.getPokemon().getNumber()));
                                 }
                             }
@@ -1322,8 +1459,10 @@ public class AbstractRomTest {
                                 for (Encounter enc : es.getEncounters()) {
                                     assertFalse("A null encounter was found",
                                             enc.getPokemon() == null);
-                                    assertTrue(enc.getPokemon().getNumber()
-                                            + " was found with these restrictions " + restrictions,
+                                    assertTrue(
+                                            enc.getPokemon().getNumber()
+                                                    + " was not found with these restrictions "
+                                                    + restrictions,
                                             allowedNumbers.contains(enc.getPokemon().getNumber()));
                                 }
                             }
@@ -1498,7 +1637,7 @@ public class AbstractRomTest {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
         romhandler.randomizeEvolutions(false, false, false, false, false, false, false, true);
-        for (Pokemon pk : romhandler.getPokemon()) {
+        for (Pokemon pk : romhandler.getMainPokemonList()) {
             // Skip index 0 since this is automatically removed from the list by the code
             if (pk.number == 0) {
                 continue;
