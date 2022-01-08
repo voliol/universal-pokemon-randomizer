@@ -1049,7 +1049,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="pokemonEvolutionsPanel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="366" max="32767" attributes="0"/>
+                      <EmptySpace pref="269" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1077,31 +1077,25 @@
                               <Component id="peRandomRB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="peNoLegendariesCB" max="32767" attributes="0"/>
                               <Component id="peSameTypeCB" min="-2" max="-2" attributes="0"/>
                               <Component id="peSimilarStrengthCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="peNoConvergeCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="peNoConvergeCB" max="32767" attributes="0"/>
                               <Component id="peEvolveLv1CB" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="73" max="32767" attributes="0"/>
+                          <EmptySpace pref="69" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Component id="peSameStageCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                              </Group>
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="peThreeStagesCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="peForceGrowthCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="peForceChangeCB" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace pref="101" max="32767" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="goRemoveTradeEvosCheckBox" min="-2" max="-2" attributes="0"/>
-                                      <Component id="goCondenseEvosCheckBox" min="-2" max="-2" attributes="0"/>
-                                      <Component id="peChangeMethodsCB" max="32767" attributes="0"/>
-                                  </Group>
-                              </Group>
+                              <Component id="peThreeStagesCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="peForceGrowthCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="peForceChangeCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="peSameStageCB" min="-2" pref="179" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace pref="96" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="goRemoveTradeEvosCheckBox" min="-2" max="-2" attributes="0"/>
+                              <Component id="goCondenseEvosCheckBox" min="-2" max="-2" attributes="0"/>
+                              <Component id="peChangeMethodsCB" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1130,11 +1124,14 @@
                               <Component id="peForceGrowthCB" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="goCondenseEvosCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="3" max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="peEvolveLv1CB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="peSameStageCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="peSameStageCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="peEvolveLv1CB" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="peNoLegendariesCB" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1314,6 +1311,19 @@
                     </Property>
                     <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peSameStageCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="peNoLegendariesCB">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peNoLegendariesCB.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peNoLegendariesCB.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.peNoLegendariesCB.name" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                   </Properties>
                 </Component>

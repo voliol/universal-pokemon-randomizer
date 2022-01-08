@@ -55,6 +55,7 @@ public class SettingsConstants {
         public static final String EVOS_FORCE_GROWTH = "evosForceGrowth";
         public static final String EVOS_LV_1 = "evosLv1";
         public static final String EVOS_SAME_STAGE = "evosSameStage";
+        public static final String EVOS_NO_LEGENDARIES = "evosNoLegendaries";
         public static final String STARTERS_MOD = "startersMod";
         public static final String CUSTOM_STARTERS = "customStarters";
         public static final String RANDOMIZE_STARTERS_HELD_ITEMS = "randomizeStartersHeldItems";

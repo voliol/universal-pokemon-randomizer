@@ -1635,7 +1635,7 @@ public class AbstractRomTest {
     public void TestEvoLv1() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, true,
+        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, true, false,
                 false);
         for (Pokemon pk : romhandler.getMainPokemonList()) {
             // Skip index 0 since this is automatically removed from the list by the code
@@ -1736,8 +1736,8 @@ public class AbstractRomTest {
             originalFromEvos.put(pk, pk.evolutionsFrom);
         }
 
-        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, false,
-                true);
+        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, false, true,
+                false);
 
         for (Pokemon pk : romhandler.getPokemon()) {
             for (int i = 0; i < pk.evolutionsFrom.size(); i++) {
@@ -1748,6 +1748,21 @@ public class AbstractRomTest {
                                 + " with orignal stage count " + originalToEvosCount.get(newTo)
                                 + ", but should have had count " + originalToEvosCount.get(oldTo),
                         originalToEvosCount.get(newTo) == originalToEvosCount.get(oldTo));
+            }
+        }
+    }
+
+    @Test
+    public void TestEvoNoLegendaries() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, false,
+                false, true);
+        for (Pokemon pk : romhandler.getMainPokemonList()) {
+            for (Evolution ev : pk.evolutionsFrom) {
+                assertTrue(
+                        "Legendary " + ev.to.number + " was found as an evolution for " + pk.number,
+                        !romhandler.onlyLegendaryList.contains(ev.to));
             }
         }
     }

@@ -3270,16 +3270,21 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType,
             boolean changeMethods, boolean limitToThreeStages, boolean forceChange,
-            boolean noConverge, boolean forceGrowth, boolean forceLv1, boolean sameStage) {
+            boolean noConverge, boolean forceGrowth, boolean forceLv1, boolean sameStage,
+            boolean noLegendaries) {
         checkPokemonRestrictions();
         this.getTemplateData().put("logEvolutions", true);
-        List<Pokemon> pokemonPool = new ArrayList<Pokemon>(getMainPokemonList());
         int stageLimit = limitToThreeStages ? 3 : 10;
+
+        PokemonSet globalSet = new PokemonSet(getMainPokemonList());
+        if (noLegendaries) {
+            globalSet.filterLegendaries();
+        }
 
         // Cache old evolutions for data later
         Map<Pokemon, List<Evolution>> originalFromEvos = new HashMap<Pokemon, List<Evolution>>();
         Map<Pokemon, List<Evolution>> originalToEvos = new HashMap<Pokemon, List<Evolution>>();
-        for (Pokemon pk : pokemonPool) {
+        for (Pokemon pk : getMainPokemonList()) {
             originalFromEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsFrom));
             originalToEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsTo));
         }
@@ -3288,7 +3293,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<EvolutionPair> oldEvoPairs = new HashSet<EvolutionPair>();
 
         if (forceChange) {
-            for (Pokemon pk : pokemonPool) {
+            for (Pokemon pk : getMainPokemonList()) {
                 for (Evolution ev : pk.evolutionsFrom) {
                     oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
                 }
@@ -3301,16 +3306,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         while (loops < 1) {
             // Setup for this loop.
             boolean hadError = false;
-            for (Pokemon pk : pokemonPool) {
+            for (Pokemon pk : getMainPokemonList()) {
                 pk.evolutionsFrom.clear();
                 pk.evolutionsTo.clear();
             }
             newEvoPairs.clear();
 
             // Shuffle pokemon list so the results aren't overly predictable.
+            List<Pokemon> pokemonPool = new ArrayList<Pokemon>(globalSet.getPokes());
             Collections.shuffle(pokemonPool, this.random);
 
-            for (Pokemon fromPK : pokemonPool) {
+            for (Pokemon fromPK : getMainPokemonList()) {
                 List<Evolution> oldFromEvos = originalFromEvos.get(fromPK);
                 if (forceLv1 && oldFromEvos.size() == 0) {
                     oldFromEvos.add(

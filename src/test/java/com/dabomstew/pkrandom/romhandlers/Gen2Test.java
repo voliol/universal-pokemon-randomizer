@@ -29,7 +29,8 @@ public class Gen2Test {
         Gen2RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler);
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
+                false);
         romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
@@ -74,7 +75,8 @@ public class Gen2Test {
         Gen2RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler);
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
+                false);
         romhandler.removeTradeEvolutions(false, true);
         romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();

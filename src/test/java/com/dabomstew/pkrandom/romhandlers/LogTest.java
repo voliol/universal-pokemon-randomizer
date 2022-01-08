@@ -746,7 +746,7 @@ public class LogTest {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
         romhandler.randomizeEvolutions(false, false, false, false, false, false, false, false,
-                false);
+                false, false);
         assertEquals(romhandler.getTemplateData().get("logEvolutions"), true);
 
     }

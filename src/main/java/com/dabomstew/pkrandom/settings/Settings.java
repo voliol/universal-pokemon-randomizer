@@ -240,6 +240,9 @@ public class Settings {
         SettingsOptionComposite evosSameStage = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.EVOS_SAME_STAGE, false).addMatches(
                         new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosNoLegendaries = SettingsOptionFactory.createSettingsOption(
+                new SettingsOption.Builder(SettingsConstants.EVOS_NO_LEGENDARIES, false).addMatches(
+                        new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
 
         // Starters
         SettingsOptionComposite startersMod = SettingsOptionFactory.createSettingsOption(
@@ -860,7 +863,8 @@ public class Settings {
         out.write(makeByteSelected(
                 (Boolean) settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD),
                 (Boolean) settingsMap.getValue(SettingsConstants.EVOS_LV_1),
-                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_SAME_STAGE)));
+                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_SAME_STAGE),
+                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_NO_LEGENDARIES)));
 
         // @ 42 Starter Types
         try {
@@ -1112,6 +1116,7 @@ public class Settings {
         settings.setEvosChangeMethod(restoreState(data[41], 0));
         settings.setEvosLv1(restoreState(data[41], 1));
         settings.setEvosSameStage(restoreState(data[41], 2));
+        settings.setEvosNoLegendaries(restoreState(data[41], 3));
 
         settings.setStarterTypes(Type.intToTypes(FileFunctions.readFullInt(data, 42)));
 
@@ -1539,6 +1544,15 @@ public class Settings {
 
     public Settings setEvosSameStage(boolean evosSameStage) {
         settingsMap.putValue(SettingsConstants.EVOS_SAME_STAGE, evosSameStage);
+        return this;
+    }
+
+    public boolean isEvosNoLegendaries() {
+        return settingsMap.getValue(SettingsConstants.EVOS_NO_LEGENDARIES);
+    }
+
+    public Settings setEvosNoLegendaries(boolean evosNoLegendaries) {
+        settingsMap.putValue(SettingsConstants.EVOS_NO_LEGENDARIES, evosNoLegendaries);
         return this;
     }
 

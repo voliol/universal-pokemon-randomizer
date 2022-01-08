@@ -413,7 +413,7 @@ public interface RomHandler {
         public void randomizeEvolutions(boolean similarStrength, boolean sameType,
                         boolean changeMethods, boolean limitToThreeStages, boolean forceChange,
                         boolean noConverge, boolean forceGrowth, boolean forceLv1,
-                        boolean sameStage);
+                        boolean sameStage, boolean noLegendaries);
 
         public void updateExtraInfo(Evolution ev);
 

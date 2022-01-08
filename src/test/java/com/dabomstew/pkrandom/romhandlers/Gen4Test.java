@@ -73,7 +73,8 @@ public class Gen4Test {
                 .getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
+                false);
         romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
@@ -134,7 +135,8 @@ public class Gen4Test {
                 .getRomEntry();
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
+                false);
         romhandler.removeTradeEvolutions(false, true);
         romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();

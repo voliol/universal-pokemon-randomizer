@@ -1023,6 +1023,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peEvolveLv1CB.setSelected(false);
         this.peSameStageCB.setEnabled(false);
         this.peSameStageCB.setSelected(false);
+        this.peNoLegendariesCB.setEnabled(false);
+        this.peNoLegendariesCB.setSelected(false);
 
         for (JCheckBox cb : tweakCheckboxes) {
             cb.setVisible(true);
@@ -1768,6 +1770,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peChangeMethodsCB.setEnabled(true);
             this.peEvolveLv1CB.setEnabled(true);
             this.peSameStageCB.setEnabled(true);
+            this.peNoLegendariesCB.setEnabled(true);
         } else {
             this.peForceChangeCB.setEnabled(false);
             this.peForceChangeCB.setSelected(false);
@@ -1785,6 +1788,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peEvolveLv1CB.setSelected(false);
             this.peSameStageCB.setEnabled(false);
             this.peSameStageCB.setSelected(false);
+            this.peNoLegendariesCB.setEnabled(false);
+            this.peNoLegendariesCB.setSelected(false);
         }
 
         if (this.peEvolveLv1CB.isSelected() || !this.peEvolveLv1CB.isEnabled()) {
@@ -1980,6 +1985,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peChangeMethodsCB.setSelected(settings.isEvosChangeMethod());
         this.peEvolveLv1CB.setSelected(settings.isEvosLv1());
         this.peSameStageCB.setSelected(settings.isEvosSameStage());
+        this.peNoLegendariesCB.setSelected(settings.isEvosNoLegendaries());
 
         this.mdRandomAccuracyCB.setSelected(settings.isRandomizeMoveAccuracies());
         this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());
@@ -2186,6 +2192,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setEvosChangeMethod(peChangeMethodsCB.isSelected());
         settings.setEvosLv1(peEvolveLv1CB.isSelected());
         settings.setEvosSameStage(peSameStageCB.isSelected());
+        settings.setEvosNoLegendaries(peNoLegendariesCB.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
         settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());
@@ -3105,6 +3112,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         peChangeMethodsCB = new javax.swing.JCheckBox();
         peEvolveLv1CB = new javax.swing.JCheckBox();
         peSameStageCB = new javax.swing.JCheckBox();
+        peNoLegendariesCB = new javax.swing.JCheckBox();
         startersInnerPanel = new javax.swing.JPanel();
         starterPokemonPanel = new javax.swing.JPanel();
         spUnchangedRB = new javax.swing.JRadioButton();
@@ -3815,6 +3823,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
         peSameStageCB.setToolTipText(bundle.getString("RandomizerGUI.peSameStageCB.toolTipText")); // NOI18N
         peSameStageCB.setName(bundle.getString("RandomizerGUI.peSameStageCB.name")); // NOI18N
 
+        peNoLegendariesCB.setText(bundle.getString("RandomizerGUI.peNoLegendariesCB.text")); // NOI18N
+        peNoLegendariesCB.setToolTipText(bundle.getString("RandomizerGUI.peNoLegendariesCB.toolTipText")); // NOI18N
+        peNoLegendariesCB.setName(bundle.getString("RandomizerGUI.peNoLegendariesCB.name")); // NOI18N
+
         javax.swing.GroupLayout pokemonEvolutionsPanelLayout = new javax.swing.GroupLayout(pokemonEvolutionsPanel);
         pokemonEvolutionsPanel.setLayout(pokemonEvolutionsPanelLayout);
         pokemonEvolutionsPanelLayout.setHorizontalGroup(
@@ -3825,26 +3837,23 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(peUnchangedRB)
                     .addComponent(peRandomRB))
                 .addGap(59, 59, 59)
-                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(peNoLegendariesCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(peSameTypeCB)
                     .addComponent(peSimilarStrengthCB)
-                    .addComponent(peNoConvergeCB)
+                    .addComponent(peNoConvergeCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(peEvolveLv1CB))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pokemonEvolutionsPanelLayout.createSequentialGroup()
-                        .addComponent(peSameStageCB)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(pokemonEvolutionsPanelLayout.createSequentialGroup()
-                        .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(peThreeStagesCB)
-                            .addComponent(peForceGrowthCB)
-                            .addComponent(peForceChangeCB))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
-                        .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(goRemoveTradeEvosCheckBox)
-                            .addComponent(goCondenseEvosCheckBox)
-                            .addComponent(peChangeMethodsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addComponent(peThreeStagesCB)
+                    .addComponent(peForceGrowthCB)
+                    .addComponent(peForceChangeCB)
+                    .addComponent(peSameStageCB, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 96, Short.MAX_VALUE)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(goRemoveTradeEvosCheckBox)
+                    .addComponent(goCondenseEvosCheckBox)
+                    .addComponent(peChangeMethodsCB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pokemonEvolutionsPanelLayout.setVerticalGroup(
@@ -3867,10 +3876,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(peNoConvergeCB)
                     .addComponent(peForceGrowthCB)
                     .addComponent(goCondenseEvosCheckBox))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 3, Short.MAX_VALUE)
-                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(peEvolveLv1CB)
-                    .addComponent(peSameStageCB)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(peSameStageCB)
+                    .addComponent(peEvolveLv1CB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(peNoLegendariesCB)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout evolutionsInnerPanelLayout = new javax.swing.GroupLayout(evolutionsInnerPanel);
@@ -3884,7 +3896,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             .addGroup(evolutionsInnerPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pokemonEvolutionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(366, Short.MAX_VALUE))
+                .addContainerGap(269, Short.MAX_VALUE))
         );
 
         randomizerOptionsPane.addTab(bundle.getString("RandomizerGUI.evolutionsInnerPanel.TabConstraints.tabTitle"), evolutionsInnerPanel); // NOI18N
@@ -5556,6 +5568,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox pbsStandardEXPCurvesCB;
     private javax.swing.JCheckBox pbsStatsRandomizeFirstCB;
     private javax.swing.JCheckBox pbsUpdateStatsCB;
+    private javax.swing.JCheckBox peNoLegendariesCB;
     private javax.swing.JCheckBox peChangeMethodsCB;
     private javax.swing.JCheckBox peEvolveLv1CB;
     private javax.swing.JCheckBox peForceChangeCB;

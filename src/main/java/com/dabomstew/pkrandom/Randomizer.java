@@ -505,7 +505,7 @@ public class Randomizer {
                     settings.isEvosSameTyping(), settings.isEvosChangeMethod(),
                     settings.isEvosMaxThreeStages(), settings.isEvosForceChange(),
                     settings.isEvosNoConverge(), settings.isEvosForceGrowth(), settings.isEvosLv1(),
-                    settings.isEvosSameStage());
+                    settings.isEvosSameStage(), settings.isEvosNoLegendaries());
 
             List<Pokemon> allPokes = romHandler.getPokemon();
             List<Pokemon> basePokes = new ArrayList<Pokemon>();

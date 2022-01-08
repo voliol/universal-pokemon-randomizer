@@ -1168,6 +1168,31 @@ public class SettingsTest extends AbstractUIBase {
         }
 
         /**
+         * Selecting "RANDOM" enables the No Legendary Evos checkbox
+         * 
+         * Toggles the No Legendary Evos checkbox
+         * 
+         * Selecting "UNCHANGED" disables the No Legendary Evos checkbox and resets state to false
+         * 
+         * Verifies settings can be stored and loaded with no error and preserve state
+         * 
+         * @throws IOException
+         */
+        @Test(timeout = 4000)
+        public void TestEvoNoLegendaries() throws IOException {
+                JRadioButtonFixture unchangedEvolveRBFixture =
+                                getRadioButtonByName("peUnchangedRB");
+                JRadioButtonFixture randomEvolveRBFixture = getRadioButtonByName("peRandomRB");
+                JCheckBoxFixture peNoLegendariesCBFixture = getCheckBoxByName("peNoLegendariesCB");
+                TestCheckboxBasedOnRadioButton(unchangedEvolveRBFixture, randomEvolveRBFixture,
+                                peNoLegendariesCBFixture,
+                                (settings) -> settings.isEvosNoLegendaries(),
+                                (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
+                                (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
+                                (settings) -> settings.getEvolutionsMod(), "Evolutions");
+        }
+
+        /**
          * Captures a common sequence of a checkbox being enabled or disabled based on radio button
          * selection
          * 

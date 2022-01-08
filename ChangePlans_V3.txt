@@ -16,14 +16,18 @@ Randomize roaming pokemon in Gen 3+ (https://www.reddit.com/r/PokemonROMhacks/co
 Update Type Effectiveness to Gen 8 (https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
 randomizable_809 ROM support for Fairy type (maybe just set fairy to 0x17, ideally parse a types table and align)
 RandomizerGUI romLoaded state matches new Settings object
+All fields should be private and only accessible through getters/setters
 Trainer Options to new class
 Starter Options to new class
 Evolution Options to new class
+All other group options to new class
 Move ROMEntry to separate Class
 Move RomHandler state to Model Class
 Change Settings toString and fromString to refer to a separate list. Try to make saving options easier when adding new options
+Try to automatically create all boilerplate settings code (get setting, set setting, from string, to string, initial form state, enable or disable, rom loaded, etc)
+Redo code to use PokemonSet
 Unit Tests use common data model
-Replace versioning system with more robust model (190 -> 1100 is stupid)
+Replace versioning system with more robust model (190 -> 1100 is stupid, maybe find maven package for versioning)
 Gen4 Trades should use new pokemon (still uses old pokemon)
 Gen4 leader TM should use new names
 TM text updates for Gen 5 (use new names)
@@ -40,7 +44,6 @@ Signature Move - All leaders have a signature move on all pokes (same as TM?)
 Type by ace (one of dual type, or if mono type, keeps mono) (keep type but change team)
 Magikarp Mode (everything is magikarp, everyone has hyper beam, and all text is changed to MAGIKARP)
 RSE Gen 3 - Patch both Arco and Mach
-Redo code to use PokemonSet
 Trainer pokemon evolve at appropriate level (if at level, evolve. if not, unevolve. non-level base off bst)
 Select full team instead of only starter (is it possible to prestock a pc?)
 Shift abilities to left or right instead of randomizing (thus activating hidden abilities)
@@ -51,7 +54,7 @@ Move prefixes (DEFDN-Leer)
 Add PokemonEmerald Party Randomizer
 Platinum rival gets random replacement for Heracross when "Carries Team" is active
 
-All versions to 200
+All versions to 1100
 Update settings updater
 Verify docs
 Update premade settings
