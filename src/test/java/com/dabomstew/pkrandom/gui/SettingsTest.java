@@ -1144,6 +1144,30 @@ public class SettingsTest extends AbstractUIBase {
         }
 
         /**
+         * Selecting "RANDOM" enables the Evos Same Stage checkbox
+         * 
+         * Toggles the Evos Same Stage checkbox
+         * 
+         * Selecting "UNCHANGED" disables the Evos Same Stage checkbox and resets state to false
+         * 
+         * Verifies settings can be stored and loaded with no error and preserve state
+         * 
+         * @throws IOException
+         */
+        @Test(timeout = 4000)
+        public void TestEvoSameStage() throws IOException {
+                JRadioButtonFixture unchangedEvolveRBFixture =
+                                getRadioButtonByName("peUnchangedRB");
+                JRadioButtonFixture randomEvolveRBFixture = getRadioButtonByName("peRandomRB");
+                JCheckBoxFixture peSameStageCBFixture = getCheckBoxByName("peSameStageCB");
+                TestCheckboxBasedOnRadioButton(unchangedEvolveRBFixture, randomEvolveRBFixture,
+                                peSameStageCBFixture, (settings) -> settings.isEvosSameStage(),
+                                (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
+                                (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
+                                (settings) -> settings.getEvolutionsMod(), "Evolutions");
+        }
+
+        /**
          * Captures a common sequence of a checkbox being enabled or disabled based on radio button
          * selection
          * 

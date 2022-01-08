@@ -160,6 +160,14 @@ that are desired.
   evolutions, randomizes move power, accuracy, pp, types, and category, in addition
   to everything Randomizer Race already does. 
 
+Randomize Subset of Pokemon
+---------------------------
+For games where only a subset of pokemon are modified, it is now possible to reduce
+the randomizer to just that subset. To activate this feature, you will need to modify
+"rom_options.ini" file in this folder so that "RandomizeSubset" is true and
+"MinPokemonNumber"/"MaxPokemonNumber" are set to the values desired. Note that this
+will impact log generation.
+
 Games/ROMs supported
 --------------------
 

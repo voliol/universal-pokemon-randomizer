@@ -120,9 +120,16 @@
   - A side-effect of this is that the valid pool can be drained a lot quicker. This will throw "Exhausted starter pool" errors a lot more frequently.
 - Fix deprecated DatatypeConverter for Base64 to allow compatability with Java 8 and newer Java versions
 
-## 2.0.0
+## 1.10.0
 
 - All pokemon can evolve at level 1
   - If `Change Methods` is chosen, all pokemon will evolve with a random method and level evolutions will NOT be at 1
   - Evolution paths in the log will only display pokemon where nothing evolves into them
 - `Force Fully Evolved` and `Modify Trainer Level` are available to use regardless of trainer option selected
+- Rotom has been removed from the legendary pool list
+- Platinum rival at Battle Tower now correctly retains starter or team if that option is selected
+- `Allow Low Level Evolution` wild pokemon setting now correctly toggles behavior in the randomizer
+- `LEVEL_ITEM_DAY`, `LEVEL_ITEM_NIGHT`, and `TRADE_ITEM` should correctly avoid duplicates. _should_
+- Subsets of pokemon can now be randomized instead of everything in a ROM. Details can be found in "UserGuide,txt".
+- When randomizing evolutions, you can restrict replacements to the same stage that the evolution is.
+  - The main filter for evolution replacement in general is experience curve. Attempting to filter by same stage and same type can result in no change (such as the Abra line). Choosing "force change" on top of this will result in type or stage restrictions potentially being skipped, leading to odd selections for evolutions (Kadabra can only evolve into Celebi or Mew). Selecting "Standardize exp curves" will help in widening the available pool.

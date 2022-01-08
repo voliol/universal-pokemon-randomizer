@@ -407,7 +407,7 @@ public class Gen5Test {
                                 .getRomEntry();
                 doReturn(mock(Map.class)).when(romhandler).getTemplateData();
                 resetDataModel(romhandler);
-                romhandler.randomizeEvolutions(false, false, true, true, false, false, false,
+                romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false,
                                 false);
                 romhandler.getMainPokemonList().forEach(pk -> {
                         ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
@@ -475,7 +475,7 @@ public class Gen5Test {
                                 .getRomEntry();
                 doReturn(mock(Map.class)).when(romhandler).getTemplateData();
                 resetDataModel(romhandler);
-                romhandler.randomizeEvolutions(false, false, true, true, false, false, false,
+                romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false,
                                 false);
                 romhandler.removeTradeEvolutions(false, true);
                 romhandler.getMainPokemonList().forEach(pk -> {

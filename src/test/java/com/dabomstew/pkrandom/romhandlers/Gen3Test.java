@@ -54,7 +54,7 @@ public class Gen3Test {
         Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
         resetDataModel(romhandler);
         doReturn(mock(Map.class)).when(romhandler).getTemplateData();
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false);
         romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
@@ -106,7 +106,8 @@ public class Gen3Test {
             mockRomFunctions
                     .when(() -> com.dabomstew.pkrandom.RomFunctions.removeUsedStones(any(), any()))
                     .thenCallRealMethod();
-            romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false);
+            romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false,
+                    false);
             romhandler.removeTradeEvolutions(false, true);
             romhandler.getMainPokemonList().forEach(pk -> {
                 ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();

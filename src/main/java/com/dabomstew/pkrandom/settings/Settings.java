@@ -237,6 +237,9 @@ public class Settings {
         SettingsOptionComposite evosLv1 = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.EVOS_LV_1, false).addMatches(
                         new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+        SettingsOptionComposite evosSameStage = SettingsOptionFactory.createSettingsOption(
+                new SettingsOption.Builder(SettingsConstants.EVOS_SAME_STAGE, false).addMatches(
+                        new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
 
         // Starters
         SettingsOptionComposite startersMod = SettingsOptionFactory.createSettingsOption(
@@ -535,7 +538,7 @@ public class Settings {
 
     public void randomSettings() {
         // List of keys that should not have a random option applied
-        List<String> bannedKeys = Arrays.asList("raceMode");
+        List<String> bannedKeys = Arrays.asList(SettingsConstants.RACE_MODE);
         Random random = new Random();
 
         settingsMap.forEachParent((option) -> {
@@ -856,7 +859,8 @@ public class Settings {
         // @ 41 Evolution overflow
         out.write(makeByteSelected(
                 (Boolean) settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD),
-                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_LV_1)));
+                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_LV_1),
+                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_SAME_STAGE)));
 
         // @ 42 Starter Types
         try {
@@ -1107,6 +1111,7 @@ public class Settings {
 
         settings.setEvosChangeMethod(restoreState(data[41], 0));
         settings.setEvosLv1(restoreState(data[41], 1));
+        settings.setEvosSameStage(restoreState(data[41], 2));
 
         settings.setStarterTypes(Type.intToTypes(FileFunctions.readFullInt(data, 42)));
 
@@ -1525,6 +1530,15 @@ public class Settings {
 
     public Settings setEvosLv1(boolean evosLv1) {
         settingsMap.putValue(SettingsConstants.EVOS_LV_1, evosLv1);
+        return this;
+    }
+
+    public boolean isEvosSameStage() {
+        return settingsMap.getValue(SettingsConstants.EVOS_SAME_STAGE);
+    }
+
+    public Settings setEvosSameStage(boolean evosSameStage) {
+        settingsMap.putValue(SettingsConstants.EVOS_SAME_STAGE, evosSameStage);
         return this;
     }
 

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -1367,8 +1368,6 @@ public class AbstractRomTest {
         restrictions = new GenRestrictions();
         restrictions.allow_gen1 = true;
         romhandler.setPokemonPool(restrictions, romOptions);
-        System.out.println(
-                romhandler.getMainPokemonList().get(0) + ", " + romhandler.getPokemon().get(152));
         assertTrue("First element of main Pokemon list does not equal 4th index of pokemonList",
                 romhandler.getMainPokemonList().get(0) == romhandler.getPokemon().get(4));
         assertTrue("Last element of main Pokemon list does not equal 151st index of pokemonList",
@@ -1636,7 +1635,8 @@ public class AbstractRomTest {
     public void TestEvoLv1() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
-        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, true);
+        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, true,
+                false);
         for (Pokemon pk : romhandler.getMainPokemonList()) {
             // Skip index 0 since this is automatically removed from the list by the code
             if (pk.number == 0) {
@@ -1717,6 +1717,41 @@ public class AbstractRomTest {
         }
     }
 
+    @Test
+    public void TestEvoSameStage() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+
+        // Cache old evolution count for data later
+        Map<Pokemon, Integer> originalToEvosCount = new HashMap<Pokemon, Integer>();
+        Map<Pokemon, List<Evolution>> originalFromEvos = new HashMap<Pokemon, List<Evolution>>();
+        for (Pokemon pk : romhandler.getPokemon()) {
+            int preEvoCount = 0;
+            Pokemon considered = pk;
+            while (considered.evolutionsTo.size() != 0) {
+                preEvoCount++;
+                considered = considered.evolutionsTo.get(0).getFrom();
+            }
+            originalToEvosCount.put(pk, preEvoCount);
+            originalFromEvos.put(pk, pk.evolutionsFrom);
+        }
+
+        romhandler.randomizeEvolutions(false, false, false, false, false, false, false, false,
+                true);
+
+        for (Pokemon pk : romhandler.getPokemon()) {
+            for (int i = 0; i < pk.evolutionsFrom.size(); i++) {
+                Pokemon newTo = pk.evolutionsFrom.get(i).getTo();
+                Pokemon oldTo = originalFromEvos.get(pk).get(i).getTo();
+                assertTrue(
+                        "Pokemon " + pk.number + " evolved into Pokemon " + newTo.number
+                                + " with orignal stage count " + originalToEvosCount.get(newTo)
+                                + ", but should have had count " + originalToEvosCount.get(oldTo),
+                        originalToEvosCount.get(newTo) == originalToEvosCount.get(oldTo));
+            }
+        }
+    }
+
     /**
      * Function for granular modification of data model
      */
@@ -1726,7 +1761,7 @@ public class AbstractRomTest {
         startersList = new ArrayList();
         encountersList = new ArrayList();
 
-        for (int i = 0, ii = -1; i < Gen5Constants.pokemonCount + 1; i++) {
+        for (int i = 0; i < Gen5Constants.pokemonCount + 1; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
             pk.name = "";
@@ -1734,14 +1769,22 @@ public class AbstractRomTest {
             pokemonList.add(pk);
             for (int j = 0; j < i % 2; j++) {
                 Pokemon evPk = new Pokemon();
-                evPk.number = ii--;
+                evPk.number = ++i;
+                evPk.name = "";
+                evPk.primaryType = Type.values()[i % 17];
+                pokemonList.add(evPk);
                 Evolution ev = new Evolution(pk, evPk, false, EvolutionType.LEVEL, 1);
                 pk.evolutionsFrom.add(ev);
+                evPk.evolutionsTo.add(ev);
                 if (i % 3 == 0) {
                     Pokemon evPk2 = new Pokemon();
-                    evPk.number = ii--;
+                    evPk2.number = ++i;
+                    evPk2.name = "";
+                    evPk2.primaryType = Type.values()[i % 17];
+                    pokemonList.add(evPk2);
                     Evolution ev2 = new Evolution(ev.to, evPk2, false, EvolutionType.LEVEL, 1);
                     ev.to.evolutionsFrom.add(ev2);
+                    evPk2.evolutionsTo.add(ev2);
                 }
             }
         }

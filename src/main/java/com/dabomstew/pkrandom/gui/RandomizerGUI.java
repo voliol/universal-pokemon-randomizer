@@ -1021,6 +1021,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peChangeMethodsCB.setSelected(false);
         this.peEvolveLv1CB.setEnabled(false);
         this.peEvolveLv1CB.setSelected(false);
+        this.peSameStageCB.setEnabled(false);
+        this.peSameStageCB.setSelected(false);
 
         for (JCheckBox cb : tweakCheckboxes) {
             cb.setVisible(true);
@@ -1765,6 +1767,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peNoConvergeCB.setEnabled(true);
             this.peChangeMethodsCB.setEnabled(true);
             this.peEvolveLv1CB.setEnabled(true);
+            this.peSameStageCB.setEnabled(true);
         } else {
             this.peForceChangeCB.setEnabled(false);
             this.peForceChangeCB.setSelected(false);
@@ -1780,6 +1783,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peChangeMethodsCB.setSelected(false);
             this.peEvolveLv1CB.setEnabled(false);
             this.peEvolveLv1CB.setSelected(false);
+            this.peSameStageCB.setEnabled(false);
+            this.peSameStageCB.setSelected(false);
         }
 
         if (this.peEvolveLv1CB.isSelected() || !this.peEvolveLv1CB.isEnabled()) {
@@ -1974,6 +1979,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         this.peNoConvergeCB.setSelected(settings.isEvosNoConverge());
         this.peChangeMethodsCB.setSelected(settings.isEvosChangeMethod());
         this.peEvolveLv1CB.setSelected(settings.isEvosLv1());
+        this.peSameStageCB.setSelected(settings.isEvosSameStage());
 
         this.mdRandomAccuracyCB.setSelected(settings.isRandomizeMoveAccuracies());
         this.mdRandomCategoryCB.setSelected(settings.isRandomizeMoveCategory());
@@ -2179,6 +2185,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         settings.setEvosNoConverge(peNoConvergeCB.isSelected());
         settings.setEvosChangeMethod(peChangeMethodsCB.isSelected());
         settings.setEvosLv1(peEvolveLv1CB.isSelected());
+        settings.setEvosSameStage(peSameStageCB.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomAccuracyCB.isSelected());
         settings.setRandomizeMoveCategory(mdRandomCategoryCB.isSelected());
@@ -3097,6 +3104,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         peForceGrowthCB = new javax.swing.JCheckBox();
         peChangeMethodsCB = new javax.swing.JCheckBox();
         peEvolveLv1CB = new javax.swing.JCheckBox();
+        peSameStageCB = new javax.swing.JCheckBox();
         startersInnerPanel = new javax.swing.JPanel();
         starterPokemonPanel = new javax.swing.JPanel();
         spUnchangedRB = new javax.swing.JRadioButton();
@@ -3803,6 +3811,10 @@ public class RandomizerGUI extends javax.swing.JFrame {
             }
         });
 
+        peSameStageCB.setText(bundle.getString("RandomizerGUI.peSameStageCB.text")); // NOI18N
+        peSameStageCB.setToolTipText(bundle.getString("RandomizerGUI.peSameStageCB.toolTipText")); // NOI18N
+        peSameStageCB.setName(bundle.getString("RandomizerGUI.peSameStageCB.name")); // NOI18N
+
         javax.swing.GroupLayout pokemonEvolutionsPanelLayout = new javax.swing.GroupLayout(pokemonEvolutionsPanel);
         pokemonEvolutionsPanel.setLayout(pokemonEvolutionsPanelLayout);
         pokemonEvolutionsPanelLayout.setHorizontalGroup(
@@ -3814,15 +3826,16 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(peRandomRB))
                 .addGap(59, 59, 59)
                 .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(peSameTypeCB)
+                    .addComponent(peSimilarStrengthCB)
+                    .addComponent(peNoConvergeCB)
+                    .addComponent(peEvolveLv1CB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pokemonEvolutionsPanelLayout.createSequentialGroup()
-                        .addComponent(peEvolveLv1CB)
+                        .addComponent(peSameStageCB)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(pokemonEvolutionsPanelLayout.createSequentialGroup()
-                        .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(peSameTypeCB)
-                            .addComponent(peSimilarStrengthCB)
-                            .addComponent(peNoConvergeCB))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 100, Short.MAX_VALUE)
                         .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(peThreeStagesCB)
                             .addComponent(peForceGrowthCB)
@@ -3855,7 +3868,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     .addComponent(peForceGrowthCB)
                     .addComponent(goCondenseEvosCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 3, Short.MAX_VALUE)
-                .addComponent(peEvolveLv1CB))
+                .addGroup(pokemonEvolutionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(peEvolveLv1CB)
+                    .addComponent(peSameStageCB)))
         );
 
         javax.swing.GroupLayout evolutionsInnerPanelLayout = new javax.swing.GroupLayout(evolutionsInnerPanel);
@@ -5547,6 +5562,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox peForceGrowthCB;
     private javax.swing.JCheckBox peNoConvergeCB;
     private javax.swing.JRadioButton peRandomRB;
+    private javax.swing.JCheckBox peSameStageCB;
     private javax.swing.JCheckBox peSameTypeCB;
     private javax.swing.JCheckBox peSimilarStrengthCB;
     private javax.swing.JCheckBox peThreeStagesCB;

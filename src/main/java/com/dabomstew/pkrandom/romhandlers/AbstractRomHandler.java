@@ -3270,16 +3270,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeEvolutions(boolean similarStrength, boolean sameType,
             boolean changeMethods, boolean limitToThreeStages, boolean forceChange,
-            boolean noConverge, boolean forceGrowth, boolean forceLv1) {
+            boolean noConverge, boolean forceGrowth, boolean forceLv1, boolean sameStage) {
         checkPokemonRestrictions();
         this.getTemplateData().put("logEvolutions", true);
         List<Pokemon> pokemonPool = new ArrayList<Pokemon>(getMainPokemonList());
         int stageLimit = limitToThreeStages ? 3 : 10;
 
         // Cache old evolutions for data later
-        Map<Pokemon, List<Evolution>> originalEvos = new HashMap<Pokemon, List<Evolution>>();
+        Map<Pokemon, List<Evolution>> originalFromEvos = new HashMap<Pokemon, List<Evolution>>();
+        Map<Pokemon, List<Evolution>> originalToEvos = new HashMap<Pokemon, List<Evolution>>();
         for (Pokemon pk : pokemonPool) {
-            originalEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsFrom));
+            originalFromEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsFrom));
+            originalToEvos.put(pk, new ArrayList<Evolution>(pk.evolutionsTo));
         }
 
         Set<EvolutionPair> newEvoPairs = new HashSet<EvolutionPair>();
@@ -3309,12 +3311,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             Collections.shuffle(pokemonPool, this.random);
 
             for (Pokemon fromPK : pokemonPool) {
-                List<Evolution> oldEvos = originalEvos.get(fromPK);
-                if (forceLv1 && oldEvos.size() == 0) {
-                    oldEvos.add(
+                List<Evolution> oldFromEvos = originalFromEvos.get(fromPK);
+                if (forceLv1 && oldFromEvos.size() == 0) {
+                    oldFromEvos.add(
                             new Evolution(fromPK, randomPokemon(), true, EvolutionType.LEVEL, 1));
                 }
-                for (Evolution ev : oldEvos) {
+                for (Evolution ev : oldFromEvos) {
                     // Pick a Pokemon as replacement
                     replacements.clear();
 
@@ -3364,7 +3366,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                     break;
                                 } else if (numPreEvos == stageLimit - 1
                                         && pk2.evolutionsFrom.size() == 0
-                                        && originalEvos.get(pk2).size() > 0) {
+                                        && originalFromEvos.get(pk2).size() > 0) {
                                     exceededLimit = true;
                                     break;
                                 }
@@ -3438,12 +3440,28 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
 
+                    // Step 3: Prevent different stage
+                    if (sameStage) {
+                        Set<Pokemon> equalStage = new HashSet<Pokemon>();
+                        for (Pokemon pk : replacements) {
+                            if (numOldPreEvolutions(originalToEvos, pk,
+                                    stageLimit) == numOldPreEvolutions(originalToEvos, ev.to,
+                                            stageLimit)) {
+                                equalStage.add(pk);
+                            }
+                        }
+
+                        if (equalStage.size() != 0) {
+                            replacements.retainAll(equalStage);
+                        }
+                    }
+
                     if (!alreadyPicked.containsAll(replacements)
                             && (!forceLv1 || !similarStrength)) {
                         replacements.removeAll(alreadyPicked);
                     }
 
-                    // Step 3: pick - by similar strength or otherwise
+                    // Step 4: pick - by similar strength or otherwise
                     Pokemon picked = null;
 
                     if (replacements.size() == 1) {
@@ -3458,7 +3476,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         alreadyPicked.add(picked);
                     }
 
-                    // Step 4: add it to the new evos pool
+                    // Step 5: add it to the new evos pool
                     Evolution newEvo =
                             new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
                     if (changeMethods) {
@@ -4223,6 +4241,30 @@ public abstract class AbstractRomHandler implements RomHandler {
                     tries++;
                     break;
                 }
+            }
+        }
+    }
+
+    // Return the max depth of pre-evolutions a Pokemon originally had
+    private int numOldPreEvolutions(Map<Pokemon, List<Evolution>> preEvoMap, Pokemon pk,
+            int maxInterested) {
+        return numOldPreEvolutions(preEvoMap, pk, 0, maxInterested);
+    }
+
+    private int numOldPreEvolutions(Map<Pokemon, List<Evolution>> preEvoMap, Pokemon pk, int depth,
+            int maxInterested) {
+        if (preEvoMap.get(pk).size() == 0) {
+            return 0;
+        } else {
+            if (depth == maxInterested - 1) {
+                return 1;
+            } else {
+                int maxPreEvos = 0;
+                for (Evolution ev : preEvoMap.get(pk)) {
+                    maxPreEvos = Math.max(maxPreEvos,
+                            numOldPreEvolutions(preEvoMap, ev.from, depth + 1, maxInterested) + 1);
+                }
+                return maxPreEvos;
             }
         }
     }
