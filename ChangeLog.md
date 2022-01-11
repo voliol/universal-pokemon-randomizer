@@ -133,3 +133,9 @@
 - Subsets of pokemon can now be randomized instead of everything in a ROM. Details can be found in "UserGuide,txt".
 - When randomizing evolutions, you can restrict replacements to the same stage that the evolution is.
   - The main filter for evolution replacement in general is experience curve. Attempting to filter by same stage and same type can result in no change (such as the Abra line). Choosing "force change" on top of this will result in type or stage restrictions potentially being skipped, leading to odd selections for evolutions (Kadabra can only evolve into Celebi or Mew). Selecting "Standardize exp curves" will help in widening the available pool.
+- When randomizing evolutions, you can ban legendaries as an option
+- HGSS can now randomize headbutt trees
+  - Credit to [dee-ee](https://www.reddit.com/user/dee-ee/) for pointing me [to the code](https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/comment/gz8evmb/?utm_source=share&utm_medium=web2x&context=3)
+- Wild encounters are now sorted alphabetically
+- HGSS wild encounter logs now have background colors for Swarms and Radio encounters
+  - If any other logs are missing colors, please let me know!

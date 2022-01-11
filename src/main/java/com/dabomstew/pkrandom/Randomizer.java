@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
-
+import java.util.stream.Collectors;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
@@ -665,7 +665,9 @@ public class Randomizer {
     private void maybeLogWildPokemonChanges(final RomHandler romHandler) {
         if (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED) {
             List<EncounterSet> encounters =
-                    romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+                    romHandler.getEncounters(settings.isUseTimeBasedEncounters()).stream()
+                            .sorted((x, y) -> x.displayName.compareTo(y.displayName))
+                            .collect(Collectors.toList());
             romHandler.getTemplateData().put("wildPokemon", encounters);
         }
     }

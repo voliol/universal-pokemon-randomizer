@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*--  log.css - Contains stylesheet for log produced at end of              --*/ 
+/*--  log.css - Contains stylesheet for log produced at end of              --*/
 /*--  randomization.                                                        --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
@@ -42,7 +42,8 @@ table {
   empty-cells: show;
 }
 
-th, td {
+th,
+td {
   padding: 6px 8px;
   border-right: 1px solid #444;
   border-left: 1px solid #444;
@@ -60,7 +61,7 @@ td {
 }
 
 ul#toc li {
-  display:inline;
+  display: inline;
 }
 
 li {
@@ -151,7 +152,7 @@ li {
 }
 
 .error {
-  color:red;
+  color: red;
   padding: 3px 10px;
   border: solid 1px red;
   font-style: italic;
@@ -160,7 +161,7 @@ li {
 }
 
 .success {
-  color:green;
+  color: green;
   padding: 3px 10px;
   border: solid 1px green;
   font-style: italic;
@@ -195,7 +196,7 @@ li {
 }
 
 .water {
-  background-color: #2d94ff
+  background-color: #2d94ff;
 }
 
 .electric {
@@ -219,7 +220,7 @@ li {
 }
 
 .ice {
-  background-color:   #95d0fd;
+  background-color: #95d0fd;
 }
 
 .psychic {
@@ -235,7 +236,7 @@ li {
 }
 
 .fighting {
-  background-color: #bf533b
+  background-color: #bf533b;
 }
 
 .dragon {
@@ -281,12 +282,12 @@ li {
 
 .tm-list {
   list-style: none;
-  padding-left: 20px
+  padding-left: 20px;
 }
 
 .tm-list > li {
   margin: 8px 0;
-}      
+}
 
 .tm-list > li > strong {
   border-radius: 3px;
@@ -427,7 +428,6 @@ li {
   background-color: #c0d66a;
 }
 
-
 .pk-set-bug-catching-contest {
   background-color: #a7822e;
   color: #eee;
@@ -439,6 +439,19 @@ li {
 
 .pk-list-bug-catching-contest > li {
   background-color: #ecd375;
+}
+
+.pk-set-radio {
+  background-color: #942b3b;
+  color: #eee;
+}
+
+.pk-list-radio {
+  background-color: #ab2836;
+}
+
+.pk-list-radio > li {
+  background-color: #bd6e73;
 }
 
 .trainer-box {
@@ -525,4 +538,4 @@ li {
   padding: 6px 14px;
   border-radius: 8px;
   border: 2px solid #ffb262;
-} 
+}

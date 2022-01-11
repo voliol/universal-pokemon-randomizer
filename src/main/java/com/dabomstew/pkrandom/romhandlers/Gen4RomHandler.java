@@ -264,7 +264,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private List<String> abilityNames;
     private List<String> itemNames;
     private boolean loadedWildMapNames;
-    private Map<Integer, String> wildMapNames;
+    private Map<Integer, String> wildMapNames, headbuttMapNames;
 
     private RomEntry romEntry;
 
@@ -1013,6 +1013,34 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 encounters.add(swarms);
             }
         }
+
+        // Headbutt Encounters
+        String headbuttEncountersFile = romEntry.getString("HeadbuttPokemon");
+        NARCArchive headbuttEncounterData = readNARC(headbuttEncountersFile);
+        c = -1;
+        for (byte[] b : headbuttEncounterData.files) {
+            c++;
+
+            // Each headbutt encounter file starts with four bytes, which I believe are used
+            // to indicate the number of "normal" and "special" trees that are available in
+            // this area. For areas that don't contain any headbutt encounters, these four
+            // bytes constitute the only four bytes in the file, so we can stop looking at
+            // this file in this case.
+            if (b.length == 4) {
+                continue;
+            }
+
+            String mapName = headbuttMapNames.get(c);
+            EncounterSet headbuttEncounters = readHeadbuttEncountersHGSS(b, 4, 18);
+            headbuttEncounters.displayName = mapName + " Headbutt";
+
+            // Map 24 is an unused version of Route 16, but it still has valid headbutt encounter
+            // data.
+            // Avoid adding it to the list of encounters to prevent confusion.
+            if (headbuttEncounters.encounters.size() > 0 && c != 24) {
+                encounters.add(headbuttEncounters);
+            }
+        }
         return encounters;
     }
 
@@ -1051,6 +1079,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             encounters.add(enc);
         }
         return encounters;
+    }
+
+    private EncounterSet readHeadbuttEncountersHGSS(byte[] data, int offset, int amount) {
+        EncounterSet es = new EncounterSet();
+        es.rate = 1;
+        for (int i = 0; i < amount; i++) {
+            int pokemon = readWord(data, offset + i * 4);
+            if (pokemon != 0) {
+                Encounter enc = new Encounter();
+                enc.level = data[offset + 2 + i * 4];
+                enc.maxLevel = data[offset + 3 + i * 4];
+                enc.pokemon = pokes[pokemon];
+                es.encounters.add(enc);
+            }
+        }
+        return es;
     }
 
     @Override
@@ -1140,8 +1184,27 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
         }
 
+        // Write Headbutt encounters
+        String headbuttEncountersFile = romEntry.getString("HeadbuttPokemon");
+        NARCArchive headbuttEncounterData = readNARC(headbuttEncountersFile);
+        int c = -1;
+        for (byte[] b : headbuttEncounterData.files) {
+            c++;
+
+            // In getEncountersHGSS, we ignored maps with no headbutt encounter data,
+            // and we also ignored map 24 for being unused. We need to ignore them
+            // here as well to keep encounters.next() in sync with the correct file.
+            if (b.length == 4 || c == 24) {
+                continue;
+            }
+
+            EncounterSet headbutt = encounters.next();
+            writeHeadbuttEncountersHGSS(b, 4, headbutt.encounters);
+        }
+
         // Save
         writeNARC(encountersFile, encounterData);
+        writeNARC(headbuttEncountersFile, headbuttEncounterData);
 
     }
 
@@ -1160,6 +1223,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             Encounter enc = encounters.get(i);
             writeLong(data, offset + i * 8, (enc.level << 8) + enc.maxLevel);
             writeLong(data, offset + i * 8 + 4, enc.pokemon.number);
+        }
+    }
+
+    private void writeHeadbuttEncountersHGSS(byte[] data, int offset, List<Encounter> encounters) {
+        int enclength = encounters.size();
+        for (int i = 0; i < enclength; i++) {
+            Encounter enc = encounters.get(i);
+            writeWord(data, offset + i * 4, enc.pokemon.number);
+            data[offset + 2 + i * 4] = (byte) enc.level;
+            data[offset + 3 + i * 4] = (byte) enc.maxLevel;
         }
     }
 
@@ -1273,6 +1346,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private void loadWildMapNames() {
         try {
             wildMapNames = new HashMap<Integer, String>();
+            headbuttMapNames = new HashMap<Integer, String>();
             byte[] internalNames = this.readFile(getRomEntry().getString("MapTableFile"));
             int numMapHeaders = internalNames.length / 16;
             int baseMHOffset = getRomEntry().getInt("MapTableARM9Offset");
@@ -1288,6 +1362,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     if (wildSet != 255) {
                         wildMapNames.put(wildSet, mapName);
                     }
+                    headbuttMapNames.put(map, mapName);
                 } else {
                     int wildSet = readWord(arm9, baseOffset + 14);
                     if (wildSet != 65535) {
