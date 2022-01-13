@@ -631,6 +631,9 @@
 		<p>RNG Calls: ${rngCalls}<p>
 		<p>RNG Seed: ${rngSeed?long?c}<p>
 		<p>Settings: ${settingsString}<p>
+		<div>
+      		<button onclick="darkMode()">Light Mode</button>
+    	</div>
     </body>
 	<!-- HEAD section at end to enable proper FTL template colorization -->
 	<head>
@@ -640,4 +643,22 @@
 	    	<#include "log.css">
 	    </style> 
 	</head>
+	<script>
+	  var theme = "";
+	  // Set it once per load - otherwise set it below
+	  if (theme == "" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+		theme = "dark";
+		document.body.classList.add("dark-mode");
+	  }
+
+      function darkMode() {
+		if (theme=="dark") {
+			theme="light";
+			document.body.classList.remove("dark-mode");
+		} else {
+			theme="dark";
+			document.body.classList.add("dark-mode");
+		}
+      }
+    </script>
 </html>

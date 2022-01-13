@@ -139,3 +139,5 @@
 - Wild encounters are now sorted alphabetically
 - HGSS wild encounter logs now have background colors for Swarms and Radio encounters
   - If any other logs are missing colors, please let me know!
+- Logs now have Dark Mode
+  - Will start in Light Mode unless browser/system settings are configured for dark mode in a way "matchMedia" can read from

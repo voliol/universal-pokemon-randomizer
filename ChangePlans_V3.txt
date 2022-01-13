@@ -30,6 +30,7 @@ Try to automatically create all boilerplate settings code (get setting, set sett
 Redo code to use PokemonSet
 Redo Gen4 WriteEncounters to not use iterator
 Unit Tests use common data model
+Unit tests deterministic (random should print seed and be sourced from manually input seed)
 Replace versioning system with more robust model (190 -> 1100 is stupid, maybe find maven package for versioning)
 Gen4 Trades should use new pokemon (still uses old pokemon)
 Gen4 leader TM should use new names
