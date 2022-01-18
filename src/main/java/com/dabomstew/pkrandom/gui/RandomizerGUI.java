@@ -1424,16 +1424,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spUniqueTypesCB.setEnabled(true);
             this.spBaseEvoCB.setEnabled(true);
             this.spBSTLimitCB.setEnabled(true);
-            this.spExactEvoCB.setEnabled(true);
-            this.spRandomSlider.setEnabled(true);
             this.spSETriangleCB.setEnabled(true);
             this.spNoSplitCB.setEnabled(true);
-            if (this.spSETriangleCB.isSelected()) {
-                this.spTypeFilterButton.setEnabled(false);
-                this.starterTypes = null;
-            } else {
-                this.spTypeFilterButton.setEnabled(true);
-            }
         } else {
             this.spUniqueTypesCB.setSelected(false);
             this.spUniqueTypesCB.setEnabled(false);
@@ -1441,17 +1433,28 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spBaseEvoCB.setSelected(false);
             this.spBSTLimitCB.setEnabled(false);
             this.spBSTLimitCB.setSelected(false);
-            this.spExactEvoCB.setEnabled(false);
-            this.spExactEvoCB.setSelected(false);
-            this.spRandomSlider.setEnabled(false);
-            this.spRandomSlider.setValue(this.spRandomSlider.getMinimum());
             this.spSETriangleCB.setEnabled(false);
             this.spSETriangleCB.setSelected(false);
             this.spTypeFilterButton.setEnabled(false);
             this.spNoSplitCB.setEnabled(false);
             this.spNoSplitCB.setSelected(false);
+        }
 
+        if (this.spRandomRB.isSelected() && !this.peEvolveLv1CB.isSelected()) {
+            this.spExactEvoCB.setEnabled(true);
+            this.spRandomSlider.setEnabled(true);
+        } else {
+            this.spExactEvoCB.setEnabled(false);
+            this.spExactEvoCB.setSelected(false);
+            this.spRandomSlider.setEnabled(false);
+            this.spRandomSlider.setValue(this.spRandomSlider.getMinimum());
+        }
+
+        if (this.spSETriangleCB.isSelected()) {
+            this.spTypeFilterButton.setEnabled(false);
             this.starterTypes = null;
+        } else {
+            this.spTypeFilterButton.setEnabled(true);
         }
 
         if (this.spBSTLimitCB.isSelected()) {

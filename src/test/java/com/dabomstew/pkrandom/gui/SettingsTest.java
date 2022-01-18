@@ -956,6 +956,121 @@ public class SettingsTest extends AbstractUIBase {
                                 (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
                                 (settings) -> settings.getEvolutionsMod(), "Evolutions");
 
+                // TODO: EvoLv1 disables random slider and exact evos
+        }
+
+        /**
+         * Selecting "Force Lv1 Evo" disables "Exact Evo" starters option and random slider
+         * 
+         * Toggles checkbox and verifies correct enable/disable behavior
+         * 
+         * Checks that values are reset to default if disabled
+         * 
+         * @throws IOException
+         */
+        @Test(timeout = 4000)
+        public void TestEvolveLevel1DisablesExactEvoStarters() throws IOException {
+                JRadioButtonFixture unchangedEvolveRBFixture =
+                                getRadioButtonByName("peUnchangedRB");
+                JRadioButtonFixture randomEvolveRBFixture = getRadioButtonByName("peRandomRB");
+                JCheckBoxFixture peEvolveLv1CBFixture = getCheckBoxByName("peEvolveLv1CB");
+
+                JRadioButtonFixture unchangedStartersRBFixture =
+                                getRadioButtonByName("spUnchangedRB");
+                JRadioButtonFixture randomStartersRBFixture = getRadioButtonByName("spRandomRB");
+                JCheckBoxFixture exactEvoCB = getCheckBoxByName("spExactEvoCB");
+                JSliderFixture spRandomSlider = getSliderByName("spRandomSlider");
+
+                // Sanity Check
+                AtomicInteger settingsReloadCount = new AtomicInteger(0);
+                testConditions(() -> {
+                        radioButtonSelected(unchangedEvolveRBFixture, (
+                                        evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
+                                        (settings) -> settings.getEvolutionsMod(), "Evolutions");
+                        radioButtonSelected(unchangedStartersRBFixture, (
+                                        startersMod) -> startersMod == Settings.StartersMod.UNCHANGED,
+                                        (settings) -> settings.getStartersMod(), "Starters");
+                        checkboxNotEnabledAndNotSelected(peEvolveLv1CBFixture,
+                                        (settings) -> settings.isEvosLv1());
+                        checkboxNotEnabledAndNotSelected(exactEvoCB,
+                                        (settings) -> settings.isStartersExactEvo());
+                        sliderNotEnabledAndValueMatches(spRandomSlider,
+                                        (settings) -> settings.getStartersMinimumEvos() == 0,
+                                        "Random Starters Slider");
+                }, settingsReloadCount);
+
+                // Turn random starters on
+                clickRBAndWait(randomStartersRBFixture);
+                testConditions(() -> {
+                        radioButtonSelected(unchangedEvolveRBFixture, (
+                                        evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
+                                        (settings) -> settings.getEvolutionsMod(), "Evolutions");
+                        radioButtonSelected(randomStartersRBFixture,
+                                        (startersMod) -> startersMod == Settings.StartersMod.RANDOM,
+                                        (settings) -> settings.getStartersMod(), "Starters");
+                        checkboxNotEnabledAndNotSelected(peEvolveLv1CBFixture,
+                                        (settings) -> settings.isEvosLv1());
+                        checkboxEnabledButNotSelected(exactEvoCB,
+                                        (settings) -> settings.isStartersExactEvo());
+                        sliderEnabledAndValueMatches(spRandomSlider,
+                                        (settings) -> settings.getStartersMinimumEvos() == 0,
+                                        "Random Starters Slider");
+                }, settingsReloadCount);
+
+                // Turn random evolutions on
+                clickRBAndWait(randomEvolveRBFixture);
+                testConditions(() -> {
+                        radioButtonSelected(randomEvolveRBFixture, (
+                                        evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
+                                        (settings) -> settings.getEvolutionsMod(), "Evolutions");
+                        radioButtonSelected(randomEvolveRBFixture,
+                                        (startersMod) -> startersMod == Settings.StartersMod.RANDOM,
+                                        (settings) -> settings.getStartersMod(), "Starters");
+                        checkboxEnabledButNotSelected(peEvolveLv1CBFixture,
+                                        (settings) -> settings.isEvosLv1());
+                        checkboxEnabledButNotSelected(exactEvoCB,
+                                        (settings) -> settings.isStartersExactEvo());
+                        sliderEnabledAndValueMatches(spRandomSlider,
+                                        (settings) -> settings.getStartersMinimumEvos() == 0,
+                                        "Random Starters Slider");
+                }, settingsReloadCount);
+
+                // Turn "Exact Evo" on and move "Random Slider" to maximum
+                exactEvoCB.requireEnabled().requireVisible().click();
+                spRandomSlider.slideToMaximum();
+                testConditions(() -> {
+                        radioButtonSelected(randomEvolveRBFixture, (
+                                        evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
+                                        (settings) -> settings.getEvolutionsMod(), "Evolutions");
+                        radioButtonSelected(randomEvolveRBFixture,
+                                        (startersMod) -> startersMod == Settings.StartersMod.RANDOM,
+                                        (settings) -> settings.getStartersMod(), "Starters");
+                        checkboxEnabledButNotSelected(peEvolveLv1CBFixture,
+                                        (settings) -> settings.isEvosLv1());
+                        checkboxEnabledAndSelected(exactEvoCB,
+                                        (settings) -> settings.isStartersExactEvo());
+                        sliderEnabledAndValueMatches(spRandomSlider,
+                                        (settings) -> settings.getStartersMinimumEvos() == 2,
+                                        "Random Starters Slider");
+                }, settingsReloadCount);
+
+                // Turn "Force Lv1 Evo" on
+                clickCBAndWait(peEvolveLv1CBFixture);
+                testConditions(() -> {
+                        radioButtonSelected(randomEvolveRBFixture, (
+                                        evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
+                                        (settings) -> settings.getEvolutionsMod(), "Evolutions");
+                        radioButtonSelected(randomEvolveRBFixture,
+                                        (startersMod) -> startersMod == Settings.StartersMod.RANDOM,
+                                        (settings) -> settings.getStartersMod(), "Starters");
+                        checkboxEnabledAndSelected(peEvolveLv1CBFixture,
+                                        (settings) -> settings.isEvosLv1());
+                        checkboxNotEnabledAndNotSelected(exactEvoCB,
+                                        (settings) -> settings.isStartersExactEvo());
+                        sliderNotEnabledAndValueMatches(spRandomSlider,
+                                        (settings) -> settings.getStartersMinimumEvos() == 0,
+                                        "Random Starters Slider");
+                }, settingsReloadCount);
         }
 
         /**
@@ -1568,5 +1683,49 @@ public class SettingsTest extends AbstractUIBase {
                 assertTrue(cbFixture.text() + " was not enabled", cbFixture.isEnabled());
                 assertTrue(cbFixture.text() + " was selected",
                                 cbFixture.requireSelected() == cbFixture);
+        }
+
+        /**
+         * Checks if a slider is disabled, and confirms the settings state matches provided
+         * expectations
+         * 
+         * @param sliderFixture - The slider being tested
+         * @param settingsSliderFunction - The method in Settings.java that refers to the state of
+         *                the slider
+         * @param sliderName - The name of this slider (for better error messages)
+         */
+        private void sliderNotEnabledAndValueMatches(JSliderFixture sliderFixture,
+                        Predicate<Settings> settingsSliderFunction, String sliderName) {
+                Settings settings = null;
+                try {
+                        settings = this.mainWindow.getCurrentSettings();
+                } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                }
+                assertTrue(sliderName + " did not match expected settings value",
+                                settingsSliderFunction.test(settings));
+                assertFalse(sliderName + " was enabled", sliderFixture.isEnabled());
+        }
+
+        /**
+         * Checks if a slider is disabled, and confirms the settings state matches provided
+         * expectations
+         * 
+         * @param sliderFixture - The slider being tested
+         * @param settingsSliderFunction - The method in Settings.java that refers to the state of
+         *                the slider
+         * @param sliderName - The name of this slider (for better error messages)
+         */
+        private void sliderEnabledAndValueMatches(JSliderFixture sliderFixture,
+                        Predicate<Settings> settingsSliderFunction, String sliderName) {
+                Settings settings = null;
+                try {
+                        settings = this.mainWindow.getCurrentSettings();
+                } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                }
+                assertTrue(sliderName + " did not match expected settings value",
+                                settingsSliderFunction.test(settings));
+                assertTrue(sliderName + " was disabled", sliderFixture.isEnabled());
         }
 }

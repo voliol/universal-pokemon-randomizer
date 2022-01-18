@@ -1,11 +1,11 @@
 package com.dabomstew.pkrandom.settings;
 
-import java.util.Arrays;
-
 /*----------------------------------------------------------------------------*/
-/*--  SettingsOptionFactory.java - encapsulates the instantiation of        --*/
-/*--                               SettingsOption objects to reduce         --*/
-/*--                               creation parameters into easier modules  --*/
+/*--  PredicateArray.java - represents an array of PredicatePairs that form --*/
+/*--                        a logical AND situation between two or more     --*/
+/*--                        PredicatePair objects.                          --*/
+/*--                        Enables a child SettingsOption object to define --*/
+/*--                        when its state is allowed to be changed         --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -27,36 +27,39 @@ import java.util.Arrays;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public class SettingsOptionFactory {
-    private static SettingsOptionFactory instance;
-    private SettingsMap settingsMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Optional;
 
-    private SettingsOptionFactory() {}
+public class PredicateArray {
+    private ArrayList<PredicatePair> predicateArray;
+    private HashMap<SettingsOption, Boolean> predicatePairResults;
 
-    public static SettingsOptionFactory getInstance() {
-        if (instance == null) {
-            instance = new SettingsOptionFactory();
-        }
-        return instance;
+    public PredicateArray(PredicatePair[] predicates) {
+        this.predicateArray = new ArrayList<PredicatePair>(Arrays.asList(predicates));
+        predicatePairResults = new HashMap<SettingsOption, Boolean>();
     }
 
-    public static void setSettingsMap(SettingsMap refMap) {
-        getInstance().settingsMap = refMap;
+    public boolean isValueRandomizable(SettingsOption item) {
+        // See if item is in the predicateArray and then set the result
+        Optional<PredicatePair> match =
+                predicateArray.stream().filter(p -> p.getParent() == item).findFirst();
+
+        if (match.isPresent()) {
+            predicatePairResults.put(item, match.get().test(item));
+        }
+
+        // Cannot randomize until all parents have run and all results are true
+        if (predicatePairResults.size() == predicateArray.size()) {
+            return predicatePairResults.values().stream().allMatch(v -> v);
+        }
+
+        // Return false if all conditions fail
+        return false;
     }
 
-    public static <T> SettingsOptionComposite<T> createSettingsOption(
-            SettingsOption.Builder builder) {
-        SettingsOptionComposite<T> soc = builder.build();
-        if (soc.getMatches().size() > 0) {
-            soc.setIsChild(true);
-            soc.getMatches().forEach(match -> match.getParent().add(soc));
-        } else if (soc.getMultiMatches().size() > 0) {
-            soc.setIsChild(true);
-            soc.getMultiMatches().forEach(predicateArray -> predicateArray.setChildren(soc));
-        } else {
-            soc.setIsChild(false);
-        }
-        getInstance().settingsMap.putOption(soc.getName(), soc);
-        return soc;
+    public void setChildren(SettingsOption item) {
+        predicateArray.forEach(p -> p.getParent().add(item));
     }
 }

@@ -47,6 +47,8 @@ public interface SettingsOption<T> {
 
     public ArrayList<PredicatePair> getMatches();
 
+    public ArrayList<PredicateArray> getMultiMatches();
+
     public void randomValue(Random random, Integer generationOfRom);
 
     public void attemptRandomValue(Random random, SettingsOption item, Integer generationOfRom);
@@ -58,6 +60,7 @@ public interface SettingsOption<T> {
 
         // Optional parameters
         private PredicatePair[] matches;
+        private List<PredicatePair[]> multiMatches;
         private IntStream validInts;
         private Integer[] validGenerations;
         private List validItems;
@@ -67,8 +70,33 @@ public interface SettingsOption<T> {
             this.value = value;
         }
 
+        /**
+         * Any PredicatePair which can be true independent of other conditions to pass
+         * 
+         * @param matches Any sequence of PredicatePairs where at least one must be true to be valid
+         * @return Builder
+         */
         public Builder addMatches(PredicatePair... matches) {
             this.matches = matches;
+            return this;
+        }
+
+        /**
+         * Requires all PredicatePairs provided to be true for this condition to pass.
+         * 
+         * Each usage of "addMultiMatches" is considered independent of other conditions. The group
+         * is treated as a single unit of truth alongside anything in "addMatches" or other
+         * "addMultiMatches"
+         * 
+         * @param matches Any sequence of PredicatePairs which must all be simultaneously true to be
+         *            valid
+         * @return Builder
+         */
+        public Builder addMultiMatch(PredicatePair... matches) {
+            if (multiMatches == null) {
+                multiMatches = new ArrayList<PredicatePair[]>();
+            }
+            multiMatches.add(matches);
             return this;
         }
 
@@ -90,23 +118,23 @@ public interface SettingsOption<T> {
         public SettingsOptionComposite build() {
             if (value instanceof Boolean) {
                 return new SettingsOptionComposite<Boolean>(new BooleanSettingsOption(name,
-                        (Boolean) value, matches, validGenerations));
+                        (Boolean) value, matches, multiMatches, validGenerations));
             } else if (value instanceof GenRestrictions) {
                 return new SettingsOptionComposite<GenRestrictions>(
                         new GenRestrictionsSettingsOption(name, (GenRestrictions) value, matches,
-                                validGenerations));
+                                multiMatches, validGenerations));
             } else if (value instanceof Enum) {
-                return new SettingsOptionComposite<Enum>(
-                        new EnumSettingsOption(name, (Enum) value, matches, validGenerations));
+                return new SettingsOptionComposite<Enum>(new EnumSettingsOption(name, (Enum) value,
+                        matches, multiMatches, validGenerations));
             } else if (value instanceof int[]) {
                 return new SettingsOptionComposite<int[]>(new IntArraySettingsOption(name,
-                        (int[]) value, validInts, matches, validGenerations));
+                        (int[]) value, validInts, matches, multiMatches, validGenerations));
             } else if (value instanceof Integer) {
                 return new SettingsOptionComposite<Integer>(new IntSettingsOption(name,
-                        (Integer) value, validInts, matches, validGenerations));
+                        (Integer) value, validInts, matches, multiMatches, validGenerations));
             } else if (value instanceof List) {
                 return new SettingsOptionComposite<List>(new ListSettingsOption(name, (List) value,
-                        matches, validItems, validGenerations));
+                        matches, multiMatches, validItems, validGenerations));
             } else {
                 String className = value == null ? "Null" : value.getClass().toString();
                 throw new RuntimeException(className + " has no supported factory.");
@@ -123,10 +151,11 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
     protected T value;
     protected Boolean isChild;
     protected ArrayList<PredicatePair> matches;
+    protected ArrayList<PredicateArray> multiMatches;
     protected ArrayList<Integer> validGenerations;
 
     protected AbstractSettingsOption(String name, T value, PredicatePair[] matches,
-            Integer[] validGenerations) {
+            List<PredicatePair[]> multiMatches, Integer[] validGenerations) {
         this.name = name;
         this.defaultValue = value;
         this.value = value;
@@ -135,6 +164,10 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
             this.matches = new ArrayList<PredicatePair>(Arrays.asList(matches));
         } else {
             this.matches = new ArrayList<PredicatePair>();
+        }
+        this.multiMatches = new ArrayList<PredicateArray>();
+        if (multiMatches != null) {
+            multiMatches.forEach(p -> this.multiMatches.add(new PredicateArray(p)));
         }
         if (validGenerations != null) {
             this.validGenerations = new ArrayList<Integer>(Arrays.asList(validGenerations));
@@ -174,8 +207,14 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
     }
 
     @Override
+    public ArrayList<PredicateArray> getMultiMatches() {
+        return multiMatches;
+    }
+
+    @Override
     public void attemptRandomValue(Random random, SettingsOption item, Integer generationOfRom) {
-        if (matches.stream().anyMatch((match) -> match.test(item))) {
+        if (matches.stream().anyMatch((match) -> match.test(item))
+                || multiMatches.stream().anyMatch(arr -> arr.isValueRandomizable(item))) {
             randomValue(random, generationOfRom);
         } else {
             setItem(defaultValue);
@@ -187,8 +226,8 @@ abstract class AbstractSettingsOption<T> implements SettingsOption<T> {
 class BooleanSettingsOption extends AbstractSettingsOption<Boolean> {
 
     public BooleanSettingsOption(String name, Boolean value, PredicatePair[] matches,
-            Integer[] validGenerations) {
-        super(name, value, matches, validGenerations);
+            List<PredicatePair[]> multiMatches, Integer[] validGenerations) {
+        super(name, value, matches, multiMatches, validGenerations);
     }
 
     @Override
@@ -203,8 +242,8 @@ class BooleanSettingsOption extends AbstractSettingsOption<Boolean> {
 class EnumSettingsOption extends AbstractSettingsOption<Enum> {
 
     public EnumSettingsOption(String name, Enum value, PredicatePair[] matches,
-            Integer[] validGenerations) {
-        super(name, value, matches, validGenerations);
+            List<PredicatePair[]> multiMatches, Integer[] validGenerations) {
+        super(name, value, matches, multiMatches, validGenerations);
     }
 
     /**
@@ -225,8 +264,9 @@ class IntArraySettingsOption extends AbstractSettingsOption<int[]> {
     private IntStream allowedValues;
 
     public IntArraySettingsOption(String name, int[] value, IntStream allowedValues,
-            PredicatePair[] matches, Integer[] validGenerations) {
-        super(name, value, matches, validGenerations);
+            PredicatePair[] matches, List<PredicatePair[]> multiMatches,
+            Integer[] validGenerations) {
+        super(name, value, matches, multiMatches, validGenerations);
         if (allowedValues == null) {
             throw new IllegalArgumentException(
                     "IntArraySettingsOption must contain a non-null allowedValues");
@@ -257,8 +297,9 @@ class IntSettingsOption extends AbstractSettingsOption<Integer> {
     private IntStream allowedValues;
 
     public IntSettingsOption(String name, int value, IntStream allowedValues,
-            PredicatePair[] matches, Integer[] validGenerations) {
-        super(name, value, matches, validGenerations);
+            PredicatePair[] matches, List<PredicatePair[]> multiMatches,
+            Integer[] validGenerations) {
+        super(name, value, matches, multiMatches, validGenerations);
         if (allowedValues == null) {
             throw new IllegalArgumentException(
                     "IntSettingsOption must contain a non-null allowedValues");
@@ -288,8 +329,8 @@ class ListSettingsOption<T> extends AbstractSettingsOption<List<T>> {
     private List<T> allowedItems;
 
     public ListSettingsOption(String name, List<T> value, PredicatePair[] matches,
-            List<T> allowedItems, Integer[] validGenerations) {
-        super(name, value, matches, validGenerations);
+            List<PredicatePair[]> multiMatches, List<T> allowedItems, Integer[] validGenerations) {
+        super(name, value, matches, multiMatches, validGenerations);
         if (allowedItems == null) {
             throw new IllegalArgumentException(
                     "ListSettingsOption must contain a non-null allowedItems");
@@ -319,8 +360,9 @@ class ListSettingsOption<T> extends AbstractSettingsOption<List<T>> {
 class GenRestrictionsSettingsOption extends AbstractSettingsOption<GenRestrictions> {
 
     public GenRestrictionsSettingsOption(String name, GenRestrictions value,
-            PredicatePair[] matches, Integer[] validGenerations) {
-        super(name, value, matches, validGenerations);
+            PredicatePair[] matches, List<PredicatePair[]> multiMatches,
+            Integer[] validGenerations) {
+        super(name, value, matches, multiMatches, validGenerations);
     }
 
     @Override
@@ -431,6 +473,11 @@ class SettingsOptionComposite<T> implements SettingsOption<T> {
     @Override
     public ArrayList<PredicatePair> getMatches() {
         return value.getMatches();
+    }
+
+    @Override
+    public ArrayList<PredicateArray> getMultiMatches() {
+        return value.getMultiMatches();
     }
 
     @Override

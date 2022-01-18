@@ -281,13 +281,18 @@ public class Settings {
                         .addMatches(
                                 new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
         SettingsOptionComposite startersExactEvos = SettingsOptionFactory.createSettingsOption(
-                new SettingsOption.Builder(SettingsConstants.STARTERS_EXACT_EVOS, false).addMatches(
-                        new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM)));
-        SettingsOptionComposite startersMinimumEvos = SettingsOptionFactory.createSettingsOption(
-                new SettingsOption.Builder(SettingsConstants.STARTERS_MINIMUM_EVOS, 0)
-                        .addMatches(
-                                new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM))
-                        .addValidInts(0, 2));
+                new SettingsOption.Builder(SettingsConstants.STARTERS_EXACT_EVOS, false)
+                        .addMultiMatch(
+                                new PredicatePair(startersMod, PredicatePair.STARTERS_MOD_RANDOM),
+                                new PredicatePair(evosLv1, PredicatePair.BOOLEAN_FALSE)));
+        SettingsOptionComposite startersMinimumEvos =
+                SettingsOptionFactory.createSettingsOption(
+                        new SettingsOption.Builder(SettingsConstants.STARTERS_MINIMUM_EVOS, 0)
+                                .addMultiMatch(
+                                        new PredicatePair(startersMod,
+                                                PredicatePair.STARTERS_MOD_RANDOM),
+                                        new PredicatePair(evosLv1, PredicatePair.BOOLEAN_FALSE))
+                                .addValidInts(0, 2));
         SettingsOptionComposite startersSETriangle = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.STARTERS_SE_TRIANGLE, false)
                         .addMatches(

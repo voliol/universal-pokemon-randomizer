@@ -13,7 +13,8 @@
 * Disable legendary evolutions when randomizing evolutions
 * Randomize headbutt tree encounters in HGSS (works in gen 2 not gen 4, see https://github.com/Ajarmar/universal-pokemon-randomizer-zx/commit/c1f278fd13bf0ac23f9ed20f638b8c8754b4f348)
 * Fix HGSS wild encounters having no backgorund
-Add dark mode
+* Add dark mode
+Fix randomStarter logging to use min evos and either + or exact as header (2evos+ or 2evos exact)
 Randomize roaming pokemon in Gen 3+ (https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h4iiwzw?utm_source=share&utm_medium=web2x&context=3)
 Update Type Effectiveness to Gen 8 (https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
 randomizable_809 ROM support for Fairy type (maybe just set fairy to 0x17, ideally parse a types table and align)
@@ -31,7 +32,9 @@ Redo code to use PokemonSet
 Redo Gen4 WriteEncounters to not use iterator
 Unit Tests use common data model
 Unit tests deterministic (random should print seed and be sourced from manually input seed)
+Unit test more GenRestrictions
 Replace versioning system with more robust model (190 -> 1100 is stupid, maybe find maven package for versioning)
+Add docstrings to all functions
 Gen4 Trades should use new pokemon (still uses old pokemon)
 Gen4 leader TM should use new names
 TM text updates for Gen 5 (use new names)

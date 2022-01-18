@@ -124,6 +124,7 @@
 
 - All pokemon can evolve at level 1
   - If `Change Methods` is chosen, all pokemon will evolve with a random method and level evolutions will NOT be at 1
+  - If `Random Starters` is chosen, slider will be set to 0 and `Exact Evos` will be false as there is no end to an evolution chain
   - Evolution paths in the log will only display pokemon where nothing evolves into them
 - `Force Fully Evolved` and `Modify Trainer Level` are available to use regardless of trainer option selected
 - Rotom has been removed from the legendary pool list
@@ -131,6 +132,8 @@
 - `Allow Low Level Evolution` wild pokemon setting now correctly toggles behavior in the randomizer
 - `LEVEL_ITEM_DAY`, `LEVEL_ITEM_NIGHT`, and `TRADE_ITEM` should correctly avoid duplicates. _should_
 - Subsets of pokemon can now be randomized instead of everything in a ROM. Details can be found in "UserGuide,txt".
+  - `LimitPokemon` now restricts the pool of pokemon eligible for randomization to align with this new subset feature.
+  - Logs will still show all pokemon, even if they weren't randomized, to give a complete game guide.
 - When randomizing evolutions, you can restrict replacements to the same stage that the evolution is.
   - The main filter for evolution replacement in general is experience curve. Attempting to filter by same stage and same type can result in no change (such as the Abra line). Choosing "force change" on top of this will result in type or stage restrictions potentially being skipped, leading to odd selections for evolutions (Kadabra can only evolve into Celebi or Mew). Selecting "Standardize exp curves" will help in widening the available pool.
 - When randomizing evolutions, you can ban legendaries as an option
@@ -141,3 +144,4 @@
   - If any other logs are missing colors, please let me know!
 - Logs now have Dark Mode
   - Will start in Light Mode unless browser/system settings are configured for dark mode in a way "matchMedia" can read from
+- Fixes potential error with `LimitPokemon` where only 1 related pokemon was included in the batch, rather than all in the evolution line that met the criteria

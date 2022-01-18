@@ -44,20 +44,21 @@ public class PredicatePair {
     // Specific enum states. More selective than "anything but unchanged"
     // Add more as needed. Do not change existing ones unless a new radio button
     // option is added that should be part of that group
-    public static final Predicate<StartersMod> STARTERS_MOD_CUSTOM = (item) ->
-        item == StartersMod.CUSTOM;
-    public static final Predicate<StartersMod> STARTERS_MOD_RANDOM = (item) ->
-        item == StartersMod.RANDOM;
-    public static final Predicate<TypesMod> TYPES_MOD_RANDOM = (item) -> 
-        item == TypesMod.RANDOM_RETAIN || item == TypesMod.COMPLETELY_RANDOM;
-    public static final Predicate<MovesetsMod> MOVESETS_MOD_RANDOM = (item) ->
-        item == MovesetsMod.RANDOM_PREFER_SAME_TYPE || item == MovesetsMod.COMPLETELY_RANDOM;
-    public static final Predicate<TrainersMod> TRAINERS_MOD_RANDOM = (item) -> 
-        item == TrainersMod.RANDOM;
+    public static final Predicate<StartersMod> STARTERS_MOD_CUSTOM =
+            (item) -> item == StartersMod.CUSTOM;
+    public static final Predicate<StartersMod> STARTERS_MOD_RANDOM =
+            (item) -> item == StartersMod.RANDOM;
+    public static final Predicate<TypesMod> TYPES_MOD_RANDOM =
+            (item) -> item == TypesMod.RANDOM_RETAIN || item == TypesMod.COMPLETELY_RANDOM;
+    public static final Predicate<MovesetsMod> MOVESETS_MOD_RANDOM =
+            (item) -> item == MovesetsMod.RANDOM_PREFER_SAME_TYPE
+                    || item == MovesetsMod.COMPLETELY_RANDOM;
+    public static final Predicate<TrainersMod> TRAINERS_MOD_RANDOM =
+            (item) -> item == TrainersMod.RANDOM;
 
     private SettingsOptionComposite parent;
     private Predicate parentState;
-    
+
     public PredicatePair(SettingsOptionComposite parent, Predicate parentState) {
         this.parent = parent;
         this.parentState = parentState;
@@ -76,9 +77,10 @@ public class PredicatePair {
         return parent;
     }
 
-    /** Determine if the enum is the same value as the first value of the enum.
-    *** The first value is assumed to always be "UNCHANGED"
-    */
+    /**
+     * Determine if the enum is the same value as the first value of the enum. The first value is
+     * assumed to always be "UNCHANGED"
+     */
     private static boolean isEnumDefault(Enum value) {
         Enum[] values = value.getClass().getEnumConstants();
         return value == values[0];

@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import freemarker.template.Template;
@@ -198,7 +199,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> getPokesFromRange(List<Pokemon> allPokemon, int range_min,
             int range_max) {
         return allPokemon.stream()
-                .filter(p -> p.getNumber() >= range_min && p.getNumber() <= range_max)
+                .filter(p -> p != null && p.getNumber() >= range_min && p.getNumber() <= range_max)
                 .collect(Collectors.toList());
     }
 
@@ -212,10 +213,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             newPokemon.addAll(p.evolutionsTo.stream()
                     .filter(ev -> ev.from.number >= second_min && ev.from.number <= second_max)
-                    .map(ev -> ev.getTo()).collect(Collectors.toList()));
+                    .map(ev -> ev.getFrom()).collect(Collectors.toList()));
         });
 
-        pokemonPool.addAll(newPokemon);
+        newPokemon.forEach(pk -> addRelatedPokemon(pokemonPool, pk, second_min, second_max,
+                evPk -> evPk.getEvolutionsFrom(), ev -> ev.getTo()));
+        newPokemon.forEach(pk -> addRelatedPokemon(pokemonPool, pk, second_min, second_max,
+                evPk -> evPk.getEvolutionsTo(), ev -> ev.getFrom()));
+    }
+
+    private void addRelatedPokemon(List<Pokemon> pokemonPool, Pokemon pk, int min, int max,
+            Function<Pokemon, List<Evolution>> evolutions, Function<Evolution, Pokemon> evo) {
+        if (pk.number >= min && pk.number <= max) {
+            pokemonPool.add(pk);
+            evolutions.apply(pk).forEach(
+                    ev -> addRelatedPokemon(pokemonPool, evo.apply(ev), min, max, evolutions, evo));
+        }
     }
 
     @Override
@@ -515,7 +528,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             for (Pokemon pk : this.getMainPokemonList()) {
                 if (pk != null) {
-                    int length = evolutionChainSize(pk);
+                    int length = 1;
+                    if (minimumEvos > 0 || exactEvos) {
+                        length = evolutionChainSize(pk);
+                    }
+
                     // Check if starter has correct evo count
                     // ExactEvos means minimum evos must equal length. Stages counts base pokemon,
                     // hence
@@ -2975,7 +2992,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeWildHeldItems(boolean banBadItems) {
-        List<Pokemon> pokemon = allPokemonWithoutNull();
+        List<Pokemon> pokemon = this.getMainPokemonList();
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
         for (Pokemon pk : pokemon) {
             if (pk.guaranteedHeldItem == -1 && pk.commonHeldItem == -1 && pk.rareHeldItem == -1
@@ -3619,7 +3636,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary) {
-        List<Pokemon> pokes = getPokemon();
+        List<Pokemon> pokes = this.getMainPokemonList();
         for (Pokemon pkmn : pokes) {
             if (pkmn == null) {
                 continue;
@@ -3632,7 +3649,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void standardizeEXPCurves() {
-        List<Pokemon> pokes = getPokemon();
+        List<Pokemon> pokes = this.getMainPokemonList();
         for (Pokemon pkmn : pokes) {
             if (pkmn == null) {
                 continue;
