@@ -145,3 +145,4 @@
 - Logs now have Dark Mode
   - Will start in Light Mode unless browser/system settings are configured for dark mode in a way "matchMedia" can read from
 - Fixes potential error with `LimitPokemon` where only 1 related pokemon was included in the batch, rather than all in the evolution line that met the criteria
+- Adds more specific headers in logs for Starter randomization

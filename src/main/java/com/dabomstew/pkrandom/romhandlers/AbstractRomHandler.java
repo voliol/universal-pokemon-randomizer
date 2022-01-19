@@ -515,16 +515,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (starterPokes == null) {
             // Prepare the list
             starterPokes = new PokemonSet();
-            switch (minimumEvos) {
-                case 0:
-                    this.getTemplateData().put("logStarters", "random");
-                    break;
-                case 1:
-                    this.getTemplateData().put("logStarters", "1or2evo");
-                    break;
-                case 2:
-                    this.getTemplateData().put("logStarters", "2evo");
-                    break;
+            if (exactEvos) {
+                this.getTemplateData().put("logStarters",
+                        "Exactly " + minimumEvos + " Evolution Starters");
+            } else {
+                this.getTemplateData().put("logStarters", minimumEvos + "+ Evolution Starters");
             }
             for (Pokemon pk : this.getMainPokemonList()) {
                 if (pk != null) {

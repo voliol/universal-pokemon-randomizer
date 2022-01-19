@@ -757,13 +757,25 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
-        assertEquals("random", romhandler.getTemplateData().get("logStarters"));
+        assertEquals("0+ Evolution Starters", romhandler.getTemplateData().get("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null);
-        assertEquals("1or2evo", romhandler.getTemplateData().get("logStarters"));
+        assertEquals("1+ Evolution Starters", romhandler.getTemplateData().get("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null);
-        assertEquals("2evo", romhandler.getTemplateData().get("logStarters"));
+        assertEquals("2+ Evolution Starters", romhandler.getTemplateData().get("logStarters"));
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null);
+        assertEquals("Exactly 0 Evolution Starters",
+                romhandler.getTemplateData().get("logStarters"));
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null);
+        assertEquals("Exactly 1 Evolution Starters",
+                romhandler.getTemplateData().get("logStarters"));
+        romhandler.clearStarterPokes();
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null);
+        assertEquals("Exactly 2 Evolution Starters",
+                romhandler.getTemplateData().get("logStarters"));
     }
 
     @Test

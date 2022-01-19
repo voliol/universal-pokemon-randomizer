@@ -364,14 +364,8 @@
     		<#case "custom">
     			<h2 id="rs">Custom Starters</h2>
     		<#break>
-    		<#case "random">
-    			<h2 id="rs">Random Starters</h2>
-    		<#break>
-    		<#case "1or2evo">
-    			<h2 id="rs">Random 1/2-Evolution Starters</h2>
-    		<#break>
-    		<#case "2evo">
-    			<h2 id="rs">Random 2-Evolution Starters</h2>
+    		<#default>
+    			<h2 id="rs">${logStarters}</h2>
     		<#break>
     	</#switch>
     	   <ul>
