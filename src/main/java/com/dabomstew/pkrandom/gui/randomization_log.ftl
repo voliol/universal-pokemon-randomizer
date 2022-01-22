@@ -113,14 +113,23 @@
 
 		<#if updateEffectiveness??>
 			<h2 id="fte">Fixing Type Effectiveness</h2>
-			<ul>
-				<li><strong>Replaced:</strong> <span class="pk-type poison">Poison</span> <em>super effective</em> vs <span class="pk-type bug">Bug</span> 
-				=> <span class="pk-type ice">Ice</span> <em>not very effective</em> vs <span class="pk-type fire">Fire</span></li>
-				<li><strong>Changed:</strong> <span class="pk-type bug">Bug</span> <em>super effective</em> vs <span class="pk-type poison">Poison</span>
-                => <span class="pk-type bug">Bug</span> <em>not very effective</em> vs <span class="pk-type poison">Poison</span></li>
-				<li><strong>Changed:</strong> <span class="pk-type psychic">Psychic</span> <em>immune</em> to <span class="pk-type ghost">Ghost</span>
-                => <span class="pk-type ghost">Ghost</span> <em>super effective</em> vs <span class="pk-type psychic">Psychic</span></li>
-			</ul>
+			<#if gen1>
+				<ul>
+					<li><strong>Replaced:</strong> <span class="pk-type poison">Poison</span> <em>super effective</em> vs <span class="pk-type bug">Bug</span> 
+					=> <span class="pk-type ice">Ice</span> <em>not very effective</em> vs <span class="pk-type fire">Fire</span></li>
+					<li><strong>Changed:</strong> <span class="pk-type bug">Bug</span> <em>super effective</em> vs <span class="pk-type poison">Poison</span>
+					=> <span class="pk-type bug">Bug</span> <em>not very effective</em> vs <span class="pk-type poison">Poison</span></li>
+					<li><strong>Changed:</strong> <span class="pk-type psychic">Psychic</span> <em>immune</em> to <span class="pk-type ghost">Ghost</span>
+					=> <span class="pk-type ghost">Ghost</span> <em>super effective</em> vs <span class="pk-type psychic">Psychic</span></li>
+				</ul>
+			<#else>
+				<ul>
+					<li><strong>Replaced:</strong> <span class="pk-type ghost">Ghost</span> <em>not very effective</em> vs <span class="pk-type steel">Steel</span> 
+					=> <span class="pk-type ghost">Ghost</span> <em>neutral</em> vs <span class="pk-type steel">Steel</span></li>
+					<li><strong>Replaced:</strong> <span class="pk-type dark">Dark</span> <em>not very effective</em> vs <span class="pk-type steel">Steel</span> 
+					=> <span class="pk-type dark">Dark</span> <em>neutral</em> vs <span class="pk-type steel">Steel</span></li>
+				</ul>
+			</#if>
 		</#if>
 
 		<!--====================================================================================-->

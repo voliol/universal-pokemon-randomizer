@@ -63,7 +63,8 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
-
+import com.dabomstew.pkrandom.pokemon.TypeRelationship;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 import compressors.DSDecmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
@@ -3230,6 +3231,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (getRomEntry().getValue("RunIndoorsTweakOffset") > 0) {
             available |= MiscTweak.RUNNING_SHOES_INDOORS.getValue();
         }
@@ -3266,6 +3268,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
             randomizePCPotion();
+        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+            updateTypeEffectiveness();
         }
     }
 
@@ -3363,9 +3367,91 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    private void updateTypeEffectiveness() {
+        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        for (TypeRelationship relationship : typeEffectivenessTable) {
+            // Change Ghost 0.5x against Steel to Ghost 1x to Steel
+            if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
+                relationship.effectiveness = Effectiveness.NEUTRAL;
+            }
+
+            // Change Dark 0.5x against Steel to Dark 1x to Steel
+            else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
+                relationship.effectiveness = Effectiveness.NEUTRAL;
+            }
+        }
+        writeTypeEffectivenessTable(typeEffectivenessTable);
+        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
+                .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+        this.getTemplateData().put("updateEffectiveness", true);
+    }
+
+    private List<TypeRelationship> readTypeEffectivenessTable() {
+        List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
+        int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        int attackingType = readByte(currentOffset);
+        // 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
+        // the actual end of the table. Since we don't care about Ghost immunities at all,
+        // just stop once we reach the Foresight section.
+        while (attackingType != (byte) 0xFE) {
+            int defendingType = readByte(currentOffset + 1);
+            int effectivenessInternal = readByte(currentOffset + 2);
+            Type attacking = getTypeTableValue(attackingType);
+            Type defending = getTypeTableValue(defendingType);
+            Effectiveness effectiveness = null;
+            switch (effectivenessInternal) {
+                case 20:
+                    effectiveness = Effectiveness.DOUBLE;
+                    break;
+                case 10:
+                    effectiveness = Effectiveness.NEUTRAL;
+                    break;
+                case 5:
+                    effectiveness = Effectiveness.HALF;
+                    break;
+                case 0:
+                    effectiveness = Effectiveness.ZERO;
+                    break;
+            }
+            if (effectiveness != null) {
+                TypeRelationship relationship =
+                        new TypeRelationship(attacking, defending, effectiveness);
+                typeEffectivenessTable.add(relationship);
+            }
+            currentOffset += 3;
+            attackingType = readByte(currentOffset);
+        }
+        return typeEffectivenessTable;
+    }
+
+    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
+        int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        for (TypeRelationship relationship : typeEffectivenessTable) {
+            writeByte(currentOffset, Gen3Constants.typeToByte(relationship.attacker));
+            writeByte(currentOffset + 1, Gen3Constants.typeToByte(relationship.defender));
+            byte effectivenessInternal = 0;
+            switch (relationship.effectiveness) {
+                case DOUBLE:
+                    effectivenessInternal = 20;
+                    break;
+                case NEUTRAL:
+                    effectivenessInternal = 10;
+                    break;
+                case HALF:
+                    effectivenessInternal = 5;
+                    break;
+                case ZERO:
+                    effectivenessInternal = 0;
+                    break;
+            }
+            writeByte(currentOffset + 2, effectivenessInternal);
+            currentOffset += 3;
+        }
+    }
+
     @Override
     public boolean isTypeInGame(Type type) {
-        if (type.isHackOnly == false) {
+        if (!type.isHackOnly) {
             return true;
         }
         if (isROMHack() && enableHackType && type == Type.HACK) {

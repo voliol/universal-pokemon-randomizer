@@ -61,7 +61,9 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-
+import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 import compressors.Gen2Decmp;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
@@ -1720,6 +1722,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (getRomEntry().codeTweaks.get("BWXPTweak") != null) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
         }
@@ -1748,6 +1751,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             Gen2Constants.nonBadItems.banSingles(Gen2Constants.luckyEggIndex);
             ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
                     .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
+        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+            updateTypeEffectiveness();
         }
     }
 
@@ -1791,6 +1796,88 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     (byte) GBConstants.gbZ80Ret);
             ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
                     .put(MiscTweak.FASTEST_TEXT.getTweakName(), true);
+        }
+    }
+
+    private void updateTypeEffectiveness() {
+        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        for (TypeRelationship relationship : typeEffectivenessTable) {
+            // Change Ghost 0.5x against Steel to Ghost 1x to Steel
+            if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
+                relationship.effectiveness = Effectiveness.NEUTRAL;
+            }
+
+            // Change Dark 0.5x against Steel to Dark 1x to Steel
+            else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
+                relationship.effectiveness = Effectiveness.NEUTRAL;
+            }
+        }
+        writeTypeEffectivenessTable(typeEffectivenessTable);
+        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
+                .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+        this.getTemplateData().put("updateEffectiveness", true);
+    }
+
+    private List<TypeRelationship> readTypeEffectivenessTable() {
+        List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
+        int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        int attackingType = readByte(currentOffset);
+        // 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
+        // the actual end of the table. Since we don't care about Ghost immunities at all,
+        // just stop once we reach the Foresight section.
+        while (attackingType != (byte) 0xFE) {
+            int defendingType = readByte(currentOffset + 1);
+            int effectivenessInternal = readByte(currentOffset + 2);
+            Type attacking = Gen2Constants.typeTable[attackingType];
+            Type defending = Gen2Constants.typeTable[defendingType];
+            Effectiveness effectiveness = null;
+            switch (effectivenessInternal) {
+                case 20:
+                    effectiveness = Effectiveness.DOUBLE;
+                    break;
+                case 10:
+                    effectiveness = Effectiveness.NEUTRAL;
+                    break;
+                case 5:
+                    effectiveness = Effectiveness.HALF;
+                    break;
+                case 0:
+                    effectiveness = Effectiveness.ZERO;
+                    break;
+            }
+            if (effectiveness != null) {
+                TypeRelationship relationship =
+                        new TypeRelationship(attacking, defending, effectiveness);
+                typeEffectivenessTable.add(relationship);
+            }
+            currentOffset += 3;
+            attackingType = readByte(currentOffset);
+        }
+        return typeEffectivenessTable;
+    }
+
+    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
+        int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        for (TypeRelationship relationship : typeEffectivenessTable) {
+            writeByte(currentOffset, Gen2Constants.typeToByte(relationship.attacker));
+            writeByte(currentOffset + 1, Gen2Constants.typeToByte(relationship.defender));
+            byte effectivenessInternal = 0;
+            switch (relationship.effectiveness) {
+                case DOUBLE:
+                    effectivenessInternal = 20;
+                    break;
+                case NEUTRAL:
+                    effectivenessInternal = 10;
+                    break;
+                case HALF:
+                    effectivenessInternal = 5;
+                    break;
+                case ZERO:
+                    effectivenessInternal = 0;
+                    break;
+            }
+            writeByte(currentOffset + 2, effectivenessInternal);
+            currentOffset += 3;
         }
     }
 

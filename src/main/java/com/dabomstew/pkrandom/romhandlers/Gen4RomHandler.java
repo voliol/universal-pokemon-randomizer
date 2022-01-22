@@ -62,6 +62,9 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
@@ -1979,7 +1982,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private int find(byte[] data, String hexString) {
+    public int find(byte[] data, String hexString) {
         if (hexString.length() % 2 != 0) {
             return -3; // error
         }
@@ -2960,6 +2963,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
+        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (getRomEntry().tweakFiles.get("FastestTextTweak") != null) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
@@ -2980,6 +2984,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             Gen4Constants.nonBadItems.banSingles(Gen4Constants.luckyEggIndex);
             ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
                     .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
+        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+            updateTypeEffectiveness();
         }
     }
 
@@ -3028,6 +3034,104 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void updateTypeEffectiveness() {
+        try {
+            byte[] battleOverlay = readOverlay(getRomEntry().getInt("BattleOvlNumber"));
+            int typeEffectivenessTableOffset =
+                    find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator);
+            if (typeEffectivenessTableOffset > 0) {
+                List<TypeRelationship> typeEffectivenessTable =
+                        readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                for (TypeRelationship relationship : typeEffectivenessTable) {
+                    // Change Ghost 0.5x against Steel to Ghost 1x to Steel
+                    if (relationship.attacker == Type.GHOST
+                            && relationship.defender == Type.STEEL) {
+                        relationship.effectiveness = Effectiveness.NEUTRAL;
+                    }
+
+                    // Change Dark 0.5x against Steel to Dark 1x to Steel
+                    else if (relationship.attacker == Type.DARK
+                            && relationship.defender == Type.STEEL) {
+                        relationship.effectiveness = Effectiveness.NEUTRAL;
+                    }
+                }
+                writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay,
+                        typeEffectivenessTableOffset);
+                writeOverlay(getRomEntry().getInt("BattleOvlNumber"), battleOverlay);
+                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
+                        .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+                this.getTemplateData().put("updateEffectiveness", true);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private List<TypeRelationship> readTypeEffectivenessTable(byte[] battleOverlay,
+            int typeEffectivenessTableOffset) {
+        List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
+        int currentOffset = typeEffectivenessTableOffset;
+        int attackingType = battleOverlay[currentOffset];
+        // 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
+        // the actual end of the table. Since we don't care about Ghost immunities at all,
+        // just stop once we reach the Foresight section.
+        while (attackingType != (byte) 0xFE) {
+            int defendingType = battleOverlay[currentOffset + 1];
+            int effectivenessInternal = battleOverlay[currentOffset + 2];
+            Type attacking = Gen4Constants.typeTable[attackingType];
+            Type defending = Gen4Constants.typeTable[defendingType];
+            Effectiveness effectiveness = null;
+            switch (effectivenessInternal) {
+                case 20:
+                    effectiveness = Effectiveness.DOUBLE;
+                    break;
+                case 10:
+                    effectiveness = Effectiveness.NEUTRAL;
+                    break;
+                case 5:
+                    effectiveness = Effectiveness.HALF;
+                    break;
+                case 0:
+                    effectiveness = Effectiveness.ZERO;
+                    break;
+            }
+            if (effectiveness != null) {
+                TypeRelationship relationship =
+                        new TypeRelationship(attacking, defending, effectiveness);
+                typeEffectivenessTable.add(relationship);
+            }
+            currentOffset += 3;
+            attackingType = battleOverlay[currentOffset];
+        }
+        return typeEffectivenessTable;
+    }
+
+    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable,
+            byte[] battleOverlay, int typeEffectivenessTableOffset) {
+        int currentOffset = typeEffectivenessTableOffset;
+        for (TypeRelationship relationship : typeEffectivenessTable) {
+            battleOverlay[currentOffset] = Gen4Constants.typeToByte(relationship.attacker);
+            battleOverlay[currentOffset + 1] = Gen4Constants.typeToByte(relationship.defender);
+            byte effectivenessInternal = 0;
+            switch (relationship.effectiveness) {
+                case DOUBLE:
+                    effectivenessInternal = 20;
+                    break;
+                case NEUTRAL:
+                    effectivenessInternal = 10;
+                    break;
+                case HALF:
+                    effectivenessInternal = 5;
+                    break;
+                case ZERO:
+                    effectivenessInternal = 0;
+                    break;
+            }
+            battleOverlay[currentOffset + 2] = effectivenessInternal;
+            currentOffset += 3;
         }
     }
 

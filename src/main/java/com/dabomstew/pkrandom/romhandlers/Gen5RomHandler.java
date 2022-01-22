@@ -62,6 +62,8 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 import com.dabomstew.pkrandom.text.Gen5TextHandler;
 
 import compressors.DSDecmp;
@@ -1336,6 +1338,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
+        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (getRomEntry().romType == Gen5Constants.Type_BW) {
             available |= MiscTweak.USE_RESISTANT_TYPE.getValue();
         }
@@ -1360,6 +1363,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // No action is taken here
             ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
                     .put(MiscTweak.USE_RESISTANT_TYPE.getTweakName(), true);
+        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+            updateTypeEffectiveness();
         }
     }
 
@@ -1465,6 +1470,88 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    private void updateTypeEffectiveness() {
+        try {
+            byte[] battleOverlay = readOverlay(getRomEntry().getInt("BattleOvlNumber"));
+            int typeEffectivenessTableOffset =
+                    find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
+            if (typeEffectivenessTableOffset > 0) {
+                Effectiveness[][] typeEffectivenessTable =
+                        readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                int steel = Gen5Constants.typeToByte(Type.STEEL);
+                int dark = Gen5Constants.typeToByte(Type.DARK);
+                int ghost = Gen5Constants.typeToByte(Type.GHOST);
+                typeEffectivenessTable[ghost][steel] = Effectiveness.NEUTRAL;
+                typeEffectivenessTable[dark][steel] = Effectiveness.NEUTRAL;
+                writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay,
+                        typeEffectivenessTableOffset);
+                writeOverlay(getRomEntry().getInt("BattleOvlNumber"), battleOverlay);
+                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
+                        .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+                this.getTemplateData().put("updateEffectiveness", true);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private Effectiveness[][] readTypeEffectivenessTable(byte[] battleOverlay,
+            int typeEffectivenessTableOffset) {
+        Effectiveness[][] effectivenessTable =
+                new Effectiveness[getTypesInGame().size()][getTypesInGame().size()];
+        for (int attacker = 0; attacker < getTypesInGame().size(); attacker++) {
+            for (int defender = 0; defender < getTypesInGame().size(); defender++) {
+                int offset = typeEffectivenessTableOffset + (attacker * (getTypesInGame().size()))
+                        + defender;
+                int effectivenessInternal = battleOverlay[offset];
+                Effectiveness effectiveness = null;
+                switch (effectivenessInternal) {
+                    case 8:
+                        effectiveness = Effectiveness.DOUBLE;
+                        break;
+                    case 4:
+                        effectiveness = Effectiveness.NEUTRAL;
+                        break;
+                    case 2:
+                        effectiveness = Effectiveness.HALF;
+                        break;
+                    case 0:
+                        effectiveness = Effectiveness.ZERO;
+                        break;
+                }
+                effectivenessTable[attacker][defender] = effectiveness;
+            }
+        }
+        return effectivenessTable;
+    }
+
+    private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable,
+            byte[] battleOverlay, int typeEffectivenessTableOffset) {
+        for (int attacker = 0; attacker < getTypesInGame().size(); attacker++) {
+            for (int defender = 0; defender < getTypesInGame().size(); defender++) {
+                Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
+                int offset = typeEffectivenessTableOffset + (attacker * (getTypesInGame().size()))
+                        + defender;
+                byte effectivenessInternal = 0;
+                switch (effectiveness) {
+                    case DOUBLE:
+                        effectivenessInternal = 8;
+                        break;
+                    case NEUTRAL:
+                        effectivenessInternal = 4;
+                        break;
+                    case HALF:
+                        effectivenessInternal = 2;
+                        break;
+                    case ZERO:
+                        effectivenessInternal = 0;
+                        break;
+                }
+                battleOverlay[offset] = effectivenessInternal;
+            }
         }
     }
 
@@ -1726,7 +1813,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private int find(byte[] data, String hexString) {
+    public int find(byte[] data, String hexString) {
         if (hexString.length() % 2 != 0) {
             return -3; // error
         }

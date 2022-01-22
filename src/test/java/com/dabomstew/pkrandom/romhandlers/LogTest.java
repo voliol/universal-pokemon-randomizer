@@ -412,6 +412,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         doReturn(Gen1RomHandler.getRomFromSupportedRom("Red (U)")).when(romhandler).getRomEntry();
         doReturn(new int[] {0}).when(romhandler).getPokeNumToRBYTable();
+        doReturn(-1).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         int mTweaks = romhandler.miscTweaksAvailable();
 
@@ -443,6 +444,7 @@ public class LogTest {
         doReturn(Gen2RomHandler.getRomFromSupportedRom("Silver (U)")).when(romhandler)
                 .getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
+        doReturn(-2).when(romhandler).readByte(anyInt());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -474,6 +476,7 @@ public class LogTest {
         doReturn(IntStream.range(0, 649).toArray()).when(romhandler).getPokedexToInternal();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doNothing().when(romhandler).writeWord(anyInt(), anyInt());
+        doReturn(-2).when(romhandler).readByte(anyInt());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -504,12 +507,17 @@ public class LogTest {
     }
 
     @Test
-    public void TestGen4MiscTweak() {
+    public void TestGen4MiscTweak() throws IOException {
         Gen4RomHandler romhandler = spy(new Gen4RomHandler(new Random()));
         resetDataModel(romhandler, 250);
         doReturn(Gen4RomHandler.getRomFromSupportedRom("Platinum (U)")).when(romhandler)
                 .getRomEntry();
+        doReturn(0).when(romhandler).readWord(any(), anyInt());
+        doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
+        doNothing().when(romhandler).writeOverlay(anyInt(), any());
         doNothing().when(romhandler).writeLong(any(), anyInt(), anyInt());
+        doReturn(new byte[] {-2, -2}).when(romhandler).readOverlay(anyInt());
+        doReturn(1).when(romhandler).find(any(), anyString());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -535,11 +543,23 @@ public class LogTest {
     }
 
     @Test
-    public void TestGen5MiscTweak() {
+    public void TestGen5MiscTweak() throws IOException {
         Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        int maxOffset =
+                1 + (romhandler.getTypesInGame().size() * romhandler.getTypesInGame().size())
+                        + romhandler.getTypesInGame().size();
+        byte[] ovList = new byte[maxOffset];
+        for (int i = 0; i < maxOffset; i++) {
+            ovList[i] = 0;
+        }
         resetDataModel(romhandler, 250);
         doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
         doNothing().when(romhandler).writeLong(any(), anyInt(), anyInt());
+        doReturn(0).when(romhandler).readWord(any(), anyInt());
+        doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
+        doNothing().when(romhandler).writeOverlay(anyInt(), any());
+        doReturn(ovList).when(romhandler).readOverlay(anyInt());
+        doReturn(1).when(romhandler).find(any(), anyString());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -813,12 +833,72 @@ public class LogTest {
     }
 
     @Test
-    public void TestUpdateEffectiveness() {
+    public void TestGen1UpdateEffectiveness() {
         Gen1RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
         doReturn(Gen1RomHandler.getRomFromSupportedRom("Red (U)")).when(romhandler).getRomEntry();
         doReturn(new int[] {0}).when(romhandler).getPokeNumToRBYTable();
+        doReturn(-1).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
+        romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
+        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+    }
+
+    @Test
+    public void TestGen2UpdateEffectiveness() {
+        Gen2RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
+        resetDataModel(romhandler, 250);
+        doReturn(Gen2RomHandler.getRomFromSupportedRom("Silver (U)")).when(romhandler)
+                .getRomEntry();
+        doNothing().when(romhandler).writeByte(anyInt(), anyByte());
+        doReturn(-2).when(romhandler).readByte(anyInt());
+        romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
+        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+    }
+
+    @Test
+    public void TestGen3UpdateEffectiveness() {
+        Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
+        resetDataModel(romhandler, 250);
+        doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
+        doNothing().when(romhandler).writeByte(anyInt(), anyByte());
+        doReturn(-2).when(romhandler).readByte(anyInt());
+        romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
+        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+    }
+
+    @Test
+    public void TestGen4UpdateEffectiveness() throws IOException {
+        Gen4RomHandler romhandler = spy(new Gen4RomHandler(new Random()));
+        resetDataModel(romhandler, 250);
+        doReturn(Gen4RomHandler.getRomFromSupportedRom("Diamond (U)")).when(romhandler)
+                .getRomEntry();
+        doReturn(0).when(romhandler).readWord(any(), anyInt());
+        doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
+        doNothing().when(romhandler).writeOverlay(anyInt(), any());
+        doReturn(new byte[] {-2, -2}).when(romhandler).readOverlay(anyInt());
+        doReturn(1).when(romhandler).find(any(), anyString());
+        romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
+        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+    }
+
+    @Test
+    public void TestGen5UpdateEffectiveness() throws IOException {
+        Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
+        int maxOffset =
+                1 + (romhandler.getTypesInGame().size() * romhandler.getTypesInGame().size())
+                        + romhandler.getTypesInGame().size();
+        byte[] ovList = new byte[maxOffset];
+        for (int i = 0; i < maxOffset; i++) {
+            ovList[i] = 0;
+        }
+        resetDataModel(romhandler, 250);
+        doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler).getRomEntry();
+        doReturn(0).when(romhandler).readWord(any(), anyInt());
+        doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
+        doNothing().when(romhandler).writeOverlay(anyInt(), any());
+        doReturn(ovList).when(romhandler).readOverlay(anyInt());
+        doReturn(1).when(romhandler).find(any(), anyString());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
     }
@@ -841,7 +921,6 @@ public class LogTest {
         assertArrayEquals(((ArrayList<String[]>) romhandler.getTemplateData().get("toc")).get(1),
                 new String[] {"rs", "Starters"});
     }
-
 
     /**
      * Function for granular modification of data model

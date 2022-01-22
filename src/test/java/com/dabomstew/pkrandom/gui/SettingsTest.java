@@ -1308,6 +1308,62 @@ public class SettingsTest extends AbstractUIBase {
         }
 
         /**
+         * Selecting UPDATE_TYPE_EFFECTIVENESS evaluates to true
+         * 
+         * Not selecting evaluates to false
+         * 
+         * @throws IOException
+         */
+        @Test(timeout = 4000)
+        public void TestUpdateTypeEffectiveness() throws IOException {
+                JCheckBoxFixture updateTypeEffectivenessCBFixture =
+                                getCheckBoxByName("Update Type Effectiveness");
+                Settings settings = this.mainWindow.getCurrentSettings();
+                // Sanity check - should evaluate to false
+                assertTrue("Misc Tweaks should not be set yet",
+                                settings.getCurrentMiscTweaks() == 0);
+                checkboxEnabledButNotSelected(updateTypeEffectivenessCBFixture,
+                                (setts) -> (setts.getCurrentMiscTweaks()
+                                                & MiscTweak.UPDATE_TYPE_EFFECTIVENESS
+                                                                .getValue()) > 0);
+                // Sanity check - Should not fail with 0 options
+                String setttingsString = settings.toString();
+                settings = Settings.fromString(setttingsString);
+                assertTrue("Misc Tweaks were selected after reloading settings 0",
+                                settings.getCurrentMiscTweaks() == 0);
+                checkboxEnabledButNotSelected(updateTypeEffectivenessCBFixture,
+                                (setts) -> (setts.getCurrentMiscTweaks()
+                                                & MiscTweak.UPDATE_TYPE_EFFECTIVENESS
+                                                                .getValue()) > 0);
+
+                // Turn UPDATE_TYPE_EFFECTIVENESS to true
+                updateTypeEffectivenessCBFixture.requireVisible().requireEnabled().click();
+                checkboxEnabledAndSelected(updateTypeEffectivenessCBFixture,
+                                (setts) -> (setts.getCurrentMiscTweaks()
+                                                & MiscTweak.UPDATE_TYPE_EFFECTIVENESS
+                                                                .getValue()) > 0);
+                setttingsString = settings.toString();
+                settings = Settings.fromString(setttingsString);
+                checkboxEnabledAndSelected(updateTypeEffectivenessCBFixture,
+                                (setts) -> (setts.getCurrentMiscTweaks()
+                                                & MiscTweak.UPDATE_TYPE_EFFECTIVENESS
+                                                                .getValue()) > 0);
+
+                // Turn UPDATE_TYPE_EFFECTIVENESS to false
+                updateTypeEffectivenessCBFixture.requireVisible().requireEnabled().click();
+                checkboxEnabledButNotSelected(updateTypeEffectivenessCBFixture,
+                                (setts) -> (setts.getCurrentMiscTweaks()
+                                                & MiscTweak.UPDATE_TYPE_EFFECTIVENESS
+                                                                .getValue()) > 0);
+                setttingsString = settings.toString();
+                settings = Settings.fromString(setttingsString);
+                checkboxEnabledButNotSelected(updateTypeEffectivenessCBFixture,
+                                (setts) -> (setts.getCurrentMiscTweaks()
+                                                & MiscTweak.UPDATE_TYPE_EFFECTIVENESS
+                                                                .getValue()) > 0);
+        }
+
+        /**
          * Captures a common sequence of a checkbox being enabled or disabled based on radio button
          * selection
          * 
