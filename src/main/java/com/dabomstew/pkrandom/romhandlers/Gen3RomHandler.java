@@ -3394,10 +3394,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // the actual end of the table. Since we don't care about Ghost immunities at all,
         // just stop once we reach the Foresight section.
         while (attackingType != (byte) 0xFE) {
-            int defendingType = readByte(currentOffset + 1);
+            Type attacking = getTypeTableValue(currentOffset);
+            Type defending = getTypeTableValue(currentOffset + 1);
             int effectivenessInternal = readByte(currentOffset + 2);
-            Type attacking = getTypeTableValue(attackingType);
-            Type defending = getTypeTableValue(defendingType);
             Effectiveness effectiveness = null;
             switch (effectivenessInternal) {
                 case 20:

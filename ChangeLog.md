@@ -146,3 +146,6 @@
   - Will start in Light Mode unless browser/system settings are configured for dark mode in a way "matchMedia" can read from
 - Fixes potential error with `LimitPokemon` where only 1 related pokemon was included in the batch, rather than all in the evolution line that met the criteria
 - Adds more specific headers in logs for Starter randomization
+- Type effectiveness can now be used in all generations
+  - This only removes Steel resistance to Ghost and Dark for Gen 2+, and does not add the Fairy type
+  - Credit to [dee-ee](https://www.reddit.com/user/dee-ee/) for pointing me [to the code](https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
