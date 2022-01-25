@@ -104,6 +104,21 @@ public class FileFunctions {
                 .getResourceAsStream("/com/dabomstew/pkrandom/config/" + filename);
     }
 
+    public static InputStream openHackConfig(String filename) throws FileNotFoundException {
+        if (overrideFiles.contains(filename)) {
+            File fh = new File(SysConstants.ROOT_PATH + filename);
+            if (fh.exists() && fh.canRead()) {
+                return new FileInputStream(fh);
+            }
+            fh = new File("./" + filename);
+            if (fh.exists() && fh.canRead()) {
+                return new FileInputStream(fh);
+            }
+        }
+        return FileFunctions.class
+                .getResourceAsStream("/com/dabomstew/pkrandom/hackhandlers/" + filename);
+    }
+
     public static CustomNamesSet getCustomNames() throws IOException {
         InputStream is = openConfig(SysConstants.customNamesFile);
         CustomNamesSet cns = new CustomNamesSet(is);

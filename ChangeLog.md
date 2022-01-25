@@ -149,3 +149,6 @@
 - Type effectiveness can now be used in all generations
   - This only removes Steel resistance to Ghost and Dark for Gen 2+, and does not add the Fairy type
   - Credit to [dee-ee](https://www.reddit.com/user/dee-ee/) for pointing me [to the code](https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
+- Adds more support for Randomizable 809
+  - Adds unique entry to allow FAIRY type to be properly recognized
+  - This also enables other rom hacks to be easily supported, so long as the offsets are known and a unique identifier exists
