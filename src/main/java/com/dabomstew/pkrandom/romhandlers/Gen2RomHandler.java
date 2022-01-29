@@ -49,6 +49,7 @@ import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -325,6 +326,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         loadLandmarkNames();
         preprocessMaps();
         loadItemNames();
+        updateTypes();
     }
 
     private static RomEntry checkRomEntry(byte[] rom) {
@@ -1441,7 +1443,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                         });
             }
         }
-        this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+        TemplateData.putData("removeTradeEvo", tradeEvoFixed);
     }
 
     @Override
@@ -1749,8 +1751,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             Gen2Constants.allowedItems.banSingles(Gen2Constants.luckyEggIndex);
             Gen2Constants.nonBadItems.banSingles(Gen2Constants.luckyEggIndex);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
             updateTypeEffectiveness();
         }
@@ -1769,8 +1770,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             for (int offset : offsets) {
                 writeByte(offset, (byte) pokemon);
             }
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(),
+                    true);
         }
 
     }
@@ -1783,8 +1784,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         try {
             FileFunctions.applyPatch(rom, patchName);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.BW_EXP_PATCH.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.BW_EXP_PATCH.getTweakName(), true);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -1794,9 +1794,27 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (getRomEntry().getValue("TextDelayFunctionOffset") != 0) {
             writeByte(getRomEntry().getValue("TextDelayFunctionOffset"),
                     (byte) GBConstants.gbZ80Ret);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.FASTEST_TEXT.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.FASTEST_TEXT.getTweakName(), true);
         }
+    }
+
+    private void updateTypes() {
+        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        Type.STRONG_AGAINST.clear();
+        Type.RESISTANT_TO.clear();
+        for (TypeRelationship rel : typeEffectivenessTable) {
+            switch (rel.effectiveness) {
+                case ZERO:
+                case HALF:
+                    Type.updateResistantTo(rel.attacker, rel.defender);
+                    break;
+                case DOUBLE:
+                    Type.updateStrongAgainst(rel.attacker, rel.defender);
+                    break;
+            }
+        }
+
+        TemplateData.setGenerateTypeChartOrder(new ArrayList<Type>(Type.STRONG_AGAINST.keySet()));
     }
 
     private void updateTypeEffectiveness() {
@@ -1805,17 +1823,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // Change Ghost 0.5x against Steel to Ghost 1x to Steel
             if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
                 relationship.effectiveness = Effectiveness.NEUTRAL;
+                Type.RESISTANT_TO.get(Type.GHOST).remove(Type.STEEL);
             }
 
             // Change Dark 0.5x against Steel to Dark 1x to Steel
             else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
                 relationship.effectiveness = Effectiveness.NEUTRAL;
+                Type.RESISTANT_TO.get(Type.DARK).remove(Type.STEEL);
             }
         }
         writeTypeEffectivenessTable(typeEffectivenessTable);
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
-        this.getTemplateData().put("updateEffectiveness", true);
+        TemplateData.putMap("tweakMap", MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+        TemplateData.putData("updateEffectiveness", true);
     }
 
     private List<TypeRelationship> readTypeEffectivenessTable() {

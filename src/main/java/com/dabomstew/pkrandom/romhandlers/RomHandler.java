@@ -60,13 +60,6 @@ public interface RomHandler {
 
         public String loadedFilename();
 
-        // Log stuff with template
-        public void setTemplate(Template template, Map templateData);
-
-        public Map getTemplateData();
-
-        public Template getTemplate();
-
         // Get a List of Pokemon objects in this game.
         // 0 = null 1-whatever = the Pokemon.
         public List<Pokemon> getPokemon();
@@ -457,8 +450,6 @@ public interface RomHandler {
         public int generationOfPokemon();
 
         public void writeCheckValueToROM(int value);
-
-        public void generateTableOfContents();
 
         public void modifyTrainerText(Map taggedTypes);
 

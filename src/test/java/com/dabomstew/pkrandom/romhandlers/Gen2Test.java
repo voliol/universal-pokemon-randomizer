@@ -28,7 +28,6 @@ public class Gen2Test {
     public void TestGen2ChangeMethods() {
         Gen2RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler);
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
                 false);
         romhandler.getMainPokemonList().forEach(pk -> {
@@ -74,7 +73,6 @@ public class Gen2Test {
     public void TestGen2RemoveEvosChangeMethods() {
         Gen2RomHandler romhandler = spy(new Gen2RomHandler(new Random()));
         resetDataModel(romhandler);
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
                 false);
         romhandler.removeTradeEvolutions(false, true);
@@ -113,6 +111,9 @@ public class Gen2Test {
                     uniqueItems.size() == usedItems.size());
         });
     }
+
+    // TODO: Test that updateTypeEffectivenss runs and updates Type.STRONG_AGAINST and
+    // Type.RESISTANT_TO correctly
 
     /**
      * Function for granular modification of data model

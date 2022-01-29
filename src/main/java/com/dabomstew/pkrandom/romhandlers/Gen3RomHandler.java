@@ -50,6 +50,7 @@ import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -1865,8 +1866,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int newItemDescOffset = RomFunctions.freeSpaceFinder(rom,
                         Gen3Constants.freeSpaceByte, fsBytesNeeded, fsOffset);
                 if (newItemDescOffset < fsOffset) {
-                    this.getTemplateData().put("TMTextFailure",
-                            "Couldn't insert new item description.");
+                    TemplateData.putData("TMTextFailure", "Couldn't insert new item description.");
                     return;
                 }
                 writeVariableLengthString(newItemDesc, newItemDescOffset);
@@ -1881,7 +1881,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 // create the new TM text
                 int oldPointer = readPointer(tte.actualOffset);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
-                    this.getTemplateData().put("TMTextFailure",
+                    TemplateData.putData("TMTextFailure",
                             "Couldn't insert new TM text. Skipping remaining TM text updates.");
                     return;
                 }
@@ -1898,7 +1898,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int newOffset =
                         RomFunctions.freeSpaceFinder(rom, (byte) 0xFF, fsBytesNeeded, fsOffset);
                 if (newOffset < fsOffset) {
-                    this.getTemplateData().put("TMTextFailure", "Couldn't insert new TM text.");
+                    TemplateData.putData("TMTextFailure", "Couldn't insert new TM text.");
                     return;
                 }
                 writeVariableLengthString(newText, newOffset);
@@ -2024,7 +2024,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte,
                         fsBytesNeeded, fsOffset);
                 if (newOffset < fsOffset) {
-                    this.getTemplateData().put("MoveTutorTextFailure",
+                    TemplateData.putData("MoveTutorTextFailure",
                             "Couldn't insert new Move Tutor text.");
                     return;
                 }
@@ -2214,21 +2214,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.rsPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                this.getTemplateData().put("natDexPatch", "noDexOffset");
+                TemplateData.putData("natDexPatch", "noDexOffset");
                 return;
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                this.getTemplateData().put("natDexPatch", "noScriptPtr");
+                TemplateData.putData("natDexPatch", "noScriptPtr");
                 return;
             }
             // Find free space for our new routine
             int writeSpace =
                     RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 44, fso);
             if (writeSpace < fso) {
-                this.getTemplateData().put("natDexPatch", "fullRom");
+                TemplateData.putData("natDexPatch", "fullRom");
                 // Somehow this ROM is full
                 return;
             }
@@ -2241,14 +2241,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.frlgPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                this.getTemplateData().put("natDexPatch", "noDexOffset");
+                TemplateData.putData("natDexPatch", "noDexOffset");
                 return;
             }
             // Find free space for our new routine
             int writeSpace =
                     RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 10, fso);
             if (writeSpace < fso) {
-                this.getTemplateData().put("natDexPatch", "fullRom");
+                TemplateData.putData("natDexPatch", "fullRom");
                 // Somehow this ROM is full
                 return;
             }
@@ -2284,14 +2284,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.ePokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                this.getTemplateData().put("natDexPatch", "noDexOffset");
+                TemplateData.putData("natDexPatch", "noDexOffset");
                 return;
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                this.getTemplateData().put("natDexPatch", "noScriptPtr");
+                TemplateData.putData("natDexPatch", "noScriptPtr");
                 return;
             }
             // Find free space for our new routine
@@ -2299,7 +2299,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 27, fso);
             if (writeSpace < fso) {
                 // Somehow this ROM is full
-                this.getTemplateData().put("natDexPatch", "fullRom");
+                TemplateData.putData("natDexPatch", "fullRom");
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -2307,7 +2307,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(writeSpace + 4, textPointer);
             writeHexString(Gen3Constants.eNatDexScriptPart2, writeSpace + 8);
         }
-        this.getTemplateData().put("natDexPatch", "success");
+        TemplateData.putData("natDexPatch", "success");
     }
 
     public String pointerToHexString(int pointer) {
@@ -2538,7 +2538,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
         }
-        this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+        TemplateData.putData("removeTradeEvo", tradeEvoFixed);
     }
 
     @Override
@@ -3298,8 +3298,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             getAllowedItems().banSingles(Gen3Constants.luckyEggIndex);
             getNonBadItems().banSingles(Gen3Constants.luckyEggIndex);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
             randomizePCPotion();
         } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
@@ -3318,8 +3317,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     writeByte(oppOffset, (byte) oppValue);
                     writeByte(oppOffset + 1,
                             (byte) (Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1));
-                    ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                            .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+                    TemplateData.putMap("tweakMap",
+                            MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
                 }
             } else {
                 Pokemon opponent = randomPokemonLimited(510, true);
@@ -3340,8 +3339,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
                         writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
                     }
-                    ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                            .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+                    TemplateData.putMap("tweakMap",
+                            MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
                 }
             }
         }
@@ -3366,8 +3365,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
                     writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
                 }
-                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                        .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+                TemplateData.putMap("tweakMap",
+                        MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
             }
         }
 
@@ -3376,8 +3375,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void applyRunningShoesIndoorsPatch() {
         if (getRomEntry().getValue("RunIndoorsTweakOffset") != 0) {
             writeByte(getRomEntry().getValue("RunIndoorsTweakOffset"), (byte) 0x00);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.RUNNING_SHOES_INDOORS.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.RUNNING_SHOES_INDOORS.getTweakName(), true);
         }
     }
 
@@ -3387,8 +3385,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeByte(tsvOffset, (byte) 4); // slow = medium
             writeByte(tsvOffset + 1, (byte) 1); // medium = fast
             writeByte(tsvOffset + 2, (byte) 0); // fast = instant
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.FASTEST_TEXT.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.FASTEST_TEXT.getTweakName(), true);
         }
     }
 
@@ -3396,13 +3393,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (getRomEntry().getValue("PCPotionOffset") != 0) {
             writeWord(getRomEntry().getValue("PCPotionOffset"),
                     this.getNonBadItems().randomNonTM(this.random));
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.RANDOMIZE_PC_POTION.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.RANDOMIZE_PC_POTION.getTweakName(), true);
         }
     }
 
     private void updateTypes() {
+        // Update type to byte conversion table
         getRomEntry().typeMap.forEach((k, v) -> Gen3Constants.typeTable[k] = v);
+
+        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        Type.STRONG_AGAINST.clear();
+        Type.RESISTANT_TO.clear();
+        for (TypeRelationship rel : typeEffectivenessTable) {
+            switch (rel.effectiveness) {
+                case ZERO:
+                case HALF:
+                    Type.updateResistantTo(rel.attacker, rel.defender);
+                    break;
+                case DOUBLE:
+                    Type.updateStrongAgainst(rel.attacker, rel.defender);
+                    break;
+            }
+        }
+
+        TemplateData.setGenerateTypeChartOrder(new ArrayList<Type>(Type.STRONG_AGAINST.keySet()));
     }
 
     private void updateTypeEffectiveness() {
@@ -3411,17 +3425,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Change Ghost 0.5x against Steel to Ghost 1x to Steel
             if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
                 relationship.effectiveness = Effectiveness.NEUTRAL;
+                Type.RESISTANT_TO.get(Type.GHOST).remove(Type.STEEL);
             }
 
             // Change Dark 0.5x against Steel to Dark 1x to Steel
             else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
                 relationship.effectiveness = Effectiveness.NEUTRAL;
+                Type.RESISTANT_TO.get(Type.DARK).remove(Type.STEEL);
             }
         }
         writeTypeEffectivenessTable(typeEffectivenessTable);
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
-        this.getTemplateData().put("updateEffectiveness", true);
+        TemplateData.putMap("tweakMap", MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+        TemplateData.putData("updateEffectiveness", true);
     }
 
     private List<TypeRelationship> readTypeEffectivenessTable() {

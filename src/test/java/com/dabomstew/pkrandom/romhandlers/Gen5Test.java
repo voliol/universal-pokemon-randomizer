@@ -405,7 +405,6 @@ public class Gen5Test {
                 Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
                 doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler)
                                 .getRomEntry();
-                doReturn(mock(Map.class)).when(romhandler).getTemplateData();
                 resetDataModel(romhandler);
                 romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false,
                                 false, false);
@@ -473,7 +472,6 @@ public class Gen5Test {
                 Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
                 doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler)
                                 .getRomEntry();
-                doReturn(mock(Map.class)).when(romhandler).getTemplateData();
                 resetDataModel(romhandler);
                 romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false,
                                 false, false);
@@ -585,7 +583,6 @@ public class Gen5Test {
                 Gen5RomHandler romhandler = spy(new Gen5RomHandler(random));
                 doReturn(Gen4RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler)
                                 .getRomEntry();
-                doReturn(mock(Map.class)).when(romhandler).getTemplateData();
                 doReturn(0, 1).when(romhandler).randomMove(any());
                 resetDataModel(romhandler);
 
@@ -626,7 +623,6 @@ public class Gen5Test {
                 Gen5RomHandler romhandler = spy(new Gen5RomHandler(new Random()));
                 doReturn(Gen5RomHandler.getRomFromSupportedRom("Black (U)")).when(romhandler)
                                 .getRomEntry();
-                doReturn(mock(Map.class)).when(romhandler).getTemplateData();
                 resetDataModel(romhandler);
                 romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false,
                                 false, true, false, 0);
@@ -638,6 +634,9 @@ public class Gen5Test {
                         }
                 }
         }
+
+        // TODO: Test that updateTypeEffectivenss runs and updates Type.STRONG_AGAINST and
+        // Type.RESISTANT_TO correctly
 
         /**
          * Function for granular modification of data model

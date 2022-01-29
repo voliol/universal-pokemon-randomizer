@@ -3,8 +3,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import freemarker.template.Template;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +17,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -33,7 +32,6 @@ public class LogTest {
 
     ArrayList<Move> moveList;
     ArrayList<Pokemon> pokemonList;
-    HashMap<String, Object> templateData = new HashMap();
 
     @Test
     public void TestGen1MoveModernization() {
@@ -503,7 +501,7 @@ public class LogTest {
 
         // Check NatDex tweak separately
         // Success mock is too complicated due to numerous dependencies
-        assertEquals(romhandler.getTemplateData().get("natDexPatch"), "noDexOffset");
+        assertEquals(TemplateData.getData("natDexPatch"), "noDexOffset");
     }
 
     @Test
@@ -592,7 +590,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
-        assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
+        assertEquals(((ArrayList) TemplateData.getData("removeTradeEvo")).size(), 1);
     }
 
     @Test
@@ -601,7 +599,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
-        assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
+        assertEquals(((ArrayList) TemplateData.getData("removeTradeEvo")).size(), 1);
     }
 
     @Test
@@ -614,8 +612,7 @@ public class LogTest {
             resetDataModel(romhandler, 250);
             romhandler.setPokemonPool(null, null);
             romhandler.removeTradeEvolutions(true, false);
-            assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(),
-                    1);
+            assertEquals(((ArrayList) TemplateData.getData("removeTradeEvo")).size(), 1);
         }
     }
 
@@ -634,7 +631,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
-        assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
+        assertEquals(((ArrayList) TemplateData.getData("removeTradeEvo")).size(), 1);
     }
 
     @Test
@@ -651,7 +648,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.removeTradeEvolutions(true, false);
-        assertEquals(((ArrayList) romhandler.getTemplateData().get("removeTradeEvo")).size(), 1);
+        assertEquals(((ArrayList) TemplateData.getData("removeTradeEvo")).size(), 1);
     }
 
     @Test
@@ -664,9 +661,9 @@ public class LogTest {
         doReturn(0).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         romhandler.randomizeStaticPokemon(true);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 29);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 29);
         romhandler.randomizeStaticPokemon(false);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 29);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 29);
     }
 
     @Test
@@ -680,9 +677,9 @@ public class LogTest {
         doReturn(0).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         romhandler.randomizeStaticPokemon(true);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 29);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 29);
         romhandler.randomizeStaticPokemon(false);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 29);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 29);
     }
 
     @Test
@@ -700,9 +697,9 @@ public class LogTest {
                     .getPokesInternal();
             doNothing().when(romhandler).writeWord(anyInt(), anyInt());
             romhandler.randomizeStaticPokemon(true);
-            assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 18);
+            assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 18);
             romhandler.randomizeStaticPokemon(false);
-            assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 18);
+            assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 18);
         }
     }
 
@@ -723,9 +720,9 @@ public class LogTest {
         doReturn(mock_arch).when(romhandler).getScriptNARC();
         doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
         romhandler.randomizeStaticPokemon(true);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 23);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 23);
         romhandler.randomizeStaticPokemon(false);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 23);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 23);
     }
 
     @Test
@@ -746,9 +743,9 @@ public class LogTest {
         doReturn(mock(Gen5TextHandler.class)).when(romhandler).getTextHandler();
         doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
         romhandler.randomizeStaticPokemon(true);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 31);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 31);
         romhandler.randomizeStaticPokemon(false);
-        assertEquals(((TreeMap) romhandler.getTemplateData().get("staticPokemon")).size(), 31);
+        assertEquals(((TreeMap) TemplateData.getData("staticPokemon")).size(), 31);
     }
 
     @Test
@@ -757,7 +754,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.shufflePokemonTypes();
-        assertEquals(romhandler.getTemplateData().get("shuffledTypes"), Type.getShuffledList());
+        assertEquals(TemplateData.getData("shuffledTypes"), Type.getShuffledList());
         assertTrue("No types were found in the shuffled list.", Type.getShuffledList().size() > 0);
     }
 
@@ -767,7 +764,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.randomizeEvolutions(false, false, false, false, false, false, false, false,
                 false, false);
-        assertEquals(romhandler.getTemplateData().get("logEvolutions"), true);
+        assertEquals(TemplateData.getData("logEvolutions"), true);
 
     }
 
@@ -777,25 +774,22 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
         romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
-        assertEquals("0+ Evolution Starters", romhandler.getTemplateData().get("logStarters"));
+        assertEquals("0+ Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null);
-        assertEquals("1+ Evolution Starters", romhandler.getTemplateData().get("logStarters"));
+        assertEquals("1+ Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null);
-        assertEquals("2+ Evolution Starters", romhandler.getTemplateData().get("logStarters"));
+        assertEquals("2+ Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null);
-        assertEquals("Exactly 0 Evolution Starters",
-                romhandler.getTemplateData().get("logStarters"));
+        assertEquals("Exactly 0 Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null);
-        assertEquals("Exactly 1 Evolution Starters",
-                romhandler.getTemplateData().get("logStarters"));
+        assertEquals("Exactly 1 Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
         romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null);
-        assertEquals("Exactly 2 Evolution Starters",
-                romhandler.getTemplateData().get("logStarters"));
+        assertEquals("Exactly 2 Evolution Starters", TemplateData.getData("logStarters"));
     }
 
     @Test
@@ -812,13 +806,13 @@ public class LogTest {
         try (MockedStatic<com.dabomstew.pkrandom.FileFunctions> mockFileFunctions =
                 mockStatic(com.dabomstew.pkrandom.FileFunctions.class)) {
             romhandler.randomizeMovesLearnt(false, false, false, 0, 0);
-            assertEquals(romhandler.getTemplateData().get("gameBreakingMoves"), false);
+            assertEquals(TemplateData.getData("gameBreakingMoves"), false);
             resetDataModel(romhandler, 250);
             romhandler.randomizeMovesLearnt(false, true, false, 0, 0);
-            assertEquals(romhandler.getTemplateData().get("gameBreakingMoves"), true);
+            assertEquals(TemplateData.getData("gameBreakingMoves"), true);
             resetDataModel(romhandler, 250);
             romhandler.removeBrokenMoves();
-            assertEquals(romhandler.getTemplateData().get("gameBreakingMoves"), true);
+            assertEquals(TemplateData.getData("gameBreakingMoves"), true);
         }
     }
 
@@ -829,7 +823,7 @@ public class LogTest {
         romhandler.setPokemonPool(null, null);
         romhandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL,
                 GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
-        assertEquals(((TreeSet) romhandler.getTemplateData().get("condensedEvos")).size(), 1);
+        assertEquals(((TreeSet) TemplateData.getData("condensedEvos")).size(), 1);
     }
 
     @Test
@@ -841,7 +835,7 @@ public class LogTest {
         doReturn(-1).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
-        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+        assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
 
     @Test
@@ -853,7 +847,7 @@ public class LogTest {
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doReturn(-2).when(romhandler).readByte(anyInt());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
-        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+        assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
 
     @Test
@@ -864,7 +858,7 @@ public class LogTest {
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doReturn(-2).when(romhandler).readByte(anyInt());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
-        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+        assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
 
     @Test
@@ -879,7 +873,7 @@ public class LogTest {
         doReturn(new byte[] {-2, -2}).when(romhandler).readOverlay(anyInt());
         doReturn(1).when(romhandler).find(any(), anyString());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
-        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+        assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
 
     @Test
@@ -900,7 +894,7 @@ public class LogTest {
         doReturn(ovList).when(romhandler).readOverlay(anyInt());
         doReturn(1).when(romhandler).find(any(), anyString());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
-        assertEquals(romhandler.getTemplateData().get("updateEffectiveness"), true);
+        assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
 
     @Test
@@ -908,25 +902,27 @@ public class LogTest {
         RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
-        romhandler.generateTableOfContents();
-        assertEquals(0, ((ArrayList) romhandler.getTemplateData().get("toc")).size());
+        TemplateData.generateTableOfContents();
+        assertEquals(0, ((ArrayList) TemplateData.getData("toc")).size());
         // Spot Check
         romhandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL,
                 GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
-        romhandler.generateTableOfContents();
-        assertArrayEquals(((ArrayList<String[]>) romhandler.getTemplateData().get("toc")).get(0),
+        TemplateData.generateTableOfContents();
+        assertArrayEquals(((ArrayList<String[]>) TemplateData.getData("toc")).get(0),
                 new String[] {"cle", "Condensed Evos"});
         romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
-        romhandler.generateTableOfContents();
-        assertArrayEquals(((ArrayList<String[]>) romhandler.getTemplateData().get("toc")).get(1),
+        TemplateData.generateTableOfContents();
+        assertArrayEquals(((ArrayList<String[]>) TemplateData.getData("toc")).get(1),
                 new String[] {"rs", "Starters"});
     }
+
+    // TODO: Check that log prints type chart
 
     /**
      * Function for granular modification of data model
      */
     private void setUp() {
-        templateData.clear();
+        TemplateData.resetData();
         moveList = spy(ArrayList.class);
         pokemonList = spy(ArrayList.class);
         for (int i = 0; i < 559; i++) {
@@ -970,8 +966,7 @@ public class LogTest {
         doReturn(moveSize).when(moveList).size();
         doReturn(pokemonList).when(romhandler).getPokemon();
         doReturn(pokemonList.get(0)).when(romhandler).randomPokemon();
-        templateData.put("tweakMap", new HashMap<String, Boolean>());
-        romhandler.setTemplate(mock(Template.class), templateData);
+        TemplateData.putData("tweakMap", new HashMap<String, Boolean>());
     }
 
     /**
@@ -981,7 +976,7 @@ public class LogTest {
      * @return The moveMod value in the template data as an ArrayList<Move>
      */
     private ArrayList<Move> getTemplateDataMovesMod(RomHandler romhandler) {
-        return (ArrayList<Move>) romhandler.getTemplateData().get("movesMod");
+        return (ArrayList<Move>) TemplateData.getData("movesMod");
     }
 
     /**
@@ -991,6 +986,6 @@ public class LogTest {
      * @return The tweakMap value in the template data as an HashMap<String, Boolean>
      */
     private HashMap<String, Boolean> getTemplateDataTweakMap(RomHandler romhandler) {
-        return (HashMap<String, Boolean>) romhandler.getTemplateData().get("tweakMap");
+        return (HashMap<String, Boolean>) TemplateData.getData("tweakMap");
     }
 }

@@ -30,14 +30,13 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import freemarker.template.Template;
-
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -46,8 +45,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected List<Pokemon> mainPokemonList;
     protected List<Pokemon> noLegendaryList, onlyLegendaryList;
     protected final Random random;
-    protected Template template;
-    protected Map<String, Object> templateData;
     private List<Pokemon> alreadyPicked = new ArrayList<Pokemon>();
     private List<Pokemon> giratinaPicks;
     protected boolean ptGiratina = false;
@@ -66,21 +63,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     /*
      * Public Methods, implemented here for all gens. Unlikely to be overridden.
      */
-    @Override
-    public void setTemplate(Template template, Map templateData) {
-        this.template = template;
-        this.templateData = templateData;
-    }
-
-    @Override
-    public Map getTemplateData() {
-        return this.templateData;
-    }
-
-    @Override
-    public Template getTemplate() {
-        return this.template;
-    }
 
     public void setPokemonPool(GenRestrictions restrictions, RomOptions romOptions) {
         restrictionsSet = true;
@@ -516,10 +498,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Prepare the list
             starterPokes = new PokemonSet();
             if (exactEvos) {
-                this.getTemplateData().put("logStarters",
+                TemplateData.putData("logStarters",
                         "Exactly " + minimumEvos + " Evolution Starters");
             } else {
-                this.getTemplateData().put("logStarters", minimumEvos + "+ Evolution Starters");
+                TemplateData.putData("logStarters", minimumEvos + "+ Evolution Starters");
             }
             for (Pokemon pk : this.getMainPokemonList()) {
                 if (pk != null) {
@@ -691,8 +673,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.getTemplateData().put("typeList", getTypesInGame());
-        this.getTemplateData().put("shuffledTypes", Type.getShuffledList());
+        TemplateData.putData("typeList", getTypesInGame());
+        TemplateData.putData("shuffledTypes", Type.getShuffledList());
     }
 
     @Override
@@ -1985,7 +1967,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void initMoveModernization() {
         moveUpdates = new TreeMap<Integer, boolean[]>();
-        this.getTemplateData().put("isModernMoves", true);
+        TemplateData.putData("isModernMoves", true);
     }
 
     /**
@@ -1994,8 +1976,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void printMoveModernization() {
         ArrayList<Move> moveModernization = new ArrayList<Move>();
-        this.templateData.put("moveUpdates", moveUpdates);
-        this.templateData.put("movesMod", moveModernization);
+        TemplateData.putData("moveUpdates", moveUpdates);
+        TemplateData.putData("movesMod", moveModernization);
         List<Move> moves = this.getMoves();
         for (int moveID : moveUpdates.keySet()) {
             moveModernization.add(new Move(moves.get(moveID)));
@@ -2013,7 +1995,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Done, save
         this.setMovesLearnt(movesets);
-        this.getTemplateData().put("gameBreakingMoves", true);
+        TemplateData.putData("gameBreakingMoves", true);
     }
 
     @Override
@@ -2173,7 +2155,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         // Done, save
         this.setMovesLearnt(movesets);
-        this.getTemplateData().put("gameBreakingMoves", noBroken);
+        TemplateData.putData("gameBreakingMoves", noBroken);
     }
 
     @Override
@@ -2460,7 +2442,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Save
         this.setStaticPokemon(replacements);
-        this.getTemplateData().put("staticPokemon", staticPokemon);
+        TemplateData.putData("staticPokemon", staticPokemon);
     }
 
     @Override
@@ -3276,7 +3258,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.getTemplateData().put("condensedEvos", changedEvos);
+        TemplateData.putData("condensedEvos", changedEvos);
     }
 
     @Override
@@ -3285,7 +3267,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             boolean noConverge, boolean forceGrowth, boolean forceLv1, boolean sameStage,
             boolean noLegendaries) {
         checkPokemonRestrictions();
-        this.getTemplateData().put("logEvolutions", true);
+        TemplateData.putData("logEvolutions", true);
         int stageLimit = limitToThreeStages ? 3 : 10;
 
         PokemonSet globalSet = new PokemonSet(getMainPokemonList());
@@ -4470,9 +4452,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             pkmn.name = RomFunctions.camelCase(pkmn.name);
         }
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.LOWER_CASE_POKEMON_NAMES.getTweakName(), true);
-
+        TemplateData.putMap("tweakMap", MiscTweak.LOWER_CASE_POKEMON_NAMES.getTweakName(), true);
     }
 
     /* Default Implementations */
@@ -4574,85 +4554,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void writeCheckValueToROM(int value) {
         // do nothing
-    }
-
-    @Override
-    public void generateTableOfContents() {
-        try {
-            List<String[]> toc = new ArrayList<String[]>();
-            if (this.getTemplateData().get("isModernMoves") != null
-                    && (Boolean) this.getTemplateData().get("isModernMoves")) {
-                toc.add(new String[] {"mm", "Move Modernization"});
-            }
-            if (((Map) this.getTemplateData().get("tweakMap")).size() > 0) {
-                toc.add(new String[] {"pa", "Patches Applied"});
-            }
-            if (this.getTemplateData().get("shuffledTypes") != null) {
-                toc.add(new String[] {"st", "Shuffled Types"});
-            }
-            Object fte = this.getTemplateData().get("updateEffectiveness");
-            if (fte != null && (Boolean) fte) {
-                toc.add(new String[] {"fte", "Fixed Type Effectiveness"});
-            }
-            if ((Boolean) this.getTemplateData().get("logEvolutions") != null
-                    && (Boolean) this.getTemplateData().get("logEvolutions")) {
-                toc.add(new String[] {"re", "Randomized Evolutions"});
-                toc.add(new String[] {"ep", "Evolution Paths"});
-            }
-            if ((Boolean) this.getTemplateData().get("logPokemon") != null
-                    && (Boolean) this.getTemplateData().get("logPokemon")) {
-                toc.add(new String[] {"ps", "Pokemon Stats"});
-            }
-            if (this.getTemplateData().get("removeTradeEvo") != null
-                    && ((List) this.getTemplateData().get("removeTradeEvo")).size() > 0) {
-                toc.add(new String[] {"rte", "Impossible Evos"});
-            }
-            if (this.getTemplateData().get("condensedEvos") != null
-                    && ((TreeSet) this.getTemplateData().get("condensedEvos")).size() > 0) {
-                toc.add(new String[] {"cle", "Condensed Evos"});
-            }
-            if (this.getTemplateData().get("logStarters") != null) {
-                toc.add(new String[] {"rs", "Starters"});
-            }
-            if (this.getTemplateData().get("logMoves") != null
-                    && (Boolean) this.getTemplateData().get("logMoves")) {
-                toc.add(new String[] {"md", "Move Data"});
-            }
-            if (this.getTemplateData().get("gameBreakingMoves") != null
-                    && (Boolean) this.getTemplateData().get("gameBreakingMoves")) {
-                toc.add(new String[] {"gbm", "Game Breaking Moves"});
-            }
-            if (this.getTemplateData().get("logPokemonMoves") != null) {
-                toc.add(new String[] {"pm", "Pokemon Moves"});
-            }
-            if (this.getTemplateData().get("originalTrainers") != null
-                    && ((List) this.getTemplateData().get("originalTrainers")).size() > 0) {
-                toc.add(new String[] {"tp", "Trainer Pokemon"});
-            }
-            if (this.getTemplateData().get("staticPokemon") != null
-                    && ((Map) this.getTemplateData().get("staticPokemon")).size() > 0) {
-                toc.add(new String[] {"sp", "Static Pokemon"});
-            }
-            if (this.getTemplateData().get("wildPokemon") != null
-                    && ((List) this.getTemplateData().get("wildPokemon")).size() > 0) {
-                toc.add(new String[] {"wp", "Wild Pokemon"});
-            }
-            if (this.getTemplateData().get("logTMMoves") != null
-                    && !((String) this.getTemplateData().get("logTMMoves")).isEmpty()) {
-                toc.add(new String[] {"tm", "TM Moves"});
-            }
-            if (this.getTemplateData().get("logTutorMoves") != null) {
-                toc.add(new String[] {"mt", "Tutor Moves"});
-            }
-            if (this.getTemplateData().get("oldTrades") != null
-                    && ((List) this.getTemplateData().get("oldTrades")).size() > 0) {
-                toc.add(new String[] {"igt", "In-Game Trades"});
-            }
-
-            this.getTemplateData().put("toc", toc);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
     }
 
     @Override

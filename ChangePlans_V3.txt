@@ -17,8 +17,12 @@
 * Fix randomStarter logging to use min evos and either + or exact as header (2evos+ or 2evos exact)
 * Update Type Effectiveness to Gen 8 (https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
 * randomizable_809 ROM support for Fairy type (maybe just set fairy to 0x17, ideally parse a types table and align)
-Type Strong Against and Weak Against based on rom values (supports hack changes)
-- Output type chart
+* Type Strong Against and Weak Against based on rom values (supports hack changes)
+* Output type chart
+* Refactor templating data into static class (Must reset when rom loads)
+Refactor STRONG_AGAINST/RESISTANT_TO to be a table (need to be able to get all types and differentiate between 0 and 0.5)
+Fix initial starter list getting ignored (while starters.contains(pkmn) always true on first round)
+Investigate if there is a better SE triangle algorithm (go against something that is planned to be kept rather than replaced)
 ---------------
 RandomizerGUI romLoaded state matches new Settings object
 All fields should be private and only accessible through getters/setters
@@ -35,6 +39,7 @@ Redo Gen4 WriteEncounters to not use iterator
 Unit Tests use common data model
 Unit tests deterministic (random should print seed and be sourced from manually input seed)
 Unit test more GenRestrictions
+Unit test RomEntry
 Replace versioning system with more robust model (190 -> 1100 is stupid, maybe find maven package for versioning)
 Add docstrings to all functions
 Remove all warnings

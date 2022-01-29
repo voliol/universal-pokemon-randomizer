@@ -35,8 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 
-import freemarker.template.Template;
-
 public class AbstractRomTest {
 
     ArrayList<Pokemon> pokemonList;
@@ -135,10 +133,12 @@ public class AbstractRomTest {
             // CRESS fights the second starter (index 1)
             else if (t.getTag().equals("CRESS")) {
                 // Pure Fire type like Ponyta should fight random weakness
-                assertTrue("No type found that is in STRONG_AGAINST_FIRE for CRESS", t.getPokemon()
-                        .stream()
-                        .anyMatch(tp -> Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.primaryType)
-                                || Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.secondaryType)));
+                assertTrue("No type found that is in STRONG_AGAINST.get(Type.FIRE) for CRESS",
+                        t.getPokemon().stream()
+                                .anyMatch(tp -> Type.STRONG_AGAINST.get(Type.FIRE)
+                                        .contains(tp.pokemon.primaryType)
+                                        || Type.STRONG_AGAINST.get(Type.FIRE)
+                                                .contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
@@ -222,10 +222,12 @@ public class AbstractRomTest {
             // CRESS fights the second starter (index 1)
             else if (t.getTag().equals("CRESS")) {
                 // Pure Fire type like Ponyta should fight random weakness
-                assertTrue("No type found that is in RESISTANT_TO_FIRE for CRESS", t.getPokemon()
-                        .stream()
-                        .anyMatch(tp -> Type.RESISTANT_TO_FIRE.contains(tp.pokemon.primaryType)
-                                || Type.RESISTANT_TO_FIRE.contains(tp.pokemon.secondaryType)));
+                assertTrue("No type found that is in RESISTANT_TO.get(Type.FIRE) for CRESS",
+                        t.getPokemon().stream()
+                                .anyMatch(tp -> Type.RESISTANT_TO.get(Type.FIRE)
+                                        .contains(tp.pokemon.primaryType)
+                                        || Type.RESISTANT_TO.get(Type.FIRE)
+                                                .contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
@@ -239,10 +241,12 @@ public class AbstractRomTest {
             // CILAN fights the last starter (index 2)
             else if (t.getTag().equals("CILAN")) {
                 // Pure Normal type like Rattata should fight random weakness
-                assertTrue("No type found that is in RESISTANT_TO_NORMAL for CILAN", t.getPokemon()
-                        .stream()
-                        .anyMatch(tp -> Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.primaryType)
-                                || Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.secondaryType)));
+                assertTrue("No type found that is in RESISTANT_TO.get(Type.NORMAL) for CILAN",
+                        t.getPokemon().stream()
+                                .anyMatch(tp -> Type.RESISTANT_TO.get(Type.NORMAL)
+                                        .contains(tp.pokemon.primaryType)
+                                        || Type.RESISTANT_TO.get(Type.NORMAL)
+                                                .contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                 // the type. 0 is possible due to the shared type and trump type
@@ -340,10 +344,11 @@ public class AbstractRomTest {
                 // CRESS fights the second starter (index 1)
                 else if (newT.getTag().equals("CRESS")) {
                     // Pure Fire type like Ponyta should fight random weakness
-                    assertTrue("No type found that is in STRONG_AGAINST_FIRE for CRESS",
-                            newT.getPokemon().stream().anyMatch(
-                                    tp -> Type.STRONG_AGAINST_FIRE.contains(tp.pokemon.primaryType)
-                                            || Type.STRONG_AGAINST_FIRE
+                    assertTrue("No type found that is in STRONG_AGAINST.get(Type.FIRE) for CRESS",
+                            newT.getPokemon().stream()
+                                    .anyMatch(tp -> Type.STRONG_AGAINST.get(Type.FIRE)
+                                            .contains(tp.pokemon.primaryType)
+                                            || Type.STRONG_AGAINST.get(Type.FIRE)
                                                     .contains(tp.pokemon.secondaryType)));
                     // Find out how many pokemon share a type with GYM1, subtract it from the total
                     // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
@@ -416,13 +421,13 @@ public class AbstractRomTest {
                                 assertTrue("Pokemon did not match the replacement - "
                                         + oldTp.pokemon.number + " gave " + cached.number
                                         + " but newTp was " + newTp.pokemon.number
-                                        + " and type did not match GYM1 or STRONG_AGAINST_FIRE",
+                                        + " and type did not match GYM1 or STRONG_AGAINST.get(Type.FIRE)",
                                         cached.equals(newTp.pokemon)
                                                 || gym1Type.contains(newTp.pokemon.primaryType)
                                                 || gym1Type.contains(newTp.pokemon.secondaryType)
-                                                || Type.STRONG_AGAINST_FIRE
+                                                || Type.STRONG_AGAINST.get(Type.FIRE)
                                                         .contains(newTp.pokemon.primaryType)
-                                                || Type.STRONG_AGAINST_FIRE
+                                                || Type.STRONG_AGAINST.get(Type.FIRE)
                                                         .contains(newTp.pokemon.secondaryType));
                                 break;
                             case "CILAN":
@@ -507,10 +512,12 @@ public class AbstractRomTest {
                 // CRESS fights the second starter (index 1)
                 else if (newT.getTag().equals("CRESS")) {
                     // Pure Fire type like Ponyta should fight random weakness
-                    assertTrue("No type found that is in RESISTANT_TO_FIRE for CRESS", newT
-                            .getPokemon().stream()
-                            .anyMatch(tp -> Type.RESISTANT_TO_FIRE.contains(tp.pokemon.primaryType)
-                                    || Type.RESISTANT_TO_FIRE.contains(tp.pokemon.secondaryType)));
+                    assertTrue("No type found that is in RESISTANT_TO.get(Type.FIRE) for CRESS",
+                            newT.getPokemon().stream()
+                                    .anyMatch(tp -> Type.RESISTANT_TO.get(Type.FIRE)
+                                            .contains(tp.pokemon.primaryType)
+                                            || Type.RESISTANT_TO.get(Type.FIRE)
+                                                    .contains(tp.pokemon.secondaryType)));
                     // Find out how many pokemon share a type with GYM1, subtract it from the total
                     // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
                     // the type. 0 is possible due to the shared type and trump type
@@ -524,10 +531,11 @@ public class AbstractRomTest {
                 // CILAN fights the last starter (index 2)
                 else if (newT.getTag().equals("CILAN")) {
                     // Pure Normal type like Rattata should fight random weakness
-                    assertTrue("No type found that is in RESISTANT_TO_NORMAL for CILAN",
-                            newT.getPokemon().stream().anyMatch(
-                                    tp -> Type.RESISTANT_TO_NORMAL.contains(tp.pokemon.primaryType)
-                                            || Type.RESISTANT_TO_NORMAL
+                    assertTrue("No type found that is in RESISTANT_TO.get(Type.NORMAL) for CILAN",
+                            newT.getPokemon().stream()
+                                    .anyMatch(tp -> Type.RESISTANT_TO.get(Type.NORMAL)
+                                            .contains(tp.pokemon.primaryType)
+                                            || Type.RESISTANT_TO.get(Type.NORMAL)
                                                     .contains(tp.pokemon.secondaryType)));
                     // Find out how many pokemon share a type with GYM1, subtract it from the total
                     // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
@@ -583,26 +591,26 @@ public class AbstractRomTest {
                                 assertTrue("Pokemon did not match the replacement - "
                                         + oldTp.pokemon.number + " gave " + cached.number
                                         + " but newTp was " + newTp.pokemon.number
-                                        + " and type did not match GYM1 or RESISTANT_TO_FIRE",
+                                        + " and type did not match GYM1 or RESISTANT_TO.get(Type.FIRE)",
                                         cached.equals(newTp.pokemon)
                                                 || gym1Type.contains(newTp.pokemon.primaryType)
                                                 || gym1Type.contains(newTp.pokemon.secondaryType)
-                                                || Type.RESISTANT_TO_FIRE
+                                                || Type.RESISTANT_TO.get(Type.FIRE)
                                                         .contains(newTp.pokemon.primaryType)
-                                                || Type.RESISTANT_TO_FIRE
+                                                || Type.RESISTANT_TO.get(Type.FIRE)
                                                         .contains(newTp.pokemon.secondaryType));
                                 break;
                             case "CILAN":
                                 assertTrue("Pokemon did not match the replacement - "
                                         + oldTp.pokemon.number + " gave " + cached.number
                                         + " but newTp was " + newTp.pokemon.number
-                                        + " and type did not match GYM1 or RESISTANT_TO_NORMAL",
+                                        + " and type did not match GYM1 or RESISTANT_TO.get(Type.NORMAL)",
                                         cached.equals(newTp.pokemon)
                                                 || gym1Type.contains(newTp.pokemon.primaryType)
                                                 || gym1Type.contains(newTp.pokemon.secondaryType)
-                                                || Type.RESISTANT_TO_NORMAL
+                                                || Type.RESISTANT_TO.get(Type.NORMAL)
                                                         .contains(newTp.pokemon.primaryType)
-                                                || Type.RESISTANT_TO_NORMAL
+                                                || Type.RESISTANT_TO.get(Type.NORMAL)
                                                         .contains(newTp.pokemon.secondaryType));
                                 break;
                         }
@@ -650,7 +658,6 @@ public class AbstractRomTest {
         doReturn(pokemonList.subList(511, 516)).when(romhandler).getStaticPokemon();
         doNothing().when(romhandler).setTrainers(trainerCap.capture());
         doReturn(true).when(romhandler).setStaticPokemon(pokemonCap.capture());
-        romhandler.setTemplate(mock(Template.class), mock(Map.class));
 
         // **************************
         // Test general selection
@@ -670,12 +677,12 @@ public class AbstractRomTest {
 
         // This one needs to cover a random fire type weakness, which gives us a wide selection
         ArrayList<Type> weaknessTypes = new ArrayList<Type>();
-        Type.STRONG_AGAINST.get(startersList.get(1).primaryType.ordinal()).forEach(t -> {
+        Type.STRONG_AGAINST.get(startersList.get(1).primaryType).forEach(t -> {
             // Get the list of weaknesses for that type and add them to acceptable types
-            weaknessTypes.addAll(Type.STRONG_AGAINST.get(t.ordinal()));
+            weaknessTypes.addAll(Type.STRONG_AGAINST.get(t));
         });
 
-        weaknessTypes.addAll(Type.STRONG_AGAINST_ROCK);
+        weaknessTypes.addAll(Type.STRONG_AGAINST.get(Type.ROCK));
         assertTrue("Grass monkey replacement type was not found in weakness list for starter 1",
                 !Collections.disjoint(weaknessTypes, types));
 
@@ -694,7 +701,7 @@ public class AbstractRomTest {
         // includes
         // at least ine of the replacement types
         assertTrue("Fire monkey replacement type was not found in weakness list for starter 2",
-                !Collections.disjoint(Type.STRONG_AGAINST_FIGHTING, types));
+                !Collections.disjoint(Type.STRONG_AGAINST.get(Type.FIGHTING), types));
 
         // Water monkey (fifth element in the static list)
         // Thus the fifth replacement in the capture
@@ -711,7 +718,7 @@ public class AbstractRomTest {
         // Steel) includes
         // at least one of the replacement's types
         assertTrue("Water monkey replacement type was not found in weakness list for starter 0",
-                !Collections.disjoint(Type.STRONG_AGAINST_GROUND, types));
+                !Collections.disjoint(Type.STRONG_AGAINST.get(Type.GROUND), types));
 
 
         // **************************
@@ -736,7 +743,7 @@ public class AbstractRomTest {
         // Add in all weaknesses of CRESS
         Type cressType = taggedTypes.get("CRESS");
         ArrayList<Type> acceptableTypes = new ArrayList<Type>();
-        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cressType.ordinal()));
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cressType));
         assertTrue(
                 "Grass monkey replacement type " + pkmn.primaryType + "/" + pkmn.secondaryType
                         + " was not found in weakness list for CRESS " + cressType.camelCase(),
@@ -757,7 +764,7 @@ public class AbstractRomTest {
         // Add in all weakneses of CILAN
         Type cilanType = taggedTypes.get("CILAN");
         acceptableTypes = new ArrayList<Type>();
-        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cilanType.ordinal()));
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cilanType));
         assertTrue(
                 "Fire monkey replacement type " + pkmn.primaryType + "/" + pkmn.secondaryType
                         + " was not found in weakness list for CILAN " + cilanType.camelCase(),
@@ -778,7 +785,7 @@ public class AbstractRomTest {
         // Add in all weakneses of CHILI
         Type chiliType = taggedTypes.get("CHILI");
         acceptableTypes = new ArrayList<Type>();
-        acceptableTypes.addAll(Type.STRONG_AGAINST.get(chiliType.ordinal()));
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(chiliType));
         assertTrue(
                 "Water monkey replacement type " + pkmn.primaryType + "/" + pkmn.secondaryType
                         + " was not found in weakness list for CHILI " + chiliType.camelCase(),
@@ -808,7 +815,7 @@ public class AbstractRomTest {
         // Add in all weaknesses of CRESS
         cressType = taggedTypes.get("CRESS");
         acceptableTypes = new ArrayList<Type>();
-        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cressType.ordinal()));
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cressType));
         assertTrue(
                 "Grass monkey replacement type " + pkmn.primaryType + "/" + pkmn.secondaryType
                         + " was not found in weakness list for CRESS " + cressType.camelCase(),
@@ -829,7 +836,7 @@ public class AbstractRomTest {
         // Add in all weakneses of CILAN
         cilanType = taggedTypes.get("CILAN");
         acceptableTypes = new ArrayList<Type>();
-        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cilanType.ordinal()));
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(cilanType));
         assertTrue(
                 "Fire monkey replacement type " + pkmn.primaryType + "/" + pkmn.secondaryType
                         + " was not found in weakness list for CILAN " + cilanType.camelCase(),
@@ -850,7 +857,7 @@ public class AbstractRomTest {
         // Add in all weakneses of CHILI
         chiliType = taggedTypes.get("CHILI");
         acceptableTypes = new ArrayList<Type>();
-        acceptableTypes.addAll(Type.STRONG_AGAINST.get(chiliType.ordinal()));
+        acceptableTypes.addAll(Type.STRONG_AGAINST.get(chiliType));
         assertTrue(
                 "Water monkey replacement type " + pkmn.primaryType + "/" + pkmn.secondaryType
                         + " was not found in weakness list for CHILI " + chiliType.camelCase(),
@@ -1856,6 +1863,5 @@ public class AbstractRomTest {
         doReturn(trainerList).when(romhandler).getTrainers();
         doReturn(startersList).when(romhandler).getStarters();
         doReturn(encountersList).when(romhandler).getEncounters(anyBoolean());
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
     }
 }

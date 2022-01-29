@@ -131,7 +131,7 @@
 - Platinum rival at Battle Tower now correctly retains starter or team if that option is selected
 - `Allow Low Level Evolution` wild pokemon setting now correctly toggles behavior in the randomizer
 - `LEVEL_ITEM_DAY`, `LEVEL_ITEM_NIGHT`, and `TRADE_ITEM` should correctly avoid duplicates. _should_
-- Subsets of pokemon can now be randomized instead of everything in a ROM. Details can be found in "UserGuide,txt".
+- Subsets of pokemon can now be randomized instead of everything in a ROM. Details can be found in "UserGuide.txt".
   - `LimitPokemon` now restricts the pool of pokemon eligible for randomization to align with this new subset feature.
   - Logs will still show all pokemon, even if they weren't randomized, to give a complete game guide.
 - When randomizing evolutions, you can restrict replacements to the same stage that the evolution is.
@@ -149,6 +149,10 @@
 - Type effectiveness can now be used in all generations
   - This only removes Steel resistance to Ghost and Dark for Gen 2+, and does not add the Fairy type
   - Credit to [dee-ee](https://www.reddit.com/user/dee-ee/) for pointing me [to the code](https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
+- Type effectiveness is now based on the data in the ROM
+  - A Gen 8 effectiveness table (minus FAIRY) is provided if game data is not found.
+  - This has not been tested thoroughly, and it is reasonable to assume some hacks may have types improperly read. Please let me know if you find an example!
 - Adds more support for Randomizable 809
   - Adds unique entry to allow FAIRY type to be properly recognized
   - This also enables other rom hacks to be easily supported, so long as the offsets are known and a unique identifier exists
+- Logs are now handled in a separate class. There should be no impact to users.

@@ -35,7 +35,6 @@ public class Gen3Test {
             Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler)
                     .getRomEntry();
-            doReturn(mock(Map.class)).when(romhandler).getTemplateData();
             resetDataModel(romhandler);
             romhandler.setPokemonPool(null, null);
             romhandler.removeTradeEvolutions(true, false);
@@ -53,7 +52,6 @@ public class Gen3Test {
     public void TestGen3ChangeMethods() {
         Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
         resetDataModel(romhandler);
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
                 false);
         romhandler.getMainPokemonList().forEach(pk -> {
@@ -101,7 +99,6 @@ public class Gen3Test {
                 mockStatic(com.dabomstew.pkrandom.RomFunctions.class)) {
             Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
             resetDataModel(romhandler);
-            doReturn(mock(Map.class)).when(romhandler).getTemplateData();
             doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler)
                     .getRomEntry();
             mockRomFunctions
@@ -154,7 +151,6 @@ public class Gen3Test {
     public void TestGen3TrainerRandomHeldItem() {
         Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
         doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
         romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
                 true, false, 0);
@@ -165,6 +161,9 @@ public class Gen3Test {
             }
         }
     }
+
+    // TODO: Test that updateTypeEffectivenss runs and updates Type.STRONG_AGAINST and
+    // Type.RESISTANT_TO correctly
 
     /**
      * Function for granular modification of data model

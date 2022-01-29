@@ -49,6 +49,7 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -343,6 +344,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
+        updateTypes();
 
         abilityNames = getStrings(false, getRomEntry().getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, getRomEntry().getInt("ItemNamesTextOffset"));
@@ -1354,15 +1356,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             Gen5Constants.allowedItems.banSingles(Gen5Constants.luckyEggIndex);
             Gen5Constants.nonBadItems.banSingles(Gen5Constants.luckyEggIndex);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         } else if (tweak == MiscTweak.NO_FREE_LUCKY_EGG) {
             removeFreeLuckyEgg();
         } else if (tweak == MiscTweak.USE_RESISTANT_TYPE) {
             // Is referenced in Randomizer.java
             // No action is taken here
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.USE_RESISTANT_TYPE.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.USE_RESISTANT_TYPE.getTweakName(), true);
         } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
             updateTypeEffectiveness();
         }
@@ -1407,8 +1407,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         writeWord(itemScripts, offsetInFile + 4,
                                 Gen5Constants.mulchIndices[mulchIndex]);
                         lookingForEggs--;
-                        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                                .put(MiscTweak.NO_FREE_LUCKY_EGG.getTweakName(), true);
+                        TemplateData.putMap("tweakMap", MiscTweak.NO_FREE_LUCKY_EGG.getTweakName(),
+                                true);
                     }
                 }
                 if (b == 0x2E) { // Beginning of a new block in the file
@@ -1447,16 +1447,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // the rest of the file is items
             }
             this.writeNARC(getRomEntry().getString("HiddenGrottos"), hhNARC);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.RANDOMIZE_HIDDEN_GROTTOS.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.RANDOMIZE_HIDDEN_GROTTOS.getTweakName(),
+                    true);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
     private void applyFastestText() {
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(
-                MiscTweak.FASTEST_TEXT.getTweakName(), genericIPSPatch(arm9, "FastestTextTweak"));
+        TemplateData.putMap("tweakMap", MiscTweak.FASTEST_TEXT.getTweakName(),
+                genericIPSPatch(arm9, "FastestTextTweak"));
     }
 
     private boolean genericIPSPatch(byte[] data, String ctName) {
@@ -1468,6 +1468,40 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             FileFunctions.applyPatch(data, patchName);
             return true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void updateTypes() {
+        try {
+            byte[] battleOverlay = readOverlay(getRomEntry().getInt("BattleOvlNumber"));
+            int typeEffectivenessTableOffset =
+                    find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
+            if (typeEffectivenessTableOffset > 0) {
+                Effectiveness[][] typeEffectivenessTable =
+                        readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                Type.STRONG_AGAINST.clear();
+                Type.RESISTANT_TO.clear();
+                for (int attacker = 0; attacker < getTypesInGame().size(); attacker++) {
+                    for (int defender = 0; defender < getTypesInGame().size(); defender++) {
+                        switch (typeEffectivenessTable[attacker][defender]) {
+                            case ZERO:
+                            case HALF:
+                                Type.updateResistantTo(Gen5Constants.typeTable[attacker],
+                                        Gen5Constants.typeTable[defender]);
+                                break;
+                            case DOUBLE:
+                                Type.updateStrongAgainst(Gen5Constants.typeTable[attacker],
+                                        Gen5Constants.typeTable[defender]);
+                                break;
+                        }
+                    }
+                }
+
+                TemplateData.setGenerateTypeChartOrder(
+                        new ArrayList<Type>(Type.STRONG_AGAINST.keySet()));
+            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -1485,13 +1519,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 int dark = Gen5Constants.typeToByte(Type.DARK);
                 int ghost = Gen5Constants.typeToByte(Type.GHOST);
                 typeEffectivenessTable[ghost][steel] = Effectiveness.NEUTRAL;
+                Type.RESISTANT_TO.get(Type.GHOST).remove(Type.STEEL);
                 typeEffectivenessTable[dark][steel] = Effectiveness.NEUTRAL;
+                Type.RESISTANT_TO.get(Type.DARK).remove(Type.STEEL);
                 writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay,
                         typeEffectivenessTableOffset);
                 writeOverlay(getRomEntry().getInt("BattleOvlNumber"), battleOverlay);
-                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                        .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
-                this.getTemplateData().put("updateEffectiveness", true);
+                TemplateData.putMap("tweakMap", MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(),
+                        true);
+                TemplateData.putData("updateEffectiveness", true);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -2091,7 +2127,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+        TemplateData.putData("removeTradeEvo", tradeEvoFixed);
     }
 
     @Override

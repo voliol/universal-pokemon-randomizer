@@ -49,6 +49,7 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -320,6 +321,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         abilityNames = getStrings(getRomEntry().getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(getRomEntry().getInt("ItemNamesTextOffset"));
         loadedWildMapNames = false;
+        updateTypes();
 
         if (getRomEntry().romType == Gen4Constants.Type_Plat) {
             ptGiratina = true;
@@ -2348,7 +2350,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+        TemplateData.putData("removeTradeEvo", tradeEvoFixed);
     }
 
     @Override
@@ -2982,8 +2984,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             Gen4Constants.allowedItems.banSingles(Gen4Constants.luckyEggIndex);
             Gen4Constants.nonBadItems.banSingles(Gen4Constants.luckyEggIndex);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.BAN_LUCKY_EGG.getTweakName(), true);
         } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
             updateTypeEffectiveness();
         }
@@ -3002,8 +3003,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             if (opponent != null && player != null) {
                 arm9[opponentOffset] = (byte) opponent.number;
                 arm9[playerOffset] = (byte) player.number;
-                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                        .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+                TemplateData.putMap("tweakMap",
+                        MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
             }
         } else {
             // Only opponent, but enough space for any mon
@@ -3011,16 +3012,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
             if (opponent != null) {
                 writeLong(arm9, opponentOffset, opponent.number);
-                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                        .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+                TemplateData.putMap("tweakMap",
+                        MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
             }
         }
 
     }
 
     private void applyFastestText() {
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap")).put(
-                MiscTweak.FASTEST_TEXT.getTweakName(), genericIPSPatch(arm9, "FastestTextTweak"));
+        TemplateData.putMap("tweakMap", MiscTweak.FASTEST_TEXT.getTweakName(),
+                genericIPSPatch(arm9, "FastestTextTweak"));
     }
 
     private boolean genericIPSPatch(byte[] data, String ctName) {
@@ -3032,6 +3033,36 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         try {
             FileFunctions.applyPatch(data, patchName);
             return true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void updateTypes() {
+        try {
+            byte[] battleOverlay = readOverlay(getRomEntry().getInt("BattleOvlNumber"));
+            int typeEffectivenessTableOffset =
+                    find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator);
+            if (typeEffectivenessTableOffset > 0) {
+                List<TypeRelationship> typeEffectivenessTable =
+                        readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                Type.STRONG_AGAINST.clear();
+                Type.RESISTANT_TO.clear();
+                for (TypeRelationship rel : typeEffectivenessTable) {
+                    switch (rel.effectiveness) {
+                        case ZERO:
+                        case HALF:
+                            Type.updateResistantTo(rel.attacker, rel.defender);
+                            break;
+                        case DOUBLE:
+                            Type.updateStrongAgainst(rel.attacker, rel.defender);
+                            break;
+                    }
+                }
+
+                TemplateData.setGenerateTypeChartOrder(
+                        new ArrayList<Type>(Type.STRONG_AGAINST.keySet()));
+            }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -3050,20 +3081,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     if (relationship.attacker == Type.GHOST
                             && relationship.defender == Type.STEEL) {
                         relationship.effectiveness = Effectiveness.NEUTRAL;
+                        Type.RESISTANT_TO.get(Type.GHOST).remove(Type.STEEL);
                     }
 
                     // Change Dark 0.5x against Steel to Dark 1x to Steel
                     else if (relationship.attacker == Type.DARK
                             && relationship.defender == Type.STEEL) {
                         relationship.effectiveness = Effectiveness.NEUTRAL;
+                        Type.RESISTANT_TO.get(Type.DARK).remove(Type.STEEL);
                     }
                 }
                 writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay,
                         typeEffectivenessTableOffset);
                 writeOverlay(getRomEntry().getInt("BattleOvlNumber"), battleOverlay);
-                ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                        .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
-                this.getTemplateData().put("updateEffectiveness", true);
+                TemplateData.putMap("tweakMap", MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(),
+                        true);
+                TemplateData.putData("updateEffectiveness", true);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);

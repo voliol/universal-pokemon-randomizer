@@ -38,7 +38,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
@@ -46,9 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -69,11 +66,7 @@ import javax.swing.ToolTipManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import freemarker.template.Version;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.FileFunctions;
@@ -1041,6 +1034,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     // rom loading
 
     private void loadROM() {
+        TemplateData.resetData();
         romOpenChooser.setSelectedFile(null);
         int returnVal = romOpenChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -2303,16 +2297,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
         final Settings settings = createSettingsFromState(romOptions, customNames);
         final boolean raceMode = settings.isRaceMode();
 
-        Configuration cfg = new Configuration(new Version("2.3.30"));
-
-        cfg.setClassForTemplateLoading(RandomizerGUI.class, "/com/dabomstew/pkrandom/gui/");
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        cfg.setBooleanFormat("c");
-        cfg.setWhitespaceStripping(true);
-
-        Map<String, Object> templateData = new HashMap<String, Object>();
-
         try {
             final AtomicInteger finishedCV = new AtomicInteger(0);
             opDialog =
@@ -2328,8 +2312,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     });
                     boolean succeededSave = false;
                     try {
-                        Template template = cfg.getTemplate("randomization_log.ftl");
-                        RandomizerGUI.this.romHandler.setTemplate(template, templateData);
                         finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler)
                                 .randomize(filename, seed));
                         succeededSave = true;
@@ -2359,13 +2341,13 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                     if (response == JOptionPane.YES_OPTION) {
                                         // Print ftl log
                                         try {
-                                            Writer file =
-                                                    new FileWriter(new File(filename + ".log.htm"));
-                                            romHandler.getTemplate()
-                                                    .process(romHandler.getTemplateData(), file);
+                                            TemplateData.process(new FileWriter(
+                                                    new File(filename + ".log.htm")));
                                         } catch (IOException | TemplateException e) {
                                             JOptionPane.showMessageDialog(RandomizerGUI.this, bundle
                                                     .getString("RandomizerGUI.logSaveFailed"));
+                                            RandomizerGUI.this.romHandler = null;
+                                            initialFormState();
                                             return;
                                         }
                                         JOptionPane.showMessageDialog(RandomizerGUI.this,
@@ -2417,6 +2399,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
     }
 
     private void presetLoader() {
+        TemplateData.resetData();
         PresetLoadDialog pld = new PresetLoadDialog(this);
         if (pld.isCompleted()) {
             // Apply it

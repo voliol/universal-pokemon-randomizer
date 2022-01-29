@@ -134,6 +134,43 @@
 
 		<!--====================================================================================-->
 
+		<#if typeMatchups??>
+			<h2 id="tmc">Type Matchup Chart</h2>
+			<table class="pk-table">
+				<#list typeMatchups as row>
+				<#if row?is_first>
+					<tr>
+						<#list row as type>
+						<th><span class="pk-type ${type?lower_case}">${type?upper_case}</span></th>
+						</#list>
+					</tr>
+				<#else>
+					<tr>
+						<#list row as matchup>
+							<#if matchup?is_first>
+								<td><span class="pk-type ${matchup?lower_case}">${matchup?upper_case}</span></td>
+							<#else>
+							<#switch matchup>
+								<#case "SE">
+									<td class="success">2</td>
+								<#break>
+								<#case "NE">
+									<td class="error">0.5</td>
+								<#break>
+								<#default>
+									<td>1</td>
+								<#break>
+							</#switch>
+							</#if>
+						</#list>
+					</tr>
+				</#if>
+				</#list>
+			</table>
+		</#if>
+
+		<!--====================================================================================-->
+
     	<#if logEvolutions?? && logEvolutions>
     		<h2 id="re">Randomized Evolutions</h2>
     		<ul>

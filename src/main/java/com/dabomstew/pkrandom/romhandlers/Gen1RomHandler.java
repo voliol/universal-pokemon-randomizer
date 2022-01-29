@@ -48,6 +48,7 @@ import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -386,6 +387,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         loadItemNames();
         preloadMaps();
         loadMapNames();
+        updateTypes();
     }
 
     private void loadPokedexOrder() {
@@ -1131,6 +1133,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return false;
     }
 
+    private void updateTypes() {
+        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        Type.STRONG_AGAINST.clear();
+        Type.RESISTANT_TO.clear();
+        for (TypeRelationship rel : typeEffectivenessTable) {
+            switch (rel.effectiveness) {
+                case ZERO:
+                case HALF:
+                    Type.updateResistantTo(rel.attacker, rel.defender);
+                    break;
+                case DOUBLE:
+                    Type.updateStrongAgainst(rel.attacker, rel.defender);
+                    break;
+            }
+        }
+        TemplateData.setGenerateTypeChartOrder(new ArrayList<Type>(Type.STRONG_AGAINST.keySet()));
+    }
+
     private void updateTypeEffectiveness() {
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
 
@@ -1141,20 +1161,25 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 relationship.attacker = Type.ICE;
                 relationship.defender = Type.FIRE;
                 relationship.effectiveness = Effectiveness.HALF;
+                Type.STRONG_AGAINST.get(Type.POISON).remove(Type.BUG);
+                Type.updateResistantTo(relationship.attacker, relationship.defender);
             } else if (relationship.attacker == Type.BUG && relationship.defender == Type.POISON) {
                 // Change Bug 2x against Poison to Bug 0.5x against Poison
                 relationship.effectiveness = Effectiveness.HALF;
+                Type.STRONG_AGAINST.get(Type.BUG).remove(Type.POISON);
+                Type.updateResistantTo(Type.BUG, Type.POISON);
             } else if (relationship.attacker == Type.GHOST
                     && relationship.defender == Type.PSYCHIC) {
                 // Change Ghost 0x against Psychic to Ghost 2x against Psychic
                 relationship.effectiveness = Effectiveness.DOUBLE;
+                Type.RESISTANT_TO.get(Type.PSYCHIC).remove(Type.GHOST);
+                Type.updateStrongAgainst(Type.GHOST, Type.PSYCHIC);
             }
         }
 
         writeTypeEffectivenessTable(typeEffectivenessTable);
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
-        this.getTemplateData().put("updateEffectiveness", true);
+        TemplateData.putMap("tweakMap", MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getTweakName(), true);
+        TemplateData.putData("updateEffectiveness", true);
     }
 
     private List<TypeRelationship> readTypeEffectivenessTable() {
@@ -1541,7 +1566,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         });
             }
         }
-        this.getTemplateData().put("removeTradeEvo", tradeEvoFixed);
+        TemplateData.putData("removeTradeEvo", tradeEvoFixed);
     }
 
     @Override
@@ -1780,26 +1805,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void applyBWEXPPatch() {
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.BW_EXP_PATCH.getTweakName(), genericIPSPatch("BWXPTweak"));
+        TemplateData.putMap("tweakMap", MiscTweak.BW_EXP_PATCH.getTweakName(),
+                genericIPSPatch("BWXPTweak"));
     }
 
     private void applyXAccNerfPatch() {
         xAccNerfed = genericIPSPatch("XAccNerfTweak");
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.NERF_X_ACCURACY.getTweakName(), xAccNerfed);
+        TemplateData.putMap("tweakMap", MiscTweak.NERF_X_ACCURACY.getTweakName(), xAccNerfed);
     }
 
     private void applyCritRatePatch() {
-        ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                .put(MiscTweak.FIX_CRIT_RATE.getTweakName(), genericIPSPatch("CritRateTweak"));
+        TemplateData.putMap("tweakMap", MiscTweak.FIX_CRIT_RATE.getTweakName(),
+                genericIPSPatch("CritRateTweak"));
     }
 
     private void applyFastestTextPatch() {
         if (getRomEntry().getValue("TextDelayFunctionOffset") != 0) {
             writeByte(getRomEntry().getValue("TextDelayFunctionOffset"), GBConstants.gbZ80Ret);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.FASTEST_TEXT.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.FASTEST_TEXT.getTweakName(), true);
         }
     }
 
@@ -1807,8 +1830,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (getRomEntry().getValue("PCPotionOffset") != 0) {
             writeByte(getRomEntry().getValue("PCPotionOffset"),
                     (byte) this.getNonBadItems().randomNonTM(this.random));
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.RANDOMIZE_PC_POTION.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.RANDOMIZE_PC_POTION.getTweakName(), true);
         }
     }
 
@@ -1816,8 +1838,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (getRomEntry().getValue("PikachuEvoJumpOffset") != 0) {
             writeByte(getRomEntry().getValue("PikachuEvoJumpOffset"),
                     GBConstants.gbZ80JumpRelative);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.ALLOW_PIKACHU_EVOLUTION.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.ALLOW_PIKACHU_EVOLUTION.getTweakName(), true);
         }
     }
 
@@ -1825,8 +1846,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (getRomEntry().getValue("CatchingTutorialMonOffset") != 0) {
             writeByte(getRomEntry().getValue("CatchingTutorialMonOffset"),
                     (byte) getPokeNumToRBYTable()[this.randomPokemon().number]);
-            ((Map<String, Boolean>) this.getTemplateData().get("tweakMap"))
-                    .put(MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(), true);
+            TemplateData.putMap("tweakMap", MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getTweakName(),
+                    true);
         }
     }
 

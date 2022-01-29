@@ -170,14 +170,11 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     public boolean isWeakTo(Pokemon pkmn) {
-        boolean isWeak = Type.STRONG_AGAINST.get(this.primaryType.ordinal())
-                .contains(pkmn.primaryType)
-                || Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.secondaryType);
+        boolean isWeak = Type.STRONG_AGAINST.get(this.primaryType).contains(pkmn.primaryType)
+                || Type.STRONG_AGAINST.get(this.primaryType).contains(pkmn.secondaryType);
         if (this.secondaryType != null && !isWeak) {
-            isWeak = Type.STRONG_AGAINST.get(this.secondaryType.ordinal())
-                    .contains(pkmn.primaryType)
-                    || Type.STRONG_AGAINST.get(this.secondaryType.ordinal())
-                            .contains(pkmn.secondaryType);
+            isWeak = Type.STRONG_AGAINST.get(this.secondaryType).contains(pkmn.primaryType)
+                    || Type.STRONG_AGAINST.get(this.secondaryType).contains(pkmn.secondaryType);
         }
         return isWeak;
     }
