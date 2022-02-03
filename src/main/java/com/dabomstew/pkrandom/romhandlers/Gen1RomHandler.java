@@ -1137,9 +1137,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
         Type.STRONG_AGAINST.clear();
         Type.RESISTANT_TO.clear();
+        Type.IMMUNE_TO.clear();
         for (TypeRelationship rel : typeEffectivenessTable) {
             switch (rel.effectiveness) {
                 case ZERO:
+                    Type.updateImmuneTo(rel.attacker, rel.defender);
+                    break;
                 case HALF:
                     Type.updateResistantTo(rel.attacker, rel.defender);
                     break;

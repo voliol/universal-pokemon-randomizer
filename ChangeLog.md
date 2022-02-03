@@ -151,6 +151,7 @@
   - Credit to [dee-ee](https://www.reddit.com/user/dee-ee/) for pointing me [to the code](https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/version_190_of_universal_pokemon_randomizer/h54tvei?utm_source=share&utm_medium=web2x&context=3)
 - Type effectiveness is now based on the data in the ROM
   - A Gen 8 effectiveness table (minus FAIRY) is provided if game data is not found.
+  - The type chart in game is printed as part of the logs if game data is found.
   - This has not been tested thoroughly, and it is reasonable to assume some hacks may have types improperly read. Please let me know if you find an example!
 - Adds more support for Randomizable 809
   - Adds unique entry to allow FAIRY type to be properly recognized

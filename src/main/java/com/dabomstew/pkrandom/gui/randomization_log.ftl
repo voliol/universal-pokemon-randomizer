@@ -157,6 +157,9 @@
 								<#case "NE">
 									<td class="error">0.5</td>
 								<#break>
+								<#case "ZE">
+									<td class="black-background">0</td>
+								<#break>
 								<#default>
 									<td>1</td>
 								<#break>

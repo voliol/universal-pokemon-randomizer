@@ -80,10 +80,13 @@ public class TemplateData {
                 for (Type columnType : typeOrder) {
                     List<Type> strong = Type.STRONG_AGAINST.get(columnType);
                     List<Type> resist = Type.RESISTANT_TO.get(rowType);
+                    List<Type> immune = Type.IMMUNE_TO.get(rowType);
                     if (strong != null && strong.contains(rowType)) {
                         nextRow.add("SE");
                     } else if (resist != null && resist.contains(columnType)) {
                         nextRow.add("NE");
+                    } else if (immune != null && immune.contains(columnType)) {
+                        nextRow.add("ZE");
                     } else {
                         nextRow.add("E");
                     }

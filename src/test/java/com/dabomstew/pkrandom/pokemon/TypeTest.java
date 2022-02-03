@@ -396,11 +396,11 @@ public class TypeTest {
         Type newType = Type.randomStrength(new Random(), true, type1);
         assertTrue(
                 type1.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
-                Type.RESISTANT_TO.get(newType).contains(type1));
+                Type.getCombinedResistanceMap().get(newType).contains(type1));
         newType = Type.randomStrength(new Random(), true, type2);
         assertTrue(
                 type2.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
-                Type.RESISTANT_TO.get(newType).contains(type2));
+                Type.getCombinedResistanceMap().get(newType).contains(type2));
         newType = Type.randomStrength(new Random(), true, type1, type2);
         assertTrue("Random Strength resistance for both types is not FLYING ",
                 newType == Type.FLYING);

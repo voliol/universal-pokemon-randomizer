@@ -6,9 +6,7 @@ import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
-
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -102,6 +100,7 @@ public class Gen1Test {
 
     // TODO: Test that updateTypeEffectivenss runs and updates Type.STRONG_AGAINST and
     // Type.RESISTANT_TO correctly
+    // Requires having a type table to read from, which requires not reading bytes
 
     /**
      * Function for granular modification of data model

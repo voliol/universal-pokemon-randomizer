@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
@@ -442,7 +443,7 @@ public class LogTest {
         doReturn(Gen2RomHandler.getRomFromSupportedRom("Silver (U)")).when(romhandler)
                 .getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
-        doReturn(-2).when(romhandler).readByte(anyInt());
+        doReturn(-1).when(romhandler).readByte(anyInt());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -474,7 +475,7 @@ public class LogTest {
         doReturn(IntStream.range(0, 649).toArray()).when(romhandler).getPokedexToInternal();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doNothing().when(romhandler).writeWord(anyInt(), anyInt());
-        doReturn(-2).when(romhandler).readByte(anyInt());
+        doReturn(-1).when(romhandler).readByte(anyInt());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -514,7 +515,7 @@ public class LogTest {
         doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
         doNothing().when(romhandler).writeOverlay(anyInt(), any());
         doNothing().when(romhandler).writeLong(any(), anyInt(), anyInt());
-        doReturn(new byte[] {-2, -2}).when(romhandler).readOverlay(anyInt());
+        doReturn(new byte[] {-1, -1}).when(romhandler).readOverlay(anyInt());
         doReturn(1).when(romhandler).find(any(), anyString());
         int mTweaks = romhandler.miscTweaksAvailable();
 
@@ -845,7 +846,7 @@ public class LogTest {
         doReturn(Gen2RomHandler.getRomFromSupportedRom("Silver (U)")).when(romhandler)
                 .getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
-        doReturn(-2).when(romhandler).readByte(anyInt());
+        doReturn(-1).when(romhandler).readByte(anyInt());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
@@ -856,7 +857,7 @@ public class LogTest {
         resetDataModel(romhandler, 250);
         doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
-        doReturn(-2).when(romhandler).readByte(anyInt());
+        doReturn(-1).when(romhandler).readByte(anyInt());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
@@ -870,7 +871,7 @@ public class LogTest {
         doReturn(0).when(romhandler).readWord(any(), anyInt());
         doNothing().when(romhandler).writeWord(any(), anyInt(), anyInt());
         doNothing().when(romhandler).writeOverlay(anyInt(), any());
-        doReturn(new byte[] {-2, -2}).when(romhandler).readOverlay(anyInt());
+        doReturn(new byte[] {-1, -1}).when(romhandler).readOverlay(anyInt());
         doReturn(1).when(romhandler).find(any(), anyString());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
@@ -916,7 +917,34 @@ public class LogTest {
                 new String[] {"rs", "Starters"});
     }
 
-    // TODO: Check that log prints type chart
+    @Test
+    public void TestTypeChart() {
+        RomHandler romhandler = spy(new Gen1RomHandler(new Random()));
+        resetDataModel(romhandler, 250);
+        TemplateData.setGenerateTypeChartOrder(Arrays.asList(Type.values()));
+        TemplateData.generateTypeChart();
+        // Inside and outside array size should match
+        assertEquals(((ArrayList<ArrayList<String>>) TemplateData.getData("typeMatchups")).size(),
+                27);
+        assertEquals(
+                ((ArrayList<ArrayList<String>>) TemplateData.getData("typeMatchups")).get(1).size(),
+                27);
+        // Spot check
+        // NORMAL zero effect GHOST
+        assertEquals(((ArrayList<ArrayList<String>>) TemplateData.getData("typeMatchups")).get(1)
+                .get(13), "ZE");
+        // FIGHTING not effective FLYING
+        assertEquals(
+                ((ArrayList<ArrayList<String>>) TemplateData.getData("typeMatchups")).get(2).get(3),
+                "NE");
+        // FLYING super effective FIGHTING
+        assertEquals(
+                ((ArrayList<ArrayList<String>>) TemplateData.getData("typeMatchups")).get(3).get(2),
+                "SE");
+        // DARK effective NORMAL
+        assertEquals(((ArrayList<ArrayList<String>>) TemplateData.getData("typeMatchups")).get(17)
+                .get(1), "E");
+    }
 
     /**
      * Function for granular modification of data model

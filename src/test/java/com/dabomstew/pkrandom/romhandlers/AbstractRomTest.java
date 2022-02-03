@@ -241,11 +241,11 @@ public class AbstractRomTest {
             // CILAN fights the last starter (index 2)
             else if (t.getTag().equals("CILAN")) {
                 // Pure Normal type like Rattata should fight random weakness
-                assertTrue("No type found that is in RESISTANT_TO.get(Type.NORMAL) for CILAN",
+                assertTrue("No type found that is in combineMap.get(Type.NORMAL) for CILAN",
                         t.getPokemon().stream()
-                                .anyMatch(tp -> Type.RESISTANT_TO.get(Type.NORMAL)
+                                .anyMatch(tp -> Type.getCombinedResistanceMap().get(Type.NORMAL)
                                         .contains(tp.pokemon.primaryType)
-                                        || Type.RESISTANT_TO.get(Type.NORMAL)
+                                        || Type.getCombinedResistanceMap().get(Type.NORMAL)
                                                 .contains(tp.pokemon.secondaryType)));
                 // Find out how many pokemon share a type with GYM1, subtract it from the total
                 // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
@@ -531,11 +531,11 @@ public class AbstractRomTest {
                 // CILAN fights the last starter (index 2)
                 else if (newT.getTag().equals("CILAN")) {
                     // Pure Normal type like Rattata should fight random weakness
-                    assertTrue("No type found that is in RESISTANT_TO.get(Type.NORMAL) for CILAN",
+                    assertTrue("No type found that is in combineMap.get(Type.NORMAL) for CILAN",
                             newT.getPokemon().stream()
-                                    .anyMatch(tp -> Type.RESISTANT_TO.get(Type.NORMAL)
+                                    .anyMatch(tp -> Type.getCombinedResistanceMap().get(Type.NORMAL)
                                             .contains(tp.pokemon.primaryType)
-                                            || Type.RESISTANT_TO.get(Type.NORMAL)
+                                            || Type.getCombinedResistanceMap().get(Type.NORMAL)
                                                     .contains(tp.pokemon.secondaryType)));
                     // Find out how many pokemon share a type with GYM1, subtract it from the total
                     // number of pokemon on the team, and ensure either 0 or 1 pokemon don't share
@@ -604,13 +604,13 @@ public class AbstractRomTest {
                                 assertTrue("Pokemon did not match the replacement - "
                                         + oldTp.pokemon.number + " gave " + cached.number
                                         + " but newTp was " + newTp.pokemon.number
-                                        + " and type did not match GYM1 or RESISTANT_TO.get(Type.NORMAL)",
+                                        + " and type did not match GYM1 or combineMap.get(Type.NORMAL)",
                                         cached.equals(newTp.pokemon)
                                                 || gym1Type.contains(newTp.pokemon.primaryType)
                                                 || gym1Type.contains(newTp.pokemon.secondaryType)
-                                                || Type.RESISTANT_TO.get(Type.NORMAL)
+                                                || Type.getCombinedResistanceMap().get(Type.NORMAL)
                                                         .contains(newTp.pokemon.primaryType)
-                                                || Type.RESISTANT_TO.get(Type.NORMAL)
+                                                || Type.getCombinedResistanceMap().get(Type.NORMAL)
                                                         .contains(newTp.pokemon.secondaryType));
                                 break;
                         }

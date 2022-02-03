@@ -1802,9 +1802,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
         Type.STRONG_AGAINST.clear();
         Type.RESISTANT_TO.clear();
+        Type.IMMUNE_TO.clear();
         for (TypeRelationship rel : typeEffectivenessTable) {
             switch (rel.effectiveness) {
                 case ZERO:
+                    Type.updateImmuneTo(rel.attacker, rel.defender);
+                    break;
                 case HALF:
                     Type.updateResistantTo(rel.attacker, rel.defender);
                     break;
@@ -1842,9 +1845,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
         int attackingType = readByte(currentOffset);
         // 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
-        // the actual end of the table. Since we don't care about Ghost immunities at all,
-        // just stop once we reach the Foresight section.
-        while (attackingType != (byte) 0xFE) {
+        // the actual end of the table.
+        while (attackingType != (byte) 0xFF) {
             int defendingType = readByte(currentOffset + 1);
             int effectivenessInternal = readByte(currentOffset + 2);
             Type attacking = Gen2Constants.typeTable[attackingType];
@@ -1871,6 +1873,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
             currentOffset += 3;
             attackingType = readByte(currentOffset);
+            while (attackingType == (byte) 0xFE) {
+                currentOffset += 3;
+                attackingType = readByte(currentOffset);
+            }
         }
         return typeEffectivenessTable;
     }

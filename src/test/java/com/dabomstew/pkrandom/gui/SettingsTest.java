@@ -955,8 +955,6 @@ public class SettingsTest extends AbstractUIBase {
                                 (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
                                 (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
                                 (settings) -> settings.getEvolutionsMod(), "Evolutions");
-
-                // TODO: EvoLv1 disables random slider and exact evos
         }
 
         /**

@@ -29,10 +29,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 
 public enum Type {
 
@@ -56,6 +58,7 @@ public enum Type {
 
     public static final Map<Type, List<Type>> STRONG_AGAINST = new HashMap<Type, List<Type>>();
     public static final Map<Type, List<Type>> RESISTANT_TO = new HashMap<Type, List<Type>>();
+    public static final Map<Type, List<Type>> IMMUNE_TO = new HashMap<Type, List<Type>>();
 
     // Setup a default list to support type matchups
     static {
@@ -94,6 +97,14 @@ public enum Type {
         RESISTANT_TO.put(ROCK, TypeRelationship.RESISTANT_TO_ROCK);
         RESISTANT_TO.put(STEEL, TypeRelationship.RESISTANT_TO_STEEL);
         RESISTANT_TO.put(WATER, TypeRelationship.RESISTANT_TO_WATER);
+
+        IMMUNE_TO.put(ELECTRIC, TypeRelationship.IMMUNE_TO_ELECTRIC);
+        IMMUNE_TO.put(FIGHTING, TypeRelationship.IMMUNE_TO_FIGHTING);
+        IMMUNE_TO.put(GHOST, TypeRelationship.IMMUNE_TO_GHOST);
+        IMMUNE_TO.put(GROUND, TypeRelationship.IMMUNE_TO_GROUND);
+        IMMUNE_TO.put(NORMAL, TypeRelationship.IMMUNE_TO_NORMAL);
+        IMMUNE_TO.put(POISON, TypeRelationship.IMMUNE_TO_POISON);
+        IMMUNE_TO.put(PSYCHIC, TypeRelationship.IMMUNE_TO_PSYCHIC);
     }
 
     public static Type randomType(Random random) {
@@ -123,7 +134,7 @@ public enum Type {
         }
 
         if (useResistantType) {
-            return getStrengthFromList(random, RESISTANT_TO, checkTypes);
+            return getStrengthFromList(random, getCombinedResistanceMap(), checkTypes);
         } else {
             return getStrengthFromList(random, STRONG_AGAINST, checkTypes);
         }
@@ -173,7 +184,7 @@ public enum Type {
         }
 
         if (useResistantType) {
-            return getWeaknessFromList(random, RESISTANT_TO, checkTypes);
+            return getWeaknessFromList(random, getCombinedResistanceMap(), checkTypes);
         } else {
             return getWeaknessFromList(random, STRONG_AGAINST, checkTypes);
         }
@@ -254,6 +265,16 @@ public enum Type {
         return typesList;
     }
 
+    public static Map<Type, List<Type>> getCombinedResistanceMap() {
+        Map<Type, List<Type>> combineMap = new HashMap<Type, List<Type>>();
+        for (Type type : RESISTANT_TO.keySet()) {
+            ArrayList<Type> combineList = new ArrayList<Type>(RESISTANT_TO.get(type));
+            Optional.ofNullable(IMMUNE_TO.get(type)).ifPresent(combineList::addAll);
+            combineMap.put(type, combineList);
+        }
+        return combineMap;
+    }
+
     /**
      * Update the STRONG_AGAINST map such that STRONG_AGAINST_<defender> includes attacker
      * 
@@ -278,5 +299,18 @@ public enum Type {
             RESISTANT_TO.put(attacker, new ArrayList<Type>());
         }
         RESISTANT_TO.get(attacker).add(defender);
+    }
+
+    /**
+     * Update the IMMUNE_TO map such that IMMUNE_TO_<attacker> includes defender
+     * 
+     * @param attacker - Type of the attacker
+     * @param defender - Type of the defender
+     */
+    public static void updateImmuneTo(Type attacker, Type defender) {
+        if (IMMUNE_TO.get(attacker) == null) {
+            IMMUNE_TO.put(attacker, new ArrayList<Type>());
+        }
+        IMMUNE_TO.get(attacker).add(defender);
     }
 }

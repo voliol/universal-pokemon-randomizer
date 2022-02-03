@@ -1483,10 +1483,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
                 Type.STRONG_AGAINST.clear();
                 Type.RESISTANT_TO.clear();
+                Type.IMMUNE_TO.clear();
                 for (int attacker = 0; attacker < getTypesInGame().size(); attacker++) {
                     for (int defender = 0; defender < getTypesInGame().size(); defender++) {
                         switch (typeEffectivenessTable[attacker][defender]) {
                             case ZERO:
+                                Type.updateImmuneTo(Gen5Constants.typeTable[attacker],
+                                        Gen5Constants.typeTable[defender]);
+                                break;
                             case HALF:
                                 Type.updateResistantTo(Gen5Constants.typeTable[attacker],
                                         Gen5Constants.typeTable[defender]);

@@ -20,7 +20,7 @@
 * Type Strong Against and Weak Against based on rom values (supports hack changes)
 * Output type chart
 * Refactor templating data into static class (Must reset when rom loads)
-Refactor STRONG_AGAINST/RESISTANT_TO to be a table (need to be able to get all types and differentiate between 0 and 0.5)
+* Refactor STRONG_AGAINST/RESISTANT_TO to be a table (need to be able to get all types and differentiate between 0 and 0.5)
 Fix initial starter list getting ignored (while starters.contains(pkmn) always true on first round)
 Investigate if there is a better SE triangle algorithm (go against something that is planned to be kept rather than replaced)
 ---------------
