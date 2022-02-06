@@ -122,6 +122,7 @@
 
 ## 1.10.0
 
+- UI layout has been moved around for easier development
 - All pokemon can evolve at level 1
   - If `Change Methods` is chosen, all pokemon will evolve with a random method and level evolutions will NOT be at 1
   - If `Random Starters` is chosen, slider will be set to 0 and `Exact Evos` will be false as there is no end to an evolution chain

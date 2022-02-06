@@ -1407,46 +1407,53 @@
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="spHeldItemsCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="spHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <Component id="spUniqueTypesCB" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="spNoSplitCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="spExactEvoCB" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
+                              <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                      <Group type="102" attributes="0">
+                                          <Component id="spHeldItemsCB" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="spHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="spUniqueTypesCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spNoSplitCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
                                           <Component id="spSETriangleCB" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="spBSTLimitCB" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="spBaseEvoCB" alignment="0" max="32767" attributes="0"/>
                                       </Group>
-                                      <Component id="jCheckBox1" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="spExactEvoCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spBSTLimitCB" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace pref="56" max="32767" attributes="0"/>
                                   <Component id="spBSTLimitSlider" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="spUnchangedRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spHeldItemsCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spHeldItemsBanBadCB" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="spCustomRB" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spCustomPoke1Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spCustomPoke2Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spCustomPoke3Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="spExactEvoCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="spUnchangedRB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spBSTLimitCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="spCustomRB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spCustomPoke1Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spCustomPoke2Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spCustomPoke3Chooser" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spExactEvoCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <Component id="spBSTLimitSlider" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
@@ -1467,18 +1474,11 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="spSETriangleCB" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="1" attributes="0">
-                                      <Group type="102" alignment="1" attributes="0">
-                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                          <Component id="spBSTLimitSlider" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" alignment="1" attributes="0">
-                                          <Component id="jCheckBox1" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="32767" attributes="0"/>
-                                          <Component id="spBSTLimitCB" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                      </Group>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="spHeldItemsCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="spHeldItemsBanBadCB" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <EmptySpace min="0" pref="30" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -1736,13 +1736,6 @@
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="spTypeFilterButtonActionPerformed"/>
                   </Events>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="jCheckBox1">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="com/dabomstew/pkrandom/gui/Bundle.properties" key="RandomizerGUI.jCheckBox1.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
-                    </Property>
-                  </Properties>
                 </Component>
               </SubComponents>
             </Container>
@@ -2784,19 +2777,22 @@
                           <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="wpUseTimeCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="wpNoLegendariesCB" min="-2" max="-2" attributes="0"/>
+                              <Component id="wpAllowEvosCB" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="wpCatchRateCB" min="-2" max="-2" attributes="0"/>
-                                      <Component id="wpHeldItemsCB" min="-2" max="-2" attributes="0"/>
+                                      <Component id="wpNoLegendariesCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="wpCatchRateCB" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
                                   <Component id="wpCatchRateSlider" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="wpHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
-                              <Component id="wpAllowEvosCB" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="wpHeldItemsCB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="wpHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
-                          <EmptySpace pref="49" max="32767" attributes="0"/>
+                          <EmptySpace pref="25" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2814,27 +2810,28 @@
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="wpGlobalRB" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Group type="102" attributes="0">
-                                  <Component id="wpUseTimeCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="wpNoLegendariesCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="wildPokemonARulePanel" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="wpCatchRateSlider" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Group type="102" alignment="0" attributes="0">
+                                      <Group type="102" attributes="0">
                                           <Component id="wpCatchRateCB" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                          <Component id="wpHeldItemsCB" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="wpNoLegendariesCB" min="-2" max="-2" attributes="0"/>
                                       </Group>
+                                      <Component id="wpCatchRateSlider" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="wpHeldItemsBanBadCB" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="wpAllowEvosCB" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="wpHeldItemsCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="wpHeldItemsBanBadCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="wpUseTimeCB" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="wildPokemonARulePanel" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
