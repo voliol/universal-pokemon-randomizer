@@ -179,6 +179,17 @@ public class Pokemon implements Comparable<Pokemon> {
         return isWeak;
     }
 
+    public int evolutionChainSize() {
+        int length = 0;
+        for (Evolution ev : this.evolutionsFrom) {
+            int temp = ev.to.evolutionChainSize();
+            if (temp > length) {
+                length = temp;
+            }
+        }
+        return length + 1;
+    }
+
     public int minimumLevel() {
         int min = 1;
         for (Evolution evo : evolutionsTo) {

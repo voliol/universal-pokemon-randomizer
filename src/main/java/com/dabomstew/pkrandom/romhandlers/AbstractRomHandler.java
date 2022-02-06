@@ -48,11 +48,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> alreadyPicked = new ArrayList<Pokemon>();
     private List<Pokemon> giratinaPicks;
     protected boolean ptGiratina = false;
-    protected PokemonSet starterPokes;
+    protected PokemonCollection starterPokes;
     protected Map<String, Type> groupTypesMap = new HashMap<String, Type>();
     private HashMap<Pokemon, Pokemon> trainerTranslateMap;
-    private PokemonSet cachedReplacementLists;
-    private PokemonSet cachedEliteReplacementLists;
+    private PokemonCollection cachedReplacementLists;
+    private PokemonCollection cachedEliteReplacementLists;
     private List<Type> typeInGame;
 
     /* Constructor */
@@ -480,52 +480,33 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public int evolutionChainSize(Pokemon pk) {
-        int length = 0;
-        for (Evolution ev : pk.evolutionsFrom) {
-            int temp = evolutionChainSize(ev.to);
-            if (temp > length) {
-                length = temp;
-            }
-        }
-        return length + 1;
-    }
-
-    @Override
     public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes, boolean baseOnly,
-            int bstLimit, int minimumEvos, boolean exactEvos, List<Type> starterType) {
+            int bstLimit, int minimumEvos, boolean exactEvos, Type[] starterType,
+            Set<Type> mustInclude, Set<Type> cannotInclude) {
         if (starterPokes == null) {
             // Prepare the list
-            starterPokes = new PokemonSet();
+            starterPokes = new PokemonCollection(getMainPokemonList());
             if (exactEvos) {
                 TemplateData.putData("logStarters",
                         "Exactly " + minimumEvos + " Evolution Starters");
             } else {
                 TemplateData.putData("logStarters", minimumEvos + "+ Evolution Starters");
             }
-            for (Pokemon pk : this.getMainPokemonList()) {
-                if (pk != null) {
-                    int length = 1;
-                    if (minimumEvos > 0 || exactEvos) {
-                        length = evolutionChainSize(pk);
-                    }
-
-                    // Check if starter has correct evo count
-                    // ExactEvos means minimum evos must equal length. Stages counts base pokemon,
-                    // hence
-                    // a pokemon with no evolutions has length 1
-                    if (((exactEvos && length == minimumEvos + 1)
-                            || (!exactEvos && length > minimumEvos))
-                            && (pk.evolutionsFrom.size() < 2 || !noSplitEvos)
-                            && (pk.evolutionsTo.size() == 0 || !baseOnly)
-                            && !(pk.bstForPowerLevels() > bstLimit)
-                            && (starterType == null || (starterType.contains(pk.primaryType)
-                                    || starterType.contains(pk.secondaryType)))) {
-                        // Candidate
-                        starterPokes.add(pk);
-                    }
-                }
+            if (exactEvos) {
+                starterPokes.filterByEvolutionStagesRemaining(minimumEvos + 1, minimumEvos + 1);
+            } else {
+                starterPokes.filterByEvolutionStagesRemaining(minimumEvos + 1, 999);
             }
+            if (noSplitEvos) {
+                starterPokes.filterByEvolutionCount(0, 1);
+            }
+            if (baseOnly) {
+                starterPokes.filterByEvolutionStage(0, 0);
+            }
+            if (starterType != null && starterType.length > 0) {
+                starterPokes.filterByType(starterType);
+            }
+            starterPokes.filterByPowerLevel(bstLimit);
             if (starterPokes.size() < 3 || (uniqueTypes && starterPokes.uniquePokes() < 3)) {
                 throw new RandomizationException(
                         "ERROR: Not enough starter choices available. Please "
@@ -533,7 +514,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         try {
-            return starterPokes.randomPokemon(this.random, true);
+            return starterPokes.randomPokemonTypeRestricted(
+                    Optional.ofNullable(mustInclude).orElse(Collections.EMPTY_SET),
+                    Optional.ofNullable(cannotInclude).orElse(Collections.EMPTY_SET), this.random,
+                    true);
         } catch (Exception exc) {
             throw new RandomizationException(
                     "ERROR: Valid list of starters has been consumed. Please "
@@ -971,24 +955,25 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
         Collections.shuffle(scrambledEncounters, this.random);
 
-        PokemonSet globalSet =
-                new PokemonSet(getMainPokemonList()).filterList(this.bannedForWildEncounters());
+        PokemonCollection globalSet = new PokemonCollection(getMainPokemonList())
+                .filterList(this.bannedForWildEncounters());
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }
         for (EncounterSet area : scrambledEncounters) {
-            PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon)
+            PokemonCollection areaSet = new PokemonCollection(globalSet)
+                    .filterSet(area.bannedPokemon)
                     .filterByMinimumLevel(allowLowLevelEvolvedTypes ? 100 : area.maximumLevel());
             if (areaSet.size() == 0) {
                 throw new RandomizationException("ERROR: Current bans and level requirements "
                         + "have lead to no available pokemon. Please reduce the filtering and try again.");
             }
             if (catchEmAll) {
-                PokemonSet workingSet = new PokemonSet(areaSet);
+                PokemonCollection workingSet = new PokemonCollection(areaSet);
                 for (Encounter enc : area.encounters) {
                     enc.pokemon = workingSet.randomPokemon(random, true);
                     if (workingSet.size() == 0) {
-                        workingSet = new PokemonSet(areaSet);
+                        workingSet = new PokemonCollection(areaSet);
                     }
                 }
             } else if (typeThemed) {
@@ -1029,13 +1014,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> scrambledEncounters = new ArrayList<EncounterSet>(currentEncounters);
         Collections.shuffle(scrambledEncounters, this.random);
 
-        PokemonSet globalSet =
-                new PokemonSet(getMainPokemonList()).filterList(this.bannedForWildEncounters());
+        PokemonCollection globalSet = new PokemonCollection(getMainPokemonList())
+                .filterList(this.bannedForWildEncounters());
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }
         for (EncounterSet area : scrambledEncounters) {
-            PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon)
+            PokemonCollection areaSet = new PokemonCollection(globalSet)
+                    .filterSet(area.bannedPokemon)
                     .filterByMinimumLevel(allowLowLevelEvolvedTypes ? 100 : area.maximumLevel());
             if (areaSet.size() == 0) {
                 throw new RandomizationException("ERROR: Current bans and level requirements "
@@ -1044,10 +1030,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             Set<Pokemon> inArea = pokemonInArea(area);
             Map<Pokemon, Pokemon> areaMap = new TreeMap<Pokemon, Pokemon>();
             if (catchEmAll) {
-                PokemonSet workingSet = null;
+                PokemonCollection workingSet = null;
                 for (Pokemon areaPk : inArea) {
                     if (workingSet == null || workingSet.size() == 0) {
-                        workingSet = new PokemonSet(areaSet);
+                        workingSet = new PokemonCollection(areaSet);
                     }
 
                     Pokemon picked = workingSet.randomPokemon(random, true);
@@ -1091,15 +1077,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
 
         List<Pokemon> banned = this.bannedForWildEncounters();
-        PokemonSet globalSet = new PokemonSet(getMainPokemonList()).filterList(banned);
+        PokemonCollection globalSet =
+                new PokemonCollection(getMainPokemonList()).filterList(banned);
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }
 
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> wildTranslateMap = new HashMap<Pokemon, Pokemon>(getPokemon().size());
-        PokemonSet fromSet = new PokemonSet(allPokemonWithoutNull()).filterList(banned);
-        PokemonSet toSet = null;
+        PokemonCollection fromSet =
+                new PokemonCollection(allPokemonWithoutNull()).filterList(banned);
+        PokemonCollection toSet = null;
 
         // Banned pokemon should be mapped to themselves
         for (Pokemon pk : banned) {
@@ -1108,7 +1096,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         while (fromSet.size() > 0) {
             if (toSet == null || toSet.size() == 0) {
-                toSet = new PokemonSet(globalSet);
+                toSet = new PokemonCollection(globalSet);
             }
 
             Pokemon from = fromSet.randomPokemon(random, true);
@@ -1137,7 +1125,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 enc.pokemon = wildTranslateMap.get(enc.pokemon);
                 if (area.bannedPokemon.contains(enc.pokemon)) {
                     // Ignore the map and put a random non-banned poke
-                    PokemonSet areaSet = new PokemonSet(globalSet).filterSet(area.bannedPokemon);
+                    PokemonCollection areaSet =
+                            new PokemonCollection(globalSet).filterSet(area.bannedPokemon);
                     if (areaSet.size() == 0) {
                         throw new RandomizationException("ERROR: Current bans have lead "
                                 + "to no available pokemon. Please reduce the filtering and try again.");
@@ -1204,9 +1193,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> scrambledTrainers = new ArrayList<Trainer>(currentTrainers);
         Collections.shuffle(scrambledTrainers, this.random);
 
-        cachedReplacementLists = new PokemonSet();
+        cachedReplacementLists = new PokemonCollection();
         cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : getMainPokemonList());
-        cachedEliteReplacementLists = new PokemonSet();
+        cachedEliteReplacementLists = new PokemonCollection();
         cachedEliteReplacementLists.addAll(getMainPokemonList().stream()
                 .filter(pk -> pk.isBigPoke(isGen1()) || pk.isLegendary())
                 .collect(Collectors.toList()));
@@ -1430,7 +1419,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         if (cachedReplacementLists == null) {
-            cachedReplacementLists = new PokemonSet();
+            cachedReplacementLists = new PokemonCollection();
             cachedReplacementLists.addAll(noLegendaries ? noLegendaryList : getMainPokemonList());
         }
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", 1);
@@ -2293,8 +2282,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<String, String> staticPokemon = new TreeMap<String, String>();
 
         if (legendForLegend) {
-            PokemonSet legendariesLeft = new PokemonSet(onlyLegendaryList);
-            PokemonSet nonlegsLeft = new PokemonSet(noLegendaryList);
+            PokemonCollection legendariesLeft = new PokemonCollection(onlyLegendaryList);
+            PokemonCollection nonlegsLeft = new PokemonCollection(noLegendaryList);
             legendariesLeft.filterList(banned);
             nonlegsLeft.filterList(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
@@ -2371,7 +2360,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 staticPokemon.put(oldName, newPK.name);
             }
         } else {
-            PokemonSet pokemonLeft = new PokemonSet(getMainPokemonList());
+            PokemonCollection pokemonLeft = new PokemonCollection(getMainPokemonList());
             pokemonLeft.filterList(banned);
             for (int i = 0; i < currentStaticPokemon.size(); i++) {
                 Pokemon old = currentStaticPokemon.get(i);
@@ -3270,7 +3259,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         TemplateData.putData("logEvolutions", true);
         int stageLimit = limitToThreeStages ? 3 : 10;
 
-        PokemonSet globalSet = new PokemonSet(getMainPokemonList());
+        PokemonCollection globalSet = new PokemonCollection(getMainPokemonList());
         if (noLegendaries) {
             globalSet.filterLegendaries();
         }

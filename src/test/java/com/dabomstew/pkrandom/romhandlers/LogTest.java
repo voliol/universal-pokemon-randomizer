@@ -774,22 +774,22 @@ public class LogTest {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler, 250);
         romhandler.setPokemonPool(null, null);
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null, null, null);
         assertEquals("0+ Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null, null, null);
         assertEquals("1+ Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null, null, null);
         assertEquals("2+ Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null, null, null);
         assertEquals("Exactly 0 Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null, null, null);
         assertEquals("Exactly 1 Evolution Starters", TemplateData.getData("logStarters"));
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null, null, null);
         assertEquals("Exactly 2 Evolution Starters", TemplateData.getData("logStarters"));
     }
 
@@ -911,7 +911,7 @@ public class LogTest {
         TemplateData.generateTableOfContents();
         assertArrayEquals(((ArrayList<String[]>) TemplateData.getData("toc")).get(0),
                 new String[] {"cle", "Condensed Evos"});
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null, null, null);
         TemplateData.generateTableOfContents();
         assertArrayEquals(((ArrayList<String[]>) TemplateData.getData("toc")).get(1),
                 new String[] {"rs", "Starters"});

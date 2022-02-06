@@ -21,8 +21,9 @@
 * Output type chart
 * Refactor templating data into static class (Must reset when rom loads)
 * Refactor STRONG_AGAINST/RESISTANT_TO to be a table (need to be able to get all types and differentiate between 0 and 0.5)
-Fix initial starter list getting ignored (while starters.contains(pkmn) always true on first round)
-Investigate if there is a better SE triangle algorithm (go against something that is planned to be kept rather than replaced)
+* Fix initial starter list getting ignored (while starters.contains(pkmn) always true on first round)
+* Investigate if there is a better SE triangle algorithm (go against something that is planned to be kept rather than replaced)
+* Rename "PokemonSet" to "PokemonCollection"
 ---------------
 RandomizerGUI romLoaded state matches new Settings object
 All fields should be private and only accessible through getters/setters
@@ -34,7 +35,7 @@ Move ROMEntry to separate Class
 Move RomHandler state to Model Class
 Change Settings toString and fromString to refer to a separate list. Try to make saving options easier when adding new options
 Try to automatically create all boilerplate settings code (get setting, set setting, from string, to string, initial form state, enable or disable, rom loaded, etc)
-Redo code to use PokemonSet
+Redo code to use PokemonCollection
 Redo Gen4 WriteEncounters to not use iterator
 Unit Tests use common data model
 Unit tests deterministic (random should print seed and be sourced from manually input seed)

@@ -157,3 +157,4 @@
   - Adds unique entry to allow FAIRY type to be properly recognized
   - This also enables other rom hacks to be easily supported, so long as the offsets are known and a unique identifier exists
 - Logs are now handled in a separate class. There should be no impact to users.
+- SE Triangle algorithm has been redone. It should be more consistent and throw fewer errors.

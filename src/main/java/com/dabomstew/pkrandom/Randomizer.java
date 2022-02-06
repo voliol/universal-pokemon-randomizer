@@ -25,13 +25,14 @@ package com.dabomstew.pkrandom;
 /*----------------------------------------------------------------------------*/
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.gui.TemplateData;
@@ -588,15 +589,21 @@ public class Randomizer {
                 List<Type> typeArr;
                 if (settings.isStartersSETriangle()) {
                     typeArr = getSETriangleTypes();
-                } else {
+                } else if (settings.getStarterTypes() != null) {
                     typeArr = settings.getStarterTypes();
+                } else {
+                    typeArr = Collections.EMPTY_LIST;
                 }
-                selectRandomStarter(starterCount, starters, () -> romHandler.randomStarterPokemon(
-                        settings.isStartersNoSplit(), settings.isStartersUniqueTypes(),
-                        settings.isStartersBaseEvoOnly(),
-                        settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier()
-                                : 9999,
-                        settings.getStartersMinimumEvos(), settings.isStartersExactEvo(), typeArr));
+
+                selectRandomStarter(starterCount, starters, typeArr,
+                        (mustInclude, cannotInclude) -> romHandler.randomStarterPokemon(
+                                settings.isStartersNoSplit(), settings.isStartersUniqueTypes(),
+                                settings.isStartersBaseEvoOnly(),
+                                settings.isStartersLimitBST()
+                                        ? settings.getStartersBSTLimitModifier()
+                                        : 9999,
+                                settings.getStartersMinimumEvos(), settings.isStartersExactEvo(),
+                                typeArr.toArray(new Type[0]), mustInclude, cannotInclude));
 
                 romHandler.setStarters(starters);
                 TemplateData.putData("startersList", starters);
@@ -608,27 +615,37 @@ public class Randomizer {
         }
     }
 
-    private void selectRandomStarter(int starterCount, List<Pokemon> starters,
-            Supplier<Pokemon> randomPicker) {
-        Set<Type> typesUsed = new HashSet<Type>();
-        // Initialize the list
+    private void selectRandomStarter(int starterCount, List<Pokemon> starters, List<Type> typeArr,
+            BiFunction<Set<Type>, Set<Type>, Pokemon> randomPicker) {
+        List<Set<Type>> cniList =
+                Arrays.asList(new HashSet<Type>(), new HashSet<Type>(), new HashSet<Type>());
         for (int i = 0; i < starterCount; i++) {
-            starters.add(randomPicker.get());
-        }
-        // Make sure the starters meet criteria
-        for (int i = 0; i < starterCount; i++) {
-            Pokemon pkmn = starters.get(i);
-            while (starters.contains(pkmn) || (settings.isStartersUniqueTypes()
-                    && (typesUsed.contains(pkmn.primaryType)
-                            || pkmn.secondaryType != null && typesUsed.contains(pkmn.secondaryType))
-                    || (settings.isStartersSETriangle()
-                            && (!starters.get((i + 1) % starterCount).isWeakTo(pkmn))))) {
-                pkmn = randomPicker.get();
+            Set<Type> cannotInclude = cniList.get(i);
+            Pokemon pkmn;
+            if (settings.isStartersSETriangle() && settings.isStartersUniqueTypes()) {
+                // Add all the starter types, then remove the one related to this iteration
+                cannotInclude.addAll(typeArr);
+                cannotInclude.remove(typeArr.get(i));
+
+                // Pick a pokemon with the type related to this iteration, and excluding any other
+                // types
+                pkmn = randomPicker.apply(new HashSet<Type>(typeArr.subList(i, i + 1)),
+                        cannotInclude);
+            } else if (settings.isStartersUniqueTypes()) {
+                pkmn = randomPicker.apply(null, cannotInclude);
+            } else if (settings.isStartersSETriangle()) {
+                pkmn = randomPicker.apply(new HashSet<Type>(typeArr.subList(i, i + 1)), null);
+            } else {
+                pkmn = randomPicker.apply(null, null);
             }
-            starters.set(i, pkmn);
-            typesUsed.add(pkmn.primaryType);
-            if (pkmn.secondaryType != null) {
-                typesUsed.add(pkmn.secondaryType);
+            starters.add(pkmn);
+            if (settings.isStartersUniqueTypes()) {
+                for (int j = i + 1; j < starterCount; j++) {
+                    cniList.get(j).add(pkmn.primaryType);
+                    if (pkmn.secondaryType != null) {
+                        cniList.get(j).add(pkmn.secondaryType);
+                    }
+                }
             }
         }
     }

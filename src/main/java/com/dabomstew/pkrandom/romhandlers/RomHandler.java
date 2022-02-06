@@ -27,8 +27,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import freemarker.template.Template;
+import java.util.Set;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -116,14 +115,10 @@ public interface RomHandler {
         // Business rules for who's legendary are in Pokemon class
         public Pokemon randomLegendaryPokemon();
 
-        // Return the longest number of stages in the evolution chain
-        // Useful for starter evolution length
-        public int evolutionChainSize(Pokemon pk);
-
         // Give a random Pokemon who is eligible as a starter
         public Pokemon randomStarterPokemon(boolean noSplitEvos, boolean uniqueTypes,
                         boolean baseOnly, int bstLimit, int minimumEvos, boolean exactEvos,
-                        List<Type> starterTypes);
+                        Type[] starterTypes, Set<Type> mustInclude, Set<Type> cannotInclude);
 
         // Randomizer: types
         // return a random type valid in this game.

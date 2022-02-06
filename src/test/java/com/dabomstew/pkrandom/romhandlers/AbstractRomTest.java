@@ -870,10 +870,10 @@ public class AbstractRomTest {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
         romhandler.setPokemonPool(null, null);
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null, null, null);
         boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
         for (Pokemon pk : romhandler.getStarterPokes()) {
-            int evoLength = romhandler.evolutionChainSize(pk);
+            int evoLength = pk.evolutionChainSize();
             if (evoLength == 1) {
                 pokemonWithZeroEvo = true;
             } else if (evoLength == 2) {
@@ -895,9 +895,9 @@ public class AbstractRomTest {
         pokemonWithOneEvo = false;
         pokemonWithTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, false, null, null, null);
         for (Pokemon pk : romhandler.getStarterPokes()) {
-            int evoLength = romhandler.evolutionChainSize(pk);
+            int evoLength = pk.evolutionChainSize();
             if (evoLength == 1) {
                 pokemonWithZeroEvo = true;
             } else if (evoLength == 2) {
@@ -915,9 +915,9 @@ public class AbstractRomTest {
         pokemonWithOneEvo = false;
         pokemonWithTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, false, null, null, null);
         for (Pokemon pk : romhandler.getStarterPokes()) {
-            int evoLength = romhandler.evolutionChainSize(pk);
+            int evoLength = pk.evolutionChainSize();
             if (evoLength == 1) {
                 pokemonWithZeroEvo = true;
             } else if (evoLength == 2) {
@@ -936,10 +936,10 @@ public class AbstractRomTest {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
         romhandler.setPokemonPool(null, null);
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, true, null, null, null);
         boolean pokemonWithZeroEvo = false, pokemonWithOneEvo = false, pokemonWithTwoEvo = false;
         for (Pokemon pk : romhandler.getStarterPokes()) {
-            int evoLength = romhandler.evolutionChainSize(pk);
+            int evoLength = pk.evolutionChainSize();
             if (evoLength == 1) {
                 pokemonWithZeroEvo = true;
             } else if (evoLength == 2) {
@@ -957,9 +957,9 @@ public class AbstractRomTest {
         pokemonWithOneEvo = false;
         pokemonWithTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 1, true, null, null, null);
         for (Pokemon pk : romhandler.getStarterPokes()) {
-            int evoLength = romhandler.evolutionChainSize(pk);
+            int evoLength = pk.evolutionChainSize();
             if (evoLength == 1) {
                 pokemonWithZeroEvo = true;
             } else if (evoLength == 2) {
@@ -976,9 +976,9 @@ public class AbstractRomTest {
         pokemonWithTwoEvo = false;
         boolean pokemonWithMoreThanTwoEvo = false;
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 2, true, null, null, null);
         for (Pokemon pk : romhandler.getStarterPokes()) {
-            int evoLength = romhandler.evolutionChainSize(pk);
+            int evoLength = pk.evolutionChainSize();
             if (evoLength == 1) {
                 pokemonWithZeroEvo = true;
             } else if (evoLength == 2) {
@@ -1087,15 +1087,15 @@ public class AbstractRomTest {
         resetDataModel(romhandler);
         romhandler.setPokemonPool(null, null);
         // Test null first
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, null, null, null);
         assertTrue("Starters list did not contain all available pokemon",
                 // Subtract due to randomStarterPokemon doing a pop operation and reducing by 1
                 romhandler.getStarterPokes().size() == romhandler.getMainPokemonList().size() - 1);
 
         // Test with 1 type
         romhandler.clearStarterPokes();
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false,
-                Arrays.asList(Type.FIRE));
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, new Type[] {Type.FIRE},
+                null, null);
         assertTrue("Starters list did not contain only FIRE types",
                 romhandler.getStarterPokes().stream().allMatch(
                         pk -> pk.primaryType == Type.FIRE || pk.secondaryType == Type.FIRE));
@@ -1104,11 +1104,17 @@ public class AbstractRomTest {
         romhandler.clearStarterPokes();
         ArrayList<Type> typesArr =
                 new ArrayList<Type>(Arrays.asList(Type.FIRE, Type.BUG, Type.DARK));
-        romhandler.randomStarterPokemon(false, false, false, 999, 0, false, typesArr);
+        romhandler.randomStarterPokemon(false, false, false, 999, 0, false,
+                typesArr.toArray(new Type[0]), null, null);
         assertTrue("Starters list did not contain only FIRE, BUG, and DARK types",
                 romhandler.getStarterPokes().stream()
                         .allMatch(pk -> typesArr.contains(pk.primaryType)
                                 || typesArr.contains(pk.secondaryType)));
+    }
+
+    @Test
+    public void TestSETriangleStarterOrder() {
+        // TODO: Requires testing function in Randomizer
     }
 
     /**
