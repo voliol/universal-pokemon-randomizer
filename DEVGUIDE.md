@@ -30,9 +30,17 @@ Each test should attempt to cover the following cases
 If you have a less common radio button or slider, adjust the above criteria to exercise any conditions this could cover.
 It may be worthwhile to divide a test case into multiple functions. This is perfectly acceptable.
 
-There are some utility methods included to assist with generic patterns.
+There are some utility methods included to assist with generic patterns. All methods require appropriate method references to tie into Settings unless otherwise stated.
 
-- TestCheckboxBasedOnRadioButton - Allows testing when a checkbox is disabled on 1 radio button (default) and enabled on another (trigger). Requires appropriate method references to tie into Settings.
+- TestCheckboxBasedOnRadioButton - Allows testing when a checkbox is disabled on 1 radio button (default) and enabled on another (trigger).
+- TestRadioButton - Allows testing a radio button state against a default radio button.
+- TestCheckboxBasedOnCheckbox - Allows testing when a checkbox is disabled based on the value of another checkbox.
+- checkboxNotEnabledAndNotSelected - Allows testing when a checkbox should be disabled and unselected.
+- checkboxEnabledButNotSelected - Allows testing when a checkbox should be enabled but unselected.
+- checkboxEnabledAndSelected - Allows testing when a checkbox should be enabled and selected.
+- radioButtonSelected - Allows testing when a radio button should be selected.
+- sliderNotEnabledAndValueMatches - Allows testing when a slider should be disabled and the value it has.
+- sliderEnabledAndValueMatches - Allows testing when a slider should be enabled and the value it has.
 
 # How do I write a unit test for my function?
 
