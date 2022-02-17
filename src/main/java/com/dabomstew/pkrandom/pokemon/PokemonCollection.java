@@ -116,18 +116,21 @@ public class PokemonCollection {
     }
 
     public PokemonCollection filterByMinimumLevel(int level) {
-        filter(p -> p.minimumLevel() < level);
+        filter(p -> p.minimumLevel() > level);
         return this;
     }
 
     /**
-     * Filters by how many stages are left for a given pokemon
+     * Filters by how many stages are left for a given pokemon If a pokemon is cyclic, it is removed
      * 
      * @param minStages Minimum amount of stages a pokemon must have
      * @param maxStages Maximum amount of stages a pokemon can have
      * @return This modified PokemonCollection
      */
     public PokemonCollection filterByEvolutionStagesRemaining(int minStages, int maxStages) {
+        Set<Pokemon> visited = new HashSet<Pokemon>();
+        Set<Pokemon> recStack = new HashSet<Pokemon>();
+        filter(p -> p.isCyclic(visited, recStack));
         filter(p -> p.evolutionChainSize() < minStages || p.evolutionChainSize() > maxStages);
         return this;
     }

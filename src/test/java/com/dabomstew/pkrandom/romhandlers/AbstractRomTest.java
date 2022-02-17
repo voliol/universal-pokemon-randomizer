@@ -866,6 +866,32 @@ public class AbstractRomTest {
     }
 
     @Test
+    public void TestGiratinaStaticReplacement() {
+        Gen4RomHandler romhandler = spy(new Gen4RomHandler(new Random()));
+        resetDataModel(romhandler);
+        doReturn(Gen4RomHandler.getRomFromSupportedRom("Platinum (U)")).when(romhandler)
+                .getRomEntry();
+        doReturn(pokemonList.subList(487, 488)).when(romhandler).getStaticPokemon();
+        doReturn(true).when(romhandler).setStaticPokemon(pokemonCap.capture());
+        GenRestrictions genRestrictions = new GenRestrictions();
+        genRestrictions.allow_gen1 = true;
+        romhandler.setPokemonPool(genRestrictions, null);
+
+        // First with any replacement
+        romhandler.randomizeStaticPokemon(false);
+        int replacement = pokemonCap.getValue().get(0).getNumber();
+        assertTrue("Giratina was not replaced with a Gen1 pokemon",
+                replacement > 0 && replacement < 152);
+
+        // Next with only legendaries
+        romhandler.setPokemonPool(genRestrictions, null);
+        romhandler.randomizeStaticPokemon(true);
+        replacement = pokemonCap.getValue().get(0).getNumber();
+        assertTrue("Giratina was not replaced with a legendary Gen1 pokemon",
+                replacement > 0 && replacement < 152 && pokemonCap.getValue().get(0).isLegendary());
+    }
+
+    @Test
     public void TestMinimumEvos() {
         TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
         resetDataModel(romhandler);
@@ -1075,6 +1101,57 @@ public class AbstractRomTest {
                         trainerType.size() > 0);
             }
         }
+    }
+
+    @Test
+    public void TestRandomRetainWithMergedEvoPaths() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        romhandler.setPokemonPool(null, null);
+        Pokemon p1 = pokemonList.get(1);
+        Pokemon p2 = pokemonList.get(2);
+        Pokemon p3 = pokemonList.get(3);
+        Type prior1Initial = Type.FIRE;
+        Type prior2Initial = Type.DARK;
+        Type sharedType = Type.GROUND;
+
+        // Primary type all similar
+        p1.primaryType = sharedType;
+        p1.secondaryType = prior1Initial;
+        p2.primaryType = sharedType;
+        p2.secondaryType = prior2Initial;
+        p3.primaryType = sharedType;
+        p3.secondaryType = prior1Initial;
+        Evolution duplicate1 = new Evolution(p1, p3, false, EvolutionType.LEVEL, 1);
+        Evolution duplicate2 = new Evolution(p2, p3, false, EvolutionType.LEVEL, 1);
+        p1.evolutionsFrom.clear();
+        p2.evolutionsFrom.clear();
+        p3.evolutionsTo.clear();
+        p1.evolutionsFrom.add(duplicate1);
+        p2.evolutionsFrom.add(duplicate2);
+        p3.evolutionsTo.add(duplicate1);
+        p3.evolutionsTo.add(duplicate2);
+        romhandler.randomizeRetainPokemonTypes(true);
+        assertEquals(p3.primaryType, sharedType);
+
+        // Secondary type all similar
+        p1.primaryType = prior1Initial;
+        p1.secondaryType = sharedType;
+        p2.primaryType = prior2Initial;
+        p2.secondaryType = sharedType;
+        p3.primaryType = prior1Initial;
+        p3.secondaryType = sharedType;
+        duplicate1 = new Evolution(p1, p3, false, EvolutionType.LEVEL, 1);
+        duplicate2 = new Evolution(p2, p3, false, EvolutionType.LEVEL, 1);
+        p1.evolutionsFrom.clear();
+        p2.evolutionsFrom.clear();
+        p3.evolutionsTo.clear();
+        p1.evolutionsFrom.add(duplicate1);
+        p2.evolutionsFrom.add(duplicate2);
+        p3.evolutionsTo.add(duplicate1);
+        p3.evolutionsTo.add(duplicate2);
+        romhandler.randomizeRetainPokemonTypes(true);
+        assertEquals(p3.secondaryType, sharedType);
     }
 
     /**
@@ -1486,6 +1563,24 @@ public class AbstractRomTest {
     }
 
     @Test
+    public void TestLowLevelWildEncounters() {
+        TestRomHandler romhandler = spy(new TestRomHandler(new Random()));
+        resetDataModel(romhandler);
+        doNothing().when(romhandler).setEncounters(anyBoolean(), encounterCap.capture());
+        romhandler.setPokemonPool(null, null);
+        romhandler.randomEncounters(false, false, false, false, false, false, true);
+        for (EncounterSet es : encounterCap.getValue()) {
+            for (Encounter enc : es.getEncounters()) {
+                assertFalse("A null encounter was found", enc.getPokemon() == null);
+                assertTrue(
+                        enc.getPokemon().getNumber()
+                                + " has a max level higher than the area allowed",
+                        enc.getMaxLevel() <= es.maximumLevel());
+            }
+        }
+    }
+
+    @Test
     public void TestTrainersBuffElite() {
         HashMap<Pokemon, Pokemon> pokemonSwap =
                 new HashMap<Pokemon, Pokemon>(Gen5Constants.pokemonCount + 1);
@@ -1852,7 +1947,9 @@ public class AbstractRomTest {
             EncounterSet es = new EncounterSet();
             Encounter e1 = new Encounter();
             e1.setPokemon(pokemonList.get(new Random().nextInt(pokemonList.size())));
+            e1.setMaxLevel(new Random().nextInt(100));
             es.setEncounters(Arrays.asList(e1));
+            es.setDisplayName(Integer.toString(i));
             encountersList.add(es);
         }
     }

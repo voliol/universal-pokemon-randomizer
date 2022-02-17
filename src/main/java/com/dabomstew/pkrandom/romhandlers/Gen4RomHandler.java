@@ -1189,28 +1189,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
         }
 
-        // Write Headbutt encounters
-        String headbuttEncountersFile = romEntry.getString("HeadbuttPokemon");
-        NARCArchive headbuttEncounterData = readNARC(headbuttEncountersFile);
-        int c = -1;
-        for (byte[] b : headbuttEncounterData.files) {
-            c++;
-
-            // In getEncountersHGSS, we ignored maps with no headbutt encounter data,
-            // and we also ignored map 24 for being unused. We need to ignore them
-            // here as well to keep encounters.next() in sync with the correct file.
-            if (b.length == 4 || c == 24) {
-                continue;
-            }
-
-            EncounterSet headbutt = encounters.next();
-            writeHeadbuttEncountersHGSS(b, 4, headbutt.encounters);
-        }
-
         // Save
         writeNARC(encountersFile, encounterData);
-        writeNARC(headbuttEncountersFile, headbuttEncounterData);
-
     }
 
     private void writeEncountersDPPt(byte[] data, int offset, List<Encounter> encounters,
@@ -1296,8 +1276,27 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             writeOptionalEncountersHGSS(b, offset, 4, encounters);
         }
 
+        // Write Headbutt encounters
+        String headbuttEncountersFile = romEntry.getString("HeadbuttPokemon");
+        NARCArchive headbuttEncounterData = readNARC(headbuttEncountersFile);
+        int c = -1;
+        for (byte[] b : headbuttEncounterData.files) {
+            c++;
+
+            // In getEncountersHGSS, we ignored maps with no headbutt encounter data,
+            // and we also ignored map 24 for being unused. We need to ignore them
+            // here as well to keep encounters.next() in sync with the correct file.
+            if (b.length == 4 || c == 24) {
+                continue;
+            }
+
+            EncounterSet headbutt = encounters.next();
+            writeHeadbuttEncountersHGSS(b, 4, headbutt.encounters);
+        }
+
         // Save
         writeNARC(encountersFile, encounterData);
+        writeNARC(headbuttEncountersFile, headbuttEncounterData);
 
     }
 
@@ -3046,6 +3045,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             if (typeEffectivenessTableOffset > 0) {
                 List<TypeRelationship> typeEffectivenessTable =
                         readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                if (typeEffectivenessTable == null || typeEffectivenessTable.size() == 0) {
+                    return;
+                }
                 Type.STRONG_AGAINST.clear();
                 Type.RESISTANT_TO.clear();
                 Type.IMMUNE_TO.clear();
@@ -3079,6 +3081,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             if (typeEffectivenessTableOffset > 0) {
                 List<TypeRelationship> typeEffectivenessTable =
                         readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                if (typeEffectivenessTable == null || typeEffectivenessTable.size() == 0) {
+                    return;
+                }
                 for (TypeRelationship relationship : typeEffectivenessTable) {
                     // Change Ghost 0.5x against Steel to Ghost 1x to Steel
                     if (relationship.attacker == Type.GHOST
@@ -3106,7 +3111,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private List<TypeRelationship> readTypeEffectivenessTable(byte[] battleOverlay,
+    public List<TypeRelationship> readTypeEffectivenessTable(byte[] battleOverlay,
             int typeEffectivenessTableOffset) {
         List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
         int currentOffset = typeEffectivenessTableOffset;
@@ -3148,7 +3153,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return typeEffectivenessTable;
     }
 
-    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable,
+    public void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable,
             byte[] battleOverlay, int typeEffectivenessTableOffset) {
         int currentOffset = typeEffectivenessTableOffset;
         for (TypeRelationship relationship : typeEffectivenessTable) {

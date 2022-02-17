@@ -56,7 +56,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 1100;
+    public static final int VERSION = 200;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 46;
 
@@ -206,6 +206,9 @@ public class Settings {
         SettingsOptionComposite evolutionsMod =
                 SettingsOptionFactory.createSettingsOption(new SettingsOption.Builder(
                         SettingsConstants.EVOLUTIONS_MOD, EvolutionsMod.UNCHANGED));
+        SettingsOptionComposite evosLv1 = SettingsOptionFactory.createSettingsOption(
+                new SettingsOption.Builder(SettingsConstants.EVOS_LV_1, false).addMatches(
+                        new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
         SettingsOptionComposite changeImpossibleEvolutions =
                 SettingsOptionFactory.createSettingsOption(new SettingsOption.Builder(
                         SettingsConstants.CHANGE_IMPOSSIBLE_EVOLUTIONS, false));
@@ -223,8 +226,9 @@ public class Settings {
                         new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
         SettingsOptionComposite evosMaxThreeStages = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.EVOS_MAX_THREE_STAGES, false)
-                        .addMatches(new PredicatePair(evolutionsMod,
-                                PredicatePair.ENUM_NOT_UNCHANGED)));
+                        .addMultiMatch(
+                                new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED),
+                                new PredicatePair(evosLv1, PredicatePair.BOOLEAN_FALSE)));
         SettingsOptionComposite evosForceChange = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.EVOS_FORCE_CHANGE, false).addMatches(
                         new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
@@ -232,11 +236,10 @@ public class Settings {
                 new SettingsOption.Builder(SettingsConstants.EVOS_NO_CONVERGE, false).addMatches(
                         new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
         SettingsOptionComposite evosForceGrowth = SettingsOptionFactory.createSettingsOption(
-                new SettingsOption.Builder(SettingsConstants.EVOS_FORCE_GROWTH, false).addMatches(
-                        new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
-        SettingsOptionComposite evosLv1 = SettingsOptionFactory.createSettingsOption(
-                new SettingsOption.Builder(SettingsConstants.EVOS_LV_1, false).addMatches(
-                        new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+                new SettingsOption.Builder(SettingsConstants.EVOS_FORCE_GROWTH, false)
+                        .addMultiMatch(
+                                new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED),
+                                new PredicatePair(evosLv1, PredicatePair.BOOLEAN_FALSE)));
         SettingsOptionComposite evosSameStage = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.EVOS_SAME_STAGE, false).addMatches(
                         new PredicatePair(evolutionsMod, PredicatePair.ENUM_NOT_UNCHANGED)));

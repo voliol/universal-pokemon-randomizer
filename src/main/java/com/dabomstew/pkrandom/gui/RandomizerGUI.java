@@ -1444,7 +1444,8 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.spRandomSlider.setValue(this.spRandomSlider.getMinimum());
         }
 
-        if (this.spSETriangleCB.isSelected()) {
+        if (this.spSETriangleCB.isSelected() || this.spCustomRB.isSelected()
+                || this.spUnchangedRB.isSelected()) {
             this.spTypeFilterButton.setEnabled(false);
             this.starterTypes = null;
         } else {
@@ -1762,7 +1763,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peForceChangeCB.setEnabled(true);
             this.peSameTypeCB.setEnabled(true);
             this.peSimilarStrengthCB.setEnabled(true);
-            this.peForceGrowthCB.setEnabled(true);
             this.peNoConvergeCB.setEnabled(true);
             this.peChangeMethodsCB.setEnabled(true);
             this.peEvolveLv1CB.setEnabled(true);
@@ -1775,8 +1775,6 @@ public class RandomizerGUI extends javax.swing.JFrame {
             this.peSameTypeCB.setSelected(false);
             this.peSimilarStrengthCB.setEnabled(false);
             this.peSimilarStrengthCB.setSelected(false);
-            this.peForceGrowthCB.setEnabled(false);
-            this.peForceGrowthCB.setSelected(false);
             this.peNoConvergeCB.setEnabled(false);
             this.peNoConvergeCB.setSelected(false);
             this.peChangeMethodsCB.setEnabled(false);
@@ -1792,8 +1790,11 @@ public class RandomizerGUI extends javax.swing.JFrame {
         if (this.peEvolveLv1CB.isSelected() || !this.peEvolveLv1CB.isEnabled()) {
             this.peThreeStagesCB.setEnabled(false);
             this.peThreeStagesCB.setSelected(false);
+            this.peForceGrowthCB.setEnabled(false);
+            this.peForceGrowthCB.setSelected(false);
         } else {
             this.peThreeStagesCB.setEnabled(true);
+            this.peForceGrowthCB.setEnabled(true);
         }
 
         uiUpdated = true;
@@ -2340,9 +2341,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                                             JOptionPane.YES_NO_OPTION);
                                     if (response == JOptionPane.YES_OPTION) {
                                         // Print ftl log
-                                        try {
-                                            TemplateData.process(new FileWriter(
-                                                    new File(filename + ".log.htm")));
+                                        try (FileWriter fw =
+                                                new FileWriter(new File(filename + ".log.htm"))) {
+                                            TemplateData.process(fw);
                                         } catch (IOException | TemplateException e) {
                                             JOptionPane.showMessageDialog(RandomizerGUI.this, bundle
                                                     .getString("RandomizerGUI.logSaveFailed"));
@@ -3789,6 +3790,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
 
         peForceGrowthCB.setText(bundle.getString("RandomizerGUI.peForceGrowthCB.text")); // NOI18N
         peForceGrowthCB.setToolTipText(bundle.getString("RandomizerGUI.peForceGrowthCB.toolTipText")); // NOI18N
+        peForceGrowthCB.setName(bundle.getString("RandomizerGUI.peForceGrowthCB.name")); // NOI18N
 
         peChangeMethodsCB.setText(bundle.getString("RandomizerGUI.peChangeMethodsCB.text")); // NOI18N
         peChangeMethodsCB.setToolTipText(bundle.getString("RandomizerGUI.peChangeMethodsCB.toolTipText")); // NOI18N

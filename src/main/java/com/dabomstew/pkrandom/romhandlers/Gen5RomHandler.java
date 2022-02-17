@@ -1481,6 +1481,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (typeEffectivenessTableOffset > 0) {
                 Effectiveness[][] typeEffectivenessTable =
                         readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                if (typeEffectivenessTable == null || typeEffectivenessTable.length == 0) {
+                    return;
+                }
                 Type.STRONG_AGAINST.clear();
                 Type.RESISTANT_TO.clear();
                 Type.IMMUNE_TO.clear();
@@ -1519,6 +1522,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (typeEffectivenessTableOffset > 0) {
                 Effectiveness[][] typeEffectivenessTable =
                         readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+                if (typeEffectivenessTable == null || typeEffectivenessTable.length == 0) {
+                    return;
+                }
                 int steel = Gen5Constants.typeToByte(Type.STEEL);
                 int dark = Gen5Constants.typeToByte(Type.DARK);
                 int ghost = Gen5Constants.typeToByte(Type.GHOST);

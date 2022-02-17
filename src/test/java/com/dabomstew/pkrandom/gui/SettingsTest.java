@@ -955,6 +955,16 @@ public class SettingsTest extends AbstractUIBase {
                                 (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
                                 (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
                                 (settings) -> settings.getEvolutionsMod(), "Evolutions");
+
+                // Test that Limit 3 Stages disables if Force Lv1 Evo is checked
+                JCheckBoxFixture peForceGrowthCBFixture = getCheckBoxByName("peForceGrowthCB");
+                TestCheckboxBasedOnCheckbox(unchangedEvolveRBFixture, randomEvolveRBFixture,
+                                peEvolveLv1CBFixture, peForceGrowthCBFixture,
+                                (settings) -> settings.isEvosLv1(),
+                                (settings) -> settings.isEvosForceGrowth(),
+                                (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.UNCHANGED,
+                                (evolutionsMod) -> evolutionsMod == Settings.EvolutionsMod.RANDOM,
+                                (settings) -> settings.getEvolutionsMod(), "Evolutions");
         }
 
         /**

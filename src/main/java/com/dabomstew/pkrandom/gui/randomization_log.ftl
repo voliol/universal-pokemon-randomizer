@@ -228,6 +228,12 @@
 							<#case "TRADE_ITEM">
 								TRADE holding ${romHandler.getItemNames()[evoFm.extraInfo]}
 							<#break>
+							<#case "MEGA_EVOLVE">
+								MEGA EVOLVE holding ${romHandler.getItemNames()[evoFm.extraInfo]}
+							<#break>
+							<#case "FAIRY_AFFECTION">
+								HAPPINESS with FAIRY-type move
+							<#break>
 							<#default>
 								${evoFm.type}
 							<#break>

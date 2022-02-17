@@ -23,6 +23,7 @@ import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.TypeRelationship;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.text.Gen5TextHandler;
@@ -413,6 +414,9 @@ public class LogTest {
         doReturn(new int[] {0}).when(romhandler).getPokeNumToRBYTable();
         doReturn(-1).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable();
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -444,6 +448,9 @@ public class LogTest {
                 .getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doReturn(-1).when(romhandler).readByte(anyInt());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable();
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -476,6 +483,9 @@ public class LogTest {
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doNothing().when(romhandler).writeWord(anyInt(), anyInt());
         doReturn(-1).when(romhandler).readByte(anyInt());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable();
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -517,6 +527,10 @@ public class LogTest {
         doNothing().when(romhandler).writeLong(any(), anyInt(), anyInt());
         doReturn(new byte[] {-1, -1}).when(romhandler).readOverlay(anyInt());
         doReturn(1).when(romhandler).find(any(), anyString());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable(any(), anyInt());
+        doNothing().when(romhandler).writeTypeEffectivenessTable(any(), any(), anyInt());
         int mTweaks = romhandler.miscTweaksAvailable();
 
         // Sanity check
@@ -835,6 +849,9 @@ public class LogTest {
         doReturn(new int[] {0}).when(romhandler).getPokeNumToRBYTable();
         doReturn(-1).when(romhandler).readByte(anyInt());
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable();
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
@@ -847,6 +864,9 @@ public class LogTest {
                 .getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doReturn(-1).when(romhandler).readByte(anyInt());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable();
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
@@ -858,6 +878,9 @@ public class LogTest {
         doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
         doNothing().when(romhandler).writeByte(anyInt(), anyByte());
         doReturn(-1).when(romhandler).readByte(anyInt());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable();
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }
@@ -873,6 +896,10 @@ public class LogTest {
         doNothing().when(romhandler).writeOverlay(anyInt(), any());
         doReturn(new byte[] {-1, -1}).when(romhandler).readOverlay(anyInt());
         doReturn(1).when(romhandler).find(any(), anyString());
+        doReturn(Arrays.asList(
+                new TypeRelationship(Type.BUG, Type.DARK, TypeRelationship.Effectiveness.NEUTRAL)))
+                        .when(romhandler).readTypeEffectivenessTable(any(), anyInt());
+        doNothing().when(romhandler).writeTypeEffectivenessTable(any(), any(), anyInt());
         romhandler.applyMiscTweak(MiscTweak.UPDATE_TYPE_EFFECTIVENESS);
         assertEquals(TemplateData.getData("updateEffectiveness"), true);
     }

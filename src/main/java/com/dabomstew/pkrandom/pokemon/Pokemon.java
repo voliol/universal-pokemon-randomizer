@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -188,6 +189,22 @@ public class Pokemon implements Comparable<Pokemon> {
             }
         }
         return length + 1;
+    }
+
+    public boolean isCyclic(Set<Pokemon> visited, Set<Pokemon> recStack) {
+        if (!visited.contains(this)) {
+            visited.add(this);
+            recStack.add(this);
+            for (Evolution ev : this.evolutionsFrom) {
+                if (!visited.contains(ev.to) && ev.to.isCyclic(visited, recStack)) {
+                    return true;
+                } else if (recStack.contains(ev.to)) {
+                    return true;
+                }
+            }
+        }
+        recStack.remove(this);
+        return false;
     }
 
     public int minimumLevel() {

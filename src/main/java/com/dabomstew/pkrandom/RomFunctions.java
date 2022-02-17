@@ -43,13 +43,13 @@ public class RomFunctions {
         Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
         for (Pokemon pkmn : allPokes) {
             if (pkmn != null) {
-                //If this pokemon has no evolutions, it's a basic
+                // If this pokemon has no evolutions, it's a basic
                 if (pkmn.evolutionsTo.size() < 1) {
                     dontCopyPokes.add(pkmn);
                 } else {
-                    //This pokemon has evolutions, so we're only going to get the first one
+                    // This pokemon has evolutions, so we're only going to get the first one
                     Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    //Split evos don't carry stats and are treated specially
+                    // Split evos don't carry stats and are treated specially
                     if (!onlyEvo.carryStats) {
                         dontCopyPokes.add(pkmn);
                     }
@@ -97,10 +97,10 @@ public class RomFunctions {
         // Remove any stones already used
         ev.from.evolutionsFrom.forEach(evo -> {
             if (EvolutionType.isOfType("Stone", evo.type)) {
-                availableStones.remove(availableStones.indexOf(evo.extraInfo));
+                availableStones.remove(Math.max(availableStones.indexOf(evo.extraInfo), 0));
             }
         });
-        
+
         return availableStones;
     }
 
@@ -112,11 +112,13 @@ public class RomFunctions {
      * @param level
      * @return
      */
-    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level) {
+    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets,
+            int level) {
         return getMovesAtLevel(pkmn, movesets, level, 0);
     }
 
-    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level, int emptyValue) {
+    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets,
+            int level, int emptyValue) {
         int[] curMoves = new int[4];
 
         if (emptyValue != 0) {
@@ -179,7 +181,8 @@ public class RomFunctions {
         return freeSpaceFinder(rom, freeSpace, amount, offset, true);
     }
 
-    public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset, boolean longAligned) {
+    public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset,
+            boolean longAligned) {
         if (!longAligned) {
             // Find 2 more than necessary and return 2 into it,
             // to preserve stuff like FF terminators for strings
@@ -210,7 +213,8 @@ public class RomFunctions {
         return search(haystack, beginOffset, haystack.length, needle);
     }
 
-    public static List<Integer> search(byte[] haystack, int beginOffset, int endOffset, byte[] needle) {
+    public static List<Integer> search(byte[] haystack, int beginOffset, int endOffset,
+            byte[] needle) {
         int currentMatchStart = beginOffset;
         int currentCharacterPosition = 0;
 
@@ -222,7 +226,8 @@ public class RomFunctions {
 
         while ((currentMatchStart + currentCharacterPosition) < docSize) {
 
-            if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition + currentMatchStart])) {
+            if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition
+                    + currentMatchStart])) {
                 currentCharacterPosition = currentCharacterPosition + 1;
 
                 if (currentCharacterPosition == (needleSize)) {
@@ -261,7 +266,8 @@ public class RomFunctions {
 
         while ((currentMatchStart + currentCharacterPosition) < docSize) {
 
-            if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition + currentMatchStart])) {
+            if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition
+                    + currentMatchStart])) {
                 currentCharacterPosition = currentCharacterPosition + 1;
 
                 if (currentCharacterPosition == (needleSize)) {
@@ -307,8 +313,8 @@ public class RomFunctions {
         return stable;
     }
 
-    public static String rewriteDescriptionForNewLineSize(String moveDesc, String newline, int lineSize,
-            StringSizeDeterminer ssd) {
+    public static String rewriteDescriptionForNewLineSize(String moveDesc, String newline,
+            int lineSize, StringSizeDeterminer ssd) {
         // We rewrite the description we're given based on some new chars per
         // line.
         moveDesc = moveDesc.replace("-" + newline, "").replace(newline, " ");
@@ -368,8 +374,9 @@ public class RomFunctions {
         return fullDesc.toString();
     }
 
-    public static String formatTextWithReplacements(String text, Map<String, String> replacements, String newline,
-            String extraline, String newpara, int maxLineLength, StringSizeDeterminer ssd) {
+    public static String formatTextWithReplacements(String text, Map<String, String> replacements,
+            String newline, String extraline, String newpara, int maxLineLength,
+            StringSizeDeterminer ssd) {
         // Ends with a paragraph indicator?
         boolean endsWithPara = false;
         if (text.endsWith(newpara)) {
@@ -410,8 +417,9 @@ public class RomFunctions {
                     reqLength++;
                 }
                 if ((currLineCC + reqLength > maxLineLength)
-                        || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.' || currLineLastChar == '?'
-                                || currLineLastChar == '!' || currLineLastChar == '…' || currLineLastChar == ','))) {
+                        || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.'
+                                || currLineLastChar == '?' || currLineLastChar == '!'
+                                || currLineLastChar == '…' || currLineLastChar == ','))) {
                     // new line
                     // Save current line, if applicable
                     if (currLineWC > 0) {

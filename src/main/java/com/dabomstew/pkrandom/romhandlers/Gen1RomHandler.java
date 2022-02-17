@@ -1135,6 +1135,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private void updateTypes() {
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        if (typeEffectivenessTable == null || typeEffectivenessTable.size() == 0) {
+            return;
+        }
         Type.STRONG_AGAINST.clear();
         Type.RESISTANT_TO.clear();
         Type.IMMUNE_TO.clear();
@@ -1156,6 +1159,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private void updateTypeEffectiveness() {
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        if (typeEffectivenessTable == null || typeEffectivenessTable.size() == 0) {
+            return;
+        }
 
         for (TypeRelationship relationship : typeEffectivenessTable) {
             if (relationship.attacker == Type.POISON && relationship.defender == Type.BUG) {
@@ -1185,9 +1191,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         TemplateData.putData("updateEffectiveness", true);
     }
 
-    private List<TypeRelationship> readTypeEffectivenessTable() {
+    public List<TypeRelationship> readTypeEffectivenessTable() {
         List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
         int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        if (currentOffset < 0) {
+            return null;
+        }
         int attackingType = readByte(currentOffset);
         while (attackingType != (byte) 0xFF) {
             int defendingType = readByte(currentOffset + 1);
@@ -1222,6 +1231,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
         int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        if (currentOffset < 0) {
+            return;
+        }
         for (TypeRelationship relationship : typeEffectivenessTable) {
             writeByte(currentOffset, Gen1Constants.typeToByte(relationship.attacker));
             writeByte(currentOffset + 1, Gen1Constants.typeToByte(relationship.defender));

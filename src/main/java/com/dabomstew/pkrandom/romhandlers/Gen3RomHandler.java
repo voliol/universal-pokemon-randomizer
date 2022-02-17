@@ -107,6 +107,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
         private List<TMOrMTTextEntry> tmmtTexts = new ArrayList<TMOrMTTextEntry>();
         private Map<Integer, Type> typeMap = new HashMap<Integer, Type>();
+        private Map<Integer, EvolutionType> evolutionMethodsMap =
+                new HashMap<Integer, EvolutionType>();
 
         public RomEntry() {
 
@@ -124,6 +126,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             this.staticPokemon.addAll(toCopy.staticPokemon);
             this.tmmtTexts.addAll(toCopy.tmmtTexts);
             this.typeMap.putAll(toCopy.typeMap);
+            this.evolutionMethodsMap.putAll(toCopy.evolutionMethodsMap);
         }
 
         private int getValue(String key) {
@@ -232,6 +235,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             for (int i = 0; i < parts.length; i += 2) {
                                 current.typeMap.put(parseRIInt(parts[i]),
                                         Type.valueOf(parts[i + 1].toUpperCase().trim()));
+                            }
+                        }
+                    } else if (r[0].equals("EvolutionMethods[]")) {
+                        if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                            String[] parts = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (int i = 0; i < parts.length; i += 2) {
+                                current.evolutionMethodsMap.put(parseRIInt(parts[i]),
+                                        EvolutionType.valueOf(parts[i + 1].toUpperCase().trim()));
                             }
                         }
                     } else if (r[0].equals("Game")) {
@@ -483,13 +494,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             basicBPRE10HackSupport();
         }
 
+        updateTypes();
+        updateEvolutionMethods();
         loadPokemonNames();
         loadPokedex();
         loadPokemonStats();
         constructPokemonList();
         populateEvolutions();
         loadMoves();
-        updateTypes();
 
         // Get wild Pokemon offset
         int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
@@ -718,8 +730,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
             getRomEntry().entries.put("TrainerCount", trainerCount);
 
-            // disable static pokemon & move tutor/tm text
+            // disable static pokemon & move tutor/tm text, and type effectiveness
             getRomEntry().entries.put("StaticPokemonSupport", 0);
+            getRomEntry().entries.put("TypeEffectivenessOffset", -1);
             getRomEntry().staticPokemon.clear();
             getRomEntry().tmmtTexts.clear();
 
@@ -2316,6 +2329,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 hex.charAt(2), hex.charAt(3), hex.charAt(0), hex.charAt(1)});
     }
 
+    private void updateEvolutionMethods() {
+        EvolutionType.modifyEvolutionTypes(generationOfPokemon(),
+                getRomEntry().evolutionMethodsMap);
+    }
+
     private void populateEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2325,23 +2343,42 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         int baseOffset = getRomEntry().getValue("PokemonEvolutions");
+        int evoBlockSize = getRomEntry().getValue("PokemonEvolutionsBlockSize");
         int numInternalPokes = getRomEntry().getValue("PokemonCount");
+        int evoCount = evoBlockSize / 8;
         for (int i = 1; i <= numRealPokemon; i++) {
             Pokemon pk = pokemonList.get(i);
             int idx = getPokedexToInternal()[pk.number];
-            int evoOffset = baseOffset + (idx) * 0x28;
-            for (int j = 0; j < 5; j++) {
+            int evoOffset = baseOffset + (idx) * evoBlockSize;
+            for (int j = 0; j < evoCount; j++) {
                 int method = readWord(evoOffset + j * 8);
                 int evolvingTo = readWord(evoOffset + j * 8 + 4);
-                if (method >= 1 && method <= Gen3Constants.evolutionMethodCount && evolvingTo >= 1
-                        && evolvingTo <= numInternalPokes) {
-                    int extraInfo = readWord(evoOffset + j * 8 + 2);
+                if (method >= 1 && EvolutionType.generationCount(3).contains(method)
+                        && evolvingTo >= 1) {
                     EvolutionType et = EvolutionType.fromIndex(3, method);
-                    Evolution evo =
-                            new Evolution(pk, pokesInternal[evolvingTo], true, et, extraInfo);
+                    if (evolvingTo > numInternalPokes && !EvolutionType.isOfType("DIFFERENT", et)) {
+                        continue;
+                    }
+                    int extraInfo = readWord(evoOffset + j * 8 + 2);
+
+                    // Allows us to create fake pokemon so that evolutions are preserved on write
+                    Pokemon toPk;
+                    if (evolvingTo > numInternalPokes) {
+                        toPk = new Pokemon();
+                        toPk.setNumber(evolvingTo);
+                        toPk.ability1 = 1;
+                        toPk.primaryType = Type.NORMAL;
+                        toPk.attack =
+                                toPk.defense = toPk.spatk = toPk.spdef = toPk.speed = toPk.hp = 50;
+                    } else {
+                        toPk = pokesInternal[evolvingTo];
+                    }
+
+                    // Make the evo and add it correctly.
+                    Evolution evo = new Evolution(pk, toPk, true, et, extraInfo);
                     if (!pk.evolutionsFrom.contains(evo)) {
                         pk.evolutionsFrom.add(evo);
-                        pokesInternal[evolvingTo].evolutionsTo.add(evo);
+                        toPk.evolutionsTo.add(evo);
                     }
                 }
             }
@@ -2356,23 +2393,31 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void writeEvolutions() {
         int baseOffset = getRomEntry().getValue("PokemonEvolutions");
+        int evoBlockSize = getRomEntry().getValue("PokemonEvolutionsBlockSize");
+        int evoCount = evoBlockSize / 8;
         for (int i = 1; i <= numRealPokemon; i++) {
             Pokemon pk = pokemonList.get(i);
             int idx = getPokedexToInternal()[pk.number];
-            int evoOffset = baseOffset + (idx) * 0x28;
+            int evoOffset = baseOffset + (idx) * evoBlockSize;
             int evosWritten = 0;
             for (Evolution evo : pk.evolutionsFrom) {
+                int internalNumber;
+                if (evo.to.number >= getPokedexToInternal().length) {
+                    internalNumber = evo.to.number;
+                } else {
+                    internalNumber = getPokedexToInternal()[evo.to.number];
+                }
                 writeWord(evoOffset, evo.type.toIndex(3));
                 writeWord(evoOffset + 2, evo.extraInfo);
-                writeWord(evoOffset + 4, getPokedexToInternal()[evo.to.number]);
+                writeWord(evoOffset + 4, internalNumber);
                 writeWord(evoOffset + 6, 0);
                 evoOffset += 8;
                 evosWritten++;
-                if (evosWritten == 5) {
+                if (evosWritten == evoCount) {
                     break;
                 }
             }
-            while (evosWritten < 5) {
+            while (evosWritten < evoCount) {
                 writeWord(evoOffset, 0);
                 writeWord(evoOffset + 2, 0);
                 writeWord(evoOffset + 4, 0);
@@ -2626,7 +2671,112 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
                 break;
             default:
-                ev.extraInfo = 0;
+                if (isROMHack()) {
+                    switch (ev.type) {
+                        case LEVEL_FEMALE_ONLY:
+                        case LEVEL_MALE_ONLY:
+                            // Get the level of previous evolution
+                            prevLevel = minSiblingLevel = maxSiblingLevel = 0;
+                            for (Evolution ev2 : ev.from.evolutionsTo) {
+                                if (ev2.type.usesLevel()) {
+                                    prevLevel = Integer.max(prevLevel, ev2.extraInfo);
+                                }
+                            }
+
+                            // If there is a split evo based on level, make sure it is the highest
+                            for (Evolution ev3 : ev.from.evolutionsFrom) {
+                                if (EvolutionType.isOfType("Uncontrolled", ev3.type)) {
+                                    maxSiblingLevel = Integer.max(maxSiblingLevel, ev3.extraInfo);
+                                }
+                                // Check if it's a level at all to avoid setting a new evolution
+                                // earlier than a method like ATTACK_HIGHER
+                                else if (ev3.type.usesLevel()) {
+                                    minSiblingLevel = Integer.max(minSiblingLevel, ev3.extraInfo);
+                                }
+                            }
+
+                            // There's no previous level so make it at least 25
+                            if (prevLevel == 0) {
+                                ev.extraInfo = this.random.nextInt(16) + 25;
+                                // For low BST, divide that level in half
+                                if (ev.from.bst() < 300) {
+                                    ev.extraInfo /= 2;
+                                }
+                            }
+                            // Set the new evolution level to 5-20 higher than the current
+                            else {
+                                ev.extraInfo = this.random.nextInt(16) + 5 + prevLevel;
+                            }
+
+                            // We have a method that can conflict
+                            if (maxSiblingLevel > 0) {
+                                // Set this one equal to that sibling since they're both
+                                // uncontrolled levels
+                                if (EvolutionType.isOfType("Uncontrolled", ev.type)) {
+                                    ev.extraInfo = maxSiblingLevel;
+                                }
+                                // Set this one less than that sibling since this is controllable
+                                else if (ev.extraInfo >= maxSiblingLevel) {
+                                    ev.extraInfo = maxSiblingLevel - 1;
+                                }
+                            }
+
+                            // Increase above level if necessary (setting uncontrolledLevelEvo after
+                            // controllable)
+                            if (minSiblingLevel > 0 && maxSiblingLevel == 0
+                                    && ev.extraInfo <= minSiblingLevel) {
+                                ev.extraInfo = minSiblingLevel + 1;
+                            }
+                            break;
+                        case LEVEL_WITH_OTHER:
+                            List<Integer> usedPokemon = ev.from.evolutionsFrom.stream()
+                                    .filter(evo -> evo.type == ev.type).map(evo -> evo.extraInfo)
+                                    .collect(Collectors.toList());
+                            ev.extraInfo = this.random.nextInt(numRealPokemon);
+                            // Given there are 450+ pokemon to choose from, this should almost never
+                            // be called
+                            // It exists to prevent the edge case where we have a split evo pokemon
+                            // with both methods being LEVEL_WITH_OTHER and both pick the same
+                            // pokemon
+                            while (usedPokemon.contains(ev.extraInfo)) {
+                                ev.extraInfo = this.random.nextInt(numRealPokemon);
+                            }
+                            break;
+                        case LEVEL_WITH_MOVE:
+                            List<Integer> usedMoves = ev.from.evolutionsFrom.stream()
+                                    .filter(evo -> evo.type == ev.type).map(evo -> evo.extraInfo)
+                                    .collect(Collectors.toList());
+                            ev.extraInfo = this.randomMove(ev.from);
+                            // Similar to STONE, but each Pokemon has a finite moveset
+                            // Must make sure there are no duplicates
+                            while (usedMoves.contains(ev.extraInfo)) {
+                                ev.extraInfo = this.randomMove(ev.from);
+                            }
+                            break;
+                        case STONE_MALE_ONLY:
+                        case STONE_FEMALE_ONLY:
+                            // Remove any stones already used
+                            unusedStones = RomFunctions
+                                    .removeUsedStones(Gen3Constants.availableStones, ev);
+                            ev.extraInfo =
+                                    unusedStones.get(this.random.nextInt(unusedStones.size()));
+                            break;
+                        case LEVEL_ITEM_DAY:
+                        case LEVEL_ITEM_NIGHT:
+                            usedItems = ev.from.evolutionsFrom.stream()
+                                    .filter(evo -> evo.type == ev.type).map(evo -> evo.extraInfo)
+                                    .collect(Collectors.toList());
+                            ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                            // Similar to LEVEL_WITH_OTHER, there are a lot of items
+                            // available and this should almost never be called.
+                            while (usedItems.contains(ev.extraInfo)) {
+                                ev.extraInfo = this.getAllowedItems().randomNonTM(this.random);
+                            }
+                            break;
+                    }
+                } else {
+                    ev.extraInfo = 0;
+                }
                 break;
         }
     }
@@ -3402,6 +3552,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         getRomEntry().typeMap.forEach((k, v) -> Gen3Constants.typeTable[k] = v);
 
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        if (typeEffectivenessTable == null || typeEffectivenessTable.size() == 0) {
+            return;
+        }
         Type.STRONG_AGAINST.clear();
         Type.RESISTANT_TO.clear();
         Type.IMMUNE_TO.clear();
@@ -3424,6 +3577,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void updateTypeEffectiveness() {
         List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        if (typeEffectivenessTable == null || typeEffectivenessTable.size() == 0) {
+            return;
+        }
         for (TypeRelationship relationship : typeEffectivenessTable) {
             // Change Ghost 0.5x against Steel to Ghost 1x to Steel
             if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
@@ -3442,12 +3598,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         TemplateData.putData("updateEffectiveness", true);
     }
 
-    private List<TypeRelationship> readTypeEffectivenessTable() {
+    public List<TypeRelationship> readTypeEffectivenessTable() {
         List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
         int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
-        int attackingType = readByte(currentOffset);
+        if (currentOffset < 0) {
+            return null;
+        }
+
         // 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
         // the actual end of the table.
+        int attackingType = readByte(currentOffset);
         while (attackingType != (byte) 0xFF) {
             Type attacking = getTypeTableValue(currentOffset);
             Type defending = getTypeTableValue(currentOffset + 1);
@@ -3484,6 +3644,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
         int currentOffset = getRomEntry().getValue("TypeEffectivenessOffset");
+        if (currentOffset < 0) {
+            return;
+        }
         for (TypeRelationship relationship : typeEffectivenessTable) {
             writeByte(currentOffset, Gen3Constants.typeToByte(relationship.attacker));
             writeByte(currentOffset + 1, Gen3Constants.typeToByte(relationship.defender));

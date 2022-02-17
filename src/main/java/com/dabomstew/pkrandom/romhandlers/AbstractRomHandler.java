@@ -169,12 +169,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             } else {
                 noLegendaryList.add(p);
             }
-            for (int specialIntro : GlobalConstants.ptSpecialIntros) {
-                if (p.number == specialIntro) {
-                    giratinaPicks.add(p);
-                    break;
-                }
+            if (GlobalConstants.ptSpecialIntros.contains(p.number)) {
+                giratinaPicks.add(p);
             }
+        }
+
+        if (giratinaPicks.size() < 1) {
+            giratinaPicks.addAll(onlyLegendaryList);
         }
     }
 
@@ -494,7 +495,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             if (exactEvos) {
                 starterPokes.filterByEvolutionStagesRemaining(minimumEvos + 1, minimumEvos + 1);
-            } else {
+            } else if (minimumEvos > 0) {
                 starterPokes.filterByEvolutionStagesRemaining(minimumEvos + 1, 999);
             }
             if (noSplitEvos) {
@@ -715,7 +716,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         evTo.assignTypeByReference(evFrom, evTo.evolutionsTo.get(0).typesDiffer,
                                 () -> randomType());
                     } else {
-                        // Multiple evo paths merge here. Check for similarity
+                        // Multiple evo paths merge here
+                        // similar indicates which type all evo paths share
+                        // evoDiff indicates which type evFrom and evTo share
                         int similar = -1;
                         int evoDiff = -1;
                         for (Evolution e : evTo.evolutionsTo) {
@@ -752,18 +755,27 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                         // Only one type is similar = keep that one type
                         if (similar > 0 && similar < 3) {
-                            evTo.typeChanged = (similar & 1) == 0 ? 1 : 2;
+                            evTo.typeChanged = (similar & 1) == 0 ? 2 : 1;
                             do {
                                 // If we're changing the first type, check which type of
                                 // the prior evo we should copy
                                 evTo.primaryType = evTo.typeChanged == 1
-                                        ? evoDiff == 2 ? evFrom.primaryType : evFrom.secondaryType
+                                        ? evoDiff == 2 || evFrom.secondaryType == null
+                                                ? evFrom.primaryType
+                                                : evFrom.secondaryType
                                         : evTo.primaryType;
                                 // If we're changing the second type, check which type
                                 // of the prior evo we should copy
                                 evTo.secondaryType = evTo.typeChanged == 2
                                         ? evoDiff == 1 ? evFrom.secondaryType : evFrom.primaryType
                                         : evTo.secondaryType;
+
+                                if (evTo.primaryType == evTo.secondaryType) {
+                                    evTo.primaryType =
+                                            evTo.typeChanged == 1 ? randomType() : evTo.primaryType;
+                                    evTo.secondaryType = evTo.typeChanged == 2 ? randomType()
+                                            : evTo.secondaryType;
+                                }
                             } while (evTo.primaryType == evTo.secondaryType);
                         }
                         // All/Nothing is similar = default type select
@@ -3675,12 +3687,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         int maxTarget = currentBST + currentBST / 10;
         List<Pokemon> canPick = new ArrayList<Pokemon>();
         List<Pokemon> emergencyPick = new ArrayList<Pokemon>();
+        Set<Pokemon> nonNullPick = new HashSet<Pokemon>();
         int expandRounds = 0;
-        while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
+        while (canPick.isEmpty() || expandRounds < 3) {
             for (Pokemon pk : pokemonPool) {
                 if (pk == null) {
                     continue;
                 }
+                // Always add to non-null set
+                nonNullPick.add(pk);
+
+                // Figure out if we can add to either list
                 if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
                         && !canPick.contains(pk) && !emergencyPick.contains(pk)) {
                     if (alreadyPicked.contains(pk)) {
@@ -3689,6 +3706,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                         canPick.add(pk);
                     }
                 }
+            }
+            // Prevents a case where the currentBST is 0 and this enters an
+            // infinite loop
+            if (expandRounds >= 2 && emergencyPick.isEmpty()) {
+                emergencyPick.addAll(nonNullPick);
             }
             if (expandRounds >= 2 && canPick.isEmpty()) {
                 canPick.addAll(emergencyPick);
@@ -3763,25 +3785,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         from.evolutionsFrom.add(tempEvo);
         Set<Pokemon> visited = new HashSet<Pokemon>();
         Set<Pokemon> recStack = new HashSet<Pokemon>();
-        boolean recur = isCyclic(from, visited, recStack);
+        boolean recur = from.isCyclic(visited, recStack);
         from.evolutionsFrom.remove(tempEvo);
         return recur;
-    }
-
-    private boolean isCyclic(Pokemon pk, Set<Pokemon> visited, Set<Pokemon> recStack) {
-        if (!visited.contains(pk)) {
-            visited.add(pk);
-            recStack.add(pk);
-            for (Evolution ev : pk.evolutionsFrom) {
-                if (!visited.contains(ev.to) && isCyclic(ev.to, visited, recStack)) {
-                    return true;
-                } else if (recStack.contains(ev.to)) {
-                    return true;
-                }
-            }
-        }
-        recStack.remove(pk);
-        return false;
     }
 
     private interface BasePokemonAction {
@@ -3824,9 +3830,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Non-randomized pokes at this point must have
                 // a linear chain of single evolutions down to
                 // a randomized poke.
+                // Lv1 Evos may cause a cyclic chain, which requires
+                // skipping this requirement and applying the effect
+                // on as many evolutions as possible - even if this
+                // may get overwritten due to evolution lines merging
                 Stack<Evolution> currentStack = new Stack<Evolution>();
                 Evolution ev = pk.evolutionsTo.get(0);
-                while (!ev.from.temporaryFlag) {
+                while (!ev.from.temporaryFlag && !currentStack.contains(ev)) {
                     currentStack.push(ev);
                     ev = ev.from.evolutionsTo.get(0);
                 }
@@ -4242,7 +4252,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private int numOldPreEvolutions(Map<Pokemon, List<Evolution>> preEvoMap, Pokemon pk, int depth,
             int maxInterested) {
-        if (preEvoMap.get(pk).size() == 0) {
+        if (preEvoMap.get(pk) == null || preEvoMap.get(pk).size() == 0) {
             return 0;
         } else {
             if (depth == maxInterested - 1) {

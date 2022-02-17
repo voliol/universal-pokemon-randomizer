@@ -124,9 +124,13 @@
 
 - UI layout has been moved around for easier development
 - All pokemon can evolve at level 1
+  - Gen 2 will likely fail due to restrictions on data block size.
   - If `Change Methods` is chosen, all pokemon will evolve with a random method and level evolutions will NOT be at 1
   - If `Random Starters` is chosen, slider will be set to 0 and `Exact Evos` will be false as there is no end to an evolution chain
   - Evolution paths in the log will only display pokemon where nothing evolves into them
+  - If `Follow Evolutions` is chosen, no guarantee is made to linear behavior. This will result in stat drops, type disparity, and moveset oddities.
+  - If `Randomize Methods` is chosen, everything will still have an evolution, but it will no longer be at level 1.
+  - Selecting `Standardize EXP Curves` will result it better selections. However, combining this with `Filter Legendaries` will result in failure as legendaries will have no valid selections to evolve into due to mandatory EXP curve requirements.
 - `Force Fully Evolved` and `Modify Trainer Level` are available to use regardless of trainer option selected
 - Rotom has been removed from the legendary pool list
 - Platinum rival at Battle Tower now correctly retains starter or team if that option is selected
@@ -157,5 +161,8 @@
 - Adds more support for Randomizable 809
   - Adds unique entry to allow FAIRY type to be properly recognized
   - This also enables other rom hacks to be easily supported, so long as the offsets are known and a unique identifier exists
+  - Added support for evolutions. Credit to [ajarmar](https://github.com/Ajarmar) for [evolution type code](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/blob/master/src/com/dabomstew/pkrandom/pokemon/EvolutionType.java)
 - Logs are now handled in a separate class. There should be no impact to users.
 - SE Triangle algorithm has been redone. It should be more consistent and throw fewer errors.
+- Fixed bug where `Random (retain one)` type randomization would hit an infinite loop
+- Fixed bug in Platinum where Giratina could not be replaced when limiting generations
