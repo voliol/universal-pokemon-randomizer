@@ -65,19 +65,21 @@ public class Gen3Constants {
     public static final String rsPokemonPalettesPointerSuffix = "080C064A11404840";
 
     public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
-            efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
-            efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;
+            efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8,
+            efrlgMoveDataPointer = 0x1CC, efrlgPokemonStatsPointer = 0x1BC,
+            efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;
 
-    public static final byte[] emptyPokemonSig = new byte[] { 0x32, (byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32,
-            0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00, (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F,
-            0x0F, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00 };
+    public static final byte[] emptyPokemonSig = new byte[] {0x32, (byte) 0x96, 0x32, (byte) 0x96,
+            (byte) 0x96, 0x32, 0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00,
+            (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F, 0x0F, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00};
 
     public static final int baseStatsEntrySize = 0x1C;
 
-    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
-            bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
-            bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23;
+    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2,
+            bsSpeedOffset = 3, bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6,
+            bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12,
+            bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16, bsGrowthCurveOffset = 19,
+            bsAbility1Offset = 22, bsAbility2Offset = 23;
 
     public static final int textTerminator = 0xFF, textVariable = 0xFD;
 
@@ -90,21 +92,25 @@ public class Gen3Constants {
 
     public static final int frlgStarterItemsOffset = 218;
 
-    public static final int gbaAddRxOpcode = 0x30, gbaUnconditionalJumpOpcode = 0xE0, gbaSetRxOpcode = 0x20,
-            gbaCmpRxOpcode = 0x28, gbaNopOpcode = 0x46C0;
+    public static final int gbaAddRxOpcode = 0x30, gbaUnconditionalJumpOpcode = 0xE0,
+            gbaSetRxOpcode = 0x20, gbaCmpRxOpcode = 0x28, gbaNopOpcode = 0x46C0;
 
-    public static final int gbaR0 = 0, gbaR1 = 1, gbaR2 = 2, gbaR3 = 3, gbaR4 = 4, gbaR5 = 5, gbaR6 = 6, gbaR7 = 7;
+    public static final int gbaR0 = 0, gbaR1 = 1, gbaR2 = 2, gbaR3 = 3, gbaR4 = 4, gbaR5 = 5,
+            gbaR6 = 6, gbaR7 = 7;
 
     public static final Type[] typeTable = constructTypeTable();
 
-    public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
+    public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5,
+            fishingSlots = 10;
 
-    public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117, poliwhirlIndex = 61,
-            mewIndex = 151, clamperlIndex = 366, huntailIndex = 367, gorebyssIndex = 368;
+    public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117,
+            poliwhirlIndex = 61, mewIndex = 151, clamperlIndex = 366, huntailIndex = 367,
+            gorebyssIndex = 368;
 
     public static final int tmCount = 50, hmCount = 8;
 
-    public static final List<Integer> hmMoves = Arrays.asList(0xf, 0x13, 0x39, 0x46, 0x94, 0xf9, 0x7f, 0x123);
+    public static final List<Integer> hmMoves =
+            Arrays.asList(0xf, 0x13, 0x39, 0x46, 0x94, 0xf9, 0x7f, 0x123);
 
     public static final int tmItemOffset = 289;
 
@@ -130,7 +136,8 @@ public class Gen3Constants {
 
     public static final String rsNatDexScriptPart1 = "31720167";
 
-    public static final String rsNatDexScriptPart2 = "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
+    public static final String rsNatDexScriptPart2 =
+            "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
 
     public static final String frlgPokedexScriptIdentifier = "292908258101";
 
@@ -144,7 +151,8 @@ public class Gen3Constants {
 
     public static final String frlgOaksLabFix = "257D011604800100";
 
-    public static final String frlgOakOutsideHouseCheck = "1604800000260D80D4001908800580190980068083000880830109802109803C";
+    public static final String frlgOakOutsideHouseCheck =
+            "1604800000260D80D4001908800580190980068083000880830109802109803C";
 
     public static final String frlgOakOutsideHouseFix = "1604800100";
 
@@ -154,39 +162,41 @@ public class Gen3Constants {
 
     public static final String eNatDexScriptPart2 = "3229610825F00129E40825F30116CD40010003";
 
-    public static final int unhackedMaxPokedex = 411, unhackedRealPokedex = 386, hoennPokesStart = 252;
+    public static final int unhackedMaxPokedex = 411, unhackedRealPokedex = 386,
+            hoennPokesStart = 252;
 
     public static final int evolutionMethodCount = 15;
 
-    public static final int sunStoneIndex = 93, moonStoneIndex = 94, fireStoneIndex = 95, thunderStoneIndex = 96,
-        waterStoneIndex = 97, leafStoneIndex = 98;
-    public static final List<Integer> availableStones = Arrays.asList(
-        Gen3Constants.moonStoneIndex, Gen3Constants.fireStoneIndex,
-        Gen3Constants.waterStoneIndex, Gen3Constants.thunderStoneIndex,
-        Gen3Constants.leafStoneIndex, Gen3Constants.sunStoneIndex);
+    public static final int sunStoneIndex = 93, moonStoneIndex = 94, fireStoneIndex = 95,
+            thunderStoneIndex = 96, waterStoneIndex = 97, leafStoneIndex = 98;
+    public static final List<Integer> availableStones =
+            Arrays.asList(Gen3Constants.moonStoneIndex, Gen3Constants.fireStoneIndex,
+                    Gen3Constants.waterStoneIndex, Gen3Constants.thunderStoneIndex,
+                    Gen3Constants.leafStoneIndex, Gen3Constants.sunStoneIndex);
 
     public static final int highestAbilityIndex = 77;
 
     public static final int frlgMapLabelsStart = 0x58;
 
-    public static final List<Integer> rsRequiredFieldTMs = Arrays.asList(new Integer[] { 1, 2, 6, 7, 11, 18, 22, 23,
-            26, 30, 37, 48 });
+    public static final List<Integer> rsRequiredFieldTMs =
+            Arrays.asList(new Integer[] {1, 2, 6, 7, 11, 18, 22, 23, 26, 30, 37, 48});
 
-    public static final List<Integer> eRequiredFieldTMs = Arrays.asList(new Integer[] { 2, 6, 7, 11, 18, 22, 23, 30,
-            37, 48 });
+    public static final List<Integer> eRequiredFieldTMs =
+            Arrays.asList(new Integer[] {2, 6, 7, 11, 18, 22, 23, 30, 37, 48});
 
-    public static final List<Integer> frlgRequiredFieldTMs = Arrays.asList(new Integer[] { 1, 2, 7, 8, 9, 11, 12, 14,
-            17, 18, 21, 22, 25, 32, 36, 37, 40, 41, 44, 46, 47, 48, 49, 50 });
+    public static final List<Integer> frlgRequiredFieldTMs = Arrays.asList(new Integer[] {1, 2, 7,
+            8, 9, 11, 12, 14, 17, 18, 21, 22, 25, 32, 36, 37, 40, 41, 44, 46, 47, 48, 49, 50});
 
-    public static final List<Integer> rseFieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230, 291,
-            290);
+    public static final List<Integer> rseFieldMoves =
+            Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230, 291, 290);
 
-    public static final List<Integer> frlgFieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230);
+    public static final List<Integer> frlgFieldMoves =
+            Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230);
 
     public static final List<Integer> rseEarlyRequiredHMMoves = Arrays.asList(249);
 
     public static final List<Integer> frlgEarlyRequiredHMMoves = Arrays.asList(15);
-    
+
     public static final int luckyEggIndex = 0xC5;
 
     private static Type[] constructTypeTable() {
@@ -215,44 +225,9 @@ public class Gen3Constants {
         if (type == null) {
             return 0x09; // ???-type
         }
-        switch (type) {
-        case NORMAL:
-            return 0x00;
-        case FIGHTING:
-            return 0x01;
-        case FLYING:
-            return 0x02;
-        case POISON:
-            return 0x03;
-        case GROUND:
-            return 0x04;
-        case ROCK:
-            return 0x05;
-        case BUG:
-            return 0x06;
-        case GHOST:
-            return 0x07;
-        case FIRE:
-            return 0x0A;
-        case WATER:
-            return 0x0B;
-        case GRASS:
-            return 0x0C;
-        case ELECTRIC:
-            return 0x0D;
-        case PSYCHIC:
-            return 0x0E;
-        case ICE:
-            return 0x0F;
-        case DRAGON:
-            return 0x10;
-        case STEEL:
-            return 0x08;
-        case DARK:
-            return 0x11;
-        default:
-            return 0; // normal by default
-        }
+
+        // return type, or normal by default
+        return (byte) Math.max(Arrays.asList(typeTable).indexOf(type), 0);
     }
 
     public static ItemList allowedItems, nonBadItems, trainerItemList;
@@ -294,7 +269,7 @@ public class Gen3Constants {
         trainerItemList.allowSingles(138, 139, 141); // LEPPA BERRY, ORAN BERRY, LUM BERRY
         trainerItemList.allowSingles(142, 168, 169); // SITRUS BERRY, LIECHI BERRY, GANLON BERRY
         trainerItemList.allowSingles(170, 171, 172); // SALAC BERRY, PETAYA BERRY, APICOT BERRY
-        trainerItemList.allowSingles(173, 174, 175); // LANSAT BERRY, STARF BERRY, ENIGMA BERRY 
+        trainerItemList.allowSingles(173, 174, 175); // LANSAT BERRY, STARF BERRY, ENIGMA BERRY
         trainerItemList.allowSingles(179, 180, 183); // BRIGHTPOWDER, WHITE HERB, QUICK CLAW
         trainerItemList.allowSingles(186, 187, 188); // CHOICE BAND, KING's ROCK, SILVERPOWDER
         trainerItemList.allowSingles(196, 198, 199); // FOCUS BAND, SCOPE LENS, METAL COAT
@@ -395,7 +370,8 @@ public class Gen3Constants {
         tag(trs, "GYM4", 0x288, 0xC9, 0xCB, 0x28A, 0xCA, 0xCC, 0x1F5, 0xCD);
         tag(trs, "GYM5", 0x47, 0x59, 0x49, 0x5A, 0x48, 0x5B, 0x4A);
         tag(trs, "GYM6", 0x192, 0x28F, 0x191, 0x28E, 0x194, 0x323);
-        tag(trs, "GYM7", 0xE9, 0xEA, 0xEB, 0xF4, 0xF5, 0xF6, 0x24F, 0x248, 0x247, 0x249, 0x246, 0x23F);
+        tag(trs, "GYM7", 0xE9, 0xEA, 0xEB, 0xF4, 0xF5, 0xF6, 0x24F, 0x248, 0x247, 0x249, 0x246,
+                0x23F);
         tag(trs, "GYM8", 0x265, 0x80, 0x1F6, 0x73, 0x81, 0x76, 0x82, 0x12D, 0x83, 0x266);
 
         // Gym Leaders + Emerald Rematches!

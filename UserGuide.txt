@@ -1,6 +1,6 @@
-Universal Pokemon Randomizer 1.9.1
+Universal Pokemon Randomizer 1.10.0
 by Dabomstew, 2012-16
-by brentspector, 2019-21
+by brentspector, 2019-22
 
 Homepage: http://pokehacks.dabomstew.com/randomizer/index.php
 Source: https://github.com/brentspector/universal-pokemon-randomizer
@@ -160,6 +160,14 @@ that are desired.
   evolutions, randomizes move power, accuracy, pp, types, and category, in addition
   to everything Randomizer Race already does. 
 
+Randomize Subset of Pokemon
+---------------------------
+For games where only a subset of pokemon are modified, it is now possible to reduce
+the randomizer to just that subset. To activate this feature, you will need to modify
+"romoptions.ini" file in this folder so that "RandomizeSubset" is true and
+"MinPokemonNumber"/"MaxPokemonNumber" are set to the values desired. Note that this
+will impact log generation.
+
 Games/ROMs supported
 --------------------
 
@@ -202,6 +210,15 @@ It may still be possible depending on the specifics of the hack itself.
 In general, the simpler a hack is, the more likely it will be able to be randomized.
 Fire Red hacks are more likely to work than any others, due to specific
 code added in 1.7.0 attempting to deal with them.
+
+Additional infrastructure was added in 1.10.0 to enable adding support for Gen3
+hacks. Other hacks could use this same pattern, but have not been tested.
+
+Hacks Supported
+---------------
+- Randomizable 809
+- Jambo's Moves Learnt
+- Unofficial Emerald Rom
 
 License
 -------

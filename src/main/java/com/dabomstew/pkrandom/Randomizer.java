@@ -25,15 +25,17 @@ package com.dabomstew.pkrandom;
 /*----------------------------------------------------------------------------*/
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
-
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.gui.TemplateData;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
@@ -62,32 +64,32 @@ public class Randomizer {
         RandomSource.seed(seed);
         final boolean raceMode = settings.isRaceMode();
         int checkValue = 0;
-        
+
         // Cache original trainers
-        for(Trainer t : romHandler.getTrainers()) {
+        for (Trainer t : romHandler.getTrainers()) {
             originalTrainers.add(new Trainer(t));
         }
-                
+
         // Template stuff
-        this.romHandler.getTemplateData().put("romHandler", romHandler);
-        this.romHandler.getTemplateData().put("gen1", romHandler instanceof Gen1RomHandler);
+        TemplateData.putData("romHandler", romHandler);
+        TemplateData.putData("gen1", romHandler instanceof Gen1RomHandler);
 
         // limit pokemon based on generation
-        if (settings.isLimitPokemon()) {
-            romHandler.setPokemonPool(settings.getCurrentRestrictions());
+        if (settings.isLimitPokemon() || settings.getRomOptions().isRandomizeSubset()) {
+            romHandler.setPokemonPool(settings.getCurrentRestrictions(), settings.getRomOptions());
             romHandler.removeEvosForPokemonPool();
         } else {
-            romHandler.setPokemonPool(null);
+            romHandler.setPokemonPool(null, null);
         }
 
         // Gen 5/6 Move stat updates & data changes
         if (settings.isUpdateMoves() || settings.isUpdateMovesLegacy()) {
-            // Regardless of whether Gen 5, Gen 6, or both, initialize the 
+            // Regardless of whether Gen 5, Gen 6, or both, initialize the
             // change data structure
             romHandler.initMoveModernization();
 
             // Update to Gen 5 if selected and not already a Gen 5 ROM
-            if (settings.isUpdateMovesLegacy()  && !(romHandler instanceof Gen5RomHandler)) {
+            if (settings.isUpdateMovesLegacy() && !(romHandler instanceof Gen5RomHandler)) {
                 romHandler.updateMovesToGen5();
             }
 
@@ -126,14 +128,15 @@ public class Randomizer {
             Map<String, Boolean> tweakMap = new HashMap<String, Boolean>();
 
             for (MiscTweak mt : MiscTweak.allTweaks) {
-                if ((codeTweaksAvailable & mt.getValue()) > 0 && (currentMiscTweaks & mt.getValue()) > 0) {
+                if ((codeTweaksAvailable & mt.getValue()) > 0
+                        && (currentMiscTweaks & mt.getValue()) > 0) {
                     tweaksToApply.add(mt);
                 }
             }
 
             // Sort so priority is respected in tweak ordering.
             Collections.sort(tweaksToApply);
-            romHandler.getTemplateData().put("tweakMap", tweakMap);
+            TemplateData.putData("tweakMap", tweakMap);
 
             // Now apply in order.
             for (MiscTweak mt : tweaksToApply) {
@@ -144,31 +147,31 @@ public class Randomizer {
         if (settings.isStandardizeEXPCurves()) {
             romHandler.standardizeEXPCurves();
         }
-        
+
         if (settings.isUpdateBaseStats()) {
             romHandler.updatePokemonStats();
         }
-        
+
         // Base stats adjustment (pre-evolution randomization)
         if (settings.isStatsRandomizeFirst()) {
             maybeChangeStats(romHandler);
         }
 
         // Pokemon Types (pre-evolution randomization)
-        if(settings.isTypesRandomizeFirst()) {
+        if (settings.isTypesRandomizeFirst()) {
             maybeChangeTypes(romHandler);
         }
 
         // Pokemon evolutions
         maybeChangeEvolutions(romHandler);
-        
+
         // Base stats adjustment (post-evolution randomization)
         if (!settings.isStatsRandomizeFirst()) {
             maybeChangeStats(romHandler);
         }
 
         // Pokemon Types (post-evolution randomization)
-        if(!settings.isTypesRandomizeFirst()) {
+        if (!settings.isTypesRandomizeFirst()) {
             maybeChangeTypes(romHandler);
         }
 
@@ -178,16 +181,18 @@ public class Randomizer {
         }
 
         // Abilities? (new 1.0.2)
-        if (romHandler.abilitiesPerPokemon() > 0 && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
-            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(), settings.isAllowWonderGuard(),
-                    settings.isBanTrappingAbilities(), settings.isBanNegativeAbilities());
+        if (romHandler.abilitiesPerPokemon() > 0
+                && settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+            romHandler.randomizeAbilities(settings.isAbilitiesFollowEvolutions(),
+                    settings.isAllowWonderGuard(), settings.isBanTrappingAbilities(),
+                    settings.isBanNegativeAbilities());
         }
 
         maybeLogBaseStatAndTypeChanges(romHandler);
         for (Pokemon pkmn : romHandler.getPokemon()) {
             if (pkmn != null) {
-                checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
-                        pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
+                checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed,
+                        pkmn.spatk, pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
             }
         }
 
@@ -201,14 +206,18 @@ public class Randomizer {
 
         // Movesets
         boolean noBrokenMoves = settings.doBlockBrokenMoves();
-        boolean forceLv1s = romHandler.supportsFourStartingMoves() && settings.isStartWithGuaranteedMoves();
+        boolean forceLv1s =
+                romHandler.supportsFourStartingMoves() && settings.isStartWithGuaranteedMoves();
         int forceLv1Count = settings.getGuaranteedMoveCount();
-        double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging() ? settings.getMovesetsGoodDamagingPercent() / 100.0
+        double msGoodDamagingProb = settings.isMovesetsForceGoodDamaging()
+                ? settings.getMovesetsGoodDamagingPercent() / 100.0
                 : 0;
         if (settings.getMovesetsMod() == Settings.MovesetsMod.RANDOM_PREFER_SAME_TYPE) {
-            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(true, noBrokenMoves, forceLv1s, forceLv1Count,
+                    msGoodDamagingProb);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.COMPLETELY_RANDOM) {
-            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceLv1s, forceLv1Count, msGoodDamagingProb);
+            romHandler.randomizeMovesLearnt(false, noBrokenMoves, forceLv1s, forceLv1Count,
+                    msGoodDamagingProb);
         } else if (noBrokenMoves) {
             romHandler.removeBrokenMoves();
         }
@@ -219,47 +228,50 @@ public class Randomizer {
 
         // Trade evolutions removal
         if (settings.isChangeImpossibleEvolutions()) {
-            romHandler.removeTradeEvolutions(!(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED),
-                settings.isEvosChangeMethod());
+            romHandler.removeTradeEvolutions(
+                    !(settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED),
+                    settings.isEvosChangeMethod());
         }
 
         // Easier evolutions
         if (settings.isMakeEvolutionsEasier()) {
-            romHandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL, GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
+            romHandler.condenseLevelEvolutions(GlobalConstants.MAXIMUM_EVO_LEVEL,
+                    GlobalConstants.MAXIMUM_INTERMEDIATE_EVO_LEVEL);
         }
 
         // Show the new movesets if applicable
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.getTemplateData().put("logPokemonMoves", "metronome");
-        } 
-        else if (settings.getMovesetsMod() != Settings.MovesetsMod.UNCHANGED) {
-            romHandler.getTemplateData().put("logPokemonMoves", "random");
+            TemplateData.putData("logPokemonMoves", "metronome");
+        } else if (settings.getMovesetsMod() != Settings.MovesetsMod.UNCHANGED) {
+            TemplateData.putData("logPokemonMoves", "random");
         }
 
         // Trainer Pokemon
-        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED){
-            romHandler.modifyTrainerPokes(settings.isTrainersRandomHeldItem(), settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
-        }
-        else {
+        if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED) {
+            romHandler.modifyTrainerPokes(settings.isTrainersRandomHeldItem(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+        } else {
             romHandler.randomizeTrainerPokes(settings.isTrainersUsePokemonOfSimilarStrength(),
-            settings.isTrainersMatchTypingDistribution(), settings.isTrainersBlockLegendaries(),
-            settings.isTrainersBlockEarlyWonderGuard(),
-            (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0,
-            settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED,
-            settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING, 
-            settings.isGymTypeTheme(), settings.isTrainersRandomHeldItem(),
-            settings.isTrainersBuffElite(),
-            settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
+                    settings.isTrainersMatchTypingDistribution(),
+                    settings.isTrainersBlockLegendaries(),
+                    settings.isTrainersBlockEarlyWonderGuard(),
+                    (settings.getCurrentMiscTweaks() & MiscTweak.USE_RESISTANT_TYPE.getValue()) > 0,
+                    settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED,
+                    settings.getTrainersMod() == Settings.TrainersMod.GLOBAL_MAPPING,
+                    settings.isGymTypeTheme(), settings.isTrainersRandomHeldItem(),
+                    settings.isTrainersBuffElite(),
+                    settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0);
         }
 
-        if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
+        if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
+                || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-                    // First randomize the starter
-                    romHandler.rivalCarriesStarter(settings.isTrainersBlockLegendaries());
-                    // Then randomize the team
-                    if (settings.isRivalCarriesTeamThroughout()) {
-                        romHandler.rivalCarriesTeam();
-                    }
+            // First randomize the starter
+            romHandler.rivalCarriesStarter(settings.isTrainersBlockLegendaries());
+            // Then randomize the team
+            if (settings.isRivalCarriesTeamThroughout()) {
+                romHandler.rivalCarriesTeam();
+            }
         }
 
         if (settings.isTrainersForceFullyEvolved()) {
@@ -301,54 +313,55 @@ public class Randomizer {
             boolean gen5 = romHandler instanceof Gen5RomHandler;
             int normalMin, legendaryMin;
             switch (settings.getMinimumCatchRateLevel()) {
-            case 1:
-            default:
-                normalMin = gen5 ? 50 : 75;
-                legendaryMin = gen5 ? 25 : 37;
-                break;
-            case 2:
-                normalMin = gen5 ? 100 : 128;
-                legendaryMin = gen5 ? 45 : 64;
-                break;
-            case 3:
-                normalMin = gen5 ? 180 : 200;
-                legendaryMin = gen5 ? 75 : 100;
-                break;
-            case 4:
-                normalMin = legendaryMin = 255;
-                break;
+                case 1:
+                default:
+                    normalMin = gen5 ? 50 : 75;
+                    legendaryMin = gen5 ? 25 : 37;
+                    break;
+                case 2:
+                    normalMin = gen5 ? 100 : 128;
+                    legendaryMin = gen5 ? 45 : 64;
+                    break;
+                case 3:
+                    normalMin = gen5 ? 180 : 200;
+                    legendaryMin = gen5 ? 75 : 100;
+                    break;
+                case 4:
+                    normalMin = legendaryMin = 255;
+                    break;
             }
             romHandler.minimumCatchRate(normalMin, legendaryMin);
         }
 
         switch (settings.getWildPokemonMod()) {
-        case RANDOM:
-            romHandler.randomEncounters(settings.isUseTimeBasedEncounters(),
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION,
-                    settings.isBlockWildLegendaries(), settings.isAllowLowLevelEvolvedTypes());
-            break;
-        case AREA_MAPPING:
-            romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(),
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION,
-                    settings.isBlockWildLegendaries(), settings.isAllowLowLevelEvolvedTypes());
-            break;
-        case GLOBAL_MAPPING:
-            romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(),
-                    settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                    settings.isBlockWildLegendaries());
-            break;
-        default:
-            break;
+            case RANDOM:
+                romHandler.randomEncounters(settings.isUseTimeBasedEncounters(), settings
+                        .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
+                        settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                        settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                        settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION,
+                        settings.isBlockWildLegendaries(), settings.isAllowLowLevelEvolvedTypes());
+                break;
+            case AREA_MAPPING:
+                romHandler.area1to1Encounters(settings.isUseTimeBasedEncounters(), settings
+                        .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL,
+                        settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                        settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                        settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.MATCH_TYPING_DISTRIBUTION,
+                        settings.isBlockWildLegendaries(), settings.isAllowLowLevelEvolvedTypes());
+                break;
+            case GLOBAL_MAPPING:
+                romHandler.game1to1Encounters(settings.isUseTimeBasedEncounters(), settings
+                        .getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                        settings.isBlockWildLegendaries());
+                break;
+            default:
+                break;
         }
 
         maybeLogWildPokemonChanges(romHandler);
-        List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
+        List<EncounterSet> encounters =
+                romHandler.getEncounters(settings.isUseTimeBasedEncounters());
         for (EncounterSet es : encounters) {
             for (Encounter e : es.encounters) {
                 checkValue = addToCV(checkValue, e.level, e.pokemon.number);
@@ -358,31 +371,33 @@ public class Randomizer {
         // TMs
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
-            double goodDamagingProb = settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0
-                    : 0;
-            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(), goodDamagingProb);
+            double goodDamagingProb =
+                    settings.isTmsForceGoodDamaging() ? settings.getTmsGoodDamagingPercent() / 100.0
+                            : 0;
+            romHandler.randomizeTMMoves(noBrokenMoves, settings.isKeepFieldMoveTMs(),
+                    goodDamagingProb);
             List<Integer> tmMoves = romHandler.getTMMoves();
             for (int i = 0; i < tmMoves.size(); i++) {
                 checkValue = addToCV(checkValue, tmMoves.get(i));
             }
-            romHandler.getTemplateData().put("logTMMoves", "random");
+            TemplateData.putData("logTMMoves", "random");
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.getTemplateData().put("logTMMoves", "metronome");
+            TemplateData.putData("logTMMoves", "metronome");
         }
 
         // TM/HM compatibility
         switch (settings.getTmsHmsCompatibilityMod()) {
-        case RANDOM_PREFER_TYPE:
-            romHandler.randomizeTMHMCompatibility(true);
-            break;
-        case COMPLETELY_RANDOM:
-            romHandler.randomizeTMHMCompatibility(false);
-            break;
-        case FULL:
-            romHandler.fullTMHMCompatibility();
-            break;
-        default:
-            break;
+            case RANDOM_PREFER_TYPE:
+                romHandler.randomizeTMHMCompatibility(true);
+                break;
+            case COMPLETELY_RANDOM:
+                romHandler.randomizeTMHMCompatibility(false);
+                break;
+            case FULL:
+                romHandler.fullTMHMCompatibility();
+                break;
+            default:
+                break;
         }
 
         if (settings.isTmLevelUpMoveSanity()) {
@@ -398,32 +413,34 @@ public class Randomizer {
             if (settings.getMovesetsMod() != Settings.MovesetsMod.METRONOME_ONLY
                     && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
                 List<Integer> oldMtMoves = romHandler.getMoveTutorMoves();
-                double goodDamagingProb = settings.isTutorsForceGoodDamaging() ? settings
-                        .getTutorsGoodDamagingPercent() / 100.0 : 0;
-                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(), goodDamagingProb);
+                double goodDamagingProb = settings.isTutorsForceGoodDamaging()
+                        ? settings.getTutorsGoodDamagingPercent() / 100.0
+                        : 0;
+                romHandler.randomizeMoveTutorMoves(noBrokenMoves, settings.isKeepFieldMoveTutors(),
+                        goodDamagingProb);
                 List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
                 for (int i = 0; i < newMtMoves.size(); i++) {
                     checkValue = addToCV(checkValue, newMtMoves.get(i));
                 }
-                romHandler.getTemplateData().put("logTutorMoves", "random");
-                romHandler.getTemplateData().put("oldTutorMoves", oldMtMoves);
+                TemplateData.putData("logTutorMoves", "random");
+                TemplateData.putData("oldTutorMoves", oldMtMoves);
             } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-                romHandler.getTemplateData().put("logTutorMoves", "metronome");
-            } 
+                TemplateData.putData("logTutorMoves", "metronome");
+            }
 
             // Compatibility
             switch (settings.getMoveTutorsCompatibilityMod()) {
-            case RANDOM_PREFER_TYPE:
-                romHandler.randomizeMoveTutorCompatibility(true);
-                break;
-            case COMPLETELY_RANDOM:
-                romHandler.randomizeMoveTutorCompatibility(false);
-                break;
-            case FULL:
-                romHandler.fullMoveTutorCompatibility();
-                break;
-            default:
-                break;
+                case RANDOM_PREFER_TYPE:
+                    romHandler.randomizeMoveTutorCompatibility(true);
+                    break;
+                case COMPLETELY_RANDOM:
+                    romHandler.randomizeMoveTutorCompatibility(false);
+                    break;
+                case FULL:
+                    romHandler.fullMoveTutorCompatibility();
+                    break;
+                default:
+                    break;
             }
 
             if (settings.isTutorLevelUpMoveSanity()) {
@@ -437,14 +454,15 @@ public class Randomizer {
             romHandler.randomizeIngameTrades(false, settings.isRandomizeInGameTradesNicknames(),
                     settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
                     settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
-        } else if (settings.getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED) {
+        } else if (settings
+                .getInGameTradesMod() == Settings.InGameTradesMod.RANDOMIZE_GIVEN_AND_REQUESTED) {
             romHandler.randomizeIngameTrades(true, settings.isRandomizeInGameTradesNicknames(),
                     settings.isRandomizeInGameTradesOTs(), settings.isRandomizeInGameTradesIVs(),
                     settings.isRandomizeInGameTradesItems(), settings.getCustomNames());
         }
 
         if (settings.getInGameTradesMod() != Settings.InGameTradesMod.UNCHANGED) {
-            romHandler.getTemplateData().put("oldTrades", oldTrades);
+            TemplateData.putData("oldTrades", oldTrades);
         }
 
         // Field Items
@@ -464,12 +482,13 @@ public class Randomizer {
         romHandler.saveRom(filename);
 
         // Log tail
-        romHandler.getTemplateData().put("elapsed", (System.currentTimeMillis() - startTime));
-        romHandler.getTemplateData().put("rngCalls", RandomSource.callsSinceSeed());
-        romHandler.getTemplateData().put("rngSeed", RandomSource.getSeed());
-        romHandler.getTemplateData().put("settingsString", Settings.VERSION + settings.toString());
-        romHandler.generateTableOfContents();
-                
+        TemplateData.putData("elapsed", (System.currentTimeMillis() - startTime));
+        TemplateData.putData("rngCalls", RandomSource.callsSinceSeed());
+        TemplateData.putData("rngSeed", RandomSource.getSeed());
+        TemplateData.putData("settingsString", Settings.VERSION + settings.toString());
+        TemplateData.generateTypeChart();
+        TemplateData.generateTableOfContents();
+
         return checkValue;
     }
 
@@ -479,15 +498,17 @@ public class Randomizer {
                 || settings.getTypesMod() != Settings.TypesMod.UNCHANGED
                 || settings.getAbilitiesMod() != Settings.AbilitiesMod.UNCHANGED
                 || settings.isRandomizeWildPokemonHeldItems()) {
-            romHandler.getTemplateData().put("logPokemon", true);
-        } 
+            TemplateData.putData("logPokemon", true);
+        }
     }
 
     private void maybeChangeEvolutions(final RomHandler romHandler) {
         if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
-            romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(), settings.isEvosSameTyping(),
-                    settings.isEvosChangeMethod(), settings.isEvosMaxThreeStages(), settings.isEvosForceChange(),
-                    settings.isEvosNoConverge(), settings.isEvosForceGrowth());
+            romHandler.randomizeEvolutions(settings.isEvosSimilarStrength(),
+                    settings.isEvosSameTyping(), settings.isEvosChangeMethod(),
+                    settings.isEvosMaxThreeStages(), settings.isEvosForceChange(),
+                    settings.isEvosNoConverge(), settings.isEvosForceGrowth(), settings.isEvosLv1(),
+                    settings.isEvosSameStage(), settings.isEvosNoLegendaries());
 
             List<Pokemon> allPokes = romHandler.getPokemon();
             List<Pokemon> basePokes = new ArrayList<Pokemon>();
@@ -501,112 +522,130 @@ public class Randomizer {
                     }
                 }
             }
-            romHandler.getTemplateData().put("basePokes", basePokes);
-        }        
+            TemplateData.putData("basePokes", basePokes);
+        }
     }
 
     private void maybeChangeStats(final RomHandler romHandler) {
         switch (settings.getBaseStatisticsMod()) {
-        case SHUFFLE_ORDER:
-            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
-            break;
-        case SHUFFLE_BST:
-            romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
-            break;
-        case SHUFFLE_ALL:
-            romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
-            romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
-            break;
-        case RANDOM_WITHIN_BST:
-            romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
-            break;
-        case RANDOM_UNRESTRICTED:
-            romHandler.randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
-            break;
-        case RANDOM_COMPLETELY:
-            romHandler.randomizeCompletelyPokemonStats(settings.isBaseStatsFollowEvolutions());
-            break;
-        default:
-            break;
+            case SHUFFLE_ORDER:
+                romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
+                break;
+            case SHUFFLE_BST:
+                romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
+                break;
+            case SHUFFLE_ALL:
+                romHandler.shufflePokemonStats(settings.isBaseStatsFollowEvolutions());
+                romHandler.shuffleAllPokemonBSTs(settings.isBaseStatsFollowEvolutions(), false);
+                break;
+            case RANDOM_WITHIN_BST:
+                romHandler.randomizePokemonStatsWithinBST(settings.isBaseStatsFollowEvolutions());
+                break;
+            case RANDOM_UNRESTRICTED:
+                romHandler
+                        .randomizePokemonStatsUnrestricted(settings.isBaseStatsFollowEvolutions());
+                break;
+            case RANDOM_COMPLETELY:
+                romHandler.randomizeCompletelyPokemonStats(settings.isBaseStatsFollowEvolutions());
+                break;
+            default:
+                break;
         }
     }
 
     private void maybeChangeTypes(final RomHandler romHandler) {
         switch (settings.getTypesMod()) {
-        case SHUFFLE:
-            romHandler.shufflePokemonTypes();
-            break;
-        case RANDOM_RETAIN:
-            romHandler.randomizeRetainPokemonTypes(settings.isTypesFollowEvolutions());
-            break;
-        case COMPLETELY_RANDOM:
-            romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());
-            break;
-        default:
-            break;
+            case SHUFFLE:
+                romHandler.shufflePokemonTypes();
+                break;
+            case RANDOM_RETAIN:
+                romHandler.randomizeRetainPokemonTypes(settings.isTypesFollowEvolutions());
+                break;
+            case COMPLETELY_RANDOM:
+                romHandler.randomizePokemonTypes(settings.isTypesFollowEvolutions());
+                break;
+            default:
+                break;
         }
     }
 
     private void maybeChangeAndLogStarters(final RomHandler romHandler) {
-        if (romHandler.canChangeStarters()) {  
+        if (romHandler.canChangeStarters()) {
             if (settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
                 List<Pokemon> starters = new ArrayList();
-                romHandler.getTemplateData().put("logStarters", "custom");
-                for(Integer customStarter : settings.getCustomStarters()) {
+                TemplateData.putData("logStarters", "custom");
+                for (Integer customStarter : settings.getCustomStarters()) {
                     starters.add(romHandler.getPokemon().get(customStarter));
                 }
                 // Ensure starter list only contains 2
                 if (romHandler.isYellow()) {
-                    starters = starters.subList(0, 2);                    
+                    starters = starters.subList(0, 2);
                 }
                 romHandler.setStarters(starters);
-                romHandler.getTemplateData().put("startersList", starters);
+                TemplateData.putData("startersList", starters);
             } else if (settings.getStartersMod() == Settings.StartersMod.RANDOM) {
                 int starterCount = romHandler.isYellow() ? 2 : 3;
                 List<Pokemon> starters = new ArrayList<Pokemon>();
                 List<Type> typeArr;
                 if (settings.isStartersSETriangle()) {
                     typeArr = getSETriangleTypes();
-                } else {
+                } else if (settings.getStarterTypes() != null) {
                     typeArr = settings.getStarterTypes();
+                } else {
+                    typeArr = Collections.EMPTY_LIST;
                 }
-                selectRandomStarter(starterCount, starters, () -> romHandler.randomStarterPokemon(
-                    settings.isStartersNoSplit(), settings.isStartersUniqueTypes(), 
-                    settings.isStartersBaseEvoOnly(),
-                    settings.isStartersLimitBST() ? settings.getStartersBSTLimitModifier() : 9999,
-                    settings.getStartersMinimumEvos(), settings.isStartersExactEvo(), typeArr));
+
+                selectRandomStarter(starterCount, starters, typeArr,
+                        (mustInclude, cannotInclude) -> romHandler.randomStarterPokemon(
+                                settings.isStartersNoSplit(), settings.isStartersUniqueTypes(),
+                                settings.isStartersBaseEvoOnly(),
+                                settings.isStartersLimitBST()
+                                        ? settings.getStartersBSTLimitModifier()
+                                        : 9999,
+                                settings.getStartersMinimumEvos(), settings.isStartersExactEvo(),
+                                typeArr.toArray(new Type[0]), mustInclude, cannotInclude));
 
                 romHandler.setStarters(starters);
-                romHandler.getTemplateData().put("startersList", starters);
+                TemplateData.putData("startersList", starters);
             }
-            if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
+            if (settings.isRandomizeStartersHeldItems()
+                    && !(romHandler instanceof Gen1RomHandler)) {
                 romHandler.randomizeStarterHeldItems(settings.isBanBadRandomStarterHeldItems());
             }
         }
     }
 
-    private void selectRandomStarter(int starterCount, List<Pokemon> starters, 
-            Supplier<Pokemon> randomPicker) {
-        Set<Type> typesUsed = new HashSet<Type>();
-        // Initialize the list
+    private void selectRandomStarter(int starterCount, List<Pokemon> starters, List<Type> typeArr,
+            BiFunction<Set<Type>, Set<Type>, Pokemon> randomPicker) {
+        List<Set<Type>> cniList =
+                Arrays.asList(new HashSet<Type>(), new HashSet<Type>(), new HashSet<Type>());
         for (int i = 0; i < starterCount; i++) {
-            starters.add(randomPicker.get());
-        }
-        // Make sure the starters meet criteria
-        for (int i = 0; i < starterCount; i++) {
-            Pokemon pkmn = starters.get(i);
-            while (starters.contains(pkmn) || 
-                   (settings.isStartersUniqueTypes() &&
-                   (typesUsed.contains(pkmn.primaryType) || 
-                    pkmn.secondaryType != null && typesUsed.contains(pkmn.secondaryType)) ||
-                    (settings.isStartersSETriangle() &&
-                    (!starters.get((i+1)%3).isWeakTo(pkmn))))) {
-                pkmn = randomPicker.get();
+            Set<Type> cannotInclude = cniList.get(i);
+            Pokemon pkmn;
+            if (settings.isStartersSETriangle() && settings.isStartersUniqueTypes()) {
+                // Add all the starter types, then remove the one related to this iteration
+                cannotInclude.addAll(typeArr);
+                cannotInclude.remove(typeArr.get(i));
+
+                // Pick a pokemon with the type related to this iteration, and excluding any other
+                // types
+                pkmn = randomPicker.apply(new HashSet<Type>(typeArr.subList(i, i + 1)),
+                        cannotInclude);
+            } else if (settings.isStartersUniqueTypes()) {
+                pkmn = randomPicker.apply(null, cannotInclude);
+            } else if (settings.isStartersSETriangle()) {
+                pkmn = randomPicker.apply(new HashSet<Type>(typeArr.subList(i, i + 1)), null);
+            } else {
+                pkmn = randomPicker.apply(null, null);
             }
-            starters.set(i, pkmn);
-            typesUsed.add(pkmn.primaryType);
-            if(pkmn.secondaryType != null) {
-                typesUsed.add(pkmn.secondaryType);
+            starters.add(pkmn);
+            if (settings.isStartersUniqueTypes()) {
+                for (int j = i + 1; j < starterCount; j++) {
+                    cniList.get(j).add(pkmn.primaryType);
+                    if (pkmn.secondaryType != null) {
+                        cniList.get(j).add(pkmn.secondaryType);
+                    }
+                }
             }
         }
     }
@@ -618,18 +657,19 @@ public class Randomizer {
         ArrayList<Type> typeArr = new ArrayList<Type>();
         // Iterate until type triangle is found
         boolean found = false;
-        while(!found) {
+        while (!found) {
             // Optimistic break
             found = true;
-            for(int i = 0; i < 3; i++) {
+            for (int i = 0; i < 3; i++) {
                 if (typeArr.size() > i) {
                     Type currentType = typeArr.get(i);
-                    Type checkType = typeArr.get((i+2)%3);
-                    if (Type.STRONG_AGAINST.get(checkType.ordinal()).contains(currentType)) {
+                    Type checkType = typeArr.get((i + 2) % 3);
+                    if (Type.STRONG_AGAINST.get(checkType).contains(currentType)) {
                         continue;
                     } else {
                         found = false;
-                        typeArr.set(i, Type.randomWeakness(RandomSource.instance(), false, checkType));
+                        typeArr.set(i,
+                                Type.randomWeakness(RandomSource.instance(), false, checkType));
                     }
                 } else {
                     found = false;
@@ -643,15 +683,20 @@ public class Randomizer {
 
     private void maybeLogWildPokemonChanges(final RomHandler romHandler) {
         if (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED) {
-            List<EncounterSet> encounters = romHandler.getEncounters(settings.isUseTimeBasedEncounters());
-            romHandler.getTemplateData().put("wildPokemon", encounters);
+            List<EncounterSet> encounters =
+                    romHandler.getEncounters(settings.isUseTimeBasedEncounters()).stream()
+                            .sorted((x, y) -> x.displayName.compareTo(y.displayName))
+                            .collect(Collectors.toList());
+            TemplateData.putData("wildPokemon", encounters);
         }
     }
 
     private void maybeLogTrainerChanges(final RomHandler romHandler) {
-        if (settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED || settings.isRivalCarriesStarterThroughout()
-            || settings.isTrainersRandomHeldItem()) {
-            romHandler.getTemplateData().put("originalTrainers", originalTrainers);
+        if (settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
+                || settings.isTrainersForceFullyEvolved() || settings.isTrainersLevelModified()
+                || settings.isRivalCarriesStarterThroughout()
+                || settings.isTrainersRandomHeldItem()) {
+            TemplateData.putData("originalTrainers", originalTrainers);
         }
     }
 
@@ -661,7 +706,8 @@ public class Randomizer {
         if (romHandler.canChangeStaticPokemon()) {
             if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING) {
                 romHandler.randomizeStaticPokemon(true);
-            } else if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
+            } else if (settings
+                    .getStaticPokemonMod() == Settings.StaticPokemonMod.COMPLETELY_RANDOM) {
                 romHandler.randomizeStaticPokemon(false);
             }
 
@@ -679,9 +725,9 @@ public class Randomizer {
     private void maybeLogMoveChanges(final RomHandler romHandler) {
         if (settings.isRandomizeMoveAccuracies() || settings.isRandomizeMovePowers()
                 || settings.isRandomizeMovePPs() || settings.isRandomizeMoveCategory()
-                || settings.isRandomizeMoveTypes() || settings.isUpdateMoves() 
+                || settings.isRandomizeMoveTypes() || settings.isUpdateMoves()
                 || settings.isUpdateMovesLegacy()) {
-            romHandler.getTemplateData().put("logMoves", true);
+            TemplateData.putData("logMoves", true);
         }
     }
 

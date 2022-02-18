@@ -32,8 +32,7 @@ public class GenRestrictions {
     public boolean assoc_g3_g2, assoc_g3_g4;
     public boolean assoc_g4_g1, assoc_g4_g2, assoc_g4_g3;
 
-    public GenRestrictions() {
-    }
+    public GenRestrictions() {}
 
     public GenRestrictions(int state) {
         allow_gen1 = (state & 1) > 0;
@@ -61,9 +60,29 @@ public class GenRestrictions {
         return !allow_gen1 && !allow_gen2 && !allow_gen3 && !allow_gen4 && !allow_gen5;
     }
 
+    public void makeEverythingSelected() {
+        allow_gen1 = true;
+        allow_gen2 = true;
+        allow_gen3 = true;
+        allow_gen4 = true;
+        allow_gen5 = true;
+
+        assoc_g1_g2 = true;
+        assoc_g1_g4 = true;
+        assoc_g2_g1 = true;
+        assoc_g2_g3 = true;
+        assoc_g2_g4 = true;
+        assoc_g3_g2 = true;
+        assoc_g3_g4 = true;
+        assoc_g4_g1 = true;
+        assoc_g4_g2 = true;
+        assoc_g4_g3 = true;
+    }
+
     public int toInt() {
-        return makeIntSelected(allow_gen1, allow_gen2, allow_gen3, allow_gen4, allow_gen5, assoc_g1_g2, assoc_g1_g4,
-                assoc_g2_g1, assoc_g2_g3, assoc_g2_g4, assoc_g3_g2, assoc_g3_g4, assoc_g4_g1, assoc_g4_g2, assoc_g4_g3);
+        return makeIntSelected(allow_gen1, allow_gen2, allow_gen3, allow_gen4, allow_gen5,
+                assoc_g1_g2, assoc_g1_g4, assoc_g2_g1, assoc_g2_g3, assoc_g2_g4, assoc_g3_g2,
+                assoc_g3_g4, assoc_g4_g1, assoc_g4_g2, assoc_g4_g3);
     }
 
     public void limitToGen(int generation) {
@@ -107,8 +126,7 @@ public class GenRestrictions {
 
     @Override
     public String toString() {
-        return "1-" + allow_gen1 + ", 2-" + allow_gen2 +
-        ", 3-" + allow_gen3 + ", 4-" + allow_gen4 +
-        ", 5-" + allow_gen5;
+        return "1-" + allow_gen1 + ", 2-" + allow_gen2 + ", 3-" + allow_gen3 + ", 4-" + allow_gen4
+                + ", 5-" + allow_gen5;
     }
 }

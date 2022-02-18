@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public List<Integer> shuffledStatsOrder = null;
     public int typeChanged;
-    
+
     private static final double GENERAL_MEDIAN = 411.5;
     private static final double GENERAL_SD = 108.5;
     private static final double GENERAL_SKEW = -0.1;
@@ -86,71 +87,82 @@ public class Pokemon implements Comparable<Pokemon> {
     // Must not rely on the state of this flag being preserved between calls.
     public boolean temporaryFlag;
 
-    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243, 244, 245, 249, 250,
-    251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488,
-    489, 490, 491, 492, 493, 494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649);
+    private static final List<Integer> legendaries = Arrays.asList(144, 145, 146, 150, 151, 243,
+            244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 480, 481,
+            482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 638, 639, 640, 641,
+            642, 643, 644, 645, 646, 647, 648, 649);
 
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
-    
+
     // Select a type from the ones on this pokemon
     public Type randomOfTypes(Random random) {
         if (secondaryType == null) {
             return primaryType;
         }
-        
+
         return random.nextBoolean() ? primaryType : secondaryType;
     }
-    
-    public void assignTypeByReference(Pokemon ref, int typesDiffer, Supplier<Type> defaultFunction) {
-        switch(typesDiffer) {
-        case 0:
-            this.primaryType = ref.primaryType;
-            this.secondaryType = ref.secondaryType;
-            this.typeChanged = ref.typeChanged;
-            break;
-        case 1:           
-            this.primaryType = ref.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
-            this.secondaryType = ref.typeChanged == 2 ? ref.secondaryType : this.secondaryType;
-            this.typeChanged = ref.typeChanged;
-            while(this.primaryType == this.secondaryType) {
-                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
-                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
-            }
-            break;
-        case 2:
-            this.primaryType = ref.typeChanged == 1 ? ref.primaryType : 
-                    this.secondaryType != null ? this.primaryType : ref.secondaryType;
-            this.secondaryType = ref.typeChanged == 2 && this.secondaryType != null ? 
-                    defaultFunction.get() : this.secondaryType;
-            this.typeChanged = this.secondaryType != null ? ref.typeChanged : 1;
-            while(this.primaryType == this.secondaryType) {
-                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
-                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
-            }
-            break;
-        case 3:
-            this.primaryType = ref.typeChanged == 1 ? this.primaryType : defaultFunction.get();
-            this.secondaryType = ref.typeChanged == 1 ? ref.primaryType : this.secondaryType;
-            this.typeChanged = ref.typeChanged == 1 ? 2 : 1;
-            while(this.primaryType == this.secondaryType) {
-                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
-                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
-            }
-            break;
-        case 4:
-            this.primaryType = ref.typeChanged == 2 ? ref.secondaryType : 
-                    this.secondaryType != null ? ref.secondaryType: ref.primaryType;
-            this.secondaryType = ref.typeChanged == 1 && this.secondaryType != null ? 
-                    defaultFunction.get() : this.secondaryType;
-            this.typeChanged = ref.typeChanged == 1 && this.secondaryType != null ? 
-                    2 : 1;
-            while(this.primaryType == this.secondaryType) {
-                this.primaryType = this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
-                this.secondaryType = this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
-            }
-            break;
+
+    public void assignTypeByReference(Pokemon ref, int typesDiffer,
+            Supplier<Type> defaultFunction) {
+        switch (typesDiffer) {
+            case 0:
+                this.primaryType = ref.primaryType;
+                this.secondaryType = ref.secondaryType;
+                this.typeChanged = ref.typeChanged;
+                break;
+            case 1:
+                this.primaryType = ref.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                this.secondaryType = ref.typeChanged == 2 ? ref.secondaryType : this.secondaryType;
+                this.typeChanged = ref.typeChanged;
+                while (this.primaryType == this.secondaryType) {
+                    this.primaryType =
+                            this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                    this.secondaryType =
+                            this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+                }
+                break;
+            case 2:
+                this.primaryType = ref.typeChanged == 1 ? ref.primaryType
+                        : this.secondaryType != null ? this.primaryType : ref.secondaryType;
+                this.secondaryType =
+                        ref.typeChanged == 2 && this.secondaryType != null ? defaultFunction.get()
+                                : this.secondaryType;
+                this.typeChanged = this.secondaryType != null ? ref.typeChanged : 1;
+                while (this.primaryType == this.secondaryType) {
+                    this.primaryType =
+                            this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                    this.secondaryType =
+                            this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+                }
+                break;
+            case 3:
+                this.primaryType = ref.typeChanged == 1 ? this.primaryType : defaultFunction.get();
+                this.secondaryType = ref.typeChanged == 1 ? ref.primaryType : this.secondaryType;
+                this.typeChanged = ref.typeChanged == 1 ? 2 : 1;
+                while (this.primaryType == this.secondaryType) {
+                    this.primaryType =
+                            this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                    this.secondaryType =
+                            this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+                }
+                break;
+            case 4:
+                this.primaryType = ref.typeChanged == 2 ? ref.secondaryType
+                        : this.secondaryType != null ? ref.secondaryType : ref.primaryType;
+                this.secondaryType =
+                        ref.typeChanged == 1 && this.secondaryType != null ? defaultFunction.get()
+                                : this.secondaryType;
+                this.typeChanged = ref.typeChanged == 1 && this.secondaryType != null ? 2 : 1;
+                while (this.primaryType == this.secondaryType) {
+                    this.primaryType =
+                            this.typeChanged == 1 ? defaultFunction.get() : this.primaryType;
+                    this.secondaryType =
+                            this.typeChanged == 2 ? defaultFunction.get() : this.secondaryType;
+                }
+                break;
         }
     }
 
@@ -159,13 +171,40 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     public boolean isWeakTo(Pokemon pkmn) {
-        boolean isWeak = Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.primaryType) ||
-            Type.STRONG_AGAINST.get(this.primaryType.ordinal()).contains(pkmn.secondaryType);
+        boolean isWeak = Type.STRONG_AGAINST.get(this.primaryType).contains(pkmn.primaryType)
+                || Type.STRONG_AGAINST.get(this.primaryType).contains(pkmn.secondaryType);
         if (this.secondaryType != null && !isWeak) {
-            isWeak = Type.STRONG_AGAINST.get(this.secondaryType.ordinal()).contains(pkmn.primaryType) ||
-            Type.STRONG_AGAINST.get(this.secondaryType.ordinal()).contains(pkmn.secondaryType);
+            isWeak = Type.STRONG_AGAINST.get(this.secondaryType).contains(pkmn.primaryType)
+                    || Type.STRONG_AGAINST.get(this.secondaryType).contains(pkmn.secondaryType);
         }
         return isWeak;
+    }
+
+    public int evolutionChainSize() {
+        int length = 0;
+        for (Evolution ev : this.evolutionsFrom) {
+            int temp = ev.to.evolutionChainSize();
+            if (temp > length) {
+                length = temp;
+            }
+        }
+        return length + 1;
+    }
+
+    public boolean isCyclic(Set<Pokemon> visited, Set<Pokemon> recStack) {
+        if (!visited.contains(this)) {
+            visited.add(this);
+            recStack.add(this);
+            for (Evolution ev : this.evolutionsFrom) {
+                if (!visited.contains(ev.to) && ev.to.isCyclic(visited, recStack)) {
+                    return true;
+                } else if (recStack.contains(ev.to)) {
+                    return true;
+                }
+            }
+        }
+        recStack.remove(this);
+        return false;
     }
 
     public int minimumLevel() {
@@ -177,21 +216,21 @@ public class Pokemon implements Comparable<Pokemon> {
             } else {
                 // TODO: Make this better (move MoveLearnt to Pokemon, etc.).
                 switch (evo.type) {
-                case STONE:
-                case STONE_FEMALE_ONLY:
-                case STONE_MALE_ONLY:
-                    evoMin = 24;
-                    break;
+                    case STONE:
+                    case STONE_FEMALE_ONLY:
+                    case STONE_MALE_ONLY:
+                        evoMin = 24;
+                        break;
 
-                case TRADE:
-                case TRADE_ITEM:
-                case TRADE_SPECIAL:
-                    evoMin = 37;
-                    break;
+                    case TRADE:
+                    case TRADE_ITEM:
+                    case TRADE_SPECIAL:
+                        evoMin = 37;
+                        break;
 
-                default:
-                    evoMin = 33;
-                    break;
+                    default:
+                        evoMin = 33;
+                        break;
                 }
             }
 
@@ -205,9 +244,9 @@ public class Pokemon implements Comparable<Pokemon> {
     public int nearestEvoTarget(int level) {
         int target = -1;
         int evoMin = -1;
-        for(int i = 0; i < evolutionsFrom.size(); i++) {
-            if(evolutionsFrom.get(i).type.usesLevel()) {
-                    evoMin = evolutionsFrom.get(i).extraInfo;
+        for (int i = 0; i < evolutionsFrom.size(); i++) {
+            if (evolutionsFrom.get(i).type.usesLevel()) {
+                evoMin = evolutionsFrom.get(i).extraInfo;
             } else {
                 switch (evolutionsFrom.get(i).type) {
                     case STONE:
@@ -215,13 +254,13 @@ public class Pokemon implements Comparable<Pokemon> {
                     case STONE_MALE_ONLY:
                         evoMin = 24;
                         break;
-    
+
                     case TRADE:
                     case TRADE_ITEM:
                     case TRADE_SPECIAL:
                         evoMin = 37;
                         break;
-    
+
                     default:
                         evoMin = 33;
                         break;
@@ -238,7 +277,7 @@ public class Pokemon implements Comparable<Pokemon> {
         Collections.shuffle(shuffledStatsOrder, random);
         applyShuffledOrderToStats();
     }
-    
+
     public void copyShuffledStatsUpEvolution(Pokemon evolvesFrom) {
         shuffledStatsOrder = evolvesFrom.shuffledStatsOrder;
         applyShuffledOrderToStats();
@@ -266,7 +305,8 @@ public class Pokemon implements Comparable<Pokemon> {
 
             // Make weightings
             double atkW = random.nextDouble(), defW = random.nextDouble();
-            double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
+            double spaW = random.nextDouble(), spdW = random.nextDouble(),
+                    speW = random.nextDouble();
 
             double totW = atkW + defW + spaW + spdW + speW;
 
@@ -285,8 +325,10 @@ public class Pokemon implements Comparable<Pokemon> {
             int bst = bst() - 50;
 
             // Make weightings
-            double hpW = random.nextDouble(), atkW = random.nextDouble(), defW = random.nextDouble();
-            double spaW = random.nextDouble(), spdW = random.nextDouble(), speW = random.nextDouble();
+            double hpW = random.nextDouble(), atkW = random.nextDouble(),
+                    defW = random.nextDouble();
+            double spaW = random.nextDouble(), spdW = random.nextDouble(),
+                    speW = random.nextDouble();
 
             double totW = hpW + atkW + defW + spaW + spdW + speW;
 
@@ -294,8 +336,8 @@ public class Pokemon implements Comparable<Pokemon> {
             float suggestedHP = Math.round(hpW / totW * bst);
             hp = suggestedHP < 35 ? 35 : (int) suggestedHP;
             // Remove any added stats from the remaining bst
-            bst -= suggestedHP < 35 ? (35-suggestedHP) : 0;
-            
+            bst -= suggestedHP < 35 ? (35 - suggestedHP) : 0;
+
             // Handle the rest normally
             attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
             defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
@@ -308,7 +350,8 @@ public class Pokemon implements Comparable<Pokemon> {
         }
 
         // Check for something we can't store
-        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255) {
+        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255
+                || speed > 255) {
             // re roll
             randomizeStatsWithinBST(random);
         }
@@ -320,44 +363,53 @@ public class Pokemon implements Comparable<Pokemon> {
         double theirBST = evolvesFrom.bst();
 
         double bstRatio = ourBST / theirBST;
-        
-        // Lower HP growth by 10% to allow other stats a chance to grow (except when growth is already under 10%)
+
+        // Lower HP growth by 10% to allow other stats a chance to grow (except when growth is
+        // already under 10%)
         hp = (int) Math.min(283, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
         int hpDiff = 1.1f < bstRatio ? Math.round(hp * 0.1f) : 0;
         hp -= hpDiff;
-        
+
         // Convert HPDiff into series of ints
-        int hpInt = hpDiff/5;
+        int hpInt = hpDiff / 5;
         int hpRem = hpDiff % 5;
         int[] hpArray = new int[] {hpInt, hpInt, hpInt, hpInt, hpInt};
-        
-        //Add remainder to random spots in hpArray
+
+        // Add remainder to random spots in hpArray
         for (int i = 0; i < hpRem; i++) {
-            hpArray[Math.abs(random.nextInt()%5)]++;
+            hpArray[Math.abs(random.nextInt() % 5)]++;
         }
-        
-        
+
+
         // Add HPDiff to remaining stats
-        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio))) + hpArray[0];
-        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio))) + hpArray[1];
-        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio))) + hpArray[2];
-        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio))) + hpArray[3];
-        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio))) + hpArray[4];
+        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)))
+                + hpArray[0];
+        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)))
+                + hpArray[1];
+        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio)))
+                + hpArray[2];
+        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * bstRatio)))
+                + hpArray[3];
+        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * bstRatio)))
+                + hpArray[4];
 
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
-    
+
     public void randomizeStatsNoRestrictions(Random random, boolean evolutionSanity) {
         double weightSd = 0.16;
-        
+
         if (number == 292) {
             // Shedinja is horribly broken unless we restrict him to 1HP.
             int bst;
-            
-            if(evolutionSanity) {
-                bst = (int) (PK_1EVO_DIFF_MEDIAN + skewedGaussian(random.nextGaussian(), PK_1EVO_DIFF_SKEW) * PK_1EVO_DIFF_SD - 51);
+
+            if (evolutionSanity) {
+                bst = (int) (PK_1EVO_DIFF_MEDIAN
+                        + skewedGaussian(random.nextGaussian(), PK_1EVO_DIFF_SKEW) * PK_1EVO_DIFF_SD
+                        - 51);
             } else {
-                bst = (int) (GENERAL_MEDIAN + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 51);
+                bst = (int) (GENERAL_MEDIAN
+                        + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 51);
             }
             // Make weightings
             double atkW = Math.max(0, Math.min(1, random.nextGaussian() * weightSd + 0.5));
@@ -377,13 +429,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
             // Fix up special too
             special = (int) Math.ceil((spatk + spdef) / 2.0f);
-        } else {            
+        } else {
             // Minimum 10 everything not including HP
             int bst;
-            if(evolutionSanity) {
-                if(evolutionsFrom.size() > 0) {
+            if (evolutionSanity) {
+                if (evolutionsFrom.size() > 0) {
                     boolean pk2Evos = false;
-                    
+
                     for (Evolution ev : evolutionsFrom) {
                         // If any of the targets here evolve, the original
                         // Pokemon has 2+ stages.
@@ -392,28 +444,39 @@ public class Pokemon implements Comparable<Pokemon> {
                             break;
                         }
                     }
-                    
-                    if(pk2Evos) {
+
+                    if (pk2Evos) {
                         // First evo of 3 stages
-                        bst = (int) (EVO1_2EVOS_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_2EVOS_SKEW) * EVO1_2EVOS_SD - 50);
+                        bst = (int) (EVO1_2EVOS_MEDIAN
+                                + skewedGaussian(random.nextGaussian(), EVO1_2EVOS_SKEW)
+                                        * EVO1_2EVOS_SD
+                                - 50);
                     } else {
                         // First evo of 2 stages
-                        bst = (int) (EVO1_1EVO_MEDIAN + skewedGaussian(random.nextGaussian(), EVO1_1EVO_SKEW) * EVO1_1EVO_SD - 50);
+                        bst = (int) (EVO1_1EVO_MEDIAN
+                                + skewedGaussian(random.nextGaussian(), EVO1_1EVO_SKEW)
+                                        * EVO1_1EVO_SD
+                                - 50);
                     }
                 } else {
-                    if(evolutionsTo.size() > 0) {
+                    if (evolutionsTo.size() > 0) {
                         // Last evo, doesn't carry stats
-                        bst = (int) (MAX_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), MAX_EVO_SKEW) * MAX_EVO_SD - 50);
+                        bst = (int) (MAX_EVO_MEDIAN
+                                + skewedGaussian(random.nextGaussian(), MAX_EVO_SKEW) * MAX_EVO_SD
+                                - 50);
                     } else {
                         // No evolutions, no pre-evolutions
-                        bst = (int) (NO_EVO_MEDIAN + skewedGaussian(random.nextGaussian(), NO_EVO_SKEW) * NO_EVO_SD - 50);                    
+                        bst = (int) (NO_EVO_MEDIAN
+                                + skewedGaussian(random.nextGaussian(), NO_EVO_SKEW) * NO_EVO_SD
+                                - 50);
                     }
                 }
             } else {
                 // No 'Follow evolutions'
-                bst = (int) (GENERAL_MEDIAN + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 50);
+                bst = (int) (GENERAL_MEDIAN
+                        + skewedGaussian(random.nextGaussian(), GENERAL_SKEW) * GENERAL_SD - 50);
             }
-            
+
             // Make weightings
             double hpW = Math.max(0.01, Math.min(1, random.nextGaussian() * weightSd + 0.5));
             double atkW = Math.max(0.01, Math.min(1, random.nextGaussian() * weightSd + 0.5));
@@ -428,8 +491,8 @@ public class Pokemon implements Comparable<Pokemon> {
             float suggestedHP = Math.round(hpW / totW * bst);
             hp = suggestedHP < 35 ? 35 : (int) suggestedHP;
             // Remove any added stats from the remaining bst
-            bst -= suggestedHP < 35 ? (35-suggestedHP) : 0;
-            
+            bst -= suggestedHP < 35 ? (35 - suggestedHP) : 0;
+
             // Handle the rest normally
             attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
             defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
@@ -442,28 +505,33 @@ public class Pokemon implements Comparable<Pokemon> {
         }
 
         // Check for something we can't store
-        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255 || speed > 255) {
+        if (hp > 255 || attack > 255 || defense > 255 || spatk > 255 || spdef > 255
+                || speed > 255) {
             // re roll
             randomizeStatsNoRestrictions(random, evolutionSanity);
         }
     }
-    
+
     public void copyRandomizedStatsNoRestrictionsUpEvolution(Pokemon evolvesFrom, Random random) {
         double theirBST = evolvesFrom.bst();
         double ourBST;
         double bstRatio;
-        
+
         do {
-            if(evolutionsFrom.size() > 0 || (evolutionsTo.get(0).from.evolutionsTo.size() > 0)) {
+            if (evolutionsFrom.size() > 0 || (evolutionsTo.get(0).from.evolutionsTo.size() > 0)) {
                 // 3 stages
-                ourBST = theirBST + PK_2EVOS_DIFF_MEDIAN + skewedGaussian(random.nextGaussian(), PK_2EVOS_DIFF_SKEW) * PK_2EVOS_DIFF_SD;
+                ourBST = theirBST + PK_2EVOS_DIFF_MEDIAN
+                        + skewedGaussian(random.nextGaussian(), PK_2EVOS_DIFF_SKEW)
+                                * PK_2EVOS_DIFF_SD;
             } else {
                 // 2 stages
-                ourBST = theirBST + PK_1EVO_DIFF_MEDIAN + skewedGaussian(random.nextGaussian(), PK_1EVO_DIFF_SKEW) * PK_1EVO_DIFF_SD;
+                ourBST = theirBST + PK_1EVO_DIFF_MEDIAN
+                        + skewedGaussian(random.nextGaussian(), PK_1EVO_DIFF_SKEW)
+                                * PK_1EVO_DIFF_SD;
             }
             bstRatio = ourBST / theirBST;
-        } while(bstRatio < 1);
-        
+        } while (bstRatio < 1);
+
         hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
         attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
         defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
@@ -473,17 +541,19 @@ public class Pokemon implements Comparable<Pokemon> {
 
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
-    
+
     private double skewedGaussian(double gaussian, double skew) {
-        double skewedCdf = ((1 - Math.exp(-1.7 * gaussian * skew)) / (2 * (1 + Math.exp(-1.7 * gaussian * skew))) + 0.5);
+        double skewedCdf = ((1 - Math.exp(-1.7 * gaussian * skew))
+                / (2 * (1 + Math.exp(-1.7 * gaussian * skew))) + 0.5);
         return 2 * gaussian * skewedCdf;
     }
 
-    public void copyCompletelyRandomizedStatsUpEvolution(Pokemon evolvesFrom, Random random, double meanBST) {
+    public void copyCompletelyRandomizedStatsUpEvolution(Pokemon evolvesFrom, Random random,
+            double meanBST) {
         double theirBST = evolvesFrom.bst();
         double ratio = meanBST / theirBST;
         double mean, stdDev;
-        
+
         // mean < 201 e.g. Caterpie, Weedle, Metapod, Kakuna, Magikarp
         if (ratio > 1.7) {
             mean = 0.5;
@@ -493,7 +563,7 @@ public class Pokemon implements Comparable<Pokemon> {
         else if (ratio > 1.4) {
             mean = 0.5;
             stdDev = 0.2; // Average multiplier = 1.5x, (366) max multiplier = 2.3x (561)
-        } 
+        }
         // mean < 342 e.g. starters, Koffing, Butterfree, Onyx, Raticate, Jynx
         else if (ratio > 1.0) {
             mean = 0.25;
@@ -507,23 +577,31 @@ public class Pokemon implements Comparable<Pokemon> {
         // mean < 488 e.g. Tauros, Arcanine, Gyarados, Articuno
         else if (ratio > 0.7) {
             mean = -0.1;
-            stdDev = 0.1; // Average multiplier = 0.9x (488), max multiplier = 1.3x (634)  [clamped to 1.0x min]
+            stdDev = 0.1; // Average multiplier = 0.9x (488), max multiplier = 1.3x (634) [clamped
+                          // to 1.0x min]
         }
         // mean > 488 e.g. Dragonite, Moltres, Zapdos, Mew, Mewtwo
         else {
             mean = -0.2;
-            stdDev = 0.1; // Average multiplier = 0.8x (~500), max multiplier = 1.2x (760 = max roll of above group max rolled again)
+            stdDev = 0.1; // Average multiplier = 0.8x (~500), max multiplier = 1.2x (760 = max roll
+                          // of above group max rolled again)
         }
-        
-        double multiplier = Math.max(1.05 + mean + (random.nextGaussian()*stdDev), 1.05);
-        
+
+        double multiplier = Math.max(1.05 + mean + (random.nextGaussian() * stdDev), 1.05);
+
         // Allow each stat to vary by +- 5% so stats vary a little between them
-        hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * multiplier * (0.95 + random.nextDouble() / 10))));
-        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * multiplier * (0.95 + random.nextDouble() / 10))));
-        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * multiplier * (0.95 + random.nextDouble() / 10))));
-        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * multiplier * (0.95 + random.nextDouble() / 10))));
-        spatk = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spatk * multiplier * (0.95 + random.nextDouble() / 10))));
-        spdef = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.spdef * multiplier * (0.95 + random.nextDouble() / 10))));
+        hp = (int) Math.min(255, Math.max(1,
+                Math.round(evolvesFrom.hp * multiplier * (0.95 + random.nextDouble() / 10))));
+        attack = (int) Math.min(255, Math.max(1,
+                Math.round(evolvesFrom.attack * multiplier * (0.95 + random.nextDouble() / 10))));
+        defense = (int) Math.min(255, Math.max(1,
+                Math.round(evolvesFrom.defense * multiplier * (0.95 + random.nextDouble() / 10))));
+        speed = (int) Math.min(255, Math.max(1,
+                Math.round(evolvesFrom.speed * multiplier * (0.95 + random.nextDouble() / 10))));
+        spatk = (int) Math.min(255, Math.max(1,
+                Math.round(evolvesFrom.spatk * multiplier * (0.95 + random.nextDouble() / 10))));
+        spdef = (int) Math.min(255, Math.max(1,
+                Math.round(evolvesFrom.spdef * multiplier * (0.95 + random.nextDouble() / 10))));
 
         special = (int) Math.ceil((spatk + spdef) / 2.0f);
     }
@@ -531,19 +609,21 @@ public class Pokemon implements Comparable<Pokemon> {
     public boolean isLegendary() {
         return legendaries.contains(this.number);
     }
-    
+
     public boolean isBigPoke(boolean isGen1) {
-        if(isGen1) {
-            return gen1Bst() > 490 || Collections.max(Arrays.asList(hp, attack, defense, speed, special)) > 190;
+        if (isGen1) {
+            return gen1Bst() > 490
+                    || Collections.max(Arrays.asList(hp, attack, defense, speed, special)) > 190;
         } else {
-            return bst() > 590 || Collections.max(Arrays.asList(hp, attack, defense, speed, spatk, spdef)) > 190;
+            return bst() > 590 || Collections
+                    .max(Arrays.asList(hp, attack, defense, speed, spatk, spdef)) > 190;
         }
     }
 
     public int bst() {
         return hp + attack + defense + spatk + spdef + speed;
     }
-    
+
     public int gen1Bst() {
         return hp + attack + defense + special + speed;
     }
@@ -556,18 +636,19 @@ public class Pokemon implements Comparable<Pokemon> {
             return hp + attack + defense + spatk + spdef + speed;
         }
     }
-    
+
     @Override
     public String toString() {
-        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="
-                + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense + ", spatk=" + spatk
-                + ", spdef=" + spdef + ", speed=" + speed + "]";
+        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType
+                + ", secondaryType=" + secondaryType + ", hp=" + hp + ", attack=" + attack
+                + ", defense=" + defense + ", spatk=" + spatk + ", spdef=" + spdef + ", speed="
+                + speed + "]";
     }
 
     public String toStringRBY() {
-        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="
-                + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense + ", special=" + special
-                + ", speed=" + speed + "]";
+        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType
+                + ", secondaryType=" + secondaryType + ", hp=" + hp + ", attack=" + attack
+                + ", defense=" + defense + ", special=" + special + ", speed=" + speed + "]";
     }
 
     @Override
@@ -772,9 +853,8 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> getFilteredEvolutionsFrom() {
         // Filter out evolutions with a duplicate names
         HashSet<String> nameSet = new HashSet<String>();
-        return evolutionsFrom.stream()
-               .filter(e -> nameSet.add(e.to.name))
-               .collect(Collectors.toList());
+        return evolutionsFrom.stream().filter(e -> nameSet.add(e.to.name))
+                .collect(Collectors.toList());
     }
 
     public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {

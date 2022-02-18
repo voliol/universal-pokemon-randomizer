@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.zip.CRC32;
@@ -49,10 +50,12 @@ public class FileFunctions {
     // if there are banned extensions & file has a banned extension, replace
     // with defaultExtension
     // else, leave as is
-    public static File fixFilename(File original, String defaultExtension, List<String> bannedExtensions) {
+    public static File fixFilename(File original, String defaultExtension,
+            List<String> bannedExtensions) {
         String filename = original.getName();
-        if (filename.lastIndexOf('.') >= filename.length() - 5 && filename.lastIndexOf('.') != filename.length() - 1
-                && filename.length() > 4 && filename.lastIndexOf('.') != -1) {
+        if (filename.lastIndexOf('.') >= filename.length() - 5
+                && filename.lastIndexOf('.') != filename.length() - 1 && filename.length() > 4
+                && filename.lastIndexOf('.') != -1) {
             // valid extension, read it off
             String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
             if (bannedExtensions != null && bannedExtensions.contains(ext)) {
@@ -67,8 +70,9 @@ public class FileFunctions {
         return new File(original.getAbsolutePath().replace(original.getName(), "") + filename);
     }
 
-    private static List<String> overrideFiles = Arrays.asList(new String[] { SysConstants.customNamesFile,
-            SysConstants.tclassesFile, SysConstants.tnamesFile, SysConstants.nnamesFile });
+    private static List<String> overrideFiles =
+            Arrays.asList(new String[] {SysConstants.romOptionsFile, SysConstants.customNamesFile,
+                    SysConstants.tclassesFile, SysConstants.tnamesFile, SysConstants.nnamesFile});
 
     public static boolean configExists(String filename) {
         if (overrideFiles.contains(filename)) {
@@ -81,7 +85,8 @@ public class FileFunctions {
                 return true;
             }
         }
-        return FileFunctions.class.getResource("/com/dabomstew/pkrandom/config/" + filename) != null;
+        return FileFunctions.class
+                .getResource("/com/dabomstew/pkrandom/config/" + filename) != null;
     }
 
     public static InputStream openConfig(String filename) throws FileNotFoundException {
@@ -95,7 +100,23 @@ public class FileFunctions {
                 return new FileInputStream(fh);
             }
         }
-        return FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/config/" + filename);
+        return FileFunctions.class
+                .getResourceAsStream("/com/dabomstew/pkrandom/config/" + filename);
+    }
+
+    public static InputStream openHackConfig(String filename) throws FileNotFoundException {
+        if (overrideFiles.contains(filename)) {
+            File fh = new File(SysConstants.ROOT_PATH + filename);
+            if (fh.exists() && fh.canRead()) {
+                return new FileInputStream(fh);
+            }
+            fh = new File("./" + filename);
+            if (fh.exists() && fh.canRead()) {
+                return new FileInputStream(fh);
+            }
+        }
+        return FileFunctions.class
+                .getResourceAsStream("/com/dabomstew/pkrandom/hackhandlers/" + filename);
     }
 
     public static CustomNamesSet getCustomNames() throws IOException {
@@ -103,6 +124,38 @@ public class FileFunctions {
         CustomNamesSet cns = new CustomNamesSet(is);
         is.close();
         return cns;
+    }
+
+    public static RomOptions getRomOptions() throws IOException {
+        InputStream is = openConfig(SysConstants.romOptionsFile);
+        HashMap<String, HashMap<String, Object>> romOptions =
+                new HashMap<String, HashMap<String, Object>>();
+        HashMap<String, Object> optionSet = null;
+
+        Scanner sc = new Scanner(is, "UTF-8");
+        while (sc.hasNextLine()) {
+            String q = sc.nextLine().trim();
+            if (q.contains("//")) {
+                q = q.substring(0, q.indexOf("//")).trim();
+            }
+            if (!q.isEmpty()) {
+                if (q.startsWith("[") && q.endsWith("]")) {
+                    optionSet = new HashMap<String, Object>();
+                    romOptions.put(q.substring(1, q.length() - 1), optionSet);
+                } else {
+                    String[] tokens = q.split("=", 2);
+                    if (tokens.length == 2) {
+                        optionSet.put(tokens[0].trim(), tokens[1].trim());
+                    } else {
+                        System.err.println("invalid entry " + q);
+                        continue;
+                    }
+                }
+            }
+        }
+        sc.close();
+
+        return new RomOptions(romOptions);
     }
 
     public static int readFullInt(byte[] data, int offset) {
@@ -120,7 +173,8 @@ public class FileFunctions {
         writeArrayIntoBuffer(valueBytes, 0, data, offset, 4);
     }
 
-    public static void writeArrayIntoBuffer(Object src,  int  srcPos, Object dest, int destPos, int length) {
+    public static void writeArrayIntoBuffer(Object src, int srcPos, Object dest, int destPos,
+            int length) {
         System.arraycopy(src, srcPos, dest, destPos, length);
     }
 
@@ -145,7 +199,8 @@ public class FileFunctions {
         return buf;
     }
 
-    public static void readFully(InputStream in, byte[] buf, int offset, int length) throws IOException {
+    public static void readFully(InputStream in, byte[] buf, int offset, int length)
+            throws IOException {
         int offs = 0, read = 0;
         while (offs < length && (read = in.read(buf, offs + offset, length - offs)) != -1) {
             offs += read;
@@ -190,7 +245,8 @@ public class FileFunctions {
         }
     }
 
-    public static boolean checkOtherCRC(byte[] data, int byteIndex, int switchIndex, String filename, int offsetInData) {
+    public static boolean checkOtherCRC(byte[] data, int byteIndex, int switchIndex,
+            String filename, int offsetInData) {
         // If the switch at data[byteIndex].switchIndex is on, then check that
         // the CRC at data[offsetInData] ... data[offsetInData+3] matches the
         // CRC of filename.
@@ -209,7 +265,8 @@ public class FileFunctions {
     }
 
     public static byte[] getCodeTweakFile(String filename) throws IOException {
-        InputStream is = FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/patches/" + filename);
+        InputStream is = FileFunctions.class
+                .getResourceAsStream("/com/dabomstew/pkrandom/patches/" + filename);
         byte[] buf = readFullyIntoBuffer(is, is.available());
         is.close();
         return buf;
@@ -233,7 +290,8 @@ public class FileFunctions {
 
         // check sig
         int patchlen = patch.length;
-        if (patchlen < 8 || patch[0] != 'P' || patch[1] != 'A' || patch[2] != 'T' || patch[3] != 'C' || patch[4] != 'H') {
+        if (patchlen < 8 || patch[0] != 'P' || patch[1] != 'A' || patch[2] != 'T' || patch[3] != 'C'
+                || patch[4] != 'H') {
             throw new IOException("not a valid IPS file");
         }
 
@@ -256,7 +314,8 @@ public class FileFunctions {
                 // RLE
                 if (offset + 1 >= patchlen) {
                     // error
-                    throw new IOException("abrupt ending to IPS file, entry cut off before RLE size");
+                    throw new IOException(
+                            "abrupt ending to IPS file, entry cut off before RLE size");
                 }
                 int rleSize = readIPSSize(patch, offset);
                 if (writeOffset + rleSize > rom.length) {
@@ -266,7 +325,8 @@ public class FileFunctions {
                 offset += 2;
                 if (offset >= patchlen) {
                     // error
-                    throw new IOException("abrupt ending to IPS file, entry cut off before RLE byte");
+                    throw new IOException(
+                            "abrupt ending to IPS file, entry cut off before RLE byte");
                 }
                 byte rleByte = patch[offset++];
                 for (int i = writeOffset; i < writeOffset + rleSize; i++) {
@@ -275,7 +335,8 @@ public class FileFunctions {
             } else {
                 if (offset + size > patchlen) {
                     // error
-                    throw new IOException("abrupt ending to IPS file, entry cut off before end of data block");
+                    throw new IOException(
+                            "abrupt ending to IPS file, entry cut off before end of data block");
                 }
                 if (writeOffset + size > rom.length) {
                     // error
@@ -289,7 +350,8 @@ public class FileFunctions {
     }
 
     private static int readIPSOffset(byte[] data, int offset) {
-        return ((data[offset] & 0xFF) << 16) | ((data[offset + 1] & 0xFF) << 8) | (data[offset + 2] & 0xFF);
+        return ((data[offset] & 0xFF) << 16) | ((data[offset + 1] & 0xFF) << 8)
+                | (data[offset + 2] & 0xFF);
     }
 
     private static int readIPSSize(byte[] data, int offset) {
