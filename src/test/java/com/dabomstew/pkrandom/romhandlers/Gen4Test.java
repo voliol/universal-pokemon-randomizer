@@ -60,8 +60,9 @@ public class Gen4Test {
         }
 
         /**
-         * Test Gen4 change methods only includes methods available in Gen4 Also verify no duplicate
-         * methods used, and no invalid evolutions
+         * Test Gen4 change methods only includes methods available in Gen4
+         * 
+         * Also verify no duplicate methods used, and no invalid evolutions
          * 
          * @throws IOException
          */

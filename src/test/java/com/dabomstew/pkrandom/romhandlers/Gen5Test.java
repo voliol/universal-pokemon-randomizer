@@ -395,9 +395,10 @@ public class Gen5Test {
         }
 
         /**
-         * Test Gen5 change methods only includes methods available in Gen5 Also verify no duplicate
-         * methods used, and no invalid evolutions
+         * Test Gen5 change methods only includes methods available in Gen5
          * 
+         * Also verify no duplicate methods used, and no invalid evolutions
+         *
          * @throws IOException
          */
         @Test
@@ -462,8 +463,9 @@ public class Gen5Test {
         }
 
         /**
-         * Test Gen5 change methods is correctly affected by remvoe impossible evos Also verify no
-         * duplicate methods used, and no invalid evolutions
+         * Test Gen5 change methods is correctly affected by remvoe impossible evos
+         * 
+         * Also verify no duplicate methods used, and no invalid evolutions
          * 
          * @throws IOException
          */

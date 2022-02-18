@@ -19,8 +19,9 @@ public class Gen1Test {
     ArrayList<Pokemon> pokemonList;
 
     /**
-     * Test Gen1 change methods only includes methods available in Gen1 Also verify no duplicate
-     * methods used, and no invalid evolutions
+     * Test Gen1 change methods only includes methods available in Gen1
+     * 
+     * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
     public void TestGen1ChangeMethods() {
@@ -58,8 +59,9 @@ public class Gen1Test {
     }
 
     /**
-     * Test Gen1 change methods is correctly affected by remove impossible evos Also verify no
-     * duplicate methods used, and no invalid evolutions
+     * Test Gen1 change methods is correctly affected by remove impossible evos
+     * 
+     * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
     public void TestGen1RemoveEvosWithChangeMethods() {

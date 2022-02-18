@@ -45,8 +45,9 @@ public class Gen3Test {
     }
 
     /**
-     * Test Gen3 change methods only includes methods available in Gen3 Also verify no duplicate
-     * methods used, and no invalid evolutions
+     * Test Gen3 change methods only includes methods available in Gen3
+     * 
+     * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
     public void TestGen3ChangeMethods() {
@@ -90,8 +91,9 @@ public class Gen3Test {
     }
 
     /**
-     * Test Gen3 change methods is correctly affected by remove impossible evos Also verify no
-     * duplicate methods used, and no invalid evolutions
+     * Test Gen3 change methods is correctly affected by remove impossible evos
+     * 
+     * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
     public void TestGen3RemoveEvosChangeMethods() {

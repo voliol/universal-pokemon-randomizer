@@ -129,7 +129,6 @@
   - If `Random Starters` is chosen, slider will be set to 0 and `Exact Evos` will be false as there is no end to an evolution chain
   - Evolution paths in the log will only display pokemon where nothing evolves into them
   - If `Follow Evolutions` is chosen, no guarantee is made to linear behavior. This will result in stat drops, type disparity, and moveset oddities.
-  - If `Randomize Methods` is chosen, everything will still have an evolution, but it will no longer be at level 1.
   - Selecting `Standardize EXP Curves` will result it better selections. However, combining this with `Filter Legendaries` will result in failure as legendaries will have no valid selections to evolve into due to mandatory EXP curve requirements.
 - `Force Fully Evolved` and `Modify Trainer Level` are available to use regardless of trainer option selected
 - Rotom has been removed from the legendary pool list
@@ -140,7 +139,7 @@
   - `LimitPokemon` now restricts the pool of pokemon eligible for randomization to align with this new subset feature.
   - Logs will still show all pokemon, even if they weren't randomized, to give a complete game guide.
 - When randomizing evolutions, you can restrict replacements to the same stage that the evolution is.
-  - The main filter for evolution replacement in general is experience curve. Attempting to filter by same stage and same type can result in no change (such as the Abra line). Choosing "force change" on top of this will result in type or stage restrictions potentially being skipped, leading to odd selections for evolutions (Kadabra can only evolve into Celebi or Mew). Selecting "Standardize exp curves" will help in widening the available pool.
+  - The main filter for evolution replacement in general is experience curve. Attempting to filter by same stage and same type can result in no change (such as the Abra line). Choosing `Force change` on top of this will result in type or stage restrictions potentially being skipped, leading to odd selections for evolutions (Kadabra can only evolve into Celebi or Mew). Selecting `Standardize exp curves` will help in widening the available pool.
 - When randomizing evolutions, you can ban legendaries as an option
 - HGSS can now randomize headbutt trees
   - Credit to [dee-ee](https://www.reddit.com/user/dee-ee/) for pointing me [to the code](https://www.reddit.com/r/PokemonROMhacks/comments/n0xsrl/comment/gz8evmb/?utm_source=share&utm_medium=web2x&context=3)
