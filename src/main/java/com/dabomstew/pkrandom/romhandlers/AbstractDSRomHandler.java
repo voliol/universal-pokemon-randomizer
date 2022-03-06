@@ -25,9 +25,11 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
@@ -126,15 +128,79 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
 
-    protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
+    protected boolean basicCPUEHackDetection() {
+        int size128M = 0x8000000;
+        if (baseRom.getLength() != size128M) {
+            return true;
+        }
+        return !isChecksumEqual(1775642856L);
+    }
+
+    protected boolean basicIPGEHackDetection() {
+        int size128M = 0x8000000;
+        if (baseRom.getLength() != size128M) {
+            return true;
+        }
+        return !isChecksumEqual(3954411495L);
+    }
+
+    protected boolean basicIPKEHackDetection() {
+        int size128M = 0x8000000;
+        if (baseRom.getLength() != size128M) {
+            return true;
+        }
+        return !isChecksumEqual(3246432489L);
+    }
+
+    protected boolean basicIRBOHackDetection() {
+        int size256M = 0x10000000;
+        if (baseRom.getLength() != size256M) {
+            return true;
+        }
+        return !isChecksumEqual(3804161561L);
+    }
+
+    protected boolean basicIRAOHackDetection() {
+        int size256M = 0x10000000;
+        if (baseRom.getLength() != size256M) {
+            return true;
+        }
+        return !isChecksumEqual(3989655905L);
+    }
+
+    protected boolean basicIREOHackDetection() {
+        int size512M = 0x20000000;
+        if (baseRom.getLength() != size512M) {
+            return true;
+        }
+        return !isChecksumEqual(632961702L);
+    }
+
+    protected boolean basicIRDOHackDetection() {
+        int size512M = 0x20000000;
+        if (baseRom.getLength() != size512M) {
+            return true;
+        }
+        return !isChecksumEqual(2004791375L);
+    }
+
+    protected boolean isChecksumEqual(long checksum) {
+        // Uncomment to find the checksum on your ROM
+        // System.out.println(baseRom.getChecksum());
+        return baseRom.getChecksum() == checksum;
+    }
+
+    protected int readByte(byte[] data, int offset) {
+        return data[offset] & 0xFF;
+    }
 
     protected int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
     }
 
     protected int readLong(byte[] data, int offset) {
-        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) | ((data[offset + 2] & 0xFF) << 16)
-                | ((data[offset + 3] & 0xFF) << 24);
+        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)
+                | ((data[offset + 2] & 0xFF) << 16) | ((data[offset + 3] & 0xFF) << 24);
     }
 
     protected int readRelativePointer(byte[] data, int offset) {
@@ -166,7 +232,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         writeFile(location, data, 0, data.length);
     }
 
-    protected void writeFile(String location, byte[] data, int offset, int length) throws IOException {
+    protected void writeFile(String location, byte[] data, int offset, int length)
+            throws IOException {
         if (offset != 0 || length != data.length) {
             byte[] newData = new byte[length];
             System.arraycopy(data, offset, newData, 0, length);
@@ -191,7 +258,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         baseRom.writeOverlay(number, data);
     }
 
-    protected void readByteIntoFlags(byte[] data, boolean[] flags, int offsetIntoFlags, int offsetIntoData) {
+    protected void readByteIntoFlags(byte[] data, boolean[] flags, int offsetIntoFlags,
+            int offsetIntoData) {
         int thisByte = data[offsetIntoData] & 0xFF;
         for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
             flags[offsetIntoFlags + i] = ((thisByte >> i) & 0x01) == 0x01;
@@ -211,41 +279,41 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             return 411; // CURSE
         }
         switch (t) {
-        case FIGHTING:
-            return 398;
-        case DRAGON:
-            return 399;
-        case WATER:
-            return 400;
-        case PSYCHIC:
-            return 401;
-        case NORMAL:
-            return 402;
-        case POISON:
-            return 403;
-        case ICE:
-            return 404;
-        case GRASS:
-            return 405;
-        case FIRE:
-            return 406;
-        case DARK:
-            return 407;
-        case STEEL:
-            return 408;
-        case ELECTRIC:
-            return 409;
-        case GROUND:
-            return 410;
-        case GHOST:
-        default:
-            return 411; // for CURSE
-        case ROCK:
-            return 412;
-        case FLYING:
-            return 413;
-        case BUG:
-            return 610;
+            case FIGHTING:
+                return 398;
+            case DRAGON:
+                return 399;
+            case WATER:
+                return 400;
+            case PSYCHIC:
+                return 401;
+            case NORMAL:
+                return 402;
+            case POISON:
+                return 403;
+            case ICE:
+                return 404;
+            case GRASS:
+                return 405;
+            case FIRE:
+                return 406;
+            case DARK:
+                return 407;
+            case STEEL:
+                return 408;
+            case ELECTRIC:
+                return 409;
+            case GROUND:
+                return 410;
+            case GHOST:
+            default:
+                return 411; // for CURSE
+            case ROCK:
+                return 412;
+            case FLYING:
+                return 413;
+            case BUG:
+                return 610;
         }
     }
 

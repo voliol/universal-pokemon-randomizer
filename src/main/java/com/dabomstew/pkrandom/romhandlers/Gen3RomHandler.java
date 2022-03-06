@@ -3678,6 +3678,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (isROMHack() && enableHackType && type == Type.HACK) {
             return true;
         }
+        if (Gen3Constants.isTypeSupported(type)) {
+            return true;
+        }
         return false;
     }
 

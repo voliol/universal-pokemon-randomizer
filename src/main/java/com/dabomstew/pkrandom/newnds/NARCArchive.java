@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.CRC32;
 
 public class NARCArchive {
 
     public List<String> filenames = new ArrayList<String>();
     public List<byte[]> files = new ArrayList<byte[]>();
+    public CRC32 checksum = new CRC32();
 
     public boolean hasFilenames = false;
 
@@ -18,8 +20,10 @@ public class NARCArchive {
     }
 
     public NARCArchive(byte[] data) throws IOException {
+        checksum.update(data);
         Map<String, byte[]> frames = readNitroFrames(data);
-        if (!frames.containsKey("FATB") || !frames.containsKey("FNTB") || !frames.containsKey("FIMG")) {
+        if (!frames.containsKey("FATB") || !frames.containsKey("FNTB")
+                || !frames.containsKey("FIMG")) {
             throw new IOException("Not a valid narc file");
         }
 
@@ -143,7 +147,8 @@ public class NARCArchive {
         writeWord(nitroFile, 14, 3);
         System.arraycopy(fatbFrame, 0, nitroFile, 16, fatbFrame.length);
         System.arraycopy(fntbFrame, 0, nitroFile, 16 + fatbFrame.length, fntbFrame.length);
-        System.arraycopy(fimgFrame, 0, nitroFile, 16 + fatbFrame.length + fntbFrame.length, fimgFrame.length);
+        System.arraycopy(fimgFrame, 0, nitroFile, 16 + fatbFrame.length + fntbFrame.length,
+                fimgFrame.length);
 
         return nitroFile;
     }
@@ -157,7 +162,8 @@ public class NARCArchive {
         int offset = 0x10;
         Map<String, byte[]> frames = new TreeMap<String, byte[]>();
         for (int i = 0; i < frameCount; i++) {
-            byte[] magic = new byte[] { data[offset + 3], data[offset + 2], data[offset + 1], data[offset] };
+            byte[] magic =
+                    new byte[] {data[offset + 3], data[offset + 2], data[offset + 1], data[offset]};
             String magicS = new String(magic, "US-ASCII");
 
             int frame_size = readLong(data, offset + 4);
@@ -167,7 +173,11 @@ public class NARCArchive {
                 frame_size = data.length - offset;
             }
             byte[] frame = new byte[frame_size - 8];
-            System.arraycopy(data, offset + 8, frame, 0, frame_size - 8);
+            // Patch for Drayno hacks to downscale filesize if length would
+            // exceed array size
+            int length =
+                    frame.length + offset < data.length ? frame.length : data.length - offset - 8;
+            System.arraycopy(data, offset + 8, frame, 0, length);
             frames.put(magicS, frame);
             offset += frame_size;
         }
@@ -179,8 +189,8 @@ public class NARCArchive {
     }
 
     private int readLong(byte[] data, int offset) {
-        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) | ((data[offset + 2] & 0xFF) << 16)
-                | ((data[offset + 3] & 0xFF) << 24);
+        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)
+                | ((data[offset + 2] & 0xFF) << 16) | ((data[offset + 3] & 0xFF) << 24);
     }
 
     private void writeWord(byte[] data, int offset, int value) {
@@ -198,7 +208,7 @@ public class NARCArchive {
     public List<byte[]> getFiles() {
         return this.files;
     }
-    
+
     public void setFiles(List<byte[]> files) {
         this.files = files;
     }

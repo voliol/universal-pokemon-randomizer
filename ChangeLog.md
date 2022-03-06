@@ -165,3 +165,13 @@
 - SE Triangle algorithm has been redone. It should be more consistent and throw fewer errors.
 - Fixed bug where `Random (retain one)` type randomization would hit an infinite loop
 - Fixed bug in Platinum where Giratina could not be replaced when limiting generations
+
+## 1.10.1
+
+- Add support for Renegade Platinum and Following Platinum
+  - Static pokemon are not supported
+  - Following Renegade Platinum is not supported due to misalignment between expected offsets
+- Fix bug for Randomizable 809 where FAIRY type was incorrectly mapped as HACK type for type shuffling
+- Added Rom Hack checking for Platinum, Soul Silver, Heart Gold, Black, White, Black 2, White 2
+- Added basic Fire Red hack support structures for Gen 4 and Gen 5
+  - Unfortunately, due to bad NDS ROM writing, Gen 4 and Gen 5 hacks are largely unsupported. Feel free to try though!

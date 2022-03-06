@@ -192,44 +192,13 @@ public class Gen5Constants {
         if (type == null) {
             return 0x00; // normal?
         }
-        switch (type) {
-            case NORMAL:
-                return 0x00;
-            case FIGHTING:
-                return 0x01;
-            case FLYING:
-                return 0x02;
-            case POISON:
-                return 0x03;
-            case GROUND:
-                return 0x04;
-            case ROCK:
-                return 0x05;
-            case BUG:
-                return 0x06;
-            case GHOST:
-                return 0x07;
-            case FIRE:
-                return 0x09;
-            case WATER:
-                return 0x0A;
-            case GRASS:
-                return 0x0B;
-            case ELECTRIC:
-                return 0x0C;
-            case PSYCHIC:
-                return 0x0D;
-            case ICE:
-                return 0x0E;
-            case DRAGON:
-                return 0x0F;
-            case STEEL:
-                return 0x08;
-            case DARK:
-                return 0x10;
-            default:
-                return 0; // normal by default
-        }
+
+        // return type, or normal by default
+        return (byte) Math.max(Arrays.asList(typeTable).indexOf(type), 0);
+    }
+
+    public static boolean isTypeSupported(Type type) {
+        return Arrays.asList(typeTable).indexOf(type) > -1;
     }
 
     public static ItemList allowedItems, nonBadItems, trainerItemList;

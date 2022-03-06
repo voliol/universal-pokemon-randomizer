@@ -104,6 +104,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private Map<String, OffsetWithinEntry[]> offsetArrayEntries =
                 new HashMap<String, OffsetWithinEntry[]>();
         private List<StaticPokemon> staticPokemon = new ArrayList<StaticPokemon>();
+        private Map<Integer, Type> typeMap = new HashMap<Integer, Type>();
+        private Map<Integer, EvolutionType> evolutionMethodsMap =
+                new HashMap<Integer, EvolutionType>();
+
+        public RomEntry() {}
+
+        public RomEntry(RomEntry toCopy) {
+            this.name = toCopy.name;
+            this.romCode = toCopy.romCode;
+            this.romType = toCopy.romType;
+            this.staticPokemonSupport = toCopy.staticPokemonSupport;
+            this.copyStaticPokemon = toCopy.copyStaticPokemon;
+            this.strings.putAll(toCopy.strings);
+            this.tweakFiles.putAll(toCopy.tweakFiles);
+            this.numbers.putAll(toCopy.numbers);
+            this.arrayEntries.putAll(toCopy.arrayEntries);
+            this.staticPokemon.addAll(toCopy.staticPokemon);
+            this.typeMap.putAll(toCopy.typeMap);
+            this.evolutionMethodsMap.putAll(toCopy.evolutionMethodsMap);
+        }
 
         @Override
         public int getInt(String key) {
@@ -181,6 +201,23 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                     } else {
                                         current.staticPokemonSupport = false;
                                     }
+                                }
+                            }
+                        } else if (r[0].equals("Types[]")) {
+                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                                String[] parts = r[1].substring(1, r[1].length() - 1).split(",");
+                                for (int i = 0; i < parts.length; i += 2) {
+                                    current.typeMap.put(parseRIInt(parts[i]),
+                                            Type.valueOf(parts[i + 1].toUpperCase().trim()));
+                                }
+                            }
+                        } else if (r[0].equals("EvolutionMethods[]")) {
+                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                                String[] parts = r[1].substring(1, r[1].length() - 1).split(",");
+                                for (int i = 0; i < parts.length; i += 2) {
+                                    current.evolutionMethodsMap.put(parseRIInt(parts[i]),
+                                            EvolutionType
+                                                    .valueOf(parts[i + 1].toUpperCase().trim()));
                                 }
                             }
                         } else if (r[0].equals("StaticPokemon[]")) {
@@ -291,6 +328,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private List<String> itemNames;
     private boolean loadedWildMapNames;
     private Map<Integer, String> wildMapNames;
+    private boolean isRomHack;
+    private boolean enableHackType;
+    private byte hackByte;
 
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc;
 
@@ -316,9 +356,36 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return null;
     }
 
+    private void determineRomEntry(String romCode) {
+        isRomHack = false;
+        this.romEntry = entryFor(romCode);
+
+        // Check for hacks
+        // Black 1
+        if (getRomEntry().romCode.equals("IRBO") && basicIRBOHackDetection()) {
+            isRomHack = true;
+            getRomEntry().staticPokemonSupport = false;
+        }
+        // White 1
+        else if (getRomEntry().romCode.equals("IRAO") && basicIRAOHackDetection()) {
+            isRomHack = true;
+            getRomEntry().staticPokemonSupport = false;
+        }
+        // Black 2
+        else if (getRomEntry().romCode.equals("IREO") && basicIREOHackDetection()) {
+            isRomHack = true;
+            getRomEntry().staticPokemonSupport = false;
+        }
+        // White 2
+        else if (getRomEntry().romCode.equals("IRDO") && basicIRDOHackDetection()) {
+            isRomHack = true;
+            getRomEntry().staticPokemonSupport = false;
+        }
+    }
+
     @Override
     protected void loadedROM(String romCode) {
-        this.romEntry = entryFor(romCode);
+        determineRomEntry(romCode);
         try {
             arm9 = readARM9();
         } catch (IOException e) {
@@ -341,10 +408,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         getTextHandler().setStoryNARC(storyTextNarc);
         Gen5Constants.allowedItems.allowSingles(Gen5Constants.luckyEggIndex);
         Gen5Constants.nonBadItems.allowSingles(Gen5Constants.luckyEggIndex);
+        updateTypes();
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
-        updateTypes();
 
         abilityNames = getStrings(false, getRomEntry().getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, getRomEntry().getInt("ItemNamesTextOffset"));
@@ -384,7 +451,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 moves[i].hitratio = (moveData[4] & 0xFF);
                 moves[i].power = moveData[3] & 0xFF;
                 moves[i].pp = moveData[5] & 0xFF;
-                moves[i].type = Gen5Constants.typeTable[moveData[0] & 0xFF];
+                moves[i].type = getTypeTableValue(moveData[0] & 0xFF);
                 moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
 
                 if (GlobalConstants.normalMultihitMoves.contains(i)) {
@@ -410,9 +477,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pkmn.spatk = stats[Gen5Constants.bsSpAtkOffset] & 0xFF;
         pkmn.spdef = stats[Gen5Constants.bsSpDefOffset] & 0xFF;
         // Type
-        pkmn.primaryType = Gen5Constants.typeTable[stats[Gen5Constants.bsPrimaryTypeOffset] & 0xFF];
-        pkmn.secondaryType =
-                Gen5Constants.typeTable[stats[Gen5Constants.bsSecondaryTypeOffset] & 0xFF];
+        pkmn.primaryType = getTypeTableValue(stats[Gen5Constants.bsPrimaryTypeOffset] & 0xFF);
+        pkmn.secondaryType = getTypeTableValue(stats[Gen5Constants.bsSecondaryTypeOffset] & 0xFF);
         // Only one type?
         if (pkmn.secondaryType == pkmn.primaryType) {
             pkmn.secondaryType = null;
@@ -479,7 +545,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             byte[] data = moveNarc.files.get(i);
             data[2] = Gen5Constants.moveCategoryToByte(moves[i].category);
             data[3] = (byte) moves[i].power;
-            data[0] = Gen5Constants.typeToByte(moves[i].type);
+            data[0] = getTypeToByte(moves[i].type);
             int hitratio = (int) Math.round(moves[i].hitratio);
             if (hitratio < 0) {
                 hitratio = 0;
@@ -525,12 +591,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         stats[Gen5Constants.bsSpeedOffset] = (byte) pkmn.speed;
         stats[Gen5Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
         stats[Gen5Constants.bsSpDefOffset] = (byte) pkmn.spdef;
-        stats[Gen5Constants.bsPrimaryTypeOffset] = Gen5Constants.typeToByte(pkmn.primaryType);
+        stats[Gen5Constants.bsPrimaryTypeOffset] = getTypeToByte(pkmn.primaryType);
         if (pkmn.secondaryType == null) {
             stats[Gen5Constants.bsSecondaryTypeOffset] = stats[Gen5Constants.bsPrimaryTypeOffset];
         } else {
-            stats[Gen5Constants.bsSecondaryTypeOffset] =
-                    Gen5Constants.typeToByte(pkmn.secondaryType);
+            stats[Gen5Constants.bsSecondaryTypeOffset] = getTypeToByte(pkmn.secondaryType);
         }
         stats[Gen5Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
         stats[Gen5Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
@@ -1475,6 +1540,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void updateTypes() {
         try {
+            // Update type to byte conversion table
+            getRomEntry().typeMap.forEach((k, v) -> Gen5Constants.typeTable[k] = v);
+
+            // Generate type matchups
             byte[] battleOverlay = readOverlay(getRomEntry().getInt("BattleOvlNumber"));
             int typeEffectivenessTableOffset =
                     find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
@@ -1491,16 +1560,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     for (int defender = 0; defender < getTypesInGame().size(); defender++) {
                         switch (typeEffectivenessTable[attacker][defender]) {
                             case ZERO:
-                                Type.updateImmuneTo(Gen5Constants.typeTable[attacker],
-                                        Gen5Constants.typeTable[defender]);
+                                Type.updateImmuneTo(getTypeTableValue(attacker),
+                                        getTypeTableValue(defender));
                                 break;
                             case HALF:
-                                Type.updateResistantTo(Gen5Constants.typeTable[attacker],
-                                        Gen5Constants.typeTable[defender]);
+                                Type.updateResistantTo(getTypeTableValue(attacker),
+                                        getTypeTableValue(defender));
                                 break;
                             case DOUBLE:
-                                Type.updateStrongAgainst(Gen5Constants.typeTable[attacker],
-                                        Gen5Constants.typeTable[defender]);
+                                Type.updateStrongAgainst(getTypeTableValue(attacker),
+                                        getTypeTableValue(defender));
                                 break;
                         }
                     }
@@ -1525,9 +1594,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (typeEffectivenessTable == null || typeEffectivenessTable.length == 0) {
                     return;
                 }
-                int steel = Gen5Constants.typeToByte(Type.STEEL);
-                int dark = Gen5Constants.typeToByte(Type.DARK);
-                int ghost = Gen5Constants.typeToByte(Type.GHOST);
+                int steel = getTypeToByte(Type.STEEL);
+                int dark = getTypeToByte(Type.DARK);
+                int ghost = getTypeToByte(Type.GHOST);
                 typeEffectivenessTable[ghost][steel] = Effectiveness.NEUTRAL;
                 Type.RESISTANT_TO.get(Type.GHOST).remove(Type.STEEL);
                 typeEffectivenessTable[dark][steel] = Effectiveness.NEUTRAL;
@@ -1892,7 +1961,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public String getROMName() {
-        return "Pokemon " + getRomEntry().name;
+        return getRomEntry().name + (this.isRomHack ? " (ROM Hack)" : "");
     }
 
     @Override
@@ -1902,7 +1971,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return getRomEntry().staticPokemonSupport ? "Complete" : "No Static Pokemon";
+        return (getRomEntry().staticPokemonSupport) ? "Complete" : "No Static Pokemon";
     }
 
     @Override
@@ -2773,6 +2842,42 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else {
             return Gen5Constants.bw1EarlyRequiredHMMoves;
         }
+    }
+
+    private byte getTypeToByte(Type type) {
+        if (type == Type.HACK) {
+            return hackByte;
+        }
+        return Gen5Constants.typeToByte(type);
+    }
+
+    private Type getTypeTableValue(int offset) {
+        Type type = Gen5Constants.typeTable[offset];
+        if (type == null && isROMHack()) {
+            enableHackType = true;
+            hackByte = (byte) (offset);
+            type = Type.HACK;
+        }
+        return type;
+    }
+
+    @Override
+    public boolean isTypeInGame(Type type) {
+        if (!type.isHackOnly) {
+            return true;
+        }
+        if (isROMHack() && enableHackType && type == Type.HACK) {
+            return true;
+        }
+        if (Gen5Constants.isTypeSupported(type)) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isROMHack() {
+        return this.isRomHack;
     }
 
     @Override

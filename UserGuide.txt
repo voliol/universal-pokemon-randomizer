@@ -1,4 +1,4 @@
-Universal Pokemon Randomizer 1.10.0
+Universal Pokemon Randomizer 1.10.1
 by Dabomstew, 2012-16
 by brentspector, 2019-22
 
@@ -214,11 +214,17 @@ code added in 1.7.0 attempting to deal with them.
 Additional infrastructure was added in 1.10.0 to enable adding support for Gen3
 hacks. Other hacks could use this same pattern, but have not been tested.
 
+Some of that infrastructure was copied for Gen4 and Gen5 hacks in 1.10.1,
+however bad ROM writing by the randomizer has lead to most hacks being unsupported.
+Feel free to try though!
+
 Hacks Supported
 ---------------
 - Randomizable 809
 - Jambo's Moves Learnt
 - Unofficial Emerald Rom
+- Renegade Platinum
+- Following Platinum
 
 License
 -------

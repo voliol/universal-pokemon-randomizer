@@ -381,13 +381,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 && getRomEntry().extraTableFile.equalsIgnoreCase("none") == false) {
             readTextTable(getRomEntry().extraTableFile);
         }
+        updateTypes();
         loadPokedexOrder();
         loadPokemonStats();
         loadMoves();
         loadItemNames();
         preloadMaps();
         loadMapNames();
-        updateTypes();
     }
 
     private void loadPokedexOrder() {

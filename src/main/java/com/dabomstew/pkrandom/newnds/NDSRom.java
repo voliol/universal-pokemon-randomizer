@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.newnds;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -8,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
+import java.util.zip.CRC32;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
@@ -54,6 +55,8 @@ public class NDSRom {
     private int arm9_szmode, arm9_szoffset;
     private byte[] arm9_footer;
     private byte[] arm9_ramstored;
+    private long checksum;
+    private long baseRomSize;
 
     private static final int arm9_align = 0x1FF, arm7_align = 0x1FF;
     private static final int fnt_align = 0x1FF, fat_align = 0x1FF;
@@ -81,6 +84,21 @@ public class NDSRom {
         arm9_open = false;
         arm9_changed = false;
         arm9_ramstored = null;
+
+        // Get checksum of file
+        try (FileInputStream fi = new FileInputStream(new File(filename))) {
+            // Get length of rom
+            baseRomSize = fi.available();
+
+            // Get checksum
+            // Buffer is standard power of 2 (binary system)
+            CRC32 crc32 = new CRC32();
+            byte[] bufferedData = new byte[8192];
+            while (fi.read(bufferedData) >= 0) {
+                crc32.update(bufferedData);
+            }
+            checksum = crc32.getValue();
+        }
     }
 
     public void reopenROM() throws IOException {
@@ -139,7 +157,8 @@ public class NDSRom {
         Map<Integer, String> filenames = new TreeMap<Integer, String>();
         Map<Integer, Integer> fileDirectories = new HashMap<Integer, Integer>();
         for (int i = 0; i < dircount && i < 0x1000; i++) {
-            firstPassDirectory(i, subTableOffsets[i], firstFileIDs[i], directoryNames, filenames, fileDirectories);
+            firstPassDirectory(i, subTableOffsets[i], firstFileIDs[i], directoryNames, filenames,
+                    fileDirectories);
         }
 
         // get full dirnames
@@ -492,8 +511,8 @@ public class NDSRom {
             // Any extras?
             while ((readFromByteArr(arm9, arm9.length - 12, 4) == 0xDEC00621)
                     || ((readFromByteArr(arm9, arm9.length - 12, 4) == 0
-                            && readFromByteArr(arm9, arm9.length - 8, 4) == 0 && readFromByteArr(arm9, arm9.length - 4,
-                            4) == 0))) {
+                            && readFromByteArr(arm9, arm9.length - 8, 4) == 0
+                            && readFromByteArr(arm9, arm9.length - 4, 4) == 0))) {
                 if (!arm9_has_footer) {
                     arm9_has_footer = true;
                     arm9_footer = new byte[0];
@@ -598,8 +617,9 @@ public class NDSRom {
         }
     }
 
-    private void firstPassDirectory(int dir, int subTableOffset, int firstFileID, String[] directoryNames,
-            Map<Integer, String> filenames, Map<Integer, Integer> fileDirectories) throws IOException {
+    private void firstPassDirectory(int dir, int subTableOffset, int firstFileID,
+            String[] directoryNames, Map<Integer, String> filenames,
+            Map<Integer, Integer> fileDirectories) throws IOException {
         // read subtable
         baseRom.seek(subTableOffset);
         while (true) {
@@ -638,6 +658,14 @@ public class NDSRom {
         return writingEnabled;
     }
 
+    public long getLength() {
+        return baseRomSize;
+    }
+
+    public long getChecksum() {
+        return checksum;
+    }
+
     public int readFromByteArr(byte[] data, int offset, int size) {
         int result = 0;
         for (int i = 0; i < size; i++) {
@@ -674,7 +702,8 @@ public class NDSRom {
         writeToFile(file, -1, size, value);
     }
 
-    public void writeToFile(RandomAccessFile file, int offset, int size, int value) throws IOException {
+    public void writeToFile(RandomAccessFile file, int offset, int size, int value)
+            throws IOException {
         byte[] buf = new byte[size];
         for (int i = 0; i < size; i++) {
             buf[i] = (byte) ((value >> (i * 8)) & 0xFF);

@@ -320,13 +320,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             isVietCrystal = false;
         }
         havePatchedFleeing = false;
+        updateTypes();
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
         loadLandmarkNames();
         preprocessMaps();
         loadItemNames();
-        updateTypes();
     }
 
     private static RomEntry checkRomEntry(byte[] rom) {
