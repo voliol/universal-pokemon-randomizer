@@ -934,7 +934,7 @@ public class SettingsTest extends AbstractUIBase {
          * 
          * @throws IOException
          */
-        @Test(timeout = 8000)
+        @Test(timeout = 12000)
         public void TestEvolveLevel1() throws IOException {
                 JRadioButtonFixture unchangedEvolveRBFixture =
                                 getRadioButtonByName("peUnchangedRB");

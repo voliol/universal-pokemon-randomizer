@@ -395,14 +395,26 @@ public class PokemonCollection {
     }
 
     public Type randomTypeWeighted(Random random) {
-        int idx = random.nextInt(typeCount);
-        for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
-            if (idx < entry.getValue().size()) {
-                return entry.getKey();
-            }
-            idx -= entry.getValue().size();
+        Map<Type, Integer> typeWeightings = new TreeMap<Type, Integer>();
+        int totalTypeWeighting = 0;
+
+        // Determine weightings
+        for (Type t : pokesByType.keySet()) {
+            int pkWithTyping = pokesByType.get(t).size();
+            typeWeightings.put(t, pkWithTyping);
+            totalTypeWeighting += pkWithTyping;
         }
-        throw new IllegalStateException(String.format("randomTypeWeighted: %d/%d", idx, typeCount));
+
+        int typePick = random.nextInt(totalTypeWeighting);
+        int typePos = 0;
+        for (Type t : typeWeightings.keySet()) {
+            int weight = typeWeightings.get(t);
+            if (typePos + weight > typePick) {
+                return t;
+            }
+            typePos += weight;
+        }
+        return null;
     }
 
     // Internal

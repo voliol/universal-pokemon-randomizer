@@ -1211,8 +1211,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         cachedEliteReplacementLists.addAll(getMainPokemonList().stream()
                 .filter(pk -> pk.isBigPoke(isGen1()) || pk.isLegendary())
                 .collect(Collectors.toList()));
-        typeWeightings = new TreeMap<Type, Integer>();
-        totalTypeWeighting = 0;
 
         // Attempt to type theme tagged trainers. If gym type theming and type theming are false,
         // set this to empty
@@ -1240,8 +1238,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else {
                     // If type theming is true, pick a type. Otherwise null skips the type
                     // restriction
-                    Type typeForTrainer =
-                            typeTheme ? pickType(weightByFrequency, noLegendaries) : null;
+                    Type typeForTrainer = typeTheme
+                            ? weightByFrequency ? cachedReplacementLists.randomTypeWeighted(random)
+                                    : cachedReplacementLists.randomType(random)
+                            : null;
                     for (TrainerPokemon tp : t.getPokemon()) {
                         boolean shedAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                         tp.pokemon = pickReplacement(tp.pokemon, usePowerLevels, typeForTrainer,
@@ -1305,28 +1305,50 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Trainer> trainersInGroup = groups.get(group);
             // Shuffle ordering within group to promote randomness
             Collections.shuffle(trainersInGroup, random);
-            Type typeForGroup = pickType(weightByFrequency, noLegendaries);
+            Type typeForGroup =
+                    weightByFrequency ? cachedReplacementLists.randomTypeWeighted(random)
+                            : cachedReplacementLists.randomType(random);
             if (group.startsWith("GYM")) {
+                if (usedGymTypes.size() == cachedReplacementLists.typeCount()) {
+                    throw new RandomizationException(
+                            "Not enough types of Pokemon available for gyms. Please reduce filtering and try again.");
+                }
                 while (usedGymTypes.contains(typeForGroup)) {
-                    typeForGroup = pickType(weightByFrequency, noLegendaries);
+                    typeForGroup =
+                            weightByFrequency ? cachedReplacementLists.randomTypeWeighted(random)
+                                    : cachedReplacementLists.randomType(random);
                 }
                 usedGymTypes.add(typeForGroup);
             }
             if (group.startsWith("ELITE")) {
-                while (usedEliteTypes.contains(typeForGroup) || (buffElite
-                        && cachedEliteReplacementLists.sizeByType(typeForGroup) == 0)) {
-                    typeForGroup = pickType(weightByFrequency, noLegendaries);
+                PokemonCollection toUse =
+                        buffElite ? cachedEliteReplacementLists : cachedReplacementLists;
+                if (usedEliteTypes.size() == toUse.typeCount()) {
+                    throw new RandomizationException(
+                            "Not enough types of Pokemon available for Elites. Please reduce filtering and try again.");
+                }
+                while (usedEliteTypes.contains(typeForGroup)
+                        || toUse.sizeByType(typeForGroup) == 0) {
+                    typeForGroup = weightByFrequency ? toUse.randomTypeWeighted(random)
+                            : toUse.randomType(random);
                 }
                 usedEliteTypes.add(typeForGroup);
             }
             if (group.equals("CHAMPION") || group.startsWith("UBER")) {
-                while (usedUberTypes.contains(typeForGroup) || (buffElite
-                        && cachedEliteReplacementLists.sizeByType(typeForGroup) == 0)) {
-                    typeForGroup = pickType(weightByFrequency, noLegendaries);
+                PokemonCollection toUse =
+                        buffElite ? cachedEliteReplacementLists : cachedReplacementLists;
+                if (usedUberTypes.size() == toUse.typeCount()) {
+                    throw new RandomizationException(
+                            "Not enough types of Pokemon available for Champion/Uber. Please reduce filtering and try again.");
+                }
+                while (usedUberTypes.contains(typeForGroup)
+                        || (toUse.sizeByType(typeForGroup) == 0)) {
+                    typeForGroup = weightByFrequency ? toUse.randomTypeWeighted(random)
+                            : toUse.randomType(random);
                 }
                 usedUberTypes.add(typeForGroup);
             }
-            // Themed groups just have a theme, no special criteria
+            // Assign new teams to themed trainers
             for (Trainer t : trainersInGroup) {
                 if (buffElite && (t.getTag().startsWith("ELITE")
                         || t.getTag().startsWith("CHAMPION") || t.getTag().startsWith("UBER"))) {
@@ -1366,7 +1388,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // This is the last pokemon. Use the superior type
                     if (i == t.getPokemon().size() - 1) {
                         // Get the starters
-                        // us 0 1 2 => CHILI CRESS CILAN
+                        // starter order 0 1 2 => leader to fight CHILI CRESS CILAN
                         Type superiorType;
                         List<Pokemon> starters = this.getStarters();
                         if (group.equals("CHILI")) {
@@ -3864,18 +3886,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         return false;
     }
 
-    private List<Pokemon> pokemonOfType(Type type, boolean noLegendaries) {
-        List<Pokemon> typedPokes = new ArrayList<Pokemon>();
-        for (Pokemon pk : getMainPokemonList()) {
-            if (pk != null && (!noLegendaries || !pk.isLegendary())) {
-                if (pk.primaryType == type || pk.secondaryType == type) {
-                    typedPokes.add(pk);
-                }
-            }
-        }
-        return typedPokes;
-    }
-
     private List<Pokemon> allPokemonWithoutNull() {
         List<Pokemon> allPokes = new ArrayList<Pokemon>(this.getPokemon());
         allPokes.remove(0);
@@ -3888,37 +3898,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             inArea.add(enc.pokemon);
         }
         return inArea;
-    }
-
-    private Map<Type, Integer> typeWeightings;
-    private int totalTypeWeighting;
-
-    private Type pickType(boolean weightByFrequency, boolean noLegendaries) {
-        if (totalTypeWeighting == 0) {
-            // Determine weightings
-            for (Type t : Type.values()) {
-                if (isTypeInGame(t)) {
-                    int pkWithTyping = pokemonOfType(t, noLegendaries).size();
-                    typeWeightings.put(t, pkWithTyping);
-                    totalTypeWeighting += pkWithTyping;
-                }
-            }
-        }
-
-        if (weightByFrequency) {
-            int typePick = this.random.nextInt(totalTypeWeighting);
-            int typePos = 0;
-            for (Type t : typeWeightings.keySet()) {
-                int weight = typeWeightings.get(t);
-                if (typePos + weight > typePick) {
-                    return t;
-                }
-                typePos += weight;
-            }
-            return null;
-        } else {
-            return randomType();
-        }
     }
 
     private void rivalCarriesStarterUpdate(List<Trainer> currentTrainers, String prefix,

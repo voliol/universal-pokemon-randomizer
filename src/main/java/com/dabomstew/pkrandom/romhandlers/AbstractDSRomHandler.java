@@ -141,7 +141,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         if (baseRom.getLength() != size128M) {
             return true;
         }
-        return !isChecksumEqual(3954411495L);
+        return !isChecksumEqual(3639238800L);
     }
 
     protected boolean basicIPKEHackDetection() {

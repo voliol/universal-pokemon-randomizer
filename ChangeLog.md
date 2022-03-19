@@ -175,3 +175,9 @@
 - Added Rom Hack checking for Platinum, Soul Silver, Heart Gold, Black, White, Black 2, White 2
 - Added basic Fire Red hack support structures for Gen 4 and Gen 5
   - Unfortunately, due to bad NDS ROM writing, Gen 4 and Gen 5 hacks are largely unsupported. Feel free to try though!
+
+## 1.10.2
+
+- Fix Soul Silver checksum to match a more common version
+- Update type theming for trainers to use new PokemonCollection from 1.10.0
+  - This should now properly support new move types that have no corresponding Pokemon (like Curse)
