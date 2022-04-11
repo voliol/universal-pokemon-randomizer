@@ -36,6 +36,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -3491,7 +3492,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : ExpCurve.MEDIUM_FAST;
         }
     }
-
+    
     /* Private methods/structs used internally by the above methods */
     private void updateMovePower(List<Move> moves, int moveNum, int power) {
         Move mv = moves.get(moveNum);
@@ -4373,6 +4374,23 @@ public abstract class AbstractRomHandler implements RomHandler {
         // override until detection implemented
         return false;
     }
+
+    @Override
+    public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
+        loadPokemonPalettes();
+
+        getPaletteHandler().randomizePokemonPalettes(mainPokemonList, typeSanity, evolutionSanity, shinyFromNormal);
+
+        writePokemonPalettes();
+    }
+    
+    protected abstract PaletteHandler getPaletteHandler();
+
+    protected abstract void loadPokemonPalettes();
+
+    protected abstract void writePokemonPalettes();
+
+    protected abstract String getPaletteDescriptionsFileName();
 
     @Override
     public void writeCheckValueToROM(int value) {

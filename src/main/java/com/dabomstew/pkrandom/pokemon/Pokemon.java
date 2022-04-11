@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import com.dabomstew.pkrandom.graphics.Palette;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -56,7 +57,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public List<Evolution> evolutionsFrom = new ArrayList<Evolution>();
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
-
+    
+    // only for Gen 1, yet another reason to split this class eventually
+    private byte paletteID;
+    // for Gen 2-5
+    private Palette normalPalette;
+    private Palette shinyPalette;
+    
     public List<Integer> shuffledStatsOrder = null;
     public int typeChanged;
     
@@ -628,6 +635,10 @@ public class Pokemon implements Comparable<Pokemon> {
     public void setSecondaryType(Type secondaryType) {
         this.secondaryType = secondaryType;
     }
+    
+    public boolean hasSecondaryType() {
+        return secondaryType != null; 
+    }
 
     public int getHp() {
         return hp;
@@ -780,6 +791,15 @@ public class Pokemon implements Comparable<Pokemon> {
     public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {
         this.evolutionsFrom = evolutionsFrom;
     }
+    
+	// for cases where you are only interested in what evolves from this Pokémon, not how
+    public List<Pokemon> getEvolutionsFromPokemon() {
+        List<Pokemon> evolutionsFromPokemon = new ArrayList<>();
+        for (Evolution e : getEvolutionsFrom()) {
+            evolutionsFromPokemon.add(e.getTo());
+        }
+        return evolutionsFromPokemon;
+    }
 
     public List<Evolution> getEvolutionsTo() {
         return evolutionsTo;
@@ -787,5 +807,38 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public void setEvolutionsTo(List<Evolution> evolutionsTo) {
         this.evolutionsTo = evolutionsTo;
+    }
+    	
+	// for cases where you are only interested in what evolves to this Pokémon, not how
+    public List<Pokemon> getEvolutionsToPokemon() {
+        List<Pokemon> evolutionsToPokemon = new ArrayList<>();
+        for (Evolution e : getEvolutionsTo()) {
+            evolutionsToPokemon.add(e.getFrom());
+        }
+        return evolutionsToPokemon;
+    }
+    
+    public byte getPaletteID() {
+        return paletteID;
+    }
+
+    public void setPaletteID(byte paletteID) {
+        this.paletteID = paletteID;
+    }
+
+    public Palette getNormalPalette() {
+        return normalPalette;
+    }
+
+    public void setNormalPalette(Palette palette) {
+        this.normalPalette = palette;
+    }
+
+    public Palette getShinyPalette() {
+        return shinyPalette;
+    }
+
+    public void setShinyPalette(Palette palette) {
+        this.shinyPalette = palette;
     }
 }

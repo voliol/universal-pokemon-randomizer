@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
@@ -452,5 +454,28 @@ public class TestRomHandler extends AbstractRomHandler {
      */
     public List<Pokemon> getStarterPokes() {
         return starterPokes.getPokes();
+    }
+    
+    @Override
+    protected void loadPokemonPalettes() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    protected void writePokemonPalettes() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected String getPaletteDescriptionsFileName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected PaletteHandler getPaletteHandler() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

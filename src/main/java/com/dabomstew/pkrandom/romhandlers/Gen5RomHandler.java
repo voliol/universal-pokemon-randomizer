@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +41,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
 import pptxt.PPTxtHandler;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -49,6 +52,8 @@ import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
@@ -67,7 +72,9 @@ import com.dabomstew.pkrandom.text.Gen5TextHandler;
 import compressors.DSDecmp;
 
 public class Gen5RomHandler extends AbstractDSRomHandler {
-
+    
+    private PaletteHandler paletteHandler;
+    
     public static class Factory extends RomHandler.Factory {
 
         @Override
@@ -341,6 +348,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         abilityNames = getStrings(false, getRomEntry().getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, getRomEntry().getInt("ItemNamesTextOffset"));
         loadedWildMapNames = false;
+        
+     // TODO: consider moving
+        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteDescriptionsFileName());
+
     }
 
     private void loadPokemonStats() {
@@ -2567,10 +2578,78 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return Gen5Constants.bw1EarlyRequiredHMMoves;
         }
     }
+    
+    protected String getNARCPath(String key) {
+        return getRomEntry().getString(key);
+    }
+    
+    protected int calculatePokemonNormalPaletteIndex(int i) {
+        return i * 20 + 18;
+    }
+    
+    protected int calculatePokemonShinyPaletteIndex(int i) {
+        return calculatePokemonNormalPaletteIndex(i) + 1; 
+    }
+    
+    // just for testing
+    private void dumpAllPokemonSprites() {
+        try {
+            for (int i = 1; i < pokemonList.size(); i++) {
+                NARCArchive pokespritesNARC = this.readNARC(getRomEntry().getString("PokemonGraphics"));
+
+                // First prepare the palette, it's the easy bit
+                byte[] rawPalette = pokespritesNARC.files.get(i * 20 + 18);
+                int[] palette = new int[16];
+                for (int j = 0; j < 16; j++) {
+                    palette[j] = GFXFunctions.conv16BitColorToARGB(readWord(rawPalette, 40 + j * 2));
+                }
+
+                // Get the picture and uncompress it.
+                byte[] compressedPic = pokespritesNARC.files.get(i * 20);
+                byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
+
+                // Output to 64x144 tiled image to prepare for unscrambling
+                BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, palette, 48, 64, 144, 4);
+                // Unscramble the above onto a 96x96 canvas
+                BufferedImage finalImage = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB);
+                Graphics g = finalImage.getGraphics();
+                g.drawImage(bim, 0, 0, 64, 64, 0, 0, 64, 64, null);
+                g.drawImage(bim, 64, 0, 96, 8, 0, 64, 32, 72, null);
+                g.drawImage(bim, 64, 8, 96, 16, 32, 64, 64, 72, null);
+                g.drawImage(bim, 64, 16, 96, 24, 0, 72, 32, 80, null);
+                g.drawImage(bim, 64, 24, 96, 32, 32, 72, 64, 80, null);
+                g.drawImage(bim, 64, 32, 96, 40, 0, 80, 32, 88, null);
+                g.drawImage(bim, 64, 40, 96, 48, 32, 80, 64, 88, null);
+                g.drawImage(bim, 64, 48, 96, 56, 0, 88, 32, 96, null);
+                g.drawImage(bim, 64, 56, 96, 64, 32, 88, 64, 96, null);
+                g.drawImage(bim, 0, 64, 64, 96, 0, 96, 64, 128, null);
+                g.drawImage(bim, 64, 64, 96, 72, 0, 128, 32, 136, null);
+                g.drawImage(bim, 64, 72, 96, 80, 32, 128, 64, 136, null);
+                g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
+                g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
+
+
+                for (int j = 0; j < 16; j++) {
+                    bim.setRGB(j, 0, palette[j]);
+                }
+                
+                System.out.print(i + ":\t");
+                System.out.println(bytesToString(rawPalette));
+
+                String fileAdress = "Pokemon_sprite_dump/gen5/" + String.format("%03d-2.png", i);
+                File outputfile = new File(fileAdress);
+                ImageIO.write(finalImage, "png", outputfile);
+
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
 
     @Override
     public BufferedImage getMascotImage() {
         try {
+            dumpAllPokemonSprites();
             Pokemon pk = randomPokemon();
             NARCArchive pokespritesNARC = this.readNARC(getRomEntry().getString("PokemonGraphics"));
 
@@ -2613,6 +2692,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
     
+    private String bytesToString(byte[] bytes) {
+        String s = "";
+        for (byte b : bytes) {
+            s += System.out.format("%02X ", b);
+        }
+        return s;
+    }
+    
+    protected String getPaletteDescriptionsFileName() {
+        switch (romEntry.romType) {
+        case Gen5Constants.Type_BW:
+            return "palettesBW.txt";
+        case Gen5Constants.Type_BW2:
+            // TODO: check if this should be identical
+            return "palettesBW.txt";
+        default:
+            return null;
+        }
+    }
+    
     protected RomEntry getRomEntry() {
         return romEntry;
     }
@@ -2627,5 +2726,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     protected Map getTaggedGroupTypes() {
         return groupTypesMap;
+    }
+
+    @Override
+    protected PaletteHandler getPaletteHandler() {
+        return paletteHandler;
     }
 }

@@ -25,15 +25,25 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 public abstract class AbstractDSRomHandler extends AbstractRomHandler {
+
+    private static final byte[] PALETTE_PREFIX_BYTES = { (byte) 0x52, (byte) 0x4C, (byte) 0x43, (byte) 0x4E,
+            (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x01, (byte) 0x48, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x10, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x54, (byte) 0x54, (byte) 0x4C, (byte) 0x50,
+            (byte) 0x38, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x0A, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
     protected String dataFolder;
     private NDSRom baseRom;
@@ -126,7 +136,9 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
 
-    protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
+    protected int readByte(byte[] data, int offset) {
+        return data[offset] & 0xFF;
+    }
 
     protected int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
@@ -248,5 +260,73 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             return 610;
         }
     }
+    
+    @Override
+    protected void loadPokemonPalettes() {
+        try {
+            String NARCpath = getNARCPath("PokemonGraphics");
+            NARCArchive pokespritesNARC = readNARC(NARCpath);
+            for (Pokemon pk : mainPokemonList) {
+                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
+                pk.setNormalPalette(readPalette(pokespritesNARC, normalPaletteIndex));
+                
+                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
+                pk.setShinyPalette(readPalette(pokespritesNARC, shinyPaletteIndex));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    protected abstract int calculatePokemonNormalPaletteIndex(int i);
+    
+    protected abstract int calculatePokemonShinyPaletteIndex(int i);
+
+    private Palette readPalette(NARCArchive NARC, int index) {
+        byte[] withPrefixBytes = NARC.files.get(index);
+        byte[] paletteBytes = Arrays.copyOfRange(withPrefixBytes, PALETTE_PREFIX_BYTES.length, withPrefixBytes.length);
+        return new Palette(paletteBytes);
+    }
+
+    @Override
+    protected void writePokemonPalettes() {
+        try {
+            String NARCpath = getNARCPath("PokemonGraphics");
+            NARCArchive pokespritesNARC = readNARC(NARCpath);
+
+            for (Pokemon pk : mainPokemonList) {
+
+                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
+                byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
+                normalPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, normalPaletteBytes);
+                pokespritesNARC.getFiles().set(normalPaletteIndex, normalPaletteBytes);
+                
+                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
+                byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
+                shinyPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, shinyPaletteBytes);
+                pokespritesNARC.getFiles().set(shinyPaletteIndex, shinyPaletteBytes);
+
+            }
+            writeNARC(NARCpath, pokespritesNARC);
+
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private byte[] concatenate(byte[] a, byte[] b) {
+        byte[] sum = new byte[a.length + b.length];
+        System.arraycopy(a, 0, sum, 0, a.length);
+        System.arraycopy(b, 0, sum, a.length, b.length);
+        return sum;
+    }
+
+    // because RomEntry is an inner class it can't be accessed here, so an abstract
+    // method is needed.
+    // a refactoring might be better, but is outside of the scope for the changes
+    // I'm making now
+    // - voliol 2022-01-13
+    protected abstract String getNARCPath(String key);
 
 }

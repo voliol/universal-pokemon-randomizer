@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
@@ -46,6 +49,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -63,8 +67,16 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 
-public class Gen4RomHandler extends AbstractDSRomHandler {
+import compressors.DSDecmp;
 
+import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
+
+public class Gen4RomHandler extends AbstractDSRomHandler {
+    
+    private PaletteHandler paletteHandler;
+    
     public static class Factory extends RomHandler.Factory {
 
         @Override
@@ -321,6 +333,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (getRomEntry().romType == Gen4Constants.Type_Plat) {
             ptGiratina = true;
         }
+        
+        // TODO: consider moving
+        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteDescriptionsFileName());
     }
 
     private void loadMoves() {
@@ -2888,10 +2903,97 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             return validPokemon.get(random.nextInt(validPokemon.size()));
         }
     }
+    
+    // just for testing
+    private void dumpAllPokemonSprites() {
+        try {
+            for (int i = 1; i < pokemonList.size(); i++) {
+                Pokemon pk = pokemonList.get(i);
+                NARCArchive pokespritesNARC = this.readNARC(getRomEntry().getString("PokemonGraphics"));
+                int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
+                int palIndex = pk.number * 6 + 4;
+
+                // read sprite
+                byte[] rawSprite = pokespritesNARC.files.get(spriteIndex);
+                if (rawSprite.length == 0) {
+                    // Must use other gender form
+                    rawSprite = pokespritesNARC.files.get(spriteIndex ^ 1);
+                }
+                int[] spriteData = new int[3200];
+                for (int j = 0; j < 3200; j++) {
+                    spriteData[j] = readWord(rawSprite, j * 2 + 48);
+                }
+
+                // Decrypt sprite (why does EVERYTHING use the RNG formula geez)
+                if (getRomEntry().romType != Gen4Constants.Type_DP) {
+                    int key = spriteData[0];
+                    for (int j = 0; j < 3200; j++) {
+                        spriteData[j] ^= (key & 0xFFFF);
+                        key = key * 0x41C64E6D + 0x6073;
+                    }
+                } else {
+                    // D/P sprites are encrypted *backwards*. Wut.
+                    int key = spriteData[3199];
+                    for (int j = 3199; j >= 0; j--) {
+                        spriteData[j] ^= (key & 0xFFFF);
+                        key = key * 0x41C64E6D + 0x6073;
+                    }
+                }
+
+                byte[] rawPalette = pokespritesNARC.files.get(palIndex);
+                
+                System.out.print(pk.number + ":\t");
+                System.out.println(bytesToString(rawPalette));
+
+                int[] palette = new int[16];
+                for (int j = 0; j < 16; j++) {
+                    palette[j] = GFXFunctions.conv16BitColorToARGB(readWord(rawPalette, 40 + j * 2));
+                }
+
+                // Deliberately chop off the right half of the image while still
+                // correctly indexing the array.
+                BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
+                for (int y = 0; y < 80; y++) {
+                    for (int x = 0; x < 80; x++) {
+                        int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+                        bim.setRGB(x, y, palette[value]);
+                    }
+                }
+
+                for (int j = 0; j < 16; j++) {
+                    bim.setRGB(j, 0, palette[j]);
+                }
+
+                String fileAdress = String.format("%03d.png", pk.number);
+                File outputfile = new File(fileAdress);
+                try {
+                    ImageIO.write(bim, "png", outputfile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+    
+    protected String getNARCPath(String key) {
+        return getRomEntry().getString(key);
+    }
+
+    protected int calculatePokemonNormalPaletteIndex(int i) {
+        return i * 6 + 4;
+    }
+    
+    protected int calculatePokemonShinyPaletteIndex(int i) {
+        return calculatePokemonNormalPaletteIndex(i) + 1;
+    }
 
     @Override
     public BufferedImage getMascotImage() {
         try {
+            dumpAllPokemonSprites();
             Pokemon pk = randomPokemon();
             NARCArchive pokespritesNARC = this.readNARC(getRomEntry().getString("PokemonGraphics"));
             int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
@@ -2950,11 +3052,39 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
     
+    private String bytesToString(byte[] bytes) {
+        String s = "";
+        for (byte b : bytes) {
+            s += System.out.format("%02X ", b);
+        }
+        return s;
+    }
+    
+    protected String getPaletteDescriptionsFileName() {
+        switch (romEntry.romType) {
+        case Gen4Constants.Type_DP:
+            return "palettesDP.txt";
+        case Gen4Constants.Type_Plat:
+            // TODO: check if this should be identical
+            return "palettesDP.txt";
+        case Gen4Constants.Type_HGSS:
+            // TODO: check if this should be identical
+            return "palettesDP.txt";
+        default:
+            return null;
+        }
+    }
+    
     protected RomEntry getRomEntry() {
         return romEntry;
     }
 
     protected NARCArchive getScriptNARC() {
         return scriptNarc;
+    }
+
+    @Override
+    protected PaletteHandler getPaletteHandler() {
+        return paletteHandler;
     }
 }

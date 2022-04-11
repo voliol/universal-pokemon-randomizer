@@ -59,7 +59,8 @@ public class GFXFunctions {
             int tileY = tile / widthInTiles;
             for (int yT = 0; yT < tileHeight; yT++) {
                 for (int xT = 0; xT < tileWidth; xT++) {
-                    int value = data[tile * bytesPerTile + yT * tileWidth / pixelsPerByte + xT / pixelsPerByte + offset] & 0xFF;
+                    int value = data[tile * bytesPerTile + yT * tileWidth / pixelsPerByte + xT / pixelsPerByte + offset]
+                            & 0xFF;
                     if (pixelsPerByte != 1) {
                         value = (value >>> (xT % pixelsPerByte) * bpp) & ((1 << bpp) - 1);
                     }
@@ -71,7 +72,11 @@ public class GFXFunctions {
         return bim;
     }
 
+    @Deprecated()
     public static int conv16BitColorToARGB(int palValue) {
+        // TODO: is printing a string like this the way to do deprecation?
+        System.out.println(
+                "GFXFunctions.conv16BitColorToARGB(int) is depracated. Use graphics.Color.ARGB() instead, or graphics.Color.highColorWordToARGB() in cases where you don't load a full palette.");
         int red = (int) ((palValue & 0x1F) * 8.25);
         int green = (int) (((palValue & 0x3E0) >> 5) * 8.25);
         int blue = (int) (((palValue & 0x7C00) >> 10) * 8.25);

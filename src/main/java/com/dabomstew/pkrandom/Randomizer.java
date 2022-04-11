@@ -453,6 +453,12 @@ public class Randomizer {
         } else if (settings.getFieldItemsMod() == Settings.FieldItemsMod.RANDOM) {
             romHandler.randomizeFieldItems(settings.isBanBadRandomFieldItems());
         }
+        
+        boolean typeSanity = false;
+        boolean followEvolutions = true; // TODO change name
+        boolean shinyFromNormal = true;
+        romHandler.randomizePokemonPalettes(typeSanity, followEvolutions, shinyFromNormal);
+        
 
         // Signature...
         romHandler.applySignature();

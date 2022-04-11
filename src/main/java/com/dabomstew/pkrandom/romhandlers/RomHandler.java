@@ -400,6 +400,9 @@ public interface RomHandler {
             boolean limitToThreeStages, boolean forceChange, boolean noConverge, boolean forceGrowth);
 
     public void updateExtraInfo(Evolution ev);
+    
+    // Graphics
+    public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
 
     // stats stuff
     public void minimumCatchRate(int rateNonLegendary, int rateLegendary);
