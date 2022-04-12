@@ -18,11 +18,11 @@ If you have any questions, I will try my best to answer them.
 ## What it can do right now:
 
 - Currently, this branch can randomize palettes of Ruby(U), and likely Sapphire(U) and
-  Emerald(U) as well. All parts of Artemis257's system are implemented, but the 
+  Emerald(U) as well. All parts of Artemis251's system are implemented, but the 
   "sibling palette" feature.
   Other games can also be supported, but require palette description files and/or offsets.
   
-- Some parts of Artemis257's system have been changed/replaced, most notably colors
+- Some parts of Artemis251's system have been changed/replaced, most notably colors
   should change with evolutions according to types, including ones set earlier during
   randomization.
   
@@ -35,7 +35,7 @@ If you have any questions, I will try my best to answer them.
   beyond that of Vulpix; the sprite of Ninetales could not be dumped because one of
   its palettes corrupted its backsprites (it does work if backsprites are not dumped).
   
-- The "sibling palette" feature of Artemis257's system. 
+- The "sibling palette" feature of Artemis251's system. 
 
 - Better handling of unorthodox types like fairy (and types at all). What colors should
   be used when they are not based on Pokémon types?
@@ -49,7 +49,7 @@ If you have any questions, I will try my best to answer them.
 
 - Palette description files for most games, though I might be "finished" before doing all
   of them as it is a lot of manual work. FRLG and DP are prioritized as I did some of it
-  during an earlier/unpublished/crappy attempt at porting Artemis257's system.
+  during an earlier/unpublished/crappy attempt at porting Artemis251's system.
   
 - Documentation and credits for all new classes.
 
