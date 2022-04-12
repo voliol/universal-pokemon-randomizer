@@ -2,6 +2,71 @@ Universal Pokemon Randomizer
 
 By Dabomstew
 
+Palette test branch 
+by voliol
+
+# Description of the Palette Test Branch
+What is this: 
+A branch for a framework for palette randomization in all generations (I-V), 
+and porting the implementation from Artemis257's Pokemon Emerald Randomizer for gens III-5. 
+Neither are finished, and I am still working on it. The reason for uploading now is to
+facilitate collaborations. If you want to implement parts of in your branch I
+can't stop you, but I ask that you wait before it is more finished.
+
+If you have any questions, I will try my best to answer them.
+
+## What it can do right now:
+
+- Currently, this branch can randomize palettes of Ruby(U), and likely Sapphire(U) and
+  Emerald(U) as well. All parts of Artemis257's system are implemented, but the 
+  "sibling palette" feature.
+  Other games can also be supported, but require palette description files and/or offsets.
+  
+- Some parts of Artemis257's system have been changed/replaced, most notably colors
+  should change with evolutions according to types, including ones set earlier during
+  randomization.
+  
+- Sprites are dumped when you open a rom, so palettes can be viewed quickly. 
+  See the Pokemon-sprite-dump folder.
+
+## What needs to be done:
+- Palettes need size checking, so they don't corrupt the file when written to file. 
+  This is presumably why the gen III sprite dump does only have randomized palettes
+  beyond that of Vulpix; the sprite of Ninetales could not be dumped because one of
+  its palettes corrupted its backsprites (it does work if backsprites are not dumped).
+  
+- The "sibling palette" feature of Artemis257's system. 
+
+- Better handling of unorthodox types like fairy (and types at all). What colors should
+  be used when they are not based on Pokémon types?
+  
+- Gen I and II need better palette randomization, respecting evolution families and types.
+
+- Offsets for normal palettes, shiny palettes, and backsprites 
+  (for sprite dumping), primarily for gen III ROMs. There was an automated method 
+  for normal palettes I commented out due to not understanding it, 
+  it should be investigated whether it is superior to manual offsets or can be removed. 
+
+- Palette description files for most games, though I might be "finished" before doing all
+  of them as it is a lot of manual work. FRLG and DP are prioritized as I did some of it
+  during an earlier/unpublished/crappy attempt at porting Artemis257's system.
+  
+- Documentation and credits for all new classes.
+
+- Various other things to be touched up in the framework. I'm quite new to Java/programming
+  at a higher level so many of my TODO's are about best practices/patterns and such.
+  
+## What lies further into the future:
+ 
+ - Porting/pushing this framework to the main active branches of the UPR, brentspector's branch
+   and hopefully ZX, though I do not know if they take full features like this. Supporting 
+   Pokémon forms would come at this point.
+   
+ - A working GUI, instead of setting settings in Randomizer.java.
+
+
+**The rest of the readme is from the version of the Randomizer this was branched from:**
+
 Homepage: http://pokehacks.dabomstew.com/randomizer/
 
 Forks used -
