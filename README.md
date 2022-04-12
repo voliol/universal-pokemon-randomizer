@@ -8,7 +8,7 @@ by voliol
 # Description of the Palette Test Branch
 What is this: 
 A branch for a framework for palette randomization in all generations (I-V), 
-and porting the implementation from Artemis257's Pokemon Emerald Randomizer for gens III-5. 
+and porting the implementation from Artemis251's Pokemon Emerald Randomizer for gens III-5. 
 Neither are finished, and I am still working on it. The reason for uploading now is to
 facilitate collaborations. If you want to implement parts of in your branch I
 can't stop you, but I ask that you wait before it is more finished.
