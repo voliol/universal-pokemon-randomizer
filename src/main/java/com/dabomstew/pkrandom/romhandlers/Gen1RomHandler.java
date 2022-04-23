@@ -1320,7 +1320,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Pokemon> getStaticPokemon() {
         List<Pokemon> statics = new ArrayList<Pokemon>();
-        if (getRomEntry().getValue("StaticPokemonSupport") > 0) {
+        if (disableROMHack || getRomEntry().getValue("StaticPokemonSupport") > 0) {
             for (int offset : getRomEntry().staticPokemonSingle) {
                 statics.add(getPokemon().get(getPokeRBYToNumTable()[readByte(offset) & 0xFF]));
             }
@@ -1373,7 +1373,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return (getRomEntry().getValue("StaticPokemonSupport") > 0);
+        return disableROMHack ? true : (getRomEntry().getValue("StaticPokemonSupport") > 0);
     }
 
     @Override
@@ -1507,7 +1507,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return (getRomEntry().getValue("StaticPokemonSupport") > 0) ? "Complete"
+        return disableROMHack || (getRomEntry().getValue("StaticPokemonSupport") > 0) ? "Complete"
                 : "No Static Pokemon";
     }
 

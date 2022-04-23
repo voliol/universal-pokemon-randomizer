@@ -1749,7 +1749,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Pokemon> getStaticPokemon() {
         List<Pokemon> sp = new ArrayList<Pokemon>();
-        if (!getRomEntry().staticPokemonSupport) {
+        if (!disableROMHack && !getRomEntry().staticPokemonSupport) {
             return sp;
         }
         try {
@@ -2169,7 +2169,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return (getRomEntry().staticPokemonSupport) ? "Complete" : "No Static Pokemon";
+        return (disableROMHack || getRomEntry().staticPokemonSupport) ? "Complete" : "No Static Pokemon";
     }
 
     @Override
@@ -2180,7 +2180,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return getRomEntry().staticPokemonSupport;
+        return disableROMHack ? true : getRomEntry().staticPokemonSupport;
     }
 
     @Override
@@ -3330,7 +3330,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean isROMHack() {
-        return this.isRomHack;
+        return this.disableROMHack ? false : this.isRomHack;
     }
 
     private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {

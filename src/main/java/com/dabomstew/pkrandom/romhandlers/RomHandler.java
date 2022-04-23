@@ -442,6 +442,8 @@ public interface RomHandler {
 
         public boolean isROMHack();
 
+        public void setDisableROMHack(boolean disableROMHack);
+
         public int generationOfPokemon();
 
         public void writeCheckValueToROM(int value);

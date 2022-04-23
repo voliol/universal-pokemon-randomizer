@@ -181,3 +181,8 @@
 - Fix Soul Silver checksum to match a more common version
 - Update type theming for trainers to use new PokemonCollection from 1.10.0
   - This should now properly support new move types that have no corresponding Pokemon (like Curse)
+
+## 1.10.3
+
+- Add "Disable ROM Hack" checkbox to treat a ROM as a base game
+  - No guarantee is made that the ROM will be functional. This is meant to prevent normal ROMs from being feature blocked

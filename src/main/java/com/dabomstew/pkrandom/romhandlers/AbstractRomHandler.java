@@ -42,6 +42,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 public abstract class AbstractRomHandler implements RomHandler {
 
     private boolean restrictionsSet;
+    protected boolean disableROMHack;
     protected List<Pokemon> mainPokemonList;
     protected List<Pokemon> noLegendaryList, onlyLegendaryList;
     protected final Random random;
@@ -4521,6 +4522,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public boolean isGen1() {
         return false;
+    }
+
+    @Override
+    public void setDisableROMHack(boolean disableROMHack) {
+        this.disableROMHack = disableROMHack;
     }
 
     @Override

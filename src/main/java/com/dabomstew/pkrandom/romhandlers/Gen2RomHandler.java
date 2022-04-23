@@ -1061,7 +1061,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Pokemon> getStaticPokemon() {
         List<Pokemon> statics = new ArrayList<Pokemon>();
-        if (getRomEntry().getValue("StaticPokemonSupport") > 0) {
+        if (disableROMHack || getRomEntry().getValue("StaticPokemonSupport") > 0) {
             for (StaticPokemon sp : getRomEntry().staticPokemon) {
                 statics.add(sp.getPokemon(this));
             }
@@ -1111,7 +1111,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return (getRomEntry().getValue("StaticPokemonSupport") > 0);
+        return disableROMHack ? true : (getRomEntry().getValue("StaticPokemonSupport") > 0);
     }
 
     @Override

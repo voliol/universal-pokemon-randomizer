@@ -56,7 +56,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class Settings {
 
-    public static final int VERSION = 202;
+    public static final int VERSION = 203;
 
     public static final int LENGTH_OF_SETTINGS_DATA = 46;
 
@@ -148,8 +148,8 @@ public class Settings {
                 new SettingsOption.Builder(SettingsConstants.CURRENT_RESTRICTIONS,
                         new GenRestrictions()).addMatches(
                                 new PredicatePair(limitPokemon, PredicatePair.BOOLEAN_TRUE)));
-        SettingsOptionComposite blockBrokenMoves = SettingsOptionFactory.createSettingsOption(
-                new SettingsOption.Builder(SettingsConstants.BLOCK_BROKEN_MOVES, false));
+        SettingsOptionComposite disableROMHack = SettingsOptionFactory.createSettingsOption(
+            new SettingsOption.Builder(SettingsConstants.DISABLE_ROM_HACK, false));
         SettingsOptionComposite raceMode = SettingsOptionFactory.createSettingsOption(
                 new SettingsOption.Builder(SettingsConstants.RACE_MODE, false));
 
@@ -348,6 +348,8 @@ public class Settings {
                                 .addMatches(new PredicatePair(movesetsForceGoodDamaging,
                                         PredicatePair.BOOLEAN_TRUE))
                                 .addValidInts(0, 100));
+        SettingsOptionComposite blockBrokenMoves = SettingsOptionFactory.createSettingsOption(
+                new SettingsOption.Builder(SettingsConstants.BLOCK_BROKEN_MOVES, false));
 
         // Trainer pokemon
         SettingsOptionComposite trainersMod = SettingsOptionFactory.createSettingsOption(
@@ -872,7 +874,8 @@ public class Settings {
                 (Boolean) settingsMap.getValue(SettingsConstants.EVOS_CHANGE_METHOD),
                 (Boolean) settingsMap.getValue(SettingsConstants.EVOS_LV_1),
                 (Boolean) settingsMap.getValue(SettingsConstants.EVOS_SAME_STAGE),
-                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_NO_LEGENDARIES)));
+                (Boolean) settingsMap.getValue(SettingsConstants.EVOS_NO_LEGENDARIES),
+                (Boolean) settingsMap.getValue(SettingsConstants.DISABLE_ROM_HACK)));
 
         // @ 42 Starter Types
         try {
@@ -1125,6 +1128,7 @@ public class Settings {
         settings.setEvosLv1(restoreState(data[41], 1));
         settings.setEvosSameStage(restoreState(data[41], 2));
         settings.setEvosNoLegendaries(restoreState(data[41], 3));
+        settings.setDisableROMHack(restoreState(data[41], 4));
 
         settings.setStarterTypes(Type.intToTypes(FileFunctions.readFullInt(data, 42)));
 
@@ -1308,6 +1312,15 @@ public class Settings {
 
     public Settings setBlockBrokenMoves(boolean blockBrokenMoves) {
         settingsMap.putValue(SettingsConstants.BLOCK_BROKEN_MOVES, blockBrokenMoves);
+        return this;
+    }
+
+    public boolean isDisableROMHack() {
+        return settingsMap.getValue(SettingsConstants.DISABLE_ROM_HACK);
+    }
+
+    public Settings setDisableROMHack(boolean disableROMHack) {
+        settingsMap.putValue(SettingsConstants.DISABLE_ROM_HACK, disableROMHack);
         return this;
     }
 

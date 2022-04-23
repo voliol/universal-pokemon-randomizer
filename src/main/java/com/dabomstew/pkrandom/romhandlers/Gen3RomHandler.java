@@ -2111,7 +2111,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return (getRomEntry().getValue("StaticPokemonSupport") > 0) ? "Complete"
+        return disableROMHack || (getRomEntry().getValue("StaticPokemonSupport") > 0) ? "Complete"
                 : "No Static Pokemon";
     }
 
@@ -2873,7 +2873,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return (getRomEntry().getValue("StaticPokemonSupport") > 0);
+        return disableROMHack ? true : (getRomEntry().getValue("StaticPokemonSupport") > 0);
     }
 
     @Override
@@ -3686,7 +3686,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean isROMHack() {
-        return this.isRomHack;
+        return this.disableROMHack ? false : this.isRomHack;
     }
 
     @Override

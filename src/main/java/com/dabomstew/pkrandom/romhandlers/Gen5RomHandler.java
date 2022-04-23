@@ -1349,13 +1349,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean canChangeStaticPokemon() {
-        return getRomEntry().staticPokemonSupport;
+        return disableROMHack ? true : getRomEntry().staticPokemonSupport;
     }
 
     @Override
     public List<Pokemon> getStaticPokemon() {
         List<Pokemon> sp = new ArrayList<Pokemon>();
-        if (!getRomEntry().staticPokemonSupport) {
+        if (!disableROMHack && !getRomEntry().staticPokemonSupport) {
             return sp;
         }
         NARCArchive scriptNARC = getScriptNARC();
@@ -1367,7 +1367,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean setStaticPokemon(List<Pokemon> staticPokemon) {
-        if (!getRomEntry().staticPokemonSupport) {
+        if (!disableROMHack && !getRomEntry().staticPokemonSupport) {
             return false;
         }
         if (staticPokemon.size() != getRomEntry().staticPokemon.size()) {
@@ -1971,7 +1971,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public String getSupportLevel() {
-        return (getRomEntry().staticPokemonSupport) ? "Complete" : "No Static Pokemon";
+        return (disableROMHack || getRomEntry().staticPokemonSupport) ? "Complete" : "No Static Pokemon";
     }
 
     @Override
@@ -2877,7 +2877,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public boolean isROMHack() {
-        return this.isRomHack;
+        return this.disableROMHack ? false : this.isRomHack;
     }
 
     @Override

@@ -30,6 +30,7 @@ public class SettingsConstants {
         public static final String CURRENT_RESTRICTIONS = "currentRestrictions";
         public static final String BLOCK_BROKEN_MOVES = "blockBrokenMoves";
         public static final String RACE_MODE = "raceMode";
+        public static final String DISABLE_ROM_HACK = "disableROMHack";
         public static final String BASE_STATISTICS_MOD = "baseStatisticsMod";
         public static final String STANDARDIZE_EXP_CURVES = "standardizeEXPCurves";
         public static final String UPDATE_BASE_STATS = "updateBaseStats";
