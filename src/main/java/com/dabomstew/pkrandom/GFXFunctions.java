@@ -72,11 +72,10 @@ public class GFXFunctions {
         return bim;
     }
 
-    @Deprecated()
+    @Deprecated
     public static int conv16BitColorToARGB(int palValue) {
-        // TODO: is printing a string like this the way to do deprecation?
         System.out.println(
-                "GFXFunctions.conv16BitColorToARGB(int) is depracated. Use graphics.Color.ARGB() instead, or graphics.Color.highColorWordToARGB() in cases where you don't load a full palette.");
+                "GFXFunctions.conv16BitColorToARGB(int) is deprecated. Use graphics.Palette.toARGB() instead, or graphics.Color.highColorWordToARGB() in cases where you don't load a full palette.");
         int red = (int) ((palValue & 0x1F) * 8.25);
         int green = (int) (((palValue & 0x3E0) >> 5) * 8.25);
         int blue = (int) (((palValue & 0x7C00) >> 10) * 8.25);
