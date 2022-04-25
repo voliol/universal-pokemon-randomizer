@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import java.awt.image.BufferedImage;
 /*----------------------------------------------------------------------------*/
 /*--  AbstractDSRomHandler.java - a base class for DS rom handlers          --*/
 /*--                              which standardises common DS functions.   --*/
@@ -25,7 +26,9 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -283,7 +286,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     
     protected abstract int calculatePokemonShinyPaletteIndex(int i);
 
-    private Palette readPalette(NARCArchive NARC, int index) {
+    protected final Palette readPalette(NARCArchive NARC, int index) {
         byte[] withPrefixBytes = NARC.files.get(index);
         byte[] paletteBytes = Arrays.copyOfRange(withPrefixBytes, PALETTE_PREFIX_BYTES.length, withPrefixBytes.length);
         return new Palette(paletteBytes);
@@ -293,27 +296,71 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     protected void writePokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
-            NARCArchive pokespritesNARC = readNARC(NARCpath);
+            NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 
             for (Pokemon pk : mainPokemonList) {
 
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
                 byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
                 normalPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, normalPaletteBytes);
-                pokespritesNARC.getFiles().set(normalPaletteIndex, normalPaletteBytes);
+                pokeGraphicsNARC.getFiles().set(normalPaletteIndex, normalPaletteBytes);
                 
                 int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
                 byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
                 shinyPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, shinyPaletteBytes);
-                pokespritesNARC.getFiles().set(shinyPaletteIndex, shinyPaletteBytes);
+                pokeGraphicsNARC.getFiles().set(shinyPaletteIndex, shinyPaletteBytes);
 
             }
-            writeNARC(NARCpath, pokespritesNARC);
+            writeNARC(NARCpath, pokeGraphicsNARC);
 
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
+    
+    @Override
+    protected List<BufferedImage> getAllPokemonImages() {
+        List<BufferedImage> bims = new ArrayList<>();
+        
+        String NARCpath = getNARCPath("PokemonGraphics");
+        NARCArchive pokeGraphicsNARC;
+        try {
+            pokeGraphicsNARC = readNARC(NARCpath);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        
+        for (int i = 1; i < getPokemon().size(); i++) {
+            Pokemon pk = getPokemon().get(i);
+            bims.add(getPokemonImage(pk, pokeGraphicsNARC, false, false, true));
+        }
+        return bims;
+    }
+    
+    @Override
+    public final BufferedImage getMascotImage() {
+        try {
+            dumpAllPokemonSprites();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            Pokemon pk = randomPokemon();
+            String NARCpath = getNARCPath("PokemonGraphics");
+            NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
+            boolean shiny = random.nextInt(10) == 0;
+            
+            BufferedImage bim = getPokemonImage(pk, pokeGraphicsNARC, shiny, true, false);
+            
+            return bim;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+    
+    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
+    protected abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean shiny,
+            boolean transparentBackground, boolean includePalette);
 
     private byte[] concatenate(byte[] a, byte[] b) {
         byte[] sum = new byte[a.length + b.length];

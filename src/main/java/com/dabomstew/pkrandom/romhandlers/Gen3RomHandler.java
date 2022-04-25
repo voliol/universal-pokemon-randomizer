@@ -28,7 +28,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,9 +44,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
-// only for testing
-import javax.imageio.ImageIO;
-
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
@@ -56,7 +52,6 @@ import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
@@ -3365,7 +3360,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePalette(int offset, Palette palette) {
-        // TODO: safety-measures so they don't overwrite data after
+        // TODO: safety-measures so they don't overwrite data after/corrupt the rom
         byte[] paletteBytes = palette.toBytes();
         paletteBytes = DSCmp.compressLZ10(paletteBytes);
         for (int j = 0; j < paletteBytes.length; j++) {
@@ -3381,12 +3376,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return s;
     }
 
-    // just for testing
-    private void dumpAllPokemonSprites() {
+    // TODO: this version of getAllPokemonImages() does not need to exist, 
+    //  split its functionality between the super version and getPokemonImage()
+    @Override
+    protected List<BufferedImage> getAllPokemonImages() {
 
         final boolean DUMP_BACKSPRITES = true;
         final boolean DUMP_SHINY = true;
         final boolean DRAW_PALETTE_PIXELS = true;
+
+        List<BufferedImage> bims = new ArrayList<>();
 
         // TODO: offsets for all vanilla roms
         int frontSprites = getRomEntry().getValue("PokemonFrontSprites");
@@ -3402,8 +3401,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
             int fsOffset = readPointer(frontSprites + internalID * 8);
             byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging purposes
+            if (trueFrontSprite == null) {
+                fsOffset = readPointer(frontSprites);
+                trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+            }
+            
             int bsOffset = readPointer(backSprites + internalID * 8);
             byte[] trueBackSprite = DSDecmp.Decompress(rom, bsOffset);
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging purposes
+            if (trueBackSprite == null) {
+                bsOffset = readPointer(backSprites);
+                trueBackSprite = DSDecmp.Decompress(rom, bsOffset);
+            }
 
             int npOffset = readPointer(normalPalettes + internalID * 8);
             Palette normalPalette = readPalette(npOffset);
@@ -3442,49 +3452,50 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
 
-            // the writing
-            String fileAdress = "Pokemon_sprite_dump/gen3/" + String.format("%03d.png", i);
-            File outputfile = new File(fileAdress);
-            try {
-                ImageIO.write(bim, "png", outputfile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            bims.add(bim);
 
         }
+        return bims;
+
     }
 
     @Override
-    // TODO: maybe move getMascotImage to AbstractRomHandler. It should look mostly
-    // the same for Gen II-V
-    public BufferedImage getMascotImage() {
-        try {
-            dumpAllPokemonSprites();
-        } catch (Exception e) {
-            e.printStackTrace();
-            ;
-        }
+    protected BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground,
+            boolean includePalette) {
 
-        Pokemon mascotPk = randomPokemon();
-        int mascotPokemon = getPokedexToInternal()[mascotPk.number];
+        int mascotPokemon = getPokedexToInternal()[pk.number];
         int frontSprites = getRomEntry().getValue("PokemonFrontSprites");
-        int palettes = getRomEntry().getValue("PokemonNormalPalettes");
+        int palettes = shiny ? getRomEntry().getValue("PokemonShinyPalettes")
+                : getRomEntry().getValue("PokemonNormalPalettes");
 
         int fsOffset = readPointer(frontSprites + mascotPokemon * 8);
         byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+        // Uses the 0-index missingno sprite if the data failed to read, for debugging purposes
+        if (trueFrontSprite == null) {
+            fsOffset = readPointer(frontSprites);
+            trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+        }
 
         int palOffset = readPointer(palettes + mascotPokemon * 8);
         Palette palette = readPalette(palOffset);
         int[] convPalette = palette.toARGB();
-        // transparent background
-        convPalette[0] = 0;
+        if (transparentBackground) {
+            convPalette[0] = 0;
+        }
 
         // Make image, 4bpp
         BufferedImage bim = GFXFunctions.drawTiledImage(trueFrontSprite, convPalette, 64, 64, 4);
+        
+        if (includePalette) {
+            for (int j = 0; j < convPalette.length; j++) {
+                bim.setRGB(j, 0, convPalette[j]);
+            }
+        }
+
         return bim;
     }
 
-    protected String getPaletteDescriptionsFileName() {
+    private String getPaletteDescriptionsFileName() {
         switch (romEntry.romType) {
         case Gen3Constants.RomType_Ruby:
         case Gen3Constants.RomType_Sapp:

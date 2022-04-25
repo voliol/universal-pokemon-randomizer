@@ -62,6 +62,7 @@ import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.graphics.Gen1PaletteHandler;
+import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import compressors.Gen1Decmp;
 
@@ -2426,48 +2427,56 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             rom[palIndex + pk.getNumber()] = pk.getPaletteID(); //they are in Pokédex order //TODO: verify
         }
     }
+    
+    private Palette read4ColorPalette(int offset) {
+        byte[] paletteBytes = new byte[8];
+        for (int i=0; i < 8 ; i++) {
+            paletteBytes[i] = rom[offset + i];
+        }
+        return new Palette(paletteBytes);
+    }
 
     @Override
-    public BufferedImage getMascotImage() {
-        Pokemon mascot = randomPokemon();
+    protected BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground, boolean includePalette) {
+        int fsBank = calculateFrontSpriteBank(pk);
+        int fsOffset = calculateOffset(fsBank, pk.frontSpritePointer);
         
-        int fsBank = calculateFrontSpriteBank(mascot);
-        int fsOffset = calculateOffset(fsBank, mascot.frontSpritePointer);
+        Gen1Decmp sprite = new Gen1Decmp(rom, fsOffset);
+        sprite.decompress();
+        sprite.transpose();
+        int w = sprite.getWidth();
+        int h = sprite.getHeight();
         
-        Gen1Decmp mscSprite = new Gen1Decmp(rom, fsOffset);
-        mscSprite.decompress();
-        mscSprite.transpose();
-        int w = mscSprite.getWidth();
-        int h = mscSprite.getHeight();
+        byte[] data = sprite.getFlattenedData();
 
         // Palette?
-        int[] palette;
+        int[] convPalette;
         if (getRomEntry().getValue("MonPaletteIndicesOffset") > 0 && getRomEntry().getValue("SGBPalettesOffset") > 0) {
-            int palIndex = rom[getRomEntry().getValue("MonPaletteIndicesOffset") + mascot.number] & 0xFF;
+            int palIndex = rom[getRomEntry().getValue("MonPaletteIndicesOffset") + pk.number] & 0xFF;
             int palOffset = getRomEntry().getValue("SGBPalettesOffset") + palIndex * 8;
             if (getRomEntry().isYellow && getRomEntry().nonJapanese == 1) {
                 // Non-japanese Yellow can use GBC palettes instead.
                 // Stored directly after regular SGB palettes.
                 palOffset += 320;
             }
-            palette = new int[4];
-            for (int i = 0; i < 4; i++) {
-                palette[i] = GFXFunctions.conv16BitColorToARGB(readWord(palOffset + i * 2));
-            }
+            Palette palette = read4ColorPalette(palOffset);
+            convPalette = palette.toARGB();
         } else {
-            palette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
+            convPalette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
         }
 
-        byte[] data = mscSprite.getFlattenedData();
-
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, palette, w, h, 8);
-        GFXFunctions.pseudoTransparency(bim, palette[0]);
-
+        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
+        
+        if (transparentBackground) {
+            GFXFunctions.pseudoTransparency(bim, convPalette[0]);
+        }
+        if (includePalette) {
+            for (int j = 0; j < convPalette.length; j++) {
+                bim.setRGB(j, 0, convPalette[j]);
+            }
+        }
+        
         return bim;
-    }
-    
-    protected String getPaletteDescriptionsFileName() {
-        return null;
     }
 
     protected RomEntry getRomEntry() {

@@ -1,5 +1,9 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 /*----------------------------------------------------------------------------*/
 /*--  AbstractRomHandler.java - a base class for all rom handlers which     --*/
 /*--                            implements the majority of the actual       --*/
@@ -26,8 +30,11 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  You should have received a copy of the GNU General Public License     --*/
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
+
 import java.util.*;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import freemarker.template.Template;
 
@@ -4389,8 +4396,25 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected abstract void loadPokemonPalettes();
 
     protected abstract void writePokemonPalettes();
-
-    protected abstract String getPaletteDescriptionsFileName();
+    
+    // just for testing
+    protected final void dumpAllPokemonSprites() {
+        List<BufferedImage> bims = getAllPokemonImages();
+        
+        for (int i = 0; i < bims.size(); i++) {
+            String fileAdress = "Pokemon_sprite_dump/gen" + generationOfPokemon() + "/"
+                    + String.format("%03d_d.png", i + 1);
+            File outputfile = new File(fileAdress);
+            try {
+                ImageIO.write(bims.get(i), "png", outputfile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+    }
+    
+    protected abstract List<BufferedImage> getAllPokemonImages();
 
     @Override
     public void writeCheckValueToROM(int value) {

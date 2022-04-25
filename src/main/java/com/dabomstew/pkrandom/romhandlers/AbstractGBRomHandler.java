@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import java.awt.image.BufferedImage;
+
 /*----------------------------------------------------------------------------*/
 /*--  AbstractGBRomHandler.java - a base class for GB/GBA rom handlers      --*/
 /*--                              which standardises common GB(A) functions.--*/
@@ -28,10 +30,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
@@ -168,5 +173,35 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         return true;
     }
+    
+    @Override
+    protected List<BufferedImage> getAllPokemonImages() {
+        List<BufferedImage> bims = new ArrayList<>();
+        for (int i = 1; i < getPokemon().size(); i++) {
+            Pokemon pk = getPokemon().get(i);
+            bims.add(getPokemonImage(pk, false, false, true));
+        }
+        return bims;
+    }
+    
+    @Override
+    public final BufferedImage getMascotImage() {
+        try {
+            dumpAllPokemonSprites();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Pokemon pk = randomPokemon();
+        boolean shiny = random.nextInt(10) == 0;
+        
+        BufferedImage bim = getPokemonImage(pk, shiny, true, false);
+        
+        return bim;
+    }
+
+ // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
+    protected abstract BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground, boolean includePalette);
+    
+    
 
 }

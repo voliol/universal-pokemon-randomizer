@@ -34,6 +34,11 @@ manifest.mf
 *.dsv
 build_eclipse.xml
 /customnames.rncn
+Pokemon_sprite_dump/gen1/*.png
+Pokemon_sprite_dump/gen2/*.png
+Pokemon_sprite_dump/gen3/*.png
+Pokemon_sprite_dump/gen4/*.png
+Pokemon_sprite_dump/gen5/*.png
 
 # Maven
 .idea

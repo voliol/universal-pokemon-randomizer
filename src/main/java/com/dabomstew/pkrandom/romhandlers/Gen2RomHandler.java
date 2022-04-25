@@ -61,7 +61,6 @@ import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-import com.dabomstew.pkrandom.graphics.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.Gen2PaletteHandler;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
@@ -2315,19 +2314,48 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public BufferedImage getMascotImage() {
-        
-        Pokemon mascot = randomPokemon(); 
-        while (mascot.number == Gen2Constants.unownIndex) { // Unown is banned as handling it would add a ton of extra effort. 
-            mascot = randomPokemon(); 
-        }
-        // Each Pokemon has a front and back pic with a bank and a pointer
-        // (3*2=6)
+    protected BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground, boolean includePalette) {
+        // Each Pokemon has a pointer front and back pic with a bank and a pointer (3*2=6)
         // There is no zero-entry.
-        int picPointer = getRomEntry().getValue("PicPointers") + (mascot.number - 1) * 6;
-        int picWidth = mascot.picDimensions & 0x0F;
-        int picHeight = (mascot.picDimensions >> 4) & 0x0F;
+        int picPointer;
+        if (pk.getNumber() == Gen2Constants.unownIndex) {
+            int unownLetter = random.nextInt(26);
+            picPointer = getRomEntry().getValue("UnownPicPointers") + unownLetter * 6;
+        } else {
+        picPointer = getRomEntry().getValue("PicPointers") + (pk.number - 1) * 6;
+        }
+        
+        int picWidth = pk.picDimensions & 0x0F;
+        int picHeight = (pk.picDimensions >> 4) & 0x0F;
+        
+        byte[] data = readSpriteData(picPointer, picWidth, picHeight);
+        int w = picWidth * 8;
+        int h = picHeight * 8;
 
+        int paletteOffset = getRomEntry().getValue("PokemonPalettes") + pk.number * 8;
+        if (shiny) {
+            paletteOffset += 4;
+        }
+        // White and black are always in the palettes at positions 0 and 3, 
+        // so only the middle colors are stored and need to be read.
+        Palette palette = read2ColorPalette(paletteOffset);
+        int[] convPalette = new int[] { 0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000 };
+
+        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
+        
+        if (transparentBackground) {
+            GFXFunctions.pseudoTransparency(bim, convPalette[0]);
+        }
+        if (includePalette) {
+            for (int j = 0; j < convPalette.length; j++) {
+                bim.setRGB(j, 0, convPalette[j]);
+            }
+        }
+        
+        return bim;
+    }
+
+    private byte[] readSpriteData(int picPointer, int picWidth, int picHeight) {
         int picBank = (rom[picPointer] & 0xFF);
         if (getRomEntry().isCrystal) {
             // Crystal pic banks are offset by x36 for whatever reason.
@@ -2345,29 +2373,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int picOffset = calculateOffset(picBank, readWord(picPointer + 1));
 
         Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
-        int w = picWidth * 8;
-        int h = picHeight * 8;
-
-        // Palette?
-        // Two colors per Pokemon + two more for shiny, unlike pics there is a
-        // zero-entry.
-        // Black and white are left alone at the start and end of the palette.
-        int[] palette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
-        int paletteOffset = getRomEntry().getValue("PokemonPalettes") + mascot.number * 8;
-//        if (random.nextInt(10) == 0) {
-//            // Use shiny instead
-//            paletteOffset += 4;
-//        }
-        for (int i = 0; i < 2; i++) {
-            palette[i + 1] = GFXFunctions.conv16BitColorToARGB(readWord(paletteOffset + i * 2));
-        }
-
         byte[] data = mscSprite.getFlattenedData();
-
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, palette, w, h, 8);
-        GFXFunctions.pseudoTransparency(bim, palette[0]);
-
-        return bim;
+        return data;
     }
     
     @Override
@@ -2378,10 +2385,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 rom[cvOffset + i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
             }
         }
-    }
-    
-    protected String getPaletteDescriptionsFileName() {
-        return null;
     }
     
     protected RomEntry getRomEntry() {

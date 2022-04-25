@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
@@ -468,13 +467,13 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected String getPaletteDescriptionsFileName() {
+    protected PaletteHandler getPaletteHandler() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    protected PaletteHandler getPaletteHandler() {
+    protected List<BufferedImage> getAllPokemonImages() {
         // TODO Auto-generated method stub
         return null;
     }
