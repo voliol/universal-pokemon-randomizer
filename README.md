@@ -30,10 +30,6 @@ If you have any questions, I will try my best to answer them.
   See the Pokemon-sprite-dump folder.
 
 ## What needs to be done:
-- Palettes need size checking, so they don't corrupt the file when written to file. 
-  This is presumably why the gen III sprite dump does only have randomized palettes
-  beyond that of Vulpix; the sprite of Ninetales could not be dumped because one of
-  its palettes corrupted its backsprites (it does work if backsprites are not dumped).
   
 - The "sibling palette" feature of Artemis251's system. 
 
