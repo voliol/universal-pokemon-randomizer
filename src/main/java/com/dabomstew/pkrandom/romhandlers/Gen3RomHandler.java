@@ -3351,20 +3351,84 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (Pokemon pk : mainPokemonList) {
             int pokeNumber = getPokedexToInternal()[pk.getNumber()];
 
-            int normalPalOffset = readPointer(normalPaletteTableOffset + pokeNumber * 8);
-            writePalette(normalPalOffset, pk.getNormalPalette());
+            int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
+            rewritePalette(normalPalPointerOffset, pk.getNormalPalette());
 
-            int shinyPalOffset = readPointer(shinyPaletteTableOffset + pokeNumber * 8);
-            writePalette(shinyPalOffset, pk.getShinyPalette());
+            int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
+            rewritePalette(shinyPalPointerOffset, pk.getShinyPalette());
         }
     }
 
-    private void writePalette(int offset, Palette palette) {
-        // TODO: safety-measures so they don't overwrite data after/corrupt the rom
-        byte[] paletteBytes = palette.toBytes();
-        paletteBytes = DSCmp.compressLZ10(paletteBytes);
-        for (int j = 0; j < paletteBytes.length; j++) {
-            rom[offset + j] = paletteBytes[j];
+    private void rewritePalette(int pointerOffset, Palette palette) {
+        rewriteCompressedData(pointerOffset, palette.toBytes());
+    }
+
+    /*
+     * Assumes there is only one pointer to the compressed data. If there are more,
+     * use rewriteCompressedData(int, byte[], int[]) directly.
+     */
+    private void rewriteCompressedData(int pointerOffset, byte[] data) {
+        rewriteCompressedData(pointerOffset, data, new int[0]);
+    }
+
+    private void rewriteCompressedData(int pointerOffset, byte[] uncompressed, int[] secondaryPointerOffsets) {
+        byte[] compressed = DSCmp.compressLZ10(uncompressed);
+        int dataOffset = readPointer(pointerOffset);
+        int oldLength = compressedDataLength(dataOffset);
+
+        for (int secondaryPointerOffset : secondaryPointerOffsets) {
+            if (readPointer(secondaryPointerOffset) != dataOffset) {
+                throw new RandomizerIOException("Invalid secondary pointer.");
+            }
+        }
+
+        if (oldLength != compressed.length) {
+            freeSpace(dataOffset, oldLength);
+        }
+
+        if (oldLength < compressed.length) {
+            int newOffset = repointAndWriteToFreeSpace(pointerOffset, compressed);
+            for (int secondaryPointerOffset : secondaryPointerOffsets) {
+                writePointer(secondaryPointerOffset, newOffset);
+            }
+        } else {
+            writeBytes(dataOffset, compressed);
+        }
+    }
+
+    /*
+     * Returns the length in bytes of the compressed data at the pointer. NOT the
+     * length of the uncompressed data, but the length of it when compressed.
+     */
+    private int compressedDataLength(int pointer) {
+        // Yes, the "easiest" way to check how long compressed data is to uncompress it
+        // and then compress it back.
+        // A better solution would require understanding the inner workings of the LZ10.
+        byte[] uncompressed = DSDecmp.Decompress(rom, pointer);
+        byte[] compressed = DSCmp.compressLZ10(uncompressed);
+        return compressed.length;
+    }
+
+    /*
+     * Returns the new offset of the data.
+     */
+    // TODO: refactor old functions to use this
+    private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+        int freeSpaceOffset = getRomEntry().getValue("FreeSpace");
+        int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, data.length, freeSpaceOffset);
+        if (newOffset < freeSpaceOffset) {
+            throw new RandomizerIOException("ROM is full");
+        }
+
+        writePointer(pointerOffset, newOffset);
+        writeBytes(newOffset, data);
+
+        return newOffset;
+    }
+
+    private void freeSpace(int offset, int length) {
+        for (int i = 0; i < length; i++) {
+            writeByte(offset + i, Gen3Constants.freeSpaceByte);
         }
     }
 
@@ -3376,8 +3440,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return s;
     }
 
-    // TODO: this version of getAllPokemonImages() does not need to exist, 
-    //  split its functionality between the super version and getPokemonImage()
+    // TODO: this version of getAllPokemonImages() does not need to exist,
+    // split its functionality between the super version and getPokemonImage()
     @Override
     protected List<BufferedImage> getAllPokemonImages() {
 
@@ -3401,15 +3465,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
             int fsOffset = readPointer(frontSprites + internalID * 8);
             byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
-            // Uses the 0-index missingno sprite if the data failed to read, for debugging purposes
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging
+            // purposes
             if (trueFrontSprite == null) {
                 fsOffset = readPointer(frontSprites);
                 trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
             }
-            
+
             int bsOffset = readPointer(backSprites + internalID * 8);
             byte[] trueBackSprite = DSDecmp.Decompress(rom, bsOffset);
-            // Uses the 0-index missingno sprite if the data failed to read, for debugging purposes
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging
+            // purposes
             if (trueBackSprite == null) {
                 bsOffset = readPointer(backSprites);
                 trueBackSprite = DSDecmp.Decompress(rom, bsOffset);
@@ -3470,7 +3536,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         int fsOffset = readPointer(frontSprites + mascotPokemon * 8);
         byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
-        // Uses the 0-index missingno sprite if the data failed to read, for debugging purposes
+        // Uses the 0-index missingno sprite if the data failed to read, for debugging
+        // purposes
         if (trueFrontSprite == null) {
             fsOffset = readPointer(frontSprites);
             trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
@@ -3485,7 +3552,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         // Make image, 4bpp
         BufferedImage bim = GFXFunctions.drawTiledImage(trueFrontSprite, convPalette, 64, 64, 4);
-        
+
         if (includePalette) {
             for (int j = 0; j < convPalette.length; j++) {
                 bim.setRGB(j, 0, convPalette[j]);
@@ -3521,10 +3588,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     protected Pokemon[] getPokesInternal() {
         return pokesInternal;
-    }
-
-    protected int readByte(int offset) {
-        return rom[offset];
     }
 
     @Override

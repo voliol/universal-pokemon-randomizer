@@ -122,14 +122,14 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
     }
 
-    protected void readByteIntoFlags(boolean[] flags, int offsetIntoFlags, int offsetIntoROM) {
+    protected final void readByteIntoFlags(boolean[] flags, int offsetIntoFlags, int offsetIntoROM) {
         int thisByte = rom[offsetIntoROM] & 0xFF;
         for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
             flags[offsetIntoFlags + i] = ((thisByte >> i) & 0x01) == 0x01;
         }
     }
 
-    protected byte getByteFromFlags(boolean[] flags, int offsetIntoFlags) {
+    protected final byte getByteFromFlags(boolean[] flags, int offsetIntoFlags) {
         int thisByte = 0;
         for (int i = 0; i < 8 && (i + offsetIntoFlags) < flags.length; i++) {
             thisByte |= (flags[offsetIntoFlags + i] ? 1 : 0) << i;
@@ -137,32 +137,38 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return (byte) thisByte;
     }
 
-    protected int readByte(int offset) {
+    protected final int readByte(int offset) {
         return rom[offset];
     }
 
-    protected int readWord(int offset) {
+    protected final int readWord(int offset) {
         return readWord(rom, offset);
     }
 
-    protected int readWord(byte[] data, int offset) {
+    protected final int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
     }
 
-    protected void writeByte(int offset, byte value) {
+    protected final void writeByte(int offset, byte value) {
         rom[offset] = value;
     }
 
-    protected void writeWord(int offset, int value) {
+    protected final void writeBytes(int offset, byte[] values) {
+        for (int i = 0; i < values.length; i++) {
+            writeByte(offset + i, values[i]);
+        }
+    }
+
+    protected final void writeWord(int offset, int value) {
         writeWord(rom, offset, value);
     }
 
-    protected void writeWord(byte[] data, int offset, int value) {
+    protected final void writeWord(byte[] data, int offset, int value) {
         data[offset] = (byte) (value % 0x100);
         data[offset + 1] = (byte) ((value / 0x100) % 0x100);
     }
 
-    protected boolean matches(byte[] data, int offset, byte[] needle) {
+    protected final boolean matches(byte[] data, int offset, byte[] needle) {
         for (int i = 0; i < needle.length; i++) {
             if (offset + i >= data.length) {
                 return false;
@@ -173,7 +179,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         return true;
     }
-    
+
     @Override
     protected List<BufferedImage> getAllPokemonImages() {
         List<BufferedImage> bims = new ArrayList<>();
@@ -183,7 +189,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         return bims;
     }
-    
+
     @Override
     public final BufferedImage getMascotImage() {
         try {
@@ -193,15 +199,15 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         Pokemon pk = randomPokemon();
         boolean shiny = random.nextInt(10) == 0;
-        
+
         BufferedImage bim = getPokemonImage(pk, shiny, true, false);
-        
+
         return bim;
     }
 
- // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-    protected abstract BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground, boolean includePalette);
-    
-    
+    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of
+    // the pattern to replace it
+    protected abstract BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground,
+            boolean includePalette);
 
 }
