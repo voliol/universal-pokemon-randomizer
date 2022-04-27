@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 
-public class TypeTest {    
+public class TypeTest {
     private Pokemon prior = new Pokemon(), latter = new Pokemon();
     private Type priorInitial = Type.FIRE;
     private Type latterInitial = Type.DARK;
@@ -16,15 +16,15 @@ public class TypeTest {
 
     public Type randomType(Type[] excluded) {
         Type newType = Type.randomType(new Random());
-        while(excluded != null && Arrays.stream(excluded).anyMatch(newType::equals)) {
+        while (excluded != null && Arrays.stream(excluded).anyMatch(newType::equals)) {
             newType = Type.randomType(new Random());
         }
         return newType;
     }
-    
+
     @Test
     public void TestRandomTypeCarryZeroTypesDiffer() {
-     // ******************
+        // ******************
         // Types are the same
         // ******************
         int typesDiffer = 0;
@@ -32,7 +32,7 @@ public class TypeTest {
         prior.secondaryType = sharedType2;
         latter.primaryType = sharedType2;
         latter.secondaryType = sharedType;
-        
+
         // Prior first type changes
         Type newType = randomType(new Type[] {sharedType2});
         prior.primaryType = newType;
@@ -43,7 +43,7 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.secondaryType, prior.secondaryType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior second type changes
         newType = randomType(new Type[] {newType});
         prior.secondaryType = newType;
@@ -55,9 +55,9 @@ public class TypeTest {
         assertEquals(latter.secondaryType, newType);
         assertNotEquals(latter.secondaryType, null);
     }
-    
+
     @Test
-    public void TestRandomTypeCarryPrimaryTypesDiffer() {  
+    public void TestRandomTypeCarryPrimaryTypesDiffer() {
         // ******************
         // Primary Types differ
         // ******************
@@ -66,7 +66,7 @@ public class TypeTest {
         prior.secondaryType = sharedType;
         latter.primaryType = latterInitial;
         latter.secondaryType = sharedType;
-        
+
         // Prior first type changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = newType;
@@ -76,7 +76,7 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.secondaryType, prior.secondaryType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior second type changes
         prior.primaryType = priorInitial;
         latter.primaryType = latterInitial;
@@ -90,7 +90,7 @@ public class TypeTest {
         assertEquals(latter.secondaryType, prior.secondaryType);
         assertEquals(latter.secondaryType, newType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior primary type changes into latter initial
         prior.primaryType = latterInitial;
         prior.secondaryType = sharedType;
@@ -103,7 +103,7 @@ public class TypeTest {
         assertEquals(latter.secondaryType, prior.secondaryType);
         assertEquals(latter.secondaryType, sharedType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior secondary type changes into latter initial
         prior.primaryType = priorInitial;
         prior.secondaryType = latterInitial;
@@ -116,18 +116,18 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertNotEquals(latter.secondaryType, null);
     }
-    
+
     @Test
     public void TestRandomTypeCarrySecondaryTypesDiffer() {
         // ******************
-        // Secondary Types differ        
+        // Secondary Types differ
         // ******************
         int typesDiffer = 2;
         prior.primaryType = sharedType;
         prior.secondaryType = priorInitial;
         latter.primaryType = sharedType;
         latter.secondaryType = latterInitial;
-        
+
         // Prior first type changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = newType;
@@ -136,10 +136,10 @@ public class TypeTest {
         assertEquals(latter.typeChanged, 1);
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, prior.primaryType);
-        assertEquals(latter.primaryType , newType);
+        assertEquals(latter.primaryType, newType);
         assertEquals(latter.secondaryType, latterInitial);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior second type changes
         prior.primaryType = sharedType;
         latter.primaryType = sharedType;
@@ -152,7 +152,7 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, prior.primaryType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior primary type changes into latter initial
         prior.primaryType = latterInitial;
         prior.secondaryType = priorInitial;
@@ -166,7 +166,7 @@ public class TypeTest {
         assertEquals(latter.secondaryType, prior.primaryType);
         assertEquals(latter.secondaryType, latterInitial);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior secondary type changes into latter initial
         prior.primaryType = sharedType;
         prior.secondaryType = latterInitial;
@@ -179,7 +179,7 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, sharedType);
         assertNotEquals(latter.secondaryType, null);
-        
+
 
         // Latter has no secondary type and prior primary changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
@@ -194,7 +194,7 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, newType);
         assertEquals(latter.secondaryType, null);
-        
+
         // Latter has no secondary type and prior secondary changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = sharedType;
@@ -208,12 +208,13 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, newType);
         assertEquals(latter.secondaryType, null);
-        
+
         // Latter has no secondary type and prior secondary changes
         // and no types are shared
         // WEEPINBELL -> SNORLAX
         // RNG Seed: 113088671701646
-        // Settings: 181AREBAQgYAIQAAABylAaoAkcCKgGUFAARCQT+AAAAAAAACWjaDBorAQMSUG9rZW1vbiBZZWxsb3cgKFUpbBtkiuPDOIo=
+        // Settings:
+        // 181AREBAQgYAIQAAABylAaoAkcCKgGUFAARCQT+AAAAAAAACWjaDBorAQMSUG9rZW1vbiBZZWxsb3cgKFUpbBtkiuPDOIo=
         newType = Type.FIGHTING;
         prior.primaryType = Type.GRASS;
         prior.secondaryType = newType;
@@ -231,14 +232,14 @@ public class TypeTest {
     @Test
     public void TestRandomTypeCarrySecondaryAndPrimaryTypesDiffer() {
         // ******************
-        // Secondary and Primary Types differ        
+        // Secondary and Primary Types differ
         // ******************
         int typesDiffer = 3;
         prior.primaryType = sharedType;
         prior.secondaryType = priorInitial;
         latter.primaryType = latterInitial;
         latter.secondaryType = sharedType;
-        
+
         // Prior first type changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = newType;
@@ -250,7 +251,7 @@ public class TypeTest {
         assertEquals(latter.secondaryType, newType);
         assertEquals(latter.secondaryType, prior.primaryType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior second type changes
         prior.primaryType = sharedType;
         latter.secondaryType = sharedType;
@@ -263,7 +264,7 @@ public class TypeTest {
         assertEquals(latter.secondaryType, sharedType);
         assertEquals(latter.secondaryType, prior.primaryType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior primary type changes into latter initial
         prior.primaryType = latterInitial;
         prior.secondaryType = priorInitial;
@@ -276,7 +277,7 @@ public class TypeTest {
         assertEquals(latter.primaryType, latterInitial);
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior secondary type changes into latter initial
         prior.primaryType = sharedType;
         prior.secondaryType = latterInitial;
@@ -284,24 +285,24 @@ public class TypeTest {
         latter.secondaryType = sharedType;
         prior.typeChanged = 2;
         latter.assignTypeByReference(prior, typesDiffer, () -> randomType(null));
-        assertEquals(latter.typeChanged, 1);        
+        assertEquals(latter.typeChanged, 1);
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.secondaryType, sharedType);
         assertEquals(latter.secondaryType, prior.primaryType);
         assertNotEquals(latter.secondaryType, null);
     }
-        
+
     @Test
     public void TestRandomTypeCarryPrimaryAndSecondaryTypesDiffer() {
         // ******************
-        // Primary and Secondary Types differ        
+        // Primary and Secondary Types differ
         // ******************
         int typesDiffer = 4;
         prior.primaryType = priorInitial;
         prior.secondaryType = sharedType;
         latter.primaryType = sharedType;
         latter.secondaryType = latterInitial;
-        
+
         // Prior first type changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = newType;
@@ -310,9 +311,9 @@ public class TypeTest {
         assertEquals(latter.typeChanged, 2);
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, prior.secondaryType);
-        assertEquals(latter.primaryType , sharedType);
+        assertEquals(latter.primaryType, sharedType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior second type changes
         prior.primaryType = priorInitial;
         latter.secondaryType = latterInitial;
@@ -325,7 +326,7 @@ public class TypeTest {
         assertEquals(latter.primaryType, prior.secondaryType);
         assertEquals(latter.secondaryType, latterInitial);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior primary type changes into latter initial
         prior.primaryType = latterInitial;
         prior.secondaryType = sharedType;
@@ -338,7 +339,7 @@ public class TypeTest {
         assertEquals(latter.primaryType, prior.secondaryType);
         assertEquals(latter.primaryType, sharedType);
         assertNotEquals(latter.secondaryType, null);
-        
+
         // Prior secondary type changes into latter initial
         prior.primaryType = priorInitial;
         prior.secondaryType = latterInitial;
@@ -350,14 +351,14 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.secondaryType, latterInitial);
         assertEquals(latter.secondaryType, prior.secondaryType);
-        
+
 
         // Latter has no secondary type and prior primary changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = newType;
         prior.secondaryType = sharedType;
         latter.primaryType = sharedType;
-        latter.secondaryType = null; 
+        latter.secondaryType = null;
         prior.typeChanged = 1;
         latter.assignTypeByReference(prior, typesDiffer, () -> randomType(null));
         assertEquals(latter.typeChanged, 1);
@@ -365,7 +366,7 @@ public class TypeTest {
         assertNotEquals(latter.primaryType, latter.secondaryType);
         assertEquals(latter.primaryType, newType);
         assertEquals(latter.secondaryType, null);
-        
+
         // Latter has no secondary type and prior secondary changes
         newType = randomType(new Type[] {prior.secondaryType, latterInitial});
         prior.primaryType = priorInitial;
@@ -393,33 +394,36 @@ public class TypeTest {
         // Test resistances first
         // ******************
         Type newType = Type.randomStrength(new Random(), true, type1);
-        assertTrue(type1.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
-            Type.RESISTANT_TO.get(newType.ordinal()).contains(type1));
+        assertTrue(
+                type1.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
+                Type.getCombinedResistanceMap().get(newType).contains(type1));
         newType = Type.randomStrength(new Random(), true, type2);
-        assertTrue(type2.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
-            Type.RESISTANT_TO.get(newType.ordinal()).contains(type2));
+        assertTrue(
+                type2.camelCase() + " does not appear in " + newType.camelCase() + " resist list",
+                Type.getCombinedResistanceMap().get(newType).contains(type2));
         newType = Type.randomStrength(new Random(), true, type1, type2);
         assertTrue("Random Strength resistance for both types is not FLYING ",
-            newType == Type.FLYING);
+                newType == Type.FLYING);
 
         // ******************
         // Test strengths next
         // ******************
         type2 = Type.ICE;
         newType = Type.randomStrength(new Random(), false, type1);
-        assertTrue(type1.camelCase() + " does not appear in " + newType.camelCase() + " strength list",
-            Type.STRONG_AGAINST.get(newType.ordinal()).contains(type1));
+        assertTrue(
+                type1.camelCase() + " does not appear in " + newType.camelCase() + " strength list",
+                Type.STRONG_AGAINST.get(newType).contains(type1));
         newType = Type.randomStrength(new Random(), false, type2);
-        assertTrue(type2.camelCase() + " does not appear in " + newType.camelCase() + " strength list",
-            Type.STRONG_AGAINST.get(newType.ordinal()).contains(type2));
+        assertTrue(
+                type2.camelCase() + " does not appear in " + newType.camelCase() + " strength list",
+                Type.STRONG_AGAINST.get(newType).contains(type2));
         newType = Type.randomStrength(new Random(), false, type1, type2);
-        assertTrue("Random Strength offense for both types is not FLYING ",
-            newType == Type.FLYING);
+        assertTrue("Random Strength offense for both types is not FLYING ", newType == Type.FLYING);
 
         // ******************
         // Test Normal type
         // ******************
-        assertEquals(null,  Type.randomStrength(new Random(), false, Type.NORMAL));
+        assertEquals(null, Type.randomStrength(new Random(), false, Type.NORMAL));
 
     }
 
@@ -435,12 +439,12 @@ public class TypeTest {
         assertEquals(1, returnedList.size());
 
         // Test equal to
-        returnedList = Type.getWeaknesses(type1, Type.STRONG_AGAINST.get(type1.ordinal()).size());
-        assertEquals(Type.STRONG_AGAINST.get(type1.ordinal()).size(), returnedList.size());
+        returnedList = Type.getWeaknesses(type1, Type.STRONG_AGAINST.get(type1).size());
+        assertEquals(Type.STRONG_AGAINST.get(type1).size(), returnedList.size());
 
         // Test greater than
         returnedList = Type.getWeaknesses(type1, 999);
-        assertEquals(Type.STRONG_AGAINST.get(type1.ordinal()).size(), returnedList.size());
+        assertEquals(Type.STRONG_AGAINST.get(type1).size(), returnedList.size());
 
         // Test negative
         returnedList = Type.getWeaknesses(type1, -1);

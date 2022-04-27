@@ -39,32 +39,34 @@ public class Gen5Constants {
 
     public static final int pokemonCount = 649, moveCount = 559, nonUnovaPokemonCount = 493;
 
-    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
-            bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
-            bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
-            bsAbility3Offset = 26, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
+    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2,
+            bsSpeedOffset = 3, bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6,
+            bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12,
+            bsRareHeldItemOffset = 14, bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21,
+            bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26,
+            bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
-    public static final byte[] bw1NewStarterScript = { 0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
-            (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00 };
+    public static final byte[] bw1NewStarterScript = {0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7,
+            0x00, 0x00, 0x00, (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00};
 
     public static final String bw1StarterScriptMagic = "2400A702";
 
-    public static final int bw1StarterTextOffset = 18, bw1CherenText1Offset = 26, bw1CherenText2Offset = 53;
+    public static final int bw1StarterTextOffset = 18, bw1CherenText1Offset = 26,
+            bw1CherenText2Offset = 53;
 
     public static final int bw1StriatonCityGymTextOffset = 2, bw1StriatonCityGymText2Offset = 8,
-        bw1NacreneCityGymTextOffset = 1, bw1CasteliaCityBurghTextOffset = 0,
-        bw1CasteliaCityBurghText2Offset = 5, bw1CasteliaCityBurghText3Offset = 11,
-        bw1CherenBurghTextOffset = 1, bw1NimbasaCityTextOffset = 18, 
-        bw1JuniperElesaTextOffset = 2, bw1DriftveilCityTextOffset = 1,
-        bw1MistraltonCityTextOffset = 8, bw1MonkeyGiverTextOffset = 4,
-        bw1PinwheelForestTextOffset = 28, bw1CelestialTowerTextOffset = 6;
-    
-    public static final int bw1CasteliaCityItemTextOffset = 3, bw1CasteliaCityItemText2Offset = 7,
-        bw1CasteliaCityItemText3Offset = 11, bw1CasteliaCityPraiseTextOffset = 6;
+            bw1NacreneCityGymTextOffset = 1, bw1CasteliaCityBurghTextOffset = 0,
+            bw1CasteliaCityBurghText2Offset = 5, bw1CasteliaCityBurghText3Offset = 11,
+            bw1CherenBurghTextOffset = 1, bw1NimbasaCityTextOffset = 18,
+            bw1JuniperElesaTextOffset = 2, bw1DriftveilCityTextOffset = 1,
+            bw1MistraltonCityTextOffset = 8, bw1MonkeyGiverTextOffset = 4,
+            bw1PinwheelForestTextOffset = 28, bw1CelestialTowerTextOffset = 6;
 
-    public static final byte[] bw2NewStarterScript = { 0x28, 0x00, (byte) 0xA1, 0x40, 0x04, 0x00, (byte) 0xDE, 0x00,
-            0x00, 0x00, (byte) 0xFD, 0x01, 0x05, 0x00 };
+    public static final int bw1CasteliaCityItemTextOffset = 3, bw1CasteliaCityItemText2Offset = 7,
+            bw1CasteliaCityItemText3Offset = 11, bw1CasteliaCityPraiseTextOffset = 6;
+
+    public static final byte[] bw2NewStarterScript = {0x28, 0x00, (byte) 0xA1, 0x40, 0x04, 0x00,
+            (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xFD, 0x01, 0x05, 0x00};
 
     public static final String bw2StarterScriptMagic = "2800A1400400";
 
@@ -73,24 +75,26 @@ public class Gen5Constants {
     public static final int perSeasonEncounterDataLength = 232, bw2AreaDataEntryLength = 345,
             bw2EncounterAreaCount = 85;
 
-    public static final int[] encountersOfEachType = { 12, 12, 12, 5, 5, 5, 5 };
+    public static final int[] encountersOfEachType = {12, 12, 12, 5, 5, 5, 5};
 
-    public static final String[] encounterTypeNames = { "Grass/Cave", "Doubles Grass", "Shaking Spots", "Surfing",
-            "Surfing Spots", "Fishing", "Fishing Spots" };
+    public static final String[] encounterTypeNames = {"Grass/Cave", "Doubles Grass",
+            "Shaking Spots", "Surfing", "Surfing Spots", "Fishing", "Fishing Spots"};
 
-    public static final int[] habitatClassificationOfEachType = { 0, 0, 0, 1, 1, 2, 2 };
+    public static final int[] habitatClassificationOfEachType = {0, 0, 0, 1, 1, 2, 2};
 
-    public static final int bw2Route4AreaIndex = 40, bw2VictoryRoadAreaIndex = 76, bw2ReversalMountainAreaIndex = 73;
+    public static final int bw2Route4AreaIndex = 40, bw2VictoryRoadAreaIndex = 76,
+            bw2ReversalMountainAreaIndex = 73;
 
-    public static final int b2Route4EncounterFile = 104, b2VRExclusiveRoom1 = 71, b2VRExclusiveRoom2 = 73,
-            b2ReversalMountainStart = 49, b2ReversalMountainEnd = 54;
+    public static final int b2Route4EncounterFile = 104, b2VRExclusiveRoom1 = 71,
+            b2VRExclusiveRoom2 = 73, b2ReversalMountainStart = 49, b2ReversalMountainEnd = 54;
 
-    public static final int w2Route4EncounterFile = 105, w2VRExclusiveRoom1 = 78, w2VRExclusiveRoom2 = 79,
-            w2ReversalMountainStart = 55, w2ReversalMountainEnd = 60;
+    public static final int w2Route4EncounterFile = 105, w2VRExclusiveRoom1 = 78,
+            w2VRExclusiveRoom2 = 79, w2ReversalMountainStart = 55, w2ReversalMountainEnd = 60;
 
-    public static final int[] bw2HiddenHollowUnovaPokemon = { 505, 507, 510, 511, 513, 515, 519, 523, 525, 527, 529,
-            531, 533, 535, 538, 539, 542, 545, 546, 548, 550, 553, 556, 558, 559, 561, 564, 569, 572, 575, 578, 580,
-            583, 587, 588, 594, 596, 601, 605, 607, 610, 613, 616, 618, 619, 621, 622, 624, 626, 628, 630, 631, 632, };
+    public static final int[] bw2HiddenHollowUnovaPokemon = {505, 507, 510, 511, 513, 515, 519, 523,
+            525, 527, 529, 531, 533, 535, 538, 539, 542, 545, 546, 548, 550, 553, 556, 558, 559,
+            561, 564, 569, 572, 575, 578, 580, 583, 587, 588, 594, 596, 601, 605, 607, 610, 613,
+            616, 618, 619, 621, 622, 624, 626, 628, 630, 631, 632,};
 
     public static final String tmDataPrefix = "87038803";
 
@@ -107,58 +111,60 @@ public class Gen5Constants {
     public static final int slowpokeIndex = 79, karrablastIndex = 588, shelmetIndex = 616;
 
     public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82,
-        thunderStoneIndex = 83, waterStoneIndex = 84, leafStoneIndex = 85, shinyStoneIndex = 107,
-        duskStoneIndex = 108, dawnStoneIndex = 109;
+            thunderStoneIndex = 83, waterStoneIndex = 84, leafStoneIndex = 85,
+            shinyStoneIndex = 107, duskStoneIndex = 108, dawnStoneIndex = 109;
 
-    public static final List<Integer> availableStones = Arrays.asList(
-        Gen5Constants.moonStoneIndex, Gen5Constants.fireStoneIndex,
-        Gen5Constants.waterStoneIndex, Gen5Constants.thunderStoneIndex,
-        Gen5Constants.leafStoneIndex, Gen5Constants.sunStoneIndex,
-        Gen5Constants.shinyStoneIndex, Gen5Constants.duskStoneIndex,
-        Gen5Constants.dawnStoneIndex);
+    public static final List<Integer> availableStones = Arrays.asList(Gen5Constants.moonStoneIndex,
+            Gen5Constants.fireStoneIndex, Gen5Constants.waterStoneIndex,
+            Gen5Constants.thunderStoneIndex, Gen5Constants.leafStoneIndex,
+            Gen5Constants.sunStoneIndex, Gen5Constants.shinyStoneIndex,
+            Gen5Constants.duskStoneIndex, Gen5Constants.dawnStoneIndex);
 
     public static final int highestAbilityIndex = 164;
 
-    public static final int normalItemSetVarCommand = 0x28, hiddenItemSetVarCommand = 0x2A, normalItemVarSet = 0x800C,
-            hiddenItemVarSet = 0x8000;
+    public static final int normalItemSetVarCommand = 0x28, hiddenItemSetVarCommand = 0x2A,
+            normalItemVarSet = 0x800C, hiddenItemVarSet = 0x8000;
 
     public static final int scriptListTerminator = 0xFD13;
-    
+
     public static final int luckyEggIndex = 0xE7;
 
     public static final int[] mulchIndices = {0x5F, 0x60, 0x61, 0x62};
 
-    public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
-            MoveCategory.SPECIAL };
+    public static final String typeEffectivenessTableLocator = "0404040404020400";
+
+    public static final MoveCategory[] moveCategoryIndices =
+            {MoveCategory.STATUS, MoveCategory.PHYSICAL, MoveCategory.SPECIAL};
 
     public static byte moveCategoryToByte(MoveCategory cat) {
         switch (cat) {
-        case PHYSICAL:
-            return 1;
-        case SPECIAL:
-            return 2;
-        case STATUS:
-        default:
-            return 0;
+            case PHYSICAL:
+                return 1;
+            case SPECIAL:
+                return 2;
+            case STATUS:
+            default:
+                return 0;
         }
     }
 
     public static final Type[] typeTable = constructTypeTable();
 
-    public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(new Integer[] { 2, 3, 5, 6, 9, 12, 13, 19,
-            22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47, 50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90,
-            91, 92, 93 });
+    public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(
+            new Integer[] {2, 3, 5, 6, 9, 12, 13, 19, 22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47,
+                    50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90, 91, 92, 93});
 
-    public static final List<Integer> bw2RequiredFieldTMs = Arrays.asList(new Integer[] { 1, 2, 3, 5, 6, 12, 13, 19,
-            22, 26, 28, 29, 30, 36, 39, 41, 46, 47, 50, 52, 53, 56, 58, 61, 63, 65, 66, 67, 69, 71, 80, 81, 84, 85, 86,
-            90, 91, 92, 93 });
+    public static final List<Integer> bw2RequiredFieldTMs = Arrays.asList(new Integer[] {1, 2, 3, 5,
+            6, 12, 13, 19, 22, 26, 28, 29, 30, 36, 39, 41, 46, 47, 50, 52, 53, 56, 58, 61, 63, 65,
+            66, 67, 69, 71, 80, 81, 84, 85, 86, 90, 91, 92, 93});
 
     public static final List<Integer> bw1EarlyRequiredHMMoves = Arrays.asList(15);
 
     @SuppressWarnings("unchecked")
     public static final List<Integer> bw2EarlyRequiredHMMoves = Collections.EMPTY_LIST;
 
-    public static final List<Integer> fieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
+    public static final List<Integer> fieldMoves =
+            Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 230, 291);
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
@@ -186,44 +192,13 @@ public class Gen5Constants {
         if (type == null) {
             return 0x00; // normal?
         }
-        switch (type) {
-        case NORMAL:
-            return 0x00;
-        case FIGHTING:
-            return 0x01;
-        case FLYING:
-            return 0x02;
-        case POISON:
-            return 0x03;
-        case GROUND:
-            return 0x04;
-        case ROCK:
-            return 0x05;
-        case BUG:
-            return 0x06;
-        case GHOST:
-            return 0x07;
-        case FIRE:
-            return 0x09;
-        case WATER:
-            return 0x0A;
-        case GRASS:
-            return 0x0B;
-        case ELECTRIC:
-            return 0x0C;
-        case PSYCHIC:
-            return 0x0D;
-        case ICE:
-            return 0x0E;
-        case DRAGON:
-            return 0x0F;
-        case STEEL:
-            return 0x08;
-        case DARK:
-            return 0x10;
-        default:
-            return 0; // normal by default
-        }
+
+        // return type, or normal by default
+        return (byte) Math.max(Arrays.asList(typeTable).indexOf(type), 0);
+    }
+
+    public static boolean isTypeSupported(Type type) {
+        return Arrays.asList(typeTable).indexOf(type) > -1;
     }
 
     public static ItemList allowedItems, nonBadItems, trainerItemList;

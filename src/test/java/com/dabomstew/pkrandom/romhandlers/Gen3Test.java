@@ -24,42 +24,48 @@ public class Gen3Test {
 
     ArrayList<Pokemon> pokemonList;
     ArrayList<Trainer> trainerList;
-    
+
     /**
-     * When removing trades, verify that LEVEL_HIGH_BEAUTY adds
-     * a new HAPPINESS evolution
+     * When removing trades, verify that LEVEL_HIGH_BEAUTY adds a new HAPPINESS evolution
      */
     @Test
     public void TestHighBeautyTradeEvoRemoval() {
-        try (MockedStatic<com.dabomstew.pkrandom.RomFunctions> mockRomFunctions = mockStatic(com.dabomstew.pkrandom.RomFunctions.class)) {
+        try (MockedStatic<com.dabomstew.pkrandom.RomFunctions> mockRomFunctions =
+                mockStatic(com.dabomstew.pkrandom.RomFunctions.class)) {
             Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
-            doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
-            doReturn(mock(Map.class)).when(romhandler).getTemplateData();
+            doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler)
+                    .getRomEntry();
             resetDataModel(romhandler);
+            romhandler.setPokemonPool(null, null);
             romhandler.removeTradeEvolutions(true, false);
             // Stream the "evolutionsFrom" list to see if any evolutions are now HAPPINESS
-            assertTrue(pokemonList.get(0).evolutionsFrom.stream().anyMatch(ev -> EvolutionType.HAPPINESS.equals(ev.type)));
+            assertTrue(romhandler.getMainPokemonList().get(0).evolutionsFrom.stream()
+                    .anyMatch(ev -> EvolutionType.HAPPINESS.equals(ev.type)));
         }
     }
 
     /**
      * Test Gen3 change methods only includes methods available in Gen3
+     * 
      * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
     public void TestGen3ChangeMethods() {
         Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
         resetDataModel(romhandler);
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
-        romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
-        romhandler.getPokemon().forEach(pk -> {
+        romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false, false,
+                false);
+        romhandler.getMainPokemonList().forEach(pk -> {
             ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
             ArrayList<Integer> usedStones = new ArrayList<Integer>();
             ArrayList<Integer> usedItems = new ArrayList<Integer>();
             pk.evolutionsFrom.forEach(evo -> {
-                assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
-                assertTrue(evo.type + " was not available in Gen 3", EvolutionType.isInGeneration(3, evo.type));
-                assertFalse(evo.type + " should be removed", EvolutionType.isOfType("Banned", evo.type));
+                assertTrue("Evolution is invalid - " + evo,
+                        evo.type != null && evo.type != EvolutionType.NONE);
+                assertTrue(evo.type + " was not available in Gen 3",
+                        EvolutionType.isInGeneration(3, evo.type));
+                assertFalse(evo.type + " should be removed",
+                        EvolutionType.isOfType("Banned", evo.type));
 
                 // Collect the method
                 if (EvolutionType.isOfType("Stone", evo.type)) {
@@ -73,40 +79,48 @@ public class Gen3Test {
 
             // Verify no duplicates
             HashSet<EvolutionType> uniqueMethods = new HashSet<EvolutionType>(usedMethods);
-            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()), 
-                uniqueMethods.size() == usedMethods.size());
+            assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()),
+                    uniqueMethods.size() == usedMethods.size());
             HashSet<Integer> uniqueStones = new HashSet<Integer>(usedStones);
-            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()), 
+            assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()),
                     uniqueStones.size() == usedStones.size());
             HashSet<Integer> uniqueItems = new HashSet<Integer>(usedItems);
-            assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()), 
+            assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()),
                     uniqueItems.size() == usedItems.size());
         });
     }
 
     /**
      * Test Gen3 change methods is correctly affected by remove impossible evos
+     * 
      * Also verify no duplicate methods used, and no invalid evolutions
      */
     @Test
     public void TestGen3RemoveEvosChangeMethods() {
-        try (MockedStatic<com.dabomstew.pkrandom.RomFunctions> mockRomFunctions = mockStatic(com.dabomstew.pkrandom.RomFunctions.class)) {
+        try (MockedStatic<com.dabomstew.pkrandom.RomFunctions> mockRomFunctions =
+                mockStatic(com.dabomstew.pkrandom.RomFunctions.class)) {
             Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
             resetDataModel(romhandler);
-            doReturn(mock(Map.class)).when(romhandler).getTemplateData();
-            doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler).getRomEntry();
-            mockRomFunctions.when(() -> com.dabomstew.pkrandom.RomFunctions.removeUsedStones(any(), any())).thenCallRealMethod();
-            romhandler.randomizeEvolutions(false, false, true, true, false, false, false);
+            doReturn(Gen3RomHandler.getRomFromSupportedRom("Emerald (U)")).when(romhandler)
+                    .getRomEntry();
+            mockRomFunctions
+                    .when(() -> com.dabomstew.pkrandom.RomFunctions.removeUsedStones(any(), any()))
+                    .thenCallRealMethod();
+            romhandler.randomizeEvolutions(false, false, true, true, false, false, false, false,
+                    false, false);
             romhandler.removeTradeEvolutions(false, true);
-            romhandler.getPokemon().forEach(pk -> {
+            romhandler.getMainPokemonList().forEach(pk -> {
                 ArrayList<EvolutionType> usedMethods = new ArrayList<EvolutionType>();
                 ArrayList<Integer> usedStones = new ArrayList<Integer>();
                 ArrayList<Integer> usedItems = new ArrayList<Integer>();
                 pk.evolutionsFrom.forEach(evo -> {
-                    assertTrue("Evolution is invalid - " + evo, evo.type != null && evo.type != EvolutionType.NONE);
-                    assertTrue(evo.type + " was not available in Gen 3", EvolutionType.isInGeneration(3, evo.type));
-                    assertFalse(evo.type + " should be removed", EvolutionType.isOfType("Trade", evo.type) 
-                    || EvolutionType.isOfType("Banned", evo.type));
+                    assertTrue("Evolution is invalid - " + evo,
+                            evo.type != null && evo.type != EvolutionType.NONE);
+                    assertTrue(evo.type + " was not available in Gen 3",
+                            EvolutionType.isInGeneration(3, evo.type));
+                    assertFalse(evo.type + " should be removed",
+                            EvolutionType.isOfType("Trade", evo.type)
+                                    || EvolutionType.isOfType("Banned", evo.type));
 
                     // Collect the method
                     if (EvolutionType.isOfType("Stone", evo.type)) {
@@ -120,13 +134,13 @@ public class Gen3Test {
 
                 // Verify no duplicates
                 HashSet<EvolutionType> uniqueMethods = new HashSet<EvolutionType>(usedMethods);
-                assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()), 
-                    uniqueMethods.size() == usedMethods.size());
+                assertTrue("Duplicate method detected - " + Arrays.toString(usedMethods.toArray()),
+                        uniqueMethods.size() == usedMethods.size());
                 HashSet<Integer> uniqueStones = new HashSet<Integer>(usedStones);
-                assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()), 
+                assertTrue("Duplicate stone detected - " + Arrays.toString(usedStones.toArray()),
                         uniqueStones.size() == usedStones.size());
                 HashSet<Integer> uniqueItems = new HashSet<Integer>(usedItems);
-                assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()), 
+                assertTrue("Duplicate item detected - " + Arrays.toString(usedItems.toArray()),
                         uniqueItems.size() == usedItems.size());
             });
         }
@@ -139,16 +153,19 @@ public class Gen3Test {
     public void TestGen3TrainerRandomHeldItem() {
         Gen3RomHandler romhandler = spy(new Gen3RomHandler(new Random()));
         doReturn(Gen3RomHandler.getRomFromSupportedRom("Ruby (U)")).when(romhandler).getRomEntry();
-        doReturn(mock(Map.class)).when(romhandler).getTemplateData();
         resetDataModel(romhandler);
-        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false, true, false, 0);
+        romhandler.randomizeTrainerPokes(false, false, false, false, false, false, false, false,
+                true, false, 0);
         for (Trainer t : romhandler.getTrainers()) {
             for (TrainerPokemon tp : t.getPokemon()) {
-                assertTrue(tp.heldItem + " was not in Gen 3 allowed items.", 
-                    Gen3Constants.trainerItemList.isAllowed(tp.heldItem));
+                assertTrue(tp.heldItem + " was not in Gen 3 allowed items.",
+                        Gen3Constants.trainerItemList.isAllowed(tp.heldItem));
             }
         }
     }
+
+    // TODO: Test that updateTypeEffectivenss runs and updates Type.STRONG_AGAINST and
+    // Type.RESISTANT_TO correctly
 
     /**
      * Function for granular modification of data model
@@ -156,7 +173,7 @@ public class Gen3Test {
     private void setUp() {
         pokemonList = spy(ArrayList.class);
         trainerList = spy(ArrayList.class);
-        for(int i = 0; i < Gen3Constants.unhackedRealPokedex; i++) {
+        for (int i = 0; i < Gen3Constants.unhackedRealPokedex; i++) {
             Pokemon pk = new Pokemon();
             pk.number = i;
             pk.name = "";
@@ -167,9 +184,10 @@ public class Gen3Test {
                 pk.evolutionsFrom.add(ev);
             }
         }
-        Evolution ev = new Evolution(pokemonList.get(0), pokemonList.get(1), false, EvolutionType.LEVEL_HIGH_BEAUTY, 0);
-        pokemonList.get(0).evolutionsFrom.add(ev);
-        
+        Evolution ev = new Evolution(pokemonList.get(1), pokemonList.get(2), false,
+                EvolutionType.LEVEL_HIGH_BEAUTY, 0);
+        pokemonList.get(1).evolutionsFrom.add(ev);
+
         while (trainerList.size() < 693) {
             Trainer t = new Trainer();
             TrainerPokemon tp = mock(TrainerPokemon.class);
@@ -181,6 +199,7 @@ public class Gen3Test {
 
     /**
      * Puts data model back to initial form and assigns mock and spy substitutions
+     * 
      * @param romhandler The RomHandler under test
      */
     private void resetDataModel(Gen3RomHandler romhandler) {

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /*----------------------------------------------------------------------------*/
 /*--  EvolutionType.java - represents an evolution method.                  --*/
@@ -58,15 +61,36 @@ public enum EvolutionType {
     LEVEL_MOSS_ROCK(-1, -1, -1, 25, 26),
     LEVEL_ICY_ROCK(-1, -1, -1, 26, 27),
     TRADE_SPECIAL(-1, -1, -1, -1, 7),
+    FAIRY_AFFECTION(-1, -1, -1, -1, -1),
+    LEVEL_WITH_DARK(-1, -1, -1, -1, -1),
+    LEVEL_UPSIDE_DOWN(-1, -1, -1, -1, -1),
+    LEVEL_RAIN(-1, -1, -1, -1, -1),
+    LEVEL_DAY(-1, -1, -1, -1, -1),
+    LEVEL_NIGHT(-1, -1, -1, -1, -1),
+    MEGA_EVOLVE(-1, -1, -1, -1, -1),
+    LEVEL_FEMALE_ESPURR(-1, -1, -1, -1, -1),
+    LEVEL_GAME(-1, -1, -1, -1, -1),
+    LEVEL_DAY_GAME(-1, -1, -1, -1, -1),
+    LEVEL_NIGHT_GAME(-1, -1, -1, -1, -1),
+    LEVEL_SNOWY(-1, -1, -1, -1, -1),
+    LEVEL_DUSK(-1, -1, -1, -1, -1),
+    LEVEL_NIGHT_ULTRA(-1, -1, -1, -1, -1),
+    STONE_ULTRA(-1, -1, -1, -1, -1),
     NONE(-1, -1, -1, -1, -1);
     /* @formatter:on */
 
     private int[] indexNumbers;
-    private static EvolutionType[][] reverseIndexes = new EvolutionType[5][30];
+    private static ArrayList<Integer> methodsAvailable = new ArrayList<Integer>();
+    private static EvolutionType[][] reverseIndexes = new EvolutionType[5][256];
     private static ArrayList<EvolutionType> bannedMethods = new ArrayList<EvolutionType>(
-        // These don't work for anything but Nincada -> Shedninja
-        // And Karrablast -> Shelmet
-        Arrays.asList(LEVEL_CREATE_EXTRA, LEVEL_IS_EXTRA, TRADE_SPECIAL));
+            // These don't work for anything but Nincada -> Shedninja
+            // And Karrablast -> Shelmet
+            // And MEGA_EVOLVE is too complicated
+            Arrays.asList(LEVEL_CREATE_EXTRA, LEVEL_IS_EXTRA, TRADE_SPECIAL, MEGA_EVOLVE));
+    private static ArrayList<EvolutionType> usesDifferentData = new ArrayList<EvolutionType>(
+            // These methods do not follow standard data structure - skip requirements and
+            // just copy the data
+            Arrays.asList(MEGA_EVOLVE));
 
     static {
         for (EvolutionType et : EvolutionType.values()) {
@@ -82,19 +106,36 @@ public enum EvolutionType {
         this.indexNumbers = indexes;
     }
 
+    public static void modifyEvolutionTypes(int generation,
+            Map<Integer, EvolutionType> evolutionMethods) {
+        evolutionMethods.forEach((k, v) -> {
+            if (v != NONE) {
+                v.indexNumbers[generation - 1] = k;
+                reverseIndexes[generation - 1][k] = v;
+                methodsAvailable.add(k);
+            } else {
+                EvolutionType oldByte = reverseIndexes[generation - 1][k];
+                if (oldByte != null) {
+                    oldByte.indexNumbers[generation - 1] = -1;
+                    reverseIndexes[generation - 1][k] = null;
+                }
+            }
+        });
+    }
+
     public int toIndex(int generation) {
         return indexNumbers[generation - 1];
     }
 
     public boolean usesLevel() {
         return (this == LEVEL) || (this == LEVEL_ATTACK_HIGHER) || (this == LEVEL_DEFENSE_HIGHER)
-            || (this == LEVEL_ATK_DEF_SAME) || (this == LEVEL_LOW_PV) || (this == LEVEL_HIGH_PV)
-            || (this == LEVEL_CREATE_EXTRA) || (this == LEVEL_IS_EXTRA) || (this == LEVEL_MALE_ONLY)
-            || (this == LEVEL_FEMALE_ONLY);
+                || (this == LEVEL_ATK_DEF_SAME) || (this == LEVEL_LOW_PV) || (this == LEVEL_HIGH_PV)
+                || (this == LEVEL_CREATE_EXTRA) || (this == LEVEL_IS_EXTRA)
+                || (this == LEVEL_MALE_ONLY) || (this == LEVEL_FEMALE_ONLY);
     }
 
     public static boolean isInGeneration(int generation, EvolutionType et) {
-        return et.indexNumbers[generation-1] > -1;
+        return et.indexNumbers[generation - 1] > -1;
     }
 
     public static EvolutionType fromIndex(int generation, int index) {
@@ -102,70 +143,77 @@ public enum EvolutionType {
     }
 
     public static EvolutionType randomFromGeneration(Random random, int generation) {
-        int choice = random.nextInt(generationCount(generation));
-        EvolutionType et = reverseIndexes[generation-1][choice+1];
-        while (bannedMethods.contains(et)) {
-            choice = random.nextInt(generationCount(generation));
-            et = reverseIndexes[generation-1][choice+1];
+        List<Integer> available = generationCount(generation);
+        int choice = available.get(random.nextInt(available.size()));
+        EvolutionType et = reverseIndexes[generation - 1][choice];
+        while (bannedMethods.contains(et) || et == null) {
+            choice = available.get(random.nextInt(available.size()));
+            et = reverseIndexes[generation - 1][choice];
         }
         if (generation == 2) {
             // Since Gen 2 has a special pointer value for the version of happiness,
             // all indices are set at 4. We select a specific version by getting a
             // number from 0-2 and adding 4 to match the index of that type
             if (et == EvolutionType.HAPPINESS) {
-                et = EvolutionType.values()[random.nextInt(3)+4];
+                et = EvolutionType.values()[random.nextInt(3) + 4];
             }
             // Same thing here, but for atk-def methods
             else if (et == EvolutionType.LEVEL_ATTACK_HIGHER) {
-                et = EvolutionType.values()[random.nextInt(3)+7];
+                et = EvolutionType.values()[random.nextInt(3) + 7];
             }
             // Same thing here, but for trade and trade_item
             else if (et == EvolutionType.TRADE) {
-                et = EvolutionType.values()[random.nextInt(2)+2];
+                et = EvolutionType.values()[random.nextInt(2) + 2];
             }
         }
         return et;
     }
 
-    public static int generationCount(int generation) {
-        switch(generation) {
-            case 1:
-                return 3;
-            case 2:
-                return 5;
-            case 3:
-                return 15;
-            case 4:
-                return 26;
-            case 5:
-                return 27;
-            default:
-                return 0;
+    public static List<Integer> generationCount(int generation) {
+        if (methodsAvailable.size() > 0) {
+            return methodsAvailable;
+        } else {
+            switch (generation) {
+                case 1:
+                    return IntStream.range(1, 4).boxed().collect(Collectors.toList());
+                case 2:
+                    return IntStream.range(1, 6).boxed().collect(Collectors.toList());
+                case 3:
+                    return IntStream.range(1, 16).boxed().collect(Collectors.toList());
+                case 4:
+                    return IntStream.range(1, 27).boxed().collect(Collectors.toList());
+                case 5:
+                    return IntStream.range(1, 28).boxed().collect(Collectors.toList());
+                default:
+                    return Collections.EMPTY_LIST;
+            }
         }
     }
 
     public static ArrayList<EvolutionType> happinessEvos() {
-        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, 
-            EvolutionType.HAPPINESS_NIGHT));
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.HAPPINESS,
+                EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT));
     }
 
     public static ArrayList<EvolutionType> uncontrolledLevelEvos() {
-        return  new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL, EvolutionType.LEVEL_HIGH_PV,
-            EvolutionType.LEVEL_LOW_PV, EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_MALE_ONLY));
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL,
+                EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_LOW_PV,
+                EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_MALE_ONLY));
     }
 
     public static ArrayList<EvolutionType> tradeEvos() {
-        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.TRADE, EvolutionType.TRADE_ITEM));
+        return new ArrayList<EvolutionType>(
+                Arrays.asList(EvolutionType.TRADE, EvolutionType.TRADE_ITEM));
     }
 
     public static ArrayList<EvolutionType> stoneEvos() {
-        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.STONE, EvolutionType.STONE_MALE_ONLY, 
-            EvolutionType.STONE_FEMALE_ONLY));
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.STONE,
+                EvolutionType.STONE_MALE_ONLY, EvolutionType.STONE_FEMALE_ONLY));
     }
 
     public static ArrayList<EvolutionType> itemEvos() {
-        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL_ITEM_DAY, EvolutionType.LEVEL_ITEM_NIGHT,
-            EvolutionType.TRADE_ITEM));
+        return new ArrayList<EvolutionType>(Arrays.asList(EvolutionType.LEVEL_ITEM_DAY,
+                EvolutionType.LEVEL_ITEM_NIGHT, EvolutionType.TRADE_ITEM));
     }
 
     public static ArrayList<EvolutionType> partyEvos() {
@@ -174,6 +222,7 @@ public enum EvolutionType {
 
     /**
      * Check if an evolution type is of a particular group
+     * 
      * @param method - The group name
      * @param toCheck - The evolution type to compare with the group
      * @return - True if it's in the group, false if it's not or if the method is unsupported
@@ -196,6 +245,8 @@ public enum EvolutionType {
                 return partyEvos().contains(toCheck);
             case "BANNED":
                 return bannedMethods.contains(toCheck);
+            case "DIFFERENT":
+                return usesDifferentData.contains(toCheck);
             default:
                 return false;
         }
@@ -203,10 +254,11 @@ public enum EvolutionType {
 
     /**
      * Check if a list of evolution types contains a type used in a method
+     * 
      * @param method - The group to check
      * @param methodGroup - List of evolution types to compare with
-     * @return - True if there is at least one shared method between the lists, false if not or
-     * if method is unsupported
+     * @return - True if there is at least one shared method between the lists, false if not or if
+     *         method is unsupported
      */
     public static boolean usesTypeOf(String method, List<EvolutionType> methodGroup) {
         switch (method.toUpperCase()) {
@@ -215,7 +267,8 @@ public enum EvolutionType {
             case "UNCONTROLLED":
                 return !Collections.disjoint(uncontrolledLevelEvos(), methodGroup);
             case "BRANCHLEVEL":
-                return !Collections.disjoint(uncontrolledLevelEvos(), methodGroup) && !methodGroup.contains(EvolutionType.LEVEL);
+                return !Collections.disjoint(uncontrolledLevelEvos(), methodGroup)
+                        && !methodGroup.contains(EvolutionType.LEVEL);
             case "TRADE":
                 return !Collections.disjoint(tradeEvos(), methodGroup);
             case "STONE":
@@ -226,19 +279,25 @@ public enum EvolutionType {
                 return !Collections.disjoint(partyEvos(), methodGroup);
             case "BANNED":
                 return !Collections.disjoint(bannedMethods, methodGroup);
+            case "DIFFERENT":
+                return !Collections.disjoint(usesDifferentData, methodGroup);
             default:
-                return false; 
+                return false;
         }
     }
 
     public static boolean usesTypeOf(String method, List<EvolutionType> methodGroup, int size) {
         switch (method.toUpperCase()) {
             case "HAPPINESS":
-                return happinessEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+                return happinessEvos().stream().filter(ev -> methodGroup.contains(ev))
+                        .count() >= size;
             case "UNCONTROLLED":
-                return uncontrolledLevelEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+                return uncontrolledLevelEvos().stream().filter(ev -> methodGroup.contains(ev))
+                        .count() >= size;
             case "BRANCHLEVEL":
-                return uncontrolledLevelEvos().stream().filter(ev -> methodGroup.contains(ev) && ev != EvolutionType.LEVEL).count() >= size;
+                return uncontrolledLevelEvos().stream()
+                        .filter(ev -> methodGroup.contains(ev) && ev != EvolutionType.LEVEL)
+                        .count() >= size;
             case "TRADE":
                 return tradeEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
             case "STONE":
@@ -248,7 +307,11 @@ public enum EvolutionType {
             case "PARTY":
                 return partyEvos().stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
             case "BANNED":
-                return bannedMethods.stream().filter(ev -> methodGroup.contains(ev)).count() >= size;
+                return bannedMethods.stream().filter(ev -> methodGroup.contains(ev))
+                        .count() >= size;
+            case "DIFFERENT":
+                return usesDifferentData.stream().filter(ev -> methodGroup.contains(ev))
+                        .count() >= size;
             default:
                 return false;
         }

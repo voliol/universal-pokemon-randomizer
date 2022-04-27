@@ -113,14 +113,63 @@
 
 		<#if updateEffectiveness??>
 			<h2 id="fte">Fixing Type Effectiveness</h2>
-			<ul>
-				<li><strong>Replaced:</strong> <span class="pk-type poison">Poison</span> <em>super effective</em> vs <span class="pk-type bug">Bug</span> 
-				=> <span class="pk-type ice">Ice</span> <em>not very effective</em> vs <span class="pk-type fire">Fire</span></li>
-				<li><strong>Changed:</strong> <span class="pk-type bug">Bug</span> <em>super effective</em> vs <span class="pk-type poison">Poison</span>
-                => <span class="pk-type bug">Bug</span> <em>not very effective</em> vs <span class="pk-type poison">Poison</span></li>
-				<li><strong>Changed:</strong> <span class="pk-type psychic">Psychic</span> <em>immune</em> to <span class="pk-type ghost">Ghost</span>
-                => <span class="pk-type ghost">Ghost</span> <em>super effective</em> vs <span class="pk-type psychic">Psychic</span></li>
-			</ul>
+			<#if gen1>
+				<ul>
+					<li><strong>Replaced:</strong> <span class="pk-type poison">Poison</span> <em>super effective</em> vs <span class="pk-type bug">Bug</span> 
+					=> <span class="pk-type ice">Ice</span> <em>not very effective</em> vs <span class="pk-type fire">Fire</span></li>
+					<li><strong>Changed:</strong> <span class="pk-type bug">Bug</span> <em>super effective</em> vs <span class="pk-type poison">Poison</span>
+					=> <span class="pk-type bug">Bug</span> <em>not very effective</em> vs <span class="pk-type poison">Poison</span></li>
+					<li><strong>Changed:</strong> <span class="pk-type psychic">Psychic</span> <em>immune</em> to <span class="pk-type ghost">Ghost</span>
+					=> <span class="pk-type ghost">Ghost</span> <em>super effective</em> vs <span class="pk-type psychic">Psychic</span></li>
+				</ul>
+			<#else>
+				<ul>
+					<li><strong>Replaced:</strong> <span class="pk-type ghost">Ghost</span> <em>not very effective</em> vs <span class="pk-type steel">Steel</span> 
+					=> <span class="pk-type ghost">Ghost</span> <em>neutral</em> vs <span class="pk-type steel">Steel</span></li>
+					<li><strong>Replaced:</strong> <span class="pk-type dark">Dark</span> <em>not very effective</em> vs <span class="pk-type steel">Steel</span> 
+					=> <span class="pk-type dark">Dark</span> <em>neutral</em> vs <span class="pk-type steel">Steel</span></li>
+				</ul>
+			</#if>
+		</#if>
+
+		<!--====================================================================================-->
+
+		<#if typeMatchups??>
+			<h2 id="tmc">Type Matchup Chart</h2>
+			<table class="pk-table">
+				<#list typeMatchups as row>
+				<#if row?is_first>
+					<tr>
+						<#list row as type>
+						<th><span class="pk-type ${type?lower_case}">${type?upper_case}</span></th>
+						</#list>
+					</tr>
+				<#else>
+					<tr>
+						<#list row as matchup>
+							<#if matchup?is_first>
+								<td><span class="pk-type ${matchup?lower_case}">${matchup?upper_case}</span></td>
+							<#else>
+							<#switch matchup>
+								<#case "SE">
+									<td class="success">2</td>
+								<#break>
+								<#case "NE">
+									<td class="error">0.5</td>
+								<#break>
+								<#case "ZE">
+									<td class="black-background">0</td>
+								<#break>
+								<#default>
+									<td>1</td>
+								<#break>
+							</#switch>
+							</#if>
+						</#list>
+					</tr>
+				</#if>
+				</#list>
+			</table>
 		</#if>
 
 		<!--====================================================================================-->
@@ -178,6 +227,12 @@
 							<#break>
 							<#case "TRADE_ITEM">
 								TRADE holding ${romHandler.getItemNames()[evoFm.extraInfo]}
+							<#break>
+							<#case "MEGA_EVOLVE">
+								MEGA EVOLVE holding ${romHandler.getItemNames()[evoFm.extraInfo]}
+							<#break>
+							<#case "FAIRY_AFFECTION">
+								HAPPINESS with FAIRY-type move
 							<#break>
 							<#default>
 								${evoFm.type}
@@ -364,14 +419,8 @@
     		<#case "custom">
     			<h2 id="rs">Custom Starters</h2>
     		<#break>
-    		<#case "random">
-    			<h2 id="rs">Random Starters</h2>
-    		<#break>
-    		<#case "1or2evo">
-    			<h2 id="rs">Random 1/2-Evolution Starters</h2>
-    		<#break>
-    		<#case "2evo">
-    			<h2 id="rs">Random 2-Evolution Starters</h2>
+    		<#default>
+    			<h2 id="rs">${logStarters}</h2>
     		<#break>
     	</#switch>
     	   <ul>
@@ -631,6 +680,9 @@
 		<p>RNG Calls: ${rngCalls}<p>
 		<p>RNG Seed: ${rngSeed?long?c}<p>
 		<p>Settings: ${settingsString}<p>
+		<div>
+      		<button onclick="darkMode()">Light Mode</button>
+    	</div>
     </body>
 	<!-- HEAD section at end to enable proper FTL template colorization -->
 	<head>
@@ -640,4 +692,22 @@
 	    	<#include "log.css">
 	    </style> 
 	</head>
+	<script>
+	  var theme = "";
+	  // Set it once per load - otherwise set it below
+	  if (theme == "" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+		theme = "dark";
+		document.body.classList.add("dark-mode");
+	  }
+
+      function darkMode() {
+		if (theme=="dark") {
+			theme="light";
+			document.body.classList.remove("dark-mode");
+		} else {
+			theme="dark";
+			document.body.classList.add("dark-mode");
+		}
+      }
+    </script>
 </html>

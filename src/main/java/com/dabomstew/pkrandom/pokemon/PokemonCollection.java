@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +10,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
-
+import java.util.stream.Collectors;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 
 /*----------------------------------------------------------------------------*/
-/*--  PokemonSet.java - represents a list of pokemon grouped by type        --*/
+/*--  PokemonCollection.java - represents a list of pokemon grouped by type --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -35,28 +36,28 @@ import com.dabomstew.pkrandom.exceptions.RandomizationException;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public class PokemonSet {
-    
+public class PokemonCollection {
+
     private ArrayList<Pokemon> pokes;
     private Map<Type, ArrayList<Pokemon>> pokesByType;
     private int typeCount;
     private int uniquePokeCount;
 
-    public PokemonSet() {
+    public PokemonCollection() {
         pokes = new ArrayList<Pokemon>();
         pokesByType = new TreeMap<Type, ArrayList<Pokemon>>();
     }
 
-    public PokemonSet(List<Pokemon> pks) {
+    public PokemonCollection(List<Pokemon> pks) {
         pokes = new ArrayList<Pokemon>();
         pokesByType = new TreeMap<Type, ArrayList<Pokemon>>();
 
-        addAll(pks);        
+        addAll(pks);
 
         updateTypeCount();
     }
 
-    public PokemonSet(PokemonSet ps) {
+    public PokemonCollection(PokemonCollection ps) {
         pokes = new ArrayList<Pokemon>(ps.pokes);
         pokesByType = new TreeMap<Type, ArrayList<Pokemon>>();
         for (Map.Entry<Type, ArrayList<Pokemon>> entry : ps.pokesByType.entrySet()) {
@@ -94,12 +95,7 @@ public class PokemonSet {
     }
 
     // Filtering
-    public PokemonSet filterLegendaries() {
-        filter(p -> p.isLegendary());
-        return this;
-    }
-
-    public PokemonSet filterList(List<Pokemon> list) {
+    public PokemonCollection filterList(List<Pokemon> list) {
         if (!list.isEmpty()) {
             Set<Pokemon> set = new TreeSet<Pokemon>(list);
             filter(p -> set.contains(p));
@@ -107,29 +103,89 @@ public class PokemonSet {
         return this;
     }
 
-    public PokemonSet filterSet(Set<Pokemon> set) {
+    public PokemonCollection filterSet(Set<Pokemon> set) {
         if (!set.isEmpty()) {
             filter(p -> set.contains(p));
         }
         return this;
     }
 
-    public PokemonSet filterByMinimumLevel(int level) {
+    public PokemonCollection filterLegendaries() {
+        filter(p -> p.isLegendary());
+        return this;
+    }
+
+    public PokemonCollection filterByMinimumLevel(int level) {
         filter(p -> p.minimumLevel() > level);
         return this;
     }
 
-    public PokemonSet addAll(List<Pokemon> list) {
+    /**
+     * Filters by how many stages are left for a given pokemon If a pokemon is cyclic, it is removed
+     * 
+     * @param minStages Minimum amount of stages a pokemon must have
+     * @param maxStages Maximum amount of stages a pokemon can have
+     * @return This modified PokemonCollection
+     */
+    public PokemonCollection filterByEvolutionStagesRemaining(int minStages, int maxStages) {
+        Set<Pokemon> visited = new HashSet<Pokemon>();
+        Set<Pokemon> recStack = new HashSet<Pokemon>();
+        filter(p -> p.isCyclic(visited, recStack));
+        filter(p -> p.evolutionChainSize() < minStages || p.evolutionChainSize() > maxStages);
+        return this;
+    }
+
+    /**
+     * Filters by how many evolutions a given Pokemon can evolve into (aka split evolutions)
+     * 
+     * @param minCount Minimum amount of split evolutions a pokemon must have
+     * @param maxCount Maximum amount of split evolutions a pokemon can have
+     * @return This modified PokemonCollection
+     */
+    public PokemonCollection filterByEvolutionCount(int minCount, int maxCount) {
+        filter(p -> p.evolutionsFrom.size() < minCount || p.evolutionsFrom.size() > maxCount);
+        return this;
+    }
+
+    /**
+     * Filters by how many evolutions a given Pokemon is into the evolution chain (aka stage of
+     * evolution)
+     * 
+     * @param minCount Minimum stage of evolution a pokemon must be
+     * @param maxCount Maximum stage of evolution a pokemon can be
+     * @return This modified PokemonCollection
+     */
+    public PokemonCollection filterByEvolutionStage(int minStage, int maxStage) {
+        filter(p -> p.evolutionsTo.size() < minStage || p.evolutionsTo.size() > maxStage);
+        return this;
+    }
+
+    public PokemonCollection filterByPowerLevel(int bstLimit) {
+        filter(p -> p.bstForPowerLevels() > bstLimit);
+        return this;
+    }
+
+    public PokemonCollection filterByType(Type... types) {
+        // Safety check - varargs array can have 0 values
+        if (types.length < 1) {
+            throw new RandomizationException("No types were passed into the filter");
+        }
+        filter(p -> Arrays.stream(types)
+                .noneMatch(type -> p.primaryType == type || p.secondaryType == type));
+        return this;
+    }
+
+    public PokemonCollection addAll(List<Pokemon> list) {
         list.forEach(pk -> add(pk));
         return this;
     }
 
-    public PokemonSet remove(Pokemon poke) {
+    public PokemonCollection remove(Pokemon poke) {
         filter(p -> p.equals(poke));
         return this;
     }
 
-    public PokemonSet add(Pokemon poke) {
+    public PokemonCollection add(Pokemon poke) {
         if (poke != null) {
             pokes.add(poke);
 
@@ -148,12 +204,12 @@ public class PokemonSet {
                 }
                 set.add(poke);
             }
-        }  
+        }
         updateTypeCount();
-        return this;      
+        return this;
     }
 
-    public PokemonSet filter(Predicate<Pokemon> pred) {
+    public PokemonCollection filter(Predicate<Pokemon> pred) {
         pokes.removeIf(pred);
         for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
             entry.getValue().removeIf(pred);
@@ -167,6 +223,7 @@ public class PokemonSet {
 
     /**
      * Returns a random pokemon from the set
+     * 
      * @param random The object containing the random seed
      * @param pop Remove the pokemon from the set and return it
      * @return Pokemon from the set
@@ -181,6 +238,7 @@ public class PokemonSet {
 
     /**
      * Returns a random pokemon from the set with the type requested
+     * 
      * @param type Type for the pokemon to have
      * @param random The object containing the random seed
      * @param pop Remove the pokemon from the set and return it
@@ -202,6 +260,7 @@ public class PokemonSet {
 
     /**
      * Returns a random pokemon with greater preference to common types
+     * 
      * @param random The object containing the random seed
      * @param pop Remove the pokemon from the set and return it
      * @return Pokemon from the set
@@ -224,11 +283,57 @@ public class PokemonSet {
             idx -= entry.getValue().size();
         }
 
-        throw new IllegalStateException(String.format("randomPokemonTypeWeighted: %d/%d", idx, typeCount));
+        throw new IllegalStateException(
+                String.format("randomPokemonTypeWeighted: %d/%d", idx, typeCount));
+    }
+
+    /**
+     * Returns a random pokemon from the pool with the required types and none of the restricted
+     * types
+     * 
+     * @param mustInclude Set of types that a pokemon must have
+     * @param cannotInclude Set of types that a pokemon cannot have
+     * @param random The object containing the random seed
+     * @param pop Remove the pokemon from the pool and return it
+     * @return Pokemon from the pool
+     */
+    public Pokemon randomPokemonTypeRestricted(Set<Type> mustInclude, Set<Type> cannotInclude,
+            Random random, boolean pop) {
+        ArrayList<Pokemon> mustHave = new ArrayList<Pokemon>();
+        if (mustInclude.size() == 0) {
+            mustHave.addAll(getPokes());
+        } else {
+            for (Type type : mustInclude) {
+                ArrayList<Pokemon> list = getPokesByType().get(type);
+                if (list == null || list.size() == 0) {
+                    throw new RandomizationException("No pokemon in set of type: " + type);
+                }
+                mustHave.addAll(list);
+            }
+        }
+
+        List<Pokemon> filteredList =
+                mustHave.stream()
+                        .filter(p -> !cannotInclude.contains(p.primaryType)
+                                && !cannotInclude.contains(p.secondaryType))
+                        .collect(Collectors.toList());
+
+        if (filteredList.size() == 0) {
+            throw new RandomizationException("No pokemon with required types " + mustInclude
+                    + " and banned types " + cannotInclude);
+        }
+
+        Pokemon chosen = filteredList.get(random.nextInt(filteredList.size()));
+        if (pop) {
+            remove(chosen);
+        }
+
+        return chosen;
     }
 
     /**
      * Returns a random pokemon with a similar BST
+     * 
      * @param current The pokemon for comparison
      * @param banSamePokemon Do not select the same pokemon as a replacement
      * @param random The object containing the random seed
@@ -236,16 +341,19 @@ public class PokemonSet {
      * @return Pokemon from the set with similar BST
      * @throws RandomizationException If no pokemon were found with similar BST
      */
-    public Pokemon randomPokemonByPowerLevel(Pokemon current, boolean banSamePokemon, Random random, boolean pop) {
+    public Pokemon randomPokemonByPowerLevel(Pokemon current, boolean banSamePokemon, Random random,
+            boolean pop) {
         // start with within 10% and add 20% either direction till we find
         // something
         int currentBST = current.bstForPowerLevels();
         int minTarget = currentBST - currentBST / 10;
         int maxTarget = currentBST + currentBST / 10;
         Set<Pokemon> canPick = new TreeSet<Pokemon>();
-        // Create a pick list of similar BST. Break when three or more elements exist in the pick list, 
+        // Create a pick list of similar BST. Break when three or more elements exist in the pick
+        // list,
         // or exceeds 50 BST either direction
-        for (int expandRounds = 0; canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3); expandRounds++) {
+        for (int expandRounds = 0; canPick.isEmpty()
+                || (canPick.size() < 3 && expandRounds < 3); expandRounds++) {
             for (Pokemon pk : pokes) {
                 if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
                         && (!banSamePokemon || pk != current)) {
@@ -258,7 +366,8 @@ public class PokemonSet {
 
         // Throw error if list is empty
         if (canPick.size() < 1) {
-            throw new RandomizationException("No pokemon with similar BST found for " + current.name);
+            throw new RandomizationException(
+                    "No pokemon with similar BST found for " + current.name);
         }
 
         Pokemon chosen = new ArrayList<Pokemon>(canPick).get(random.nextInt(canPick.size()));
@@ -270,6 +379,7 @@ public class PokemonSet {
 
     /**
      * Return a type represented by the types in the set
+     * 
      * @param random The object containing the random seed
      * @return Type from the list of types available in the set
      */
@@ -285,14 +395,26 @@ public class PokemonSet {
     }
 
     public Type randomTypeWeighted(Random random) {
-        int idx = random.nextInt(typeCount);
-        for (Map.Entry<Type, ArrayList<Pokemon>> entry : pokesByType.entrySet()) {
-            if (idx < entry.getValue().size()) {
-                return entry.getKey();
-            }
-            idx -= entry.getValue().size();
+        Map<Type, Integer> typeWeightings = new TreeMap<Type, Integer>();
+        int totalTypeWeighting = 0;
+
+        // Determine weightings
+        for (Type t : pokesByType.keySet()) {
+            int pkWithTyping = pokesByType.get(t).size();
+            typeWeightings.put(t, pkWithTyping);
+            totalTypeWeighting += pkWithTyping;
         }
-        throw new IllegalStateException(String.format("randomTypeWeighted: %d/%d", idx, typeCount));
+
+        int typePick = random.nextInt(totalTypeWeighting);
+        int typePos = 0;
+        for (Type t : typeWeightings.keySet()) {
+            int weight = typeWeightings.get(t);
+            if (typePos + weight > typePick) {
+                return t;
+            }
+            typePos += weight;
+        }
+        return null;
     }
 
     // Internal

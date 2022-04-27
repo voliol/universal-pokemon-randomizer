@@ -39,39 +39,41 @@ public class Gen4Constants {
 
     public static final int pokemonCount = 493, moveCount = 467;
 
-    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
-            bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGrowthCurveOffset = 19,
-            bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
+    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2,
+            bsSpeedOffset = 3, bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6,
+            bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12,
+            bsRareHeldItemOffset = 14, bsGrowthCurveOffset = 19, bsAbility1Offset = 22,
+            bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
 
-    public static final byte[] hgssStarterCodeSuffix = { 0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 };
+    public static final byte[] hgssStarterCodeSuffix =
+            {0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0};
 
-    public static final int[] hgssFilesWithRivalScript = { 7, 23, 96, 110, 819, 850, 866 };
+    public static final int[] hgssFilesWithRivalScript = {7, 23, 96, 110, 819, 850, 866};
 
-    public static final byte[] hgssRivalScriptMagic = { (byte) 0xCE, 0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C,
-            (byte) 0x80, (byte) 152, 0, 0x1C, 0x00, 0x05 };
+    public static final byte[] hgssRivalScriptMagic = {(byte) 0xCE, 0x00, 0x0C, (byte) 0x80, 0x11,
+            0x00, 0x0C, (byte) 0x80, (byte) 152, 0, 0x1C, 0x00, 0x05};
 
-    public static final int[] ptFilesWithRivalScript = { 31, 36, 112, 123, 186, 427, 429, 1096 };
+    public static final int[] ptFilesWithRivalScript = {31, 36, 112, 123, 186, 427, 429, 1096};
 
-    public static final int[] dpFilesWithRivalScript = { 34, 90, 118, 180, 195, 394 };
+    public static final int[] dpFilesWithRivalScript = {34, 90, 118, 180, 195, 394};
 
-    public static final byte[] dpptRivalScriptMagic = { (byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C,
-            (byte) 0x80, (byte) 0x83, 0x01, 0x1C, 0x00, 0x01 };
+    public static final byte[] dpptRivalScriptMagic = {(byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x11,
+            0x00, 0x0C, (byte) 0x80, (byte) 0x83, 0x01, 0x1C, 0x00, 0x01};
 
-    public static final byte[] dpptTagBattleScriptMagic1 = { (byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x28, 0x00, 0x04,
-            (byte) 0x80 };
+    public static final byte[] dpptTagBattleScriptMagic1 =
+            {(byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x28, 0x00, 0x04, (byte) 0x80};
 
-    public static final byte[] dpptTagBattleScriptMagic2 = { 0x11, 0x00, 0x0C, (byte) 0x80, (byte) 0x86, 0x01, 0x1C,
-            0x00, 0x01 };
+    public static final byte[] dpptTagBattleScriptMagic2 =
+            {0x11, 0x00, 0x0C, (byte) 0x80, (byte) 0x86, 0x01, 0x1C, 0x00, 0x01};
 
-    public static final int[] ptFilesWithTagScript = { 2, 136, 201, 236 };
+    public static final int[] ptFilesWithTagScript = {2, 136, 201, 236};
 
-    public static final int[] dpFilesWithTagScript = { 2, 131, 230 };
+    public static final int[] dpFilesWithTagScript = {2, 131, 230};
 
     public static final int dpStarterStringIndex = 19, ptStarterStringIndex = 36;
 
-    public static final int chikoritaIndex = 152, cyndaquilIndex = 155, totodileIndex = 158, turtwigIndex = 387,
-            chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79;
+    public static final int chikoritaIndex = 152, cyndaquilIndex = 155, totodileIndex = 158,
+            turtwigIndex = 387, chimcharIndex = 390, piplupIndex = 393, slowpokeIndex = 79;
 
     public static final int fossilCount = 7;
 
@@ -88,15 +90,15 @@ public class Gen4Constants {
 
     public static final int evolutionMethodCount = 26;
 
-    public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82, thunderStoneIndex = 83, 
-        waterStoneIndex = 84, leafStoneIndex = 85, shinyStoneIndex = 107, duskStoneIndex = 108, dawnStoneIndex = 109;
+    public static final int sunStoneIndex = 80, moonStoneIndex = 81, fireStoneIndex = 82,
+            thunderStoneIndex = 83, waterStoneIndex = 84, leafStoneIndex = 85,
+            shinyStoneIndex = 107, duskStoneIndex = 108, dawnStoneIndex = 109;
 
-    public static final List<Integer> availableStones = Arrays.asList(
-        Gen4Constants.moonStoneIndex, Gen4Constants.fireStoneIndex,
-        Gen4Constants.waterStoneIndex, Gen4Constants.thunderStoneIndex,
-        Gen4Constants.leafStoneIndex, Gen4Constants.sunStoneIndex,
-        Gen4Constants.shinyStoneIndex, Gen4Constants.duskStoneIndex,
-        Gen4Constants.dawnStoneIndex);
+    public static final List<Integer> availableStones = Arrays.asList(Gen4Constants.moonStoneIndex,
+            Gen4Constants.fireStoneIndex, Gen4Constants.waterStoneIndex,
+            Gen4Constants.thunderStoneIndex, Gen4Constants.leafStoneIndex,
+            Gen4Constants.sunStoneIndex, Gen4Constants.shinyStoneIndex,
+            Gen4Constants.duskStoneIndex, Gen4Constants.dawnStoneIndex);
 
     public static final int highestAbilityIndex = 123;
 
@@ -105,53 +107,56 @@ public class Gen4Constants {
     public static final int scriptListTerminator = 0xFD13;
 
     public static final int itemScriptVariable = 0x8008;
-    
+
     public static final int luckyEggIndex = 0xE7;
+
+    public static final String typeEffectivenessTableLocator = "000505000805";
 
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
     // NOTE: in the game data there are 6 fillers between pokeradar and GBA
 
-    public static final int[] dpptAlternateSlots = new int[] { 0, 1, 2, 3, 2, 3, 4, 5, 10, 11, 8, 9, 8, 9, 8, 9, 8, 9,
-            8, 9 };
+    public static final int[] dpptAlternateSlots =
+            new int[] {0, 1, 2, 3, 2, 3, 4, 5, 10, 11, 8, 9, 8, 9, 8, 9, 8, 9, 8, 9};
 
-    public static final String[] dpptWaterSlotSetNames = new String[] { "Surfing", "Filler", "Old Rod", "Good Rod",
-            "Super Rod" };
+    public static final String[] dpptWaterSlotSetNames =
+            new String[] {"Surfing", "Filler", "Old Rod", "Good Rod", "Super Rod"};
 
-    public static final String[] hgssTimeOfDayNames = new String[] { "Morning", "Day", "Night" };
+    public static final String[] hgssTimeOfDayNames = new String[] {"Morning", "Day", "Night"};
 
-    public static final String[] hgssNonGrassSetNames = new String[] { "", "Surfing", "Rock Smash", "Old Rod",
-            "Good Rod", "Super Rod" };
+    public static final String[] hgssNonGrassSetNames =
+            new String[] {"", "Surfing", "Rock Smash", "Old Rod", "Good Rod", "Super Rod"};
 
-    public static final MoveCategory[] moveCategoryIndices = { MoveCategory.PHYSICAL, MoveCategory.SPECIAL,
-            MoveCategory.STATUS };
+    public static final MoveCategory[] moveCategoryIndices =
+            {MoveCategory.PHYSICAL, MoveCategory.SPECIAL, MoveCategory.STATUS};
 
     public static byte moveCategoryToByte(MoveCategory cat) {
         switch (cat) {
-        case PHYSICAL:
-            return 0;
-        case SPECIAL:
-            return 1;
-        case STATUS:
-        default:
-            return 2;
+            case PHYSICAL:
+                return 0;
+            case SPECIAL:
+                return 1;
+            case STATUS:
+            default:
+                return 2;
         }
     }
 
-    public static final List<Integer> dpRequiredFieldTMs = Arrays.asList(new Integer[] { 2, 3, 5, 9, 12, 19, 23, 28,
-            34, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87 });
+    public static final List<Integer> dpRequiredFieldTMs = Arrays.asList(new Integer[] {2, 3, 5, 9,
+            12, 19, 23, 28, 34, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87});
 
-    public static final List<Integer> ptRequiredFieldTMs = Arrays.asList(new Integer[] { 2, 3, 5, 7, 9, 11, 12, 18, 19,
-            23, 28, 34, 37, 39, 41, 43, 46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87 });
+    public static final List<Integer> ptRequiredFieldTMs =
+            Arrays.asList(new Integer[] {2, 3, 5, 7, 9, 11, 12, 18, 19, 23, 28, 34, 37, 39, 41, 43,
+                    46, 47, 49, 50, 62, 69, 79, 80, 82, 84, 85, 87});
 
     // DPPt:
     // cut, fly, surf, strength, flash, dig, teleport, waterfall,
     // rock smash, sweet scent, defog, rock climb
-    public static final List<Integer> dpptFieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230, 432,
-            431);
+    public static final List<Integer> dpptFieldMoves =
+            Arrays.asList(15, 19, 57, 70, 148, 91, 100, 127, 249, 230, 432, 431);
 
-    public static final List<Integer> hgssFieldMoves = Arrays.asList(15, 19, 57, 70, 148, 91, 100, 250, 127, 249, 29,
-            230, 431);
+    public static final List<Integer> hgssFieldMoves =
+            Arrays.asList(15, 19, 57, 70, 148, 91, 100, 250, 127, 249, 29, 230, 431);
     // DPPt: rock smash, cut
     public static final List<Integer> dpptEarlyRequiredHMMoves = Arrays.asList(249, 15);
     // HGSS: just cut
@@ -238,44 +243,13 @@ public class Gen4Constants {
         if (type == null) {
             return 0x09; // ???-type
         }
-        switch (type) {
-        case NORMAL:
-            return 0x00;
-        case FIGHTING:
-            return 0x01;
-        case FLYING:
-            return 0x02;
-        case POISON:
-            return 0x03;
-        case GROUND:
-            return 0x04;
-        case ROCK:
-            return 0x05;
-        case BUG:
-            return 0x06;
-        case GHOST:
-            return 0x07;
-        case FIRE:
-            return 0x0A;
-        case WATER:
-            return 0x0B;
-        case GRASS:
-            return 0x0C;
-        case ELECTRIC:
-            return 0x0D;
-        case PSYCHIC:
-            return 0x0E;
-        case ICE:
-            return 0x0F;
-        case DRAGON:
-            return 0x10;
-        case STEEL:
-            return 0x08;
-        case DARK:
-            return 0x11;
-        default:
-            return 0; // normal by default
-        }
+
+        // return type, or normal by default
+        return (byte) Math.max(Arrays.asList(typeTable).indexOf(type), 0);
+    }
+
+    public static boolean isTypeSupported(Type type) {
+        return Arrays.asList(typeTable).indexOf(type) > -1;
     }
 
     public static void tagTrainersDP(List<Trainer> trs) {
@@ -368,15 +342,16 @@ public class Gen4Constants {
         tagRivalConsecutive(trs, "RIVAL3", 0x1d7);
         tagRivalConsecutive(trs, "RIVAL4", 0x1da);
         tagRivalConsecutive(trs, "RIVAL5", 0x1dd);
-        // Tag battle is not following ze usual format
-        tag(trs, 0x26b, "RIVAL6-0");
-        tag(trs, 0x26c, "RIVAL6-1");
-        tag(trs, 0x25f, "RIVAL6-2");
+        // Tag battle is not following the usual format
+        tag(trs, 0x26b, "RIVAL6-0"); // Fire
+        tag(trs, 0x26c, "RIVAL6-1"); // Water
+        tag(trs, 0x25f, "RIVAL6-2"); // Grass
         // Back to normal
         tagRivalConsecutive(trs, "RIVAL7", 0x1e0);
-        tagRivalConsecutive(trs, "RIVAL8", 0x346);
-        tagRivalConsecutive(trs, "RIVAL9", 0x349);
-        tagRivalConsecutive(trs, "RIVAL10", 0x368);
+        tagRivalConsecutive(trs, "RIVAL8", 0x39c);
+        tagRivalConsecutive(trs, "RIVAL9", 0x346);
+        tagRivalConsecutive(trs, "RIVAL10", 0x349);
+        tagRivalConsecutive(trs, "RIVAL11", 0x368);
 
         // Battleground Gym Leaders
         tag(trs, 0x35A, "GYM1");
@@ -542,14 +517,16 @@ public class Gen4Constants {
 
     }
 
-    private static void tagFriendConsecutive(List<Trainer> allTrainers, String tag, int offsetGrass) {
+    private static void tagFriendConsecutive(List<Trainer> allTrainers, String tag,
+            int offsetGrass) {
         allTrainers.get(offsetGrass - 1).setTag(tag + "-1");
         allTrainers.get(offsetGrass).setTag(tag + "-2");
         allTrainers.get(offsetGrass + 1).setTag(tag + "-0");
 
     }
 
-    private static void tagFriendConsecutive2(List<Trainer> allTrainers, String tag, int offsetWater) {
+    private static void tagFriendConsecutive2(List<Trainer> allTrainers, String tag,
+            int offsetWater) {
         allTrainers.get(offsetWater - 1).setTag(tag + "-0");
         allTrainers.get(offsetWater).setTag(tag + "-1");
         allTrainers.get(offsetWater + 1).setTag(tag + "-2");

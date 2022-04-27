@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/*--  log.css - Contains stylesheet for log produced at end of              --*/ 
+/*--  log.css - Contains stylesheet for log produced at end of              --*/
 /*--  randomization.                                                        --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
@@ -22,8 +22,8 @@
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 body {
-  background-color: #eee;
-  color: #444;
+  background-color: var(--background-color);
+  color: var(--text-contrast);
   font-family: Arial, Helvetica, sans-serif;
   padding: 20px 60px;
 }
@@ -42,7 +42,8 @@ table {
   empty-cells: show;
 }
 
-th, td {
+th,
+td {
   padding: 6px 8px;
   border-right: 1px solid #444;
   border-left: 1px solid #444;
@@ -60,7 +61,7 @@ td {
 }
 
 ul#toc li {
-  display:inline;
+  display: inline;
 }
 
 li {
@@ -73,21 +74,23 @@ li {
 }
 
 .pk-table {
-  border-color: #244073;
+  border-color: var(--pk-border);
 }
 
 .pk-table th {
-  background-color: #1b7df7;
+  background-color: var(--pk-title);
   color: #eee;
   border-color: inherit;
 }
 
 .pk-table tr {
-  background-color: #dff0ff;
+  background-color: var(--pk-row-color);
+  color: #333;
 }
 
 .pk-table tr.alt {
-  background-color: #c5e1f9;
+  background-color: var(--pk-row-alt-color);
+  color: #333;
 }
 
 .pk-table td {
@@ -95,21 +98,23 @@ li {
 }
 
 .moves-table {
-  border-color: #881a15;
+  border-color: var(--moves-border);
 }
 
 .moves-table th {
-  background-color: #ff5746;
+  background-color: var(--moves-title);
   color: #eee;
   border-color: inherit;
 }
 
 .moves-table tr {
-  background-color: #ffecdf;
+  background-color: var(--moves-row-color);
+  color: #333;
 }
 
 .moves-table tr.alt {
-  background-color: #f9dbc5;
+  background-color: var(--moves-row-alt-color);
+  color: #333;
 }
 
 .moves-table td {
@@ -117,21 +122,23 @@ li {
 }
 
 .trades-table {
-  border-color: #0f630f;
+  border-color: var(--trades-border);
 }
 
 .trades-table th {
-  background-color: #33ac33;
+  background-color: var(--trades-title);
   color: #eee;
   border-color: inherit;
 }
 
 .trades-table tr {
-  background-color: #c3f9c3;
+  background-color: var(--trades-row-color);
+  color: #333;
 }
 
 .trades-table tr.alt {
-  background-color: #e0ffe0;
+  background-color: var(--trades-row-alt-color);
+  color: #333;
 }
 
 .trades-table td {
@@ -151,7 +158,7 @@ li {
 }
 
 .error {
-  color:red;
+  color: red;
   padding: 3px 10px;
   border: solid 1px red;
   font-style: italic;
@@ -160,11 +167,20 @@ li {
 }
 
 .success {
-  color:green;
+  color: green;
   padding: 3px 10px;
   border: solid 1px green;
   font-style: italic;
   background-color: #ccffcc;
+  border-radius: 4px;
+}
+
+.black-background {
+  color: white;
+  padding: 3px 10px;
+  border: solid 1px white;
+  font-style: italic;
+  background-color: black;
   border-radius: 4px;
 }
 
@@ -183,75 +199,75 @@ li {
 }
 
 .normal {
-  background-color: #7f7f7f;
+  background-color: var(--type-normal-color);
 }
 
 .grass {
-  background-color: #19ad30;
+  background-color: var(--type-grass-color);
 }
 
 .fire {
-  background-color: #ff690f;
+  background-color: var(--type-fire-color);
 }
 
 .water {
-  background-color: #2d94ff
+  background-color: var(--type-water-color);
 }
 
 .electric {
-  background-color: #ffce00;
+  background-color: var(--type-electric-color);
 }
 
 .rock {
-  background-color: #6f6155;
+  background-color: var(--type-rock-color);
 }
 
 .ground {
-  background-color: #d2a96a;
+  background-color: var(--type-ground-color);
 }
 
 .poison {
-  background-color: #782fff;
+  background-color: var(--type-poison-color);
 }
 
 .flying {
-  background-color: #c1c0fa;
+  background-color: var(--type-flying-color);
 }
 
 .ice {
-  background-color:   #95d0fd;
+  background-color: var(--type-ice-color);
 }
 
 .psychic {
-  background-color: #ff6aaf;
+  background-color: var(--type-psychic-color);
 }
 
 .ghost {
-  background-color: #6860a9;
+  background-color: var(--type-ghost-color);
 }
 
 .bug {
-  background-color: #a8d02d;
+  background-color: var(--type-bug-color);
 }
 
 .fighting {
-  background-color: #bf533b
+  background-color: var(--type-fighting-color);
 }
 
 .dragon {
-  background-color: #00c7be;
+  background-color: var(--type-dragon-color);
 }
 
 .dark {
-  background-color: #5133ad;
+  background-color: var(--type-dark-color);
 }
 
 .steel {
-  background-color: #93a8c1;
+  background-color: var(--type-steel-color);
 }
 
 .fairy {
-  background-color: #ff9ddd;
+  background-color: var(--type-fairy-color);
 }
 
 .moveset {
@@ -262,8 +278,8 @@ li {
   min-width: 90px;
   border-radius: 3px;
   display: inline-block;
-  background-color: #acd;
-  border: 2px solid #80b2f5;
+  background-color: var(--moveset-color);
+  border: 2px solid var(--moveset-border);
   padding: 3px 12px;
   margin: 4px;
   color: #358;
@@ -281,19 +297,19 @@ li {
 
 .tm-list {
   list-style: none;
-  padding-left: 20px
+  padding-left: 20px;
 }
 
 .tm-list > li {
   margin: 8px 0;
-}      
+}
 
 .tm-list > li > strong {
   border-radius: 3px;
   font-size: 1.2em;
   display: inline-block;
   color: #eee;
-  background-color: #5290ec;
+  background-color: var(--tm-color);
   padding: 5px 10px;
   margin-right: 10px;
 }
@@ -322,123 +338,142 @@ li {
 }
 
 .pk-set-grass {
-  background-color: #319634;
+  background-color: var(--encounter-grass-title);
   color: #eee;
 }
 
 .pk-list-grass {
-  background-color: #63d066;
+  background-color: var(--encounter-grass-background);
 }
 
 .pk-list-grass > li {
-  background-color: #94e49e;
-}
-
-.pk-set-surfing {
-  background-color: #6edde8;
+  background-color: var(--encounter-grass-color);
   color: #333;
 }
 
-.pk-list-surfing {
-  background-color: #48b9da;
-}
-
-.pk-list-surfing > li {
-  background-color: #7ad7ec;
-}
-
-.pk-set-fishing {
-  background-color: #3773e2;
-  color: #eee;
-}
-
-.pk-list-fishing {
-  background-color: #2b4e8e;
-}
-
-.pk-list-fishing > li {
-  background-color: #296fd7;
-  color: #eee;
-}
-
-.pk-set-rock-smash {
-  background-color: #96764e;
-  color: #eee;
-}
-
-.pk-list-rock-smash {
-  background-color: #b7a070;
-}
-
-.pk-list-rock-smash > li {
-  background-color: #e4d0a0;
-}
-
-.pk-set-poke-radar {
-  background-color: #7c51c3;
-  color: #eee;
-}
-
-.pk-list-poke-radar {
-  background-color: #af79ea;
-}
-
-.pk-list-poke-radar > li {
-  background-color: #d8ade6;
-}
-
 .pk-set-doubles-grass {
-  background-color: #346b3b;
+  background-color: var(--encounter-doubles-title);
   color: #eee;
 }
 
 .pk-list-doubles-grass {
-  background-color: #69b985;
+  background-color: var(--encounter-doubles-background);
 }
 
 .pk-list-doubles-grass > li {
-  background-color: #399255;
+  background-color: var(--encounter-doubles-color);
   color: #eee;
 }
 
+.pk-set-surfing {
+  background-color: var(--encounter-surfing-title);
+  color: #333;
+}
+
+.pk-list-surfing {
+  background-color: var(--encounter-surfing-background);
+}
+
+.pk-list-surfing > li {
+  background-color: var(--encounter-surfing-color);
+  color: #333;
+}
+
+.pk-set-fishing {
+  background-color: var(--encounter-fishing-title);
+  color: #eee;
+}
+
+.pk-list-fishing {
+  background-color: var(--encounter-fishing-background);
+}
+
+.pk-list-fishing > li {
+  background-color: var(--encounter-fishing-color);
+  color: #eee;
+}
+
+.pk-set-rock-smash {
+  background-color: var(--encounter-rocksmash-title);
+  color: #eee;
+}
+
+.pk-list-rock-smash {
+  background-color: var(--encounter-rocksmash-background);
+}
+
+.pk-list-rock-smash > li {
+  background-color: var(--encounter-rocksmash-color);
+  color: #333;
+}
+
+.pk-set-poke-radar {
+  background-color: var(--encounter-radar-title);
+  color: #eee;
+}
+
+.pk-list-poke-radar {
+  background-color: var(--encounter-radar-background);
+}
+
+.pk-list-poke-radar > li {
+  background-color: var(--encounter-radar-color);
+  color: #333;
+}
+
 .pk-set-shaking-spot {
-  background-color: #5f697b;
+  background-color: var(--encounter-shaking-title);
   color: #eee;
 }
 
 .pk-list-shaking-spot {
-  background-color: #8da1b9;
+  background-color: var(--encounter-shaking-background);
 }
 
 .pk-list-shaking-spot > li {
-  background-color: #b0bccc;
+  background-color: var(--encounter-shaking-color);
+  color: #333;
 }
 
 .pk-set-headbutt-trees {
-  background-color: #557d37;
+  background-color: var(--encounter-headbutt-title);
   color: #eee;
 }
 
 .pk-list-headbutt-trees {
-  background-color: #86b34b;
+  background-color: var(--encounter-headbutt-background);
 }
 
 .pk-list-headbutt-trees > li {
-  background-color: #c0d66a;
+  background-color: var(--encounter-headbutt-color);
+  color: #333;
 }
 
-
 .pk-set-bug-catching-contest {
-  background-color: #a7822e;
+  background-color: var(--encounter-bcc-title);
   color: #eee;
 }
 
 .pk-list-bug-catching-contest {
-  background-color: #deb84d;
+  background-color: var(--encounter-bcc-background);
 }
 
 .pk-list-bug-catching-contest > li {
-  background-color: #ecd375;
+  background-color: var(--encounter-bcc-color);
+}
+
+.pk-set-radio {
+  background-color: var(--encounter-radio-title);
+  color: #eee;
+}
+
+.pk-list-radio {
+  background-color: var(--encounter-radio-background);
+}
+
+.pk-list-radio > li {
+  background-color: var(--encounter-radio-color);
+  color: #eee;
 }
 
 .trainer-box {
@@ -448,9 +483,10 @@ li {
 }
 
 .trainer {
-  background-color: #ffc379;
+  background-color: var(--trainer-background);
   padding: 10px 18px;
   border-radius: 10px;
+  color: #333;
 }
 
 .trainer > em {
@@ -465,64 +501,225 @@ li {
 
 .trainer-name > em {
   font-size: 0.8em;
-  background-color: #ffde93;
+  background-color: var(--trainer-color);
   padding: 5px 8px;
   border-radius: 12px;
   margin-right: 2px;
 }
 
 .old-trainer-pk {
-  background-color: #e2d2ab;
+  background-color: var(--old-trainer-background);
   height: 250px;
   list-style-type: none;
   margin: 0;
   padding: 10px 42px;
   border-radius: 10px;
+  color: #333;
 }
 
 .old-trainer-pk > li {
   margin: 5px 0;
-  background-color: #dac281;
+  background-color: var(--old-trainer-color);
   padding: 6px 14px;
   border-radius: 8px;
-  border: 2px solid #e7a45b;
+  border: 2px solid var(--old-trainer-border);
+  color: #333;
 }
 
 .old-trainer-pk > li > em {
   float: right;
   font-size: 0.8em;
+  color: #333;
 }
 
 .new-trainer-pk {
-  background-color: #f1e1b7;
+  background-color: var(--chain-element-background);
   height: 355px;
   list-style-type: none;
   margin: 0;
   padding: 10px 42px;
   border-radius: 10px;
+  color: #333;
 }
 
 .new-trainer-pk > li {
   margin: 5px 0;
-  background-color: #f5da8e;
+  background-color: var(--chain-element-color);
   padding: 6px 14px;
   border-radius: 8px;
-  border: 2px solid #ffb262;
+  border: 2px solid var(--chain-element-border);
+  color: #333;
 }
 
 .new-trainer-pk > li > div {
   font-size: 0.8em;
+  color: #333;
 }
 
 .new-trainer-pk > li > em {
   float: right;
   font-size: 0.8em;
+  color: #333;
 }
 
 .pk-chain-element {
-  background-color: #f5da8e;
+  background-color: var(--chain-element-color);
   margin: 5px 0;
   padding: 6px 14px;
   border-radius: 8px;
-  border: 2px solid #ffb262;
-} 
+  border: 2px solid var(--chain-element-border);
+  color: #333;
+}
+
+:root {
+  --background-color: #eeeeee;
+  --text-contrast: #444444;
+  --chain-element-color: #f5da8e;
+  --chain-element-border: #ffb262;
+  --chain-element-background: #f1e1b7;
+  --old-trainer-color: #dac281;
+  --old-trainer-border: #e7a45b;
+  --old-trainer-background: #e2d2ab;
+  --trainer-color: #ffde93;
+  --trainer-background: #ffc379;
+  --encounter-radio-color: #bd6e73;
+  --encounter-radio-background: #ab2836;
+  --encounter-radio-title: #942b3b;
+  --encounter-bcc-color: #ecd375;
+  --encounter-bcc-background: #deb84d;
+  --encounter-bcc-title: #a7822e;
+  --encounter-headbutt-color: #c0d66a;
+  --encounter-headbutt-background: #86b34b;
+  --encounter-headbutt-title: #557d37;
+  --encounter-shaking-color: #b0bccc;
+  --encounter-shaking-background: #8da1b9;
+  --encounter-shaking-title: #5f697b;
+  --encounter-radar-color: #d8ade6;
+  --encounter-radar-background: #af79ea;
+  --encounter-radar-title: #7c51c3;
+  --encounter-rocksmash-color: #e4d0a0;
+  --encounter-rocksmash-background: #b7a070;
+  --encounter-rocksmash-title: #96764e;
+  --encounter-fishing-color: #296fd7;
+  --encounter-fishing-background: #2b4e8e;
+  --encounter-fishing-title: #3773e2;
+  --encounter-surfing-color: #7ad7ec;
+  --encounter-surfing-background: #48b9da;
+  --encounter-surfing-title: #6edde8;
+  --encounter-doubles-color: #399255;
+  --encounter-doubles-background: #69b985;
+  --encounter-doubles-title: #346b3b;
+  --encounter-grass-color: #94e49e;
+  --encounter-grass-background: #63d066;
+  --encounter-grass-title: #319634;
+  --tm-color: #5290ec;
+  --moveset-border: #80b2f5;
+  --moveset-color: #aaccdd;
+  --type-fairy-color: #ff9ddd;
+  --type-steel-color: #93a8c1;
+  --type-dark-color: #5133ad;
+  --type-dragon-color: #00c7be;
+  --type-fighting-color: #bf533b;
+  --type-bug-color: #a8d02d;
+  --type-ghost-color: #6860a9;
+  --type-psychic-color: #ff6aaf;
+  --type-ice-color: #95d0fd;
+  --type-flying-color: #c1c0fa;
+  --type-poison-color: #782fff;
+  --type-ground-color: #d2a96a;
+  --type-rock-color: #6f6155;
+  --type-electric-color: #ffce00;
+  --type-water-color: #2d94ff;
+  --type-fire-color: #ff690f;
+  --type-grass-color: #19ad30;
+  --type-normal-color: #7f7f7f;
+  --trades-row-alt-color: #e0ffe0;
+  --trades-row-color: #c3f9c3;
+  --trades-title: #33ac33;
+  --trades-border: #0f630f;
+  --moves-row-alt-color: #f9dbc5;
+  --moves-row-color: #ffecdf;
+  --moves-title: #ff5746;
+  --moves-border: #881a15;
+  --pk-row-alt-color: #c5e1f9;
+  --pk-row-color: #dff0ff;
+  --pk-title: #1b7df7;
+  --pk-border: #244073;
+}
+
+body.dark-mode {
+  /* dark mode variables go here */
+  --background-color: #121212;
+  --text-contrast: #aaaaaa;
+  --chain-element-color: #f1c95b;
+  --chain-element-border: #ff9c33;
+  --chain-element-background: #ead295;
+  --old-trainer-color: #d1b361;
+  --old-trainer-border: #e18f37;
+  --old-trainer-background: #d1b97a;
+  --trainer-color: #ffd166;
+  --trainer-background: #ffaf4d;
+  --encounter-radio-color: #af5057;
+  --encounter-radio-background: #91222d;
+  --encounter-radio-title: #77222f;
+  --encounter-bcc-color: #e7c54b;
+  --encounter-bcc-background: #d7a928;
+  --encounter-bcc-title: #8c6e26;
+  --encounter-headbutt-color: #b3ce4b;
+  --encounter-headbutt-background: #6c903c;
+  --encounter-headbutt-title: #3c5927;
+  --encounter-shaking-color: #92a3b9;
+  --encounter-shaking-background: #7189a8;
+  --encounter-shaking-title: #596273;
+  --encounter-radar-color: #aa77bb;
+  --encounter-radar-background: #7c40bf;
+  --encounter-radar-title: #5a3498;
+  --encounter-rocksmash-color: #d8ba74;
+  --encounter-rocksmash-background: #aa8f55;
+  --encounter-rocksmash-title: #876945;
+  --encounter-fishing-color: #2058ac;
+  --encounter-fishing-background: #234076;
+  --encounter-fishing-title: #1d59c9;
+  --encounter-surfing-color: #4dc9e6;
+  --encounter-surfing-background: #2bacd4;
+  --encounter-surfing-title: #4fd7e3;
+  --encounter-doubles-color: #2b6e40;
+  --encounter-doubles-background: #52ad72;
+  --encounter-doubles-title: #29562f;
+  --encounter-grass-color: #66b372;
+  --encounter-grass-background: #3c913e;
+  --encounter-grass-title: #184e1a;
+  --tm-color: #307ae8;
+  --moveset-border: #5a9cf2;
+  --moveset-color: #92bdd3;
+  --type-fairy-color: #ff9ddd;
+  --type-steel-color: #7d96b5;
+  --type-dark-color: #4a2f9d;
+  --type-dragon-color: #009991;
+  --type-fighting-color: #9c4430;
+  --type-bug-color: #87a725;
+  --type-ghost-color: #585095;
+  --type-psychic-color: #e963a1;
+  --type-ice-color: #69bcfc;
+  --type-flying-color: #a2a1f7;
+  --type-poison-color: #5900ff;
+  --type-ground-color: #ca994e;
+  --type-rock-color: #65584e;
+  --type-electric-color: #e6b800;
+  --type-water-color: #207cdf;
+  --type-fire-color: #e65400;
+  --type-grass-color: #1b982e;
+  --type-normal-color: #737373;
+  --trades-row-alt-color: #d3ffd3;
+  --trades-row-color: #a2f6a2;
+  --trades-title: #298929;
+  --trades-border: #0d590d;
+  --moves-row-alt-color: #f5c5a3;
+  --moves-row-color: #ffd1b3;
+  --moves-title: #e24736;
+  --moves-border: #6e1611;
+  --pk-row-alt-color: #a3cff5;
+  --pk-row-color: #b3dbff;
+  --pk-title: #1375ec;
+  --pk-border: #1f3661;
+}

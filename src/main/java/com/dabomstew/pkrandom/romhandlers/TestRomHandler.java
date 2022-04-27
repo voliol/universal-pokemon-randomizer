@@ -18,8 +18,9 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 
 /**
- * Exists to assist with AssertJ Swing GUI Unit Testing NOT FUNCTIONAL FOR
- * RANDOMIZATION PURPOSES
+ * Exists to assist with AssertJ Swing GUI Unit Testing
+ * 
+ * NOT FUNCTIONAL FOR RANDOMIZATION PURPOSES
  */
 public class TestRomHandler extends AbstractRomHandler {
 
@@ -431,7 +432,7 @@ public class TestRomHandler extends AbstractRomHandler {
         // TODO Auto-generated method stub
         return 5;
     }
-    
+
     @Override
     public int miscTweaksAvailable() {
         int available = 0;

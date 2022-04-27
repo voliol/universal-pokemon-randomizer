@@ -1,6 +1,5 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * To change this template, choose Tools | Templates and open the template in the editor.
  */
 package com.dabomstew.pkrandom.gui;
 
@@ -124,7 +123,7 @@ public class PresetLoadDialog extends javax.swing.JDialog {
             invalidValues();
             return false;
         }
-        
+
         // 161 onwards: look for version number
         String configString = this.configStringField.getText();
         if (configString.length() < 3) {
@@ -161,8 +160,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
             return false;
         }
         requiredName = name;
-        this.romRequiredLabel.setText(String.format(bundle.getString("PresetLoadDialog.romRequiredLabel.textWithROM"),
-                name));
+        this.romRequiredLabel.setText(String
+                .format(bundle.getString("PresetLoadDialog.romRequiredLabel.textWithROM"), name));
         this.romFileButton.setEnabled(true);
 
         if (currentROM != null && currentROM.getROMName().equals(name) == false) {
@@ -177,8 +176,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
         // so what version number was it?
         if (presetVN > Settings.VERSION) {
             // it's for a newer version
-            JOptionPane.showMessageDialog(this,
-            String.format(bundle.getString("PresetLoadDialog.newerVersionRequired"), presetVN));
+            JOptionPane.showMessageDialog(this, String
+                    .format(bundle.getString("PresetLoadDialog.newerVersionRequired"), presetVN));
         } else {
             // tell them which older version to use to load this preset
             // this should be the newest version that used that value
@@ -214,9 +213,23 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                 versionWanted = "1.7.2";
             } else if (presetVN == 180) {
                 versionWanted = "1.8.0";
-            } 
-            JOptionPane.showMessageDialog(this,
-                    String.format(bundle.getString("PresetLoadDialog.olderVersionRequired"), versionWanted));
+            } else if (presetVN == 181) {
+                versionWanted = "1.8.1";
+            } else if (presetVN == 190) {
+                versionWanted = "1.9.0";
+            } else if (presetVN == 191) {
+                versionWanted = "1.9.1";
+            } else if (presetVN == 200) {
+                versionWanted = "1.10.0";
+            } else if (presetVN == 201) {
+                versionWanted = "1.10.1";
+            } else if (presetVN == 202) {
+                versionWanted = "1.10.2";
+            } else if (presetVN == 203) {
+                versionWanted = "1.10.3";
+            }
+            JOptionPane.showMessageDialog(this, String.format(
+                    bundle.getString("PresetLoadDialog.olderVersionRequired"), versionWanted));
         }
     }
 
@@ -259,11 +272,12 @@ public class PresetLoadDialog extends javax.swing.JDialog {
     }
 
     public CustomNamesSet getCustomNames() {
-        if(customNames==null) {
+        if (customNames == null) {
             try {
                 customNames = FileFunctions.getCustomNames();
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.loadingCustomNamesFailed"));
+                JOptionPane.showMessageDialog(this,
+                        bundle.getString("PresetLoadDialog.loadingCustomNamesFailed"));
             }
         }
         return customNames;
@@ -300,11 +314,13 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                     this.configStringField.setEnabled(true);
                     this.presetFileField.setText("");
                     customNames = null;
-                    JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.invalidSeedFile"));
+                    JOptionPane.showMessageDialog(this,
+                            bundle.getString("PresetLoadDialog.invalidSeedFile"));
                 }
                 dis.close();
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, bundle.getString("PresetLoadDialog.loadingSeedFileFailed"));
+                JOptionPane.showMessageDialog(this,
+                        bundle.getString("PresetLoadDialog.loadingSeedFileFailed"));
             }
         }
     }// GEN-LAST:event_presetFileButtonActionPerformed
@@ -317,8 +333,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
             for (RomHandler.Factory rhf : parentGUI.checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
                     final RomHandler checkHandler = rhf.create(RandomSource.instance());
-                    final JDialog opDialog = new OperationDialog(bundle.getString("RandomizerGUI.loadingText"), this,
-                            true);
+                    final JDialog opDialog = new OperationDialog(
+                            bundle.getString("RandomizerGUI.loadingText"), this, true);
                     Thread t = new Thread() {
                         @Override
                         public void run() {
@@ -345,9 +361,11 @@ public class PresetLoadDialog extends javax.swing.JDialog {
                                         acceptButton.setEnabled(true);
                                         return;
                                     } else {
-                                        JOptionPane.showMessageDialog(PresetLoadDialog.this, String.format(
-                                                bundle.getString("PresetLoadDialog.notRequiredROM"), requiredName,
-                                                checkHandler.getROMName()));
+                                        JOptionPane.showMessageDialog(PresetLoadDialog.this,
+                                                String.format(
+                                                        bundle.getString(
+                                                                "PresetLoadDialog.notRequiredROM"),
+                                                        requiredName, checkHandler.getROMName()));
                                         return;
                                     }
                                 }
@@ -374,9 +392,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
     }// GEN-LAST:event_cancelButtonActionPerformed
 
     /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT
+     * modify this code. The content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed"
     // desc="Generated Code">//GEN-BEGIN:initComponents
@@ -404,7 +421,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
         romFileChooser.setFileFilter(new ROMFilter());
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
+        java.util.ResourceBundle bundle =
+                java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         setTitle(bundle.getString("PresetLoadDialog.title")); // NOI18N
         setModal(true);
         setResizable(false);
@@ -426,7 +444,8 @@ public class PresetLoadDialog extends javax.swing.JDialog {
 
         seedBoxLabel.setText(bundle.getString("PresetLoadDialog.seedBoxLabel.text")); // NOI18N
 
-        configStringBoxLabel.setText(bundle.getString("PresetLoadDialog.configStringBoxLabel.text")); // NOI18N
+        configStringBoxLabel
+                .setText(bundle.getString("PresetLoadDialog.configStringBoxLabel.text")); // NOI18N
 
         romRequiredLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         romRequiredLabel.setText(bundle.getString("PresetLoadDialog.romRequiredLabel.text")); // NOI18N
@@ -460,87 +479,86 @@ public class PresetLoadDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(layout
                 .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(
-                        layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(
-                                        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                                .addComponent(romFileBoxLabel,
-                                                        javax.swing.GroupLayout.Alignment.LEADING,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(presetFileLabel,
-                                                        javax.swing.GroupLayout.Alignment.LEADING,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(seedBoxLabel, javax.swing.GroupLayout.Alignment.LEADING,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(configStringBoxLabel,
-                                                        javax.swing.GroupLayout.Alignment.LEADING,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(18, 18, 18)
-                                .addGroup(
-                                        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addGroup(
-                                                        layout.createSequentialGroup()
-                                                                .addComponent(acceptButton)
-                                                                .addPreferredGap(
-                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
-                                                                        169, Short.MAX_VALUE)
-                                                                .addComponent(cancelButton))
-                                                .addComponent(randomSeedField).addComponent(configStringField)
-                                                .addComponent(presetFileField).addComponent(romFileField))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(
-                                        layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                                .addComponent(presetFileButton, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                        26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(romFileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 1,
-                                                        Short.MAX_VALUE)).addGap(12, 12, 12))
-                .addComponent(orLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)
+                .addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout
+                        .createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(romFileBoxLabel, javax.swing.GroupLayout.Alignment.LEADING,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(presetFileLabel, javax.swing.GroupLayout.Alignment.LEADING,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(seedBoxLabel, javax.swing.GroupLayout.Alignment.LEADING,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(configStringBoxLabel,
+                                javax.swing.GroupLayout.Alignment.LEADING,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup().addComponent(acceptButton)
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                169, Short.MAX_VALUE)
+                                        .addComponent(cancelButton))
+                                .addComponent(randomSeedField).addComponent(configStringField)
+                                .addComponent(presetFileField).addComponent(romFileField))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+                                        false)
+                                .addComponent(presetFileButton,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE, 26,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(romFileButton, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        1, Short.MAX_VALUE))
+                        .addGap(12, 12, 12))
+                .addComponent(orLabel, javax.swing.GroupLayout.DEFAULT_SIZE,
+                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(romRequiredLabel, javax.swing.GroupLayout.DEFAULT_SIZE,
                         javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
-        layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(
-                                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(presetFileLabel)
-                                        .addComponent(presetFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(presetFileButton))
+        layout.setVerticalGroup(layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup().addContainerGap().addGroup(layout
+                        .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(presetFileLabel)
+                        .addComponent(presetFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(presetFileButton))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(orLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(seedBoxLabel)
-                                        .addComponent(randomSeedField, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(seedBoxLabel).addComponent(randomSeedField,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(
-                                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(configStringBoxLabel)
-                                        .addComponent(configStringField, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(configStringBoxLabel).addComponent(configStringField,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(romRequiredLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(
-                                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(romFileBoxLabel)
-                                        .addComponent(romFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(romFileButton))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
-                        .addGroup(
-                                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(acceptButton).addComponent(cancelButton)).addContainerGap()));
+                        .addGroup(layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(romFileBoxLabel)
+                                .addComponent(romFileField, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(romFileButton))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23,
+                                Short.MAX_VALUE)
+                        .addGroup(layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(acceptButton).addComponent(cancelButton))
+                        .addContainerGap()));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
