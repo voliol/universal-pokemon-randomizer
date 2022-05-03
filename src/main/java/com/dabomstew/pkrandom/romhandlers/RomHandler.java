@@ -443,8 +443,10 @@ public interface RomHandler {
 
 	public void modifyTrainerText(Map taggedTypes);
 
+	public List<Pokemon> getMainPokemonList();
+
 	// code tweaks
-	public int miscTweaksAvailable();
+     public int miscTweaksAvailable();
 
 	public void applyMiscTweak(MiscTweak tweak);
 }
