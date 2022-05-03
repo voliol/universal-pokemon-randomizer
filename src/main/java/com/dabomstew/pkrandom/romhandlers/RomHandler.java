@@ -450,7 +450,9 @@ public interface RomHandler {
 
         public void modifyTrainerText(Map taggedTypes);
 
-        // code tweaks
+        public List<Pokemon> getMainPokemonList();
+
+		// code tweaks
         public int miscTweaksAvailable();
 
         public void applyMiscTweak(MiscTweak tweak);

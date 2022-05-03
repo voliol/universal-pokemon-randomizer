@@ -2,6 +2,13 @@ Universal Pokemon Randomizer
 
 By Dabomstew
 
+# Description of the Palette Test Branch
+What is this: 
+A branch for refactoring, primarily so the paltest branch can use the refactored methods/classes.
+Do not pull the refactored CopyUpEvolutionsHelper stuff yet, as it has not been thoroughly tested. 
+
+**The rest of the readme is from the version of the Randomizer this was branched from:**
+
 Homepage: http://pokehacks.dabomstew.com/randomizer/
 
 Forks used -
