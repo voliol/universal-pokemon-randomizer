@@ -8,7 +8,7 @@ by voliol
 # Description of the Palette Test Branch
 What is this: 
 A branch for a framework for palette randomization in all generations (I-V), 
-and porting the implementation from Artemis251's Pokemon Emerald Randomizer for gens III-5. 
+and porting the implementation from Artemis251's Pokemon Emerald Randomizer for gens III-V. 
 Neither are finished, and I am still working on it. The reason for uploading now is to
 facilitate collaborations. If you want to implement parts of in your branch I
 can't stop you, but I ask that you wait before it is more finished.
@@ -26,6 +26,8 @@ If you have any questions, I will try my best to answer them.
   should change with evolutions according to types, including ones set earlier during
   randomization.
   
+- Can randomize palettes of all vanilla Gen I games, and some (all?) vanilla Gen II games.  
+  
 - Sprites are dumped when you open a rom, so palettes can be viewed quickly. 
   See the Pokemon-sprite-dump folder.
 
@@ -35,8 +37,6 @@ If you have any questions, I will try my best to answer them.
 
 - Better handling of unorthodox types like fairy (and types at all). What colors should
   be used when they are not based on Pokémon types?
-  
-- Gen I and II need better palette randomization, respecting evolution families and types.
 
 - Offsets for normal palettes, shiny palettes, and backsprites 
   (for sprite dumping), primarily for gen III ROMs. There was an automated method 
