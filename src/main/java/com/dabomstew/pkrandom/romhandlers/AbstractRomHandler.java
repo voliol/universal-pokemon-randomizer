@@ -4401,7 +4401,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
         loadPokemonPalettes();
 
-        getPaletteHandler().randomizePokemonPalettes(mainPokemonList, typeSanity, evolutionSanity, shinyFromNormal);
+        getPaletteHandler().randomizePokemonPalettes(copyUpEvolutionsHelper, typeSanity, evolutionSanity, shinyFromNormal);
 
         writePokemonPalettes();
     }

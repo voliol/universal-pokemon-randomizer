@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.graphics;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen3RomHandler.java - randomizer handler for R/S/E/FR/LG.             --*/
+/*--  Color.java - represents a RGB color.             						--*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -27,13 +27,21 @@ public class Color {
     private int r, g, b;
     
     public static int highColorWordToARGB(int word) {
-        int red = (int) ((word & 0x1F) * 8.25);
-        int green = (int) (((word & 0x3E0) >> 5) * 8.25);
-        int blue = (int) (((word & 0x7C00) >> 10) * 8.25);
-        return 0xFF000000 | (red << 16) | (green << 8) | blue;
-    }
+	    int red = (int) ((word & 0x1F) * 8.25);
+	    int green = (int) (((word & 0x3E0) >> 5) * 8.25);
+	    int blue = (int) (((word & 0x7C00) >> 10) * 8.25);
+	    return 0xFF000000 | (red << 16) | (green << 8) | blue;
+	}
 
-    public Color() {
+	public static Color[] colorArrayFromHexes(int[] hexes) {
+		Color[] colors = new Color[hexes.length];
+		for (int i=0; i < colors.length; i++) {
+			colors[i] = new Color(hexes[i]);
+		}
+		return colors;
+	}
+
+	public Color() {
         this(255, 255, 255);
     }
 
@@ -102,7 +110,7 @@ public class Color {
             break;
         default:
             throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
-        }
-    }
+		}
+	}
 
 }
