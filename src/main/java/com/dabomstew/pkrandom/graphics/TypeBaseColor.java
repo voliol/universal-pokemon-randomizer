@@ -66,7 +66,7 @@ public class TypeBaseColor {
     }
 
     public Color getColor() {
-        return new Color(color);
+        return color.clone();
     }
 
     public boolean hasSameTypeAs(TypeBaseColor other) {

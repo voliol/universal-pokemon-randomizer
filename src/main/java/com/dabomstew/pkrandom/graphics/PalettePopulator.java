@@ -162,7 +162,7 @@ public class PalettePopulator {
 
         this.description = new ParsedDescription(partDescription);
 
-        this.baseColor = new Color(baseColor);
+        this.baseColor = baseColor.clone();
 
         if (description.length() != 0) {
             Color[] shades = makeShades();

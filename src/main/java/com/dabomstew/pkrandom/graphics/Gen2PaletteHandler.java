@@ -137,10 +137,8 @@ public class Gen2PaletteHandler extends PaletteHandler {
 
 	private Palette getRandom2ColorPalette() {
 		Palette palette = new Palette(2);
-		Color brightColor = new Color(random.nextInt(192, 255), random.nextInt(192, 255), random.nextInt(192, 255));
-		Color darkColor = new Color(random.nextInt(64, 192), random.nextInt(64, 192), random.nextInt(64, 192));
-		palette.setColor(0, brightColor);
-		palette.setColor(1, darkColor);
+		palette.setColor(0, getRandomBrightColor());
+		palette.setColor(1, getRandomDarkColor());
 		return palette;
 	}
 
@@ -152,11 +150,23 @@ public class Gen2PaletteHandler extends PaletteHandler {
 		palette.setColor(1, darkColor);
 		return palette;
 	}
+	
+	private Color getRandomBrightColor() {
+		Type[] keys = BRIGHT_TYPE_COLORS.keySet().toArray(new Type[0]);
+		Type type = keys[random.nextInt(keys.length)];
+		return getRandomBrightColor(type);
+	}
 
 	private Color getRandomBrightColor(Type type) {
 		Color[] typeColors = BRIGHT_TYPE_COLORS.get(type);
 		Color color = typeColors == null ? DEFAULT_BRIGHT_COLOR : typeColors[random.nextInt(typeColors.length)];
 		return color;
+	}
+	
+	private Color getRandomDarkColor() {
+		Type[] keys = DARK_TYPE_COLORS.keySet().toArray(new Type[0]);
+		Type type = keys[random.nextInt(keys.length)];
+		return getRandomDarkColor(type);
 	}
 
 	private Color getRandomDarkColor(Type type) {
@@ -187,16 +197,18 @@ public class Gen2PaletteHandler extends PaletteHandler {
 				setShinyPaletteFromNormal(evTo);
 			}
 
-			Palette palette = new Palette(evFrom.getNormalPalette());
+			Palette palette = evFrom.getNormalPalette().clone();
 
-			if (evTo.getPrimaryType() != evFrom.getPrimaryType()) {
-				Color newBrightColor = getRandomBrightColor(evTo.getPrimaryType());
-				palette.setColor(0, newBrightColor);
-
-			} else if (evTo.getSecondaryType() != evFrom.getSecondaryType()) {
-				Color newDarkColor = getRandomDarkColor(
-						evTo.getSecondaryType() == null ? evTo.getPrimaryType() : evTo.getSecondaryType());
-				palette.setColor(1, newDarkColor);
+			if (typeSanity) {
+				if (evTo.getPrimaryType() != evFrom.getPrimaryType()) {
+					Color newBrightColor = getRandomBrightColor(evTo.getPrimaryType());
+					palette.setColor(0, newBrightColor);
+	
+				} else if (evTo.getSecondaryType() != evFrom.getSecondaryType()) {
+					Color newDarkColor = getRandomDarkColor(
+							evTo.getSecondaryType() == null ? evTo.getPrimaryType() : evTo.getSecondaryType());
+					palette.setColor(1, newDarkColor);
+				}
 			}
 
 			evTo.setNormalPalette(palette);

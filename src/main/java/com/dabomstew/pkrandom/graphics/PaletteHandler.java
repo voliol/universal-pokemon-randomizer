@@ -21,7 +21,7 @@ public abstract class PaletteHandler {
             boolean evolutionSanity, boolean shinyFromNormal);
 
     protected void setShinyPaletteFromNormal(Pokemon pk) {
-		pk.setShinyPalette(new Palette(pk.getNormalPalette()));
+		pk.setShinyPalette(pk.getNormalPalette().clone());
 	}
 
 }

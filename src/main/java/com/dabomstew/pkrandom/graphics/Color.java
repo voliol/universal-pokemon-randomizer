@@ -23,7 +23,7 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public class Color {
+public class Color implements Cloneable {
     private int r, g, b;
     
     public static int highColorWordToARGB(int word) {
@@ -57,10 +57,9 @@ public class Color {
         this.b = (hex & 0xFF);
     }
 
-    public Color(Color copyOf) {
-        this.r = copyOf.r;
-        this.g = copyOf.g;
-        this.b = copyOf.b;
+    @Override
+    public Color clone() {
+    	return new Color(r, g, b);
     }
 
     @Override

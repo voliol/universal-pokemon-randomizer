@@ -1,6 +1,8 @@
 package com.dabomstew.pkrandom.graphics;
 
-public class Palette {
+import java.util.Arrays;
+
+public class Palette implements Cloneable {
 
     private final static int DEFAULT_PALETTE_SIZE = 16;
 
@@ -37,14 +39,6 @@ public class Palette {
 
     public Palette(byte[] bytes) {
         this(bytesToARGBValues(bytes));
-    }
-
-    // TODO: I'm sure there is a pattern to match perfectly here
-    public Palette(Palette copyOf) {
-        this.colors = new Color[copyOf.colors.length];
-        for (int i = 0; i < colors.length; i++) {
-            this.colors[i] = new Color(copyOf.colors[i]);
-        }
     }
 
     private static int[] bytesToARGBValues(byte[] bytes) {
@@ -84,6 +78,20 @@ public class Palette {
 
     public int size() {
         return colors.length;
+    }
+    
+    @Override
+    public String toString() {
+    	return Arrays.toString(colors);
+    }
+    
+    @Override
+    public Palette clone() {
+    	Palette palette = new Palette(colors.length);
+    	for (int i = 0; i < colors.length; i++) {
+    		palette.setColor(i, colors[i].clone());
+    	}
+    	return palette;
     }
 
 }

@@ -54,7 +54,7 @@ public class BaseColorsFamily {
 
 	public Color getBaseColor(TypeBaseColor typeBaseColor) {
 		// unsure if this is where to put copy protection
-		return new Color(baseColorMap.get(typeBaseColor));
+		return baseColorMap.get(typeBaseColor).clone();
 	}
 
 	public List<Pokemon> getMembers() {
