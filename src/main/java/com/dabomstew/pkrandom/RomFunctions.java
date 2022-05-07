@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
@@ -38,457 +39,444 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class RomFunctions {
 
-    public static Set<Pokemon> getBasicOrNoCopyPokemon(RomHandler baseRom) {
-        List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> dontCopyPokes = new TreeSet<Pokemon>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                // If this pokemon has no evolutions, it's a basic
-                if (pkmn.evolutionsTo.size() < 1) {
-                    dontCopyPokes.add(pkmn);
-                } else {
-                    // This pokemon has evolutions, so we're only going to get the first one
-                    Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    // Split evos don't carry stats and are treated specially
-                    if (!onlyEvo.carryStats) {
-                        dontCopyPokes.add(pkmn);
-                    }
-                }
-            }
-        }
-        return dontCopyPokes;
-    }
+	public static Set<Pokemon> getBasicPokemon(RomHandler baseRom) {
+		List<Pokemon> allPokes = baseRom.getPokemonWithoutNull();
+		Set<Pokemon> basicPokes = allPokes.stream().filter(pk -> pk.evolutionsTo.size() < 1)
+				.collect(Collectors.toSet());
+		return basicPokes;
+	}
 
-    public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom) {
-        List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> middleEvolutions = new TreeSet<Pokemon>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() > 0) {
-                    Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (onlyEvo.carryStats) {
-                        middleEvolutions.add(pkmn);
-                    }
-                }
-            }
-        }
-        return middleEvolutions;
-    }
+	public static Set<Pokemon> getSplitEvoPokemon(RomHandler baseRom) {
+		List<Pokemon> allPokes = baseRom.getPokemonWithoutNull();
+		Set<Pokemon> splitEvoPokes = allPokes.stream().filter(pk -> {
+			return pk.evolutionsTo.size() > 1 && !pk.evolutionsTo.get(0).carryStats;
+		}).collect(Collectors.toSet());
+		return splitEvoPokes;
+	}
 
-    public static Set<Pokemon> getFinalEvolutions(RomHandler baseRom) {
-        List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> finalEvolutions = new TreeSet<Pokemon>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() == 0) {
-                    Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (onlyEvo.carryStats) {
-                        finalEvolutions.add(pkmn);
-                    }
-                }
-            }
-        }
-        return finalEvolutions;
-    }
+	public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom) {
+		List<Pokemon> allPokes = baseRom.getPokemon();
+		Set<Pokemon> middleEvolutions = new TreeSet<Pokemon>();
+		for (Pokemon pkmn : allPokes) {
+			if (pkmn != null) {
+				if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() > 0) {
+					Evolution onlyEvo = pkmn.evolutionsTo.get(0);
+					if (onlyEvo.carryStats) {
+						middleEvolutions.add(pkmn);
+					}
+				}
+			}
+		}
+		return middleEvolutions;
+	}
 
-    public static List<Integer> removeUsedStones(List<Integer> stoneList, Evolution ev) {
-        ArrayList<Integer> availableStones = new ArrayList<Integer>(stoneList);
+	public static Set<Pokemon> getFinalEvolutions(RomHandler baseRom) {
+		List<Pokemon> allPokes = baseRom.getPokemon();
+		Set<Pokemon> finalEvolutions = new TreeSet<Pokemon>();
+		for (Pokemon pkmn : allPokes) {
+			if (pkmn != null) {
+				if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() == 0) {
+					Evolution onlyEvo = pkmn.evolutionsTo.get(0);
+					if (onlyEvo.carryStats) {
+						finalEvolutions.add(pkmn);
+					}
+				}
+			}
+		}
+		return finalEvolutions;
+	}
 
-        // Remove any stones already used
-        ev.from.evolutionsFrom.forEach(evo -> {
-            if (EvolutionType.isOfType("Stone", evo.type)) {
-                availableStones.remove(Math.max(availableStones.indexOf(evo.extraInfo), 0));
-            }
-        });
+	public static List<Integer> removeUsedStones(List<Integer> stoneList, Evolution ev) {
+		ArrayList<Integer> availableStones = new ArrayList<Integer>(stoneList);
 
-        return availableStones;
-    }
+		// Remove any stones already used
+		ev.from.evolutionsFrom.forEach(evo -> {
+			if (EvolutionType.isOfType("Stone", evo.type)) {
+				availableStones.remove(Math.max(availableStones.indexOf(evo.extraInfo), 0));
+			}
+		});
 
-    /**
-     * Get the 4 moves known by a Pokemon at a particular level.
-     * 
-     * @param pkmn
-     * @param movesets
-     * @param level
-     * @return
-     */
-    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets,
-            int level) {
-        return getMovesAtLevel(pkmn, movesets, level, 0);
-    }
+		return availableStones;
+	}
 
-    public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets,
-            int level, int emptyValue) {
-        int[] curMoves = new int[4];
+	/**
+	 * Get the 4 moves known by a Pokemon at a particular level.
+	 * 
+	 * @param pkmn
+	 * @param movesets
+	 * @param level
+	 * @return
+	 */
+	public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level) {
+		return getMovesAtLevel(pkmn, movesets, level, 0);
+	}
 
-        if (emptyValue != 0) {
-            Arrays.fill(curMoves, emptyValue);
-        }
+	public static int[] getMovesAtLevel(Pokemon pkmn, Map<Pokemon, List<MoveLearnt>> movesets, int level,
+			int emptyValue) {
+		int[] curMoves = new int[4];
 
-        int moveCount = 0;
-        List<MoveLearnt> movepool = movesets.get(pkmn);
-        for (MoveLearnt ml : movepool) {
-            if (ml.level > level) {
-                // we're done
-                break;
-            }
+		if (emptyValue != 0) {
+			Arrays.fill(curMoves, emptyValue);
+		}
 
-            boolean alreadyKnownMove = false;
-            for (int i = 0; i < moveCount; i++) {
-                if (curMoves[i] == ml.move) {
-                    alreadyKnownMove = true;
-                    break;
-                }
-            }
+		int moveCount = 0;
+		List<MoveLearnt> movepool = movesets.get(pkmn);
+		for (MoveLearnt ml : movepool) {
+			if (ml.level > level) {
+				// we're done
+				break;
+			}
 
-            if (!alreadyKnownMove) {
-                // add this move to the moveset
-                if (moveCount == 4) {
-                    // shift moves up and add to last slot
-                    for (int i = 0; i < 3; i++) {
-                        curMoves[i] = curMoves[i + 1];
-                    }
-                    curMoves[3] = ml.move;
-                } else {
-                    // add to next available slot
-                    curMoves[moveCount++] = ml.move;
-                }
-            }
-        }
+			boolean alreadyKnownMove = false;
+			for (int i = 0; i < moveCount; i++) {
+				if (curMoves[i] == ml.move) {
+					alreadyKnownMove = true;
+					break;
+				}
+			}
 
-        return curMoves;
-    }
+			if (!alreadyKnownMove) {
+				// add this move to the moveset
+				if (moveCount == 4) {
+					// shift moves up and add to last slot
+					for (int i = 0; i < 3; i++) {
+						curMoves[i] = curMoves[i + 1];
+					}
+					curMoves[3] = ml.move;
+				} else {
+					// add to next available slot
+					curMoves[moveCount++] = ml.move;
+				}
+			}
+		}
 
-    public static String camelCase(String original) {
-        char[] string = original.toLowerCase().toCharArray();
-        boolean docap = true;
-        for (int j = 0; j < string.length; j++) {
-            char current = string[j];
-            if (docap && Character.isLetter(current)) {
-                string[j] = Character.toUpperCase(current);
-                docap = false;
-            } else {
-                if (!docap && !Character.isLetter(current) && current != '\'') {
-                    docap = true;
-                }
-            }
-        }
-        return new String(string);
-    }
+		return curMoves;
+	}
 
-    public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset) {
-        // by default align to 4 bytes to make sure things don't break
-        return freeSpaceFinder(rom, freeSpace, amount, offset, true);
-    }
+	public static String camelCase(String original) {
+		char[] string = original.toLowerCase().toCharArray();
+		boolean docap = true;
+		for (int j = 0; j < string.length; j++) {
+			char current = string[j];
+			if (docap && Character.isLetter(current)) {
+				string[j] = Character.toUpperCase(current);
+				docap = false;
+			} else {
+				if (!docap && !Character.isLetter(current) && current != '\'') {
+					docap = true;
+				}
+			}
+		}
+		return new String(string);
+	}
 
-    public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset,
-            boolean longAligned) {
-        if (!longAligned) {
-            // Find 2 more than necessary and return 2 into it,
-            // to preserve stuff like FF terminators for strings
-            // 161: and FFFF terminators for movesets
-            byte[] searchNeedle = new byte[amount + 2];
-            for (int i = 0; i < amount + 2; i++) {
-                searchNeedle[i] = freeSpace;
-            }
-            return searchForFirst(rom, offset, searchNeedle) + 2;
-        } else {
-            // Find 5 more than necessary and return into it as necessary for
-            // 4-alignment,
-            // to preserve stuff like FF terminators for strings
-            // 161: and FFFF terminators for movesets
-            byte[] searchNeedle = new byte[amount + 5];
-            for (int i = 0; i < amount + 5; i++) {
-                searchNeedle[i] = freeSpace;
-            }
-            return (searchForFirst(rom, offset, searchNeedle) + 5) & ~3;
-        }
-    }
+	public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset) {
+		// by default align to 4 bytes to make sure things don't break
+		return freeSpaceFinder(rom, freeSpace, amount, offset, true);
+	}
 
-    public static List<Integer> search(byte[] haystack, byte[] needle) {
-        return search(haystack, 0, haystack.length, needle);
-    }
+	public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset, boolean longAligned) {
+		if (!longAligned) {
+			// Find 2 more than necessary and return 2 into it,
+			// to preserve stuff like FF terminators for strings
+			// 161: and FFFF terminators for movesets
+			byte[] searchNeedle = new byte[amount + 2];
+			for (int i = 0; i < amount + 2; i++) {
+				searchNeedle[i] = freeSpace;
+			}
+			return searchForFirst(rom, offset, searchNeedle) + 2;
+		} else {
+			// Find 5 more than necessary and return into it as necessary for
+			// 4-alignment,
+			// to preserve stuff like FF terminators for strings
+			// 161: and FFFF terminators for movesets
+			byte[] searchNeedle = new byte[amount + 5];
+			for (int i = 0; i < amount + 5; i++) {
+				searchNeedle[i] = freeSpace;
+			}
+			return (searchForFirst(rom, offset, searchNeedle) + 5) & ~3;
+		}
+	}
 
-    public static List<Integer> search(byte[] haystack, int beginOffset, byte[] needle) {
-        return search(haystack, beginOffset, haystack.length, needle);
-    }
+	public static List<Integer> search(byte[] haystack, byte[] needle) {
+		return search(haystack, 0, haystack.length, needle);
+	}
 
-    public static List<Integer> search(byte[] haystack, int beginOffset, int endOffset,
-            byte[] needle) {
-        int currentMatchStart = beginOffset;
-        int currentCharacterPosition = 0;
+	public static List<Integer> search(byte[] haystack, int beginOffset, byte[] needle) {
+		return search(haystack, beginOffset, haystack.length, needle);
+	}
 
-        int docSize = endOffset;
-        int needleSize = needle.length;
+	public static List<Integer> search(byte[] haystack, int beginOffset, int endOffset, byte[] needle) {
+		int currentMatchStart = beginOffset;
+		int currentCharacterPosition = 0;
 
-        int[] toFillTable = buildKMPSearchTable(needle);
-        List<Integer> results = new ArrayList<Integer>();
+		int docSize = endOffset;
+		int needleSize = needle.length;
 
-        while ((currentMatchStart + currentCharacterPosition) < docSize) {
+		int[] toFillTable = buildKMPSearchTable(needle);
+		List<Integer> results = new ArrayList<Integer>();
 
-            if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition
-                    + currentMatchStart])) {
-                currentCharacterPosition = currentCharacterPosition + 1;
+		while ((currentMatchStart + currentCharacterPosition) < docSize) {
 
-                if (currentCharacterPosition == (needleSize)) {
-                    results.add(currentMatchStart);
-                    currentCharacterPosition = 0;
-                    currentMatchStart = currentMatchStart + needleSize;
+			if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition + currentMatchStart])) {
+				currentCharacterPosition = currentCharacterPosition + 1;
 
-                }
+				if (currentCharacterPosition == (needleSize)) {
+					results.add(currentMatchStart);
+					currentCharacterPosition = 0;
+					currentMatchStart = currentMatchStart + needleSize;
 
-            } else {
-                currentMatchStart = currentMatchStart + currentCharacterPosition
-                        - toFillTable[currentCharacterPosition];
+				}
 
-                if (toFillTable[currentCharacterPosition] > -1) {
-                    currentCharacterPosition = toFillTable[currentCharacterPosition];
-                }
+			} else {
+				currentMatchStart = currentMatchStart + currentCharacterPosition
+						- toFillTable[currentCharacterPosition];
 
-                else {
-                    currentCharacterPosition = 0;
+				if (toFillTable[currentCharacterPosition] > -1) {
+					currentCharacterPosition = toFillTable[currentCharacterPosition];
+				}
 
-                }
+				else {
+					currentCharacterPosition = 0;
 
-            }
-        }
-        return results;
-    }
+				}
 
-    public static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
-        int currentMatchStart = beginOffset;
-        int currentCharacterPosition = 0;
+			}
+		}
+		return results;
+	}
 
-        int docSize = haystack.length;
-        int needleSize = needle.length;
+	public static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
+		int currentMatchStart = beginOffset;
+		int currentCharacterPosition = 0;
 
-        int[] toFillTable = buildKMPSearchTable(needle);
+		int docSize = haystack.length;
+		int needleSize = needle.length;
 
-        while ((currentMatchStart + currentCharacterPosition) < docSize) {
+		int[] toFillTable = buildKMPSearchTable(needle);
 
-            if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition
-                    + currentMatchStart])) {
-                currentCharacterPosition = currentCharacterPosition + 1;
+		while ((currentMatchStart + currentCharacterPosition) < docSize) {
 
-                if (currentCharacterPosition == (needleSize)) {
-                    return currentMatchStart;
-                }
+			if (needle[currentCharacterPosition] == (haystack[currentCharacterPosition + currentMatchStart])) {
+				currentCharacterPosition = currentCharacterPosition + 1;
 
-            } else {
-                currentMatchStart = currentMatchStart + currentCharacterPosition
-                        - toFillTable[currentCharacterPosition];
+				if (currentCharacterPosition == (needleSize)) {
+					return currentMatchStart;
+				}
 
-                if (toFillTable[currentCharacterPosition] > -1) {
-                    currentCharacterPosition = toFillTable[currentCharacterPosition];
-                }
+			} else {
+				currentMatchStart = currentMatchStart + currentCharacterPosition
+						- toFillTable[currentCharacterPosition];
 
-                else {
-                    currentCharacterPosition = 0;
+				if (toFillTable[currentCharacterPosition] > -1) {
+					currentCharacterPosition = toFillTable[currentCharacterPosition];
+				}
 
-                }
+				else {
+					currentCharacterPosition = 0;
 
-            }
-        }
-        return -1;
-    }
+				}
 
-    private static int[] buildKMPSearchTable(byte[] needle) {
-        int[] stable = new int[needle.length];
-        int pos = 2;
-        int j = 0;
-        stable[0] = -1;
-        stable[1] = 0;
-        while (pos < needle.length) {
-            if (needle[pos - 1] == needle[j]) {
-                stable[pos] = j + 1;
-                pos++;
-                j++;
-            } else if (j > 0) {
-                j = stable[j];
-            } else {
-                stable[pos] = 0;
-                pos++;
-            }
-        }
-        return stable;
-    }
+			}
+		}
+		return -1;
+	}
 
-    public static String rewriteDescriptionForNewLineSize(String moveDesc, String newline,
-            int lineSize, StringSizeDeterminer ssd) {
-        // We rewrite the description we're given based on some new chars per
-        // line.
-        moveDesc = moveDesc.replace("-" + newline, "").replace(newline, " ");
-        // Keep spatk/spdef as one word on one line
-        moveDesc = moveDesc.replace("Sp. Atk", "Sp__Atk");
-        moveDesc = moveDesc.replace("Sp. Def", "Sp__Def");
-        moveDesc = moveDesc.replace("SP. ATK", "SP__ATK");
-        moveDesc = moveDesc.replace("SP. DEF", "SP__DEF");
-        String[] words = moveDesc.split(" ");
-        StringBuilder fullDesc = new StringBuilder();
-        StringBuilder thisLine = new StringBuilder();
-        int currLineWC = 0;
-        int currLineCC = 0;
-        int linesWritten = 0;
-        for (int i = 0; i < words.length; i++) {
-            // Reverse the spatk/spdef preservation from above
-            words[i] = words[i].replace("SP__", "SP. ");
-            words[i] = words[i].replace("Sp__", "Sp. ");
-            int reqLength = ssd.lengthFor(words[i]);
-            if (currLineWC > 0) {
-                reqLength++;
-            }
-            if (currLineCC + reqLength <= lineSize) {
-                // add to current line
-                if (currLineWC > 0) {
-                    thisLine.append(' ');
-                }
-                thisLine.append(words[i]);
-                currLineWC++;
-                currLineCC += reqLength;
-            } else {
-                // Save current line, if applicable
-                if (currLineWC > 0) {
-                    if (linesWritten > 0) {
-                        fullDesc.append(newline);
-                    }
-                    fullDesc.append(thisLine.toString());
-                    linesWritten++;
-                    thisLine = new StringBuilder();
-                }
-                // Start the new line
-                thisLine.append(words[i]);
-                currLineWC = 1;
-                currLineCC = ssd.lengthFor(words[i]);
-            }
-        }
+	private static int[] buildKMPSearchTable(byte[] needle) {
+		int[] stable = new int[needle.length];
+		int pos = 2;
+		int j = 0;
+		stable[0] = -1;
+		stable[1] = 0;
+		while (pos < needle.length) {
+			if (needle[pos - 1] == needle[j]) {
+				stable[pos] = j + 1;
+				pos++;
+				j++;
+			} else if (j > 0) {
+				j = stable[j];
+			} else {
+				stable[pos] = 0;
+				pos++;
+			}
+		}
+		return stable;
+	}
 
-        // If the last line has anything add it
-        if (currLineWC > 0) {
-            if (linesWritten > 0) {
-                fullDesc.append(newline);
-            }
-            fullDesc.append(thisLine.toString());
-            linesWritten++;
-        }
+	public static String rewriteDescriptionForNewLineSize(String moveDesc, String newline, int lineSize,
+			StringSizeDeterminer ssd) {
+		// We rewrite the description we're given based on some new chars per
+		// line.
+		moveDesc = moveDesc.replace("-" + newline, "").replace(newline, " ");
+		// Keep spatk/spdef as one word on one line
+		moveDesc = moveDesc.replace("Sp. Atk", "Sp__Atk");
+		moveDesc = moveDesc.replace("Sp. Def", "Sp__Def");
+		moveDesc = moveDesc.replace("SP. ATK", "SP__ATK");
+		moveDesc = moveDesc.replace("SP. DEF", "SP__DEF");
+		String[] words = moveDesc.split(" ");
+		StringBuilder fullDesc = new StringBuilder();
+		StringBuilder thisLine = new StringBuilder();
+		int currLineWC = 0;
+		int currLineCC = 0;
+		int linesWritten = 0;
+		for (int i = 0; i < words.length; i++) {
+			// Reverse the spatk/spdef preservation from above
+			words[i] = words[i].replace("SP__", "SP. ");
+			words[i] = words[i].replace("Sp__", "Sp. ");
+			int reqLength = ssd.lengthFor(words[i]);
+			if (currLineWC > 0) {
+				reqLength++;
+			}
+			if (currLineCC + reqLength <= lineSize) {
+				// add to current line
+				if (currLineWC > 0) {
+					thisLine.append(' ');
+				}
+				thisLine.append(words[i]);
+				currLineWC++;
+				currLineCC += reqLength;
+			} else {
+				// Save current line, if applicable
+				if (currLineWC > 0) {
+					if (linesWritten > 0) {
+						fullDesc.append(newline);
+					}
+					fullDesc.append(thisLine.toString());
+					linesWritten++;
+					thisLine = new StringBuilder();
+				}
+				// Start the new line
+				thisLine.append(words[i]);
+				currLineWC = 1;
+				currLineCC = ssd.lengthFor(words[i]);
+			}
+		}
 
-        return fullDesc.toString();
-    }
+		// If the last line has anything add it
+		if (currLineWC > 0) {
+			if (linesWritten > 0) {
+				fullDesc.append(newline);
+			}
+			fullDesc.append(thisLine.toString());
+			linesWritten++;
+		}
 
-    public static String formatTextWithReplacements(String text, Map<String, String> replacements,
-            String newline, String extraline, String newpara, int maxLineLength,
-            StringSizeDeterminer ssd) {
-        // Ends with a paragraph indicator?
-        boolean endsWithPara = false;
-        if (text.endsWith(newpara)) {
-            endsWithPara = true;
-            text = text.substring(0, text.length() - newpara.length());
-        }
-        // Replace current line endings with spaces
-        text = text.replace(newline, " ").replace(extraline, " ");
-        // Replace words if replacements are set
-        // do it in two stages so the rules don't conflict
-        if (replacements != null) {
-            int index = 0;
-            for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
-                index++;
-                text = text.replace(toReplace.getKey(), "<tmpreplace" + index + ">");
-            }
-            index = 0;
-            for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
-                index++;
-                text = text.replace("<tmpreplace" + index + ">", toReplace.getValue());
-            }
-        }
-        // Split on paragraphs and deal with each one individually
-        String[] oldParagraphs = text.split(newpara.replace("\\", "\\\\"));
-        StringBuilder finalResult = new StringBuilder();
-        int sentenceNewLineSize = Math.max(10, maxLineLength / 2);
-        for (int para = 0; para < oldParagraphs.length; para++) {
-            String[] words = oldParagraphs[para].split(" ");
-            StringBuilder fullPara = new StringBuilder();
-            StringBuilder thisLine = new StringBuilder();
-            int currLineWC = 0;
-            int currLineCC = 0;
-            int linesWritten = 0;
-            char currLineLastChar = 0;
-            for (int i = 0; i < words.length; i++) {
-                int reqLength = ssd.lengthFor(words[i]);
-                if (currLineWC > 0) {
-                    reqLength++;
-                }
-                if ((currLineCC + reqLength > maxLineLength)
-                        || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.'
-                                || currLineLastChar == '?' || currLineLastChar == '!'
-                                || currLineLastChar == '…' || currLineLastChar == ','))) {
-                    // new line
-                    // Save current line, if applicable
-                    if (currLineWC > 0) {
-                        if (linesWritten > 1) {
-                            fullPara.append(extraline);
-                        } else if (linesWritten == 1) {
-                            fullPara.append(newline);
-                        }
-                        fullPara.append(thisLine.toString());
-                        linesWritten++;
-                        thisLine = new StringBuilder();
-                    }
-                    // Start the new line
-                    thisLine.append(words[i]);
-                    currLineWC = 1;
-                    currLineCC = ssd.lengthFor(words[i]);
-                    if (words[i].length() == 0) {
-                        currLineLastChar = 0;
-                    } else {
-                        currLineLastChar = words[i].charAt(words[i].length() - 1);
-                    }
-                } else {
-                    // add to current line
-                    if (currLineWC > 0) {
-                        thisLine.append(' ');
-                    }
-                    thisLine.append(words[i]);
-                    currLineWC++;
-                    currLineCC += reqLength;
-                    if (words[i].length() == 0) {
-                        currLineLastChar = 0;
-                    } else {
-                        currLineLastChar = words[i].charAt(words[i].length() - 1);
-                    }
-                }
-            }
+		return fullDesc.toString();
+	}
 
-            // If the last line has anything add it
-            if (currLineWC > 0) {
-                if (linesWritten > 1) {
-                    fullPara.append(extraline);
-                } else if (linesWritten == 1) {
-                    fullPara.append(newline);
-                }
-                fullPara.append(thisLine.toString());
-                linesWritten++;
-            }
-            if (para > 0) {
-                finalResult.append(newpara);
-            }
-            finalResult.append(fullPara.toString());
-        }
-        if (endsWithPara) {
-            finalResult.append(newpara);
-        }
-        return finalResult.toString();
-    }
+	public static String formatTextWithReplacements(String text, Map<String, String> replacements, String newline,
+			String extraline, String newpara, int maxLineLength, StringSizeDeterminer ssd) {
+		// Ends with a paragraph indicator?
+		boolean endsWithPara = false;
+		if (text.endsWith(newpara)) {
+			endsWithPara = true;
+			text = text.substring(0, text.length() - newpara.length());
+		}
+		// Replace current line endings with spaces
+		text = text.replace(newline, " ").replace(extraline, " ");
+		// Replace words if replacements are set
+		// do it in two stages so the rules don't conflict
+		if (replacements != null) {
+			int index = 0;
+			for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
+				index++;
+				text = text.replace(toReplace.getKey(), "<tmpreplace" + index + ">");
+			}
+			index = 0;
+			for (Map.Entry<String, String> toReplace : replacements.entrySet()) {
+				index++;
+				text = text.replace("<tmpreplace" + index + ">", toReplace.getValue());
+			}
+		}
+		// Split on paragraphs and deal with each one individually
+		String[] oldParagraphs = text.split(newpara.replace("\\", "\\\\"));
+		StringBuilder finalResult = new StringBuilder();
+		int sentenceNewLineSize = Math.max(10, maxLineLength / 2);
+		for (int para = 0; para < oldParagraphs.length; para++) {
+			String[] words = oldParagraphs[para].split(" ");
+			StringBuilder fullPara = new StringBuilder();
+			StringBuilder thisLine = new StringBuilder();
+			int currLineWC = 0;
+			int currLineCC = 0;
+			int linesWritten = 0;
+			char currLineLastChar = 0;
+			for (int i = 0; i < words.length; i++) {
+				int reqLength = ssd.lengthFor(words[i]);
+				if (currLineWC > 0) {
+					reqLength++;
+				}
+				if ((currLineCC + reqLength > maxLineLength)
+						|| (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.' || currLineLastChar == '?'
+								|| currLineLastChar == '!' || currLineLastChar == '…' || currLineLastChar == ','))) {
+					// new line
+					// Save current line, if applicable
+					if (currLineWC > 0) {
+						if (linesWritten > 1) {
+							fullPara.append(extraline);
+						} else if (linesWritten == 1) {
+							fullPara.append(newline);
+						}
+						fullPara.append(thisLine.toString());
+						linesWritten++;
+						thisLine = new StringBuilder();
+					}
+					// Start the new line
+					thisLine.append(words[i]);
+					currLineWC = 1;
+					currLineCC = ssd.lengthFor(words[i]);
+					if (words[i].length() == 0) {
+						currLineLastChar = 0;
+					} else {
+						currLineLastChar = words[i].charAt(words[i].length() - 1);
+					}
+				} else {
+					// add to current line
+					if (currLineWC > 0) {
+						thisLine.append(' ');
+					}
+					thisLine.append(words[i]);
+					currLineWC++;
+					currLineCC += reqLength;
+					if (words[i].length() == 0) {
+						currLineLastChar = 0;
+					} else {
+						currLineLastChar = words[i].charAt(words[i].length() - 1);
+					}
+				}
+			}
 
-    public interface StringSizeDeterminer {
-        public int lengthFor(String encodedText);
-    }
+			// If the last line has anything add it
+			if (currLineWC > 0) {
+				if (linesWritten > 1) {
+					fullPara.append(extraline);
+				} else if (linesWritten == 1) {
+					fullPara.append(newline);
+				}
+				fullPara.append(thisLine.toString());
+				linesWritten++;
+			}
+			if (para > 0) {
+				finalResult.append(newpara);
+			}
+			finalResult.append(fullPara.toString());
+		}
+		if (endsWithPara) {
+			finalResult.append(newpara);
+		}
+		return finalResult.toString();
+	}
 
-    public static class StringLengthSD implements StringSizeDeterminer {
+	public interface StringSizeDeterminer {
+		public int lengthFor(String encodedText);
+	}
 
-        @Override
-        public int lengthFor(String encodedText) {
-            return encodedText.length();
-        }
+	public static class StringLengthSD implements StringSizeDeterminer {
 
-    }
+		@Override
+		public int lengthFor(String encodedText) {
+			return encodedText.length();
+		}
+
+	}
 
 }

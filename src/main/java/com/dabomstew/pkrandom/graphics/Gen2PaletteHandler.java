@@ -130,7 +130,7 @@ public class Gen2PaletteHandler extends PaletteHandler {
 
 		this.typeSanity = typeSanity;
 		this.shinyFromNormal = shinyFromNormal;
-		copyUpEvolutionsHelper.apply(evolutionSanity, new BasePokemonPaletteAction(),
+		copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
 
 	}

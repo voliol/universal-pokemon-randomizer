@@ -67,7 +67,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			return;
 
 		} else {
-			copyUpEvolutionsHelper.apply(evolutionSanity, new BasePokemonPaletteAction(),
+			copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
 					new EvolvedPokemonPaletteAction());
 			List<String> paletteDescriptions = getPaletteDescriptions(paletteDescriptionsFileName);
 			populatePalettes(paletteDescriptions);

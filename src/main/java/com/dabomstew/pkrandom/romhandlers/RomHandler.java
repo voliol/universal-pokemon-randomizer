@@ -66,6 +66,9 @@ public interface RomHandler {
 	// Setup Gen Restrictions and list restrictions.
 	public void setPokemonPool(GenRestrictions restrictions, RomOptions romOptions);
 
+	// the above without null - note the shifted offset!
+	public List<Pokemon> getPokemonWithoutNull();
+
 	public void removeEvosForPokemonPool();
 
 	// Randomizer: Starters

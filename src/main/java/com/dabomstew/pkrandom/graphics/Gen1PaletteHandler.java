@@ -46,7 +46,7 @@ public class Gen1PaletteHandler extends PaletteHandler {
 		// obviously shinyFromNormal is not used, it is here for a hopefully prettier
 		// class structure
 		this.typeSanity = typeSanity;
-		copyUpEvolutionsHelper.apply(evolutionSanity, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
+		copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
 	}
 
 	private byte getRandomPaletteID() {

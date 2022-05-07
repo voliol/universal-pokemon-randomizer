@@ -26,8 +26,8 @@ public class CopyUpEvolutionsHelper {
 	 * @param epAction Method to run on all evolved Pokémon with a linear chain of
 	 * single evolutions.
 	 */
-	public void apply(boolean evolutionSanity, BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
-		apply(evolutionSanity, bpAction, epAction, bpAction);
+	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+		apply(evolutionSanity, splitEvoNoCopy, bpAction, epAction, bpAction);
 	}
 
 	/**
@@ -38,7 +38,7 @@ public class CopyUpEvolutionsHelper {
 	 * 
 	 * @param nopAction Method to run when evolutionSanity == false
 	 */
-	public void apply(boolean evolutionSanity, BasePokemonAction bpAction, EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
+	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction, EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
 		List<Pokemon> allPokes = romHandler.getMainPokemonList();
 
 		if (evolutionSanity) {
@@ -49,7 +49,10 @@ public class CopyUpEvolutionsHelper {
 			}
 
 			// Get evolution data.
-			Set<Pokemon> dontCopyPokes = RomFunctions.getBasicOrNoCopyPokemon(romHandler);
+			Set<Pokemon> dontCopyPokes = RomFunctions.getBasicPokemon(romHandler);
+			if (splitEvoNoCopy) {
+				dontCopyPokes.addAll(RomFunctions.getSplitEvoPokemon(romHandler));
+			}
 			Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(romHandler);
 
 			for (Pokemon pk : dontCopyPokes) {
