@@ -63,7 +63,10 @@ public interface RomHandler {
         // 0 = null 1-whatever = the Pokemon.
         public List<Pokemon> getPokemon();
 
-        // Setup Gen Restrictions and list restrictions.
+        // the above without null - note the shifted offset!
+        public List<Pokemon> getPokemonWithoutNull();
+
+		// Setup Gen Restrictions and list restrictions.
         public void setPokemonPool(GenRestrictions restrictions, RomOptions romOptions);
 
         public void removeEvosForPokemonPool();
