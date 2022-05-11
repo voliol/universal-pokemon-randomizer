@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;

@@ -424,6 +424,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void determineRomEntry() {
+    	
+    	// TODO: remove when no longer useful
+    	System.out.println("-----");
+    	for (RomEntry re : roms) {
+    		System.out.print(re.name + ":\t");
+    		System.out.print(re.getValue("PokemonFrontSprites") + ",\t");
+    		System.out.print(re.getValue("PokemonBackSprites") + ",\t");
+    		System.out.print(re.getValue("PokemonNormalPalettes") + ",\t");
+    		System.out.print(re.getValue("PokemonShinyPalettes") + "\n");
+    	}
+    	
         isRomHack = false;
         for (RomEntry re : roms) {
             if (romCode(rom, re.romCode) && (rom[0xBC] & 0xFF) == re.version) {
@@ -3708,7 +3719,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // TODO: offsets for all vanilla roms
         int normalPaletteTableOffset = getRomEntry().getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = getRomEntry().getValue("PokemonShinyPalettes");
-        System.out.println("tableoffset: " + normalPaletteTableOffset);
         for (Pokemon pk : mainPokemonList) {
             int pokeNumber = getPokedexToInternal()[pk.getNumber()];
 
@@ -3947,8 +3957,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         switch (romEntry.romType) {
         case Gen3Constants.RomType_Ruby:
         case Gen3Constants.RomType_Sapp:
-            // TODO: see if these need one of their own, if any palettes (or the use of
-            // them) are non-identical
+            // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
+        	// otherwise all palettes are pretty much identical (in use).
             return "palettesE.txt";
         case Gen3Constants.RomType_Em:
             return "palettesE.txt";

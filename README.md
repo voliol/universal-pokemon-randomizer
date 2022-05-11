@@ -26,7 +26,7 @@ If you have any questions, I will try my best to answer them.
   should change with evolutions according to types, including ones set earlier during
   randomization.
   
-- Can randomize palettes of all vanilla Gen I games, and some (all?) vanilla Gen II games.  
+- It can randomize palettes of all vanilla Gen I and Gen II games.  
   
 - Sprites are dumped when you open a rom, so palettes can be viewed quickly. 
   See the Pokemon-sprite-dump folder.

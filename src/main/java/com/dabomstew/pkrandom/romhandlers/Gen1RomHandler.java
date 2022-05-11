@@ -2571,18 +2571,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     protected void loadPokemonPalettes() {
-        int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset") + 1;
+        int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
         for (Pokemon pk : mainPokemonList) {
-            pk.setPaletteID(rom[palIndex + pk.getNumber()]);  //TODO: verify this works
+            pk.setPaletteID(rom[palIndex + pk.getNumber()]); //they are in Pokédex order
         }
     }
     
     @Override
     protected void writePokemonPalettes() {
         int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
-        
         for (Pokemon pk : mainPokemonList) {
-            rom[palIndex + pk.getNumber()] = pk.getPaletteID(); //they are in Pokédex order //TODO: verify
+            rom[palIndex + pk.getNumber()] = pk.getPaletteID(); //they are in Pokédex order
         }
     }
     

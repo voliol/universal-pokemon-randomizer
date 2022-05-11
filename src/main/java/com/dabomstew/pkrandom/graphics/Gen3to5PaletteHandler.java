@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -22,8 +22,8 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;
-	private Map<Pokemon, BaseColorsFamily> baseColorsFamilies;
-	private Map<Pokemon, PokemonTypeBaseColors> pokemonTypeBaseColors;
+	private Map<Pokemon, BaseColorMap> baseColorMaps;
+	private Map<Pokemon, TypeBaseColorList> typeBaseColorLists;
 
 	public Gen3to5PaletteHandler(Random random, String paletteDescriptionsFileName) {
 		super(random);
@@ -42,8 +42,8 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 		this.typeSanity = typeSanity;
 		this.shinyFromNormal = shinyFromNormal;
-		this.baseColorsFamilies = new HashMap<>();
-		this.pokemonTypeBaseColors = new HashMap<>();
+		this.baseColorMaps = new HashMap<>();
+		this.typeBaseColorLists = new HashMap<>();
 
 		if (paletteDescriptionsFileName == null) {
 
@@ -78,11 +78,13 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 	private void populatePalettes(List<String> paletteDescriptions) {
 
 		PalettePopulator pp = new PalettePopulator(random);
+		
+		for (Entry<Pokemon, BaseColorMap> entry : baseColorMaps.entrySet()) {
+			
+				Pokemon pk = entry.getKey();
+				BaseColorMap baseColorsMap = entry.getValue();
 
-		for (BaseColorsFamily bcFamily : new HashSet<>(baseColorsFamilies.values())) {
-			for (Pokemon pk : bcFamily.getMembers()) {
-
-				PokemonTypeBaseColors pkTBCs = pokemonTypeBaseColors.get(pk);
+				TypeBaseColorList typeBaseColorList = typeBaseColorLists.get(pk);
 
 				Palette palette = pk.getNormalPalette();
 				int pokemonNumber = pk.getNumber();
@@ -91,14 +93,14 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 				for (int i = 0; i < partDescriptions.length; i++) {
 					if (!partDescriptions[i].isBlank()) {
-						TypeBaseColor tbc = pkTBCs.getTypeBaseColors().get(i);
-						Color baseColor = bcFamily.getBaseColor(tbc);
+						TypeColor typeColor = typeBaseColorList.get(i);
+						Color baseColor = baseColorsMap.getBaseColor(typeColor);
+						LightDarkMode lightDarkMode = baseColorsMap.getLightDarkMode(typeColor);
 
-						pp.populatePartFromBaseColor(palette, partDescriptions[i], baseColor);
+						pp.populatePartFromBaseColor(palette, partDescriptions[i], baseColor, lightDarkMode);
 					}
 				}
 
-			}
 		}
 	}
 
@@ -113,7 +115,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 	private List<String> getPaletteDescriptions(String fileName) {
 		List<String> paletteDescriptions = new ArrayList<>();
 
-		InputStream infi = getClass().getResourceAsStream("resources/TBE/" + fileName);
+		InputStream infi = getClass().getResourceAsStream("resources/" + fileName);
 		BufferedReader br = new BufferedReader(new InputStreamReader(infi));
 
 		String line;
@@ -136,13 +138,13 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			if (shinyFromNormal) {
 				setShinyPaletteFromNormal(pk);
 			}
-
-			BaseColorsFamily bcFamily = new BaseColorsFamily(random);
-			bcFamily.addMember(pk);
-			baseColorsFamilies.put(pk, bcFamily);
-
-			PokemonTypeBaseColors pkTBCs = new PokemonTypeBaseColors(pk, typeSanity, random);
-			pokemonTypeBaseColors.put(pk, pkTBCs);
+			
+			System.out.println(pk);
+			BaseColorMap baseColorMap = new BaseColorMap(random);
+			baseColorMaps.put(pk, baseColorMap);
+			
+			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, typeSanity, random);
+			typeBaseColorLists.put(pk, typeBaseColorList);
 
 		}
 
@@ -156,13 +158,12 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 				setShinyPaletteFromNormal(evTo);
 			}
 
-			BaseColorsFamily bcFamily = baseColorsFamilies.get(evFrom);
-			bcFamily.addMember(evTo);
-			baseColorsFamilies.put(evTo, bcFamily);
+			BaseColorMap baseColorMap = baseColorMaps.get(evFrom);
+			baseColorMaps.put(evTo, baseColorMap);
 
-			PokemonTypeBaseColors prevo = pokemonTypeBaseColors.get(evFrom);
-			PokemonTypeBaseColors pkTBCs = new PokemonTypeBaseColors(evTo, prevo, typeSanity, random);
-			pokemonTypeBaseColors.put(evTo, pkTBCs);
+			TypeBaseColorList prevo = typeBaseColorLists.get(evFrom);
+			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(evTo, prevo, typeSanity, random);
+			typeBaseColorLists.put(evTo, typeBaseColorList);
 
 		}
 

@@ -56,14 +56,28 @@ public class PalettePopulator {
      * For the parsing of the palette (part) descriptions.
      */
     private static class ParsedDescription {
-        private String rawString;
-        private int[] slots;
-        private LightDarkSuffix lightDarkSuffix;
+        private final String rawString;
+        private final int[] slots;
+        private final int[] siblingSlots;
+        private final int sharedSiblingColor;
+        private final LightDarkSuffix lightDarkSuffix;
 
-        // TODO: let this parse all of Artemis' description syntax
+        // TODO: should this throw an IOException?
         public ParsedDescription(String rawString) {
             this.rawString = rawString;
-            this.slots = splitAndConvertToInts(rawString);
+            
+            String[] maybeSibling = rawString.split(";");
+			this.slots = splitAndConvertToInts(maybeSibling[0]);
+			
+			// sibling exists
+			if (maybeSibling.length == 2) {
+				this.siblingSlots = splitAndConvertToInts(maybeSibling[1]);
+				this.sharedSiblingColor = splitAndConvertToInts(maybeSibling[1].split("-")[1])[0];
+			} else {
+				this.siblingSlots = null;
+				this.sharedSiblingColor = -1;
+			}
+			
             this.lightDarkSuffix = initLightDarkSuffix();
 
         }
@@ -74,6 +88,22 @@ public class PalettePopulator {
 
         public int length() {
             return getSlots().length;
+        }
+        
+        public boolean hasSibling() {
+        	return siblingSlots != null;
+        }
+        
+        public int[] getSiblingSlots() {
+        	return siblingSlots;
+        }
+        
+        public int siblingLength() {
+        	return getSiblingSlots().length;
+        }
+        
+		public int getSharedSiblingColor() {
+        	return sharedSiblingColor;
         }
 
         public LightDarkSuffix getLightDarkSuffix() {
@@ -129,12 +159,7 @@ public class PalettePopulator {
     private static enum LightDarkSuffix {
         ANY, LIGHT, DARK, BASE, NO_LIGHT, NO_DARK
     }
-
-    private static enum LightDarkMode {
-        DEFAULT, LIGHT, DARK
-    }
-
-    private static final double LIGHTDARK_CHANCE = 0.2; // chance to be light or dark
+    
     private static final int TOTAL_CHANGE_THRESHOLD = 9; // threshold for color changes to meet before stopping their
                                                          // seed - artemis
 
@@ -143,6 +168,7 @@ public class PalettePopulator {
     private Palette palette;
     private ParsedDescription description;
     private Color baseColor;
+    private LightDarkMode lightDarkMode;
 
     private double[] leftShift;
     private double[] rightShift;
@@ -152,7 +178,7 @@ public class PalettePopulator {
         this.random = random;
     }
 
-    public void populatePartFromBaseColor(Palette palette, String partDescription, Color baseColor) {
+    public void populatePartFromBaseColor(Palette palette, String partDescription, Color baseColor, LightDarkMode lightDarkMode) {
 
         // TODO: Maybe an anti-pattern - should this be a subclass of Palette instead?
         // Ask someone!
@@ -163,17 +189,54 @@ public class PalettePopulator {
         this.description = new ParsedDescription(partDescription);
 
         this.baseColor = baseColor.clone();
+        
+        this.lightDarkMode = correctLightDarkMode(lightDarkMode);
 
         if (description.length() != 0) {
             Color[] shades = makeShades();
-
-            for (int i = 0; i < shades.length; i++) {
-                if (shades[i] != null) {
-                    palette.setColor(i, shades[i]);
-                }
-            }
+            fillWithShades(shades);
         }
+        
+//        if (description.hasSibling() && description.siblingLength() != 0) {
+//        	Color[] siblingShades = makeSiblingShades();
+//        	fillWithShades(siblingShades);
+//        }
     }
+    
+	private LightDarkMode correctLightDarkMode(LightDarkMode in) {
+		switch (description.getLightDarkSuffix()) {
+		case ANY:
+			return in;
+		case BASE:
+			return LightDarkMode.DEFAULT;
+		case DARK:
+			return LightDarkMode.DARK;
+		case LIGHT:
+			return LightDarkMode.LIGHT;
+		case NO_DARK:
+			if (in == LightDarkMode.DARK) {
+				return LightDarkMode.DEFAULT;
+			} else {
+				return in;
+			}
+		case NO_LIGHT:
+			if (in == LightDarkMode.LIGHT) {
+				return LightDarkMode.DEFAULT;
+			} else {
+				return in;
+			}
+		default:
+			return in;
+		}
+	}
+
+	private void fillWithShades(Color[] shades) {
+		for (int i = 0; i < shades.length; i++) {
+		    if (shades[i] != null) {
+		        palette.setColor(i, shades[i]);
+		    }
+		}
+	}
 
     private Color[] makeShades() {
         sorted = new Color[description.length()];
@@ -197,10 +260,18 @@ public class PalettePopulator {
         return out;
     }
 
-    // TODO: give this a better name(?)
-    private void makeBaseColorLightOrDark() {
-        LightDarkMode lightDarkMode = chooseLightDarkMode();
+    private Color[] makeSiblingShades() {
+	    sorted = new Color[description.siblingLength()];
+	    for (int i = 0; i < sorted.length; i++) {
+	        sorted[i] = new Color();
+	    }
+	    //TODO
+	    Color[] out = fitShadesInSiblingSlots();
+	    return out;
+	}
 
+	// TODO: give this a better name(?)
+    private void makeBaseColorLightOrDark() {
         boolean rndcha = false;
         // TODO: figure out what rndcha is - it seems if it is true, then only some are
         // darkened/lightened. Does it stand for "random chance"?
@@ -217,43 +288,6 @@ public class PalettePopulator {
         case DEFAULT:
             break;
         }
-    }
-
-    private LightDarkMode chooseLightDarkMode() {
-        LightDarkMode lightDarkMode = LightDarkMode.DEFAULT;
-        switch (description.getLightDarkSuffix()) {
-
-        case ANY:
-            if (random.nextDouble() <= LIGHTDARK_CHANCE) {
-                lightDarkMode = random.nextBoolean() ? LightDarkMode.LIGHT : LightDarkMode.DARK;
-            }
-            break;
-
-        case LIGHT:
-            lightDarkMode = LightDarkMode.LIGHT;
-            break;
-
-        case DARK:
-            lightDarkMode = LightDarkMode.DARK;
-            break;
-
-        case BASE:
-            lightDarkMode = LightDarkMode.DEFAULT;
-            break;
-
-        case NO_LIGHT:
-            if (random.nextDouble() <= LIGHTDARK_CHANCE) {
-                lightDarkMode = LightDarkMode.DARK;
-            }
-            break;
-
-        case NO_DARK:
-            if (random.nextDouble() <= LIGHTDARK_CHANCE) {
-                lightDarkMode = LightDarkMode.LIGHT;
-            }
-            break;
-        }
-        return lightDarkMode;
     }
 
     private void darkenBaseColor(boolean rndcha) {
@@ -345,6 +379,14 @@ public class PalettePopulator {
         Color[] out = new Color[palette.size()];
         for (int i = 0; i < description.length(); i++) {
             out[description.getSlots()[i] - 1] = sorted[i];
+        }
+        return out;
+    }
+    
+    private Color[] fitShadesInSiblingSlots() {
+        Color[] out = new Color[palette.size()];
+        for (int i = 0; i < description.siblingLength(); i++) {
+            out[description.getSiblingSlots()[i] - 1] = sorted[i];
         }
         return out;
     }

@@ -8,30 +8,30 @@ import java.util.Random;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
-// TODO: change class name to something better
-public class PokemonTypeBaseColors {
+// TODO: is it alright to have a "list" that doesn't implement List?
+public class TypeBaseColorList {
+	
+	private static final double SAME_TYPES_SWAP_COLORS_CHANCE = 0.3;
 
 	private Random random;
-
-	private static final double SAME_TYPES_SWAP_COLORS_CHANCE = 0.33;
-
+	
 	private Pokemon pokemon;
-	private List<TypeBaseColor> typeBaseColors;
-	private PokemonTypeBaseColors prevo;
+	private List<TypeColor> typeBaseColors;
+	private TypeBaseColorList prevo;
 
-	public PokemonTypeBaseColors(Pokemon pokemon, boolean typeSanity, Random random) {
+	public TypeBaseColorList(Pokemon pokemon, boolean typeSanity, Random random) {
 		this(pokemon, null, typeSanity, random);
 	}
 
-	public PokemonTypeBaseColors(Pokemon pokemon, PokemonTypeBaseColors prevo, boolean typeSanity, Random random) {
+	public TypeBaseColorList(Pokemon pokemon, TypeBaseColorList prevo, boolean typeSanity, Random random) {
 		this.pokemon = pokemon;
 		this.prevo = prevo;
 		this.random = random;
 		generateBaseColors(typeSanity);
 	}
 
-	public List<TypeBaseColor> getTypeBaseColors() {
-		return new ArrayList<TypeBaseColor>(typeBaseColors);
+	public TypeColor get(int i) {
+		return typeBaseColors.get(i);
 	}
 
 	private void generateBaseColors(boolean typeSanity) {
@@ -45,7 +45,7 @@ public class PokemonTypeBaseColors {
 	private void generateTypeBaseColorsBasic(boolean typeSanity) {
 		// woops, I forgot about the needs of this class when remaking TypeBaseColor,
 		// TODO
-		typeBaseColors = TypeBaseColor.getTypeBaseColors();
+		typeBaseColors = Gen3to5TypeColors.getAllTypeColors();
 		Collections.shuffle(typeBaseColors, random);
 
 		if (typeSanity) {
@@ -54,7 +54,7 @@ public class PokemonTypeBaseColors {
 	}
 
 	private void generateTypeBaseColorsFromPrevo(boolean typeSanity) {
-		typeBaseColors = prevo.getTypeBaseColors();
+		typeBaseColors = new ArrayList<>(prevo.typeBaseColors);
 
 		if (!typeSanity) {
 			if (random.nextDouble() < SAME_TYPES_SWAP_COLORS_CHANCE) {
@@ -105,14 +105,14 @@ public class PokemonTypeBaseColors {
 			// TODO: more descriptive error message? (or change this method to auto-fix)
 			throw new RuntimeException();
 		}
-		TypeBaseColor color = typeBaseColors.get(colorOfTypeIndex);
+		TypeColor color = typeBaseColors.get(colorOfTypeIndex);
 		typeBaseColors.remove(colorOfTypeIndex);
 		typeBaseColors.add(insertIndex, color);
 	}
 
 	private int findColorOfType(int start, Type type) {
 		for (int i = start; i < typeBaseColors.size(); i++) {
-			if (typeBaseColors.get(i).hasType(type)) {
+			if (typeBaseColors.get(i).getType() == type) {
 				return i;
 			}
 		}

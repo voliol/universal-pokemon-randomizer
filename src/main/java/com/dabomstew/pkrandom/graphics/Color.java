@@ -33,14 +33,6 @@ public class Color implements Cloneable {
 	    return 0xFF000000 | (red << 16) | (green << 8) | blue;
 	}
 
-	public static Color[] colorArrayFromHexes(int[] hexes) {
-		Color[] colors = new Color[hexes.length];
-		for (int i=0; i < colors.length; i++) {
-			colors[i] = new Color(hexes[i]);
-		}
-		return colors;
-	}
-
 	public Color() {
         this(255, 255, 255);
     }
