@@ -18,6 +18,7 @@ public class TypeBaseColorList {
 	private Pokemon pokemon;
 	private List<TypeColor> typeBaseColors;
 	private TypeBaseColorList prevo;
+	private BaseColorMap baseColorMap;
 
 	public TypeBaseColorList(Pokemon pokemon, boolean typeSanity, Random random) {
 		this(pokemon, null, typeSanity, random);
@@ -27,11 +28,21 @@ public class TypeBaseColorList {
 		this.pokemon = pokemon;
 		this.prevo = prevo;
 		this.random = random;
+		// evo lines share a BaseColorMap
+		this.baseColorMap = prevo == null ? new BaseColorMap(random) : prevo.baseColorMap;
 		generateBaseColors(typeSanity);
 	}
 
-	public TypeColor get(int i) {
+	private TypeColor get(int i) {
 		return typeBaseColors.get(i);
+	}
+
+	public Color getBaseColor(int i) {
+		return baseColorMap.getBaseColor(get(i));
+	}
+	
+	public LightDarkMode getLightDarkMode(int i) {
+		return baseColorMap.getLightDarkMode(get(i));
 	}
 
 	private void generateBaseColors(boolean typeSanity) {

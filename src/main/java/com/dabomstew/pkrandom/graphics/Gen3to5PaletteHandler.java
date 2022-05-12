@@ -22,7 +22,6 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;
-	private Map<Pokemon, BaseColorMap> baseColorMaps;
 	private Map<Pokemon, TypeBaseColorList> typeBaseColorLists;
 
 	public Gen3to5PaletteHandler(Random random, String paletteDescriptionsFileName) {
@@ -42,7 +41,6 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 		this.typeSanity = typeSanity;
 		this.shinyFromNormal = shinyFromNormal;
-		this.baseColorMaps = new HashMap<>();
 		this.typeBaseColorLists = new HashMap<>();
 
 		if (paletteDescriptionsFileName == null) {
@@ -79,12 +77,10 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 		PalettePopulator pp = new PalettePopulator(random);
 		
-		for (Entry<Pokemon, BaseColorMap> entry : baseColorMaps.entrySet()) {
+		for (Entry<Pokemon, TypeBaseColorList> entry : typeBaseColorLists.entrySet()) {
 			
 				Pokemon pk = entry.getKey();
-				BaseColorMap baseColorsMap = entry.getValue();
-
-				TypeBaseColorList typeBaseColorList = typeBaseColorLists.get(pk);
+				TypeBaseColorList typeBaseColorList = entry.getValue();
 
 				Palette palette = pk.getNormalPalette();
 				int pokemonNumber = pk.getNumber();
@@ -93,9 +89,8 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 				for (int i = 0; i < partDescriptions.length; i++) {
 					if (!partDescriptions[i].isBlank()) {
-						TypeColor typeColor = typeBaseColorList.get(i);
-						Color baseColor = baseColorsMap.getBaseColor(typeColor);
-						LightDarkMode lightDarkMode = baseColorsMap.getLightDarkMode(typeColor);
+						Color baseColor = typeBaseColorList.getBaseColor(i);
+						LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
 
 						pp.populatePartFromBaseColor(palette, partDescriptions[i], baseColor, lightDarkMode);
 					}
@@ -139,10 +134,6 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 				setShinyPaletteFromNormal(pk);
 			}
 			
-			System.out.println(pk);
-			BaseColorMap baseColorMap = new BaseColorMap(random);
-			baseColorMaps.put(pk, baseColorMap);
-			
 			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, typeSanity, random);
 			typeBaseColorLists.put(pk, typeBaseColorList);
 
@@ -157,10 +148,6 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			if (shinyFromNormal) {
 				setShinyPaletteFromNormal(evTo);
 			}
-
-			BaseColorMap baseColorMap = baseColorMaps.get(evFrom);
-			baseColorMaps.put(evTo, baseColorMap);
-
 			TypeBaseColorList prevo = typeBaseColorLists.get(evFrom);
 			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(evTo, prevo, typeSanity, random);
 			typeBaseColorLists.put(evTo, typeBaseColorList);

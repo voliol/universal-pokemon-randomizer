@@ -52,7 +52,6 @@ public class BaseColorMap {
 		for (TypeColor tbc : baseColors.keySet()) {
 			LightDarkMode lightDarkMode = LightDarkMode.randomLightDarkMode(random);
 			lightDarkModes.put(tbc, lightDarkMode);
-			System.out.println(lightDarkMode);
 		}
 		
 		return lightDarkModes;
