@@ -52,157 +52,186 @@ import java.util.Random;
 
 public class PalettePopulator {
 
-    /*
-     * For the parsing of the palette (part) descriptions.
-     */
-    private static class ParsedDescription {
-        private final String rawString;
-        private final int[] slots;
-        private final int[] siblingSlots;
-        private final int sharedSiblingColor;
-        private final LightDarkSuffix lightDarkSuffix;
+	/*
+	 * For the parsing of the palette (part) descriptions.
+	 */
+	private static class ParsedDescription {
+		private final String rawString;
+		private final int[] slots;
+		private final int[] siblingSlots;
+		private final int sharedColorSlot;
+		private final LightDarkSuffix lightDarkSuffix;
 
-        // TODO: should this throw an IOException?
-        public ParsedDescription(String rawString) {
-            this.rawString = rawString;
-            
-            String[] maybeSibling = rawString.split(";");
+		// TODO: should this throw an IOException?
+		public ParsedDescription(String rawString) {
+			this.rawString = rawString;
+
+			String[] maybeSibling = rawString.split(";");
 			this.slots = splitAndConvertToInts(maybeSibling[0]);
-			
+
 			// sibling exists
 			if (maybeSibling.length == 2) {
 				this.siblingSlots = splitAndConvertToInts(maybeSibling[1]);
-				this.sharedSiblingColor = splitAndConvertToInts(maybeSibling[1].split("-")[1])[0];
+				this.sharedColorSlot = splitAndConvertToInts(maybeSibling[1].split("-")[1])[0];
+				// TODO: which is the best exception here?
+				if (Arrays.stream(siblingSlots).noneMatch(i -> i == sharedColorSlot)) {
+					throw new RuntimeException("Shared color not found in description for sibling palette.");
+				}
+
 			} else {
 				this.siblingSlots = null;
-				this.sharedSiblingColor = -1;
+				this.sharedColorSlot = -1;
 			}
-			
-            this.lightDarkSuffix = initLightDarkSuffix();
 
-        }
+			this.lightDarkSuffix = initLightDarkSuffix();
 
-        public int[] getSlots() {
-            return slots;
-        }
+		}
 
-        public int length() {
-            return getSlots().length;
-        }
-        
-        public boolean hasSibling() {
-        	return siblingSlots != null;
-        }
-        
-        public int[] getSiblingSlots() {
-        	return siblingSlots;
-        }
-        
-        public int siblingLength() {
-        	return getSiblingSlots().length;
-        }
-        
-		public int getSharedSiblingColor() {
-        	return sharedSiblingColor;
-        }
+		public int[] getSlots() {
+			return slots;
+		}
 
-        public LightDarkSuffix getLightDarkSuffix() {
-            return lightDarkSuffix;
-        };
+		public int length() {
+			return getSlots().length;
+		}
 
-        public boolean isEndDarkened() {
-            return rawString.contains("-E");
-        }
+		public boolean hasSibling() {
+			return siblingSlots != null;
+		}
 
-        private static int[] splitAndConvertToInts(String s) {
-            String[] unconverted = stripAndSplit(s);
-            int[] converted = new int[unconverted.length];
-            for (int i = 0; i < unconverted.length; i++) {
-                if (isStringNumeric(unconverted[i])) {
-                    converted[i] = Integer.valueOf(unconverted[i]);
-                } else {
-                    return new int[0];
-                }
-            }
-            return converted;
-        }
+		public int[] getSiblingSlots() {
+			return siblingSlots;
+		}
 
-        private static String[] stripAndSplit(String s) {
-            s = s.replaceAll("[A-Za-z]+", "").strip().split("-")[0];
-            return s.split(",");
-        }
+		public int siblingLength() {
+			return getSiblingSlots().length;
+		}
 
-        private static boolean isStringNumeric(String s) {
-            return s != null && s.matches("[0-9.]+");
-        }
+		public int getSharedColorSlot() {
+			return sharedColorSlot;
+		}
 
-        // TODO: is calling it "init" appropriate?
-        private LightDarkSuffix initLightDarkSuffix() {
+		public LightDarkSuffix getLightDarkSuffix() {
+			return lightDarkSuffix;
+		};
 
-            LightDarkSuffix suffix = LightDarkSuffix.ANY;
-            if (rawString.contains("-LN")) {
-                suffix = LightDarkSuffix.NO_LIGHT;
-            } else if (rawString.contains("-DN")) {
-                suffix = LightDarkSuffix.NO_DARK;
-            } else if (rawString.contains("-L")) {
-                suffix = LightDarkSuffix.LIGHT;
-            } else if (rawString.contains("-D")) {
-                suffix = LightDarkSuffix.DARK;
-            } else if (rawString.contains("-B")) {
-                suffix = LightDarkSuffix.BASE;
-            }
+		public boolean isEndDarkened() {
+			return rawString.contains("-E");
+		}
 
-            return suffix;
-        }
-    }
+		private static int[] splitAndConvertToInts(String s) {
+			String[] unconverted = stripAndSplit(s);
+			int[] converted = new int[unconverted.length];
+			for (int i = 0; i < unconverted.length; i++) {
+				if (isStringNumeric(unconverted[i])) {
+					converted[i] = Integer.valueOf(unconverted[i]);
+				} else {
+					return new int[0];
+				}
+			}
+			return converted;
+		}
 
-    private static enum LightDarkSuffix {
-        ANY, LIGHT, DARK, BASE, NO_LIGHT, NO_DARK
-    }
-    
-    private static final int TOTAL_CHANGE_THRESHOLD = 9; // threshold for color changes to meet before stopping their
-                                                         // seed - artemis
+		private static String[] stripAndSplit(String s) {
+			s = s.replaceAll("[A-Za-z]+", "").strip().split("-")[0];
+			return s.split(",");
+		}
 
-    private Random random;
+		private static boolean isStringNumeric(String s) {
+			return s != null && s.matches("[0-9.]+");
+		}
 
-    private Palette palette;
-    private ParsedDescription description;
-    private Color baseColor;
-    private LightDarkMode lightDarkMode;
+		// TODO: is calling it "init" appropriate?
+		private LightDarkSuffix initLightDarkSuffix() {
 
-    private double[] leftShift;
-    private double[] rightShift;
-    private Color[] sorted;
+			LightDarkSuffix suffix = LightDarkSuffix.ANY;
+			if (rawString.contains("-LN")) {
+				suffix = LightDarkSuffix.NO_LIGHT;
+			} else if (rawString.contains("-DN")) {
+				suffix = LightDarkSuffix.NO_DARK;
+			} else if (rawString.contains("-L")) {
+				suffix = LightDarkSuffix.LIGHT;
+			} else if (rawString.contains("-D")) {
+				suffix = LightDarkSuffix.DARK;
+			} else if (rawString.contains("-B")) {
+				suffix = LightDarkSuffix.BASE;
+			}
 
-    public PalettePopulator(Random random) {
-        this.random = random;
-    }
+			return suffix;
+		}
+	}
 
-    public void populatePartFromBaseColor(Palette palette, String partDescription, Color baseColor, LightDarkMode lightDarkMode) {
+	private static enum LightDarkSuffix {
+		ANY, LIGHT, DARK, BASE, NO_LIGHT, NO_DARK
+	}
 
-        // TODO: Maybe an anti-pattern - should this be a subclass of Palette instead?
-        // Ask someone!
-        this.palette = palette;
+	private final int VARIA = 10; // 3 of these fuel the variation for sibling palettes - artemis
+	private final int VARIABASE = 3; // base forced change for sibling palettes - artemis
+	private static final int TOTAL_CHANGE_THRESHOLD = 9; // threshold for color changes to meet before stopping their
+															// seed - artemis
 
-        // get light/dark status
+	private static int indexOf(int[] ar, int src) {
+		for (int i = 0; i < ar.length; i++) {
+			if (ar[i] == src)
+				return i;
+		}
+		return -1;
+	}
 
-        this.description = new ParsedDescription(partDescription);
+	private Random random;
 
-        this.baseColor = baseColor.clone();
-        
-        this.lightDarkMode = correctLightDarkMode(lightDarkMode);
+	private Palette palette;
+	private ParsedDescription description;
+	private Color baseColor;
+	private LightDarkMode lightDarkMode;
 
-        if (description.length() != 0) {
-            Color[] shades = makeShades();
-            fillWithShades(shades);
-        }
-        
-//        if (description.hasSibling() && description.siblingLength() != 0) {
-//        	Color[] siblingShades = makeSiblingShades();
-//        	fillWithShades(siblingShades);
-//        }
-    }
-    
+	private double[] leftShift;
+	private double[] rightShift;
+
+	public PalettePopulator(Random random) {
+		this.random = random;
+	}
+
+	public void populatePartFromBaseColor(Palette palette, String partDescription, Color baseColor,
+			LightDarkMode lightDarkMode) {
+
+		// TODO: Maybe an anti-pattern - should this be a subclass of Palette instead?
+		// Ask someone!
+		this.palette = palette;
+
+		this.description = new ParsedDescription(partDescription);
+
+		this.baseColor = baseColor.clone();
+
+		this.lightDarkMode = correctLightDarkMode(lightDarkMode);
+
+		if (description.length() != 0) {
+			Color[] shades = makeShades();
+			fillWithShades(shades);
+		}
+
+		if (description.hasSibling() && description.siblingLength() != 0) {
+			Color sharedColor = getSiblingColor(palette, baseColor);
+			// TODO: refactor so makeSiblingShades and makeShades have similar parameters,
+			// or are merged into one method
+			Color[] siblingShades = makeSiblingShades(sharedColor, description.getSiblingSlots(),
+					description.getSharedColorSlot());
+
+			fillWithShades(siblingShades);
+		}
+	}
+
+	private Color getSiblingColor(Palette palette, Color baseColor) {
+		Color sharedColor = palette.getColor(description.getSharedColorSlot() - 1).clone();
+
+		if (sharedColor.getComp(0) <= 3 && sharedColor.getComp(1) <= 3 && sharedColor.getComp(2) <= 3) {
+			sharedColor.setComps((orig, i) -> (int) (baseColor.getComp(i) * 0.15));
+		} else if (sharedColor.getComp(0) >= 252 && sharedColor.getComp(1) >= 252 && sharedColor.getComp(2) >= 252) {
+			sharedColor.setComps((orig, i) -> (int) (baseColor.getComp(i) * 0.85));
+		}
+		return sharedColor;
+	}
+
 	private LightDarkMode correctLightDarkMode(LightDarkMode in) {
 		switch (description.getLightDarkSuffix()) {
 		case ANY:
@@ -232,237 +261,241 @@ public class PalettePopulator {
 
 	private void fillWithShades(Color[] shades) {
 		for (int i = 0; i < shades.length; i++) {
-		    if (shades[i] != null) {
-		        palette.setColor(i, shades[i]);
-		    }
+			if (shades[i] != null) {
+				palette.setColor(i, shades[i]);
+			}
 		}
 	}
 
-    private Color[] makeShades() {
-        sorted = new Color[description.length()];
-        for (int i = 0; i < sorted.length; i++) {
-            sorted[i] = new Color();
-        }
+	private Color[] makeShades() {
+		Color[] sorted = new Color[description.length()];
+		for (int i = 0; i < sorted.length; i++) {
+			sorted[i] = new Color();
+		}
 
-        initializeLeftRightShift();
+		initializeLeftRightShift();
 
-        makeBaseColorLightOrDark();
+		makeBaseColorLightOrDark();
 
-        makeMiddleShadeOrShades();
-        makeLeftShades();
-        makeRightShades();
+		makeMiddleShadeOrShades(sorted);
+		makeLeftShades(sorted, sorted.length / 2 - (isSlotsEven() ? 2 : 1));
+		makeRightShades(sorted, sorted.length / 2 + 1);
 
-        if (description.isEndDarkened()) {
-            makeEndShadeDarkened();
-        }
+		if (description.isEndDarkened()) {
+			makeEndShadeDarkened(sorted);
+		}
 
-        Color[] out = fitShadesInSlots();
-        return out;
-    }
+		Color[] out = fitShadesInSlots(sorted, description.getSlots());
+		return out;
+	}
 
-    private Color[] makeSiblingShades() {
-	    sorted = new Color[description.siblingLength()];
-	    for (int i = 0; i < sorted.length; i++) {
-	        sorted[i] = new Color();
-	    }
-	    //TODO
-	    Color[] out = fitShadesInSiblingSlots();
-	    return out;
+	private Color[] makeSiblingShades(Color sharedCol, int[] slots, int shared) {
+		int sharedLoc = indexOf(slots, shared);
+		Color[] sorted = new Color[slots.length];
+		for (int i = 0; i < sorted.length; i++) {
+			sorted[i] = new Color();
+		}
+
+		double[] variation = {
+				(random.nextInt(VARIA) + random.nextInt(VARIA) + random.nextInt(VARIA) + VARIABASE) * 0.01
+						* (Math.pow(-1, (random.nextInt(2)))),
+				(random.nextInt(VARIA) + random.nextInt(VARIA) + random.nextInt(VARIA) + VARIABASE) * 0.01
+						* (Math.pow(-1, (random.nextInt(2)))),
+				(random.nextInt(VARIA) + random.nextInt(VARIA) + random.nextInt(VARIA) + VARIABASE) * 0.01
+						* (Math.pow(-1, (random.nextInt(2)))) };
+		leftShift = new double[] { getLeftColorChange(sharedLoc, sharedCol.getComp(0)),
+				getLeftColorChange(sharedLoc, sharedCol.getComp(1)),
+				getLeftColorChange(sharedLoc, sharedCol.getComp(2)) };
+		rightShift = new double[] { getRightColorChange((slots.length - sharedLoc - 1), sharedCol.getComp(0)),
+				getRightColorChange((slots.length - sharedLoc - 1), sharedCol.getComp(1)),
+				getRightColorChange((slots.length - sharedLoc - 1), sharedCol.getComp(2)) };
+
+		// place shared color first
+		sorted[sharedLoc] = sharedCol;
+
+		// place shade left and right of shared
+		if (sharedLoc - 1 >= 0) {
+			sorted[sharedLoc - 1]
+					.setComps((orig, i) -> (int) (sorted[sharedLoc].getComp(i) + leftShift[i] * (1 + variation[i])));
+		}
+		if (sharedLoc + 1 < sorted.length) {
+			sorted[sharedLoc + 1]
+					.setComps((orig, i) -> (int) (sorted[sharedLoc].getComp(i) - rightShift[i] * (1 + variation[i])));
+		}
+
+		makeLeftShades(sorted, sharedLoc - 2);
+		makeRightShades(sorted, sharedLoc + 2);
+
+		Color[] out = fitShadesInSlots(sorted, description.getSiblingSlots());
+		return out;
 	}
 
 	// TODO: give this a better name(?)
-    private void makeBaseColorLightOrDark() {
-        boolean rndcha = false;
-        // TODO: figure out what rndcha is - it seems if it is true, then only some are
-        // darkened/lightened. Does it stand for "random chance"?
-        // is it not redundant with/did it originally use LIGHTDARK_CHANCE ?
-        switch (lightDarkMode) {
-        case DARK:
-            darkenBaseColor(rndcha);
-            darkenLeftRightShift();
-            break;
-        case LIGHT:
-            lightenBaseColor(rndcha);
-            lightenLeftRightShift();
-            break;
-        case DEFAULT:
-            break;
-        }
-    }
+	private void makeBaseColorLightOrDark() {
+		boolean rndcha = false;
+		// TODO: figure out what rndcha is - it seems if it is true, then only some are
+		// darkened/lightened. Does it stand for "random chance"?
+		// is it not redundant with/did it originally use LIGHTDARK_CHANCE ?
+		switch (lightDarkMode) {
+		case DARK:
+			darkenBaseColor(rndcha);
+			darkenLeftRightShift();
+			break;
+		case LIGHT:
+			lightenBaseColor(rndcha);
+			lightenLeftRightShift();
+			break;
+		case DEFAULT:
+			break;
+		}
+	}
 
-    private void darkenBaseColor(boolean rndcha) {
-        double mod;
-        if (rndcha) {
-            mod = 0.2;
-        } else {
-            mod = 0.5;
-        }
-        for (int i = 0; i < 3; i++) {
-            int value = (int) (baseColor.getComp(i) - rightShift[i] * (description.length() / 2 + 1) * mod);
-            value = Math.max(value, 0);
-            baseColor.setComp(i, value);
-        }
-    }
+	private void darkenBaseColor(boolean rndcha) {
+		double mod;
+		if (rndcha) {
+			mod = 0.2;
+		} else {
+			mod = 0.5;
+		}
+		baseColor.setComps((orig, i) -> (int) (orig.getComp(i) - rightShift[i] * (description.length() / 2 + 1) * mod));
+	}
 
-    private void darkenLeftRightShift() {
-        leftShift[0] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(0));
-        leftShift[1] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(1));
-        leftShift[2] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(2));
-        rightShift[0] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(0));
-        rightShift[1] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(1));
-        rightShift[2] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(2));
-    }
+	private void darkenLeftRightShift() {
+		leftShift[0] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(0));
+		leftShift[1] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(1));
+		leftShift[2] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(2));
+		rightShift[0] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(0));
+		rightShift[1] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(1));
+		rightShift[2] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(2));
+	}
 
-    private void lightenBaseColor(boolean rndcha) {
-        double mod;
-        if (rndcha) {
-            mod = 0.2;
-        } else {
-            mod = 0.5;
-        }
+	private void lightenBaseColor(boolean rndcha) {
+		double mod;
+		if (rndcha) {
+			mod = 0.2;
+		} else {
+			mod = 0.5;
+		}
+		baseColor.setComps((orig, i) -> (int) (orig.getComp(i) + leftShift[i] * (description.length() / 2 + 1) * mod));
+	}
 
-        for (int i = 0; i < 3; i++) {
-            int value = (int) (baseColor.getComp(i) + leftShift[i] * (description.length() / 2 + 1) * mod);
-            value = Math.min(value, 255);
-            baseColor.setComp(i, value);
-        }
-    }
+	private void lightenLeftRightShift() {
+		leftShift[0] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(0));
+		leftShift[1] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(1));
+		leftShift[2] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(2));
+		rightShift[0] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(0));
+		rightShift[1] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(1));
+		rightShift[2] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(2));
 
-    private void lightenLeftRightShift() {
-        leftShift[0] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(0));
-        leftShift[1] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(1));
-        leftShift[2] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(2));
-        rightShift[0] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(0));
-        rightShift[1] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(1));
-        rightShift[2] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(2));
+		double mod = lightDarkenCoeff();
+		for (int i = 0; i < rightShift.length; i++) {
+			rightShift[i] += mod * getLeftColorChange(getMiddleSlotID(), baseColor.getComp(i));
+		}
+	}
 
-        double mod = lightDarkenCoeff();
-        for (int i = 0; i < rightShift.length; i++) {
-            rightShift[i] += mod * getLeftColorChange(getMiddleSlotID(), baseColor.getComp(i));
-        }
-    }
+	private double lightDarkenCoeff() {
+		int[] bc = baseColor.toInts();
+		Arrays.sort(bc);
+		double avg = (bc[1] + bc[2]) / 2.0;
 
-    private double lightDarkenCoeff() {
-        int[] bc = baseColor.toInts();
-        Arrays.sort(bc);
-        double avg = (bc[1] + bc[2]) / 2.0;
+		if (baseColor.getComp(1) >= 225 && baseColor.getComp(0) < 200 && baseColor.getComp(2) < 200)
+			avg += 75; // 45
+		if (baseColor.getComp(1) >= 225)
+			avg += 75;
+		if (avg > 255)
+			avg = 255;
+		if (avg < 192) {
+			return 0.5;
+		} else {
+			return (0.0002 * Math.pow(avg - 192, 3.5) + 50) * 0.01;
+		}
+	}
 
-        if (baseColor.getComp(1) >= 225 && baseColor.getComp(0) < 200 && baseColor.getComp(2) < 200)
-            avg += 75; // 45
-        if (baseColor.getComp(1) >= 225)
-            avg += 75;
-        if (avg > 255)
-            avg = 255;
-        if (avg < 192) {
-            return 0.5;
-        } else {
-            return (0.0002 * Math.pow(avg - 192, 3.5) + 50) * 0.01;
-        }
-    }
+	private void initializeLeftRightShift() {
+		leftShift = new double[3];
+		leftShift[0] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(0));
+		leftShift[1] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(1));
+		leftShift[2] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(2));
+		rightShift = new double[3];
+		rightShift[0] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(0));
+		rightShift[1] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(1));
+		rightShift[2] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(2));
+	}
 
-    private void initializeLeftRightShift() {
-        leftShift = new double[3];
-        leftShift[0] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(0));
-        leftShift[1] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(1));
-        leftShift[2] = getLeftColorChange(getMiddleSlotID(), baseColor.getComp(2));
-        rightShift = new double[3];
-        rightShift[0] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(0));
-        rightShift[1] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(1));
-        rightShift[2] = getRightColorChange(getMiddleSlotID(), baseColor.getComp(2));
-    }
+	private int getMiddleSlotID() {
+		return (description.length() - (isSlotsEven() ? 0 : 1)) / 2;
+	}
 
-    private int getMiddleSlotID() {
-        return (description.length() - (isSlotsEven() ? 0 : 1)) / 2;
-    }
+	private Color[] fitShadesInSlots(Color[] sorted, int[] slots) {
+		Color[] out = new Color[palette.size()];
+		for (int i = 0; i < slots.length; i++) {
+			out[slots[i] - 1] = sorted[i];
+		}
+		return out;
+	}
 
-    private Color[] fitShadesInSlots() {
-        Color[] out = new Color[palette.size()];
-        for (int i = 0; i < description.length(); i++) {
-            out[description.getSlots()[i] - 1] = sorted[i];
-        }
-        return out;
-    }
-    
-    private Color[] fitShadesInSiblingSlots() {
-        Color[] out = new Color[palette.size()];
-        for (int i = 0; i < description.siblingLength(); i++) {
-            out[description.getSiblingSlots()[i] - 1] = sorted[i];
-        }
-        return out;
-    }
+	private void makeMiddleShadeOrShades(Color[] sorted) {
+		if (isSlotsEven()) {
+			for (int totalChange = 0, r = 0; totalChange < TOTAL_CHANGE_THRESHOLD && r < 5; r++) {
+				totalChange = 0;
+				for (int p = 0; p < 3; p++) {
 
-    private void makeMiddleShadeOrShades() {
-        if (isSlotsEven()) {
-            for (int totalChange = 0, r = 0; totalChange < TOTAL_CHANGE_THRESHOLD && r < 5; r++) {
-                totalChange = 0;
-                for (int p = 0; p < 3; p++) {
+					int leftValue = (int) (baseColor.getComp(p) + leftShift[p] * 0.5);
+					leftValue = Math.min(leftValue, 255);
+					sorted[sorted.length / 2 - 1].setComp(p, leftValue);
 
-                    int leftValue = (int) (baseColor.getComp(p) + leftShift[p] * 0.5);
-                    leftValue = Math.min(leftValue, 255);
-                    sorted[sorted.length / 2 - 1].setComp(p, leftValue);
+					int rightValue = (int) (baseColor.getComp(p) - rightShift[p] * 0.5);
+					rightValue = Math.max(rightValue, 0);
+					sorted[sorted.length / 2].setComp(p, rightValue);
 
-                    int rightValue = (int) (baseColor.getComp(p) - rightShift[p] * 0.5);
-                    rightValue = Math.max(rightValue, 0);
-                    sorted[sorted.length / 2].setComp(p, rightValue);
+					totalChange += (sorted[sorted.length / 2].getComp(p) >> 2)
+							- (sorted[sorted.length / 2 - 1].getComp(p) >> 2);
+				}
+			}
+		} else {
+			sorted[sorted.length / 2] = baseColor;
+		}
+	}
 
-                    totalChange += (sorted[sorted.length / 2].getComp(p) >> 2)
-                            - (sorted[sorted.length / 2 - 1].getComp(p) >> 2);
-                }
-            }
-        } else {
-            sorted[sorted.length / 2] = baseColor;
-        }
-    }
+	private void makeLeftShades(Color[] sorted, int rightBound) {
+		// make all colors left of middle
+		for (int ptr = rightBound; ptr >= 0; ptr--) {
+			int right = ptr + 1;
+			sorted[ptr].setComps((orig, i) -> (int) (sorted[right].getComp(i) + leftShift[i]));
+		}
+	}
 
-    private void makeLeftShades() {
-        // make all colors left of middle
-        for (int ptr = sorted.length / 2 - (isSlotsEven() ? 2 : 1); ptr >= 0; ptr--) {
-            for (int p = 0; p < 3; p++) {
-                int value = (int) (sorted[ptr + 1].getComp(p) + leftShift[p]);
-                value = Math.min(value, 255);
-                sorted[ptr].setComp(p, value);
-            }
-        }
-    }
+	private void makeRightShades(Color[] sorted, int leftBound) {
+		// make all colors right of middle
+		for (int ptr = leftBound; ptr < sorted.length; ptr++) {
+			int left = ptr - 1;
+			sorted[ptr].setComps((orig, i) -> (int) (sorted[left].getComp(i) - rightShift[i]));
+		}
+	}
 
-    private void makeRightShades() {
-        // make all colors right of middle
-        for (int ptr = sorted.length / 2 + 1; ptr < sorted.length; ptr++) {
-            for (int p = 0; p < 3; p++) {
-                int value = (int) (sorted[ptr - 1].getComp(p) - rightShift[p]);
-                value = Math.max(value, 0);
-                sorted[ptr].setComp(p, value);
-            }
-        }
-    }
+	private void makeEndShadeDarkened(Color[] sorted) {
+		int ptr = sorted.length - 1;
+		for (int j = 0; j < 1; j++) { // can be adjusted to darken more
+			sorted[ptr].setComps((orig, i) -> (int) (orig.getComp(i) - rightShift[i]));
+		}
+	}
 
-    private void makeEndShadeDarkened() {
-        int ptr = sorted.length - 1;
-        for (int j = 0; j < 1; j++) { // can be adjusted to darken more
-            for (int p = 0; p < 3; p++) {
-                int value = (int) (sorted[ptr].getComp(p) - rightShift[p]);
-                value = Math.max(value, 0);
-                sorted[ptr].setComp(p, value);
-            }
-        }
-    }
+	private double getLeftColorChange(int palLimit, int maxRGB) {
+		if (palLimit == 0)
+			return 0;
+		double coeff = (random.nextInt(5) + random.nextInt(5) + random.nextInt(5) + 153) / (palLimit);
+		return coeff - coeff / 255 * maxRGB + palLimit * palLimit;
+	}
 
-    private double getLeftColorChange(int palLimit, int maxRGB) {
-        if (palLimit == 0)
-            return 0;
-        double coeff = (random.nextInt(5) + random.nextInt(5) + random.nextInt(5) + 153) / (palLimit);
-        return coeff - coeff / 255 * maxRGB + palLimit * palLimit;
-    }
+	private double getRightColorChange(int palLimit, int maxRGB) {
+		if (palLimit == 0)
+			return 0;
+		double coeff = (random.nextInt(5) + random.nextInt(5) + random.nextInt(5) + 153) / (palLimit);
+		return coeff - coeff / 255 * (255 - maxRGB) + palLimit * palLimit;
+	}
 
-    private double getRightColorChange(int palLimit, int maxRGB) {
-        if (palLimit == 0)
-            return 0;
-        double coeff = (random.nextInt(5) + random.nextInt(5) + random.nextInt(5) + 153) / (palLimit);
-        return coeff - coeff / 255 * (255 - maxRGB) + palLimit * palLimit;
-    }
-
-    private boolean isSlotsEven() {
-        return description.length() % 2 == 0;
-    }
+	private boolean isSlotsEven() {
+		return description.length() % 2 == 0;
+	}
 
 }
