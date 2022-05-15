@@ -18,8 +18,7 @@ If you have any questions, I will try my best to answer them.
 ## What it can do right now:
 
 - Currently, this branch can randomize palettes of Ruby(U), and likely Sapphire(U) and
-  Emerald(U) as well. All parts of Artemis251's system are implemented, but the 
-  "sibling palette" feature.
+  Emerald(U) as well. All parts of Artemis251's system are implemented, including the "sibling colors".
   Other games can also be supported, but require palette description files and/or offsets.
   
 - Some parts of Artemis251's system have been changed/replaced, most notably colors
@@ -32,8 +31,6 @@ If you have any questions, I will try my best to answer them.
   See the Pokemon-sprite-dump folder.
 
 ## What needs to be done:
-  
-- The "sibling palette" feature of Artemis251's system. 
 
 - Better handling of unorthodox types like fairy (and types at all). What colors should
   be used when they are not based on Pokémon types?
