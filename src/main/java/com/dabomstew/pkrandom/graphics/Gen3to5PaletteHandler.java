@@ -85,10 +85,15 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 				Palette palette = pk.getNormalPalette();
 				int pokemonNumber = pk.getNumber();
 
-				String[] partDescriptions = getPartDescriptions(paletteDescriptions, pokemonNumber);
+				System.out.println("------\n" + pk.getName());
+				
+				ParsedDescription[] partDescriptions = getPartDescriptions(paletteDescriptions, pokemonNumber);
 
 				for (int i = 0; i < partDescriptions.length; i++) {
-					if (!partDescriptions[i].isBlank()) {
+					System.out.println(partDescriptions[i]);
+					if (partDescriptions[i].isAverageDescription()) {
+						pp.populateAverageColor(palette, partDescriptions[i]);
+					} else if (!partDescriptions[i].isBlank()) {
 						Color baseColor = typeBaseColorList.getBaseColor(i);
 						LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
 
@@ -99,10 +104,16 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		}
 	}
 
-	private String[] getPartDescriptions(List<String> paletteDescriptions, int pokemonNumber) {
+	private ParsedDescription[] getPartDescriptions(List<String> paletteDescriptions, int pokemonNumber) {
 		boolean validIndex = pokemonNumber - 1 <= paletteDescriptions.size();
 		String paletteDescription = validIndex ? paletteDescriptions.get(pokemonNumber - 1) : "";
-		String[] partDescriptions = paletteDescription.split("/");
+		String[] unparsedPartDescriptions = paletteDescription.split("/");
+		
+		ParsedDescription[] partDescriptions = new ParsedDescription[unparsedPartDescriptions.length];
+		for (int i = 0; i < partDescriptions.length; i++) {
+			partDescriptions[i] = new ParsedDescription(unparsedPartDescriptions[i]);
+		}
+		
 		return partDescriptions;
 	}
 

@@ -51,119 +51,8 @@ import java.util.Random;
  */
 
 public class PalettePopulator {
-
-	/*
-	 * For the parsing of the palette (part) descriptions.
-	 */
-	private static class ParsedDescription {
-		private final String rawString;
-		private final int[] slots;
-		private final int[] siblingSlots;
-		private final int sharedColorSlot;
-		private final LightDarkSuffix lightDarkSuffix;
-
-		// TODO: should this throw an IOException?
-		public ParsedDescription(String rawString) {
-			this.rawString = rawString;
-
-			String[] maybeSibling = rawString.split(";");
-			this.slots = splitAndConvertToInts(maybeSibling[0]);
-
-			// sibling exists
-			if (maybeSibling.length == 2) {
-				this.siblingSlots = splitAndConvertToInts(maybeSibling[1]);
-				this.sharedColorSlot = splitAndConvertToInts(maybeSibling[1].split("-")[1])[0];
-				// TODO: which is the best exception here?
-				if (Arrays.stream(siblingSlots).noneMatch(i -> i == sharedColorSlot)) {
-					throw new RuntimeException("Shared color not found in description for sibling palette.");
-				}
-
-			} else {
-				this.siblingSlots = null;
-				this.sharedColorSlot = -1;
-			}
-
-			this.lightDarkSuffix = initLightDarkSuffix();
-
-		}
-
-		public int[] getSlots() {
-			return slots;
-		}
-
-		public int length() {
-			return getSlots().length;
-		}
-
-		public boolean hasSibling() {
-			return siblingSlots != null;
-		}
-
-		public int[] getSiblingSlots() {
-			return siblingSlots;
-		}
-
-		public int siblingLength() {
-			return getSiblingSlots().length;
-		}
-
-		public int getSharedColorSlot() {
-			return sharedColorSlot;
-		}
-
-		public LightDarkSuffix getLightDarkSuffix() {
-			return lightDarkSuffix;
-		};
-
-		public boolean isEndDarkened() {
-			return rawString.contains("-E");
-		}
-
-		private static int[] splitAndConvertToInts(String s) {
-			String[] unconverted = stripAndSplit(s);
-			int[] converted = new int[unconverted.length];
-			for (int i = 0; i < unconverted.length; i++) {
-				if (isStringNumeric(unconverted[i])) {
-					converted[i] = Integer.valueOf(unconverted[i]);
-				} else {
-					return new int[0];
-				}
-			}
-			return converted;
-		}
-
-		private static String[] stripAndSplit(String s) {
-			s = s.replaceAll("[A-Za-z]+", "").strip().split("-")[0];
-			return s.split(",");
-		}
-
-		private static boolean isStringNumeric(String s) {
-			return s != null && s.matches("[0-9.]+");
-		}
-
-		// TODO: is calling it "init" appropriate?
-		private LightDarkSuffix initLightDarkSuffix() {
-
-			LightDarkSuffix suffix = LightDarkSuffix.ANY;
-			if (rawString.contains("-LN")) {
-				suffix = LightDarkSuffix.NO_LIGHT;
-			} else if (rawString.contains("-DN")) {
-				suffix = LightDarkSuffix.NO_DARK;
-			} else if (rawString.contains("-L")) {
-				suffix = LightDarkSuffix.LIGHT;
-			} else if (rawString.contains("-D")) {
-				suffix = LightDarkSuffix.DARK;
-			} else if (rawString.contains("-B")) {
-				suffix = LightDarkSuffix.BASE;
-			}
-
-			return suffix;
-		}
-	}
-
-	private static enum LightDarkSuffix {
-		ANY, LIGHT, DARK, BASE, NO_LIGHT, NO_DARK
-	}
+	
+	// TODO: add parsing of "average" colors, or remove them from the FRLG descriptions file
 
 	private final int VARIA = 10; // 3 of these fuel the variation for sibling palettes - artemis
 	private final int VARIABASE = 3; // base forced change for sibling palettes - artemis
@@ -192,18 +81,18 @@ public class PalettePopulator {
 		this.random = random;
 	}
 
-	public void populatePartFromBaseColor(Palette palette, String partDescription, Color baseColor,
+	public void populatePartFromBaseColor(Palette palette, ParsedDescription description, Color baseColor,
 			LightDarkMode lightDarkMode) {
 
 		// TODO: Maybe an anti-pattern - should this be a subclass of Palette instead?
 		// Ask someone!
 		this.palette = palette;
 
-		this.description = new ParsedDescription(partDescription);
+		this.description = description;
 
 		this.baseColor = baseColor.clone();
 
-		this.lightDarkMode = correctLightDarkMode(lightDarkMode);
+		this.lightDarkMode = description.correctLightDarkMode(lightDarkMode);
 
 		if (description.length() != 0) {
 			Color[] shades = makeShades();
@@ -215,14 +104,14 @@ public class PalettePopulator {
 			// TODO: refactor so makeSiblingShades and makeShades have similar parameters,
 			// or are merged into one method
 			Color[] siblingShades = makeSiblingShades(sharedColor, description.getSiblingSlots(),
-					description.getSharedColorSlot());
+					description.getSharedSlot());
 
 			fillWithShades(siblingShades);
 		}
 	}
 
 	private Color getSiblingColor(Palette palette, Color baseColor) {
-		Color sharedColor = palette.getColor(description.getSharedColorSlot() - 1).clone();
+		Color sharedColor = palette.getColor(description.getSharedSlot()).clone();
 
 		if (sharedColor.getComp(0) <= 3 && sharedColor.getComp(1) <= 3 && sharedColor.getComp(2) <= 3) {
 			sharedColor.setComps((orig, i) -> (int) (baseColor.getComp(i) * 0.15));
@@ -230,33 +119,6 @@ public class PalettePopulator {
 			sharedColor.setComps((orig, i) -> (int) (baseColor.getComp(i) * 0.85));
 		}
 		return sharedColor;
-	}
-
-	private LightDarkMode correctLightDarkMode(LightDarkMode in) {
-		switch (description.getLightDarkSuffix()) {
-		case ANY:
-			return in;
-		case BASE:
-			return LightDarkMode.DEFAULT;
-		case DARK:
-			return LightDarkMode.DARK;
-		case LIGHT:
-			return LightDarkMode.LIGHT;
-		case NO_DARK:
-			if (in == LightDarkMode.DARK) {
-				return LightDarkMode.DEFAULT;
-			} else {
-				return in;
-			}
-		case NO_LIGHT:
-			if (in == LightDarkMode.LIGHT) {
-				return LightDarkMode.DEFAULT;
-			} else {
-				return in;
-			}
-		default:
-			return in;
-		}
 	}
 
 	private void fillWithShades(Color[] shades) {
@@ -429,7 +291,7 @@ public class PalettePopulator {
 	private Color[] fitShadesInSlots(Color[] sorted, int[] slots) {
 		Color[] out = new Color[palette.size()];
 		for (int i = 0; i < slots.length; i++) {
-			out[slots[i] - 1] = sorted[i];
+			out[slots[i]] = sorted[i];
 		}
 		return out;
 	}
@@ -496,6 +358,18 @@ public class PalettePopulator {
 
 	private boolean isSlotsEven() {
 		return description.length() % 2 == 0;
+	}
+
+	public void populateAverageColor(Palette palette, ParsedDescription description) {
+		Color averageTo = palette.getColor(description.getAverageToSlot());
+		int[] averageFromSlots = description.getAverageFromSlots();
+		averageTo.setComps((orig, i) -> {
+			int sum = 0;
+			for (int slot : averageFromSlots) {
+				sum += palette.getColor(slot).getComp(i);
+			}
+			return sum / averageFromSlots.length;
+		});
 	}
 
 }
