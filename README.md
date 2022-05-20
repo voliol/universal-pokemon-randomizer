@@ -29,6 +29,8 @@ If you have any questions, I will try my best to answer them.
   
 - Sprites are dumped when you open a rom, so palettes can be viewed quickly. 
   See the Pokemon-sprite-dump folder.
+  
+- It can read .bmp files and convert them into formats that can be inserted into Gen III-V games.
 
 ## What needs to be done:
 
