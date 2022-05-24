@@ -425,7 +425,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         loadedWildMapNames = false;
         
      // TODO: consider moving
-        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteDescriptionsFileName());
+        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 
     }
 
@@ -2952,13 +2952,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return s;
     }
     
-    private String getPaletteDescriptionsFileName() {
+    private String getPaletteFilesID() {
         switch (romEntry.romType) {
         case Gen5Constants.Type_BW:
-            return "palettesBW.txt";
+            return "BW";
         case Gen5Constants.Type_BW2:
             // TODO: check if this should be identical
-            return "palettesBW.txt";
+            return "BW";
         default:
             return null;
         }

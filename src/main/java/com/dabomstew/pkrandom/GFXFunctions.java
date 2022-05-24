@@ -75,10 +75,10 @@ public class GFXFunctions {
 		return bim;
 	}
 
-	/*
+	/**
 	 * Reads the data from an image read from a 4bpp .bmp file, returning it in the
 	 * format used by Gen III-V games.
-	 * 
+	 * <p>
 	 * Allows for writing image files to Gen III-V games, by using the data as an
 	 * argument for the appropriate writing method.
 	 */
@@ -90,11 +90,11 @@ public class GFXFunctions {
 		int tileHeight = DEFAULT_TILE_HEIGHT;
 
 		if (bim.getRaster().getNumBands() != 1) {
-			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .bmp file.");
+			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .png file.");
 		}
 
 		if (bim.getRaster().getSampleModel().getSampleSize(0) != bpp) {
-			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .bmp file.");
+			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .png file.");
 		}
 
 		if (bim.getWidth() % tileWidth != 0 || bim.getHeight() % tileHeight != 0) {

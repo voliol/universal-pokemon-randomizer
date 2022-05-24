@@ -1,5 +1,26 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+/*----------------------------------------------------------------------------*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -10,7 +31,6 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 /**
  * Universal implementation for things that have "copy X up evolutions" support.
- * 
  */
 public class CopyUpEvolutionsHelper {
 
@@ -21,24 +41,26 @@ public class CopyUpEvolutionsHelper {
 	}
 
 	/**
-	 * @param bpAction Method to run on all base or no-copy Pokémon, or when evolutionSanity == false
-	 * 
-	 * @param epAction Method to run on all evolved Pokémon with a linear chain of
-	 * single evolutions.
+	 * @param splitEvoNoCopy If true, split evos (e.g. Politoed, Silcoon) will count
+	 *                       as "no-copy" Pokémon, instead of evolved Pokémon.
+	 * @param bpAction       Method to run on all base or no-copy Pokémon, or when
+	 *                       evolutionSanity == false.
+	 * @param epAction       Method to run on all evolved Pokémon.
 	 */
-	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction,
+			EvolvedPokemonAction epAction) {
 		apply(evolutionSanity, splitEvoNoCopy, bpAction, epAction, bpAction);
 	}
 
 	/**
-	 * @param bpAction Method to run on all base or no-copy Pokémon
-	 * 
-	 * @param epAction Method to run on all evolved Pokémon with a linear chain of
-	 * single evolutions.
-	 * 
-	 * @param nopAction Method to run when evolutionSanity == false
+	 * @param splitEvoNoCopy If true, split evos (e.g. Politoed, Silcoon) will count
+	 *                       as "no-copy" Pokémon, instead of evolved Pokémon.
+	 * @param bpAction       Method to run on all base or no-copy Pokémon.
+	 * @param epAction       Method to run on all evolved Pokémon.
+	 * @param nopAction      Method to run when evolutionSanity == false.
 	 */
-	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction, EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
+	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction,
+			EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
 		List<Pokemon> allPokes = romHandler.getMainPokemonList();
 
 		if (evolutionSanity) {
@@ -89,12 +111,12 @@ public class CopyUpEvolutionsHelper {
 					}
 				}
 			}
-			
+
 		} else {
 			for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                	nopAction.applyTo(pk);
-                }
+				if (pk != null) {
+					nopAction.applyTo(pk);
+				}
 			}
 		}
 	}

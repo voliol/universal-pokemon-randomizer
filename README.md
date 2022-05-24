@@ -13,7 +13,7 @@ Neither are finished, and I am still working on it. The reason for uploading now
 facilitate collaborations. If you want to implement parts of in your branch I
 can't stop you, but I ask that you wait before it is more finished.
 
-If you have any questions, I will try my best to answer them.
+If you have any questions, I will try my best to answer them. For technical notes, see GRAPHICS_GUIDE.md.
 
 ## What it can do right now:
 
@@ -46,7 +46,7 @@ If you have any questions, I will try my best to answer them.
   of them as it is a lot of manual work. FRLG and DP are prioritized as I did some of it
   during an earlier/unpublished/crappy attempt at porting Artemis251's system.
   
-- Documentation and credits for all new classes.
+- Documentation and credits could be improved.
 
 - Various other things to be touched up in the framework. I'm quite new to Java/programming
   at a higher level so many of my TODO's are about best practices/patterns and such.
@@ -58,6 +58,8 @@ If you have any questions, I will try my best to answer them.
    Pokémon forms would come at this point.
    
  - A working GUI, instead of setting settings in Randomizer.java.
+ 
+ - Image reading (from file) / writing (to ROM) framework for all Gens. See GRAPHICS_GUIDE.md.
 
 
 **The rest of the readme is from the version of the Randomizer this was branched from:**

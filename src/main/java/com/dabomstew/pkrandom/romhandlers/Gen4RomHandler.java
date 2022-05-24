@@ -429,7 +429,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
         
         // TODO: consider moving
-        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteDescriptionsFileName());
+        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     private void loadMoves() {
@@ -3433,24 +3433,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return spriteData;
     }
     
-    private String bytesToString(byte[] bytes) {
-        String s = "";
-        for (byte b : bytes) {
-            s += System.out.format("%02X ", b);
-        }
-        return s;
-    }
-    
-    private String getPaletteDescriptionsFileName() {
+    private String getPaletteFilesID() {
         switch (romEntry.romType) {
         case Gen4Constants.Type_DP:
-            return "palettesDP.txt";
+            return "DP";
         case Gen4Constants.Type_Plat:
             // TODO: check if this should be identical
-            return "palettesDP.txt";
+            return "DP";
         case Gen4Constants.Type_HGSS:
             // TODO: check if this should be identical
-            return "palettesDP.txt";
+            return "DP";
         default:
             return null;
         }

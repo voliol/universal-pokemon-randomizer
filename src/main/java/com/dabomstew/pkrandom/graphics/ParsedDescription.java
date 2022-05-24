@@ -42,6 +42,43 @@ public class ParsedDescription {
 	private LightDarkSuffix lightDarkSuffix = LightDarkSuffix.ANY;
 	private boolean endDarkened;
 
+	/**
+	 * 
+	 * @param unparsed The String containing the description. Its syntax is
+	 *                 described below.
+	 *                 <p>
+	 *                 Color slots are listed as comma-separated integers,
+	 *                 representing locations in a certain Palette.
+	 *                 <p>
+	 *                 Color slots range from 1 to the size of the Palette (normally
+	 *                 16). For images that have a transparent background color,
+	 *                 e.g. those of Pokémon, slot 1 is used for that color. Slots
+	 *                 are stored internally and returned as starting from 0, each
+	 *                 slot in the unparsed String being offset by -1. 
+	 *                 <p>
+	 *                 Color slots are ordered from brightest to darkest.
+	 *                 <p>
+	 *                 The following letters also have syntactic meaning. They
+	 *                 should be placed at the end of unparsed strings; letters at
+	 *                 the start are ignored to allow for notes e.g. what palette
+	 *                 the description pertains.
+	 *                 <p>
+	 *                 <b>L</b> - Ensures the color is light.<br>
+	 *                 <b>LN</b> - Ensures the color is not light (i.e. dark or
+	 *                 default).<br>
+	 *                 <b>D</b> - Ensures the color is dark.<br>
+	 *                 <b>DN</b> - Ensures the color is not dark (i.e. light or
+	 *                 default).<br>
+	 *                 <b>B</b> - Ensures the color is default (i.e. neither light
+	 *                 nor dark)<br>
+	 *                 <b>E</b> - Darkens the last/darkest shade of a color
+	 *                 further.<br>
+	 *                 <b>A</b> - Marks an "average color" description, see below.
+	 *                 <p>
+	 *                 Average color descriptions start with an "A", and mark that
+	 *                 the color in the first given color slot should be the average
+	 *                 of the colors in the following color slots.
+	 */
 	public ParsedDescription(String unparsed) {
 		isBlank = unparsed.isBlank();
 		List<String> tokens = splitIntoTokens(unparsed);
@@ -168,14 +205,14 @@ public class ParsedDescription {
 		}
 		return sharedSlot;
 	}
-	
+
 	public int getAverageToSlot() {
-		return averageSlots.get(averageSlots.size()-1);
+		return averageSlots.get(averageSlots.size() - 1);
 	}
-	
+
 	public int[] getAverageFromSlots() {
-		int[] slotsArr = new int[averageSlots.size()-1];
-		for (int i = 0; i < averageSlots.size()-1; i++) {
+		int[] slotsArr = new int[averageSlots.size() - 1];
+		for (int i = 0; i < averageSlots.size() - 1; i++) {
 			slotsArr[i] = averageSlots.get(i);
 		}
 		return slotsArr;
@@ -191,15 +228,17 @@ public class ParsedDescription {
 			return LightDarkMode.DARK;
 		case LIGHT:
 			return LightDarkMode.LIGHT;
+		// Dark is turned to light and vice versa so the % of light or dark colors stays
+		// the same.
 		case NO_DARK:
 			if (in == LightDarkMode.DARK) {
-				return LightDarkMode.DEFAULT;
+				return LightDarkMode.LIGHT;
 			} else {
 				return in;
 			}
 		case NO_LIGHT:
 			if (in == LightDarkMode.LIGHT) {
-				return LightDarkMode.DEFAULT;
+				return LightDarkMode.DARK;
 			} else {
 				return in;
 			}

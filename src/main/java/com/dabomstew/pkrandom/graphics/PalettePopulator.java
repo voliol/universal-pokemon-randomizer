@@ -3,7 +3,7 @@ package com.dabomstew.pkrandom.graphics;
 import java.util.Arrays;
 import java.util.Random;
 
-/* PalettePopulator.java is based on PokePalette.java from the Pokemon Emerald Randomizer (ER), by Artemis251, 
+/* PalettePopulator.java is a port of PokePalette.java from the Pokemon Emerald Randomizer (ER), by Artemis251, 
  * modified for the needs of the Universal Pokémon Randomizer (UPR).
  * 
  * Below is a section taken from codeReadMe.txt of the ER source code, 
@@ -50,9 +50,14 @@ import java.util.Random;
  *  the Emerald palette thing was such a pain to accomplish."
  */
 
+/**
+ * Populates/fills/modifies existing {@link Palette}s, using
+ * {@link ParsedDescription}s as instructions.
+ * <p>
+ * This class is a port of the corresponding class (PokePalette.java) in
+ * Artemis251's Emerald Randomizer.
+ */
 public class PalettePopulator {
-	
-	// TODO: add parsing of "average" colors, or remove them from the FRLG descriptions file
 
 	private final int VARIA = 10; // 3 of these fuel the variation for sibling palettes - artemis
 	private final int VARIABASE = 3; // base forced change for sibling palettes - artemis
@@ -192,7 +197,6 @@ public class PalettePopulator {
 		return out;
 	}
 
-	// TODO: give this a better name(?)
 	private void makeBaseColorLightOrDark() {
 		boolean rndcha = false;
 		// TODO: figure out what rndcha is - it seems if it is true, then only some are

@@ -1,5 +1,26 @@
 package com.dabomstew.pkrandom.graphics;
 
+/*----------------------------------------------------------------------------*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,17 +37,28 @@ import com.dabomstew.pkrandom.romhandlers.BasePokemonAction;
 import com.dabomstew.pkrandom.romhandlers.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
 
+/**
+ * A {@link PaletteHandler} for Gen 3, Gen 4, and Gen 5 games (R/S/E/FR/LG,
+ * D/P/Pt/HG/SS, B/W/B2/W2).
+ * <p>
+ * All three generations use similar 16-color palettes, that are implemented
+ * using the {@link Palette} class. These palettes are populated/filled/modified by 
+ * {@link PalettePopulator}, using {@link ParsedDescription}s as instructions.
+ * <p>
+ * When Pokémon palettes are randomized, each Pokémon is assigned a {@link TypeBaseColorList},
+ * which uses its types to come up with appropriate base colors.
+ */
 public class Gen3to5PaletteHandler extends PaletteHandler {
 
-	private String paletteDescriptionsFileName;
+	private String paletteFilesID;
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;
 	private Map<Pokemon, TypeBaseColorList> typeBaseColorLists;
 
-	public Gen3to5PaletteHandler(Random random, String paletteDescriptionsFileName) {
+	public Gen3to5PaletteHandler(Random random, String paletteFilesID) {
 		super(random);
-		this.paletteDescriptionsFileName = paletteDescriptionsFileName;
+		this.paletteFilesID = paletteFilesID;
 	}
 
 	@Override
@@ -43,7 +75,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		this.shinyFromNormal = shinyFromNormal;
 		this.typeBaseColorLists = new HashMap<>();
 
-		if (paletteDescriptionsFileName == null) {
+		if (paletteFilesID == null) {
 
 			// TODO: better error raising/logging, is there a log file for errors like this
 			// that do not need to interrupt the program?
@@ -67,7 +99,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		} else {
 			copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
 					new EvolvedPokemonPaletteAction());
-			List<String> paletteDescriptions = getPaletteDescriptions(paletteDescriptionsFileName);
+			List<String> paletteDescriptions = getPaletteDescriptions("pokePalettes" + paletteFilesID + ".txt");
 			populatePalettes(paletteDescriptions);
 
 		}
@@ -76,30 +108,30 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 	private void populatePalettes(List<String> paletteDescriptions) {
 
 		PalettePopulator pp = new PalettePopulator(random);
-		
+
 		for (Entry<Pokemon, TypeBaseColorList> entry : typeBaseColorLists.entrySet()) {
-			
-				Pokemon pk = entry.getKey();
-				TypeBaseColorList typeBaseColorList = entry.getValue();
 
-				Palette palette = pk.getNormalPalette();
-				int pokemonNumber = pk.getNumber();
+			Pokemon pk = entry.getKey();
+			TypeBaseColorList typeBaseColorList = entry.getValue();
 
-				System.out.println("------\n" + pk.getName());
-				
-				ParsedDescription[] partDescriptions = getPartDescriptions(paletteDescriptions, pokemonNumber);
+			Palette palette = pk.getNormalPalette();
+			int pokemonNumber = pk.getNumber();
 
-				for (int i = 0; i < partDescriptions.length; i++) {
-					System.out.println(partDescriptions[i]);
-					if (partDescriptions[i].isAverageDescription()) {
-						pp.populateAverageColor(palette, partDescriptions[i]);
-					} else if (!partDescriptions[i].isBlank()) {
-						Color baseColor = typeBaseColorList.getBaseColor(i);
-						LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
+			System.out.println("------\n" + pk.getName());
 
-						pp.populatePartFromBaseColor(palette, partDescriptions[i], baseColor, lightDarkMode);
-					}
+			ParsedDescription[] partDescriptions = getPartDescriptions(paletteDescriptions, pokemonNumber);
+
+			for (int i = 0; i < partDescriptions.length; i++) {
+				System.out.println(partDescriptions[i]);
+				if (partDescriptions[i].isAverageDescription()) {
+					pp.populateAverageColor(palette, partDescriptions[i]);
+				} else if (!partDescriptions[i].isBlank()) {
+					Color baseColor = typeBaseColorList.getBaseColor(i);
+					LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
+
+					pp.populatePartFromBaseColor(palette, partDescriptions[i], baseColor, lightDarkMode);
 				}
+			}
 
 		}
 	}
@@ -108,12 +140,12 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		boolean validIndex = pokemonNumber - 1 <= paletteDescriptions.size();
 		String paletteDescription = validIndex ? paletteDescriptions.get(pokemonNumber - 1) : "";
 		String[] unparsedPartDescriptions = paletteDescription.split("/");
-		
+
 		ParsedDescription[] partDescriptions = new ParsedDescription[unparsedPartDescriptions.length];
 		for (int i = 0; i < partDescriptions.length; i++) {
 			partDescriptions[i] = new ParsedDescription(unparsedPartDescriptions[i]);
 		}
-		
+
 		return partDescriptions;
 	}
 
@@ -144,7 +176,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			if (shinyFromNormal) {
 				setShinyPaletteFromNormal(pk);
 			}
-			
+
 			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, typeSanity, random);
 			typeBaseColorLists.put(pk, typeBaseColorList);
 

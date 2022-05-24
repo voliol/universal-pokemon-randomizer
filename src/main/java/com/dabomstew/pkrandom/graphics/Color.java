@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.graphics;
 
 /*----------------------------------------------------------------------------*/
-/*--  Color.java - represents a RGB color.             						--*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2012.                                 --*/
@@ -23,6 +21,11 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+/**
+ * An RGB color, usually to be contained by a {@link Palette}, and methods for
+ * converting to/from other formats. These formats include 32-bit ARGB, and high
+ * color words (16 bits, little endian) as used by the ROMs.
+ */
 public class Color implements Cloneable {
 
 	public static int highColorWordToARGB(int word) {

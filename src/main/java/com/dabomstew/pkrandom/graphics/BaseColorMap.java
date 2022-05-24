@@ -1,9 +1,34 @@
 package com.dabomstew.pkrandom.graphics;
 
+/*----------------------------------------------------------------------------*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Used to tweak {@link TypeColor}s, by mapping each to a {@link Color} derived
+ * from it, and a {@link LightDarkMode}.
+ */
 public class BaseColorMap {
 
 	private static final double TWEAK_RAND_MIN_COEFF = -0.032;
@@ -44,16 +69,16 @@ public class BaseColorMap {
 
 	private Map<TypeColor, LightDarkMode> initLightDarkModes(Random random) {
 		Map<TypeColor, LightDarkMode> lightDarkModes = new HashMap<>();
-		
+
 		// makes sure it is synced with baseColors key-wise
 		if (baseColors == null) {
-			throw new IllegalStateException("lightDarkModes must be initialized after baseColors"); 
+			throw new IllegalStateException("lightDarkModes must be initialized after baseColors");
 		}
 		for (TypeColor tbc : baseColors.keySet()) {
 			LightDarkMode lightDarkMode = LightDarkMode.randomLightDarkMode(random);
 			lightDarkModes.put(tbc, lightDarkMode);
 		}
-		
+
 		return lightDarkModes;
 	}
 
@@ -61,7 +86,7 @@ public class BaseColorMap {
 		// unsure if this is where to put copy protection
 		return baseColors.get(typeBaseColor).clone();
 	}
-	
+
 	public LightDarkMode getLightDarkMode(TypeColor typeBaseColor) {
 		return lightDarkModes.get(typeBaseColor);
 	}

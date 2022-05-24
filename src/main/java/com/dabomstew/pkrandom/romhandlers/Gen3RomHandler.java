@@ -552,7 +552,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         // TODO: consider moving
-        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteDescriptionsFileName());
+        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     private int findPointerPrefixAndSuffix(String prefix, String suffix) {
@@ -3758,8 +3758,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
      * Assumes there is only one pointer to the compressed data. If there are more,
      * use rewriteCompressedData(int, byte[], int[]) directly.
      */
-    private void rewriteCompressedData(int pointerOffset, byte[] data) {
-        rewriteCompressedData(pointerOffset, data, new int[0]);
+    private void rewriteCompressedData(int pointerOffset, byte[] uncompressed) {
+        rewriteCompressedData(pointerOffset, uncompressed, new int[0]);
     }
 
     private void rewriteCompressedData(int pointerOffset, byte[] uncompressed, int[] secondaryPointerOffsets) {
@@ -3821,14 +3821,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (int i = 0; i < length; i++) {
             writeByte(offset + i, Gen3Constants.freeSpaceByte);
         }
-    }
-
-    private String bytesToString(byte[] bytes) {
-        String s = "";
-        for (byte b : bytes) {
-            s += System.out.format("%02X ", b);
-        }
-        return s;
     }
 
     // TODO: this version of getAllPokemonImages() does not need to exist,
@@ -3953,17 +3945,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return bim;
     }
 
-    private String getPaletteDescriptionsFileName() {
+    private String getPaletteFilesID() {
         switch (romEntry.romType) {
         case Gen3Constants.RomType_Ruby:
         case Gen3Constants.RomType_Sapp:
             // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
         	// otherwise all palettes are pretty much identical (in use).
-            return "palettesE.txt";
+            return "E";
         case Gen3Constants.RomType_Em:
-            return "palettesE.txt";
+            return "E";
         case Gen3Constants.RomType_FRLG:
-            return "palettesFRLG.txt";
+            return "FRLG";
         default:
             return null;
         }

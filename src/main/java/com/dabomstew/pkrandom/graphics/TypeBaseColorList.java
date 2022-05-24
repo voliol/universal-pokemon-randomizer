@@ -1,5 +1,26 @@
 package com.dabomstew.pkrandom.graphics;
 
+/*----------------------------------------------------------------------------*/
+/*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
+/*--  Pokemon and any associated names and the like are                     --*/
+/*--  trademark and (C) Nintendo 1996-2012.                                 --*/
+/*--                                                                        --*/
+/*--  The custom code written here is licensed under the terms of the GPL:  --*/
+/*--                                                                        --*/
+/*--  This program is free software: you can redistribute it and/or modify  --*/
+/*--  it under the terms of the GNU General Public License as published by  --*/
+/*--  the Free Software Foundation, either version 3 of the License, or     --*/
+/*--  (at your option) any later version.                                   --*/
+/*--                                                                        --*/
+/*--  This program is distributed in the hope that it will be useful,       --*/
+/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
+/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
+/*--  GNU General Public License for more details.                          --*/
+/*--                                                                        --*/
+/*--  You should have received a copy of the GNU General Public License     --*/
+/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
+/*----------------------------------------------------------------------------*/
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,12 +30,20 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 // TODO: is it alright to have a "list" that doesn't implement List?
+/**
+ * A list of {@link TypeColor}s based on a Pokémon's types. Which TypeColors are
+ * used, and their order, can be carried up evolutions using a
+ * {@link #TypeBaseColorList(Pokemon, TypeBaseColorList, boolean, Random)
+ * constructor taking an existing TypeBaseColorList}.
+ * <p>
+ * The TypeColor constants used are those from {@link Gen3to5TypeColors}.
+ */
 public class TypeBaseColorList {
-	
+
 	private static final double SAME_TYPES_SWAP_COLORS_CHANCE = 0.3;
 
 	private Random random;
-	
+
 	private Pokemon pokemon;
 	private List<TypeColor> typeBaseColors;
 	private TypeBaseColorList prevo;
@@ -40,7 +69,7 @@ public class TypeBaseColorList {
 	public Color getBaseColor(int i) {
 		return baseColorMap.getBaseColor(get(i));
 	}
-	
+
 	public LightDarkMode getLightDarkMode(int i) {
 		return baseColorMap.getLightDarkMode(get(i));
 	}
