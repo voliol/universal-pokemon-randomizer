@@ -38,6 +38,10 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class RomFunctions {
+	
+	// TODO: find out something to replace getBasicPokemon, getSplitEvoPokemon,
+	// getMiddleEvolutions, getFinalEvolutions, and then deprecate them.
+	// Them taking a RomHandler to filter a Set<Pokemon> is strange.
 
 	public static Set<Pokemon> getBasicPokemon(RomHandler baseRom) {
 		List<Pokemon> allPokes = baseRom.getPokemonWithoutNull();

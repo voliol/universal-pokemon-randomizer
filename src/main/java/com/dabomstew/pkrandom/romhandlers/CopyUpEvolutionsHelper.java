@@ -1,10 +1,13 @@
 package com.dabomstew.pkrandom.romhandlers;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
@@ -14,32 +17,39 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
  */
 public class CopyUpEvolutionsHelper {
 
-	private RomHandler romHandler;
+	private Set<Pokemon> allPokes;
 
 	public CopyUpEvolutionsHelper(RomHandler romHandler) {
-		this.romHandler = romHandler;
+		this(romHandler.getMainPokemonList());
+	}
+
+	public CopyUpEvolutionsHelper(Collection<Pokemon> pokemon) {
+		this.allPokes = new HashSet<>(pokemon);
+		pokemon.removeIf(Objects::isNull);
 	}
 
 	/**
-	 * @param bpAction Method to run on all base or no-copy Pokémon, or when evolutionSanity == false
+	 * @param bpAction Method to run on all base or no-copy Pokémon, or when
+	 *                 evolutionSanity == false
 	 * 
 	 * @param epAction Method to run on all evolved Pokémon with a linear chain of
-	 * single evolutions.
+	 *                 single evolutions.
 	 */
-	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction,
+			EvolvedPokemonAction epAction) {
 		apply(evolutionSanity, splitEvoNoCopy, bpAction, epAction, bpAction);
 	}
 
 	/**
-	 * @param bpAction Method to run on all base or no-copy Pokémon
+	 * @param bpAction  Method to run on all base or no-copy Pokémon
 	 * 
-	 * @param epAction Method to run on all evolved Pokémon with a linear chain of
-	 * single evolutions.
+	 * @param epAction  Method to run on all evolved Pokémon with a linear chain of
+	 *                  single evolutions.
 	 * 
 	 * @param nopAction Method to run when evolutionSanity == false
 	 */
-	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction, EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
-		List<Pokemon> allPokes = romHandler.getMainPokemonList();
+	public void apply(boolean evolutionSanity, boolean splitEvoNoCopy, BasePokemonAction bpAction,
+			EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
 
 		if (evolutionSanity) {
 			for (Pokemon pk : allPokes) {
@@ -49,11 +59,11 @@ public class CopyUpEvolutionsHelper {
 			}
 
 			// Get evolution data.
-			Set<Pokemon> dontCopyPokes = RomFunctions.getBasicPokemon(romHandler);
+			Set<Pokemon> dontCopyPokes = getBasicPokemon();
 			if (splitEvoNoCopy) {
-				dontCopyPokes.addAll(RomFunctions.getSplitEvoPokemon(romHandler));
+				dontCopyPokes.addAll(getSplitEvoPokemon());
 			}
-			Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(romHandler);
+			Set<Pokemon> middleEvos = getMiddleEvolutions();
 
 			for (Pokemon pk : dontCopyPokes) {
 				pk.temporaryFlag = true;
@@ -89,14 +99,44 @@ public class CopyUpEvolutionsHelper {
 					}
 				}
 			}
-			
+
 		} else {
 			for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                	nopAction.applyTo(pk);
-                }
+				if (pk != null) {
+					nopAction.applyTo(pk);
+				}
 			}
 		}
+	}
+
+	private Set<Pokemon> getFilteredPokemon(Predicate<? super Pokemon> predicate) {
+		return allPokes.stream().filter(predicate).collect(Collectors.toSet());
+	}
+
+	// These functions replace those in RomFunctions,
+	// so they can take a set instead of a RomHandler.
+	// TODO: They don't really belong here (bad coherence), but should be in some
+	// unified Pokemon set structure. PokemonCollection might be that but
+	// investigating further is out of scope for now.
+
+	private Set<Pokemon> getBasicPokemon() {
+		return getFilteredPokemon(pk -> pk.evolutionsTo.size() < 1);
+	}
+
+	private Set<Pokemon> getSplitEvoPokemon() {
+		return getFilteredPokemon(pk -> pk.evolutionsTo.size() > 1 && !pk.evolutionsTo.get(0).carryStats);
+	}
+
+	private Set<Pokemon> getMiddleEvolutions() {
+		return getFilteredPokemon(pk -> {
+			if (pk.evolutionsTo.size() == 1 && pk.evolutionsFrom.size() > 0) {
+				Evolution onlyEvo = pk.evolutionsTo.get(0);
+				if (onlyEvo.carryStats) {
+					return true;
+				}
+			}
+			return false;
+		});
 	}
 
 }
