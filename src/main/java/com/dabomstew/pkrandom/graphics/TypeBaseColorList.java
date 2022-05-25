@@ -21,8 +21,8 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -41,11 +41,13 @@ import com.dabomstew.pkrandom.pokemon.Type;
 public class TypeBaseColorList {
 
 	private static final double SAME_TYPES_SWAP_COLORS_CHANCE = 0.3;
+	private static final int MIN_COLOR_NUMBER = 16;
+	private static final int GET_RANDOM_TRIES = 100;
 
 	private Random random;
 
 	private Pokemon pokemon;
-	private List<TypeColor> typeBaseColors;
+	private List<TypeColor> typeBaseColors = new LinkedList<>();
 	private TypeBaseColorList prevo;
 	private BaseColorMap baseColorMap;
 
@@ -83,18 +85,17 @@ public class TypeBaseColorList {
 	}
 
 	private void generateTypeBaseColorsBasic(boolean typeSanity) {
-		// woops, I forgot about the needs of this class when remaking TypeBaseColor,
-		// TODO
-		typeBaseColors = Gen3to5TypeColors.getAllTypeColors();
-		Collections.shuffle(typeBaseColors, random);
-
 		if (typeSanity) {
 			moveTypeColorsToStart();
 		}
+		for (int i = 0; i < MIN_COLOR_NUMBER - typeBaseColors.size(); i++) {
+			typeBaseColors.add(getRandomUnusedColor());
+		}
+
 	}
 
 	private void generateTypeBaseColorsFromPrevo(boolean typeSanity) {
-		typeBaseColors = new ArrayList<>(prevo.typeBaseColors);
+		typeBaseColors = new LinkedList<>(prevo.typeBaseColors);
 
 		if (!typeSanity) {
 			if (random.nextDouble() < SAME_TYPES_SWAP_COLORS_CHANCE) {
@@ -140,13 +141,14 @@ public class TypeBaseColorList {
 	}
 
 	private void moveFirstColorOfType(int insertIndex, Type type) {
+		TypeColor color;
 		int colorOfTypeIndex = findColorOfType(insertIndex, type);
 		if (colorOfTypeIndex == -1) {
-			// TODO: more descriptive error message? (or change this method to auto-fix)
-			throw new RuntimeException();
+			color = getRandomUnusedColor(type);
+		} else {
+			color = typeBaseColors.get(colorOfTypeIndex);
+			typeBaseColors.remove(colorOfTypeIndex);
 		}
-		TypeColor color = typeBaseColors.get(colorOfTypeIndex);
-		typeBaseColors.remove(colorOfTypeIndex);
 		typeBaseColors.add(insertIndex, color);
 	}
 
@@ -157,6 +159,30 @@ public class TypeBaseColorList {
 			}
 		}
 		return -1;
+	}
+
+	// Should remain a separate method calling
+	// Gen3to5TypeColors.getRandomTypeColor(); do not merge with
+	// getRandomUnusedColor(Type) by selecting a random Type here.
+	private TypeColor getRandomUnusedColor() {
+		for (int i = 0; i < GET_RANDOM_TRIES; i++) {
+			TypeColor color = Gen3to5TypeColors.getRandomTypeColor(random);
+			if (!typeBaseColors.contains(color)) {
+				return color;
+			}
+		}
+		throw new RuntimeException("Could not get an unused TypeColor in less than " + GET_RANDOM_TRIES + " tries.");
+	}
+
+	private TypeColor getRandomUnusedColor(Type type) {
+		for (int i = 0; i < GET_RANDOM_TRIES; i++) {
+			TypeColor color = Gen3to5TypeColors.getRandomTypeColor(type, random);
+			if (!typeBaseColors.contains(color)) {
+				return color;
+			}
+		}
+		throw new RuntimeException(
+				"Could not get an unused TypeColor of type " + type + " in less than " + GET_RANDOM_TRIES + " tries.");
 	}
 
 	private boolean hasSameTypesAsPrevo() {

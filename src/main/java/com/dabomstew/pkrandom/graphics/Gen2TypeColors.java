@@ -45,6 +45,7 @@ public class Gen2TypeColors {
 
 	private static EnumMap<Type, TypeColor[]> initBrightTypeColors() {
 		EnumMap<Type, TypeColor[]> brightTypeColors = new EnumMap<>(Type.class);
+		// vanilla types
 		TypeColor.putIntsAsTypeColors(brightTypeColors, Type.NORMAL,
 				new int[] { 0xF7DE6B, 0xFF7BBD, 0xFF5263, 0xEFB539, 0xFF7394, 0xFF7394, 0xFF73AD, 0xFF73AD, 0xF7D65A,
 						0xF7DE42, 0xBD6342, 0xAD6B4A, 0x634231, 0xFF5294, 0xDE9CBD, 0x8C6318, 0xCE7B29, 0xC68431,
@@ -92,12 +93,14 @@ public class Gen2TypeColors {
 				new int[] { 0xE7D639, 0x8C9CFF, 0xC68C21, 0x4AD652 });
 		TypeColor.putIntsAsTypeColors(brightTypeColors, Type.DARK,
 				new int[] { 0x637B9C, 0x8C7B00, 0xDE525A, 0xCE297B, 0x7B52DE });
+		// hack types
 		return brightTypeColors;
 
 	}
 
 	private static EnumMap<Type, TypeColor[]> initDarkTypeColors() {
 		EnumMap<Type, TypeColor[]> darkTypeColors = new EnumMap<>(Type.class);
+		// vanilla types
 		TypeColor.putIntsAsTypeColors(darkTypeColors, Type.NORMAL,
 				new int[] { 0x9C4210, 0x9C4210, 0x9C4210, 0x944A00, 0xA54A00, 0xB58431, 0x6B3900, 0x6B3900, 0x943110,
 						0x523918, 0x634231, 0x944231, 0xFF42AD, 0x313108, 0x523921, 0x8C4210, 0xC64A21, 0x427BA5,
@@ -141,6 +144,7 @@ public class Gen2TypeColors {
 				new int[] { 0x4273C6, 0x2973BD, 0x5A528C, 0xA53939, 0xFF525A });
 		TypeColor.putIntsAsTypeColors(darkTypeColors, Type.DARK,
 				new int[] { 0x29428C, 0x313929, 0x39398C, 0x39395A, 0x213142, 0x4A218C, 0xCE3984 });
+		// hack types
 		return darkTypeColors;
 	}
 

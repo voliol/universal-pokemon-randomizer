@@ -21,29 +21,24 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.dabomstew.pkrandom.pokemon.Type;
 
 /**
- * Contains {@link TypeColor} constants for Gen 3-5 games, and methods
- * for accessing them.
+ * Contains {@link TypeColor} constants for Gen 3-5 games, and methods for
+ * accessing them.
  * <p>
- * The color values for all vanilla types (-fairy) are taken from Artemis251's
- * Emerald Randomizer, and therefore by Artemis251. See the license in
- * {@link PalettePopulator}.
+ * The color values for all vanilla types (not including fairy) are taken from
+ * Artemis251's Emerald Randomizer, and therefore by Artemis251. See the license
+ * in {@link PalettePopulator}.
  */
 public class Gen3to5TypeColors {
 
-	// TODO: make this work with the rest of the Type enums (like fairy),
-	// while also returning the sort of shuffled list PokemonTypeBaseColors wants
-	// (or something facilitating PokemonTypeBaseColors making it itself)
-
-	private static final Map<Type, TypeColor[]> TYPE_BASE_COLORS = initTypeBaseColors();
+	private static final Map<Type, TypeColor[]> TYPE_COLORS = initTypeBaseColors();
+	private static final Color DEFAULT_COLOR = new Color(0xC0C0C0);
 
 	private static Map<Type, TypeColor[]> initTypeBaseColors() {
 		Map<Type, TypeColor[]> map = new EnumMap<>(Type.class);
@@ -69,13 +64,17 @@ public class Gen3to5TypeColors {
 		return map;
 	}
 
-	// preliminary
-	public static List<TypeColor> getAllTypeColors() {
-		List<TypeColor> allTypeColors = new ArrayList<>();
-		for (TypeColor[] typeColors : TYPE_BASE_COLORS.values()) {
-			allTypeColors.addAll(Arrays.asList(typeColors));
-		}
-		return allTypeColors;
+	public static TypeColor getRandomTypeColor(Random random) {
+		Type[] keys = TYPE_COLORS.keySet().toArray(new Type[0]);
+		Type type = keys[random.nextInt(keys.length)];
+		return getRandomTypeColor(type, random);
+	}
+
+	public static TypeColor getRandomTypeColor(Type type, Random random) {
+		TypeColor[] typeColors = TYPE_COLORS.get(type);
+		TypeColor color = typeColors == null ? new TypeColor(DEFAULT_COLOR, type)
+				: typeColors[random.nextInt(typeColors.length)];
+		return color;
 	}
 
 }

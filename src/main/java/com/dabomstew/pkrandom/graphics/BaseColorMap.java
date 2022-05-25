@@ -36,25 +36,37 @@ public class BaseColorMap {
 	private static final double TWEAK_RAND_MAX_COEFF = -0.042;
 	private static final double TWEAK_RAND_MAX_ADDEND = 17.19;
 
-	private final Map<TypeColor, Color> baseColors;
-	private final Map<TypeColor, LightDarkMode> lightDarkModes;
+	private final Random random;
+
+	private final Map<TypeColor, Color> baseColors = new HashMap<>();
+	private final Map<TypeColor, LightDarkMode> lightDarkModes = new HashMap<>();
 
 	public BaseColorMap(Random random) {
-		baseColors = initBaseColors(random);
-		lightDarkModes = initLightDarkModes(random);
+		this.random = random;
 	}
 
-	private Map<TypeColor, Color> initBaseColors(Random random) {
-		Map<TypeColor, Color> baseColors = new HashMap<>();
-		for (TypeColor tbc : Gen3to5TypeColors.getAllTypeColors()) {
-			Color baseColor = randomlyTweakColor(tbc, random);
-			baseColors.put(tbc, baseColor);
+	public Color getBaseColor(TypeColor key) {
+		if (!baseColors.containsKey(key)) {
+			add(key);
 		}
-		return baseColors;
+		// unsure if this is where to put copy protection
+		return baseColors.get(key).clone();
 	}
 
-	private Color randomlyTweakColor(Color color, Random random) {
-		// based on Artemis251's Emerald randomizer code
+	public LightDarkMode getLightDarkMode(TypeColor key) {
+		if (!baseColors.containsKey(key)) {
+			add(key);
+		}
+		return lightDarkModes.get(key);
+	}
+
+	private void add(TypeColor key) {
+		baseColors.put(key, randomlyTweakColor(key));
+		lightDarkModes.put(key, LightDarkMode.randomLightDarkMode(random));
+	}
+
+	private Color randomlyTweakColor(Color color) {
+		// based on Artemis251's Emerald Randomizer code
 		Color tweakedColor = new Color();
 		for (int i = 0; i < 3; i++) { // for each in R,G,B
 			int randMin = (int) (TWEAK_RAND_MIN_COEFF * color.getComp(i) + TWEAK_RAND_MIN_ADDEND);
@@ -65,30 +77,6 @@ public class BaseColorMap {
 			tweakedColor.setComp(i, value);
 		}
 		return tweakedColor;
-	}
-
-	private Map<TypeColor, LightDarkMode> initLightDarkModes(Random random) {
-		Map<TypeColor, LightDarkMode> lightDarkModes = new HashMap<>();
-
-		// makes sure it is synced with baseColors key-wise
-		if (baseColors == null) {
-			throw new IllegalStateException("lightDarkModes must be initialized after baseColors");
-		}
-		for (TypeColor tbc : baseColors.keySet()) {
-			LightDarkMode lightDarkMode = LightDarkMode.randomLightDarkMode(random);
-			lightDarkModes.put(tbc, lightDarkMode);
-		}
-
-		return lightDarkModes;
-	}
-
-	public Color getBaseColor(TypeColor typeBaseColor) {
-		// unsure if this is where to put copy protection
-		return baseColors.get(typeBaseColor).clone();
-	}
-
-	public LightDarkMode getLightDarkMode(TypeColor typeBaseColor) {
-		return lightDarkModes.get(typeBaseColor);
 	}
 
 }
