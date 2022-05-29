@@ -7,8 +7,12 @@ import java.util.Stack;
 
 // TODO: better name, and/or refactor in other classes
 
+/**
+ * Represents a parsed description for a {@link PalettePopulator} to use. For
+ * the syntax, see {@link #ParsedDescription(String)}.
+ */
 public class ParsedDescription {
-
+	
 	private static enum CharType {
 		DIGIT, LETTER, SIBLING_DELIMITER, IGNORE;
 
@@ -42,10 +46,23 @@ public class ParsedDescription {
 	private LightDarkSuffix lightDarkSuffix = LightDarkSuffix.ANY;
 	private boolean endDarkened;
 
+	public static ParsedDescription[] parsedDescriptionsFromString(List<String> paletteDescriptions, int index) {
+		boolean validIndex = index <= paletteDescriptions.size();
+		String paletteDescription = validIndex ? paletteDescriptions.get(index) : "";
+		String[] unparsedPartDescriptions = paletteDescription.split("/");
+	
+		ParsedDescription[] partDescriptions = new ParsedDescription[unparsedPartDescriptions.length];
+		for (int i = 0; i < partDescriptions.length; i++) {
+			partDescriptions[i] = new ParsedDescription(unparsedPartDescriptions[i]);
+		}
+	
+		return partDescriptions;
+	}
+
 	/**
 	 * 
-	 * @param unparsed The String containing the description. Its syntax is
-	 *                 described below.
+	 * @param unparsed The String containing the description pre-parsing. Its syntax
+	 *                 is described below.
 	 *                 <p>
 	 *                 Color slots are listed as comma-separated integers,
 	 *                 representing locations in a certain Palette.
@@ -54,9 +71,16 @@ public class ParsedDescription {
 	 *                 16). For images that have a transparent background color,
 	 *                 e.g. those of Pokémon, slot 1 is used for that color. Slots
 	 *                 are stored internally and returned as starting from 0, each
-	 *                 slot in the unparsed String being offset by -1. 
+	 *                 slot in the unparsed String being offset by -1.
 	 *                 <p>
 	 *                 Color slots are ordered from brightest to darkest.
+	 *                 <p>
+	 *                 Gen 5 palettes may look strange and too-high
+	 *                 contrast. This is because the PalettePopulator class is
+	 *                 originally made for Gen 3 palettes, and those usually have
+	 *                 a highlight color Gen 5 palettes lack. A quickfix for this is
+	 *                 to assign the first color slot to "1", that way the highlight
+	 *                 is put in the transparent slot 1, and not seen.
 	 *                 <p>
 	 *                 The following letters also have syntactic meaning. They
 	 *                 should be placed at the end of unparsed strings; letters at

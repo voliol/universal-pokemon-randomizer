@@ -119,7 +119,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 			System.out.println("------\n" + pk.getName());
 
-			ParsedDescription[] partDescriptions = getPartDescriptions(paletteDescriptions, pokemonNumber);
+			ParsedDescription[] partDescriptions = ParsedDescription.parsedDescriptionsFromString(paletteDescriptions, pokemonNumber - 1);
 
 			for (int i = 0; i < partDescriptions.length; i++) {
 				System.out.println(partDescriptions[i]);
@@ -136,20 +136,6 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		}
 	}
 
-	private ParsedDescription[] getPartDescriptions(List<String> paletteDescriptions, int pokemonNumber) {
-		boolean validIndex = pokemonNumber - 1 <= paletteDescriptions.size();
-		String paletteDescription = validIndex ? paletteDescriptions.get(pokemonNumber - 1) : "";
-		String[] unparsedPartDescriptions = paletteDescription.split("/");
-
-		ParsedDescription[] partDescriptions = new ParsedDescription[unparsedPartDescriptions.length];
-		for (int i = 0; i < partDescriptions.length; i++) {
-			partDescriptions[i] = new ParsedDescription(unparsedPartDescriptions[i]);
-		}
-
-		return partDescriptions;
-	}
-
-	// TODO: maybe change to String[] just to match getPartDescriptions
 	private List<String> getPaletteDescriptions(String fileName) {
 		List<String> paletteDescriptions = new ArrayList<>();
 

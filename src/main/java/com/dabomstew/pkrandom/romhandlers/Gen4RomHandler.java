@@ -72,8 +72,6 @@ import com.dabomstew.pkrandom.graphics.PaletteHandler;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
     
-    private PaletteHandler paletteHandler;
-    
     public static class Factory extends RomHandler.Factory {
 
         @Override
@@ -310,6 +308,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
         return null;
     }
+    
+    // Sub-handlers
+    private PaletteHandler paletteHandler;
 
     // This rom
     private Pokemon[] pokes;
@@ -428,8 +429,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             ptGiratina = true;
         }
         
-        // TODO: consider moving
-        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
+        // Having this in the constructor would be preferred, 
+        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
+        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     private void loadMoves() {

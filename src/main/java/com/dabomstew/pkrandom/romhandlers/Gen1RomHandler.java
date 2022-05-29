@@ -71,9 +71,6 @@ import compressors.Gen1Decmp;
 
 public class Gen1RomHandler extends AbstractGBCRomHandler {
     
-    // TODO: figure out proper placement of this, for aesthetics
-    private PaletteHandler paletteHandler;
-
     public static class Factory extends RomHandler.Factory {
 
         @Override
@@ -97,6 +94,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public Gen1RomHandler(Random random) {
         super(random);
+        this.paletteHandler = new Gen1PaletteHandler(random);
     }
 
     // Important RBY Data Structures
@@ -350,6 +348,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
         return null;
     }
+    
+    // Sub-handlers
+    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Pokemon[] pokes;
@@ -394,8 +395,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         loadItemNames();
         preloadMaps();
         loadMapNames();
-        
-        paletteHandler = new Gen1PaletteHandler(random);
     }
 
     private void loadPokedexOrder() {

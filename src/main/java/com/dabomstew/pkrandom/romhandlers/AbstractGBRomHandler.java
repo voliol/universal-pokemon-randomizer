@@ -205,8 +205,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return bim;
     }
 
-    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of
-    // the pattern to replace it
+    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
     protected abstract BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground,
             boolean includePalette);
 

@@ -71,9 +71,6 @@ import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 import compressors.Gen2Decmp;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
-    
-    // TODO: figure out proper placement of this, for aesthetics
-    private PaletteHandler paletteHandler;
 
     public static class Factory extends RomHandler.Factory {
 
@@ -98,6 +95,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     public Gen2RomHandler(Random random) {
         super(random);
+        this.paletteHandler = new Gen2PaletteHandler(random);
     }
 
     private static class RomEntry {
@@ -281,6 +279,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         return null;
     }
+    
+    // Sub-handlers
+    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Pokemon[] pokes;
@@ -333,9 +334,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         loadLandmarkNames();
         preprocessMaps();
         loadItemNames();
-        
-        //TODO: maybe graphics should use a separate seed
-        paletteHandler = new Gen2PaletteHandler(random);
     }
 
     private static RomEntry checkRomEntry(byte[] rom) {

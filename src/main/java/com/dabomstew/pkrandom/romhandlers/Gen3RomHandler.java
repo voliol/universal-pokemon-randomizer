@@ -76,8 +76,6 @@ import compressors.DSCmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
-    private PaletteHandler paletteHandler;
-
     public static class Factory extends RomHandler.Factory {
 
         @Override
@@ -359,6 +357,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         return null;
     }
+    
+    // Sub-handlers
+    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Pokemon[] pokes, pokesInternal;
@@ -550,9 +551,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else {
             isGen1 = false;
         }
-
-        // TODO: consider moving
-        paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
+        
+        // Having this in the constructor would be preferred, 
+        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
+        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     private int findPointerPrefixAndSuffix(String prefix, String suffix) {

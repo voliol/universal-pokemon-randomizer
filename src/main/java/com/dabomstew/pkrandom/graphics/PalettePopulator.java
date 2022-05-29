@@ -58,6 +58,8 @@ import java.util.Random;
  * Artemis251's Emerald Randomizer.
  */
 public class PalettePopulator {
+	
+	//TODO: make Gen 5 palettes look better without the "slot 1" trick.
 
 	private final int VARIA = 10; // 3 of these fuel the variation for sibling palettes - artemis
 	private final int VARIABASE = 3; // base forced change for sibling palettes - artemis
@@ -89,8 +91,6 @@ public class PalettePopulator {
 	public void populatePartFromBaseColor(Palette palette, ParsedDescription description, Color baseColor,
 			LightDarkMode lightDarkMode) {
 
-		// TODO: Maybe an anti-pattern - should this be a subclass of Palette instead?
-		// Ask someone!
 		this.palette = palette;
 
 		this.description = description;
