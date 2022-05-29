@@ -17,10 +17,11 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
  */
 public class CopyUpEvolutionsHelper {
 
+	private RomHandler romHandler;
 	private Set<Pokemon> allPokes;
 
 	public CopyUpEvolutionsHelper(RomHandler romHandler) {
-		this(romHandler.getMainPokemonList());
+		this.romHandler = romHandler;
 	}
 
 	public CopyUpEvolutionsHelper(Collection<Pokemon> pokemon) {
@@ -52,6 +53,8 @@ public class CopyUpEvolutionsHelper {
 			EvolvedPokemonAction epAction, BasePokemonAction nopAction) {
 
 		if (evolutionSanity) {
+			Set<Pokemon> allPokes = getAllPokes();
+
 			for (Pokemon pk : allPokes) {
 				if (pk != null) {
 					pk.temporaryFlag = false;
@@ -59,11 +62,11 @@ public class CopyUpEvolutionsHelper {
 			}
 
 			// Get evolution data.
-			Set<Pokemon> dontCopyPokes = getBasicPokemon();
+			Set<Pokemon> dontCopyPokes = getBasicPokemon(allPokes);
 			if (splitEvoNoCopy) {
-				dontCopyPokes.addAll(getSplitEvoPokemon());
+				dontCopyPokes.addAll(getSplitEvoPokemon(allPokes));
 			}
-			Set<Pokemon> middleEvos = getMiddleEvolutions();
+			Set<Pokemon> middleEvos = getMiddleEvolutions(allPokes);
 
 			for (Pokemon pk : dontCopyPokes) {
 				pk.temporaryFlag = true;
@@ -109,8 +112,16 @@ public class CopyUpEvolutionsHelper {
 		}
 	}
 
-	private Set<Pokemon> getFilteredPokemon(Predicate<? super Pokemon> predicate) {
-		return allPokes.stream().filter(predicate).collect(Collectors.toSet());
+	private Set<Pokemon> getAllPokes() {
+		if (romHandler != null) {
+			return new HashSet<Pokemon>(romHandler.getPokemonWithoutNull());
+		} else {
+			return allPokes;
+		}
+	}
+
+	private Set<Pokemon> getFilteredPokemon(Set<Pokemon> pokeSet, Predicate<? super Pokemon> predicate) {
+		return pokeSet.stream().filter(predicate).collect(Collectors.toSet());
 	}
 
 	// These functions replace those in RomFunctions,
@@ -119,16 +130,16 @@ public class CopyUpEvolutionsHelper {
 	// unified Pokemon set structure. PokemonCollection might be that but
 	// investigating further is out of scope for now.
 
-	private Set<Pokemon> getBasicPokemon() {
-		return getFilteredPokemon(pk -> pk.evolutionsTo.size() < 1);
+	private Set<Pokemon> getBasicPokemon(Set<Pokemon> pokeSet) {
+		return getFilteredPokemon(pokeSet, pk -> pk.evolutionsTo.size() < 1);
 	}
 
-	private Set<Pokemon> getSplitEvoPokemon() {
-		return getFilteredPokemon(pk -> pk.evolutionsTo.size() > 1 && !pk.evolutionsTo.get(0).carryStats);
+	private Set<Pokemon> getSplitEvoPokemon(Set<Pokemon> pokeSet) {
+		return getFilteredPokemon(pokeSet, pk -> pk.evolutionsTo.size() > 1 && !pk.evolutionsTo.get(0).carryStats);
 	}
 
-	private Set<Pokemon> getMiddleEvolutions() {
-		return getFilteredPokemon(pk -> {
+	private Set<Pokemon> getMiddleEvolutions(Set<Pokemon> pokeSet) {
+		return getFilteredPokemon(pokeSet, pk -> {
 			if (pk.evolutionsTo.size() == 1 && pk.evolutionsFrom.size() > 0) {
 				Evolution onlyEvo = pk.evolutionsTo.get(0);
 				if (onlyEvo.carryStats) {
