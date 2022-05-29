@@ -3370,40 +3370,44 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return calculatePokemonNormalPaletteIndex(i) + 1;
     }
 
-    @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean shiny,
-            boolean transparentBackground, boolean includePalette) {
-        int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
-        int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+	@Override
+	protected BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+			boolean transparentBackground, boolean includePalette) {
+		
+		int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
+		if (back) {
+			spriteIndex -= 2;
+		}
+		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
 
-        int palIndex = pk.number * 6 + 4;
-        if (shiny) {
-            palIndex++;
-        }
-        Palette palette = readPalette(pokeGraphicsNARC, palIndex);
-        int convPalette[] = palette.toARGB();
-        if (transparentBackground) {
-            convPalette[0] = 0;
-        }
+		int palIndex = pk.number * 6 + 4;
+		if (shiny) {
+			palIndex++;
+		}
+		Palette palette = readPalette(pokeGraphicsNARC, palIndex);
+		int convPalette[] = palette.toARGB();
+		if (transparentBackground) {
+			convPalette[0] = 0;
+		}
 
-        // Deliberately chop off the right half of the image while still
-        // correctly indexing the array.
-        BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
-        for (int y = 0; y < 80; y++) {
-            for (int x = 0; x < 80; x++) {
-                int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-                bim.setRGB(x, y, convPalette[value]);
-            }
-        }
+		// Deliberately chop off the right half of the image while still
+		// correctly indexing the array.
+		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < 80; y++) {
+			for (int x = 0; x < 80; x++) {
+				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+				bim.setRGB(x, y, convPalette[value]);
+			}
+		}
 
-        if (includePalette) {
-            for (int j = 0; j < 16; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
-            }
-        }
-        
-        return bim;
-    }
+		if (includePalette) {
+			for (int j = 0; j < 16; j++) {
+				bim.setRGB(j, 0, convPalette[j]);
+			}
+		}
+
+		return bim;
+	}
 
     private int[] readSpriteData(NARCArchive pokespritesNARC, int spriteIndex) {
         // read sprite

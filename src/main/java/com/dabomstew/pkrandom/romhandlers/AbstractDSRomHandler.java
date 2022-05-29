@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
@@ -396,34 +397,41 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         
         for (int i = 1; i < getPokemon().size(); i++) {
             Pokemon pk = getPokemon().get(i);
-            bims.add(getPokemonImage(pk, pokeGraphicsNARC, false, false, true));
+           
+            BufferedImage frontNormal = getPokemonImage(pk, pokeGraphicsNARC, false, false, false, true);
+            BufferedImage backNormal = getPokemonImage(pk, pokeGraphicsNARC, true, false, false, false);
+        	BufferedImage frontShiny = getPokemonImage(pk, pokeGraphicsNARC, false, true, false, true); 
+        	BufferedImage backShiny = getPokemonImage(pk, pokeGraphicsNARC, true, true, false, false); 
+            	
+        	BufferedImage combined = GFXFunctions.stitchToGrid(new BufferedImage[][] {{frontNormal, backNormal}, {frontShiny, backShiny}});
+            bims.add(combined);
         }
         return bims;
     }
     
-    @Override
-    public final BufferedImage getMascotImage() {
-        try {
-            dumpAllPokemonSprites();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            Pokemon pk = randomPokemon();
-            String NARCpath = getNARCPath("PokemonGraphics");
-            NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
-            boolean shiny = random.nextInt(10) == 0;
-            
-            BufferedImage bim = getPokemonImage(pk, pokeGraphicsNARC, shiny, true, false);
-            
-            return bim;
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
-        }
-    }
+	@Override
+	public final BufferedImage getMascotImage() {
+		try {
+			dumpAllPokemonSprites();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			Pokemon pk = randomPokemon();
+			String NARCpath = getNARCPath("PokemonGraphics");
+			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
+			boolean shiny = random.nextInt(10) == 0;
+
+			BufferedImage bim = getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
+
+			return bim;
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+	}
     
     // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-    protected abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean shiny,
+    protected abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
             boolean transparentBackground, boolean includePalette);
 
     private byte[] concatenate(byte[] a, byte[] b) {

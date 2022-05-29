@@ -2899,31 +2899,39 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return false;
     }
 
-    @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean shiny, boolean transparentBackground, boolean includePalette) {
-        
-        int palIndex = pk.number * 20 + 18;
-        Palette palette = readPalette(pokeGraphicsNARC, palIndex);
-        int convPalette[] = palette.toARGB();
-        if (transparentBackground) {
-            convPalette[0] = 0;
-        }
+	@Override
+	protected BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+			boolean transparentBackground, boolean includePalette) {
+		
+		int spriteIndex = pk.number * 20;
+		if (back) {
+			spriteIndex += 9;
+		}
+		byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
+		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
+		
+		int palIndex = pk.number * 20 + 18;
+		if (shiny) {
+			palIndex++;
+		}
+		Palette palette = readPalette(pokeGraphicsNARC, palIndex);
+		int convPalette[] = palette.toARGB();
+		if (transparentBackground) {
+			convPalette[0] = 0;
+		}
 
-        byte[] compressedPic = pokeGraphicsNARC.files.get(pk.number * 20);
-        byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
+		// Output to 64x144 tiled image, then unscramble to a 96x96
+		BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, convPalette, 48, 64, 144, 4);
+		bim = unscramblePokemonSprite(bim);
 
-        // Output to 64x144 tiled image, then unscramble to a 96x96
-        BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, convPalette, 48, 64, 144, 4);
-        bim = unscramblePokemonSprite(bim);
-        
-        if (includePalette) {
-            for (int j = 0; j < 16; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
-            }
-        }
-        
-        return bim;
-    }
+		if (includePalette) {
+			for (int j = 0; j < 16; j++) {
+				bim.setRGB(j, 0, convPalette[j]);
+			}
+		}
+
+		return bim;
+	}
 
     private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
         BufferedImage unscrambled = new BufferedImage(96, 96, BufferedImage.TYPE_INT_ARGB);
@@ -2943,14 +2951,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
         g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
         return unscrambled;
-    }
-    
-    private String bytesToString(byte[] bytes) {
-        String s = "";
-        for (byte b : bytes) {
-            s += System.out.format("%02X ", b);
-        }
-        return s;
     }
     
     private String getPaletteFilesID() {

@@ -481,7 +481,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pkmn.rareHeldItem = rom[offset + Gen2Constants.bsRareHeldItemOffset] & 0xFF;
         pkmn.darkGrassHeldItem = -1;
         pkmn.growthCurve = ExpCurve.fromByte(rom[offset + Gen2Constants.bsGrowthCurveOffset]);
-        pkmn.picDimensions = rom[offset + Gen2Constants.bsPicDimensionsOffset] & 0xFF;
+        pkmn.setPicDimensions(rom[offset + Gen2Constants.bsPicDimensionsOffset] & 0xFF);
 
     }
 
@@ -2486,8 +2486,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground, boolean includePalette) {
-        // Each Pokemon has a pointer front and back pic with a bank and a pointer (3*2=6)
+    protected BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
+    	// Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
         // There is no zero-entry.
         int picPointer;
         if (pk.getNumber() == Gen2Constants.unownIndex) {
@@ -2496,9 +2496,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
         picPointer = getRomEntry().getValue("PicPointers") + (pk.number - 1) * 6;
         }
+        if (back) {
+        	picPointer += 3;
+        }
         
-        int picWidth = pk.picDimensions & 0x0F;
-        int picHeight = (pk.picDimensions >> 4) & 0x0F;
+        int picWidth = back ? 6 : pk.getPicDimensions() & 0x0F;
+        int picHeight = back ? 6 : (pk.getPicDimensions() >> 4) & 0x0F;
         
         byte[] data = readSpriteData(picPointer, picWidth, picHeight);
         int w = picWidth * 8;

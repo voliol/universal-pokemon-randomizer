@@ -38,7 +38,7 @@ If you have any questions, I will try my best to answer them. For technical note
   be used when they are not based on Pokémon types?
 
 - Offsets for normal palettes, shiny palettes, and backsprites 
-  (for sprite dumping), primarily for gen III ROMs. There was an automated method 
+  for gen III ROMs. There was an automated method 
   for normal palettes I commented out due to not understanding it, 
   it should be investigated whether it is superior to manual offsets or can be removed. 
 

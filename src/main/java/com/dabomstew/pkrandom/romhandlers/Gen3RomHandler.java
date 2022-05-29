@@ -1,7 +1,5 @@
 package com.dabomstew.pkrandom.romhandlers;
 
-import java.awt.Graphics2D;
-
 /*----------------------------------------------------------------------------*/
 /*--  Gen3RomHandler.java - randomizer handler for R/S/E/FR/LG.             --*/
 /*--                                                                        --*/
@@ -71,8 +69,9 @@ import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.pokemon.TypeRelationship;
 import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
-import compressors.DSDecmp;
+
 import compressors.DSCmp;
+import compressors.DSDecmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
@@ -3825,110 +3824,25 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    // TODO: this version of getAllPokemonImages() does not need to exist,
-    // split its functionality between the super version and getPokemonImage()
     @Override
-    protected List<BufferedImage> getAllPokemonImages() {
-
-        final boolean DUMP_BACKSPRITES = true;
-        final boolean DUMP_SHINY = true;
-        final boolean DRAW_PALETTE_PIXELS = true;
-
-        List<BufferedImage> bims = new ArrayList<>();
-
-        // TODO: offsets for all vanilla roms
-        int frontSprites = getRomEntry().getValue("PokemonFrontSprites");
-        int backSprites = getRomEntry().getValue("PokemonBackSprites");
-        int normalPalettes = getRomEntry().getValue("PokemonNormalPalettes");
-        int shinyPalettes = getRomEntry().getValue("PokemonShinyPalettes");
-
-        for (int i = 1; i < pokemonList.size(); i++) {
-            int internalID = getPokedexToInternal()[i];
-
-            BufferedImage bim = new BufferedImage(DUMP_SHINY ? 128 : 64, DUMP_BACKSPRITES ? 128 : 64, 4);
-            Graphics2D g = bim.createGraphics();
-
-            int fsOffset = readPointer(frontSprites + internalID * 8);
-            byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
-            // Uses the 0-index missingno sprite if the data failed to read, for debugging
-            // purposes
-            if (trueFrontSprite == null) {
-                fsOffset = readPointer(frontSprites);
-                trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
-            }
-
-            int bsOffset = readPointer(backSprites + internalID * 8);
-            byte[] trueBackSprite = DSDecmp.Decompress(rom, bsOffset);
-            // Uses the 0-index missingno sprite if the data failed to read, for debugging
-            // purposes
-            if (trueBackSprite == null) {
-                bsOffset = readPointer(backSprites);
-                trueBackSprite = DSDecmp.Decompress(rom, bsOffset);
-            }
-
-            int npOffset = readPointer(normalPalettes + internalID * 8);
-            Palette normalPalette = readPalette(npOffset);
-            int[] convNormalPalette = normalPalette.toARGB();
-            int spOffset = readPointer(shinyPalettes + internalID * 8);
-            Palette shinyPalette = readPalette(spOffset);
-            int[] convShinyPalette = shinyPalette.toARGB();
-
-            BufferedImage frontNormal = GFXFunctions.drawTiledImage(trueFrontSprite, convNormalPalette, 64, 64, 4);
-            g.drawImage(frontNormal, 0, 0, null);
-
-            if (DUMP_BACKSPRITES) {
-                BufferedImage backNormal = GFXFunctions.drawTiledImage(trueBackSprite, convNormalPalette, 64, 64, 4);
-                g.drawImage(backNormal, 0, 64, null);
-            }
-
-            if (DUMP_SHINY) {
-                BufferedImage frontShiny = GFXFunctions.drawTiledImage(trueFrontSprite, convShinyPalette, 64, 64, 4);
-                g.drawImage(frontShiny, 64, 0, null);
-            }
-
-            if (DUMP_BACKSPRITES && DUMP_SHINY) {
-                BufferedImage backShiny = GFXFunctions.drawTiledImage(trueBackSprite, convShinyPalette, 64, 64, 4);
-                g.drawImage(backShiny, 64, 64, null);
-            }
-
-            // palette_pixels
-            if (DRAW_PALETTE_PIXELS) {
-                for (int j = 0; j < 16; j++) {
-                    bim.setRGB(j, 0, convNormalPalette[j]);
-                }
-                if (DUMP_SHINY) {
-                    for (int j = 0; j < 16; j++) {
-                        bim.setRGB(j + 64, 0, convShinyPalette[j]);
-                    }
-                }
-            }
-
-            bims.add(bim);
-
-        }
-        return bims;
-
-    }
-
-    @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground,
+    protected BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
             boolean includePalette) {
 
-        int mascotPokemon = getPokedexToInternal()[pk.number];
-        int frontSprites = getRomEntry().getValue("PokemonFrontSprites");
+        int num = getPokedexToInternal()[pk.number];
+        int sprites = back ? getRomEntry().getValue("PokemonBackSprites") : getRomEntry().getValue("PokemonFrontSprites");
         int palettes = shiny ? getRomEntry().getValue("PokemonShinyPalettes")
                 : getRomEntry().getValue("PokemonNormalPalettes");
 
-        int fsOffset = readPointer(frontSprites + mascotPokemon * 8);
-        byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+        int spriteOffset = readPointer(sprites + num * 8);
+        byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
         // Uses the 0-index missingno sprite if the data failed to read, for debugging
         // purposes
-        if (trueFrontSprite == null) {
-            fsOffset = readPointer(frontSprites);
-            trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
+        if (trueSprite == null) {
+            spriteOffset = readPointer(sprites);
+            trueSprite = DSDecmp.Decompress(rom, spriteOffset);
         }
 
-        int palOffset = readPointer(palettes + mascotPokemon * 8);
+        int palOffset = readPointer(palettes + num * 8);
         Palette palette = readPalette(palOffset);
         int[] convPalette = palette.toARGB();
         if (transparentBackground) {
@@ -3936,7 +3850,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         // Make image, 4bpp
-        BufferedImage bim = GFXFunctions.drawTiledImage(trueFrontSprite, convPalette, 64, 64, 4);
+        BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
 
         if (includePalette) {
             for (int j = 0; j < convPalette.length; j++) {

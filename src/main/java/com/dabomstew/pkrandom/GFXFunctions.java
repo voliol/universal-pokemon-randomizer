@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom;
 
+import java.awt.Graphics2D;
+
 /*----------------------------------------------------------------------------*/
 /*--  GFXFunctions.java - functions relating to graphics rendering.         --*/
 /*--                      Mainly used for rendering the sprites.            --*/
@@ -27,6 +29,7 @@ package com.dabomstew.pkrandom;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.stream.IntStream;
 
 public class GFXFunctions {
 
@@ -172,6 +175,50 @@ public class GFXFunctions {
 			queue.add((y) * width + (x));
 			queued[x][y] = true;
 		}
+	}
+
+	public static BufferedImage stitchToGrid(BufferedImage[][] bims) {
+		int gridWidth = bims.length;
+		int gridHeight = 0;
+		for (BufferedImage[] row : bims) {
+			gridHeight = Math.max(gridHeight, row.length);
+		}
+
+		int[] rowWidths = new int[gridWidth];
+		int[] columnHeights = new int[gridHeight];
+		for (int gridX = 0; gridX < gridWidth; gridX++) {
+			for (int gridY = 0; gridY < gridHeight; gridY++) {
+
+				BufferedImage bim = bims[gridX][gridY];
+
+				if (bim != null) {
+					rowWidths[gridX] = Math.max(rowWidths[gridX], bim.getWidth());
+					columnHeights[gridY] = Math.max(columnHeights[gridY], bim.getHeight());
+				}
+			}
+		}
+
+		BufferedImage stitched = new BufferedImage(IntStream.of(rowWidths).sum(), IntStream.of(columnHeights).sum(),
+				BufferedImage.TYPE_INT_BGR);
+		Graphics2D g = stitched.createGraphics();
+		
+		int x = 0;
+		for (int gridX = 0; gridX < gridWidth; gridX++) {
+			int y = 0;
+			for (int gridY = 0; gridY < gridHeight; gridY++) {
+
+				BufferedImage bim = bims[gridX][gridY];
+				
+				if (bim != null) {
+					g.drawImage(bim, x, y, null);
+				}
+				
+				y += columnHeights[gridY];
+			}
+			x += rowWidths[gridX];
+		}
+
+		return stitched;
 	}
 
 }

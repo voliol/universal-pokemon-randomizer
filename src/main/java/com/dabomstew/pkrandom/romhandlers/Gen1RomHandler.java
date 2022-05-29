@@ -594,7 +594,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         pkmn.catchRate = rom[offset + Gen1Constants.bsCatchRateOffset] & 0xFF;
         pkmn.expYield = rom[offset + Gen1Constants.bsExpYieldOffset] & 0xFF;
         pkmn.growthCurve = ExpCurve.fromByte(rom[offset + Gen1Constants.bsGrowthCurveOffset]);
-        pkmn.frontSpritePointer = readWord(offset + Gen1Constants.bsFrontSpriteOffset);
+        pkmn.setFrontSpritePointer(readWord(offset + Gen1Constants.bsFrontSpriteOffset));
+        pkmn.setBackSpritePointer(readWord(offset + Gen1Constants.bsBackSpriteOffset));
 
         pkmn.guaranteedHeldItem = -1;
         pkmn.commonHeldItem = -1;
@@ -2553,9 +2554,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             fsBank = 0x9;
         } else if (idx < 0x4A) {
             fsBank = 0xA;
-        } else if (idx < 0x74 || idx == 0x74 && pk.frontSpritePointer > 0x7000) {
+        } else if (idx < 0x74 || idx == 0x74 && pk.getFrontSpritePointer() > 0x7000) {
             fsBank = 0xB;
-        } else if (idx < 0x99 || idx == 0x99 && pk.frontSpritePointer > 0x7000) {
+        } else if (idx < 0x99 || idx == 0x99 && pk.getFrontSpritePointer() > 0x7000) {
             fsBank = 0xC;
         } else {
             fsBank = 0xD;
@@ -2593,11 +2594,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground, boolean includePalette) {
-        int fsBank = calculateFrontSpriteBank(pk);
-        int fsOffset = calculateOffset(fsBank, pk.frontSpritePointer);
+    protected BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
+    	if (shiny) {
+    		return null;
+    	}
+    	// assumes the backsprites are in the same bank as the frontSprites
+    	int spriteBank = calculateFrontSpriteBank(pk);
+        int spriteOffset = calculateOffset(spriteBank, back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer());
         
-        Gen1Decmp sprite = new Gen1Decmp(rom, fsOffset);
+        Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
         sprite.decompress();
         sprite.transpose();
         int w = sprite.getWidth();

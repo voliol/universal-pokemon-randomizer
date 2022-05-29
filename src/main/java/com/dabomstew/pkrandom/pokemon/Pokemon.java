@@ -52,7 +52,8 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int genderRatio;
 
-    public int frontSpritePointer, picDimensions;
+    private int frontSpritePointer, picDimensions;
+    private int backSpritePointer;
 
     public ExpCurve growthCurve;
 
@@ -857,7 +858,31 @@ public class Pokemon implements Comparable<Pokemon> {
         this.genderRatio = genderRatio;
     }
 
-    public List<Evolution> getEvolutionsFrom() {
+    public int getFrontSpritePointer() {
+		return frontSpritePointer;
+	}
+
+	public void setFrontSpritePointer(int frontSpritePointer) {
+		this.frontSpritePointer = frontSpritePointer;
+	}
+
+	public int getPicDimensions() {
+		return picDimensions;
+	}
+
+	public void setPicDimensions(int picDimensions) {
+		this.picDimensions = picDimensions;
+	}
+
+	public int getBackSpritePointer() {
+		return backSpritePointer;
+	}
+
+	public void setBackSpritePointer(int backSpritePointer) {
+		this.backSpritePointer = backSpritePointer;
+	}
+
+	public List<Evolution> getEvolutionsFrom() {
         return evolutionsFrom;
     }
 

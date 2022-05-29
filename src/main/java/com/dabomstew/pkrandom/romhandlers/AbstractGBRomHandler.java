@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
@@ -180,15 +181,23 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return true;
     }
 
-    @Override
-    protected List<BufferedImage> getAllPokemonImages() {
-        List<BufferedImage> bims = new ArrayList<>();
-        for (int i = 1; i < getPokemon().size(); i++) {
-            Pokemon pk = getPokemon().get(i);
-            bims.add(getPokemonImage(pk, false, false, true));
-        }
-        return bims;
-    }
+	@Override
+	protected List<BufferedImage> getAllPokemonImages() {
+		List<BufferedImage> bims = new ArrayList<>();
+		for (int i = 1; i < getPokemon().size(); i++) {
+			Pokemon pk = getPokemon().get(i);
+
+			BufferedImage frontNormal = getPokemonImage(pk, false, false, false, true);
+			BufferedImage backNormal = getPokemonImage(pk, true, false, false, false);
+			BufferedImage frontShiny = getPokemonImage(pk, false, true, false, true);
+			BufferedImage backShiny = getPokemonImage(pk, true, true, false, false);
+
+			BufferedImage combined = GFXFunctions
+					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+			bims.add(combined);
+		}
+		return bims;
+	}
 
     @Override
     public final BufferedImage getMascotImage() {
@@ -200,13 +209,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         Pokemon pk = randomPokemon();
         boolean shiny = random.nextInt(10) == 0;
 
-        BufferedImage bim = getPokemonImage(pk, shiny, true, false);
+        BufferedImage bim = getPokemonImage(pk, false, shiny, true, false);
 
         return bim;
     }
 
     // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-    protected abstract BufferedImage getPokemonImage(Pokemon pk, boolean shiny, boolean transparentBackground,
+    protected abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
             boolean includePalette);
 
 }

@@ -38,8 +38,8 @@ public class Gen1Constants {
 
     public static final int bsHPOffset = 1, bsAttackOffset = 2, bsDefenseOffset = 3, bsSpeedOffset = 4,
             bsSpecialOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8,
-            bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsLevel1MovesOffset = 15, bsGrowthCurveOffset = 19,
-            bsTMHMCompatOffset = 20;
+            bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsBackSpriteOffset = 13, bsLevel1MovesOffset = 15, 
+            bsGrowthCurveOffset = 19, bsTMHMCompatOffset = 20;
 
     public static final int moonStoneIndex = 10, fireStoneIndex = 32, thunderStoneIndex = 33, waterStoneIndex = 34,
             leafStoneIndex = 47;
