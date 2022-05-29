@@ -12,7 +12,7 @@ import java.util.Stack;
  * the syntax, see {@link #ParsedDescription(String)}.
  */
 public class ParsedDescription {
-	
+
 	private static enum CharType {
 		DIGIT, LETTER, SIBLING_DELIMITER, IGNORE;
 
@@ -50,12 +50,12 @@ public class ParsedDescription {
 		boolean validIndex = index <= paletteDescriptions.size();
 		String paletteDescription = validIndex ? paletteDescriptions.get(index) : "";
 		String[] unparsedPartDescriptions = paletteDescription.split("/");
-	
+
 		ParsedDescription[] partDescriptions = new ParsedDescription[unparsedPartDescriptions.length];
 		for (int i = 0; i < partDescriptions.length; i++) {
 			partDescriptions[i] = new ParsedDescription(unparsedPartDescriptions[i]);
 		}
-	
+
 		return partDescriptions;
 	}
 
@@ -75,12 +75,12 @@ public class ParsedDescription {
 	 *                 <p>
 	 *                 Color slots are ordered from brightest to darkest.
 	 *                 <p>
-	 *                 Gen 5 palettes may look strange and too-high
-	 *                 contrast. This is because the PalettePopulator class is
-	 *                 originally made for Gen 3 palettes, and those usually have
-	 *                 a highlight color Gen 5 palettes lack. A quickfix for this is
-	 *                 to assign the first color slot to "1", that way the highlight
-	 *                 is put in the transparent slot 1, and not seen.
+	 *                 Gen 5 palettes may look strange and too-high contrast. This
+	 *                 is because the PalettePopulator class is originally made for
+	 *                 Gen 3 palettes, and those usually have a highlight color Gen
+	 *                 5 palettes lack. A quickfix for this is to assign the first
+	 *                 color slot to "1", that way the highlight is put in the
+	 *                 transparent slot 1, and not seen.
 	 *                 <p>
 	 *                 The following letters also have syntactic meaning. They
 	 *                 should be placed at the end of unparsed strings; letters at
@@ -231,13 +231,13 @@ public class ParsedDescription {
 	}
 
 	public int getAverageToSlot() {
-		return averageSlots.get(averageSlots.size() - 1);
+		return averageSlots.get(0);
 	}
 
 	public int[] getAverageFromSlots() {
 		int[] slotsArr = new int[averageSlots.size() - 1];
-		for (int i = 0; i < averageSlots.size() - 1; i++) {
-			slotsArr[i] = averageSlots.get(i);
+		for (int i = 1; i < averageSlots.size(); i++) {
+			slotsArr[i - 1] = averageSlots.get(i);
 		}
 		return slotsArr;
 	}
