@@ -52,7 +52,7 @@ import java.util.Random;
 
 /**
  * Populates/fills/modifies existing {@link Palette}s, using
- * {@link ParsedDescription}s as instructions.
+ * {@link PalettePartDescription}s as instructions.
  * <p>
  * This class is a port of the corresponding class (PokePalette.java) in
  * Artemis251's Emerald Randomizer.
@@ -77,7 +77,7 @@ public class PalettePopulator {
 	private Random random;
 
 	private Palette palette;
-	private ParsedDescription description;
+	private PalettePartDescription description;
 	private Color baseColor;
 	private LightDarkMode lightDarkMode;
 
@@ -88,7 +88,7 @@ public class PalettePopulator {
 		this.random = random;
 	}
 
-	public void populatePartFromBaseColor(Palette palette, ParsedDescription description, Color baseColor,
+	public void populatePartFromBaseColor(Palette palette, PalettePartDescription description, Color baseColor,
 			LightDarkMode lightDarkMode) {
 
 		this.palette = palette;
@@ -364,7 +364,7 @@ public class PalettePopulator {
 		return description.length() % 2 == 0;
 	}
 
-	public void populateAverageColor(Palette palette, ParsedDescription description) {
+	public void populateAverageColor(Palette palette, PalettePartDescription description) {
 		Color averageTo = palette.getColor(description.getAverageToSlot());
 		int[] averageFromSlots = description.getAverageFromSlots();
 		averageTo.setComps((orig, i) -> {

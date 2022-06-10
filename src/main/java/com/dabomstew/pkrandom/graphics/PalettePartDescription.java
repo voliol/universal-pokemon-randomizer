@@ -3,15 +3,16 @@ package com.dabomstew.pkrandom.graphics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
-
-// TODO: better name, and/or refactor in other classes
 
 /**
- * Represents a parsed description for a {@link PalettePopulator} to use. For
- * the syntax, see {@link #ParsedDescription(String)}.
+ * Represents a parsed description for a part of a palette, for a
+ * {@link PalettePopulator} to use. These describe e.g. what slots/{@link Color}
+ * indices of a given {@link Palette} should be grouped together, or when the
+ * Color in one slot should be the average of some other.
+ * <p>
+ * For the syntax, see {@link #ParsedDescription(String)}.
  */
-public class ParsedDescription {
+public class PalettePartDescription {
 
 	private static enum CharType {
 		DIGIT, LETTER, SIBLING_DELIMITER, IGNORE;
@@ -35,25 +36,24 @@ public class ParsedDescription {
 
 	private boolean isBlank;
 
-	// TODO: should these be stacks just so siblingSlots can use pop() once?
-	private Stack<Integer> slots = new Stack<>();
+	private List<Integer> slots = new ArrayList<>();
 
-	private Stack<Integer> siblingSlots = new Stack<>();
+	private List<Integer> siblingSlots = new ArrayList<>();
 	private int sharedSlot = -1;
 
-	private Stack<Integer> averageSlots = new Stack<>();
+	private List<Integer> averageSlots = new ArrayList<>();
 
 	private LightDarkSuffix lightDarkSuffix = LightDarkSuffix.ANY;
 	private boolean endDarkened;
 
-	public static ParsedDescription[] parsedDescriptionsFromString(List<String> paletteDescriptions, int index) {
+	public static PalettePartDescription[] allFromString(List<String> paletteDescriptions, int index) {
 		boolean validIndex = index <= paletteDescriptions.size();
 		String paletteDescription = validIndex ? paletteDescriptions.get(index) : "";
 		String[] unparsedPartDescriptions = paletteDescription.split("/");
 
-		ParsedDescription[] partDescriptions = new ParsedDescription[unparsedPartDescriptions.length];
+		PalettePartDescription[] partDescriptions = new PalettePartDescription[unparsedPartDescriptions.length];
 		for (int i = 0; i < partDescriptions.length; i++) {
-			partDescriptions[i] = new ParsedDescription(unparsedPartDescriptions[i]);
+			partDescriptions[i] = new PalettePartDescription(unparsedPartDescriptions[i]);
 		}
 
 		return partDescriptions;
@@ -99,11 +99,16 @@ public class ParsedDescription {
 	 *                 further.<br>
 	 *                 <b>A</b> - Marks an "average color" description, see below.
 	 *                 <p>
+	 *                 Sibling colors are started with a ";". The shared color
+	 *                 should be repeated at the end preceded by a "-". E.g.
+	 *                 "1,2,3,4;5,6,4-4" .
+	 *                 <p>
 	 *                 Average color descriptions start with an "A", and mark that
 	 *                 the color in the first given color slot should be the average
-	 *                 of the colors in the following color slots.
+	 *                 of the colors in the following color slots. Average color
+	 *                 descriptions are not compatible with sibling colors.
 	 */
-	public ParsedDescription(String unparsed) {
+	public PalettePartDescription(String unparsed) {
 		isBlank = unparsed.isBlank();
 		List<String> tokens = splitIntoTokens(unparsed);
 		parseTokens(tokens);
@@ -135,11 +140,11 @@ public class ParsedDescription {
 	}
 
 	private void parseTokens(List<String> tokens) {
-		Stack<Integer> currentSlots = slots;
+		List<Integer> currentSlots = slots;
 		for (String token : tokens) {
 
 			if (token.matches("[0-9]+")) {
-				currentSlots.push(Integer.parseInt(token) - 1);
+				currentSlots.add(Integer.parseInt(token) - 1);
 			}
 
 			else if (token.equals("L")) {
@@ -176,7 +181,8 @@ public class ParsedDescription {
 
 		}
 		if (currentSlots == siblingSlots && !siblingSlots.isEmpty()) {
-			sharedSlot = siblingSlots.pop();
+			sharedSlot = siblingSlots.get(siblingSlots.size() - 1);
+			siblingSlots.remove(siblingSlots.size() - 1);
 		}
 	}
 
@@ -242,6 +248,13 @@ public class ParsedDescription {
 		return slotsArr;
 	}
 
+	/**
+	 * Corrects a {@link LightDarkMode} to one permitted by this description. Dark
+	 * is turned to Light and vice versa so the % of light or dark colors stays the
+	 * same.
+	 * 
+	 * @param in A LightDarkMode that may or not be permitted by this description.
+	 */
 	public LightDarkMode correctLightDarkMode(LightDarkMode in) {
 		switch (lightDarkSuffix) {
 		case ANY:
@@ -252,8 +265,6 @@ public class ParsedDescription {
 			return LightDarkMode.DARK;
 		case LIGHT:
 			return LightDarkMode.LIGHT;
-		// Dark is turned to light and vice versa so the % of light or dark colors stays
-		// the same.
 		case NO_DARK:
 			if (in == LightDarkMode.DARK) {
 				return LightDarkMode.LIGHT;

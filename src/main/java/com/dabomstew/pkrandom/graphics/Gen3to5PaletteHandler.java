@@ -43,7 +43,7 @@ import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
  * <p>
  * All three generations use similar 16-color palettes, that are implemented
  * using the {@link Palette} class. These palettes are populated/filled/modified by 
- * {@link PalettePopulator}, using {@link ParsedDescription}s as instructions.
+ * {@link PalettePopulator}, using {@link PalettePartDescription}s as instructions.
  * <p>
  * When Pokémon palettes are randomized, each Pokémon is assigned a {@link TypeBaseColorList},
  * which uses its types to come up with appropriate base colors.
@@ -119,17 +119,17 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 			System.out.println("------\n" + pk.getName());
 
-			ParsedDescription[] partDescriptions = ParsedDescription.parsedDescriptionsFromString(paletteDescriptions, pokemonNumber - 1);
+			PalettePartDescription[] palettePartDescriptions = PalettePartDescription.allFromString(paletteDescriptions, pokemonNumber - 1);
 
-			for (int i = 0; i < partDescriptions.length; i++) {
-				System.out.println(partDescriptions[i]);
-				if (partDescriptions[i].isAverageDescription()) {
-					pp.populateAverageColor(palette, partDescriptions[i]);
-				} else if (!partDescriptions[i].isBlank()) {
+			for (int i = 0; i < palettePartDescriptions.length; i++) {
+				System.out.println(palettePartDescriptions[i]);
+				if (palettePartDescriptions[i].isAverageDescription()) {
+					pp.populateAverageColor(palette, palettePartDescriptions[i]);
+				} else if (!palettePartDescriptions[i].isBlank()) {
 					Color baseColor = typeBaseColorList.getBaseColor(i);
 					LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
 
-					pp.populatePartFromBaseColor(palette, partDescriptions[i], baseColor, lightDarkMode);
+					pp.populatePartFromBaseColor(palette, palettePartDescriptions[i], baseColor, lightDarkMode);
 				}
 			}
 

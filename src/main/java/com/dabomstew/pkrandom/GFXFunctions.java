@@ -199,7 +199,7 @@ public class GFXFunctions {
 		}
 
 		BufferedImage stitched = new BufferedImage(IntStream.of(rowWidths).sum(), IntStream.of(columnHeights).sum(),
-				BufferedImage.TYPE_INT_BGR);
+				BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = stitched.createGraphics();
 		
 		int x = 0;

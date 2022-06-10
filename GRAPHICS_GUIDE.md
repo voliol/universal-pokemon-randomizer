@@ -59,6 +59,6 @@ The PaletteHandler for Gen III to V is shared between those generations, and is 
 Palette Randomization system in Artemis251's Emerald Randomizer.
 Each game uses a .txt file from graphics/resources for the Pokémon palettes, 
 and similar files could be used for other palettes. 
-The syntax for these files is explained in the JavaDoc for ParsedDescription. 
+The syntax for these files is explained in the JavaDoc for PalettePartDescription. 
 
 The Palette class has a function for reading from a BufferedImage with an indexed palette. 
