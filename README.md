@@ -7,30 +7,35 @@ by voliol
 
 # Description of the Palette Test Branch
 What is this: 
-A branch for a framework for palette randomization in all generations (I-V), 
-and porting the implementation from Artemis251's Pokemon Emerald Randomizer for gens III-V. 
-Neither are finished, and I am still working on it. The reason for uploading now is to
-facilitate collaborations. If you want to implement parts of in your branch I
-can't stop you, but I ask that you wait before it is more finished.
+A branch for a framework for palette randomization in all Generations (I-V), 
+and porting the implementation from Artemis251's Pokemon Emerald Randomizer for Gens III-V. 
+Neither are fully finished, but I am closing in on a stop, after which I will focus on other features.
+Feedback is highly appreciated, whether you are well versed in the UPR or not. 
+This is also on Github to facilitate collaborations. If you want to implement parts of in your branch,
+it has now reached a stage where no radical changes should be made; this is a good time.
 
 If you have any questions, I will try my best to answer them. For technical notes, see GRAPHICS_GUIDE.md.
+I also have these two guides for explaining how Gen II/III Pokémon palettes work:
+https://voliol.neocities.org/articles/genIIpalettes.html
+https://voliol.neocities.org/articles/genIIIpalettes.html 
 
 ## What it can do right now:
 
-- Currently, this branch can randomize palettes of Ruby(U), and likely Sapphire(U) and
-  Emerald(U) as well. All parts of Artemis251's system are implemented, including the "sibling colors".
-  Other games can also be supported, but require palette description files and/or offsets.
+- Currently, this branch can randomize palettes of Ruby(U), Emerald(U), and Fire Red (U)(1.0 Squirrels). 
+  All parts of Artemis251's system are implemented, including the "sibling colors".
+  Other games in Gens III-V can also be supported, but require palette description files and/or offsets.
   
 - Some parts of Artemis251's system have been changed/replaced, most notably colors
-  should change with evolutions according to types, including ones set earlier during
-  randomization.
+  are not dictated by just the basic Pokémon, but later evolutions that gain/lose/change 
+  types may have their colors reflect this, as well as their relation to the prevo. 
+  Randomized evolution lines are also supported.
   
 - It can randomize palettes of all vanilla Gen I and Gen II games.  
   
 - Sprites are dumped when you open a rom, so palettes can be viewed quickly. 
   See the Pokemon-sprite-dump folder.
   
-- It can read .bmp files and convert them into formats that can be inserted into Gen III-V games.
+- It can read .png/.bmp files and convert them into formats that can be inserted into Gen III-V games.
 
 ## What needs to be done:
 
@@ -38,12 +43,12 @@ If you have any questions, I will try my best to answer them. For technical note
   be used when they are not based on Pokémon types?
 
 - Offsets for normal palettes, shiny palettes, and backsprites 
-  for gen III ROMs. There was an automated method 
+  for Gen III ROMs. There was an automated method 
   for normal palettes I commented out due to not understanding it, 
   it should be investigated whether it is superior to manual offsets or can be removed. 
 
 - Palette description files for most games, though I might be "finished" before doing all
-  of them as it is a lot of manual work. FRLG and DP are prioritized as I did some of it
+  of them as it is a lot of manual work. DP is prioritized as I did some of it
   during an earlier/unpublished/crappy attempt at porting Artemis251's system.
   
 - Documentation and credits could be improved.

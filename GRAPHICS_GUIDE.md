@@ -19,8 +19,8 @@ Palettes can be read and written in all generations.
 # Images
 
 The word "image" should be used generally, rather than "sprite". "Sprite" has a meaning within 
-the consoles the ROMs are for, as an image that is not a background tile, and many of these methods 
-work on those as well.
+the consoles the ROMs are for, as an image that is not a background tile. Many of these methods 
+work on background tiles as well, making "sprite" a misnomer.
 
 Images are used by the Randomizer GUI when a ROM is loaded, to display a "mascot" Pokémon, 
 and there are methods for dumping all Pokémon images for bugtesting purposes.
@@ -34,11 +34,11 @@ This is only used for the mascot image, and image dumps. There are no correspond
 so they could be written.
 
 Gen III uses DSDecmp to decompress images. (when needed, e.g. Pokémon icons are uncompressed in the ROM)
-As there is a DScmp class, these can be compressed and written to ROM. No specific methods exist,
+As there is a DScmp class, these can be compressed and written to ROM. No methods exist specifically for this,
 but Gen3RomHandler.rewriteCompressedData can be used when the pointer offset(s) for the image are known.
  
 Gen IV and V have file systems, with Pokémon images in the "PokémonGraphics" NARC-file. It should be opened 
-beforehand for faster mass operations. Then DSDecmp is used for decompression. The DScmp class 
+beforehand for faster mass operations. Then DSDecmp is used for decompression. The DSCmp class 
 could be used for compression, but the methods for inserting into the NARCs don't exist.
 
 GFXFunctions also has a method, readTiledImageData, that reads a BufferedImage, and converts it to Gen III-V 
@@ -48,8 +48,8 @@ surrounding framework (i.e. all missing writing above) would be substantial the 
 This altered Blastoise image file can be found in graphics/resources as "pokeImageFRLG_09f.png", 
 and can be used as an example for how images should be (i.e. 4bpp .png files, irfanview is the recommended image editor).
 
-
 # Palettes
+
 Palettes are read/written by the generation/platform-specific RomHandlers (they can be read/written in all generations), 
 and then other palette operations are done in the PaletteHandlers.
 
