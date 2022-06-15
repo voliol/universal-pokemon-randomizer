@@ -65,6 +65,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.graphics.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
+import com.dabomstew.pkrandom.graphics.PaletteID;
 import com.dabomstew.pkrandom.pokemon.TypeRelationship;
 import com.dabomstew.pkrandom.pokemon.TypeRelationship.Effectiveness;
 import compressors.Gen1Decmp;
@@ -2569,21 +2570,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return paletteHandler;
     }
 
-    @Override
-    protected void loadPokemonPalettes() {
-        int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
-        for (Pokemon pk : mainPokemonList) {
-            pk.setPaletteID(rom[palIndex + pk.getNumber()]); //they are in Pokédex order
-        }
-    }
-    
-    @Override
-    protected void writePokemonPalettes() {
-        int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
-        for (Pokemon pk : mainPokemonList) {
-            rom[palIndex + pk.getNumber()] = pk.getPaletteID(); //they are in Pokédex order
-        }
-    }
+	@Override
+	protected void loadPokemonPalettes() {
+		int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
+		for (Pokemon pk : mainPokemonList) {
+			pk.setPaletteID(PaletteID.values()[rom[palIndex + pk.getNumber()]]); // they are in Pokédex order
+		}
+	}
+
+	@Override
+	protected void writePokemonPalettes() {
+		int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
+		for (Pokemon pk : mainPokemonList) {
+			rom[palIndex + pk.getNumber()] = (byte) pk.getPaletteID().ordinal(); // they are in Pokédex order
+		}
+	}
     
     private Palette read4ColorPalette(int offset) {
         byte[] paletteBytes = new byte[8];

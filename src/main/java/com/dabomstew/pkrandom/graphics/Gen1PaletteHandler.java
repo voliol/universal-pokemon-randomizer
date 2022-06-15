@@ -35,8 +35,8 @@ import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
  */
 public class Gen1PaletteHandler extends PaletteHandler {
 
-	private static final byte DEFAULT_PALETTE_ID = 16;
-	private static final EnumMap<Type, byte[]> TYPE_PALETTE_IDS = initTypePaletteIDs();
+	private static final PaletteID DEFAULT_PALETTE_ID = PaletteID.MEWMON;
+	private static final EnumMap<Type, PaletteID[]> TYPE_PALETTE_IDS = initTypePaletteIDs();
 
 	private boolean typeSanity;
 
@@ -44,23 +44,23 @@ public class Gen1PaletteHandler extends PaletteHandler {
 		super(random);
 	}
 
-	private static EnumMap<Type, byte[]> initTypePaletteIDs() {
-		EnumMap<Type, byte[]> typePaletteIDs = new EnumMap<>(Type.class);
-		typePaletteIDs.put(Type.NORMAL, new byte[] { 21, 23, 25 });
-		typePaletteIDs.put(Type.FIGHTING, new byte[] { 21, 25 });
-		typePaletteIDs.put(Type.FLYING, new byte[] { 17 });
-		typePaletteIDs.put(Type.GRASS, new byte[] { 22 });
-		typePaletteIDs.put(Type.WATER, new byte[] { 17, 19 });
-		typePaletteIDs.put(Type.FIRE, new byte[] { 18 });
-		typePaletteIDs.put(Type.ROCK, new byte[] { 25 });
-		typePaletteIDs.put(Type.GROUND, new byte[] { 21 });
-		typePaletteIDs.put(Type.PSYCHIC, new byte[] { 16, 24 });
-		typePaletteIDs.put(Type.BUG, new byte[] { 22, 24 });
-		typePaletteIDs.put(Type.DRAGON, new byte[] { 17, 21, 25 });
-		typePaletteIDs.put(Type.ELECTRIC, new byte[] { 24 });
-		typePaletteIDs.put(Type.GHOST, new byte[] { 20 });
-		typePaletteIDs.put(Type.POISON, new byte[] { 20 });
-		typePaletteIDs.put(Type.ICE, new byte[] { 17, 19 });
+	private static EnumMap<Type, PaletteID[]> initTypePaletteIDs() {
+		EnumMap<Type, PaletteID[]> typePaletteIDs = new EnumMap<>(Type.class);
+		typePaletteIDs.put(Type.NORMAL, new PaletteID[] { PaletteID.BROWNMON, PaletteID.PINKMON, PaletteID.GREYMON });
+		typePaletteIDs.put(Type.FIGHTING, new PaletteID[] { PaletteID.BROWNMON, PaletteID.GREYMON });
+		typePaletteIDs.put(Type.FLYING, new PaletteID[] { PaletteID.BLUEMON });
+		typePaletteIDs.put(Type.GRASS, new PaletteID[] { PaletteID.GREENMON });
+		typePaletteIDs.put(Type.WATER, new PaletteID[] { PaletteID.BLUEMON, PaletteID.CYANMON });
+		typePaletteIDs.put(Type.FIRE, new PaletteID[] { PaletteID.REDMON });
+		typePaletteIDs.put(Type.ROCK, new PaletteID[] { PaletteID.GREYMON });
+		typePaletteIDs.put(Type.GROUND, new PaletteID[] { PaletteID.BROWNMON });
+		typePaletteIDs.put(Type.PSYCHIC, new PaletteID[] { PaletteID.MEWMON, PaletteID.YELLOWMON });
+		typePaletteIDs.put(Type.BUG, new PaletteID[] { PaletteID.GREENMON, PaletteID.YELLOWMON });
+		typePaletteIDs.put(Type.DRAGON, new PaletteID[] { PaletteID.BLUEMON, PaletteID.BROWNMON, PaletteID.GREYMON });
+		typePaletteIDs.put(Type.ELECTRIC, new PaletteID[] { PaletteID.YELLOWMON });
+		typePaletteIDs.put(Type.GHOST, new PaletteID[] { PaletteID.PURPLEMON });
+		typePaletteIDs.put(Type.POISON, new PaletteID[] { PaletteID.PURPLEMON });
+		typePaletteIDs.put(Type.ICE, new PaletteID[] { PaletteID.BLUEMON, PaletteID.CYANMON });
 		return typePaletteIDs;
 	}
 
@@ -73,13 +73,13 @@ public class Gen1PaletteHandler extends PaletteHandler {
 		copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
 	}
 
-	private byte getRandomPaletteID() {
-		return (byte) random.nextInt(16, 26);
+	private PaletteID getRandomPaletteID() {
+		return PaletteID.values()[random.nextInt(16, 26)];
 	}
 
-	private byte getRandomPaletteID(Type type) {
-		byte[] typeIDs = TYPE_PALETTE_IDS.get(type);
-		byte paletteID = typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
+	private PaletteID getRandomPaletteID(Type type) {
+		PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(type);
+		PaletteID paletteID = typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
 		return paletteID;
 	}
 
@@ -87,7 +87,7 @@ public class Gen1PaletteHandler extends PaletteHandler {
 
 		@Override
 		public void applyTo(Pokemon pk) {
-			byte newPaletteID = typeSanity ? getRandomPaletteID(pk.primaryType) : getRandomPaletteID();
+			PaletteID newPaletteID = typeSanity ? getRandomPaletteID(pk.primaryType) : getRandomPaletteID();
 			pk.setPaletteID(newPaletteID);
 		}
 
@@ -97,9 +97,9 @@ public class Gen1PaletteHandler extends PaletteHandler {
 
 		@Override
 		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-			byte newPaletteID;
+			PaletteID newPaletteID;
 			if (typeSanity && !evTo.getPrimaryType().equals(evFrom.getPrimaryType())) {
-				byte[] typeIDs = TYPE_PALETTE_IDS.get(evTo.getPrimaryType());
+				PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(evTo.getPrimaryType());
 				newPaletteID = contains(typeIDs, evFrom.getPaletteID()) ? evFrom.getPaletteID()
 						: getRandomPaletteID(evTo.primaryType);
 
@@ -111,9 +111,9 @@ public class Gen1PaletteHandler extends PaletteHandler {
 
 	}
 
-	private boolean contains(byte[] bytes, byte b) {
-		for (byte b2 : bytes) {
-			if (b == b2) {
+	private boolean contains(PaletteID[] paletteIDs, PaletteID pid) {
+		for (PaletteID pid2 : paletteIDs) {
+			if (pid == pid2) {
 				return true;
 			}
 		}

@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.PaletteID;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -61,7 +62,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Evolution> evolutionsTo = new ArrayList<Evolution>();
     
     // only for Gen 1, yet another reason to split this class eventually
-    private byte paletteID;
+    private PaletteID paletteID;
     // for Gen 2-5
     private Palette normalPalette;
     private Palette shinyPalette;
@@ -923,11 +924,11 @@ public class Pokemon implements Comparable<Pokemon> {
         return evolutionsToPokemon;
     }
     
-    public byte getPaletteID() {
+    public PaletteID getPaletteID() {
         return paletteID;
     }
 
-    public void setPaletteID(byte paletteID) {
+    public void setPaletteID(PaletteID paletteID) {
         this.paletteID = paletteID;
     }
 
