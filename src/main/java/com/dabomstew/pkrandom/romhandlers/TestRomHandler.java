@@ -455,14 +455,9 @@ public class TestRomHandler extends AbstractRomHandler {
     public List<Pokemon> getStarterPokes() {
         return starterPokes.getPokes();
     }
-    
-    @Override
-    public void loadPokemonPalettes() {
-        // TODO Auto-generated method stub
-    }
 
     @Override
-    public void writePokemonPalettes() {
+    public void savePokemonPalettes() {
         // TODO Auto-generated method stub
         
     }

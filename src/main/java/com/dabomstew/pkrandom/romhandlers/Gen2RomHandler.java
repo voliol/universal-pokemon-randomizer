@@ -331,6 +331,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
+        loadPokemonPalettes();
         loadLandmarkNames();
         preprocessMaps();
         loadItemNames();
@@ -2437,8 +2438,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return paletteHandler;
     }
 
-    @Override
-    public void loadPokemonPalettes() {
+    private void loadPokemonPalettes() {
         // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = getRomEntry().getValue("PokemonPalettes") + 8;
         for (Pokemon pk : getPokemonWithoutNull()) {
@@ -2459,7 +2459,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
 	@Override
-	public void writePokemonPalettes() {
+	public void savePokemonPalettes() {
 		int palOffset = getRomEntry().getValue("PokemonPalettes") + 8;
 		for (Pokemon pk : getPokemonWithoutNull()) {
 			int num = pk.getNumber() - 1;
@@ -2503,13 +2503,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int w = picWidth * 8;
         int h = picHeight * 8;
 
-        int paletteOffset = getRomEntry().getValue("PokemonPalettes") + pk.number * 8;
-        if (shiny) {
-            paletteOffset += 4;
-        }
         // White and black are always in the palettes at positions 0 and 3, 
         // so only the middle colors are stored and need to be read.
-        Palette palette = read2ColorPalette(paletteOffset);
+        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         int[] convPalette = new int[] { 0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000 };
 
         BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);

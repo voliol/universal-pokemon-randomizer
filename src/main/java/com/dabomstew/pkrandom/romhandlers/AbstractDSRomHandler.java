@@ -326,8 +326,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
     
-    @Override
-    public void loadPokemonPalettes() {
+	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
+	// is separate methods called in loadedROM()/loadedRom() methods. Even though
+	// one call in AbstractRomHandler should suffice.
+	protected void loadPokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokespritesNARC = readNARC(NARCpath);
@@ -355,7 +357,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void writePokemonPalettes() {
+    public void savePokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);

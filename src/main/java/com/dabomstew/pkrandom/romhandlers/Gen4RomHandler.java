@@ -421,6 +421,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
+        loadPokemonPalettes();
         abilityNames = getStrings(getRomEntry().getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(getRomEntry().getInt("ItemNamesTextOffset"));
         loadedWildMapNames = false;
@@ -3381,11 +3382,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
 
-		int palIndex = pk.number * 6 + 4;
-		if (shiny) {
-			palIndex++;
-		}
-		Palette palette = readPalette(pokeGraphicsNARC, palIndex);
+		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
 		int convPalette[] = palette.toARGB();
 		if (transparentBackground) {
 			convPalette[0] = 0;

@@ -214,8 +214,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         Pokemon pk = randomPokemon();
         boolean shiny = random.nextInt(10) == 0;
-
-        BufferedImage bim = getPokemonImage(pk, false, shiny, true, false);
+        
+        BufferedImage bim = getPokemonImage(pk, false, isGen1() ? shiny : false, true, false);
 
         return bim;
     }

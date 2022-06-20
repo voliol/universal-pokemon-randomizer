@@ -4362,11 +4362,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
-        loadPokemonPalettes();
-
         getPaletteHandler().randomizePokemonPalettes(copyUpEvolutionsHelper, typeSanity, evolutionSanity, shinyFromNormal);
-
-        writePokemonPalettes();
     }
     
     public abstract PaletteHandler getPaletteHandler();
@@ -4409,11 +4405,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 	protected void prepareSaveRom() {
 		savePokemonStats();
 		saveMoves();
+		savePokemonPalettes();
 	}
 
 	protected abstract void saveMoves();
 
 	protected abstract void savePokemonStats();
+	
+	protected abstract void savePokemonPalettes();
 
 	protected abstract boolean saveRomFile(String filename);
 

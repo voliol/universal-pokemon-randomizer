@@ -420,6 +420,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         loadPokemonStats();
         pokemonList = Arrays.asList(pokes);
         loadMoves();
+        loadPokemonPalettes();
 
         abilityNames = getStrings(false, getRomEntry().getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, getRomEntry().getInt("ItemNamesTextOffset"));
@@ -2911,11 +2912,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
 		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
 		
-		int palIndex = pk.number * 20 + 18;
-		if (shiny) {
-			palIndex++;
-		}
-		Palette palette = readPalette(pokeGraphicsNARC, palIndex);
+		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
 		int convPalette[] = palette.toARGB();
 		if (transparentBackground) {
 			convPalette[0] = 0;

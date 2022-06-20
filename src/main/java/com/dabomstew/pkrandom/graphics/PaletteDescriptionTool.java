@@ -3,6 +3,7 @@ package com.dabomstew.pkrandom.graphics;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -33,6 +34,9 @@ import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
+// TODO: show the name of the loaded ROM/desc file
+// TODO: palette slot on hover-over
+
 public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 	/**
@@ -50,6 +54,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		private static final long serialVersionUID = 7324176616059578530L;
 
 		private ImageIcon icon;
+		private int scale = 2;
 
 		private PaletteImageLabel(BufferedImage bim) {
 			if (bim == null) {
@@ -60,7 +65,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		}
 
 		public void setImage(BufferedImage bim) {
-			icon.setImage(bim);
+			Image scaled = bim.getScaledInstance(bim.getWidth()*scale, bim.getHeight()*scale, Image.SCALE_DEFAULT);
+			icon.setImage(scaled);
 			revalidate();
 			repaint();
 		}
@@ -179,9 +185,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
 		paletteDescriptions.setListData(paletteHandler.getPaletteDescriptions("pokePalettes").toArray(new String[0]));
-		romHandler.loadPokemonPalettes();
 		for (Pokemon pk : romHandler.getPokemonWithoutNull()) {
-			originalPalettes.put(pk, pk.getNormalPalette().clone());
+			originalPalettes.put(pk, pk.getNormalPalette());
 		}
 		paletteDescriptions.setSelectedIndex(0);
 
@@ -233,7 +238,6 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 	private void newRandomizedExample() {
 		randomizePalette(getCurrentPokemon(), rawDescField.getText());
-		romHandler.writePokemonPalettes();
 		exampleImage.setImage(getPokemonImage(getCurrentPokemon()));
 	}
 
@@ -254,8 +258,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			unchanged = rawDescField.getText();
 
 			Pokemon pk = getCurrentPokemon();
-			pk.setNormalPalette(originalPalettes.get(pk));
-			romHandler.writePokemonPalettes();
+			pk.setNormalPalette(originalPalettes.get(pk).clone());
 			originalImage.setImage(getPokemonImage(pk));
 			newRandomizedExample();
 		}

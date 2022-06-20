@@ -393,6 +393,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         loadPokedexOrder();
         loadPokemonStats();
         loadMoves();
+        loadPokemonPalettes();
         loadItemNames();
         preloadMaps();
         loadMapNames();
@@ -2566,8 +2567,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return paletteHandler;
     }
 
-	@Override
-	public void loadPokemonPalettes() {
+	private void loadPokemonPalettes() {
 		int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonWithoutNull()) {
 			pk.setPaletteID(PaletteID.values()[rom[palIndex + pk.getNumber()]]); // they are in Pokédex order
@@ -2575,7 +2575,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 	}
 
 	@Override
-	public void writePokemonPalettes() {
+	public void savePokemonPalettes() {
 		int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonWithoutNull()) {
 			rom[palIndex + pk.getNumber()] = (byte) pk.getPaletteID().ordinal(); // they are in Pokédex order
@@ -2610,7 +2610,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // Palette?
         int[] convPalette;
         if (getRomEntry().getValue("MonPaletteIndicesOffset") > 0 && getRomEntry().getValue("SGBPalettesOffset") > 0) {
-            int palIndex = rom[getRomEntry().getValue("MonPaletteIndicesOffset") + pk.number] & 0xFF;
+            int palIndex = pk.getPaletteID().ordinal();
             int palOffset = getRomEntry().getValue("SGBPalettesOffset") + palIndex * 8;
             if (getRomEntry().isYellow && getRomEntry().nonJapanese == 1) {
                 // Non-japanese Yellow can use GBC palettes instead.

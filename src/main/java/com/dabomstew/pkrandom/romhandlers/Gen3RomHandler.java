@@ -521,6 +521,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         constructPokemonList();
         populateEvolutions();
         loadMoves();
+        loadPokemonPalettes();
 
         // Get wild Pokemon offset
         int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
@@ -3711,8 +3712,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return isGen1;
     }
 
-    @Override
-    public void loadPokemonPalettes() {
+    private void loadPokemonPalettes() {
         // TODO: offsets for all vanilla roms
         int normalPaletteTableOffset = getRomEntry().getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = getRomEntry().getValue("PokemonShinyPalettes");
@@ -3733,7 +3733,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void writePokemonPalettes() {
+    public void savePokemonPalettes() {
         int normalPaletteTableOffset = getRomEntry().getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = getRomEntry().getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonWithoutNull()) {
@@ -3826,8 +3826,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         int num = getPokedexToInternal()[pk.number];
         int sprites = back ? getRomEntry().getValue("PokemonBackSprites") : getRomEntry().getValue("PokemonFrontSprites");
-        int palettes = shiny ? getRomEntry().getValue("PokemonShinyPalettes")
-                : getRomEntry().getValue("PokemonNormalPalettes");
 
         int spriteOffset = readPointer(sprites + num * 8);
         byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
@@ -3838,8 +3836,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             trueSprite = DSDecmp.Decompress(rom, spriteOffset);
         }
 
-        int palOffset = readPointer(palettes + num * 8);
-        Palette palette = readPalette(palOffset);
+        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         int[] convPalette = palette.toARGB();
         if (transparentBackground) {
             convPalette[0] = 0;

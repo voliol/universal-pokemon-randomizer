@@ -405,10 +405,6 @@ public interface RomHandler {
 	public void standardizeEXPCurves();
     
     // Graphics
-	// TODO: maybe these should always be loaded/written when the rest of the ROM is, instead of having to do it manually?
-	public void loadPokemonPalettes();
-    public void writePokemonPalettes();
-
 	public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
 
 	public PaletteHandler getPaletteHandler();
