@@ -4353,11 +4353,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         writePokemonPalettes();
     }
     
-    protected abstract PaletteHandler getPaletteHandler();
-
-    protected abstract void loadPokemonPalettes();
-
-    protected abstract void writePokemonPalettes();
+    public abstract PaletteHandler getPaletteHandler();
     
     // just for testing
     protected final void dumpAllPokemonSprites() {

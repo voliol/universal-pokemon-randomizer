@@ -2437,15 +2437,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected PaletteHandler getPaletteHandler() {
+    public PaletteHandler getPaletteHandler() {
         return paletteHandler;
     }
 
     @Override
-    protected void loadPokemonPalettes() {
+    public void loadPokemonPalettes() {
         // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = getRomEntry().getValue("PokemonPalettes") + 8;
-        for (Pokemon pk : mainPokemonList) {
+        for (Pokemon pk : getPokemonWithoutNull()) {
             int num = pk.getNumber() - 1;
             
             int normalPaletteOffset = palOffset + num * 8;
@@ -2462,31 +2462,31 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return new Palette(paletteBytes);
     }
 
+	@Override
+	public void writePokemonPalettes() {
+		int palOffset = getRomEntry().getValue("PokemonPalettes") + 8;
+		for (Pokemon pk : getPokemonWithoutNull()) {
+			int num = pk.getNumber() - 1;
+
+			byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
+			// assuming the Pokemon do not have another internal order
+			for (int j = 0; j < normalPaletteBytes.length; j++) {
+				int byteOffset = palOffset + num * 8 + j;
+				rom[byteOffset] = normalPaletteBytes[j];
+			}
+
+			byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
+			// assuming the Pokemon do not have another internal order
+			for (int j = 0; j < shinyPaletteBytes.length; j++) {
+				int byteOffset = palOffset + num * 8 + 4 + j;
+				rom[byteOffset] = shinyPaletteBytes[j];
+			}
+
+		}
+	}
+
     @Override
-    protected void writePokemonPalettes() {
-        int palOffset = getRomEntry().getValue("PokemonPalettes") + 8; 
-        for (Pokemon pk : mainPokemonList) {
-            int num = pk.getNumber() - 1;
-
-            byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
-             // assuming the Pokemon do not have another internal order
-            for (int j = 0; j < normalPaletteBytes.length; j++) {
-                int byteOffset = palOffset + num * 8 + j;
-                rom[byteOffset] = normalPaletteBytes[j];
-            }
-            
-            byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
-            // assuming the Pokemon do not have another internal order
-           for (int j = 0; j < shinyPaletteBytes.length; j++) {
-               int byteOffset = palOffset + num * 8 + 4 + j;
-               rom[byteOffset] = shinyPaletteBytes[j];
-           }
-
-        }
-    }
-
-    @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
+    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
     	// Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
         // There is no zero-entry.
         int picPointer;

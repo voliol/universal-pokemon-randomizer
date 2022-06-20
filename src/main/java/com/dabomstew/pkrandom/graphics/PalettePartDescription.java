@@ -46,9 +46,7 @@ public class PalettePartDescription {
 	private LightDarkSuffix lightDarkSuffix = LightDarkSuffix.ANY;
 	private boolean endDarkened;
 
-	public static PalettePartDescription[] allFromString(List<String> paletteDescriptions, int index) {
-		boolean validIndex = index <= paletteDescriptions.size();
-		String paletteDescription = validIndex ? paletteDescriptions.get(index) : "";
+	public static PalettePartDescription[] allFromString(String paletteDescription) {
 		String[] unparsedPartDescriptions = paletteDescription.split("/");
 
 		PalettePartDescription[] partDescriptions = new PalettePartDescription[unparsedPartDescriptions.length];

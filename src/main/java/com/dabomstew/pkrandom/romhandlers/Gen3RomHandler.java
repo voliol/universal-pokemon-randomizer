@@ -3716,11 +3716,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected void loadPokemonPalettes() {
+    public void loadPokemonPalettes() {
         // TODO: offsets for all vanilla roms
         int normalPaletteTableOffset = getRomEntry().getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = getRomEntry().getValue("PokemonShinyPalettes");
-        for (Pokemon pk : mainPokemonList) {
+        for (Pokemon pk : getPokemonWithoutNull()) {
             int pokeNumber = getPokedexToInternal()[pk.getNumber()];
 
             int normalPalOffset = readPointer(normalPaletteTableOffset + pokeNumber * 8);
@@ -3737,10 +3737,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected void writePokemonPalettes() {
+    public void writePokemonPalettes() {
         int normalPaletteTableOffset = getRomEntry().getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = getRomEntry().getValue("PokemonShinyPalettes");
-        for (Pokemon pk : mainPokemonList) {
+        for (Pokemon pk : getPokemonWithoutNull()) {
             int pokeNumber = getPokedexToInternal()[pk.getNumber()];
 
             int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
@@ -3825,7 +3825,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
+    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
             boolean includePalette) {
 
         int num = getPokedexToInternal()[pk.number];
@@ -3890,7 +3890,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected PaletteHandler getPaletteHandler() {
+    public PaletteHandler getPaletteHandler() {
         return paletteHandler;
     }
 }

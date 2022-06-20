@@ -457,18 +457,18 @@ public class TestRomHandler extends AbstractRomHandler {
     }
     
     @Override
-    protected void loadPokemonPalettes() {
+    public void loadPokemonPalettes() {
         // TODO Auto-generated method stub
     }
 
     @Override
-    protected void writePokemonPalettes() {
+    public void writePokemonPalettes() {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    protected PaletteHandler getPaletteHandler() {
+    public PaletteHandler getPaletteHandler() {
         // TODO Auto-generated method stub
         return null;
     }

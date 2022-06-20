@@ -2566,22 +2566,22 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
     
     @Override
-    protected PaletteHandler getPaletteHandler() {
+    public PaletteHandler getPaletteHandler() {
         return paletteHandler;
     }
 
 	@Override
-	protected void loadPokemonPalettes() {
+	public void loadPokemonPalettes() {
 		int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
-		for (Pokemon pk : mainPokemonList) {
+		for (Pokemon pk : getPokemonWithoutNull()) {
 			pk.setPaletteID(PaletteID.values()[rom[palIndex + pk.getNumber()]]); // they are in Pokédex order
 		}
 	}
 
 	@Override
-	protected void writePokemonPalettes() {
+	public void writePokemonPalettes() {
 		int palIndex = getRomEntry().getValue("MonPaletteIndicesOffset");
-		for (Pokemon pk : mainPokemonList) {
+		for (Pokemon pk : getPokemonWithoutNull()) {
 			rom[palIndex + pk.getNumber()] = (byte) pk.getPaletteID().ordinal(); // they are in Pokédex order
 		}
 	}
@@ -2595,7 +2595,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
+    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
     	if (shiny) {
     		return null;
     	}

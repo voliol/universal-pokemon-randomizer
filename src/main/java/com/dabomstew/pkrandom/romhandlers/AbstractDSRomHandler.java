@@ -330,11 +330,11 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
     
     @Override
-    protected void loadPokemonPalettes() {
+    public void loadPokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokespritesNARC = readNARC(NARCpath);
-            for (Pokemon pk : mainPokemonList) {
+            for (Pokemon pk : getPokemonWithoutNull()) {
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
                 pk.setNormalPalette(readPalette(pokespritesNARC, normalPaletteIndex));
                 
@@ -358,12 +358,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected void writePokemonPalettes() {
+    public void writePokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 
-            for (Pokemon pk : mainPokemonList) {
+            for (Pokemon pk : getPokemonWithoutNull()) {
 
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
                 byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
@@ -431,7 +431,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	}
     
     // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-    protected abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+    public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
             boolean transparentBackground, boolean includePalette);
 
     private byte[] concatenate(byte[] a, byte[] b) {
@@ -446,6 +446,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     // a refactoring might be better, but is outside of the scope for the changes
     // I'm making now
     // - voliol 2022-01-13
-    protected abstract String getNARCPath(String key);
+    public abstract String getNARCPath(String key);
 
 }

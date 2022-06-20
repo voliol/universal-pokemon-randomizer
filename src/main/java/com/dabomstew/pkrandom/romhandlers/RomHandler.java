@@ -32,6 +32,7 @@ import java.util.Set;
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomOptions;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
@@ -404,7 +405,13 @@ public interface RomHandler {
 	public void standardizeEXPCurves();
     
     // Graphics
-    public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
+	// TODO: maybe these should always be loaded/written when the rest of the ROM is, instead of having to do it manually?
+	public void loadPokemonPalettes();
+    public void writePokemonPalettes();
+
+	public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
+
+	public PaletteHandler getPaletteHandler();
 
 	// (Mostly) unchanging lists of moves
 	public Map<String, Integer> getGameBreakingMoves();

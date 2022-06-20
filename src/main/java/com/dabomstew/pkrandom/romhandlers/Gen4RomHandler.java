@@ -3358,7 +3358,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
     
-    protected String getNARCPath(String key) {
+    public String getNARCPath(String key) {
         return getRomEntry().getString(key);
     }
 
@@ -3371,7 +3371,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
 	@Override
-	protected BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette) {
 		
 		int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
@@ -3463,7 +3463,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected PaletteHandler getPaletteHandler() {
+    public PaletteHandler getPaletteHandler() {
         return paletteHandler;
     }
 }

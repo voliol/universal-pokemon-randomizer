@@ -42,11 +42,13 @@ import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
  * D/P/Pt/HG/SS, B/W/B2/W2).
  * <p>
  * All three generations use similar 16-color palettes, that are implemented
- * using the {@link Palette} class. These palettes are populated/filled/modified by 
- * {@link PalettePopulator}, using {@link PalettePartDescription}s as instructions.
+ * using the {@link Palette} class. These palettes are populated/filled/modified
+ * by {@link PalettePopulator}, using {@link PalettePartDescription}s as
+ * instructions.
  * <p>
- * When Pokémon palettes are randomized, each Pokémon is assigned a {@link TypeBaseColorList},
- * which uses its types to come up with appropriate base colors.
+ * When Pokémon palettes are randomized, each Pokémon is assigned a
+ * {@link TypeBaseColorList}, which uses its types to come up with appropriate
+ * base colors.
  */
 public class Gen3to5PaletteHandler extends PaletteHandler {
 
@@ -99,46 +101,55 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		} else {
 			copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
 					new EvolvedPokemonPaletteAction());
-			List<String> paletteDescriptions = getPaletteDescriptions("pokePalettes" + paletteFilesID + ".txt");
-			populatePalettes(paletteDescriptions);
+			List<String> paletteDescriptions = getPaletteDescriptions("pokePalettes");
+			populatePokemonPalettes(paletteDescriptions);
 
 		}
 	}
 
-	private void populatePalettes(List<String> paletteDescriptions) {
+	private void populatePokemonPalettes(List<String> paletteDescriptions) {
 
 		PalettePopulator pp = new PalettePopulator(random);
 
 		for (Entry<Pokemon, TypeBaseColorList> entry : typeBaseColorLists.entrySet()) {
 
 			Pokemon pk = entry.getKey();
-			TypeBaseColorList typeBaseColorList = entry.getValue();
-
 			Palette palette = pk.getNormalPalette();
-			int pokemonNumber = pk.getNumber();
+			TypeBaseColorList typeBaseColorList = entry.getValue();
+			PalettePartDescription[] palettePartDescriptions = getPalettePartDescriptions(pk, paletteDescriptions);
 
-			System.out.println("------\n" + pk.getName());
-
-			PalettePartDescription[] palettePartDescriptions = PalettePartDescription.allFromString(paletteDescriptions, pokemonNumber - 1);
-
-			for (int i = 0; i < palettePartDescriptions.length; i++) {
-				System.out.println(palettePartDescriptions[i]);
-				if (palettePartDescriptions[i].isAverageDescription()) {
-					pp.populateAverageColor(palette, palettePartDescriptions[i]);
-				} else if (!palettePartDescriptions[i].isBlank()) {
-					Color baseColor = typeBaseColorList.getBaseColor(i);
-					LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
-
-					pp.populatePartFromBaseColor(palette, palettePartDescriptions[i], baseColor, lightDarkMode);
-				}
-			}
+			populatePalette(palette, pp, typeBaseColorList, palettePartDescriptions);
 
 		}
 	}
 
-	private List<String> getPaletteDescriptions(String fileName) {
+	public void populatePalette(Palette palette, PalettePopulator pp, TypeBaseColorList typeBaseColorList,
+			PalettePartDescription[] palettePartDescriptions) {
+		
+		for (int i = 0; i < palettePartDescriptions.length; i++) {
+			
+			if (palettePartDescriptions[i].isAverageDescription()) {
+				pp.populateAverageColor(palette, palettePartDescriptions[i]);
+				
+			} else if (!palettePartDescriptions[i].isBlank()) {
+				Color baseColor = typeBaseColorList.getBaseColor(i);
+				LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
+				pp.populatePartFromBaseColor(palette, palettePartDescriptions[i], baseColor, lightDarkMode);
+			}
+			
+		}
+	}
+
+	public PalettePartDescription[] getPalettePartDescriptions(Pokemon pk, List<String> paletteDescriptions) {
+		int paletteIndex = pk.getNumber() - 1;
+		boolean validIndex = paletteIndex <= paletteDescriptions.size();
+		return PalettePartDescription.allFromString(validIndex ? paletteDescriptions.get(paletteIndex) : "");
+	}
+
+	public List<String> getPaletteDescriptions(String fileKey) {
 		List<String> paletteDescriptions = new ArrayList<>();
 
+		String fileName = fileKey + paletteFilesID + ".txt";
 		InputStream infi = getClass().getResourceAsStream("resources/" + fileName);
 		BufferedReader br = new BufferedReader(new InputStreamReader(infi));
 
