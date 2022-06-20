@@ -772,12 +772,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return csum != 3716707868L;
     }
 
-    @Override
-    public void savingRom() {
-        savePokemonStats();
-        saveMoves();
-    }
-
     private void loadPokedex() {
         int pdOffset = getRomEntry().getValue("PokedexOrder");
         int numInternalPokes = getRomEntry().getValue("PokemonCount");
@@ -873,7 +867,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         // Write pokemon names & stats
         int offs = getRomEntry().getValue("PokemonNames");
         int nameLen = getRomEntry().getValue("PokemonNameLength");
@@ -916,7 +911,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         int moveCount = getRomEntry().getValue("MoveCount");
         int offs = getRomEntry().getValue("MoveData");
         for (int i = 1; i <= moveCount; i++) {

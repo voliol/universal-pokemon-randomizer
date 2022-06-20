@@ -478,4 +478,22 @@ public class TestRomHandler extends AbstractRomHandler {
         // TODO Auto-generated method stub
         return null;
     }
+
+	@Override
+	protected void saveMoves() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void savePokemonStats() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean saveRomFile(String filename) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

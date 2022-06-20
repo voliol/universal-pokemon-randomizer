@@ -44,8 +44,24 @@ import com.dabomstew.pkrandom.RomOptions;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gui.TemplateData;
-import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.pokemon.Encounter;
+import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.EvolutionType;
+import com.dabomstew.pkrandom.pokemon.ExpCurve;
+import com.dabomstew.pkrandom.pokemon.GenRestrictions;
+import com.dabomstew.pkrandom.pokemon.IngameTrade;
+import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.Move;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
+import com.dabomstew.pkrandom.pokemon.MoveLearnt;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.PokemonCollection;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -4378,8 +4394,30 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void writeCheckValueToROM(int value) {
         // do nothing
     }
+    
+    
+	@Override
+	public boolean saveRom(String filename) {
+		prepareSaveRom();
+		return saveRomFile(filename);
+	}
 
-    @Override
+	/**
+	 * Writes the remaining things to the ROM, before it is written to file. When
+	 * overridden, this should be called as a superclass method.
+	 */
+	protected void prepareSaveRom() {
+		savePokemonStats();
+		saveMoves();
+	}
+
+	protected abstract void saveMoves();
+
+	protected abstract void savePokemonStats();
+
+	protected abstract boolean saveRomFile(String filename);
+
+	@Override
     public int miscTweaksAvailable() {
         // default: none
         return 0;
