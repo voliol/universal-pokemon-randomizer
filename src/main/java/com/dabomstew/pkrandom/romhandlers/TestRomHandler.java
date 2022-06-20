@@ -454,4 +454,22 @@ public class TestRomHandler extends AbstractRomHandler {
     public List<Pokemon> getStarterPokes() {
         return starterPokes.getPokes();
     }
+
+	@Override
+	protected void saveMoves() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void savePokemonStats() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean saveRomFile(String filename) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

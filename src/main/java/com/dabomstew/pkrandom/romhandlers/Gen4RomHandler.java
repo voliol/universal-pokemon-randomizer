@@ -542,9 +542,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected void savingROM() {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
         try {
             writeARM9(arm9);
         } catch (IOException e) {
@@ -567,7 +566,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         for (int i = 1; i <= Gen4Constants.moveCount; i++) {
             byte[] data = moveNarc.files.get(i);
             writeWord(data, 0, moves[i].effectIndex);
@@ -593,7 +593,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         // Update the "a/an X" list too, if it exists
         List<String> namesList = getStrings(getRomEntry().getInt("PokemonNamesTextOffset"));
         if (getRomEntry().getString("HasExtraPokemonNames").equalsIgnoreCase("Yes")) {

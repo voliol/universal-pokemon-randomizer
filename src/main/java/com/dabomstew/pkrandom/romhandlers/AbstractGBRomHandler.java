@@ -60,8 +60,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean saveRom(String filename) {
-        savingRom();
+    public boolean saveRomFile(String filename) {
         try {
             FileOutputStream fos = new FileOutputStream(filename);
             fos.write(rom);
@@ -88,9 +87,16 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     public abstract void loadedRom();
 
-    public abstract void savingRom();
+    public void savingRom() {
+    	savePokemonStats();
+        saveMoves();
+    };
 
-    protected static byte[] loadFile(String filename) {
+    protected abstract void savePokemonStats();
+
+	protected abstract void saveMoves();
+
+	protected static byte[] loadFile(String filename) {
         try {
             return FileFunctions.readFileFullyIntoBuffer(filename);
         } catch (IOException ex) {

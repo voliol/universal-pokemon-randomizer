@@ -518,9 +518,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected void savingROM() {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
         try {
             writeARM9(arm9);
         } catch (IOException e) {
@@ -540,7 +539,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         for (int i = 1; i <= Gen5Constants.moveCount; i++) {
             byte[] data = moveNarc.files.get(i);
             data[2] = Gen5Constants.moveCategoryToByte(moves[i].category);
@@ -565,7 +565,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         List<String> nameList = getStrings(false, getRomEntry().getInt("PokemonNamesTextOffset"));
 
         for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
