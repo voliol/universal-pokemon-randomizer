@@ -108,7 +108,7 @@ public class Gen3Constants {
 
         public static final int unownIndex = 201, slowpokeIndex = 79, seadraIndex = 117,
                         poliwhirlIndex = 61, mewIndex = 151, clamperlIndex = 366,
-                        huntailIndex = 367, gorebyssIndex = 368;
+                        huntailIndex = 367, gorebyssIndex = 368, castformIndex = 351;
 
         public static final int tmCount = 50, hmCount = 8;
 

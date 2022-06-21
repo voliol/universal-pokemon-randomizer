@@ -27,6 +27,7 @@ import java.awt.Graphics2D;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.IntStream;
@@ -58,7 +59,8 @@ public class GFXFunctions {
 		int numTiles = width * height / (tileWidth * tileHeight);
 		int widthInTiles = width / tileWidth;
 
-		BufferedImage bim = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage bim = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED,
+				indexColorModelFromPalette(palette, bpp));
 
 		for (int tile = 0; tile < numTiles; tile++) {
 			int tileX = tile % widthInTiles;
@@ -79,7 +81,34 @@ public class GFXFunctions {
 	}
 
 	/**
-	 * Reads the data from an image read from a 4bpp .bmp file, returning it in the
+	 * Takes a palette in the form of 24-bit ARGB values and returns an
+	 * {@link IndexColorModel}.
+	 * 
+	 * @param palette An array of 24-bit ARGB values (i.e. ints with 8 bits each for
+	 *                Alpha, Red, Green, Blue, in that order).
+	 * @param bits    The number of bits each pixel occupies.
+	 */
+	private static IndexColorModel indexColorModelFromPalette(int[] palette, int bits) {
+		int size = palette.length;
+		if (size > 1 << bits) {
+			throw new IllegalArgumentException(
+					"Palette contains more values (=" + size + ") than can be indexed by " + bits + " bits.");
+		}
+		byte[] r = new byte[size];
+		byte[] g = new byte[size];
+		byte[] b = new byte[size];
+		byte[] a = new byte[size];
+		for (int i = 0; i < size; i++) {
+			r[i] = (byte) (palette[i] >>> 16 & 0xFF);
+			g[i] = (byte) (palette[i] >>> 8 & 0xFF);
+			b[i] = (byte) (palette[i] & 0xFF);
+			a[i] = (byte) (palette[i] >>> 24 & 0xFF);
+		}
+		return new IndexColorModel(bits, size, r, g, b, a);
+	}
+
+	/**
+	 * Reads the data from an image read from a 4bpp .png file, returning it in the
 	 * format used by Gen III-V games.
 	 * <p>
 	 * Allows for writing image files to Gen III-V games, by using the data as an
@@ -140,7 +169,18 @@ public class GFXFunctions {
 		return 0xFF000000 | (red << 16) | (green << 8) | blue;
 	}
 
-	public static void pseudoTransparency(BufferedImage img, int transColor) {
+	/**
+	 * Returns a copy of the input {@link BufferedImage} where a given color is
+	 * replaced by transparent along the border. The returning copy uses a
+	 * {@link DirectColorModel}, even if the input was indexed.
+	 * 
+	 * @param bim        The original BufferedImage.
+	 * @param transColor The color to be replaced, as a 24-bit ARGB value.
+	 */
+	public static BufferedImage pseudoTransparent(BufferedImage bim, int transColor) {
+
+		BufferedImage img = toARGB(bim);
+
 		int width = img.getWidth();
 		int height = img.getHeight();
 		Queue<Integer> visitPixels = new LinkedList<Integer>();
@@ -168,6 +208,15 @@ public class GFXFunctions {
 				queuePixel(x, y + 1, width, height, visitPixels, queued);
 			}
 		}
+
+		return img;
+	}
+
+	private static BufferedImage toARGB(BufferedImage bim) {
+		BufferedImage img = new BufferedImage(bim.getWidth(), bim.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = img.createGraphics();
+		g.drawImage(bim, 0, 0, null);
+		return img;
 	}
 
 	private static void queuePixel(int x, int y, int width, int height, Queue<Integer> queue, boolean[][] queued) {
@@ -201,18 +250,18 @@ public class GFXFunctions {
 		BufferedImage stitched = new BufferedImage(IntStream.of(rowWidths).sum(), IntStream.of(columnHeights).sum(),
 				BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = stitched.createGraphics();
-		
+
 		int x = 0;
 		for (int gridX = 0; gridX < gridWidth; gridX++) {
 			int y = 0;
 			for (int gridY = 0; gridY < gridHeight; gridY++) {
 
 				BufferedImage bim = bims[gridX][gridY];
-				
+
 				if (bim != null) {
 					g.drawImage(bim, x, y, null);
 				}
-				
+
 				y += columnHeights[gridY];
 			}
 			x += rowWidths[gridX];

@@ -2626,7 +2626,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
         
         if (transparentBackground) {
-            GFXFunctions.pseudoTransparency(bim, convPalette[0]);
+            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
         }
         if (includePalette) {
             for (int j = 0; j < convPalette.length; j++) {

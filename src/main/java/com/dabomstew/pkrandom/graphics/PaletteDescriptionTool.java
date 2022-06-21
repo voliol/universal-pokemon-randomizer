@@ -5,7 +5,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -53,19 +55,38 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		 */
 		private static final long serialVersionUID = 7324176616059578530L;
 
+		private BufferedImage bufferedImage;
 		private ImageIcon icon;
 		private int scale = 2;
 
-		private PaletteImageLabel(BufferedImage bim) {
-			if (bim == null) {
-				bim = new BufferedImage(64, 64, BufferedImage.TYPE_INT_RGB);
+		private PaletteImageLabel(BufferedImage bufferedImage) {
+			if (bufferedImage == null) {
+				bufferedImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_RGB);
 			}
-			this.icon = new ImageIcon(bim);
+			this.bufferedImage = bufferedImage;
+			this.icon = new ImageIcon(bufferedImage);
 			setIcon(icon);
 		}
 
-		public void setImage(BufferedImage bim) {
-			Image scaled = bim.getScaledInstance(bim.getWidth()*scale, bim.getHeight()*scale, Image.SCALE_DEFAULT);
+		public void setImage(BufferedImage bufferedImage) {
+			this.bufferedImage = bufferedImage;
+			update();
+		}
+
+		public void setScale(int scale) {
+			this.scale = scale;
+			update();
+		}
+
+		public int getPaletteIndexAtCoord(int x, int y) {
+			int pixelX = x / scale;
+			int pixelY = y / scale;
+			return bufferedImage.getData().getSample(pixelX, pixelY, 0);
+		}
+
+		private void update() {
+			Image scaled = bufferedImage.getScaledInstance(bufferedImage.getWidth() * scale,
+					bufferedImage.getHeight() * scale, Image.SCALE_DEFAULT);
 			icon.setImage(scaled);
 			revalidate();
 			repaint();
@@ -146,15 +167,20 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		mainPanel.add(rightPanel, quickGBC(1, 0));
 		rightPanel.setLayout(new GridBagLayout());
 
+		ShowPaletteListener showPaletteListener = new ShowPaletteListener();
+
 		JLabel originalImageLabel = new JLabel("Original:");
 		rightPanel.add(originalImageLabel, quickGBC(0, 0));
 		originalImage = new PaletteImageLabel(null);
+		originalImage.addMouseMotionListener(showPaletteListener);
 		rightPanel.add(originalImage, quickGBC(0, 1));
 
 		JLabel exampleImageLabel = new JLabel("Randomized example:");
 		rightPanel.add(exampleImageLabel, quickGBC(1, 0));
 		exampleImage = new PaletteImageLabel(null);
+		exampleImage.addMouseMotionListener(showPaletteListener);
 		rightPanel.add(exampleImage, quickGBC(1, 1));
+
 		JButton newExampleButton = new JButton("New example");
 		newExampleButton.addActionListener(event -> newRandomizedExample());
 		rightPanel.add(newExampleButton, quickGBC(2, 1));
@@ -184,10 +210,10 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		}
 
 		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
-		paletteDescriptions.setListData(paletteHandler.getPaletteDescriptions("pokePalettes").toArray(new String[0]));
 		for (Pokemon pk : romHandler.getPokemonWithoutNull()) {
 			originalPalettes.put(pk, pk.getNormalPalette());
 		}
+		paletteDescriptions.setListData(paletteHandler.getPaletteDescriptions("pokePalettes").toArray(new String[0]));
 		paletteDescriptions.setSelectedIndex(0);
 
 	}
@@ -246,10 +272,10 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		PalettePopulator pp = new PalettePopulator(RND);
 		TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, false, RND);
 		PalettePartDescription[] palettePartDescriptions = PalettePartDescription.allFromString(paletteDescription);
-		
+
 		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
 		paletteHandler.populatePalette(palette, pp, typeBaseColorList, palettePartDescriptions);
-		
+
 	}
 
 	private void updateImagesAndText() {
@@ -285,6 +311,21 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			pokemonImage = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, false, false, false);
 		}
 		return pokemonImage;
+	}
+
+	private class ShowPaletteListener implements MouseMotionListener {
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			PaletteImageLabel source = (PaletteImageLabel) e.getSource();
+			int paletteIndex = source.getPaletteIndexAtCoord(e.getX(), e.getY());
+			System.out.println(paletteIndex);
+		}
+
 	}
 
 }

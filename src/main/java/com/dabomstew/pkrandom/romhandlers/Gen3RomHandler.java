@@ -3841,6 +3841,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (transparentBackground) {
             convPalette[0] = 0;
         }
+        // Castform has a 64-color palette, 16 colors for each form.
+        if (pk.getNumber() == Gen3Constants.castformIndex) {
+        	convPalette = Arrays.copyOfRange(convPalette, 0, 16);
+        }
 
         // Make image, 4bpp
         BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
