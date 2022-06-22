@@ -43,6 +43,7 @@ import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.Gen4Constants;
@@ -3390,7 +3391,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		// Deliberately chop off the right half of the image while still
 		// correctly indexing the array.
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
+		int bpp = 4;
+		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED, GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
 		for (int y = 0; y < 80; y++) {
 			for (int x = 0; x < 80; x++) {
 				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;

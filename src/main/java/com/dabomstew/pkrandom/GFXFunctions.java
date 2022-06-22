@@ -88,7 +88,7 @@ public class GFXFunctions {
 	 *                Alpha, Red, Green, Blue, in that order).
 	 * @param bits    The number of bits each pixel occupies.
 	 */
-	private static IndexColorModel indexColorModelFromPalette(int[] palette, int bits) {
+	public static IndexColorModel indexColorModelFromPalette(int[] palette, int bits) {
 		int size = palette.length;
 		if (size > 1 << bits) {
 			throw new IllegalArgumentException(
