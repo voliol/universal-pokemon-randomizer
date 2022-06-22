@@ -101,13 +101,13 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		} else {
 			copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
 					new EvolvedPokemonPaletteAction());
-			List<String> paletteDescriptions = getPaletteDescriptions("pokePalettes");
+			List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");
 			populatePokemonPalettes(paletteDescriptions);
 
 		}
 	}
 
-	private void populatePokemonPalettes(List<String> paletteDescriptions) {
+	private void populatePokemonPalettes(List<PaletteDescription> paletteDescriptions) {
 
 		PalettePopulator pp = new PalettePopulator(random);
 
@@ -140,14 +140,14 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		}
 	}
 
-	public PalettePartDescription[] getPalettePartDescriptions(Pokemon pk, List<String> paletteDescriptions) {
+	public PalettePartDescription[] getPalettePartDescriptions(Pokemon pk, List<PaletteDescription> paletteDescriptions) {
 		int paletteIndex = pk.getNumber() - 1;
 		boolean validIndex = paletteIndex <= paletteDescriptions.size();
-		return PalettePartDescription.allFromString(validIndex ? paletteDescriptions.get(paletteIndex) : "");
+		return PalettePartDescription.allFrom(validIndex ? paletteDescriptions.get(paletteIndex) : PaletteDescription.BLANK);
 	}
 
-	public List<String> getPaletteDescriptions(String fileKey) {
-		List<String> paletteDescriptions = new ArrayList<>();
+	public List<PaletteDescription> getPaletteDescriptions(String fileKey) {
+		List<PaletteDescription> paletteDescriptions = new ArrayList<>();
 
 		String fileName = fileKey + paletteFilesID + ".txt";
 		InputStream infi = getClass().getResourceAsStream("resources/" + fileName);
@@ -156,7 +156,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		String line;
 		try {
 			while ((line = br.readLine()) != null) {
-				paletteDescriptions.add(line.trim());
+				paletteDescriptions.add(new PaletteDescription(line));
 			}
 		} catch (java.io.IOException ioe) {
 			// using RandomizerIOException because it is unchecked
