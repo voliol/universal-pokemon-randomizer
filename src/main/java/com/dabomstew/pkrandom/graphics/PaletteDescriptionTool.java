@@ -49,6 +49,8 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Utils;
@@ -73,7 +75,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	private static final long serialVersionUID = 7741836888133659367L;
 
 	private static final Random RND = new Random();
-	
+
 	private static final int DEFAULT_SCALE = 2;
 
 	private static class PaletteImageLabel extends JLabel {
@@ -143,14 +145,17 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	private Map<Pokemon, Palette> originalPalettes = new HashMap<>();
 
 	private JList<PaletteDescription> paletteDescriptions;
+	private int lastIndex;
 	private PaletteImageLabel originalImage;
 	private PaletteImageLabel exampleImage;
 	private JTextField descNameField;
 	private JTextField descBodyField;
 	private JTextField descNoteField;
-	
+
+	private boolean autoName;
+
 	private JButton saveDescButton;
-	private boolean autosave;
+	private boolean autoSave;
 
 	private String unchangedName;
 	private String unchangedBody;
@@ -163,7 +168,6 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	private PaletteDescriptionTool() {
 		this.setSize(new Dimension(800, 400));
 		JPanel mainPanel = new JPanel();
-		mainPanel.setPreferredSize(new Dimension(400, 400));
 		setContentPane(mainPanel);
 
 		// ---------
@@ -190,7 +194,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 		JScrollPane entryScrollPane = new JScrollPane();
 		paletteDescriptions = new JList<>();
-		paletteDescriptions.addListSelectionListener(event -> updateImagesAndText());
+		paletteDescriptions.addListSelectionListener(new PaletteDescriptionSelectionListener());
 		entryScrollPane.setViewportView(paletteDescriptions);
 		leftPanel.add(entryScrollPane, quickGBC(0, 2, 2, 1));
 
@@ -241,25 +245,28 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		JPanel descPanel = new JPanel();
 		rightPanel.add(descPanel, BorderLayout.PAGE_END);
 		descPanel.setLayout(new GridBagLayout());
-		
+
 		JLabel descNameLabel = new JLabel("Name:");
 		descPanel.add(descNameLabel, quickGBC(0, 0));
 		descNameField = new JTextField();
 		descNameField.setPreferredSize(new Dimension(300, 20));
-		descPanel.add(descNameField, quickGBC(1, 0, 2, 1));
+		descPanel.add(descNameField, quickGBC(1, 0));
+		JCheckBox autoNameCB = new JCheckBox("Auto-name");
+		autoNameCB.addItemListener(new AutoNameListener());
+		descPanel.add(autoNameCB, quickGBC(2, 0));
 
 		JLabel descBaseLabel = new JLabel("Palette desc.:");
 		descPanel.add(descBaseLabel, quickGBC(0, 1));
 		descBodyField = new JTextField();
 		descBodyField.setPreferredSize(new Dimension(300, 20));
 		descPanel.add(descBodyField, quickGBC(1, 1, 2, 1));
-		
+
 		JLabel descNoteLabel = new JLabel("Note:");
 		descPanel.add(descNoteLabel, quickGBC(0, 2));
 		descNoteField = new JTextField();
 		descNoteField.setPreferredSize(new Dimension(300, 20));
 		descPanel.add(descNoteField, quickGBC(1, 2, 2, 1));
-		
+
 		saveDescButton = new JButton("Save desc.");
 		saveDescButton.addActionListener(e -> savePaletteDescription());
 		descPanel.add(saveDescButton, quickGBC(1, 3));
@@ -319,26 +326,33 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 		romLoaded = true;
 	}
-	
+
 	private void savePaletteDescriptionsFile() {
 		// TODO
 	}
 
 	private void resetPaletteDescription() {
-		descNameField.setText(unchangedName);
+		if (!autoName) {
+			descNameField.setText(unchangedName);
+		}
 		descBodyField.setText(unchangedBody);
 		descNoteField.setText(unchangedNote);
 	}
-
+	
 	private void savePaletteDescription() {
-		paletteDescriptions.getSelectedValue().setName(descNameField.getText());
+		savePaletteDescription(paletteDescriptions.getSelectedIndex());
 		unchangedName = descNameField.getText();
-		paletteDescriptions.getSelectedValue().setBody(descBodyField.getText());
 		unchangedBody = descBodyField.getText();
-		paletteDescriptions.getSelectedValue().setNote(descNoteField.getText());
 		unchangedNote = descNoteField.getText();
 	}
-
+	
+	private void savePaletteDescription(int index) {
+		PaletteDescription paletteDescription = paletteDescriptions.getModel().getElementAt(index);
+		paletteDescription.setName(descNameField.getText());
+		paletteDescription.setBody(descBodyField.getText());
+		paletteDescription.setNote(descNoteField.getText());
+	}
+	
 	private void previousPaletteDescription() {
 		int currentIndex = paletteDescriptions.getSelectedIndex();
 		int newIndex = currentIndex == 0 ? paletteDescriptions.getModel().getSize() - 1 : currentIndex - 1;
@@ -371,6 +385,9 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		if (romLoaded) {
 			descNameField.setText(paletteDescriptions.getSelectedValue().getName());
 			unchangedName = descNameField.getText();
+			if (autoName) {
+				autoNameDesc();
+			}
 			descBodyField.setText(paletteDescriptions.getSelectedValue().getBody());
 			unchangedBody = descBodyField.getText();
 			descNoteField.setText(paletteDescriptions.getSelectedValue().getNote());
@@ -406,6 +423,26 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		return pokemonImage;
 	}
 
+	private void autoNameDesc() {
+		String autoName = getCurrentPokemon().getName();
+		descNameField.setText(autoName);
+	}
+	
+	private class PaletteDescriptionSelectionListener implements ListSelectionListener {
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (autoSave) {
+				savePaletteDescription(lastIndex);
+			}
+			updateImagesAndText();
+			@SuppressWarnings("unchecked")
+			JList<PaletteDescription> source = (JList<PaletteDescription>) e.getSource();
+			lastIndex = source.getSelectedIndex();
+		}
+		
+	}
+
 	private class ScaleListener implements ChangeListener {
 
 		@Override
@@ -432,15 +469,26 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		}
 
 	}
-	
+
+	private class AutoNameListener implements ItemListener {
+
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			autoName = e.getStateChange() == ItemEvent.SELECTED;
+			descNameField.setEnabled(!autoName);
+			autoNameDesc();
+		}
+
+	}
+
 	private class AutoSaveListener implements ItemListener {
 
 		@Override
 		public void itemStateChanged(ItemEvent e) {
-			autosave = e.getStateChange() == ItemEvent.SELECTED;
-			saveDescButton.setEnabled(!autosave);
+			autoSave = e.getStateChange() == ItemEvent.SELECTED;
+			saveDescButton.setEnabled(!autoSave);
 		}
-		
+
 	}
 
 }
