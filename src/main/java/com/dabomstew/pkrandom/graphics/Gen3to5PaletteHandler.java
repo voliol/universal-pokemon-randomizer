@@ -52,6 +52,11 @@ import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
  */
 public class Gen3to5PaletteHandler extends PaletteHandler {
 
+	/**
+	 * An identifier for the related resource files. ROMs that share a
+	 * paletteFilesID also share all resources. If they shouldn't, different ROMs 
+	 * must be assigned separate IDs.
+	 */
 	private String paletteFilesID;
 
 	private boolean typeSanity;
@@ -125,32 +130,34 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 	public void populatePalette(Palette palette, PalettePopulator pp, TypeBaseColorList typeBaseColorList,
 			PalettePartDescription[] palettePartDescriptions) {
-		
+
 		for (int i = 0; i < palettePartDescriptions.length; i++) {
-			
+
 			if (palettePartDescriptions[i].isAverageDescription()) {
 				pp.populateAverageColor(palette, palettePartDescriptions[i]);
-				
+
 			} else if (!palettePartDescriptions[i].isBlank()) {
 				Color baseColor = typeBaseColorList.getBaseColor(i);
 				LightDarkMode lightDarkMode = typeBaseColorList.getLightDarkMode(i);
 				pp.populatePartFromBaseColor(palette, palettePartDescriptions[i], baseColor, lightDarkMode);
 			}
-			
+
 		}
 	}
 
-	public PalettePartDescription[] getPalettePartDescriptions(Pokemon pk, List<PaletteDescription> paletteDescriptions) {
+	public PalettePartDescription[] getPalettePartDescriptions(Pokemon pk,
+			List<PaletteDescription> paletteDescriptions) {
 		int paletteIndex = pk.getNumber() - 1;
 		boolean validIndex = paletteIndex <= paletteDescriptions.size();
-		return PalettePartDescription.allFrom(validIndex ? paletteDescriptions.get(paletteIndex) : PaletteDescription.BLANK);
+		return PalettePartDescription
+				.allFrom(validIndex ? paletteDescriptions.get(paletteIndex) : PaletteDescription.BLANK);
 	}
 
 	public List<PaletteDescription> getPaletteDescriptions(String fileKey) {
 		List<PaletteDescription> paletteDescriptions = new ArrayList<>();
 
-		String fileName = fileKey + paletteFilesID + ".txt";
-		InputStream infi = getClass().getResourceAsStream("resources/" + fileName);
+		String fileAdress = getResourceAdress(fileKey);
+		InputStream infi = getClass().getResourceAsStream(fileAdress);
 		BufferedReader br = new BufferedReader(new InputStreamReader(infi));
 
 		String line;
@@ -160,10 +167,14 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			}
 		} catch (java.io.IOException ioe) {
 			// using RandomizerIOException because it is unchecked
-			throw new RandomizerIOException("Could not read palette description file " + fileName + ".");
+			throw new RandomizerIOException("Could not read palette description file " + fileAdress + ".");
 		}
 
 		return paletteDescriptions;
+	}
+
+	private String getResourceAdress(String fileKey) {
+		return "resources/" + fileKey + paletteFilesID + ".txt";
 	}
 
 	private class BasePokemonPaletteAction implements BasePokemonAction {

@@ -28,6 +28,9 @@ package com.dabomstew.pkrandom.graphics;
  * note are "just" for human use.
  */
 public class PaletteDescription {
+	
+	private static final int MAX_NAME_LENGTH = 12;
+	private static final int TAB_LENGTH = 4;
 
 	public static PaletteDescription BLANK = new PaletteDescription("");
 
@@ -82,6 +85,15 @@ public class PaletteDescription {
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+	
+	public String toFileFormattedString() {
+		StringBuilder sb = new StringBuilder(getName());
+		int tabs = (MAX_NAME_LENGTH - getName().length() + TAB_LENGTH - 1) / TAB_LENGTH;
+		sb.append("\t".repeat(tabs));
+		sb.append("[" + getBody() + "]");
+		sb.append(getNote());
+		return sb.toString();
 	}
 
 	@Override

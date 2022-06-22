@@ -32,8 +32,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -51,6 +55,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Utils;
@@ -67,6 +72,15 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 // TODO: show the name of the loaded ROM/desc file
 
+/**
+ * A developer tool for filling in files with {@link PaletteDescription}s, and
+ * see how each related image looks with accordingly randomized palettes.
+ * <p>
+ * Which file to fill is decided automatically, depending on the
+ * {@link Gen3to5PaletteHandler#paletteFilesID} assigned.
+ * <p>
+ * Currently only works for Pokémon palettes.
+ */
 public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 	/**
@@ -77,6 +91,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	private static final Random RND = new Random();
 
 	private static final int DEFAULT_SCALE = 2;
+	private static final String FILE_KEY = "pokePalettes";
 
 	private static class PaletteImageLabel extends JLabel {
 
@@ -279,9 +294,6 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private void loadBoth() {
-
-		// TODO: create some kind of back-ups
-
 		JFileChooser romChooser = new JFileChooser();
 		romChooser.setFileFilter(new ROMFilter());
 		if (romChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
@@ -300,7 +312,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			originalPalettes.put(pk, pk.getNormalPalette());
 		}
 		paletteDescriptions
-				.setListData(paletteHandler.getPaletteDescriptions("pokePalettes").toArray(new PaletteDescription[0]));
+				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY).toArray(new PaletteDescription[0]));
 		paletteDescriptions.setSelectedIndex(0);
 
 	}
@@ -328,7 +340,41 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private void savePaletteDescriptionsFile() {
-		// TODO
+		if (autoSave) {
+			savePaletteDescription();
+		}
+
+		// TODO: auto-choose the file (the same as the read resource)
+		JFileChooser descFileChooser = new JFileChooser(
+				new File("src/main/java/com/dabomstew/pkrandom/graphics/resources"));
+		descFileChooser.setFileFilter(new FileNameExtensionFilter("Palette description file (.txt)", "txt"));
+		if (descFileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+
+		try (PrintWriter writer = new PrintWriter(new FileWriter(descFileChooser.getSelectedFile()))) {
+			printPaletteDescriptions(writer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void printPaletteDescriptions(PrintWriter writer) {
+		List<PaletteDescription> out = jlistToList(paletteDescriptions);
+		for (int i = 0; i < out.size(); i++) {
+			writer.print(out.get(i).toFileFormattedString());
+			if (i != out.size() - 1) {
+				writer.print("\n");
+			}
+		}
+	}
+
+	private List<PaletteDescription> jlistToList(JList<? extends PaletteDescription> jlist) {
+		List<PaletteDescription> list = new ArrayList<PaletteDescription>();
+		for (int i = 0; i < jlist.getModel().getSize(); i++) {
+			list.add(jlist.getModel().getElementAt(i));
+		}
+		return list;
 	}
 
 	private void resetPaletteDescription() {
@@ -338,21 +384,21 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		descBodyField.setText(unchangedBody);
 		descNoteField.setText(unchangedNote);
 	}
-	
+
 	private void savePaletteDescription() {
 		savePaletteDescription(paletteDescriptions.getSelectedIndex());
 		unchangedName = descNameField.getText();
 		unchangedBody = descBodyField.getText();
 		unchangedNote = descNoteField.getText();
 	}
-	
+
 	private void savePaletteDescription(int index) {
 		PaletteDescription paletteDescription = paletteDescriptions.getModel().getElementAt(index);
 		paletteDescription.setName(descNameField.getText());
 		paletteDescription.setBody(descBodyField.getText());
 		paletteDescription.setNote(descNoteField.getText());
 	}
-	
+
 	private void previousPaletteDescription() {
 		int currentIndex = paletteDescriptions.getSelectedIndex();
 		int newIndex = currentIndex == 0 ? paletteDescriptions.getModel().getSize() - 1 : currentIndex - 1;
@@ -427,7 +473,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		String autoName = getCurrentPokemon().getName();
 		descNameField.setText(autoName);
 	}
-	
+
 	private class PaletteDescriptionSelectionListener implements ListSelectionListener {
 
 		@Override
@@ -440,7 +486,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			JList<PaletteDescription> source = (JList<PaletteDescription>) e.getSource();
 			lastIndex = source.getSelectedIndex();
 		}
-		
+
 	}
 
 	private class ScaleListener implements ChangeListener {
