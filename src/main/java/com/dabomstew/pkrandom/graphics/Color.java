@@ -1,5 +1,8 @@
 package com.dabomstew.pkrandom.graphics;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -28,6 +31,34 @@ package com.dabomstew.pkrandom.graphics;
  */
 public class Color implements Cloneable {
 
+	private static final Color DEFAULT_COLOR = new Color(255, 255, 255);
+
+	private static final String HEX_REGEX = "[0-9abcdefABCDEF]{6}";
+
+	private static Color colorFromString(String string) {
+		Matcher hexMatcher = Pattern.compile(HEX_REGEX).matcher(string);
+		if (hexMatcher.find()) {
+			String hex = hexMatcher.group();
+			return new Color(Integer.parseInt(hex, 16));
+		}
+		System.out.println(string);
+
+		// Yes, this is kind of ugly, but Matcher doesn't allow a straight-forward
+		// way of counting the matches...
+		Matcher intMatcher = Pattern.compile("[0-9]+").matcher(string);
+		int r = 0, g = 0, b = 0;
+		if (intMatcher.find())
+			r = Integer.parseInt(intMatcher.group());
+		if (intMatcher.find())
+			g = Integer.parseInt(intMatcher.group());
+		if (intMatcher.find()) {
+			b = Integer.parseInt(intMatcher.group());
+			return new Color(r, g, b);
+		}
+
+		throw new IllegalArgumentException("No color value found in \"" + string + "\".");
+	}
+
 	public static int highColorWordToARGB(int word) {
 		int red = (int) ((word & 0x1F) * 8.25);
 		int green = (int) (((word & 0x3E0) >> 5) * 8.25);
@@ -38,19 +69,42 @@ public class Color implements Cloneable {
 	private int r, g, b;
 
 	public Color() {
-		this(255, 255, 255);
+		this(DEFAULT_COLOR.r, DEFAULT_COLOR.b, DEFAULT_COLOR.g);
 	}
 
+	/**
+	 * The primary Color constructor, taking an int each for red, green, and blue.
+	 * All other constructors should go through this somehow, as it is the only one that
+	 * does bounds-checking.
+	 * 
+	 * @param r red value (0-255)
+	 * @param g green value (0-255)
+	 * @param b blue value (0-255)
+	 */
 	public Color(int r, int g, int b) {
+		if (r < 0 || r > 255) {
+			throw new IllegalArgumentException("red value out of bounds (0-255)");
+		}
+		if (g < 0 || g > 255) {
+			throw new IllegalArgumentException("green value out of bounds (0-255)");
+		}
+		if (b < 0 || b > 255) {
+			throw new IllegalArgumentException("blue value out of bounds (0-255)");
+		}
 		this.r = r;
 		this.g = g;
 		this.b = b;
 	}
 
 	public Color(int hex) {
-		this.r = (hex & 0xFF0000) >> 16;
-		this.g = (hex & 0xFF00) >> 8;
-		this.b = (hex & 0xFF);
+		this((hex & 0xFF0000) >> 16, (hex & 0xFF00) >> 8, (hex & 0xFF));
+	}
+
+	public Color(String string) {
+		Color color = colorFromString(string);
+		this.r = color.r;
+		this.g = color.g;
+		this.b = color.b;
 	}
 
 	@Override

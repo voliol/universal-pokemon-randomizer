@@ -32,9 +32,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +53,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Utils;
@@ -312,7 +309,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			originalPalettes.put(pk, pk.getNormalPalette());
 		}
 		paletteDescriptions
-				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY).toArray(new PaletteDescription[0]));
+				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY, false).toArray(new PaletteDescription[0]));
 		paletteDescriptions.setSelectedIndex(0);
 
 	}
@@ -343,30 +340,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		if (autoSave) {
 			savePaletteDescription();
 		}
-
-		// TODO: auto-choose the file (the same as the read resource)
-		JFileChooser descFileChooser = new JFileChooser(
-				new File("src/main/java/com/dabomstew/pkrandom/graphics/resources"));
-		descFileChooser.setFileFilter(new FileNameExtensionFilter("Palette description file (.txt)", "txt"));
-		if (descFileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
-			return;
-		}
-
-		try (PrintWriter writer = new PrintWriter(new FileWriter(descFileChooser.getSelectedFile()))) {
-			printPaletteDescriptions(writer);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void printPaletteDescriptions(PrintWriter writer) {
-		List<PaletteDescription> out = jlistToList(paletteDescriptions);
-		for (int i = 0; i < out.size(); i++) {
-			writer.print(out.get(i).toFileFormattedString());
-			if (i != out.size() - 1) {
-				writer.print("\n");
-			}
-		}
+		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
+		paletteHandler.savePaletteDescriptionSource(FILE_KEY, jlistToList(paletteDescriptions));
 	}
 
 	private List<PaletteDescription> jlistToList(JList<? extends PaletteDescription> jlist) {

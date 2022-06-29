@@ -22,8 +22,14 @@ package com.dabomstew.pkrandom.graphics;
 /*----------------------------------------------------------------------------*/
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +60,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 	/**
 	 * An identifier for the related resource files. ROMs that share a
-	 * paletteFilesID also share all resources. If they shouldn't, different ROMs 
+	 * paletteFilesID also share all resources. If they shouldn't, different ROMs
 	 * must be assigned separate IDs.
 	 */
 	private String paletteFilesID;
@@ -106,7 +112,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		} else {
 			copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
 					new EvolvedPokemonPaletteAction());
-			List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");
+			List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes", true);
 			populatePokemonPalettes(paletteDescriptions);
 
 		}
@@ -153,12 +159,29 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 				.allFrom(validIndex ? paletteDescriptions.get(paletteIndex) : PaletteDescription.BLANK);
 	}
 
-	public List<PaletteDescription> getPaletteDescriptions(String fileKey) {
+	/**
+	 * Gets {@link PaletteDescription}s from a resource/file.
+	 * 
+	 * @param fileKey         The key to this particular kind of file, e.g.
+	 *                        "pokePalettes".
+	 * @param useWhenCompiled If false, the corresponding source file is read
+	 *                        instead of the compiled resource.
+	 */
+	public List<PaletteDescription> getPaletteDescriptions(String fileKey, boolean useWhenCompiled) {
 		List<PaletteDescription> paletteDescriptions = new ArrayList<>();
 
-		String fileAdress = getResourceAdress(fileKey);
-		InputStream infi = getClass().getResourceAsStream(fileAdress);
-		BufferedReader br = new BufferedReader(new InputStreamReader(infi));
+		Reader reader;
+		if (useWhenCompiled) {
+			InputStream infi = getClass().getResourceAsStream(getResourceAdress(fileKey));
+			reader = new InputStreamReader(infi);
+		} else {
+			try {
+				reader = new FileReader(getSourceFileAdress(fileKey));
+			} catch (FileNotFoundException e) {
+				throw new RandomizerIOException(e);
+			}
+		}
+		BufferedReader br = new BufferedReader(reader);
 
 		String line;
 		try {
@@ -167,14 +190,37 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			}
 		} catch (java.io.IOException ioe) {
 			// using RandomizerIOException because it is unchecked
-			throw new RandomizerIOException("Could not read palette description file " + fileAdress + ".");
+			throw new RandomizerIOException("Could not read palette description file "
+					+ (useWhenCompiled ? getResourceAdress(fileKey) : getSourceFileAdress(fileKey)) + ".");
 		}
 
+		System.out.println(paletteDescriptions);
 		return paletteDescriptions;
+	}
+
+	public void savePaletteDescriptionSource(String fileKey, List<PaletteDescription> paletteDescriptions) {
+		String fileAdress = getSourceFileAdress(fileKey);
+
+		try (PrintWriter writer = new PrintWriter(new FileWriter(fileAdress))) {
+
+			for (int i = 0; i < paletteDescriptions.size(); i++) {
+				writer.print(paletteDescriptions.get(i).toFileFormattedString());
+				if (i != paletteDescriptions.size() - 1) {
+					writer.print("\n");
+				}
+			}
+
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
 	}
 
 	private String getResourceAdress(String fileKey) {
 		return "resources/" + fileKey + paletteFilesID + ".txt";
+	}
+
+	private String getSourceFileAdress(String fileKey) {
+		return "src/main/java/com/dabomstew/pkrandom/graphics/" + getResourceAdress(fileKey);
 	}
 
 	private class BasePokemonPaletteAction implements BasePokemonAction {

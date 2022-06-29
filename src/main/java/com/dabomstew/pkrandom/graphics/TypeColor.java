@@ -1,5 +1,12 @@
 package com.dabomstew.pkrandom.graphics;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -22,14 +29,65 @@ package com.dabomstew.pkrandom.graphics;
 /*----------------------------------------------------------------------------*/
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 /**
  * A {@link Color} with an associated {@link Type}.
  */
 public class TypeColor extends Color {
+	
+	private static final String TYPE_TOKEN_REGEX = "\\[.*?\\]";
+	private static final  String COLOR_TOKEN_REGEX = "\\(.*?\\)";
+	private static final  String TOKEN_REGEX = TYPE_TOKEN_REGEX + "|" + COLOR_TOKEN_REGEX;
 
+	public static Map<Type, TypeColor[]> readTypeColorMapFromFile(String fileName) {
+		Map<Type, TypeColor[]> map = new EnumMap<>(Type.class); 
+		
+		Type type = null;
+		List<TypeColor> typeColors = new ArrayList<>();
+		
+		String fileString = readAllFromTextFile(fileName);
+		Matcher matcher = Pattern.compile(TOKEN_REGEX).matcher(fileString);
+		System.out.println("== Tokens: ==");
+		while (matcher.find()) {
+			String token = matcher.group();
+			System.out.println(token);
+			
+			if (token.matches(TYPE_TOKEN_REGEX)) {
+				if (type != null) {
+					map.put(type, typeColors.toArray(new TypeColor[0]));
+				}
+				try {
+					type = Type.valueOf(token.replaceAll("[\\[\\]]", ""));
+				} catch (IllegalArgumentException e) {
+					throw new RandomizerIOException(e);
+				}
+			}
+			
+			else if (token.matches(COLOR_TOKEN_REGEX)) {
+				typeColors.add(new TypeColor(new Color(token), type));
+			}
+			
+		}
+		
+		return map;
+	}
+
+	private static String readAllFromTextFile(String fileName) {
+		String fileString;
+		try (BufferedReader br = new BufferedReader(new FileReader(fileName))){
+			fileString = br.lines().collect(Collectors.joining());
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+		return fileString;
+	}
+	
 	public static void putIntsAsTypeColors(Map<Type, TypeColor[]> map, Type type, int[] ints) {
 		TypeColor[] typeColors = new TypeColor[ints.length];
 		for (int i = 0; i < typeColors.length; i++) {
