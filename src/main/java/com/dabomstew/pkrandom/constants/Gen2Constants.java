@@ -97,7 +97,7 @@ public class Gen2Constants {
     public static final Map<String, Integer> brokenMoves = constructBanList();
 
     private static Map<String, Integer> constructBanList() {
-        Map<String, Integer> bList = new HashMap();
+        Map<String, Integer> bList = new HashMap<>();
         bList.put("GUILLOTINE", 12);
         bList.put("HORN DRILL", 32);
         bList.put("SONICBOOM", 49);

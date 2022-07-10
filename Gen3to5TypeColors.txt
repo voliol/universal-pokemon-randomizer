@@ -5,7 +5,7 @@ must have at least one assigned color.
 Types must also correspond to Type enumerator values found in pokemon/Type.java. 
 If you don't know what that means, don't worry about it.
 
-The standard color values for the vanilla types (not including fairy) 
+The standard color values for the vanilla types, not including fairy, 
 are taken from Artemis251's Emerald Randomizer, with permission, 
 and are therefore by Artemis251. 
 

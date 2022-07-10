@@ -81,7 +81,7 @@ public class Gen1Constants {
     public static final Map<String, Integer> extendedBannedMoves = constructExtendedBansList();
 
     private static Map<String, Integer> constructBannedList() {
-        Map<String, Integer> bList = new HashMap();
+        Map<String, Integer> bList = new HashMap<>();
         bList.put("SONICBOOM", 49);
         bList.put("DRAGON RAGE", 82);
         bList.put("SPORE", 147);
