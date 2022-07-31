@@ -54,6 +54,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -435,9 +436,11 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private BufferedImage getPokemonImage(Pokemon pk, boolean shiny) {
-		BufferedImage pokemonImage = null;
+		BufferedImage front = null;
+		BufferedImage back = null;
 		if (romHandler instanceof AbstractGBRomHandler gbRomHandler) {
-			pokemonImage = gbRomHandler.getPokemonImage(pk, false, shiny, false, false);
+			front = gbRomHandler.getPokemonImage(pk, false, shiny, false, false);
+			back = gbRomHandler.getPokemonImage(pk, true, shiny, false, false);
 		} else if (romHandler instanceof AbstractDSRomHandler dsRomHandler) {
 			String NARCpath = dsRomHandler.getNARCPath("PokemonGraphics");
 			NARCArchive pokeGraphicsNARC = null;
@@ -447,9 +450,10 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			pokemonImage = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, shiny, false, false);
+			front = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, shiny, false, false);
+			back = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, true, shiny, false, false);
 		}
-		return pokemonImage;
+		return GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back}});
 	}
 
 	private void autoNameDesc() {

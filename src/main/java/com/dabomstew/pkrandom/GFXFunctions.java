@@ -28,6 +28,7 @@ import java.awt.Graphics2D;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.IntStream;
@@ -226,6 +227,16 @@ public class GFXFunctions {
 		}
 	}
 
+	/**
+	 * Stiches multiple {@link BufferedImage}s together in a grid. <br>
+	 * If all input BufferedImages have {@link IndexColorModel}s with the same
+	 * colors in the same order (e.g. a Pokémon front image and the corresponding
+	 * back image, both being non-shiny/shiny), then so will the returned
+	 * BufferedImage.
+	 * 
+	 * @param bims A 2D array of BufferedImages. Can be jagged, or contain nulls
+	 *             representing empty spots in the grid.
+	 */
 	public static BufferedImage stitchToGrid(BufferedImage[][] bims) {
 		int gridWidth = bims.length;
 		int gridHeight = 0;
@@ -247,8 +258,99 @@ public class GFXFunctions {
 			}
 		}
 
-		BufferedImage stitched = new BufferedImage(IntStream.of(rowWidths).sum(), IntStream.of(columnHeights).sum(),
-				BufferedImage.TYPE_INT_ARGB);
+		BufferedImage stitched = initializeStitchedImage(bims, rowWidths, columnHeights);
+		drawOnStitchedImage(stitched, bims, gridWidth, gridHeight, rowWidths, columnHeights);
+
+		return stitched;
+	}
+
+	private static BufferedImage initializeStitchedImage(BufferedImage[][] bims, int[] rowWidths, int[] columnHeights) {
+		int stitchedWidth = IntStream.of(rowWidths).sum();
+		int stitchedHeight = IntStream.of(columnHeights).sum();
+		BufferedImage stitched;
+		if (allSameIndexedPalette(withoutNull(flatten(bims)))) {
+			System.out.println(true);
+			IndexColorModel colorModel = (IndexColorModel) bims[0][0].getColorModel();
+			stitched = new BufferedImage(stitchedWidth, stitchedHeight, BufferedImage.TYPE_BYTE_INDEXED, colorModel);
+		} else {
+			System.out.println(false);
+			stitched = new BufferedImage(stitchedWidth, stitchedHeight, BufferedImage.TYPE_INT_ARGB);
+		}
+		return stitched;
+	}
+
+	/**
+	 * Returns true if all {@link BufferedImages} have {@link IndexColorModels} with
+	 * the same colors in the same order.
+	 * 
+	 * @param bims An array of {@link BufferedImages} with no nulls.
+	 */
+	private static boolean allSameIndexedPalette(BufferedImage[] bims) {
+		if (!(bims[0].getColorModel() instanceof IndexColorModel)) {
+			return false;
+		}
+		IndexColorModel indexed1 = (IndexColorModel) bims[0].getColorModel();
+
+		for (int i = 1; i < bims.length; i++) {
+
+			if (!(bims[i].getColorModel() instanceof IndexColorModel)) {
+				return false;
+			}
+			IndexColorModel indexed2 = (IndexColorModel) bims[i].getColorModel();
+
+			if (!sameRGBs(indexed1, indexed2)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean sameRGBs(IndexColorModel colorModel1, IndexColorModel colorModel2) {
+		int[] rgbs1 = new int[colorModel1.getMapSize()];
+		colorModel1.getRGBs(rgbs1);
+		int[] rgbs2 = new int[colorModel2.getMapSize()];
+		colorModel2.getRGBs(rgbs2);
+		return Arrays.equals(rgbs1, rgbs2);
+	}
+
+	private static BufferedImage[] flatten(BufferedImage[][] unflattened) {
+		int flatLength = 0;
+		for (BufferedImage[] arr : unflattened) {
+			flatLength += arr.length;
+		}
+
+		BufferedImage[] flattened = new BufferedImage[flatLength];
+		int offset = 0;
+		for (BufferedImage[] arr : unflattened) {
+			for (BufferedImage bim : arr) {
+				flattened[offset] = bim;
+				offset++;
+			}
+		}
+
+		return flattened;
+	}
+
+	private static BufferedImage[] withoutNull(BufferedImage[] bims) {
+		int length = 0;
+		for (BufferedImage bim : bims) {
+			if (bim != null) {
+				length++;
+			}
+		}
+		BufferedImage[] withoutNull = new BufferedImage[length];
+		int i = 0;
+		for (BufferedImage bim : bims) {
+			if (bim != null) {
+				withoutNull[i] = bim;
+				i++;
+			}
+		}
+		return withoutNull;
+	}
+
+	private static void drawOnStitchedImage(BufferedImage stitched, BufferedImage[][] bims, int gridWidth,
+			int gridHeight, int[] rowWidths, int[] columnHeights) {
 		Graphics2D g = stitched.createGraphics();
 
 		int x = 0;
@@ -266,8 +368,6 @@ public class GFXFunctions {
 			}
 			x += rowWidths[gridX];
 		}
-
-		return stitched;
 	}
 
 }
