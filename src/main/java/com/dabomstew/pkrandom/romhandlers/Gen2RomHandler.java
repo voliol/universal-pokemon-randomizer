@@ -2447,7 +2447,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int normalPaletteOffset = palOffset + num * 8;
             pk.setNormalPalette(read2ColorPalette(normalPaletteOffset));
             
-            int shinyPaletteOffset = palOffset + num * 8 + 2;
+            int shinyPaletteOffset = palOffset + num * 8 + 4;
             pk.setShinyPalette(read2ColorPalette(shinyPaletteOffset));
             
         }
