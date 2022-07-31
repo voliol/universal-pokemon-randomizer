@@ -159,6 +159,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	private JList<PaletteDescription> paletteDescriptions;
 	private int lastIndex;
 	private PaletteImageLabel originalImage;
+	private PaletteImageLabel shinyImage;
 	private PaletteImageLabel exampleImage;
 	private JTextField descNameField;
 	private JTextField descBodyField;
@@ -243,16 +244,22 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		originalImage = new PaletteImageLabel(null);
 		originalImage.addMouseMotionListener(showPaletteListener);
 		imagePanel.add(originalImage, quickGBC(0, 1));
+		
+		JLabel shinyImageLabel = new JLabel("Orig. shiny:");
+		imagePanel.add(shinyImageLabel, quickGBC(1, 0));
+		shinyImage = new PaletteImageLabel(null);
+		shinyImage.addMouseMotionListener(showPaletteListener);
+		imagePanel.add(shinyImage, quickGBC(1, 1));
 
 		JLabel exampleImageLabel = new JLabel("Randomized example:");
-		imagePanel.add(exampleImageLabel, quickGBC(1, 0));
+		imagePanel.add(exampleImageLabel, quickGBC(2, 0));
 		exampleImage = new PaletteImageLabel(null);
 		exampleImage.addMouseMotionListener(showPaletteListener);
-		imagePanel.add(exampleImage, quickGBC(1, 1));
+		imagePanel.add(exampleImage, quickGBC(2, 1));
 
 		JButton newExampleButton = new JButton("New example");
 		newExampleButton.addActionListener(event -> newRandomizedExample());
-		imagePanel.add(newExampleButton, quickGBC(2, 1));
+		imagePanel.add(newExampleButton, quickGBC(3, 1));
 
 		JPanel descPanel = new JPanel();
 		rightPanel.add(descPanel, BorderLayout.PAGE_END);
@@ -388,7 +395,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 	private void newRandomizedExample() {
 		randomizePalette(getCurrentPokemon(), descBodyField.getText());
-		exampleImage.setImage(getPokemonImage(getCurrentPokemon()));
+		exampleImage.setImage(getPokemonImage(getCurrentPokemon(), false));
 	}
 
 	private void randomizePalette(Pokemon pk, String paletteDescriptionBody) {
@@ -416,7 +423,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 			Pokemon pk = getCurrentPokemon();
 			pk.setNormalPalette(originalPalettes.get(pk).clone());
-			originalImage.setImage(getPokemonImage(pk));
+			originalImage.setImage(getPokemonImage(pk, false));
+			shinyImage.setImage(getPokemonImage(pk, true));
 			newRandomizedExample();
 		}
 	}
@@ -426,10 +434,10 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		return pk;
 	}
 
-	private BufferedImage getPokemonImage(Pokemon pk) {
+	private BufferedImage getPokemonImage(Pokemon pk, boolean shiny) {
 		BufferedImage pokemonImage = null;
 		if (romHandler instanceof AbstractGBRomHandler gbRomHandler) {
-			pokemonImage = gbRomHandler.getPokemonImage(pk, false, false, false, false);
+			pokemonImage = gbRomHandler.getPokemonImage(pk, false, shiny, false, false);
 		} else if (romHandler instanceof AbstractDSRomHandler dsRomHandler) {
 			String NARCpath = dsRomHandler.getNARCPath("PokemonGraphics");
 			NARCArchive pokeGraphicsNARC = null;
@@ -439,7 +447,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			pokemonImage = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, false, false, false);
+			pokemonImage = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, shiny, false, false);
 		}
 		return pokemonImage;
 	}
@@ -471,6 +479,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			JSlider source = (JSlider) e.getSource();
 			int scale = source.getValue();
 			originalImage.setScale(scale);
+			shinyImage.setScale(scale);
 			exampleImage.setScale(scale);
 		}
 
