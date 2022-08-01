@@ -425,16 +425,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void determineRomEntry() {
     	
-    	// TODO: remove when no longer useful
-    	System.out.println("-----");
-    	for (RomEntry re : roms) {
-    		System.out.print(re.name + ":\t");
-    		System.out.print(re.getValue("PokemonFrontSprites") + ",\t");
-    		System.out.print(re.getValue("PokemonBackSprites") + ",\t");
-    		System.out.print(re.getValue("PokemonNormalPalettes") + ",\t");
-    		System.out.print(re.getValue("PokemonShinyPalettes") + "\n");
-    	}
-    	
         isRomHack = false;
         for (RomEntry re : roms) {
             if (romCode(rom, re.romCode) && (rom[0xBC] & 0xFF) == re.version) {
@@ -474,38 +464,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 findMultiple(rom, Gen3Constants.pokedexOrderPointerPrefix);
         getRomEntry().entries.put("PokedexOrder", readPointer(pokedexOrderPrefixes.get(1) + 16));
 
-        // Pokemon names offset
-        if (getRomEntry().romType == Gen3Constants.RomType_Ruby
-                || getRomEntry().romType == Gen3Constants.RomType_Sapp) {
-            int baseNomOffset = find(rom, Gen3Constants.rsPokemonNamesPointerSuffix);
-            getRomEntry().entries.put("PokemonNames", readPointer(baseNomOffset - 4));
-            getRomEntry().entries.put("FrontSprites",
-                    readPointer(findPointerPrefixAndSuffix(Gen3Constants.rsFrontSpritesPointerPrefix,
-                            Gen3Constants.rsFrontSpritesPointerSuffix)));
-            // TODO: figure out if the below automated (but for me untested) way of finding
-            // palette table offsets is any good, compared to having them manually defined
-            // in gen3_offsets.ini
+		if (getRomEntry().getValue("HasPointerBlock1") == 1) {
+			addPointerBlock1ToRomEntry();
+		} else {
+			int baseNomOffset = find(rom, Gen3Constants.rsPokemonNamesPointerSuffix);
+			getRomEntry().entries.put("PokemonNames", readPointer(baseNomOffset - 4));
+		}
 
-            // getRomEntry().entries.put(
-            // "PokemonPalettes",
-            // readPointer(findPointerPrefixAndSuffix(Gen3Constants.rsPokemonPalettesPointerPrefix,
-            // Gen3Constants.rsPokemonPalettesPointerSuffix)));
-
-        } else {
-            getRomEntry().entries.put("PokemonNames",
-                    readPointer(Gen3Constants.efrlgPokemonNamesPointer));
-            getRomEntry().entries.put("MoveNames",
-                    readPointer(Gen3Constants.efrlgMoveNamesPointer));
-            getRomEntry().entries.put("AbilityNames",
-                    readPointer(Gen3Constants.efrlgAbilityNamesPointer));
-            getRomEntry().entries.put("ItemData", readPointer(Gen3Constants.efrlgItemDataPointer));
-            getRomEntry().entries.put("MoveData", readPointer(Gen3Constants.efrlgMoveDataPointer));
-            getRomEntry().entries.put("PokemonStats", readPointer(Gen3Constants.efrlgPokemonStatsPointer));
-            getRomEntry().entries.put("FrontSprites", readPointer(Gen3Constants.efrlgFrontSpritesPointer));
+		if (getRomEntry().getValue("HasPointerBlock2") == 1) {
+			addPointerBlock2ToRomEntry();
+		}
+        
+        if (getRomEntry().romType == Gen3Constants.RomType_Em
+                || getRomEntry().romType == Gen3Constants.RomType_FRLG) {
             getRomEntry().entries.put("MoveTutorCompatibility",
                     getRomEntry().getValue("MoveTutorData")
                             + getRomEntry().getValue("MoveTutorMoves") * 2);
-        }
+        } 
 
         loadTextTable(getRomEntry().tableFile);
 
@@ -557,76 +532,27 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
-    private int findPointerPrefixAndSuffix(String prefix, String suffix) {
-        if (prefix.length() % 2 != 0 || suffix.length() % 2 != 0) {
-            return -1;
-        }
-        byte[] searchPref = new byte[prefix.length() / 2];
-        for (int i = 0; i < searchPref.length; i++) {
-            searchPref[i] = (byte) Integer.parseInt(prefix.substring(i * 2, i * 2 + 2), 16);
-        }
-        byte[] searchSuff = new byte[suffix.length() / 2];
-        for (int i = 0; i < searchSuff.length; i++) {
-            searchSuff[i] = (byte) Integer.parseInt(suffix.substring(i * 2, i * 2 + 2), 16);
-        }
-        if (searchPref.length >= searchSuff.length) {
-            // Prefix first
-            List<Integer> offsets = RomFunctions.search(rom, searchPref);
-            if (offsets.size() == 0) {
-                return -1;
-            }
-            for (int prefOffset : offsets) {
-                if (prefOffset + 4 + searchSuff.length > rom.length) {
-                    continue; // not enough room for this to be valid
-                }
-                int ptrOffset = prefOffset + searchPref.length;
-                int pointerValue = readPointer(ptrOffset);
-                if (pointerValue < 0 || pointerValue >= rom.length) {
-                    // Not a valid pointer
-                    continue;
-                }
-                boolean suffixMatch = true;
-                for (int i = 0; i < searchSuff.length; i++) {
-                    if (rom[ptrOffset + 4 + i] != searchSuff[i]) {
-                        suffixMatch = false;
-                        break;
-                    }
-                }
-                if (suffixMatch) {
-                    return ptrOffset;
-                }
-            }
-            return -1; // No match
-        } else {
-            // Suffix first
-            List<Integer> offsets = RomFunctions.search(rom, searchSuff);
-            if (offsets.size() == 0) {
-                return -1;
-            }
-            for (int suffOffset : offsets) {
-                if (suffOffset - 4 - searchPref.length < 0) {
-                    continue; // not enough room for this to be valid
-                }
-                int ptrOffset = suffOffset - 4;
-                int pointerValue = readPointer(ptrOffset);
-                if (pointerValue < 0 || pointerValue >= rom.length) {
-                    // Not a valid pointer
-                    continue;
-                }
-                boolean prefixMatch = true;
-                for (int i = 0; i < searchPref.length; i++) {
-                    if (rom[ptrOffset - searchPref.length + i] != searchPref[i]) {
-                        prefixMatch = false;
-                        break;
-                    }
-                }
-                if (prefixMatch) {
-                    return ptrOffset;
-                }
-            }
-            return -1; // No match
-        }
-    }
+	private void addPointerBlock1ToRomEntry() {
+		getRomEntry().entries.put("PokemonFrontSprites", readPointer(Gen3Constants.pokemonFrontSpritesPointer));
+		getRomEntry().entries.put("PokemonBackSprites", readPointer(Gen3Constants.pokemonBackSpritesPointer));
+		getRomEntry().entries.put("PokemonNormalPalettes", readPointer(Gen3Constants.pokemonNormalPalettesPointer));
+		getRomEntry().entries.put("PokemonShinyPalettes", readPointer(Gen3Constants.pokemonShinyPalettesPointer));
+		getRomEntry().entries.put("PokemonIconSprites", readPointer(Gen3Constants.pokemonIconSpritesPointer));
+		getRomEntry().entries.put("PokemonIconPalettes", readPointer(Gen3Constants.pokemonIconPalettesPointer));
+		getRomEntry().entries.put("PokemonNames", readPointer(Gen3Constants.pokemonNamesPointer));
+		getRomEntry().entries.put("MoveNames", readPointer(Gen3Constants.moveNamesPointer));
+		getRomEntry().entries.put("DecorationNames", readPointer(Gen3Constants.decorationNamesPointer));
+	}
+
+	private void addPointerBlock2ToRomEntry() {
+		getRomEntry().entries.put("PokemonStats", readPointer(Gen3Constants.pokemonStatsPointer));
+		getRomEntry().entries.put("AbilityNames", readPointer(Gen3Constants.abilityNamesPointer));
+		getRomEntry().entries.put("AbilityDescriptions", readPointer(Gen3Constants.abilityDescriptionsPointer));
+		getRomEntry().entries.put("ItemData", readPointer(Gen3Constants.itemDataPointer));
+		getRomEntry().entries.put("MoveData", readPointer(Gen3Constants.moveDataPointer));
+		getRomEntry().entries.put("BallSpritesPointer", readPointer(Gen3Constants.ballSpritesPointer));
+		getRomEntry().entries.put("BallPalettesPointer", readPointer(Gen3Constants.ballPalettesPointer));
+	}
 
     private void basicBPRE10HackSupport() {
         if (basicBPRE10HackDetection()) {
@@ -3713,7 +3639,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void loadPokemonPalettes() {
-        // TODO: offsets for all vanilla roms
         int normalPaletteTableOffset = getRomEntry().getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = getRomEntry().getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonWithoutNull()) {
@@ -3819,7 +3744,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeByte(offset + i, Gen3Constants.freeSpaceByte);
         }
     }
-
+    
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
             boolean includePalette) {

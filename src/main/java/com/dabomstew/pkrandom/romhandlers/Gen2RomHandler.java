@@ -2487,7 +2487,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // There is no zero-entry.
         int picPointer;
         if (pk.getNumber() == Gen2Constants.unownIndex) {
-            int unownLetter = random.nextInt(26);
+            int unownLetter = random.nextInt(Gen2Constants.unownFormCount);
             picPointer = getRomEntry().getValue("UnownPicPointers") + unownLetter * 6;
         } else {
         picPointer = getRomEntry().getValue("PicPointers") + (pk.number - 1) * 6;

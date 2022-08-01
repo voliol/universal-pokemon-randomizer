@@ -269,11 +269,9 @@ public class GFXFunctions {
 		int stitchedHeight = IntStream.of(columnHeights).sum();
 		BufferedImage stitched;
 		if (allSameIndexedPalette(withoutNull(flatten(bims)))) {
-			System.out.println(true);
 			IndexColorModel colorModel = (IndexColorModel) bims[0][0].getColorModel();
 			stitched = new BufferedImage(stitchedWidth, stitchedHeight, BufferedImage.TYPE_BYTE_INDEXED, colorModel);
 		} else {
-			System.out.println(false);
 			stitched = new BufferedImage(stitchedWidth, stitchedHeight, BufferedImage.TYPE_INT_ARGB);
 		}
 		return stitched;
