@@ -9,10 +9,11 @@ by voliol
 What is this: 
 A branch for a framework for palette randomization in all Generations (I-V), 
 and porting the implementation from Artemis251's Pokemon Emerald Randomizer for Gens III-V. 
-Neither are fully finished, but I am closing in on a stop, after which I will focus on other features.
+Neither are fully finished. My current plans are to tie up this with some GUI, 
+and then attempt a migration to UPR ZX, to be part of the more active development over there.
 Feedback is highly appreciated, whether you are well versed in the UPR or not. 
 This is also on Github to facilitate collaborations. If you want to implement parts of in your branch,
-it has now reached a stage where no radical changes should be made; this is a good time.
+it has reached a stage where no radical changes should be made; this is a good time.
 
 If you have any questions, I will try my best to answer them. For technical notes, see GRAPHICS_GUIDE.md.
 I also have these two guides for explaining how Gen II/III Pokémon palettes work:
@@ -21,50 +22,50 @@ https://voliol.neocities.org/articles/genIIIpalettes.html
 
 ## What it can do right now:
 
-- Currently, this branch can randomize palettes of Ruby(U), Emerald(U), and Fire Red (U)(1.0 Squirrels). 
-  All parts of Artemis251's system are implemented, including the "sibling colors".
-  Other games in Gens III-V can also be supported, but require palette description files and/or offsets.
+
+- It can randomize palettes of all vanilla Gen I and Gen II games.  
+
+- It can randomize palettes of all vanilla Gen III games. 
+ 
+- There is a framework to randomize palettes of all Gens IV-V games, but both generations require palette description files, 
+  and better support for forms.
+  
+- All parts of Artemis251's system are implemented, including the "sibling colors".  
   
 - Some parts of Artemis251's system have been changed/replaced, most notably colors
   are not dictated by just the basic Pokémon, but later evolutions that gain/lose/change 
   types may have their colors reflect this, as well as their relation to the prevo. 
   Randomized evolution lines are also supported.
   
-- It can randomize palettes of all vanilla Gen I and Gen II games.  
-  
 - Sprites are dumped when you open a rom, so palettes can be viewed quickly. 
   See the Pokemon-sprite-dump folder.
   
 - It can read .png/.bmp files and convert them into formats that can be inserted into Gen III-V games.
 
-## What needs to be done:
+
+## What is planned to be done before migration:
 
 - Better handling of unorthodox types like fairy (and types at all). What colors should
   be used when they are not based on Pokémon types?
+  
+- A working GUI, instead of setting settings in Randomizer.java.
 
-- Offsets for normal palettes, shiny palettes, and backsprites 
-  for Gen III ROMs. There was an automated method 
-  for normal palettes I commented out due to not understanding it, 
-  it should be investigated whether it is superior to manual offsets or can be removed. 
+  
+## What lies further into the future (after a migration to ZX):
+ 
+- Supporting Pokémon forms.
 
 - Palette description files for most games, though I might be "finished" before doing all
-  of them as it is a lot of manual work. DP is prioritized as I did some of it
-  during an earlier/unpublished/crappy attempt at porting Artemis251's system.
-  
-- Documentation and credits could be improved.
+of them as it is a lot of manual work. DP is prioritized as I did some of it
+during an earlier/unpublished/crappy attempt at porting Artemis251's system. 
+Note there is a developer tool for making palette description files. 
+ 
+- Image reading (from file) / writing (to ROM) framework for all Gens. See GRAPHICS_GUIDE.md.
+
+- Documentation and credits could always be improved.
 
 - Various other things to be touched up in the framework. I'm quite new to Java/programming
   at a higher level so many of my TODO's are about best practices/patterns and such.
-  
-## What lies further into the future:
- 
- - Porting/pushing this framework to the main active branches of the UPR, brentspector's branch
-   and hopefully ZX, though I do not know if they take full features like this. Supporting 
-   Pokémon forms would come at this point.
-   
- - A working GUI, instead of setting settings in Randomizer.java.
- 
- - Image reading (from file) / writing (to ROM) framework for all Gens. See GRAPHICS_GUIDE.md.
 
 
 **The rest of the readme is from the version of the Randomizer this was branched from:**
