@@ -21,41 +21,64 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 
-import com.dabomstew.pkrandom.pokemon.Type;
+import randompoint.RandomPointSelector;
 
 /**
- * Contains methods for accessing TypeColor constants for Gen 3-5 games. The constants
- * are read from a .txt file.
+ * RandomColorSelector can select 
  */
-public class Gen3to5TypeColors {
+public class RandomColorSelector {
 
-	private static final Map<Type, TypeColor[]> TYPE_COLORS = TypeColor
-			.readTypeColorMapFromFile("Gen3to5TypeColors.txt");
-	private static final Color DEFAULT_COLOR = new Color(0xC0C0C0);
+	public static enum Mode {
+		RGB, HSV;
+	}
 
-	public static TypeColor getRandomTypeColor(Type type, Random random) {
-		TypeColor[] typeColors = TYPE_COLORS.get(type);
-		TypeColor color = typeColors == null ? new TypeColor(DEFAULT_COLOR, type)
-				: typeColors[random.nextInt(typeColors.length)];
-		return color;
+	public static double[] defaultLowerBounds(Mode mode) {
+		return new double[] { 0, 0, 0 };
+	}
+
+	public static double[] defaultUpperBounds(Mode mode) {
+		switch (mode) {
+		case HSV:
+			return new double[] { 360, 1, 1 };
+		case RGB:
+			return new double[] { 255, 255, 255 };
+		}
+		return null;
+	}
+
+	private RandomPointSelector randomPointSelector;
+	private Mode mode;
+
+	public RandomColorSelector(Random random, Mode mode, Function<double[], Double> weightFunction) {
+		this(random, mode, weightFunction, defaultLowerBounds(mode), defaultUpperBounds(mode));
+	}
+
+	public RandomColorSelector(Random random, Mode mode, Function<double[], Double> weightFunction,
+			double[] lowerBounds, double[] upperBounds) {
+		this.mode = mode;
+		this.randomPointSelector = new RandomPointSelector(random, 3, lowerBounds, upperBounds, weightFunction);
+	}
+
+	public Color getRandomColor() {
+		double[] point = randomPointSelector.getRandomPoint();
+		switch (mode) {
+		case RGB:
+			return new Color((int) point[0], (int) point[1], (int) point[2]);
+		case HSV:
+			return Color.colorFromHSV(point[0], point[1], point[2]);
+		}
+		return null;
 	}
 	
-	private static RandomColorSelector randomColorSelector = new RandomColorSelector(new Random(),
-	RandomColorSelector.Mode.HSV, hsv -> {
-		double w = hsv[1];
-		if (20 <= hsv[0] && hsv[0] <= 70) {
-			w *= 3;
-		}
-		return w;
-	}, new double[] { 0, 0, 0.6 }, new double[] { 360, 1, 1 });
-
-	// TODO: something about too similar colors being chosen for the same mon?
-	public static TypeColor getRandomTypeColor(Random random) {
-		randomColorSelector.setRandom(random);
-		return new TypeColor(randomColorSelector.getRandomColor(), null);
+	public Random getRandom() {
+		return randomPointSelector.getRandom();
+	}
+	
+	public void setRandom(Random random) {
+		randomPointSelector.setRandom(random);
 	}
 
 }

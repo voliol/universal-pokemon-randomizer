@@ -45,12 +45,6 @@ public class Gen2TypeColors {
 	private static final Color DEFAULT_BRIGHT_COLOR = new Color(0xC0C0C0);
 	private static final Color DEFAULT_DARK_COLOR = new Color(0x808080);
 
-	public static TypeColor getRandomBrightColor(Random random) {
-		Type[] keys = BRIGHT_TYPE_COLORS.keySet().toArray(new Type[0]);
-		Type type = keys[random.nextInt(keys.length)];
-		return getRandomBrightColor(type, random);
-	}
-
 	public static TypeColor getRandomBrightColor(Type type, Random random) {
 		TypeColor[] typeColors = BRIGHT_TYPE_COLORS.get(type);
 		TypeColor color = typeColors == null ? new TypeColor(DEFAULT_BRIGHT_COLOR, type)
@@ -58,17 +52,32 @@ public class Gen2TypeColors {
 		return color;
 	}
 
-	public static TypeColor getRandomDarkColor(Random random) {
-		Type[] keys = DARK_TYPE_COLORS.keySet().toArray(new Type[0]);
-		Type type = keys[random.nextInt(keys.length)];
-		return getRandomDarkColor(type, random);
-	}
-
 	public static TypeColor getRandomDarkColor(Type type, Random random) {
 		TypeColor[] typeColors = DARK_TYPE_COLORS.get(type);
 		TypeColor color = typeColors == null ? new TypeColor(DEFAULT_DARK_COLOR, type)
 				: typeColors[random.nextInt(typeColors.length)];
 		return color;
+	}
+
+	private static RandomColorSelector brightColorSelector = new RandomColorSelector(new Random(),
+	RandomColorSelector.Mode.HSV, hsv -> {
+		double w = hsv[1] + hsv[2] * 0.5;
+		if (20 <= hsv[0] && hsv[0] <= 70) {
+			w *= 3;
+		}
+		return w;
+	}, new double[] { 0, 0, 0.6 }, new double[] { 360, 1, 1 });
+	private static RandomColorSelector darkColorSelector = new RandomColorSelector(new Random(),
+	RandomColorSelector.Mode.HSV, hsv -> hsv[1] / 2, new double[] { 0, 0, 0.5 }, new double[] { 360, 1, 0.8 });
+
+	public static TypeColor getRandomBrightColor(Random random) {
+		brightColorSelector.setRandom(random);
+		return new TypeColor(brightColorSelector.getRandomColor(), null);
+	}
+
+	public static TypeColor getRandomDarkColor(Random random) {
+		darkColorSelector.setRandom(random);
+		return new TypeColor(darkColorSelector.getRandomColor(), null);
 	};
 
 }

@@ -1,8 +1,5 @@
 package com.dabomstew.pkrandom.graphics;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -24,12 +21,54 @@ import java.util.regex.Pattern;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.imageio.ImageIO;
+
 /**
  * An RGB color, usually to be contained by a {@link Palette}, and methods for
  * converting to/from other formats. These formats include 32-bit ARGB, and high
  * color words (16 bits, little endian) as used by the ROMs.
  */
 public class Color implements Cloneable {
+
+	public static void main(String[] args) {
+
+		int tileWidth = 50;
+		int tileHeight = 50;
+		int tileSize = 5;
+
+		RandomColorSelector rcs = new RandomColorSelector(new Random(), RandomColorSelector.Mode.HSV, hsv -> {
+			double j = (double) (1);
+			return j;
+		}, new double[] { 300, 0.5, 0.5 }, new double[] { 360, 1, 1 });
+
+		BufferedImage bim = new BufferedImage(tileWidth * tileSize, tileWidth * tileSize, BufferedImage.TYPE_INT_RGB);
+		for (int x = 0; x < tileWidth; x++) {
+			for (int y = 0; y < tileHeight; y++) {
+				Color c = rcs.getRandomColor();
+
+				for (int tx = 0; tx < tileSize; tx++) {
+					for (int ty = 0; ty < tileSize; ty++) {
+						bim.setRGB(x * tileSize + tx, y * tileSize + ty, c.toARGB());
+					}
+				}
+			}
+		}
+
+		try {
+			ImageIO.write(bim, "png", new File("sample.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 
 	private static final Color DEFAULT_COLOR = new Color(255, 255, 255);
 
@@ -59,6 +98,39 @@ public class Color implements Cloneable {
 		throw new IllegalArgumentException("No color value found in \"" + string + "\".");
 	}
 
+	/**
+	 * Returns a new Color from hue, saturation, and value.
+	 * 
+	 * @param h hue (0.0 - 360.0)
+	 * @param s saturation (0.0 - 1.0)
+	 * @param v value (0.0 - 1.0)
+	 */
+	public static Color colorFromHSV(double h, double s, double v) {
+		// using this formula: https://www.rapidtables.com/convert/color/hsv-to-rgb.html
+		if (h < 0.0 || h > 360.0) {
+			throw new IllegalArgumentException("hue argument \"h\" out of bounds (0.0 - 360.0)");
+		}
+		if (s < 0.0 || s > 1.0) {
+			throw new IllegalArgumentException("saturation argument \"s\" out of bounds (0.0 - 1.0)");
+		}
+		if (v < 0.0 || v > 1.0) {
+			throw new IllegalArgumentException("value argument \"v\" out of bounds (0.0 - 1.0)");
+		}
+
+		double c = v * s;
+		double x = c * (1 - Math.abs((h / 60.0) % 2 - 1));
+		double m = v - c;
+
+		double[][] rgbBases = new double[][] { { c, x, 0 }, { x, c, 0 }, { 0, c, x }, { 0, x, c }, { x, 0, c },
+				{ c, 0, x } };
+		double[] rgbBase = rgbBases[(int) (h / 60)];
+
+		int r = (int) ((rgbBase[0] + m) * 255);
+		int g = (int) ((rgbBase[1] + m) * 255);
+		int b = (int) ((rgbBase[2] + m) * 255);
+		return new Color(r, g, b);
+	}
+
 	public static int highColorWordToARGB(int word) {
 		int red = (int) ((word & 0x1F) * 8.25);
 		int green = (int) (((word & 0x3E0) >> 5) * 8.25);
@@ -74,8 +146,8 @@ public class Color implements Cloneable {
 
 	/**
 	 * The primary Color constructor, taking an int each for red, green, and blue.
-	 * All other constructors should go through this somehow, as it is the only one that
-	 * does bounds-checking.
+	 * All other constructors should go through this somehow, as it is the only one
+	 * that does bounds-checking.
 	 * 
 	 * @param r red value (0-255)
 	 * @param g green value (0-255)
