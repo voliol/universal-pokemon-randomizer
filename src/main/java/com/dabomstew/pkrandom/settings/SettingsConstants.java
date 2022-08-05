@@ -138,6 +138,10 @@ public class SettingsConstants {
         public static final String RANDOMIZE_IN_GAME_TRADES_ITEMS = "randomizeInGameTradesItems";
         public static final String FIELD_ITEMS_MOD = "fieldItemsMod";
         public static final String BAN_BAD_RANDOM_FIELD_ITEMS = "banBadRandomFieldItems";
+        public static final String POKEMON_PALETTES_MOD = "pokemonPalettesMod";
+        public static final String POKEMON_PALETTES_FOLLOW_TYPES = "pokemonPalettesFollowTypes";
+        public static final String POKEMON_PALETTES_FOLLOW_EVOLUTIONS = "pokemonPalettesFollowEvolutions";
+        public static final String POKEMON_PALETTES_SHINY_FROM_NORMAL = "pokemonPalettesShinyFromNormal";
         public static final String CURRENT_MISC_TWEAKS = "currentMiscTweaks";
 
         public static final ResourceBundle bundle =

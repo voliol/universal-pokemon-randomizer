@@ -40,27 +40,28 @@ import com.dabomstew.pkrandom.pokemon.Type;
  * A {@link Color} with an associated {@link Type}.
  */
 public class TypeColor extends Color {
-	
+
 	private static final String TYPE_TOKEN_REGEX = "\\[.*?\\]";
-	private static final  String COLOR_TOKEN_REGEX = "\\(.*?\\)";
-	private static final  String TOKEN_REGEX = TYPE_TOKEN_REGEX + "|" + COLOR_TOKEN_REGEX;
+	private static final String COLOR_TOKEN_REGEX = "\\(.*?\\)";
+	private static final String TOKEN_REGEX = TYPE_TOKEN_REGEX + "|" + COLOR_TOKEN_REGEX;
 
 	public static Map<Type, TypeColor[]> readTypeColorMapFromFile(String fileName) {
-		Map<Type, TypeColor[]> map = new EnumMap<>(Type.class); 
-		
+		Map<Type, TypeColor[]> map = new EnumMap<>(Type.class);
+
 		Type type = null;
 		List<TypeColor> typeColors = new ArrayList<>();
-		
+
 		String fileString = readAllFromTextFile(fileName);
 		Matcher matcher = Pattern.compile(TOKEN_REGEX).matcher(fileString);
 		System.out.println("== Tokens: ==");
 		while (matcher.find()) {
 			String token = matcher.group();
 			System.out.println(token);
-			
+
 			if (token.matches(TYPE_TOKEN_REGEX)) {
 				if (type != null) {
 					map.put(type, typeColors.toArray(new TypeColor[0]));
+					typeColors = new ArrayList<>();
 				}
 				try {
 					type = Type.valueOf(token.replaceAll("[\\[\\]]", ""));
@@ -68,26 +69,29 @@ public class TypeColor extends Color {
 					throw new RandomizerIOException(e);
 				}
 			}
-			
+
 			else if (token.matches(COLOR_TOKEN_REGEX)) {
 				typeColors.add(new TypeColor(new Color(token), type));
 			}
-			
+
 		}
-		
+		if (type != null) {
+			map.put(type, typeColors.toArray(new TypeColor[0]));
+		}
+
 		return map;
 	}
 
 	private static String readAllFromTextFile(String fileName) {
 		String fileString;
-		try (BufferedReader br = new BufferedReader(new FileReader(fileName))){
+		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			fileString = br.lines().collect(Collectors.joining());
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 		return fileString;
 	}
-	
+
 	public static void putIntsAsTypeColors(Map<Type, TypeColor[]> map, Type type, int[] ints) {
 		TypeColor[] typeColors = new TypeColor[ints.length];
 		for (int i = 0; i < typeColors.length; i++) {

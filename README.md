@@ -2,15 +2,16 @@ Universal Pokemon Randomizer
 
 By Dabomstew
 
-Palette test branch 
+Palette branch 
 by voliol
 
-# Description of the Palette Test Branch
+# Description of the Palette Branch
 What is this: 
 A branch for a framework for palette randomization in all Generations (I-V), 
 and porting the implementation from Artemis251's Pokemon Emerald Randomizer for Gens III-V. 
-Neither are fully finished. My current plans are to tie up this with some GUI, 
-and then attempt a migration to UPR ZX, to be part of the more active development over there.
+Both are mostly finished, and it should be fully usable for all Gen I-III games.
+My next step is to attempt a migration to UPR ZX, to be part of the more active development over there.
+
 Feedback is highly appreciated, whether you are well versed in the UPR or not. 
 This is also on Github to facilitate collaborations. If you want to implement parts of in your branch,
 it has reached a stage where no radical changes should be made; this is a good time.
@@ -43,14 +44,6 @@ https://voliol.neocities.org/articles/genIIIpalettes.html
 - It can read .png/.bmp files and convert them into formats that can be inserted into Gen III-V games.
 
 
-## What is planned to be done before migration:
-
-- Better handling of unorthodox types like fairy (and types at all). What colors should
-  be used when they are not based on Pokémon types?
-  
-- A working GUI, instead of setting settings in Randomizer.java.
-
-  
 ## What lies further into the future (after a migration to ZX):
  
 - Supporting Pokémon forms.

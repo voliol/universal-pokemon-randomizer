@@ -58,7 +58,7 @@ public class Settings {
 
     public static final int VERSION = 203;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 46;
+    public static final int LENGTH_OF_SETTINGS_DATA = 47;
 
     public static final ResourceBundle bundle =
             ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
@@ -134,6 +134,10 @@ public class Settings {
 
     public enum FieldItemsMod {
         UNCHANGED, SHUFFLE, RANDOM
+    }
+    
+    public enum PokemonPalettesMod {
+    	UNCHANGED, RANDOM
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -542,11 +546,24 @@ public class Settings {
                 new SettingsOption.Builder(SettingsConstants.BAN_BAD_RANDOM_FIELD_ITEMS, false)
                         .addMatches(new PredicatePair(fieldItemsMod,
                                 PredicatePair.ENUM_NOT_UNCHANGED)));
+        
+		// Graphics
+		SettingsOptionComposite pokemonPalettesMod = SettingsOptionFactory.createSettingsOption(
+				new SettingsOption.Builder(SettingsConstants.POKEMON_PALETTES_MOD, PokemonPalettesMod.UNCHANGED));
+		SettingsOptionFactory
+				.createSettingsOption(new SettingsOption.Builder(SettingsConstants.POKEMON_PALETTES_FOLLOW_TYPES, false)
+						.addMatches(new PredicatePair(pokemonPalettesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+		SettingsOptionFactory.createSettingsOption(
+				new SettingsOption.Builder(SettingsConstants.POKEMON_PALETTES_FOLLOW_EVOLUTIONS, false)
+						.addMatches(new PredicatePair(pokemonPalettesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
+		SettingsOptionFactory.createSettingsOption(
+				new SettingsOption.Builder(SettingsConstants.POKEMON_PALETTES_SHINY_FROM_NORMAL, false)
+						.addMatches(new PredicatePair(pokemonPalettesMod, PredicatePair.ENUM_NOT_UNCHANGED)));
 
-        // Misc tweaks
-        SettingsOptionComposite currentMiscTweaks = SettingsOptionFactory.createSettingsOption(
-                new SettingsOption.Builder(SettingsConstants.CURRENT_MISC_TWEAKS, 0).addValidInts(0,
-                        MiscTweak.getHighestBitValue()));
+		// Misc tweaks
+		SettingsOptionComposite currentMiscTweaks = SettingsOptionFactory
+				.createSettingsOption(new SettingsOption.Builder(SettingsConstants.CURRENT_MISC_TWEAKS, 0)
+						.addValidInts(0, MiscTweak.getHighestBitValue()));
     }
 
     public void randomSettings() {
@@ -884,8 +901,16 @@ public class Settings {
             writeFullInt(out, typesInt);
         } catch (IOException e) {
         }
+        
+        // @ 46 Graphics / Pokémon Palettes
+        out.write(makeByteSelected(
+        		settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_MOD) == PokemonPalettesMod.UNCHANGED,
+                settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_MOD) == PokemonPalettesMod.RANDOM,
+                settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_FOLLOW_TYPES),
+                settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_FOLLOW_EVOLUTIONS),
+                settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_SHINY_FROM_NORMAL)));
 
-        // @ 46 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
+        // @ 47 Rom Title Name (update LENGTH_OF_SETTINGS_DATA if this changes)
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -1124,13 +1149,18 @@ public class Settings {
         settings.setGymTypeTheme(restoreState(data[40], 3));
         settings.setTrainersBuffElite(restoreState(data[40], 5));
 
-        settings.setEvosChangeMethod(restoreState(data[41], 0));
-        settings.setEvosLv1(restoreState(data[41], 1));
-        settings.setEvosSameStage(restoreState(data[41], 2));
-        settings.setEvosNoLegendaries(restoreState(data[41], 3));
-        settings.setDisableROMHack(restoreState(data[41], 4));
+		settings.setEvosChangeMethod(restoreState(data[41], 0));
+		settings.setEvosLv1(restoreState(data[41], 1));
+		settings.setEvosSameStage(restoreState(data[41], 2));
+		settings.setEvosNoLegendaries(restoreState(data[41], 3));
+		settings.setDisableROMHack(restoreState(data[41], 4));
 
-        settings.setStarterTypes(Type.intToTypes(FileFunctions.readFullInt(data, 42)));
+		settings.setStarterTypes(Type.intToTypes(FileFunctions.readFullInt(data, 42)));
+
+		settings.setPokemonPalettesMod(restoreState(data[46], 0), restoreState(data[46], 1));
+		settings.setPokemonPalettesFollowTypes(restoreState(data[46], 2));
+		settings.setPokemonPalettesFollowEvolutions(restoreState(data[46], 3));
+		settings.setPokemonPalettesShinyFromNormal(restoreState(data[46], 4));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -2300,7 +2330,50 @@ public class Settings {
         return this;
     }
 
-    public int getCurrentMiscTweaks() {
+    public PokemonPalettesMod getPokemonPalettesMod() {
+        return settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_MOD);
+    }
+
+    public Settings setPokemonPalettesMod(PokemonPalettesMod pokemonPalettesMod) {
+        settingsMap.putValue(SettingsConstants.POKEMON_PALETTES_MOD, pokemonPalettesMod);
+        return this;
+    }
+    
+    public Settings setPokemonPalettesMod(boolean... bools) {
+        return setPokemonPalettesMod(getEnum(PokemonPalettesMod.class, bools));
+    }
+
+    public boolean isPokemonPalettesFollowTypes() {
+        return settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_FOLLOW_TYPES);
+    }
+
+    public Settings setPokemonPalettesFollowTypes(boolean pokemonPalettesFollowTypes) {
+        settingsMap.putValue(SettingsConstants.POKEMON_PALETTES_FOLLOW_TYPES,
+        		pokemonPalettesFollowTypes);
+        return this;
+    }
+    
+    public boolean isPokemonPalettesFollowEvolutions() {
+        return settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_FOLLOW_EVOLUTIONS);
+    }
+
+    public Settings setPokemonPalettesFollowEvolutions(boolean pokemonPalettesFollowEvolutions) {
+        settingsMap.putValue(SettingsConstants.POKEMON_PALETTES_FOLLOW_EVOLUTIONS,
+        		pokemonPalettesFollowEvolutions);
+        return this;
+    }
+    
+    public boolean isPokemonPalettesShinyFromNormal() {
+        return settingsMap.getValue(SettingsConstants.POKEMON_PALETTES_SHINY_FROM_NORMAL);
+    }
+
+    public Settings setPokemonPalettesShinyFromNormal(boolean pokemonPalettesShinyFromNormal) {
+        settingsMap.putValue(SettingsConstants.POKEMON_PALETTES_SHINY_FROM_NORMAL,
+        		pokemonPalettesShinyFromNormal);
+        return this;
+    }
+
+	public int getCurrentMiscTweaks() {
         return settingsMap.getValue(SettingsConstants.CURRENT_MISC_TWEAKS);
     }
 
