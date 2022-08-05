@@ -39,3 +39,4 @@ If you don't know what that means, don't worry about it.
 [ICE] 		(425A94) (425A84) (9C73F7)
 [DRAGON] 	(4273C6) (2973BD) (5A528C) (A53939) (FF525A)
 [DARK] 		(29428C) (313929) (39398C) (39395A) (213142) (4A218C) (CE3984)
+[FAIRY]		(6B3900) (3184FF) (E7396B) (FF318C) (E73931)

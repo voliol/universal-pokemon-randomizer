@@ -41,3 +41,4 @@ If you don't know what that means, don't worry about it.
 [ICE] 		(9CADFF) (9CADFF) (5AADFF) (8CC6B5) (BD9473)
 [DRAGON] 	(E7D639) (8C9CFF) (C68C21) (4AD652)
 [DARK] 		(637B9C) (8C7B00) (DE525A) (CE297B) (7B52DE)
+[FAIRY] 	(FF6BCE) (FF8CFF) (FF5AFF) (F7D65A) (FFC642)
