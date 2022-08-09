@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import java.awt.image.BufferedImage;
+
 /*----------------------------------------------------------------------------*/
 /*--  AbstractGBRomHandler.java - a base class for GB/GBA rom handlers      --*/
 /*--                              which standardises common GB(A) functions.--*/
@@ -32,11 +34,16 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.pokemon.Gen1Pokemon;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
@@ -182,6 +189,16 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected int readWord(int offset) {
         return readWord(rom, offset);
     }
+    
+    protected final void writeByte(int offset, byte value) {
+        rom[offset] = value;
+    }
+
+    protected final void writeBytes(int offset, byte[] values) {
+        for (int i = 0; i < values.length; i++) {
+            writeByte(offset + i, values[i]);
+        }
+    }
 
     protected int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
@@ -207,5 +224,44 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         return true;
     }
+    
+	@Override
+	protected List<BufferedImage> getAllPokemonImages() {
+		List<BufferedImage> bims = new ArrayList<>();
+		for (int i = 1; i < getPokemon().size(); i++) {
+			Pokemon pk = getPokemon().get(i);
+
+			BufferedImage frontNormal = getPokemonImage(pk, false, false, false, true);
+			BufferedImage backNormal = getPokemonImage(pk, true, false, false, false);
+			BufferedImage frontShiny = getPokemonImage(pk, false, true, false, true);
+			BufferedImage backShiny = getPokemonImage(pk, true, true, false, false);
+
+			BufferedImage combined = GFXFunctions
+					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+			bims.add(combined);
+		}
+		return bims;
+	}
+
+	@Override
+	public final BufferedImage getMascotImage() {
+		try {
+			dumpAllPokemonSprites();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Pokemon pk = randomPokemon();
+		boolean shiny = random.nextInt(10) == 0;
+		boolean gen1 = generationOfPokemon() == 1;
+
+		BufferedImage bim = getPokemonImage(gen1 ? (Gen1Pokemon) pk : pk, false, gen1 ? shiny : false, true, false);
+
+		return bim;
+	}
+
+	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of
+	// the pattern to replace it
+	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
+			boolean transparentBackground, boolean includePalette);
 
 }

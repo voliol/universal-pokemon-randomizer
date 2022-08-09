@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.constants.Species;
+import com.dabomstew.pkrandom.graphics.Palette;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,11 +59,13 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int genderRatio;
 
-    public int frontSpritePointer, picDimensions;
+    public int picDimensions;
 
     public int callRate;
 
     public ExpCurve growthCurve;
+    
+    public Palette normalPalette, shinyPalette;
 
     public List<Evolution> evolutionsFrom = new ArrayList<>();
     public List<Evolution> evolutionsTo = new ArrayList<>();

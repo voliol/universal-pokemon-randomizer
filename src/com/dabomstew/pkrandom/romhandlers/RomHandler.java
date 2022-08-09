@@ -604,7 +604,6 @@ public interface RomHandler {
     // (excluding Gameshark codes or early drink in RBY)
     List<Integer> getEarlyRequiredHMMoves();
 
-
     // ====
     // Misc
     // ====
@@ -654,4 +653,11 @@ public interface RomHandler {
     List<Pokemon> getBannedFormesForPlayerPokemon();
 
     List<Pokemon> getBannedFormesForTrainerPokemon();
+    
+    // ========
+    // Graphics
+    // ========
+    
+    void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
+
 }

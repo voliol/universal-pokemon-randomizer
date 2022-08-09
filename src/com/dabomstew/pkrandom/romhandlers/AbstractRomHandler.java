@@ -1,5 +1,9 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 /*----------------------------------------------------------------------------*/
 /*--  AbstractRomHandler.java - a base class for all rom handlers which     --*/
 /*--                            implements the majority of the actual       --*/
@@ -32,9 +36,12 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -2695,9 +2702,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 mv2.power > 0 &&
                                 mv.power * mv.hitCount > mv2.power * mv2.hitCount)
                         .collect(Collectors.toList());
-                for (Move obsoleted: obsoleteThis) {
-                    //System.out.println(obsoleted.name + " obsoleted by " + mv.name);
-                }
+//                for (Move obsoleted: obsoleteThis) {
+//                    System.out.println(obsoleted.name + " obsoleted by " + mv.name);
+//                }
                 obsoletedMoves.addAll(obsoleteThis);
             } else if (mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER ||
                     mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_TARGET) {
@@ -2764,9 +2771,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                 }
-                for (Move obsoleted: obsoleteThis) {
-                    //System.out.println(obsoleted.name + " obsoleted by " + mv.name);
-                }
+//                for (Move obsoleted : obsoleteThis) {
+//                    System.out.println(obsoleted.name + " obsoleted by " + mv.name);
+//                }
                 obsoletedMoves.addAll(obsoleteThis);
             }
         }
@@ -3641,7 +3648,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                    Map<Type, List<Move>> validTypeMoves, Map<Type, List<Move>> validTypeDamagingMoves) {
         List<Move> allMoves = this.getMoves();
         List<Integer> hms = this.getHMMoves();
-        Set<Integer> allBanned = new HashSet<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.EMPTY_SET);
+        Set<Integer> allBanned = new HashSet<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.emptySet());
         allBanned.addAll(hms);
         allBanned.addAll(this.getMovesBannedFromLevelup());
         allBanned.addAll(GlobalConstants.zMoves);
@@ -4838,7 +4845,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
         Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
                 new TreeMap<Integer, List<String>>() };
-        
+
         List<String> repeatedTrainerNames = Arrays.asList(new String[] { "GRUNT", "EXECUTIVE", "SHADOW", "ADMIN", "GOON", "EMPLOYEE" });
 
         // Read name lists
@@ -6411,7 +6418,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         return typedPokes;
     }
 
-    private List<Pokemon> allPokemonWithoutNull() {
+    protected List<Pokemon> allPokemonWithoutNull() {
         List<Pokemon> allPokes = new ArrayList<>(this.getPokemon());
         allPokes.remove(0);
         return allPokes;
@@ -7479,4 +7486,33 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void setPickupItems(List<PickupItem> pickupItems) {
         // do nothing
     }
+
+    @Override
+    public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
+//        getPaletteHandler().randomizePokemonPalettes(copyUpEvolutionsHelper, typeSanity, evolutionSanity, shinyFromNormal);
+    }
+
+    public abstract PaletteHandler getPaletteHandler();
+
+    // just for testing
+    protected final void dumpAllPokemonSprites() {
+        List<BufferedImage> bims = getAllPokemonImages();
+
+        for (int i = 0; i < bims.size(); i++) {
+            String fileAdress = "Pokemon_sprite_dump/gen" + generationOfPokemon() + "/"
+                    + String.format("%03d_d.png", i + 1);
+            File outputfile = new File(fileAdress);
+            try {
+                ImageIO.write(bims.get(i), "png", outputfile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    protected abstract List<BufferedImage> getAllPokemonImages();
+
+	protected abstract void savePokemonPalettes();
+
 }

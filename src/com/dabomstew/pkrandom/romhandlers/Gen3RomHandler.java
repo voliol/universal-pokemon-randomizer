@@ -35,7 +35,12 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
+
+import compressors.DSCmp;
 import compressors.DSDecmp;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
@@ -342,6 +347,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
+    // Sub-handlers
+    private PaletteHandler paletteHandler;
+
     // This ROM's data
     private Pokemon[] pokes, pokesInternal;
     private List<Pokemon> pokemonList;
@@ -459,6 +467,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         constructPokemonList();
         populateEvolutions();
         loadMoves();
+        loadPokemonPalettes();
 
         // Get wild Pokemon offset
         int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
@@ -486,6 +495,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         nonBadItems = Gen3Constants.getNonBadItems(romEntry.romType).copy();
 
         actualCRC32 = FileFunctions.getCRC32(rom);
+        
+        // Having this in the constructor would be preferred, 
+        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
+        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     private int findPointerPrefixAndSuffix(String prefix, String suffix) {
@@ -4322,50 +4335,182 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[currentOffset + 2] = effectivenessInternal;
             currentOffset += 3;
         }
-    }
+	}
 
-    @Override
-    public boolean isRomValid() {
-        return romEntry.expectedCRC32 == actualCRC32;
-    }
+	@Override
+	public List<Integer> getAllHeldItems() {
+		return Gen3Constants.allHeldItems;
+	}
 
-    @Override
-    public BufferedImage getMascotImage() {
-        Pokemon mascotPk = randomPokemon();
-        int mascotPokemon = pokedexToInternal[mascotPk.number];
-        int frontSprites = romEntry.getValue("FrontSprites");
-        int palettes = romEntry.getValue("PokemonPalettes");
-        int fsOffset = readPointer(frontSprites + mascotPokemon * 8);
-        int palOffset = readPointer(palettes + mascotPokemon * 8);
-
-        byte[] trueFrontSprite = DSDecmp.Decompress(rom, fsOffset);
-        byte[] truePalette = DSDecmp.Decompress(rom, palOffset);
-
-        // Convert palette into RGB
-        int[] convPalette = new int[16];
-        // Leave palette[0] as 00000000 for transparency
-        for (int i = 0; i < 15; i++) {
-            int palValue = readWord(truePalette, i * 2 + 2);
-            convPalette[i + 1] = GFXFunctions.conv16BitColorToARGB(palValue);
-        }
-
-        // Make image, 4bpp
-        return GFXFunctions.drawTiledImage(trueFrontSprite, convPalette, 64, 64, 4);
-    }
-
-    @Override
-    public List<Integer> getAllHeldItems() {
-        return Gen3Constants.allHeldItems;
-    }
-
-    @Override
-    public boolean hasRivalFinalBattle() {
+	@Override
+	public boolean hasRivalFinalBattle() {
         return romEntry.romType == Gen3Constants.RomType_FRLG;
     }
 
     @Override
     public List<Integer> getAllConsumableHeldItems() {
         return Gen3Constants.consumableHeldItems;
+    }
+    
+    private void loadPokemonPalettes() {
+        int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
+        int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
+        for (Pokemon pk : allPokemonWithoutNull()) {
+            int pokeNumber = pokedexToInternal[pk.number];
+
+            int normalPalOffset = readPointer(normalPaletteTableOffset + pokeNumber * 8);
+            pk.normalPalette = readPalette(normalPalOffset);
+
+            int shinyPalOffset = readPointer(shinyPaletteTableOffset + pokeNumber * 8);
+            pk.shinyPalette = readPalette(shinyPalOffset);
+        }
+    }
+
+    private Palette readPalette(int palOffset) {
+        byte[] paletteBytes = DSDecmp.Decompress(rom, palOffset);
+        return new Palette(paletteBytes);
+    }
+
+    @Override
+    public void savePokemonPalettes() {
+        int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
+        int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
+        for (Pokemon pk : allPokemonWithoutNull()) {
+            int pokeNumber = pokedexToInternal[pk.number];
+
+            int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
+            rewritePalette(normalPalPointerOffset, pk.normalPalette);
+
+            int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
+            rewritePalette(shinyPalPointerOffset, pk.shinyPalette);
+        }
+    }
+
+    private void rewritePalette(int pointerOffset, Palette palette) {
+        rewriteCompressedData(pointerOffset, palette.toBytes());
+    }
+
+    /*
+     * Assumes there is only one pointer to the compressed data. If there are more,
+     * use rewriteCompressedData(int, byte[], int[]) directly.
+     */
+    private void rewriteCompressedData(int pointerOffset, byte[] uncompressed) {
+        rewriteCompressedData(pointerOffset, uncompressed, new int[0]);
+    }
+
+    private void rewriteCompressedData(int pointerOffset, byte[] uncompressed, int[] secondaryPointerOffsets) {
+        byte[] compressed = DSCmp.compressLZ10(uncompressed);
+        int dataOffset = readPointer(pointerOffset);
+        int oldLength = compressedDataLength(dataOffset);
+
+        for (int secondaryPointerOffset : secondaryPointerOffsets) {
+            if (readPointer(secondaryPointerOffset) != dataOffset) {
+                throw new RandomizerIOException("Invalid secondary pointer.");
+            }
+        }
+
+        if (oldLength != compressed.length) {
+            freeSpace(dataOffset, oldLength);
+        }
+
+        if (oldLength < compressed.length) {
+            int newOffset = repointAndWriteToFreeSpace(pointerOffset, compressed);
+            for (int secondaryPointerOffset : secondaryPointerOffsets) {
+                writePointer(secondaryPointerOffset, newOffset);
+            }
+        } else {
+            writeBytes(dataOffset, compressed);
+        }
+    }
+
+    /*
+     * Returns the length in bytes of the compressed data at the pointer. NOT the
+     * length of the uncompressed data, but the length of it when compressed.
+     */
+    private int compressedDataLength(int pointer) {
+        // Yes, the "easiest" way to check how long compressed data is to uncompress it
+        // and then compress it back.
+        // A better solution would require understanding the inner workings of the LZ10.
+        byte[] uncompressed = DSDecmp.Decompress(rom, pointer);
+        byte[] compressed = DSCmp.compressLZ10(uncompressed);
+        return compressed.length;
+    }
+
+    /*
+     * Returns the new offset of the data.
+     */
+    // TODO: refactor old functions to use this
+    private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+        int freeSpaceOffset = romEntry.getValue("FreeSpace");
+        int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, data.length, freeSpaceOffset);
+        if (newOffset < freeSpaceOffset) {
+            throw new RandomizerIOException("ROM is full");
+        }
+
+        writePointer(pointerOffset, newOffset);
+        writeBytes(newOffset, data);
+
+        return newOffset;
+    }
+
+    private void freeSpace(int offset, int length) {
+        for (int i = 0; i < length; i++) {
+            writeByte(offset + i, Gen3Constants.freeSpaceByte);
+        }
+    }
+    
+    @Override
+    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
+            boolean includePalette) {
+
+        int num = pokedexToInternal[pk.number];
+        int sprites = back ? romEntry.getValue("PokemonBackSprites") : romEntry.getValue("PokemonFrontSprites");
+
+        int spriteOffset = readPointer(sprites + num * 8);
+        byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+        // Uses the 0-index missingno sprite if the data failed to read, for debugging
+        // purposes
+        if (trueSprite == null) {
+            spriteOffset = readPointer(sprites);
+            trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+        }
+
+        Palette palette = shiny ? pk.shinyPalette : pk.normalPalette;
+        int[] convPalette = palette.toARGB();
+        if (transparentBackground) {
+            convPalette[0] = 0;
+        }
+        // Castform has a 64-color palette, 16 colors for each form.
+        if (pk.number == Species.castform) {
+        	convPalette = Arrays.copyOfRange(convPalette, 0, 16);
+        }
+
+        // Make image, 4bpp
+        BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
+
+        if (includePalette) {
+            for (int j = 0; j < convPalette.length; j++) {
+                bim.setRGB(j, 0, convPalette[j]);
+            }
+        }
+
+        return bim;
+    }
+
+    private String getPaletteFilesID() {
+        switch (romEntry.romType) {
+        case Gen3Constants.RomType_Ruby:
+        case Gen3Constants.RomType_Sapp:
+            // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
+        	// otherwise all palettes are pretty much identical (in use).
+            return "E";
+        case Gen3Constants.RomType_Em:
+            return "E";
+        case Gen3Constants.RomType_FRLG:
+            return "FRLG";
+        default:
+            return null;
+        }
     }
 
     @Override
@@ -4404,4 +4549,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         return items;
     }
+    
+    @Override
+    public PaletteHandler getPaletteHandler() {
+        return paletteHandler;
+    }
+
+	@Override
+	public boolean isRomValid() {
+		return romEntry.expectedCRC32 == actualCRC32;
+	}
 }

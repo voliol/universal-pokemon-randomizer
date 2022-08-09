@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import java.awt.image.BufferedImage;
 /*----------------------------------------------------------------------------*/
 /*--  AbstractDSRomHandler.java - a base class for DS rom handlers          --*/
 /*--                              which standardises common DS functions.   --*/
@@ -27,19 +28,30 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 public abstract class AbstractDSRomHandler extends AbstractRomHandler {
+	
+    private static final byte[] PALETTE_PREFIX_BYTES = { (byte) 0x52, (byte) 0x4C, (byte) 0x43, (byte) 0x4E,
+            (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x01, (byte) 0x48, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x10, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x54, (byte) 0x54, (byte) 0x4C, (byte) 0x50,
+            (byte) 0x38, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x0A, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
     protected String dataFolder;
     private NDSRom baseRom;
@@ -387,5 +399,126 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
         return newARM9;
     }
+    
+	private byte[] concatenate(byte[] a, byte[] b) {
+	    byte[] sum = new byte[a.length + b.length];
+	    System.arraycopy(a, 0, sum, 0, a.length);
+	    System.arraycopy(b, 0, sum, a.length, b.length);
+	    return sum;
+	}
+
+	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
+	// is separate methods called in loadedROM()/loadedRom() methods. Even though
+	// one call in AbstractRomHandler should suffice.
+	protected void loadPokemonPalettes() {
+        try {
+            String NARCpath = getNARCPath("PokemonGraphics");
+            NARCArchive pokespritesNARC = readNARC(NARCpath);
+            for (Pokemon pk : allPokemonWithoutNull()) {
+                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.number);
+                pk.normalPalette = readPalette(pokespritesNARC, normalPaletteIndex);
+                
+                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.number);
+                pk.shinyPalette = readPalette(pokespritesNARC, shinyPaletteIndex);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    protected abstract int calculatePokemonNormalPaletteIndex(int i);
+    
+    protected abstract int calculatePokemonShinyPaletteIndex(int i);
+
+    protected final Palette readPalette(NARCArchive NARC, int index) {
+        byte[] withPrefixBytes = NARC.files.get(index);
+        byte[] paletteBytes = Arrays.copyOfRange(withPrefixBytes, PALETTE_PREFIX_BYTES.length, withPrefixBytes.length);
+        return new Palette(paletteBytes);
+    }
+
+    @Override
+    public void savePokemonPalettes() {
+        try {
+            String NARCpath = getNARCPath("PokemonGraphics");
+            NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
+
+            for (Pokemon pk : allPokemonWithoutNull()) {
+
+                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.number);
+                byte[] normalPaletteBytes = pk.normalPalette.toBytes();
+                normalPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, normalPaletteBytes);
+                pokeGraphicsNARC.files.set(normalPaletteIndex, normalPaletteBytes);
+                
+                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.number);
+                byte[] shinyPaletteBytes = pk.shinyPalette.toBytes();
+                shinyPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, shinyPaletteBytes);
+                pokeGraphicsNARC.files.set(shinyPaletteIndex, shinyPaletteBytes);
+
+            }
+            writeNARC(NARCpath, pokeGraphicsNARC);
+
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+    
+    @Override
+    protected List<BufferedImage> getAllPokemonImages() {
+        List<BufferedImage> bims = new ArrayList<>();
+        
+        String NARCPath = getNARCPath("PokemonGraphics");
+        NARCArchive pokeGraphicsNARC;
+        try {
+            pokeGraphicsNARC = readNARC(NARCPath);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        
+        for (int i = 1; i < getPokemon().size(); i++) {
+            Pokemon pk = getPokemon().get(i);
+           
+            BufferedImage frontNormal = getPokemonImage(pk, pokeGraphicsNARC, false, false, false, true);
+            BufferedImage backNormal = getPokemonImage(pk, pokeGraphicsNARC, true, false, false, false);
+        	BufferedImage frontShiny = getPokemonImage(pk, pokeGraphicsNARC, false, true, false, true); 
+        	BufferedImage backShiny = getPokemonImage(pk, pokeGraphicsNARC, true, true, false, false); 
+            	
+        	BufferedImage combined = GFXFunctions.stitchToGrid(new BufferedImage[][] {{frontNormal, backNormal}, {frontShiny, backShiny}});
+            bims.add(combined);
+        }
+        return bims;
+    }
+    
+	@Override
+	public final BufferedImage getMascotImage() {
+		try {
+			dumpAllPokemonSprites();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			Pokemon pk = randomPokemon();
+			String NARCpath = getNARCPath("PokemonGraphics");
+			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
+			boolean shiny = random.nextInt(10) == 0;
+
+			BufferedImage bim = getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
+
+			return bim;
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+	}
+    
+    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
+    public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+            boolean transparentBackground, boolean includePalette);
+
+    // because RomEntry is an inner class it can't be accessed here, so an abstract
+    // method is needed.
+    // a refactoring might be better, but is outside of the scope for the changes
+    // I'm making now
+    // - voliol 2022-01-13
+    public abstract String getNARCPath(String fileName);
 
 }
