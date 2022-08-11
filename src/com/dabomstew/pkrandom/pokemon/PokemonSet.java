@@ -18,7 +18,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         return pokemonSet;
     }
 
-    // likewise static because ev.to, ev.from
+    // likewise static because ev.to, ev.from return Pokemon
     public static PokemonSet<Pokemon> related(Pokemon original) {
         PokemonSet<Pokemon> results = new PokemonSet<>();
         results.add(original);
@@ -101,4 +101,37 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         });
     }
 
+    /**
+     * Filters so that a Pokémon is only included if its number is within the range.<br>
+     * Note that alternate formes have different numbers than the base form.
+     * @param start The lower end of the range, inclusive.
+     * @param end The upper end of the range, inclusive.
+     */
+    public PokemonSet<T> filterFromNumberRange(int start, int end) {
+        return filter(pk -> start <= pk.number && pk.number <= end);
+    }
+
+    /**
+     * Filters so that a Pokémon is only included if its *base* number is within the range.<br>
+     * Note this means any alternate forms of a Pokémon with a valid number are included.
+     * @param start The lower end of the range, inclusive.
+     * @param end The upper end of the range, inclusive.
+     */
+    public PokemonSet<T> filterFromBaseNumberRange(int start, int end) {
+        return filter(pk -> start <= pk.getBaseNumber() && pk.getBaseNumber() <= end);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean addEvolutionaryRelatives() {
+        PokemonSet<Pokemon> relatives = new PokemonSet<>();
+        for (Pokemon pk : this) {
+            relatives.addAll(PokemonSet.related(pk));
+        }
+        return addAll((Collection<? extends T>) relatives);
+    }
+
+    public T getRandom(Random random) {
+        List<T> randomPickableFrom = new ArrayList<>(this);
+        return randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
+    }
 }

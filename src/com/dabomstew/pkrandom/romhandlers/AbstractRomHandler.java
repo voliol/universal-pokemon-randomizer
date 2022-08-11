@@ -28,36 +28,44 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.PrintStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 
+import java.io.PrintStream;
+import java.util.*;
+import java.util.stream.Collectors;
+
 public abstract class AbstractRomHandler implements RomHandler {
 
-    private boolean restrictionsSet;
-    protected List<Pokemon> mainPokemonList;
-    protected List<Pokemon> mainPokemonListInclFormes;
-    private List<Pokemon> altFormesList;
-    private List<MegaEvolution> megaEvolutionsList;
-    private List<Pokemon> noLegendaryList, onlyLegendaryList, ultraBeastList;
-    private List<Pokemon> noLegendaryListInclFormes, onlyLegendaryListInclFormes;
-    private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
-    private List<Pokemon> pickedStarters;
     protected final Random random;
-    private final Random cosmeticRandom;
     protected PrintStream logStream;
+
+    private boolean restrictionsSet;
+    protected PokemonSet<Pokemon> restrictedPokemon;
+    protected PokemonSet<Pokemon> restrictedPokemonInclAltFormes = new PokemonSet<>();
+    private PokemonSet<Pokemon> nonlegendaryPokemon = new PokemonSet<>();
+    private PokemonSet<Pokemon> legendaryPokemon = new PokemonSet<>();
+    private PokemonSet<Pokemon> ultraBeasts = new PokemonSet<>();
+    private PokemonSet<Pokemon> nonlegendaryPokemonInclFormes = new PokemonSet<>();
+    private PokemonSet<Pokemon> legendaryPokemonInclFormes = new PokemonSet<>();
+    private PokemonSet<Pokemon> nonlegendaryAltFormes = new PokemonSet<>();
+    private PokemonSet<Pokemon> legendaryAltFormes = new PokemonSet<>();
+
+    private List<MegaEvolution> megaEvolutionsList;
+    private List<Pokemon> altFormesList;
+    private List<Pokemon> pickedStarters;
+    private final Random cosmeticRandom;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
     private Map<Pokemon, Integer> placementHistory = new HashMap<>();
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
     private int fullyEvolvedRandomSeed;
-    boolean isORAS = false;
-    boolean isSM = false;
-    int perfectAccuracy = 100;
+
+    protected boolean isORAS = false;
+    protected boolean isSM = false;
+
+    protected int perfectAccuracy = 100;
 
     /* Constructor */
 
@@ -88,128 +96,80 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         restrictionsSet = true;
-        mainPokemonList = this.allPokemonWithoutNull();
-        mainPokemonListInclFormes = this.allPokemonInclFormesWithoutNull();
         altFormesList = this.getAltFormes();
         megaEvolutionsList = this.getMegaEvolutions();
         if (restrictions != null) {
-            mainPokemonList = new ArrayList<>();
-            mainPokemonListInclFormes = new ArrayList<>();
+            // temporary until I figure out if allPokemon() should be a PokemonSet
+            PokemonSet<Pokemon> allPokemonSet = new PokemonSet<>(getPokemon());
             megaEvolutionsList = new ArrayList<>();
             List<Pokemon> allPokemon = this.getPokemon();
 
             if (restrictions.allow_gen1) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.bulbasaur, Species.mew);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.bulbasaur, Species.mew));
             }
 
             if (restrictions.allow_gen2 && allPokemon.size() > Gen2Constants.pokemonCount) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.chikorita, Species.celebi);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.chikorita, Species.celebi));
             }
 
             if (restrictions.allow_gen3 && allPokemon.size() > Gen3Constants.pokemonCount) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.treecko, Species.deoxys);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.treecko, Species.deoxys));
             }
 
             if (restrictions.allow_gen4 && allPokemon.size() > Gen4Constants.pokemonCount) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.turtwig, Species.arceus);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.turtwig, Species.arceus));
             }
 
             if (restrictions.allow_gen5 && allPokemon.size() > Gen5Constants.pokemonCount) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.victini, Species.genesect);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.victini, Species.genesect));
             }
 
             if (restrictions.allow_gen6 && allPokemon.size() > Gen6Constants.pokemonCount) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.chespin, Species.volcanion);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.chespin, Species.volcanion));
             }
 
             int maxGen7SpeciesID = isSM ? Species.marshadow : Species.zeraora;
             if (restrictions.allow_gen7 && allPokemon.size() > maxGen7SpeciesID) {
-                addPokesFromRange(mainPokemonList, allPokemon, Species.rowlet, maxGen7SpeciesID);
+                restrictedPokemonInclAltFormes.addAll(allPokemonSet.filterFromBaseNumberRange(Species.rowlet, maxGen7SpeciesID));
             }
 
             // If the user specified it, add all the evolutionary relatives for everything in the mainPokemonList
             if (restrictions.allow_evolutionary_relatives) {
-                addEvolutionaryRelatives(mainPokemonList);
+                restrictedPokemonInclAltFormes.addEvolutionaryRelatives();
             }
-
-            // Now that mainPokemonList has all the selected Pokemon, update mainPokemonListInclFormes too
-            addAllPokesInclFormes(mainPokemonList, mainPokemonListInclFormes);
 
             // Populate megaEvolutionsList with all of the mega evolutions that exist in the pool
             List<MegaEvolution> allMegaEvolutions = this.getMegaEvolutions();
             for (MegaEvolution megaEvo : allMegaEvolutions) {
-                if (mainPokemonListInclFormes.contains(megaEvo.to)) {
+                if (restrictedPokemonInclAltFormes.contains(megaEvo.to)) {
                     megaEvolutionsList.add(megaEvo);
                 }
             }
         }
 
-        noLegendaryList = new ArrayList<>();
-        noLegendaryListInclFormes = new ArrayList<>();
-        onlyLegendaryList = new ArrayList<>();
-        onlyLegendaryListInclFormes = new ArrayList<>();
-        noLegendaryAltsList = new ArrayList<>();
-        onlyLegendaryAltsList = new ArrayList<>();
-        ultraBeastList = new ArrayList<>();
+        restrictedPokemon = restrictedPokemonInclAltFormes.filter(pk -> !altFormesList.contains(pk));
 
-        for (Pokemon p : mainPokemonList) {
+        for (Pokemon p : restrictedPokemon) {
             if (p.isLegendary()) {
-                onlyLegendaryList.add(p);
+                legendaryPokemon.add(p);
             } else if (p.isUltraBeast()) {
-                ultraBeastList.add(p);
+                ultraBeasts.add(p);
             } else {
-                noLegendaryList.add(p);
+                nonlegendaryPokemon.add(p);
             }
         }
-        for (Pokemon p : mainPokemonListInclFormes) {
+        for (Pokemon p : restrictedPokemonInclAltFormes) {
             if (p.isLegendary()) {
-                onlyLegendaryListInclFormes.add(p);
-            } else if (!ultraBeastList.contains(p)) {
-                noLegendaryListInclFormes.add(p);
+                legendaryPokemonInclFormes.add(p);
+            } else if (!ultraBeasts.contains(p)) {
+                nonlegendaryPokemonInclFormes.add(p);
             }
         }
         for (Pokemon f : altFormesList) {
             if (f.isLegendary()) {
-                onlyLegendaryAltsList.add(f);
+                legendaryAltFormes.add(f);
             } else {
-                noLegendaryAltsList.add(f);
-            }
-        }
-    }
-
-    private void addPokesFromRange(List<Pokemon> pokemonPool, List<Pokemon> allPokemon, int range_min, int range_max) {
-        for (int i = range_min; i <= range_max; i++) {
-            if (!pokemonPool.contains(allPokemon.get(i))) {
-                pokemonPool.add(allPokemon.get(i));
-            }
-        }
-    }
-
-    // TODO: work into PokemonSet?
-    private void addEvolutionaryRelatives(List<Pokemon> pokemonPool) {
-        PokemonSet<Pokemon> newPokemon = new PokemonSet<>();
-        for (Pokemon pk : pokemonPool) {
-            newPokemon.addAll(PokemonSet.related(pk));
-        }
-        for (Pokemon pk : newPokemon) {
-            if (!pokemonPool.contains(pk)) {
-                pokemonPool.add(pk);
-            }
-        }
-    }
-
-    private void addAllPokesInclFormes(List<Pokemon> pokemonPool, List<Pokemon> pokemonPoolInclFormes) {
-        List<Pokemon> altFormes = this.getAltFormes();
-        for (int i = 0; i < pokemonPool.size(); i++) {
-            Pokemon currentPokemon = pokemonPool.get(i);
-            if (!pokemonPoolInclFormes.contains(currentPokemon)) {
-                pokemonPoolInclFormes.add(currentPokemon);
-            }
-            for (int j = 0; j < altFormes.size(); j++) {
-                Pokemon potentialAltForme = altFormes.get(j);
-                if (potentialAltForme.baseForme != null && potentialAltForme.baseForme.number == currentPokemon.number) {
-                    pokemonPoolInclFormes.add(potentialAltForme);
-                }
+                nonlegendaryAltFormes.add(f);
             }
         }
     }
@@ -347,30 +307,30 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     public Pokemon randomPokemon() {
         checkPokemonRestrictions();
-        return mainPokemonList.get(this.random.nextInt(mainPokemonList.size()));
+        return restrictedPokemon.getRandom(random);
     }
 
     @Override
     public Pokemon randomPokemonInclFormes() {
         checkPokemonRestrictions();
-        return mainPokemonListInclFormes.get(this.random.nextInt(mainPokemonListInclFormes.size()));
+        return restrictedPokemonInclAltFormes.getRandom(random);
     }
 
     @Override
     public Pokemon randomNonLegendaryPokemon() {
         checkPokemonRestrictions();
-        return noLegendaryList.get(this.random.nextInt(noLegendaryList.size()));
+        return nonlegendaryPokemon.getRandom(random);
     }
 
     private Pokemon randomNonLegendaryPokemonInclFormes() {
         checkPokemonRestrictions();
-        return noLegendaryListInclFormes.get(this.random.nextInt(noLegendaryListInclFormes.size()));
+        return nonlegendaryPokemonInclFormes.getRandom(random);
     }
 
     @Override
     public Pokemon randomLegendaryPokemon() {
         checkPokemonRestrictions();
-        return onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
+        return legendaryPokemon.getRandom(random);
     }
 
     private List<Pokemon> twoEvoPokes;
@@ -718,12 +678,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             List<Pokemon> allPokes;
             if (allowAltFormes) {
-                allPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                        mainPokemonListInclFormes);
+                allPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes) : new ArrayList<>(
+                        restrictedPokemonInclAltFormes);
                 allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
             } else {
-                allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                        mainPokemonList);
+                allPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemon) : new ArrayList<>(
+                        restrictedPokemon);
             }
             allPokes.removeAll(banned);
 
@@ -740,12 +700,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         // something else for now.
                         List<Pokemon> tempPickable;
                         if (allowAltFormes) {
-                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                                    mainPokemonListInclFormes);
+                            tempPickable = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes) : new ArrayList<>(
+                                    restrictedPokemonInclAltFormes);
                             tempPickable.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
                         } else {
-                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                                    mainPokemonList);
+                            tempPickable = noLegendaries ? new ArrayList<>(nonlegendaryPokemon) : new ArrayList<>(
+                                    restrictedPokemon);
                         }
                         tempPickable.removeAll(banned);
                         tempPickable.removeAll(area.bannedPokemon);
@@ -767,10 +727,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (allPokes.size() == 0) {
                             // Start again
                             if (allowAltFormes) {
-                                allPokes.addAll(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
+                                allPokes.addAll(noLegendaries ? nonlegendaryPokemonInclFormes : restrictedPokemonInclAltFormes);
                                 allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
                             } else {
-                                allPokes.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                                allPokes.addAll(noLegendaries ? nonlegendaryPokemon : restrictedPokemon);
                             }
                             allPokes.removeAll(banned);
                             if (pickablePokemon != allPokes) {
@@ -820,11 +780,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else if (usePowerLevels) {
             List<Pokemon> allowedPokes;
             if (allowAltFormes) {
-                allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                        : new ArrayList<>(mainPokemonListInclFormes);
+                allowedPokes  = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes)
+                        : new ArrayList<>(restrictedPokemonInclAltFormes);
             } else {
-                allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
-                        : new ArrayList<>(mainPokemonList);
+                allowedPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemon)
+                        : new ArrayList<>(restrictedPokemon);
             }
             allowedPokes.removeAll(banned);
             for (EncounterSet area : scrambledEncounters) {
@@ -925,12 +885,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (catchEmAll) {
             List<Pokemon> allPokes;
             if (allowAltFormes) {
-                allPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                        mainPokemonListInclFormes);
+                allPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes) : new ArrayList<>(
+                        restrictedPokemonInclAltFormes);
                 allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
             } else {
-                allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                        mainPokemonList);
+                allPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemon) : new ArrayList<>(
+                        restrictedPokemon);
             }
             allPokes.removeAll(banned);
             for (EncounterSet area : scrambledEncounters) {
@@ -948,12 +908,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         // No more pickable pokes left, take a random one
                         List<Pokemon> tempPickable;
                         if (allowAltFormes) {
-                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                                    mainPokemonListInclFormes);
+                            tempPickable = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes) : new ArrayList<>(
+                                    restrictedPokemonInclAltFormes);
                             tempPickable.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
                         } else {
-                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                                    mainPokemonList);
+                            tempPickable = noLegendaries ? new ArrayList<>(nonlegendaryPokemon) : new ArrayList<>(
+                                    restrictedPokemon);
                         }
                         tempPickable.removeAll(banned);
                         tempPickable.removeAll(area.bannedPokemon);
@@ -974,10 +934,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (allPokes.size() == 0) {
                             // Start again
                             if (allowAltFormes) {
-                                allPokes.addAll(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
+                                allPokes.addAll(noLegendaries ? nonlegendaryPokemonInclFormes : restrictedPokemonInclAltFormes);
                                 allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
                             } else {
-                                allPokes.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                                allPokes.addAll(noLegendaries ? nonlegendaryPokemon : restrictedPokemon);
                             }
                             allPokes.removeAll(banned);
                             if (pickablePokemon != allPokes) {
@@ -1043,11 +1003,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else if (usePowerLevels) {
             List<Pokemon> allowedPokes;
             if (allowAltFormes) {
-                allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                        : new ArrayList<>(mainPokemonListInclFormes);
+                allowedPokes  = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes)
+                        : new ArrayList<>(restrictedPokemonInclAltFormes);
             } else {
-                allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
-                        : new ArrayList<>(mainPokemonList);
+                allowedPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemon)
+                        : new ArrayList<>(restrictedPokemon);
             }
             allowedPokes.removeAll(banned);
             for (EncounterSet area : scrambledEncounters) {
@@ -1120,16 +1080,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
-        List<Pokemon> remainingLeft = allPokemonInclFormesWithoutNull();
+        List<Pokemon> remainingLeft = new ArrayList<>(allPokemonSetInclFormes());
         remainingLeft.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
         List<Pokemon> remainingRight;
         if (allowAltFormes) {
-            remainingRight = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                    : new ArrayList<>(mainPokemonListInclFormes);
+            remainingRight = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes)
+                    : new ArrayList<>(restrictedPokemonInclAltFormes);
             remainingRight.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
         } else {
-            remainingRight = noLegendaries ? new ArrayList<>(noLegendaryList)
-                    : new ArrayList<>(mainPokemonList);
+            remainingRight = noLegendaries ? new ArrayList<>(nonlegendaryPokemon)
+                    : new ArrayList<>(restrictedPokemon);
         }
         List<Pokemon> banned = this.bannedForWildEncounters();
         banned.addAll(this.getBannedFormesForPlayerPokemon());
@@ -1176,18 +1136,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (remainingRight.size() == 0) {
                 // restart
                 if (allowAltFormes) {
-                    remainingRight.addAll(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
+                    remainingRight.addAll(noLegendaries ? nonlegendaryPokemonInclFormes : restrictedPokemonInclAltFormes);
                     remainingRight.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
                 } else {
-                    remainingRight.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
+                    remainingRight.addAll(noLegendaries ? nonlegendaryPokemon : restrictedPokemon);
                 }
                 remainingRight.removeAll(banned);
             }
         }
 
         // Map remaining to themselves just in case
-        List<Pokemon> allPokes = allPokemonInclFormesWithoutNull();
-        for (Pokemon poke : allPokes) {
+        for (Pokemon poke : allPokemonSetInclFormes()) {
             if (!translateMap.containsKey(poke)) {
                 translateMap.put(poke, poke);
             }
@@ -1203,12 +1162,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // Ignore the map and put a random non-banned poke
                     List<Pokemon> tempPickable;
                     if (allowAltFormes) {
-                        tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                                : new ArrayList<>(mainPokemonListInclFormes);
+                        tempPickable = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes)
+                                : new ArrayList<>(restrictedPokemonInclAltFormes);
                         tempPickable.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
                     } else {
-                        tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList)
-                                : new ArrayList<>(mainPokemonList);
+                        tempPickable = noLegendaries ? new ArrayList<>(nonlegendaryPokemon)
+                                : new ArrayList<>(restrictedPokemon);
                     }
                     tempPickable.removeAll(banned);
                     tempPickable.removeAll(area.bannedPokemon);
@@ -1326,11 +1285,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     } else if (usePowerLevels) {
                         List<Pokemon> allowedPokes;
                         if (allowAltFormes) {
-                            allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                                    : new ArrayList<>(mainPokemonListInclFormes);
+                            allowedPokes  = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes)
+                                    : new ArrayList<>(restrictedPokemonInclAltFormes);
                         } else {
-                            allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
-                                    : new ArrayList<>(mainPokemonList);
+                            allowedPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemon)
+                                    : new ArrayList<>(restrictedPokemon);
                         }
                         allowedPokes.removeAll(banned);
                         List<Pokemon> localAllowed = allowedPokes;
@@ -1407,11 +1366,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else if (usePowerLevels) {
                     List<Pokemon> allowedPokes;
                     if (allowAltFormes) {
-                        allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                                : new ArrayList<>(mainPokemonListInclFormes);
+                        allowedPokes  = noLegendaries ? new ArrayList<>(nonlegendaryPokemonInclFormes)
+                                : new ArrayList<>(restrictedPokemonInclAltFormes);
                     } else {
-                        allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
-                                : new ArrayList<>(mainPokemonList);
+                        allowedPokes = noLegendaries ? new ArrayList<>(nonlegendaryPokemon)
+                                : new ArrayList<>(restrictedPokemon);
                     }
                     allowedPokes.removeAll(banned);
                     List<Pokemon> localAllowed = allowedPokes;
@@ -1643,11 +1602,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Set up Pokemon pool
         cachedReplacementLists = new TreeMap<>();
-        cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                mainPokemonList);
+        cachedAllList = noLegendaries ? new ArrayList<>(nonlegendaryPokemon) : new ArrayList<>(
+                restrictedPokemon);
         if (includeFormes) {
             if (noLegendaries) {
-                cachedAllList.addAll(noLegendaryAltsList);
+                cachedAllList.addAll(nonlegendaryAltFormes);
             } else {
                 cachedAllList.addAll(altFormesList);
             }
@@ -3357,7 +3316,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Integer> learnt = new ArrayList<>();
             List<MoveLearnt> moves = movesets.get(pkmnNum);
             int lv1AttackingMove = 0;
-            Pokemon pkmn = findPokemonInPoolWithSpeciesID(mainPokemonListInclFormes, pkmnNum);
+            Pokemon pkmn = findPokemonInPoolWithSpeciesID(restrictedPokemonInclAltFormes, pkmnNum);
             if (pkmn == null) {
                 continue;
             }
@@ -3536,7 +3495,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Integer pkmnNum : movesets.keySet()) {
             List<Integer> learnt = new ArrayList<>();
             List<Integer> moves = movesets.get(pkmnNum);
-            Pokemon pkmn = findPokemonInPoolWithSpeciesID(mainPokemonListInclFormes, pkmnNum);
+            Pokemon pkmn = findPokemonInPoolWithSpeciesID(restrictedPokemonInclAltFormes, pkmnNum);
             if (pkmn == null) {
                 continue;
             }
@@ -4012,25 +3971,25 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         if (swapLegendaries) {
-            List<Pokemon> legendariesLeft = new ArrayList<>(onlyLegendaryList);
+            List<Pokemon> legendariesLeft = new ArrayList<>(legendaryPokemon);
             if (allowAltFormes) {
-                legendariesLeft.addAll(onlyLegendaryAltsList);
+                legendariesLeft.addAll(legendaryAltFormes);
                 legendariesLeft =
                         legendariesLeft
                                 .stream()
                                 .filter(pk -> !pk.actuallyCosmetic)
                                 .collect(Collectors.toList());
             }
-            List<Pokemon> nonlegsLeft = new ArrayList<>(noLegendaryList);
+            List<Pokemon> nonlegsLeft = new ArrayList<>(nonlegendaryPokemon);
             if (allowAltFormes) {
-                nonlegsLeft.addAll(noLegendaryAltsList);
+                nonlegsLeft.addAll(nonlegendaryAltFormes);
                 nonlegsLeft =
                         nonlegsLeft
                                 .stream()
                                 .filter(pk -> !pk.actuallyCosmetic)
                                 .collect(Collectors.toList());
             }
-            List<Pokemon> ultraBeastsLeft = new ArrayList<>(ultraBeastList);
+            List<Pokemon> ultraBeastsLeft = new ArrayList<>(ultraBeasts);
             legendariesLeft.removeAll(banned);
             nonlegsLeft.removeAll(banned);
             ultraBeastsLeft.removeAll(banned);
@@ -4045,7 +4004,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Pokemon newPK;
                 if (old.pkmn.isLegendary()) {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                        newPK = getMegaEvoPokemon(onlyLegendaryList, legendariesLeft, newStatic);
+                        newPK = getMegaEvoPokemon(legendaryPokemon, legendariesLeft, newStatic);
                     } else {
                         if (old.restrictedPool) {
                             newPK = getRestrictedPokemon(legendariesPool, legendariesLeft, old);
@@ -4059,7 +4018,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (legendariesLeft.size() == 0) {
                         legendariesLeft.addAll(legendariesPool);
                     }
-                } else if (ultraBeastList.contains(old.pkmn)) {
+                } else if (ultraBeasts.contains(old.pkmn)) {
                     if (old.restrictedPool) {
                         newPK = getRestrictedPokemon(ultraBeastsPool, ultraBeastsLeft, old);
                     } else {
@@ -4073,7 +4032,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 } else {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                        newPK = getMegaEvoPokemon(noLegendaryList, nonlegsLeft, newStatic);
+                        newPK = getMegaEvoPokemon(nonlegendaryPokemon, nonlegsLeft, newStatic);
                     } else {
                         if (old.restrictedPool) {
                             newPK = getRestrictedPokemon(nonlegsPool, nonlegsLeft, old);
@@ -4094,11 +4053,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         } else if (similarStrength) {
             List<Pokemon> listInclFormesExclCosmetics =
-                    mainPokemonListInclFormes
+                    restrictedPokemonInclAltFormes
                             .stream()
                             .filter(pk -> !pk.actuallyCosmetic)
                             .collect(Collectors.toList());
-            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? restrictedPokemon : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
 
             List<Pokemon> pokemonPool = new ArrayList<>(pokemonLeft);
@@ -4114,7 +4073,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Integer oldBST = oldPK.bstForPowerLevels();
                 if (oldBST >= 600 && limit600) {
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                        newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
+                        newPK = getMegaEvoPokemon(restrictedPokemon, pokemonLeft, newStatic);
                     } else {
                         if (old.restrictedPool) {
                             newPK = getRestrictedPokemon(pokemonPool, pokemonLeft, old);
@@ -4143,7 +4102,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                             .filter(mega -> mega.method == 1)
                                             .map(mega -> mega.from)
                                             .distinct()
-                                            .filter(mainPokemonList::contains)
+                                            .filter(restrictedPokemon::contains)
                                             .collect(Collectors.toList());
                         }
                         newPK = pickStaticPowerLvlReplacement(
@@ -4194,11 +4153,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         } else { // Completely random
             List<Pokemon> listInclFormesExclCosmetics =
-                    mainPokemonListInclFormes
+                    restrictedPokemonInclAltFormes
                             .stream()
                             .filter(pk -> !pk.actuallyCosmetic)
                             .collect(Collectors.toList());
-            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+            List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? restrictedPokemon : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
 
             List<Pokemon> pokemonPool = new ArrayList<>(pokemonLeft);
@@ -4207,7 +4166,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
                 Pokemon newPK;
                 if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                    newPK = getMegaEvoPokemon(mainPokemonList, pokemonLeft, newStatic);
+                    newPK = getMegaEvoPokemon(restrictedPokemon, pokemonLeft, newStatic);
                 } else {
                     if (old.restrictedPool) {
                         newPK = getRestrictedPokemon(pokemonPool, pokemonLeft, old);
@@ -4341,7 +4300,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private Pokemon getMegaEvoPokemon(List<Pokemon> fullList, List<Pokemon> pokemonLeft, StaticEncounter newStatic) {
+    // TODO: no reason to have this use Collection, it should use PokemonSet
+    private Pokemon getMegaEvoPokemon(Collection<Pokemon> fullList, List<Pokemon> pokemonLeft, StaticEncounter newStatic) {
         List<MegaEvolution> megaEvos = megaEvolutionsList;
         List<Pokemon> megaEvoPokemon =
                 megaEvos
@@ -5034,9 +4994,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeWildHeldItems(Settings settings) {
         boolean banBadItems = settings.isBanBadRandomWildPokemonHeldItems();
 
-        List<Pokemon> pokemon = allPokemonInclFormesWithoutNull();
         ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
-        for (Pokemon pk : pokemon) {
+        for (Pokemon pk : allPokemonSetInclFormes()) {
             if (pk.guaranteedHeldItem == -1 && pk.commonHeldItem == -1 && pk.rareHeldItem == -1
                     && pk.darkGrassHeldItem == -1) {
                 // No held items at all, abort
@@ -5389,9 +5348,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool;
         if (this.altFormesCanHaveDifferentEvolutions()) {
-            pokemonPool = new ArrayList<>(mainPokemonListInclFormes);
+            pokemonPool = new ArrayList<>(restrictedPokemonInclAltFormes);
         } else {
-            pokemonPool = new ArrayList<>(mainPokemonList);
+            pokemonPool = new ArrayList<>(restrictedPokemon);
         }
         List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
         int stageLimit = limitToThreeStages ? 3 : 10;
@@ -5459,13 +5418,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // Pick a Pokemon as replacement
                     replacements.clear();
 
-                    List<Pokemon> chosenList =
-                            allowAltFormes ?
-                            mainPokemonListInclFormes
-                                    .stream()
-                                    .filter(pk -> !pk.actuallyCosmetic)
-                                    .collect(Collectors.toList()) :
-                            mainPokemonList;
+                    List<Pokemon> chosenList = new ArrayList<>(
+                            allowAltFormes ? restrictedPokemonInclAltFormes.filter(pk -> !pk.actuallyCosmetic) :
+                                    restrictedPokemon);
                     // Step 1: base filters
                     for (Pokemon pk : chosenList) {
                         // Prevent evolving into oneself (mandatory)
@@ -5633,9 +5588,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool;
         if (this.altFormesCanHaveDifferentEvolutions()) {
-            pokemonPool = new ArrayList<>(mainPokemonListInclFormes);
+            pokemonPool = new ArrayList<>(restrictedPokemonInclAltFormes);
         } else {
-            pokemonPool = new ArrayList<>(mainPokemonList);
+            pokemonPool = new ArrayList<>(restrictedPokemon);
         }
         List<Pokemon> actuallyCosmeticPokemonPool = new ArrayList<>();
 
@@ -5689,13 +5644,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Pick a Pokemon as replacement
                 replacements.clear();
 
-                List<Pokemon> chosenList =
+                List<Pokemon> chosenList = new ArrayList<>(
                         allowAltFormes ?
-                                mainPokemonListInclFormes
-                                        .stream()
-                                        .filter(pk -> !pk.actuallyCosmetic)
-                                        .collect(Collectors.toList()) :
-                                mainPokemonList;
+                                restrictedPokemonInclAltFormes.filter(pk -> !pk.actuallyCosmetic) :
+                                restrictedPokemon);
                 // Step 1: base filters
                 for (Pokemon pk : chosenList) {
                     // Prevent evolving into oneself (mandatory)
@@ -6151,10 +6103,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     // Note that this is slow and somewhat hacky.
-    private Pokemon findPokemonInPoolWithSpeciesID(List<Pokemon> pokemonPool, int speciesID) {
-        for (int i = 0; i < pokemonPool.size(); i++) {
-            if (pokemonPool.get(i).number == speciesID) {
-                return pokemonPool.get(i);
+    // TODO: can/should this be moved to PokemonSet?
+    private Pokemon findPokemonInPoolWithSpeciesID(Collection<Pokemon> pokemonPool, int speciesID) {
+        for (Pokemon pk : pokemonPool) {
+            if (pk.number == speciesID) {
+                return pk;
             }
         }
         return null;
@@ -6333,7 +6286,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private List<Pokemon> pokemonOfType(Type type, boolean noLegendaries) {
         List<Pokemon> typedPokes = new ArrayList<>();
-        for (Pokemon pk : mainPokemonList) {
+        for (Pokemon pk : restrictedPokemon) {
             if (pk != null && (!noLegendaries || !pk.isLegendary()) && !pk.actuallyCosmetic) {
                 if (pk.primaryType == type || pk.secondaryType == type) {
                     typedPokes.add(pk);
@@ -6345,7 +6298,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private List<Pokemon> pokemonOfTypeInclFormes(Type type, boolean noLegendaries) {
         List<Pokemon> typedPokes = new ArrayList<>();
-        for (Pokemon pk : mainPokemonListInclFormes) {
+        for (Pokemon pk : restrictedPokemonInclAltFormes) {
             if (pk != null && !pk.actuallyCosmetic && (!noLegendaries || !pk.isLegendary())) {
                 if (pk.primaryType == type || pk.secondaryType == type) {
                     typedPokes.add(pk);
@@ -6354,17 +6307,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         return typedPokes;
     }
-
-    private List<Pokemon> allPokemonWithoutNull() {
-        List<Pokemon> allPokes = new ArrayList<>(this.getPokemon());
-        allPokes.remove(0);
-        return allPokes;
+    
+    private PokemonSet<Pokemon> allPokemonSet() {
+        return new PokemonSet<>(this.getPokemon());
     }
 
-    private List<Pokemon> allPokemonInclFormesWithoutNull() {
-        List<Pokemon> allPokes = new ArrayList<>(this.getPokemonInclFormes());
-        allPokes.remove(0);
-        return allPokes;
+    private PokemonSet<Pokemon> allPokemonSetInclFormes() {
+        return new PokemonSet<>(this.getPokemonInclFormes());
     }
 
     private Map<Type, Integer> typeWeightings;
@@ -6898,21 +6847,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public List<Pokemon> getAbilityDependentFormes() {
         List<Pokemon> abilityDependentFormes = new ArrayList<>();
-        for (int i = 0; i < mainPokemonListInclFormes.size(); i++) {
-            Pokemon pokemon = mainPokemonListInclFormes.get(i);
-            if (pokemon.baseForme != null) {
-                if (pokemon.baseForme.number == Species.castform) {
+        for (Pokemon pk : restrictedPokemonInclAltFormes) {
+            if (pk.baseForme != null) {
+                if (pk.getBaseNumber() == Species.castform) {
                     // All alternate Castform formes
-                    abilityDependentFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == Species.darmanitan && pokemon.formeNumber == 1) {
+                    abilityDependentFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.darmanitan && pk.formeNumber == 1) {
                     // Damanitan-Z
-                    abilityDependentFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == Species.aegislash) {
+                    abilityDependentFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.aegislash) {
                     // Aegislash-B
-                    abilityDependentFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == Species.wishiwashi) {
+                    abilityDependentFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.wishiwashi) {
                     // Wishiwashi-S
-                    abilityDependentFormes.add(pokemon);
+                    abilityDependentFormes.add(pk);
                 }
             }
         }
@@ -6922,18 +6870,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public List<Pokemon> getBannedFormesForPlayerPokemon() {
         List<Pokemon> bannedFormes = new ArrayList<>();
-        for (int i = 0; i < mainPokemonListInclFormes.size(); i++) {
-            Pokemon pokemon = mainPokemonListInclFormes.get(i);
-            if (pokemon.baseForme != null) {
-                if (pokemon.baseForme.number == Species.giratina) {
+        for (Pokemon pk : restrictedPokemonInclAltFormes) {
+            if (pk.baseForme != null) {
+                if (pk.getBaseNumber() == Species.giratina) {
                     // Giratina-O is banned because it reverts back to Altered Forme if
                     // equipped with any item that isn't the Griseous Orb.
-                    bannedFormes.add(pokemon);
-                } else if (pokemon.baseForme.number == Species.shaymin) {
+                    bannedFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.shaymin) {
                     // Shaymin-S is banned because it reverts back to its original forme
                     // under a variety of circumstances, and can only be changed back
                     // with the Gracidea.
-                    bannedFormes.add(pokemon);
+                    bannedFormes.add(pk);
                 }
             }
         }
@@ -6972,11 +6919,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(getIrregularFormes());
         }
         List<Pokemon> listInclFormesExclCosmetics =
-                mainPokemonListInclFormes
+                restrictedPokemonInclAltFormes
                         .stream()
                         .filter(pk -> !pk.actuallyCosmetic)
                         .collect(Collectors.toList());
-        List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+        List<Pokemon> pokemonLeft = new ArrayList<>(!allowAltFormes ? restrictedPokemon : listInclFormesExclCosmetics);
         pokemonLeft.removeAll(banned);
         for (TotemPokemon old : currentTotemPokemon) {
             TotemPokemon newTotem = new TotemPokemon();
@@ -7008,7 +6955,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     newTotem.level = Math.min(100, (int) Math.round(newTotem.level * (1 + levelModifier / 100.0)));
                 }
                 if (pokemonLeft.size() == 0) {
-                    pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+                    pokemonLeft.addAll(!allowAltFormes ? restrictedPokemon : listInclFormesExclCosmetics);
                     pokemonLeft.removeAll(banned);
                 }
             } else {
@@ -7050,7 +6997,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     newTotem.allies.put(oldAllyIndex,newAlly);
                     if (pokemonLeft.size() == 0) {
-                        pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
+                        pokemonLeft.addAll(!allowAltFormes ? restrictedPokemon : listInclFormesExclCosmetics);
                         pokemonLeft.removeAll(banned);
                     }
                 }
