@@ -185,18 +185,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    // TODO: work into PokemonSet?
     private void addEvolutionaryRelatives(List<Pokemon> pokemonPool) {
-        Set<Pokemon> newPokemon = new TreeSet<>();
+        PokemonSet<Pokemon> newPokemon = new PokemonSet<>();
         for (Pokemon pk : pokemonPool) {
-            List<Pokemon> evolutionaryRelatives = getEvolutionaryRelatives(pk);
-            for (Pokemon relative : evolutionaryRelatives) {
-                if (!pokemonPool.contains(relative) && !newPokemon.contains(relative)) {
-                    newPokemon.add(relative);
-                }
+            newPokemon.addAll(PokemonSet.related(pk));
+        }
+        for (Pokemon pk : newPokemon) {
+            if (!pokemonPool.contains(pk)) {
+                pokemonPool.add(pk);
             }
         }
-
-        pokemonPool.addAll(newPokemon);
     }
 
     private void addAllPokesInclFormes(List<Pokemon> pokemonPool, List<Pokemon> pokemonPoolInclFormes) {
@@ -936,7 +935,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             allPokes.removeAll(banned);
             for (EncounterSet area : scrambledEncounters) {
                 // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
+                PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using catch em all
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 List<Pokemon> pickablePokemon = allPokes;
@@ -998,7 +997,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Map<Type, List<Pokemon>> cachedPokeLists = new TreeMap<>();
             for (EncounterSet area : scrambledEncounters) {
                 // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
+                PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 List<Pokemon> possiblePokemon = null;
                 int iterLoops = 0;
                 while (possiblePokemon == null && iterLoops < 10000) {
@@ -1053,7 +1052,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             allowedPokes.removeAll(banned);
             for (EncounterSet area : scrambledEncounters) {
                 // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
+                PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using randoms
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 List<Pokemon> usedPks = new ArrayList<>();
@@ -1080,7 +1079,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Entirely random
             for (EncounterSet area : scrambledEncounters) {
                 // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
+                PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using randoms
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 for (Pokemon areaPk : inArea) {
@@ -5507,7 +5506,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pk.evolutionsTo.add(tempEvo);
                         boolean exceededLimit = false;
 
-                        Set<Pokemon> related = relatedPokemon(fromPK);
+                        PokemonSet<Pokemon> related = PokemonSet.related(fromPK);
 
                         for (Pokemon pk2 : related) {
                             int numPreEvos = numPreEvolutions(pk2, stageLimit);
@@ -6161,61 +6160,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         return null;
     }
 
-    private List<Pokemon> getEvolutionaryRelatives(Pokemon pk) {
-        List<Pokemon> evolutionaryRelatives = new ArrayList<>();
-        for (Evolution ev : pk.evolutionsFrom) {
-            if (!evolutionaryRelatives.contains(ev.to)) {
-                Pokemon evo = ev.to;
-                evolutionaryRelatives.add(evo);
-                Queue<Evolution> evolutionsList = new LinkedList<>();
-                evolutionsList.addAll(evo.evolutionsFrom);
-                while (evolutionsList.size() > 0) {
-                    evo = evolutionsList.remove().to;
-                    if (!evolutionaryRelatives.contains(evo)) {
-                        evolutionaryRelatives.add(evo);
-                        evolutionsList.addAll(evo.evolutionsFrom);
-                    }
-                }
-            }
-        }
-
-        for (Evolution ev : pk.evolutionsTo) {
-            if (!evolutionaryRelatives.contains(ev.from)) {
-                Pokemon preEvo = ev.from;
-                evolutionaryRelatives.add(preEvo);
-
-                // At this point, preEvo is basically the "parent" of pk. Run
-                // getEvolutionaryRelatives on preEvo in order to get pk's
-                // "sibling" evolutions too. For example, if pk is Espeon, then
-                // preEvo here will be Eevee, and this will add all the other
-                // eeveelutions to the relatives list.
-                List<Pokemon> relativesForPreEvo = getEvolutionaryRelatives(preEvo);
-                for (Pokemon preEvoRelative : relativesForPreEvo) {
-                    if (!evolutionaryRelatives.contains(preEvoRelative)) {
-                        evolutionaryRelatives.add(preEvoRelative);
-                    }
-                }
-
-                while (preEvo.evolutionsTo.size() > 0) {
-                    preEvo = preEvo.evolutionsTo.get(0).from;
-                    if (!evolutionaryRelatives.contains(preEvo)) {
-                        evolutionaryRelatives.add(preEvo);
-
-                        // Similar to above, get the "sibling" evolutions here too.
-                        relativesForPreEvo = getEvolutionaryRelatives(preEvo);
-                        for (Pokemon preEvoRelative : relativesForPreEvo) {
-                            if (!evolutionaryRelatives.contains(preEvoRelative)) {
-                                evolutionaryRelatives.add(preEvoRelative);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return evolutionaryRelatives;
-    }
-
     private static class EvolutionPair {
         private Pokemon from;
         private Pokemon to;
@@ -6320,9 +6264,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Get evolution data.
-        Set<Pokemon> basicPokes = RomFunctions.getBasicPokemon(this);
-        Set<Pokemon> splitEvos = RomFunctions.getSplitEvolutions(this);
-        Set<Pokemon> middleEvos = RomFunctions.getMiddleEvolutions(this, copySplitEvos);
+        PokemonSet<Pokemon> basicPokes = new PokemonSet<>(getPokemonInclFormes()).filterBasic();
+        PokemonSet<Pokemon> splitEvos = new PokemonSet<>(getPokemonInclFormes()).filterSplitEvolutions();
+        PokemonSet<Pokemon> middleEvos = new PokemonSet<>(getPokemon()).filterMiddleEvolutions(copySplitEvos);
 
         for (Pokemon pk : basicPokes) {
             bpAction.applyTo(pk);
@@ -6421,14 +6365,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> allPokes = new ArrayList<>(this.getPokemonInclFormes());
         allPokes.remove(0);
         return allPokes;
-    }
-
-    private Set<Pokemon> pokemonInArea(EncounterSet area) {
-        Set<Pokemon> inArea = new TreeSet<>();
-        for (Encounter enc : area.encounters) {
-            inArea.add(enc.pokemon);
-        }
-        return inArea;
     }
 
     private Map<Type, Integer> typeWeightings;
@@ -6735,29 +6671,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         return pokemon;
-    }
-
-    private Set<Pokemon> relatedPokemon(Pokemon original) {
-        Set<Pokemon> results = new HashSet<>();
-        results.add(original);
-        Queue<Pokemon> toCheck = new LinkedList<>();
-        toCheck.add(original);
-        while (!toCheck.isEmpty()) {
-            Pokemon check = toCheck.poll();
-            for (Evolution ev : check.evolutionsFrom) {
-                if (!results.contains(ev.to)) {
-                    results.add(ev.to);
-                    toCheck.add(ev.to);
-                }
-            }
-            for (Evolution ev : check.evolutionsTo) {
-                if (!results.contains(ev.from)) {
-                    results.add(ev.from);
-                    toCheck.add(ev.from);
-                }
-            }
-        }
-        return results;
     }
 
     private Map<Type, List<Pokemon>> cachedReplacementLists;

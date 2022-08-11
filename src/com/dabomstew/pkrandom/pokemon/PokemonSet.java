@@ -1,0 +1,104 @@
+package com.dabomstew.pkrandom.pokemon;
+
+import java.util.*;
+import java.util.function.Predicate;
+
+/**
+ * A {@link Set} of {@link Pokemon}, with common filtering methods. Does not contain a null element.
+ */
+public class PokemonSet<T extends Pokemon> extends HashSet<T> {
+
+    // has to be static (instead of a constructor) because EncounterSet is not generic,
+    // leading to bad type conversions
+    public static PokemonSet<Pokemon> inArea(EncounterSet area) {
+        PokemonSet<Pokemon> pokemonSet = new PokemonSet<>();
+        for (Encounter enc : area.encounters) {
+            pokemonSet.add(enc.pokemon);
+        }
+        return pokemonSet;
+    }
+
+    // likewise static because ev.to, ev.from
+    public static PokemonSet<Pokemon> related(Pokemon original) {
+        PokemonSet<Pokemon> results = new PokemonSet<>();
+        results.add(original);
+        Queue<Pokemon> toCheck = new LinkedList<>();
+        toCheck.add(original);
+        while (!toCheck.isEmpty()) {
+            Pokemon check = toCheck.poll();
+            for (Evolution ev : check.evolutionsFrom) {
+                if (!results.contains(ev.to)) {
+                    results.add(ev.to);
+                    toCheck.add(ev.to);
+                }
+            }
+            for (Evolution ev : check.evolutionsTo) {
+                if (!results.contains(ev.from)) {
+                    results.add(ev.from);
+                    toCheck.add(ev.from);
+                }
+            }
+        }
+        return results;
+    }
+
+    public PokemonSet() {
+    }
+
+    public PokemonSet(List<T> pokemonList) {
+        addAll(pokemonList);
+    }
+
+    private void addAll(List<T> pokemonList) {
+        pokemonList.forEach(pk -> {
+            if (pk != null) add(pk);
+        });
+    }
+
+    public PokemonSet<T> filter(Predicate<T> predicate) {
+        PokemonSet<T> filtered = new PokemonSet<>();
+        for (T pk : this) {
+            if (predicate.test(pk)) {
+                filtered.add(pk);
+            }
+        }
+        return filtered;
+    }
+
+    public PokemonSet<T> filterBasic() {
+        return filter(pk -> pk.evolutionsTo.size() < 1);
+    }
+
+    public PokemonSet<T> filterSplitEvolutions() {
+        return filter(pk -> {
+            if (pk.evolutionsTo.size() > 0) {
+                Evolution onlyEvo = pk.evolutionsTo.get(0);
+                return !onlyEvo.carryStats;
+            }
+            return false;
+        });
+    }
+
+    // TODO: according to the RomFunctions method this replaces, this should also filter out formes
+    public PokemonSet<T> filterMiddleEvolutions(boolean includeSplitEvos) {
+        return filter(pk -> {
+            if (pk.evolutionsTo.size() == 1 && pk.evolutionsFrom.size() > 0) {
+                Evolution onlyEvo = pk.evolutionsTo.get(0);
+                return (onlyEvo.carryStats || includeSplitEvos);
+            }
+            return false;
+        });
+    }
+
+    // TODO: according to the RomFunctions method this replaces, this should also filter out formes
+    public PokemonSet<T> filterFinalEvolutions(boolean includeSplitEvos) {
+        return filter(pk -> {
+            if (pk.evolutionsTo.size() == 1 && pk.evolutionsFrom.size() == 0) {
+                Evolution onlyEvo = pk.evolutionsTo.get(0);
+                return onlyEvo.carryStats || includeSplitEvos;
+            }
+            return false;
+        });
+    }
+
+}
