@@ -31,7 +31,8 @@ import java.util.Random;
 
 public class Gen1Pokemon extends Pokemon {
 
-    public Gen1Pokemon() {
+    public Gen1Pokemon(int number) {
+        super(number);
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4);
     }
 
@@ -51,14 +52,14 @@ public class Gen1Pokemon extends Pokemon {
 
     @Override
     protected void applyShuffledOrderToStats() {
-        List<Integer> stats = Arrays.asList(hp, attack, defense, special, speed);
+        List<Integer> stats = Arrays.asList(getHp(), getAttack(), getDefense(), getSpecial(), getSpeed());
 
         // Copy in new stats
-        hp = stats.get(shuffledStatsOrder.get(0));
-        attack = stats.get(shuffledStatsOrder.get(1));
-        defense = stats.get(shuffledStatsOrder.get(2));
-        special = stats.get(shuffledStatsOrder.get(3));
-        speed = stats.get(shuffledStatsOrder.get(4));
+        setHp(stats.get(shuffledStatsOrder.get(0)));
+        setAttack(stats.get(shuffledStatsOrder.get(1)));
+        setDefense(stats.get(shuffledStatsOrder.get(2)));
+        setSpecial(stats.get(shuffledStatsOrder.get(3)));
+        setSpeed(stats.get(shuffledStatsOrder.get(4)));
     }
 
     @Override
@@ -72,14 +73,14 @@ public class Gen1Pokemon extends Pokemon {
 
         double totW = hpW + atkW + defW + specW + speW;
 
-        hp = (int) Math.max(1, Math.round(hpW / totW * bst)) + 20;
-        attack = (int) Math.max(1, Math.round(atkW / totW * bst)) + 10;
-        defense = (int) Math.max(1, Math.round(defW / totW * bst)) + 10;
-        special = (int) Math.max(1, Math.round(specW / totW * bst)) + 10;
-        speed = (int) Math.max(1, Math.round(speW / totW * bst)) + 10;
+        setHp((int) Math.max(1, Math.round(hpW / totW * bst)) + 20);
+        setAttack((int) Math.max(1, Math.round(atkW / totW * bst)) + 10);
+        setDefense((int) Math.max(1, Math.round(defW / totW * bst)) + 10);
+        setSpecial((int) Math.max(1, Math.round(specW / totW * bst)) + 10);
+        setSpeed((int) Math.max(1, Math.round(speW / totW * bst)) + 10);
 
         // Check for something we can't store
-        if (hp > 255 || attack > 255 || defense > 255 || special > 255 || speed > 255) {
+        if (getHp() > 255 || getAttack() > 255 || getDefense() > 255 || getSpecial() > 255 || getSpeed() > 255) {
             // re roll
             randomizeStatsWithinBST(random);
         }
@@ -92,11 +93,11 @@ public class Gen1Pokemon extends Pokemon {
 
         double bstRatio = ourBST / theirBST;
 
-        hp = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.hp * bstRatio)));
-        attack = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.attack * bstRatio)));
-        defense = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.defense * bstRatio)));
-        speed = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.speed * bstRatio)));
-        special = (int) Math.min(255, Math.max(1, Math.round(evolvesFrom.special * bstRatio)));
+        setHp((int) Math.min(255, Math.max(1, Math.round(evolvesFrom.getHp() * bstRatio))));
+        setAttack((int) Math.min(255, Math.max(1, Math.round(evolvesFrom.getAttack() * bstRatio))));
+        setDefense((int) Math.min(255, Math.max(1, Math.round(evolvesFrom.getDefense() * bstRatio))));
+        setSpeed((int) Math.min(255, Math.max(1, Math.round(evolvesFrom.getSpeed() * bstRatio))));
+        setSpecial((int) Math.min(255, Math.max(1, Math.round(evolvesFrom.getSpecial() * bstRatio))));
     }
 
     @Override
@@ -118,32 +119,32 @@ public class Gen1Pokemon extends Pokemon {
         double specDiff = Math.round((specW / totW) * bstDiff);
         double speDiff = Math.round((speW / totW) * bstDiff);
 
-        hp = (int) Math.min(255, Math.max(1, evolvesFrom.hp + hpDiff));
-        attack = (int) Math.min(255, Math.max(1, evolvesFrom.attack + atkDiff));
-        defense = (int) Math.min(255, Math.max(1, evolvesFrom.defense + defDiff));
-        speed = (int) Math.min(255, Math.max(1, evolvesFrom.speed + speDiff));
-        special = (int) Math.min(255, Math.max(1, evolvesFrom.special + specDiff));
+        setHp((int) Math.min(255, Math.max(1, evolvesFrom.getHp() + hpDiff)));
+        setAttack((int) Math.min(255, Math.max(1, evolvesFrom.getAttack() + atkDiff)));
+        setDefense((int) Math.min(255, Math.max(1, evolvesFrom.getDefense() + defDiff)));
+        setSpeed((int) Math.min(255, Math.max(1, evolvesFrom.getSpeed() + speDiff)));
+        setSpecial((int) Math.min(255, Math.max(1, evolvesFrom.getSpecial() + specDiff)));
     }
 
     @Override
     protected int bst() {
-        return hp + attack + defense + special + speed;
+        return getHp() + getAttack() + getDefense() + getSpecial() + getSpeed();
     }
 
     @Override
     public int bstForPowerLevels() {
-        return hp + attack + defense + special + speed;
+        return getHp() + getAttack() + getDefense() + getSpecial() + getSpeed();
     }
 
     @Override
     public double getAttackSpecialAttackRatio() {
-        return (double)attack / ((double)attack + (double)special);
+        return (double) getAttack() / ((double) getAttack() + (double) getSpecial());
     }
 
     @Override
     public String toString() {
-        return "Pokemon [name=" + name + ", number=" + number + ", primaryType=" + primaryType + ", secondaryType="
-                + secondaryType + ", hp=" + hp + ", attack=" + attack + ", defense=" + defense + ", special=" + special
-                + ", speed=" + speed + "]";
+        return "Pokemon [name=" + getName() + ", number=" + getNumber() + ", primaryType=" + getPrimaryType() + ", secondaryType="
+                + getSecondaryType() + ", hp=" + getHp() + ", attack=" + getAttack() + ", defense=" + getDefense() + ", special=" + getSpecial()
+                + ", speed=" + getSpeed() + "]";
     }
 }

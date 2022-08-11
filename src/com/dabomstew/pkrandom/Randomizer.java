@@ -216,8 +216,8 @@ public class Randomizer {
 
         for (Pokemon pkmn : romHandler.getPokemon()) {
             if (pkmn != null) {
-                checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
-                        pkmn.spdef, pkmn.ability1, pkmn.ability2, pkmn.ability3);
+                checkValue = addToCV(checkValue, pkmn.getHp(), pkmn.getAttack(), pkmn.getDefense(), pkmn.getSpeed(), pkmn.getSpatk(),
+                        pkmn.getSpdef(), pkmn.getAbility1(), pkmn.getAbility2(), pkmn.getAbility3());
             }
         }
 
@@ -521,7 +521,7 @@ public class Randomizer {
         List<Trainer> trainers = romHandler.getTrainers();
         for (Trainer t : trainers) {
             for (TrainerPokemon tpk : t.pokemon) {
-                checkValue = addToCV(checkValue, tpk.level, tpk.pokemon.number);
+                checkValue = addToCV(checkValue, tpk.level, tpk.pokemon.getNumber());
             }
         }
 
@@ -603,7 +603,7 @@ public class Randomizer {
         List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
         for (EncounterSet es : encounters) {
             for (Encounter e : es.encounters) {
-                checkValue = addToCV(checkValue, e.level, e.pokemon.number);
+                checkValue = addToCV(checkValue, e.level, e.pokemon.getNumber());
             }
         }
 
@@ -751,12 +751,12 @@ public class Randomizer {
         List<Pokemon> pkmnList = romHandler.getPokemonInclFormes();
         int i = 1;
         for (Pokemon pkmn : pkmnList) {
-            if (pkmn == null || pkmn.actuallyCosmetic) {
+            if (pkmn == null || pkmn.isActuallyCosmetic()) {
                 continue;
             }
             StringBuilder evoStr = new StringBuilder();
             try {
-                evoStr.append(" -> ").append(pkmn.evolutionsFrom.get(0).to.fullName());
+                evoStr.append(" -> ").append(pkmn.getEvolutionsFrom().get(0).to.fullName());
             } catch (Exception e) {
                 evoStr.append(" (no evolution)");
             }
@@ -766,25 +766,25 @@ public class Randomizer {
             if (romHandler instanceof Gen1RomHandler) {
                 sb.append(String.format("%03d %s", i, pkmn.fullName()))
                         .append(evoStr).append(System.getProperty("line.separator"))
-                        .append(String.format("HP   %-3d", pkmn.hp)).append(System.getProperty("line.separator"))
-                        .append(String.format("ATK  %-3d", pkmn.attack)).append(System.getProperty("line.separator"))
-                        .append(String.format("DEF  %-3d", pkmn.defense)).append(System.getProperty("line.separator"))
-                        .append(String.format("SPEC %-3d", pkmn.special)).append(System.getProperty("line.separator"))
-                        .append(String.format("SPE  %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
+                        .append(String.format("HP   %-3d", pkmn.getHp())).append(System.getProperty("line.separator"))
+                        .append(String.format("ATK  %-3d", pkmn.getAttack())).append(System.getProperty("line.separator"))
+                        .append(String.format("DEF  %-3d", pkmn.getDefense())).append(System.getProperty("line.separator"))
+                        .append(String.format("SPEC %-3d", pkmn.getSpecial())).append(System.getProperty("line.separator"))
+                        .append(String.format("SPE  %-3d", pkmn.getSpeed())).append(System.getProperty("line.separator"));
             } else {
                 sb.append(String.format("%03d %s", i, pkmn.fullName()))
                         .append(evoStr).append(System.getProperty("line.separator"))
-                        .append(String.format("HP  %-3d", pkmn.hp)).append(System.getProperty("line.separator"))
-                        .append(String.format("ATK %-3d", pkmn.attack)).append(System.getProperty("line.separator"))
-                        .append(String.format("DEF %-3d", pkmn.defense)).append(System.getProperty("line.separator"))
-                        .append(String.format("SPA %-3d", pkmn.spatk)).append(System.getProperty("line.separator"))
-                        .append(String.format("SPD %-3d", pkmn.spdef)).append(System.getProperty("line.separator"))
-                        .append(String.format("SPE %-3d", pkmn.speed)).append(System.getProperty("line.separator"));
+                        .append(String.format("HP  %-3d", pkmn.getHp())).append(System.getProperty("line.separator"))
+                        .append(String.format("ATK %-3d", pkmn.getAttack())).append(System.getProperty("line.separator"))
+                        .append(String.format("DEF %-3d", pkmn.getDefense())).append(System.getProperty("line.separator"))
+                        .append(String.format("SPA %-3d", pkmn.getSpatk())).append(System.getProperty("line.separator"))
+                        .append(String.format("SPD %-3d", pkmn.getSpdef())).append(System.getProperty("line.separator"))
+                        .append(String.format("SPE %-3d", pkmn.getSpeed())).append(System.getProperty("line.separator"));
             }
 
             i++;
 
-            List<MoveLearnt> data = moveData.get(pkmn.number);
+            List<MoveLearnt> data = moveData.get(pkmn.getNumber());
             for (MoveLearnt ml : data) {
                 try {
                     if (ml.level == 0) {
@@ -800,7 +800,7 @@ public class Randomizer {
                     sb.append("invalid move at level").append(ml.level);
                 }
             }
-            List<Integer> eggMove = eggMoves.get(pkmn.number);
+            List<Integer> eggMove = eggMoves.get(pkmn.getNumber());
             if (eggMove != null && eggMove.size() != 0) {
                 sb.append("Egg Moves:").append(System.getProperty("line.separator"));
                 for (Integer move : eggMove) {
@@ -870,15 +870,15 @@ public class Randomizer {
         log.println("--Randomized Evolutions--");
         List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
-            if (pk != null && !pk.actuallyCosmetic) {
-                int numEvos = pk.evolutionsFrom.size();
+            if (pk != null && !pk.isActuallyCosmetic()) {
+                int numEvos = pk.getEvolutionsFrom().size();
                 if (numEvos > 0) {
-                    StringBuilder evoStr = new StringBuilder(pk.evolutionsFrom.get(0).toFullName());
+                    StringBuilder evoStr = new StringBuilder(pk.getEvolutionsFrom().get(0).toFullName());
                     for (int i = 1; i < numEvos; i++) {
                         if (i == numEvos - 1) {
-                            evoStr.append(" and ").append(pk.evolutionsFrom.get(i).toFullName());
+                            evoStr.append(" and ").append(pk.getEvolutionsFrom().get(i).toFullName());
                         } else {
-                            evoStr.append(", ").append(pk.evolutionsFrom.get(i).toFullName());
+                            evoStr.append(", ").append(pk.getEvolutionsFrom().get(i).toFullName());
                         }
                     }
                     log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr.toString());
@@ -898,12 +898,12 @@ public class Randomizer {
             log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC");
             for (Pokemon pkmn : allPokes) {
                 if (pkmn != null) {
-                    String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
-                    if (pkmn.secondaryType != null) {
-                        typeString += "/" + pkmn.secondaryType.toString();
+                    String typeString = pkmn.getPrimaryType() == null ? "???" : pkmn.getPrimaryType().toString();
+                    if (pkmn.getSecondaryType() != null) {
+                        typeString += "/" + pkmn.getSecondaryType().toString();
                     }
-                    log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.number, pkmn.fullName(), typeString,
-                            pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.special );
+                    log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.getNumber(), pkmn.fullName(), typeString,
+                            pkmn.getHp(), pkmn.getAttack(), pkmn.getDefense(), pkmn.getSpeed(), pkmn.getSpecial());
                 }
 
             }
@@ -935,42 +935,42 @@ public class Randomizer {
             log.println();
             int i = 0;
             for (Pokemon pkmn : allPokes) {
-                if (pkmn != null && !pkmn.actuallyCosmetic) {
+                if (pkmn != null && !pkmn.isActuallyCosmetic()) {
                     i++;
-                    String typeString = pkmn.primaryType == null ? "???" : pkmn.primaryType.toString();
-                    if (pkmn.secondaryType != null) {
-                        typeString += "/" + pkmn.secondaryType.toString();
+                    String typeString = pkmn.getPrimaryType() == null ? "???" : pkmn.getPrimaryType().toString();
+                    if (pkmn.getSecondaryType() != null) {
+                        typeString += "/" + pkmn.getSecondaryType().toString();
                     }
                     log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", i, pkmn.fullName(), typeString,
-                            pkmn.hp, pkmn.attack, pkmn.defense, pkmn.spatk, pkmn.spdef, pkmn.speed);
+                            pkmn.getHp(), pkmn.getAttack(), pkmn.getDefense(), pkmn.getSpatk(), pkmn.getSpdef(), pkmn.getSpeed());
                     if (abils > 0) {
-                        log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.ability1),
-                                pkmn.ability1 == pkmn.ability2 ? "--" : romHandler.abilityName(pkmn.ability2));
+                        log.printf("|" + abSpFormat + "|" + abSpFormat, romHandler.abilityName(pkmn.getAbility1()),
+                                pkmn.getAbility1() == pkmn.getAbility2() ? "--" : romHandler.abilityName(pkmn.getAbility2()));
                         if (abils > 2) {
-                            log.printf("|" + abSpFormat, romHandler.abilityName(pkmn.ability3));
+                            log.printf("|" + abSpFormat, romHandler.abilityName(pkmn.getAbility3()));
                         }
                     }
                     log.print("|");
-                    if (pkmn.guaranteedHeldItem > 0) {
-                        log.print(itemNames[pkmn.guaranteedHeldItem] + " (100%)");
+                    if (pkmn.getGuaranteedHeldItem() > 0) {
+                        log.print(itemNames[pkmn.getGuaranteedHeldItem()] + " (100%)");
                     } else {
                         int itemCount = 0;
-                        if (pkmn.commonHeldItem > 0) {
+                        if (pkmn.getCommonHeldItem() > 0) {
                             itemCount++;
-                            log.print(itemNames[pkmn.commonHeldItem] + " (common)");
+                            log.print(itemNames[pkmn.getCommonHeldItem()] + " (common)");
                         }
-                        if (pkmn.rareHeldItem > 0) {
+                        if (pkmn.getRareHeldItem() > 0) {
                             if (itemCount > 0) {
                                 log.print(", ");
                             }
                             itemCount++;
-                            log.print(itemNames[pkmn.rareHeldItem] + " (rare)");
+                            log.print(itemNames[pkmn.getRareHeldItem()] + " (rare)");
                         }
-                        if (pkmn.darkGrassHeldItem > 0) {
+                        if (pkmn.getDarkGrassHeldItem() > 0) {
                             if (itemCount > 0) {
                                 log.print(", ");
                             }
-                            log.print(itemNames[pkmn.darkGrassHeldItem] + " (dark grass only)");
+                            log.print(itemNames[pkmn.getDarkGrassHeldItem()] + " (dark grass only)");
                         }
                     }
                     log.println();
@@ -1005,14 +1005,14 @@ public class Randomizer {
         int tmCount = romHandler.getTMCount();
         for (Map.Entry<Pokemon, boolean[]> entry : compat.entrySet()) {
             Pokemon pkmn = entry.getKey();
-            if (pkmn.actuallyCosmetic) continue;
+            if (pkmn.isActuallyCosmetic()) continue;
             boolean[] flags = entry.getValue();
 
             String nameSpFormat = "%-14s";
             if (romHandler.generationOfPokemon() >= 6) {
                 nameSpFormat = "%-17s";
             }
-            log.printf("%3d " + nameSpFormat, pkmn.number, pkmn.fullName() + " ");
+            log.printf("%3d " + nameSpFormat, pkmn.getNumber(), pkmn.fullName() + " ");
 
             for (int i = 1; i < flags.length; i++) {
                 String moveName = moveData.get(moveList.get(i - 1)).name;
@@ -1125,9 +1125,9 @@ public class Randomizer {
                 log.print(String.format(whitespaceFormat, sb));
                 StringBuilder sb2 = new StringBuilder();
                 if (romHandler instanceof Gen1RomHandler) {
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPECIAL %-3d SPEED %-3d", e.pokemon.hp, e.pokemon.attack, e.pokemon.defense, e.pokemon.special, e.pokemon.speed));
+                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPECIAL %-3d SPEED %-3d", e.pokemon.getHp(), e.pokemon.getAttack(), e.pokemon.getDefense(), e.pokemon.getSpecial(), e.pokemon.getSpeed()));
                 } else {
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.hp, e.pokemon.attack, e.pokemon.defense, e.pokemon.spatk, e.pokemon.spdef, e.pokemon.speed));
+                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.getHp(), e.pokemon.getAttack(), e.pokemon.getDefense(), e.pokemon.getSpatk(), e.pokemon.getSpdef(), e.pokemon.getSpeed()));
                 }
                 log.print(sb2);
                 log.println();
@@ -1205,7 +1205,7 @@ public class Randomizer {
         for (int i = 0; i < oldStatics.size(); i++) {
             StaticEncounter oldP = oldStatics.get(i);
             StaticEncounter newP = newStatics.get(i);
-            checkValue = addToCV(checkValue, newP.pkmn.number);
+            checkValue = addToCV(checkValue, newP.pkmn.getNumber());
             String oldStaticString = oldP.toString(settings.isStaticLevelModified());
             log.print(oldStaticString);
             if (seenPokemon.containsKey(oldStaticString)) {
@@ -1231,7 +1231,7 @@ public class Randomizer {
         for (int i = 0; i < oldTotems.size(); i++) {
             TotemPokemon oldP = oldTotems.get(i);
             TotemPokemon newP = newTotems.get(i);
-            checkValue = addToCV(checkValue, newP.pkmn.number);
+            checkValue = addToCV(checkValue, newP.pkmn.getNumber());
             log.println(oldP.pkmn.fullName() + " =>");
             log.printf(newP.toString(),itemNames[newP.heldItem]);
         }

@@ -39,11 +39,11 @@ public class EvolutionUpdate implements Comparable<EvolutionUpdate> {
 
     @Override
     public int compareTo(EvolutionUpdate o) {
-        if (this.from.number < o.from.number) {
+        if (this.from.getNumber() < o.from.getNumber()) {
             return -1;
-        } else if (this.from.number > o.from.number) {
+        } else if (this.from.getNumber() > o.from.getNumber()) {
             return 1;
-        } else return Integer.compare(this.to.number, o.to.number);
+        } else return Integer.compare(this.to.getNumber(), o.to.getNumber());
     }
 
     @Override
