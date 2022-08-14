@@ -45,11 +45,17 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
     public PokemonSet() {
     }
 
-    public PokemonSet(List<T> pokemonList) {
+    public PokemonSet(List<? extends T> pokemonList) {
         addAll(pokemonList);
     }
 
-    private void addAll(List<T> pokemonList) {
+    // TODO: refactor occurances of "PokemonSet<T> foo = new PokemonSet<>(); foobar.addAll(foo)"
+    //  to use the below solution.
+    public PokemonSet(PokemonSet<? extends T> pokemonSet) {
+        addAll(pokemonSet);
+    }
+
+    private void addAll(List<? extends T> pokemonList) {
         pokemonList.forEach(pk -> {
             if (pk != null) add(pk);
         });
@@ -104,8 +110,9 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
     /**
      * Filters so that a Pokémon is only included if its number is within the range.<br>
      * Note that alternate formes have different numbers than the base form.
+     *
      * @param start The lower end of the range, inclusive.
-     * @param end The upper end of the range, inclusive.
+     * @param end   The upper end of the range, inclusive.
      */
     public PokemonSet<T> filterFromNumberRange(int start, int end) {
         return filter(pk -> start <= pk.number && pk.number <= end);
@@ -114,8 +121,9 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
     /**
      * Filters so that a Pokémon is only included if its *base* number is within the range.<br>
      * Note this means any alternate forms of a Pokémon with a valid number are included.
+     *
      * @param start The lower end of the range, inclusive.
-     * @param end The upper end of the range, inclusive.
+     * @param end   The upper end of the range, inclusive.
      */
     public PokemonSet<T> filterFromBaseNumberRange(int start, int end) {
         return filter(pk -> start <= pk.getBaseNumber() && pk.getBaseNumber() <= end);
@@ -138,4 +146,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         List<T> randomPickableFrom = new ArrayList<>(this);
         return randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
     }
+
+    // TODO: come up with a collector or the like, so streams can be used for longer operations
+    //  (this.filter() is a good shorthand)
 }

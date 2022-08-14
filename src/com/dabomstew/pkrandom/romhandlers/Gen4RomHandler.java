@@ -3091,8 +3091,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Pokemon> getBannedFormesForTrainerPokemon() {
-        List<Pokemon> banned = new ArrayList<>();
+    public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
+        PokemonSet<Pokemon> banned = new PokemonSet<>();
         if (romEntry.romType != Gen4Constants.Type_DP) {
             Pokemon giratinaOrigin = this.getAltFormeOfPokemon(pokes[Species.giratina], 1);
             if (giratinaOrigin != null) {
