@@ -121,6 +121,10 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         return filter(pk -> start <= pk.getBaseNumber() && pk.getBaseNumber() <= end);
     }
 
+    public PokemonSet<T> filterByType(Type type) {
+        return filter(pk -> pk.primaryType == type || pk.secondaryType == type);
+    }
+
     @SuppressWarnings("unchecked")
     public boolean addEvolutionaryRelatives() {
         PokemonSet<Pokemon> relatives = new PokemonSet<>();
