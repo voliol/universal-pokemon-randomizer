@@ -5,6 +5,12 @@ import java.util.function.Predicate;
 
 /**
  * A {@link Set} of {@link Pokemon}, with common filtering methods. Does not contain a null element.
+ * Meant to be used instead of {@link List}{@literal <Pokemon>} in cases where
+ * order does not matter, but avoiding element duplication does.
+ * <br><br>
+ * You can create a clone of any PokemonSet by using it as an constructor parameter.
+ * The "filter" methods also return new PokemonSet objects.
+ * <br><br>
  */
 public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
@@ -49,8 +55,6 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         addAll(pokemonList);
     }
 
-    // TODO: refactor occurances of "PokemonSet<T> foo = new PokemonSet<>(); foobar.addAll(foo)"
-    //  to use the below solution.
     public PokemonSet(PokemonSet<? extends T> pokemonSet) {
         addAll(pokemonSet);
     }

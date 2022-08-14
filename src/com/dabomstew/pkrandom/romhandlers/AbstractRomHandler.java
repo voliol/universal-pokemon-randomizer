@@ -670,8 +670,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             PokemonSet<Pokemon> allPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
             for (EncounterSet area : scrambledEncounters) {
-                PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>();
-                pickablePokemon.addAll(allPokes);
+                PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>(allPokes);
                 pickablePokemon.removeAll(area.bannedPokemon);
                 for (Encounter enc : area.encounters) {
                     // Pick a random pokemon
@@ -734,8 +733,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         		.filterByType(areaTheme);
                         cachedPokeSets.put(areaTheme, pType);
                     }
-                    possiblePokemon = new PokemonSet<>();
-                    possiblePokemon.addAll(cachedPokeSets.get(areaTheme));
+                    possiblePokemon = new PokemonSet<>(cachedPokeSets.get(areaTheme));
                     possiblePokemon.removeAll(area.bannedPokemon);
                     if (possiblePokemon.size() == 0) {
                         // Can't use this type for this area
@@ -758,8 +756,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else if (usePowerLevels) {
             PokemonSet<Pokemon> allowedPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, true, banned);
             for (EncounterSet area : scrambledEncounters) {
-                PokemonSet<Pokemon> localAllowed = new PokemonSet<>();
-                localAllowed.addAll(allowedPokes);
+                PokemonSet<Pokemon> localAllowed = new PokemonSet<>(allowedPokes);
                 localAllowed.removeAll(area.bannedPokemon);
                 for (Encounter enc : area.encounters) {
                     if (balanceShakingGrass) {
@@ -872,8 +869,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using catch em all
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
-                PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>();
-                pickablePokemon.addAll(allPokes);
+                PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>(allPokes);
                 pickablePokemon.removeAll(area.bannedPokemon);
                 for (Pokemon areaPk : inArea) {
                     if (pickablePokemon.size() == 0) {
@@ -923,8 +919,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         		.filterByType(areaTheme);
                         cachedPokeLists.put(areaTheme, pType);
                     }
-                    possiblePokemon = new PokemonSet<>();
-                    possiblePokemon.addAll(cachedPokeLists.get(areaTheme));
+                    possiblePokemon = new PokemonSet<>(cachedPokeLists.get(areaTheme));
                     possiblePokemon.removeAll(area.bannedPokemon);
                     if (possiblePokemon.size() < inArea.size()) {
                         // Can't use this type for this area
@@ -962,8 +957,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Build area map using randoms
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 PokemonSet<Pokemon> usedPks = new PokemonSet<>();
-                PokemonSet<Pokemon> localAllowed = new PokemonSet<>();
-                localAllowed.addAll(allowedPokes);
+                PokemonSet<Pokemon> localAllowed = new PokemonSet<>(allowedPokes);
                 localAllowed.removeAll(area.bannedPokemon);
                 for (Pokemon areaPk : inArea) {
                     Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
@@ -1182,8 +1176,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             			.filterByType(areaTheme);
                                 cachedPokeSets.put(areaTheme, pType);
                             }
-                            possiblePokemon = new PokemonSet<>();
-                            possiblePokemon.addAll(cachedPokeSets.get(areaTheme));
+                            possiblePokemon = new PokemonSet<>(cachedPokeSets.get(areaTheme));
                             possiblePokemon.removeAll(area.bannedPokemon);
                             if (possiblePokemon.size() == 0) {
                                 // Can't use this type for this area
@@ -1255,8 +1248,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     			.filterByType(areaTheme);
                         cachedPokeSets.put(areaTheme, pType);
                     }
-                    PokemonSet<Pokemon> possiblePokemon = new PokemonSet<>();
-                    possiblePokemon.addAll(cachedPokeSets.get(areaTheme));
+                    PokemonSet<Pokemon> possiblePokemon = new PokemonSet<>(cachedPokeSets.get(areaTheme));
                     possiblePokemon.removeAll(area.bannedPokemon);
                     if (possiblePokemon.size() == 0) {
                         // Can't use this type for this area
@@ -5975,7 +5967,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     // Note that this is slow and somewhat hacky.
-    // TODO: can/should this be moved to PokemonSet?
     private Pokemon findPokemonInPoolWithSpeciesID(Collection<Pokemon> pokemonPool, int speciesID) {
         for (Pokemon pk : pokemonPool) {
             if (pk.number == speciesID) {
@@ -6174,7 +6165,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else {
             allowedPokes.addAll(noLegendaries ? getNonlegendaryPokemon() : restrictedPokemon);
         }
-        // TODO: should make unmodifiable
+        // TODO: should make unmodifiable (?)
         return allowedPokes;
     }
 
@@ -6336,7 +6327,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Used for "rival carries starter"
         // Pick a random evolution of base Pokemon, subject to
         // "must evolve itself" if appropriate.
-        List<Pokemon> candidates = new ArrayList<>();
+        PokemonSet<Pokemon> candidates = new PokemonSet<>();
         for (Evolution ev : base.evolutionsFrom) {
             if (!mustEvolveItself || ev.to.evolutionsFrom.size() > 0) {
                 candidates.add(ev.to);
@@ -6347,7 +6338,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             throw new RandomizationException("Random evolution called on a Pokemon without any usable evolutions.");
         }
 
-        return candidates.get(random.nextInt(candidates.size()));
+        return candidates.getRandom(random);
     }
 
     private int getLevelOfStarter(List<Trainer> currentTrainers, String tag) {
@@ -6530,7 +6521,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     pokemonOfType.removeAll(abilityDependentFormes);
                 }
                 if (banIrregularAltFormes) {
-                    pokemonOfType.removeAll(getIrregularFormes());
+                    getIrregularFormes().forEach(pokemonOfType::remove);
                 }
                 cachedReplacementLists.put(type, new ArrayList<>(pokemonOfType)); // TODO: fix this obvious placeholder
             }
@@ -6558,7 +6549,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             int currentBST = current.bstForPowerLevels();
             int minTarget = currentBST - currentBST / 10;
             int maxTarget = currentBST + currentBST / 10;
-            List<Pokemon> canPick = new ArrayList<>();
+            PokemonSet<Pokemon> canPick = new PokemonSet<>();
             int expandRounds = 0;
             while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
                 for (Pokemon pk : pickFrom) {
@@ -6578,17 +6569,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             // is actually below the current average placement
             // if not, re-roll
 
-            Pokemon chosenPokemon = canPick.get(this.random.nextInt(canPick.size()));
+            Pokemon chosenPokemon = canPick.getRandom(random);
             if (usePlacementHistory) {
                 double placementAverage = getPlacementAverage();
-                List<Pokemon> filteredPickList = canPick
-                        .stream()
-                        .filter(pk -> getPlacementHistory(pk) < placementAverage)
-                        .collect(Collectors.toList());
+                PokemonSet<Pokemon> filteredPickList = canPick.filter(pk -> getPlacementHistory(pk) < placementAverage);
                 if (filteredPickList.isEmpty()) {
                     filteredPickList = canPick;
                 }
-                chosenPokemon = filteredPickList.get(this.random.nextInt(filteredPickList.size()));
+                chosenPokemon = filteredPickList.getRandom(random);
             }
             return chosenPokemon;
         } else {
