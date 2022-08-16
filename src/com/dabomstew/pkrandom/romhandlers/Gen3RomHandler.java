@@ -1795,13 +1795,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public List<Pokemon> bannedForWildEncounters() {
+    public PokemonSet<Pokemon> getBannedForWildEncounters() {
+        PokemonSet<Pokemon> banned = new PokemonSet<>();
         if (romEntry.romType == Gen3Constants.RomType_FRLG) {
             // Ban Unown in FRLG because the game crashes if it is encountered outside of Tanoby Ruins.
             // See GenerateWildMon in wild_encounter.c in pokefirered
-            return Collections.singletonList(pokes[Species.unown]);
+            banned.add(pokes[Species.unown]);
         }
-        return new ArrayList<>();
+        return banned;
     }
 
     @Override
@@ -3670,7 +3671,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
         checkPokemonRestrictions();
         List<Pokemon> validPokemon = new ArrayList<>();
-        for (Pokemon pk : this.mainPokemonList) {
+        for (Pokemon pk : this.restrictedPokemon) {
             if (pokedexToInternal[pk.number] <= maxValue && (!blockNonMales || pk.genderRatio <= 0xFD)) {
                 validPokemon.add(pk);
             }
@@ -4049,8 +4050,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    //TODO: this is identical to the Gen 2 implementation => merge (?)
     public void removeEvosForPokemonPool() {
-        List<Pokemon> pokemonIncluded = this.mainPokemonList;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

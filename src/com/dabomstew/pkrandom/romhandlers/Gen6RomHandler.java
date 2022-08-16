@@ -2978,12 +2978,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Pokemon> bannedForStaticPokemon() {
-        return Gen6Constants.actuallyCosmeticForms
+    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
+        return new PokemonSet<>(Gen6Constants.actuallyCosmeticForms
                 .stream()
                 .filter(index -> index < Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType))
                 .map(index -> pokes[index])
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -3813,7 +3813,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        List<Pokemon> pokemonIncluded = this.mainPokemonListInclFormes;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemonInclAltFormes;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

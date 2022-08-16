@@ -38,10 +38,9 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
-//import com.dabomstew.pkrandom.romhandlers.BasePokemonAction;
-//import com.dabomstew.pkrandom.romhandlers.CopyUpEvolutionsHelper;
-//import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
+import com.dabomstew.pkrandom.pokemon.PokemonSet;
 
 /**
  * A {@link PaletteHandler} for Gen 3, Gen 4, and Gen 5 games (R/S/E/FR/LG,
@@ -56,14 +55,14 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
  * {@link TypeBaseColorList}, which uses its types to come up with appropriate
  * base colors.
  */
-public class Gen3to5PaletteHandler extends PaletteHandler {
+public class Gen3to5PaletteHandler extends PaletteHandler<Pokemon> {
 
 	/**
 	 * An identifier for the related resource files. ROMs that share a
 	 * paletteFilesID also share all resources. If they shouldn't, different ROMs
 	 * must be assigned separate IDs.
 	 */
-	private String paletteFilesID;
+	private final String paletteFilesID;
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;
@@ -74,49 +73,46 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		this.paletteFilesID = paletteFilesID;
 	}
 
-//	@Override
-//	public void randomizePokemonPalettes(CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper, boolean typeSanity,
-//			boolean evolutionSanity, boolean shinyFromNormal) {
-//
-//		// TODO: Figure out what to do with forms, with different palettes and with the
-//		// same. One solution is to do nothing initially, and get help from the ZX folks
-//		// after the "initial release".
-//
-//		// TODO: figure out genders in gen IV and V, if anything needs to be done at all
-//
-//		this.typeSanity = typeSanity;
-//		this.shinyFromNormal = shinyFromNormal;
-//		this.typeBaseColorLists = new HashMap<>();
-//
-//		if (paletteFilesID == null) {
-//
-//			// TODO: better error raising/logging, is there a log file for errors like this
-//			// that do not need to interrupt the program?
-//			// If there was a log for putting stuff when only unessential parts of the
-//			// randomizing
-//			// failed, then this could throw anything, and
-//			// AbstractRandomizer.randomizeColors()
-//			// could have a try-catch block for any uncaught exceptions,
-//			// printing it into the log there.
-//
-//			// e.g. - You click "randomize"
-//			// - Something throws an exception here in the PaletteHandler
-//			// - The AbstractRomHandler catches it and prints it to a log,
-//			// doesn't write the palettes.
-//			// - The rest of the randomization continues
-//			// - It finishes and the end-user gets the pop-up message
-//			// "The randomization finished, but with some errors. See..."
-//			System.out.println("Could not randomize palettes, unrecognized romtype.");
-//			return;
-//
-//		} else {
-//			copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
-//					new EvolvedPokemonPaletteAction());
-//			List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes", true);
-//			populatePokemonPalettes(paletteDescriptions);
-//
-//		}
-//	}
+	@Override
+	public void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet, boolean typeSanity, boolean evolutionSanity,
+										 boolean shinyFromNormal) {
+
+		// TODO: Figure out what to do with forms, with different palettes and with the same.
+		// TODO: figure out genders in gen IV and V, if anything needs to be done at all
+
+		this.typeSanity = typeSanity;
+		this.shinyFromNormal = shinyFromNormal;
+		this.typeBaseColorLists = new HashMap<>();
+
+		if (paletteFilesID == null) {
+
+			// TODO: better error raising/logging, is there a log file for errors like this
+			// that do not need to interrupt the program?
+			// If there was a log for putting stuff when only unessential parts of the
+			// randomizing failed, then this could throw anything, and
+			// AbstractRandomizer.randomizeColors()
+			// could have a try-catch block for any uncaught exceptions,
+			// printing it into the log there.
+
+			// e.g. - You click "randomize"
+			// - Something throws an exception here in the PaletteHandler
+			// - The AbstractRomHandler catches it and prints it to a log,
+			// doesn't write the palettes.
+			// - The rest of the randomization continues
+			// - It finishes and the end-user gets the pop-up message
+			// "The randomization finished, but with some errors. See..."
+			System.out.println("Could not randomize palettes, unrecognized romtype.");
+			return;
+
+		}
+
+		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
+		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
+				new EvolvedPokemonPaletteAction());
+		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes", true);
+		populatePokemonPalettes(paletteDescriptions);
+
+	}
 
 	private void populatePokemonPalettes(List<PaletteDescription> paletteDescriptions) {
 
@@ -223,34 +219,34 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		return "src/main/java/com/dabomstew/pkrandom/graphics/" + getResourceAdress(fileKey);
 	}
 
-//	private class BasePokemonPaletteAction implements BasePokemonAction<Pokemon> {
-//
-//		@Override
-//		public void applyTo(Pokemon pk) {
-//			if (shinyFromNormal) {
-//				setShinyPaletteFromNormal(pk);
-//			}
-//
-//			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, typeSanity, random);
-//			typeBaseColorLists.put(pk, typeBaseColorList);
-//
-//		}
-//
-//	}
-//
-//	private class EvolvedPokemonPaletteAction implements EvolvedPokemonAction<Pokemon> {
-//
-//		@Override
-//		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-//			if (shinyFromNormal) {
-//				setShinyPaletteFromNormal(evTo);
-//			}
-//			TypeBaseColorList prevo = typeBaseColorLists.get(evFrom);
-//			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(evTo, prevo, typeSanity, random);
-//			typeBaseColorLists.put(evTo, typeBaseColorList);
-//
-//		}
-//
-//	}
+	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {
+
+		@Override
+		public void applyTo(Pokemon pk) {
+			if (shinyFromNormal) {
+				setShinyPaletteFromNormal(pk);
+			}
+
+			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, typeSanity, random);
+			typeBaseColorLists.put(pk, typeBaseColorList);
+
+		}
+
+	}
+
+	private class EvolvedPokemonPaletteAction implements CopyUpEvolutionsHelper.EvolvedPokemonAction<Pokemon> {
+
+		@Override
+		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+			if (shinyFromNormal) {
+				setShinyPaletteFromNormal(evTo);
+			}
+			TypeBaseColorList prevo = typeBaseColorLists.get(evFrom);
+			TypeBaseColorList typeBaseColorList = new TypeBaseColorList(evTo, prevo, typeSanity, random);
+			typeBaseColorLists.put(evTo, typeBaseColorList);
+
+		}
+
+	}
 
 }

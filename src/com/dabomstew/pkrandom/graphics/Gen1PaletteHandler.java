@@ -24,17 +24,12 @@ package com.dabomstew.pkrandom.graphics;
 import java.util.EnumMap;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.pokemon.Gen1Pokemon;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
-//import com.dabomstew.pkrandom.romhandlers.BasePokemonAction;
-//import com.dabomstew.pkrandom.romhandlers.CopyUpEvolutionsHelper;
-//import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
+import com.dabomstew.pkrandom.pokemon.*;
 
 /**
  * A {@link PaletteHandler} for Gen 1 games (R/B/Y).
  */
-public class Gen1PaletteHandler extends PaletteHandler {
+public class Gen1PaletteHandler extends PaletteHandler<Gen1Pokemon> {
 
 	private static final PaletteID DEFAULT_PALETTE_ID = PaletteID.MEWMON;
 	private static final EnumMap<Type, PaletteID[]> TYPE_PALETTE_IDS = initTypePaletteIDs();
@@ -65,52 +60,53 @@ public class Gen1PaletteHandler extends PaletteHandler {
 		return typePaletteIDs;
 	}
 
-//	@Override
-//	public void randomizePokemonPalettes(CopyUpEvolutionsHelper<Gen1Pokemon> copyUpEvolutionsHelper, boolean typeSanity,
-//			boolean evolutionSanity, boolean shinyFromNormal) {
-//		// obviously shinyFromNormal is not used, it is here for a hopefully prettier
-//		// class structure
-//		this.typeSanity = typeSanity;
-//		copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
-//	}
-//
-//	private PaletteID getRandomPaletteID() {
-//		return PaletteID.getRandomPokemonPaletteID(random);
-//	}
-//
-//	private PaletteID getRandomPaletteID(Type type) {
-//		PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(type);
-//		PaletteID paletteID = typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
-//		return paletteID;
-//	}	private class BasePokemonIDAction implements BasePokemonAction<Gen1Pokemon> {
-//
-//		@Override
-//		public void applyTo(Gen1Pokemon pk) {
-//			PaletteID newPaletteID = typeSanity ? getRandomPaletteID(pk.primaryType) : getRandomPaletteID();
-//			pk.paletteID = newPaletteID;
-//		}
-//
-//	}
-//
-//	private class EvolvedPokemonIDAction implements EvolvedPokemonAction<Gen1Pokemon> {
-//
-//		@Override
-//		public void applyTo(Gen1Pokemon evFrom, Gen1Pokemon evTo, boolean toMonIsFinalEvo) {
-//			PaletteID newPaletteID;
-//			if (typeSanity && !evTo.primaryType.equals(evFrom.primaryType)) {
-//				PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(evTo.primaryType);
-//				newPaletteID = contains(typeIDs, evFrom.paletteID) ? evFrom.paletteID
-//						: getRandomPaletteID(evTo.primaryType);
-//
-//			} else {
-//				newPaletteID = evFrom.paletteID;
-//			}
-//			evTo.paletteID = newPaletteID;
-//		}
-//
-//	}
+	@Override
+	public void randomizePokemonPalettes(PokemonSet<Gen1Pokemon> pokemonSet, boolean typeSanity,
+										 boolean evolutionSanity, boolean shinyFromNormal) {
+		// obviously shinyFromNormal is not used, it is here for a hopefully prettier
+		// class structure
+		this.typeSanity = typeSanity;
+		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
+		cueh.apply(evolutionSanity, true, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
+	}
 
-//
+	private PaletteID getRandomPaletteID() {
+		return PaletteID.getRandomPokemonPaletteID(random);
+	}
+
+	private PaletteID getRandomPaletteID(Type type) {
+		PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(type);
+		PaletteID paletteID = typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
+		return paletteID;
+	}
+
+	private class BasePokemonIDAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Gen1Pokemon> {
+
+		@Override
+		public void applyTo(Gen1Pokemon pk) {
+			PaletteID newPaletteID = typeSanity ? getRandomPaletteID(pk.primaryType) : getRandomPaletteID();
+			pk.paletteID = newPaletteID;
+		}
+
+	}
+
+	private class EvolvedPokemonIDAction implements CopyUpEvolutionsHelper.EvolvedPokemonAction<Gen1Pokemon> {
+
+		@Override
+		public void applyTo(Gen1Pokemon evFrom, Gen1Pokemon evTo, boolean toMonIsFinalEvo) {
+			PaletteID newPaletteID;
+			if (typeSanity && !evTo.primaryType.equals(evFrom.primaryType)) {
+				PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(evTo.primaryType);
+				newPaletteID = contains(typeIDs, evFrom.paletteID) ? evFrom.paletteID
+						: getRandomPaletteID(evTo.primaryType);
+
+			} else {
+				newPaletteID = evFrom.paletteID;
+			}
+			evTo.paletteID = newPaletteID;
+		}
+
+	}
 
 	private boolean contains(PaletteID[] paletteIDs, PaletteID pid) {
 		for (PaletteID pid2 : paletteIDs) {

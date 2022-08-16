@@ -24,14 +24,14 @@ package com.dabomstew.pkrandom.graphics;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.pokemon.Pokemon;
-//import com.dabomstew.pkrandom.romhandlers.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.PokemonSet;
 
 /**
  * A sub-handler for palette randomizing/modifications. Loading/writing palettes
  * should be done elsewhere, with implementations of this class only handling
  * changes done to said palettes.
  */
-public abstract class PaletteHandler {
+public abstract class PaletteHandler<T extends Pokemon> {
 
 	protected Random random;
 
@@ -43,8 +43,8 @@ public abstract class PaletteHandler {
 		this.random = new Random(seed);
 	}
 
-//	public abstract void randomizePokemonPalettes(CopyUpEvolutionsHelper<? extends Pokemon> copyUpEvolutionsHelper, boolean typeSanity,
-//			boolean evolutionSanity, boolean shinyFromNormal);
+	public abstract void randomizePokemonPalettes(PokemonSet<T> pokemonSet,
+												  boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
 
 	protected void setShinyPaletteFromNormal(Pokemon pk) {
 		pk.shinyPalette = pk.normalPalette.clone();

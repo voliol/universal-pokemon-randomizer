@@ -3157,19 +3157,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	@Override
-	public List<Pokemon> getBannedFormesForTrainerPokemon() {
-		List<Pokemon> banned = new ArrayList<>();
-		if (romEntry.romType != Gen4Constants.Type_DP) {
-			Pokemon giratinaOrigin = this.getAltFormeOfPokemon(pokes[Species.giratina], 1);
-			if (giratinaOrigin != null) {
-				// Ban Giratina-O for trainers in Gen 4, since he just instantly transforms
-				// back to Altered Forme if he's not holding the Griseous Orb.
-				banned.add(giratinaOrigin);
-			}
-		}
-		return banned;
-	}
+    @Override
+    public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
+        PokemonSet<Pokemon> banned = new PokemonSet<>();
+        if (romEntry.romType != Gen4Constants.Type_DP) {
+            Pokemon giratinaOrigin = this.getAltFormeOfPokemon(pokes[Species.giratina], 1);
+            if (giratinaOrigin != null) {
+                // Ban Giratina-O for trainers in Gen 4, since he just instantly transforms
+                // back to Altered Forme if he's not holding the Griseous Orb.
+                banned.add(giratinaOrigin);
+            }
+        }
+        return banned;
+    }
 
 	@Override
 	public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
@@ -5278,25 +5278,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return 4;
 	}
 
-	@Override
-	public void removeEvosForPokemonPool() {
-		// slightly more complicated than gen2/3
-		// we have to update a "baby table" too
-		List<Pokemon> pokemonIncluded = this.mainPokemonList;
-		Set<Evolution> keepEvos = new HashSet<>();
-		for (Pokemon pk : pokes) {
-			if (pk != null) {
-				keepEvos.clear();
-				for (Evolution evol : pk.evolutionsFrom) {
-					if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
-						keepEvos.add(evol);
-					} else {
-						evol.to.evolutionsTo.remove(evol);
-					}
-				}
-				pk.evolutionsFrom.retainAll(keepEvos);
-			}
-		}
+    @Override
+    public void removeEvosForPokemonPool() {
+        // slightly more complicated than gen2/3
+        // we have to update a "baby table" too
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        Set<Evolution> keepEvos = new HashSet<>();
+        for (Pokemon pk : pokes) {
+            if (pk != null) {
+                keepEvos.clear();
+                for (Evolution evol : pk.evolutionsFrom) {
+                    if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+                        keepEvos.add(evol);
+                    } else {
+                        evol.to.evolutionsTo.remove(evol);
+                    }
+                }
+                pk.evolutionsFrom.retainAll(keepEvos);
+            }
+        }
 
 		try {
 			byte[] babyPokes = readFile(romEntry.getFile("BabyPokemon"));
@@ -5702,20 +5702,20 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
-		checkPokemonRestrictions();
-		List<Pokemon> validPokemon = new ArrayList<>();
-		for (Pokemon pk : this.mainPokemonList) {
-			if (pk.number <= maxValue && (!blockNonMales || pk.genderRatio <= 0xFD)) {
-				validPokemon.add(pk);
-			}
-		}
-		if (validPokemon.size() == 0) {
-			return null;
-		} else {
-			return validPokemon.get(random.nextInt(validPokemon.size()));
-		}
-	}
+    private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
+        checkPokemonRestrictions();
+        List<Pokemon> validPokemon = new ArrayList<>();
+        for (Pokemon pk : this.restrictedPokemon) {
+            if (pk.number <= maxValue && (!blockNonMales || pk.genderRatio <= 0xFD)) {
+                validPokemon.add(pk);
+            }
+        }
+        if (validPokemon.size() == 0) {
+            return null;
+        } else {
+            return validPokemon.get(random.nextInt(validPokemon.size()));
+        }
+    }
 
 	private void computeCRC32sForRom() throws IOException {
 		this.actualOverlayCRC32s = new HashMap<>();

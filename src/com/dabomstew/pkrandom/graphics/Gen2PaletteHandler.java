@@ -23,7 +23,9 @@ package com.dabomstew.pkrandom.graphics;
 
 import java.util.Random;
 
+import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.pokemon.Type;
 //import com.dabomstew.pkrandom.romhandlers.BasePokemonAction;
 //import com.dabomstew.pkrandom.romhandlers.CopyUpEvolutionsHelper;
@@ -38,7 +40,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
  * "dark colors", as those descriptors generally correspond to each of the color
  * slots.
  */
-public class Gen2PaletteHandler extends PaletteHandler {
+public class Gen2PaletteHandler extends PaletteHandler<Pokemon> {
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;
@@ -47,16 +49,17 @@ public class Gen2PaletteHandler extends PaletteHandler {
 		super(random);
 	}
 
-//	@Override
-//	public void randomizePokemonPalettes(CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper, boolean typeSanity,
-//			boolean evolutionSanity, boolean shinyFromNormal) {
-//
-//		this.typeSanity = typeSanity;
-//		this.shinyFromNormal = shinyFromNormal;
-//		copyUpEvolutionsHelper.apply(evolutionSanity, false, new BasePokemonPaletteAction(),
-//				new EvolvedPokemonPaletteAction());
-//
-//	}
+	@Override
+	public void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet, boolean typeSanity,
+										 boolean evolutionSanity, boolean shinyFromNormal) {
+
+		this.typeSanity = typeSanity;
+		this.shinyFromNormal = shinyFromNormal;
+		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
+		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
+				new EvolvedPokemonPaletteAction());
+
+	}
 
 	private Palette getRandom2ColorPalette() {
 		Palette palette = new Palette(2);
@@ -75,51 +78,51 @@ public class Gen2PaletteHandler extends PaletteHandler {
 		return palette;
 	}
 
-//	private class BasePokemonPaletteAction implements BasePokemonAction<Pokemon> {
-//
-//		@Override
-//		public void applyTo(Pokemon pk) {
-//			if (shinyFromNormal) {
-//				setShinyPaletteFromNormal(pk);
-//			}
-//			setNormalPaletteRandom(pk);
-//		}
-//
-//		private void setNormalPaletteRandom(Pokemon pk) {
-//			pk.setNormalPalette(typeSanity ? getRandom2ColorPalette(pk.primaryType, pk.secondaryType)
-//					: getRandom2ColorPalette());
-//		}
-//
-//	}
-//
-//	private class EvolvedPokemonPaletteAction implements EvolvedPokemonAction<Pokemon> {
-//
-//		@Override
-//		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
-//			if (shinyFromNormal) {
-//				setShinyPaletteFromNormal(evTo);
-//			}
-//			setNormalPaletteFromPrevo(evFrom, evTo);
-//		}
-//
-//		private void setNormalPaletteFromPrevo(Pokemon evFrom, Pokemon evTo) {
-//			Palette palette = evFrom.normalPalette.clone();
-//
-//			if (typeSanity) {
-//				if (evTo.primaryType != evFrom.primaryType) {
-//					Color newBrightColor = Gen2TypeColors.getRandomBrightColor(evTo.primaryType, random);
-//					palette.setColor(0, newBrightColor);
-//
-//				} else if (evTo.secondaryType != evFrom.secondaryType) {
-//					Color newDarkColor = Gen2TypeColors.getRandomDarkColor(
-//							evTo.secondaryType == null ? evTo.primaryType : evTo.secondaryType, random);
-//					palette.setColor(1, newDarkColor);
-//				}
-//			}
-//
-//			evTo.normalPalette = palette;
-//		}
-//
-//	}
+	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {
+
+		@Override
+		public void applyTo(Pokemon pk) {
+			if (shinyFromNormal) {
+				setShinyPaletteFromNormal(pk);
+			}
+			setNormalPaletteRandom(pk);
+		}
+
+		private void setNormalPaletteRandom(Pokemon pk) {
+			pk.normalPalette = typeSanity ? getRandom2ColorPalette(pk.primaryType, pk.secondaryType)
+					: getRandom2ColorPalette();
+		}
+
+	}
+
+	private class EvolvedPokemonPaletteAction implements CopyUpEvolutionsHelper.EvolvedPokemonAction<Pokemon> {
+
+		@Override
+		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {
+			if (shinyFromNormal) {
+				setShinyPaletteFromNormal(evTo);
+			}
+			setNormalPaletteFromPrevo(evFrom, evTo);
+		}
+
+		private void setNormalPaletteFromPrevo(Pokemon evFrom, Pokemon evTo) {
+			Palette palette = evFrom.normalPalette.clone();
+
+			if (typeSanity) {
+				if (evTo.primaryType != evFrom.primaryType) {
+					Color newBrightColor = Gen2TypeColors.getRandomBrightColor(evTo.primaryType, random);
+					palette.setColor(0, newBrightColor);
+
+				} else if (evTo.secondaryType != evFrom.secondaryType) {
+					Color newDarkColor = Gen2TypeColors.getRandomDarkColor(
+							evTo.secondaryType == null ? evTo.primaryType : evTo.secondaryType, random);
+					palette.setColor(1, newDarkColor);
+				}
+			}
+
+			evTo.normalPalette = palette;
+		}
+
+	}
 
 }
