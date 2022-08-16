@@ -33,11 +33,105 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 
+import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.BasicPokemonAction;
+import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.EvolvedPokemonAction;
+
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRomHandler implements RomHandler {
+	
+//    private interface BasePokemonAction {
+//        void applyTo(Pokemon pk);
+//    }
+//
+//    private interface EvolvedPokemonAction {
+//        void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo);
+//    }
+//
+//    private interface CosmeticFormAction {
+//        void applyTo(Pokemon pk, Pokemon baseForme);
+//    }
+//
+//    /**
+//     * Universal implementation for things that have "copy X up evolutions"
+//     * support.
+//     *  @param bpAction
+//     *            Method to run on all base or no-copy Pokemon
+//     * @param epAction
+//     *            Method to run on all evolved Pokemon with a linear chain of
+//     * @param copySplitEvos
+//     *            If true, treat split evolutions the same way as base Pokemon
+//     */
+//    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
+//                                        EvolvedPokemonAction splitAction, boolean copySplitEvos) {
+//        List<Pokemon> allPokes = this.getPokemonInclFormes();
+//        for (Pokemon pk : allPokes) {
+//            if (pk != null) {
+//                pk.temporaryFlag = false;
+//            }
+//        }
+//
+//        // Get evolution data.
+//        PokemonSet<Pokemon> basicPokes = new PokemonSet<>(getPokemonInclFormes()).filterBasic();
+//        PokemonSet<Pokemon> splitEvos = new PokemonSet<>(getPokemonInclFormes()).filterSplitEvolutions();
+//        PokemonSet<Pokemon> middleEvos = new PokemonSet<>(getPokemon()).filterMiddleEvolutions(copySplitEvos);
+//
+//        for (Pokemon pk : basicPokes) {
+//            bpAction.applyTo(pk);
+//            pk.temporaryFlag = true;
+//        }
+//
+//        if (!copySplitEvos) {
+//            for (Pokemon pk : splitEvos) {
+//                bpAction.applyTo(pk);
+//                pk.temporaryFlag = true;
+//            }
+//        }
+//
+//        // go "up" evolutions looking for pre-evos to do first
+//        for (Pokemon pk : allPokes) {
+//            if (pk != null && !pk.temporaryFlag) {
+//
+//                // Non-randomized pokes at this point must have
+//                // a linear chain of single evolutions down to
+//                // a randomized poke.
+//                Stack<Evolution> currentStack = new Stack<>();
+//                Evolution ev = pk.evolutionsTo.get(0);
+//                while (!ev.from.temporaryFlag) {
+//                    currentStack.push(ev);
+//                    ev = ev.from.evolutionsTo.get(0);
+//                }
+//
+//                // Now "ev" is set to an evolution from a Pokemon that has had
+//                // the base action done on it to one that hasn't.
+//                // Do the evolution action for everything left on the stack.
+//
+//                if (copySplitEvos && splitAction != null && splitEvos.contains(ev.to)) {
+//                    splitAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+//                } else {
+//                    epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+//                }
+//                ev.to.temporaryFlag = true;
+//                while (!currentStack.isEmpty()) {
+//                    ev = currentStack.pop();
+//                    if (copySplitEvos && splitAction != null && splitEvos.contains(pk)) {
+//                        splitAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+//                    } else {
+//                        epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
+//                    }
+//                    ev.to.temporaryFlag = true;
+//                }
+//
+//            }
+//        }
+//    }
+//
+//    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
+//        copyUpEvolutionsHelper(bpAction, epAction, null, false);
+//    }
 
     protected final Random random;
     protected PrintStream logStream;
@@ -52,6 +146,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     private PokemonSet<Pokemon> legendaryPokemonInclFormes = new PokemonSet<>();
     private PokemonSet<Pokemon> nonlegendaryAltFormes = new PokemonSet<>();
     private PokemonSet<Pokemon> legendaryAltFormes = new PokemonSet<>();
+    
+	// TODO: Maybe it's important to not use the restricted sets? Does the helper
+	// break if not all members in an evo line are included?
+	private CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(() -> {
+		checkPokemonRestrictions();
+		return restrictedPokemonInclAltFormes;
+	});
 
     private List<MegaEvolution> megaEvolutionsList;
     private List<Pokemon> altFormesList;
@@ -179,18 +280,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean evolutionSanity = settings.isBaseStatsFollowEvolutions();
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
 
-        if (evolutionSanity) {
-            copyUpEvolutionsHelper(pk -> pk.shuffleStats(AbstractRomHandler.this.random),
-                    (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom)
-            );
-        } else {
-            List<Pokemon> allPokes = this.getPokemonInclFormes();
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    pk.shuffleStats(this.random);
-                }
-            }
-        }
+		copyUpEvolutionsHelper.apply(evolutionSanity, false,
+				pk -> pk.shuffleStats(random),
+				(evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom));
 
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
@@ -214,28 +306,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
         boolean assignEvoStatsRandomly = settings.isAssignEvoStatsRandomly();
 
-        if (evolutionSanity) {
-            if (assignEvoStatsRandomly) {
-                copyUpEvolutionsHelper(pk -> pk.randomizeStatsWithinBST(AbstractRomHandler.this.random),
-                        (evFrom, evTo, toMonIsFinalEvo) -> evTo.assignNewStatsForEvolution(evFrom, this.random),
-                        (evFrom, evTo, toMonIsFinalEvo) -> evTo.assignNewStatsForEvolution(evFrom, this.random),
-                        true
-                );
-            } else {
-                copyUpEvolutionsHelper(pk -> pk.randomizeStatsWithinBST(AbstractRomHandler.this.random),
-                        (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyRandomizedStatsUpEvolution(evFrom),
-                        (evFrom, evTo, toMonIsFinalEvo) -> evTo.assignNewStatsForEvolution(evFrom, this.random),
-                        true
-                );
-            }
-        } else {
-            List<Pokemon> allPokes = this.getPokemonInclFormes();
-            for (Pokemon pk : allPokes) {
-                if (pk != null) {
-                    pk.randomizeStatsWithinBST(this.random);
-                }
-            }
-        }
+		BasicPokemonAction<Pokemon> bpAction = pk -> pk.randomizeStatsWithinBST(random);
+		EvolvedPokemonAction<Pokemon> randomEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
+				.assignNewStatsForEvolution(evFrom, random);
+		EvolvedPokemonAction<Pokemon> copyEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
+				.copyRandomizedStatsUpEvolution(evFrom);
+				
+		copyUpEvolutionsHelper.apply(evolutionSanity, true, bpAction,
+				assignEvoStatsRandomly ? randomEpAction : copyEpAction, randomEpAction, bpAction);
 
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
@@ -380,59 +458,51 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean dualTypeOnly = settings.isDualTypeOnly();
 
         List<Pokemon> allPokes = this.getPokemonInclFormes();
-        if (evolutionSanity) {
-            // Type randomization with evolution sanity
-            copyUpEvolutionsHelper(pk -> {
-                // Step 1: Basic or Excluded From Copying Pokemon
-                // A Basic/EFC pokemon has a 35% chance of a second type if
-                // it has an evolution that copies type/stats, a 50% chance
-                // otherwise
-                pk.primaryType = randomType();
-                pk.secondaryType = null;
-                if (pk.evolutionsFrom.size() == 1 && pk.evolutionsFrom.get(0).carryStats) {
-                    if (AbstractRomHandler.this.random.nextDouble() < 0.35 || dualTypeOnly) {
-                        pk.secondaryType = randomType();
-                        while (pk.secondaryType == pk.primaryType) {
-                            pk.secondaryType = randomType();
-                        }
-                    }
-                } else {
-                    if (AbstractRomHandler.this.random.nextDouble() < 0.5 || dualTypeOnly) {
-                        pk.secondaryType = randomType();
-                        while (pk.secondaryType == pk.primaryType) {
-                            pk.secondaryType = randomType();
-                        }
-                    }
-                }
-            }, (evFrom, evTo, toMonIsFinalEvo) -> {
-                evTo.primaryType = evFrom.primaryType;
-                evTo.secondaryType = evFrom.secondaryType;
+		copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
+			// Step 1: Basic or Excluded From Copying Pokemon
+			// A Basic/EFC pokemon has a 35% chance of a second type if
+			// it has an evolution that copies type/stats, a 50% chance
+			// otherwise
+			pk.primaryType = randomType();
+			pk.secondaryType = null;
+			if (pk.evolutionsFrom.size() == 1 && pk.evolutionsFrom.get(0).carryStats) {
+				if (AbstractRomHandler.this.random.nextDouble() < 0.35 || dualTypeOnly) {
+					pk.secondaryType = randomType();
+					while (pk.secondaryType == pk.primaryType) {
+						pk.secondaryType = randomType();
+					}
+				}
+			} else {
+				if (AbstractRomHandler.this.random.nextDouble() < 0.5 || dualTypeOnly) {
+					pk.secondaryType = randomType();
+					while (pk.secondaryType == pk.primaryType) {
+						pk.secondaryType = randomType();
+					}
+				}
+			}
+		}, (evFrom, evTo, toMonIsFinalEvo) -> {
+			evTo.primaryType = evFrom.primaryType;
+			evTo.secondaryType = evFrom.secondaryType;
 
-                if (evTo.secondaryType == null) {
-                    double chance = toMonIsFinalEvo ? 0.25 : 0.15;
-                    if (AbstractRomHandler.this.random.nextDouble() < chance || dualTypeOnly) {
-                        evTo.secondaryType = randomType();
-                        while (evTo.secondaryType == evTo.primaryType) {
-                            evTo.secondaryType = randomType();
-                        }
-                    }
-                }
-            });
-        } else {
-            // Entirely random types
-            for (Pokemon pkmn : allPokes) {
-                if (pkmn != null) {
-                    pkmn.primaryType = randomType();
-                    pkmn.secondaryType = null;
-                    if (this.random.nextDouble() < 0.5||settings.isDualTypeOnly()) {
-                        pkmn.secondaryType = randomType();
-                        while (pkmn.secondaryType == pkmn.primaryType) {
-                            pkmn.secondaryType = randomType();
-                        }
-                    }
-                }
-            }
-        }
+			if (evTo.secondaryType == null) {
+				double chance = toMonIsFinalEvo ? 0.25 : 0.15;
+				if (AbstractRomHandler.this.random.nextDouble() < chance || dualTypeOnly) {
+					evTo.secondaryType = randomType();
+					while (evTo.secondaryType == evTo.primaryType) {
+						evTo.secondaryType = randomType();
+					}
+				}
+			}
+		}, null, pk -> {
+			pk.primaryType = randomType();
+			pk.secondaryType = null;
+			if (this.random.nextDouble() < 0.5 || settings.isDualTypeOnly()) {
+				pk.secondaryType = randomType();
+				while (pk.secondaryType == pk.primaryType) {
+					pk.secondaryType = randomType();
+				}
+			}
+		});
 
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.actuallyCosmetic) {
@@ -509,74 +579,38 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         final int maxAbility = this.highestAbilityIndex();
 
-        if (evolutionSanity) {
-            // copy abilities straight up evolution lines
-            // still keep WG as an exception, though
+        // copy abilities straight up evolution lines
+        // still keep WG as an exception, though
+		copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
+			if (pk.ability1 != Abilities.wonderGuard && pk.ability2 != Abilities.wonderGuard
+					&& pk.ability3 != Abilities.wonderGuard) {
+				// Pick first ability
+				pk.ability1 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
 
-            copyUpEvolutionsHelper(pk -> {
-                if (pk.ability1 != Abilities.wonderGuard
-                        && pk.ability2 != Abilities.wonderGuard
-                        && pk.ability3 != Abilities.wonderGuard) {
-                    // Pick first ability
-                    pk.ability1 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
+				// Second ability?
+				if (ensureTwoAbilities || random.nextDouble() < 0.5) {
+					// Yes, second ability
+					pk.ability2 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether, pk.ability1);
+				} else {
+					// Nope
+					pk.ability2 = 0;
+				}
 
-                    // Second ability?
-                    if (ensureTwoAbilities || AbstractRomHandler.this.random.nextDouble() < 0.5) {
-                        // Yes, second ability
-                        pk.ability2 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
-                                pk.ability1);
-                    } else {
-                        // Nope
-                        pk.ability2 = 0;
-                    }
+				// Third ability?
+				if (hasDWAbilities) {
+					pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether, pk.ability1,
+							pk.ability2);
+				}
+			}
+		}, (evFrom, evTo, toMonIsFinalEvo) -> {
+			if (evTo.ability1 != Abilities.wonderGuard && evTo.ability2 != Abilities.wonderGuard
+					&& evTo.ability3 != Abilities.wonderGuard) {
+				evTo.ability1 = evFrom.ability1;
+				evTo.ability2 = evFrom.ability2;
+				evTo.ability3 = evFrom.ability3;
+			}
+		});
 
-                    // Third ability?
-                    if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
-                                pk.ability1, pk.ability2);
-                    }
-                }
-            }, (evFrom, evTo, toMonIsFinalEvo) -> {
-                if (evTo.ability1 != Abilities.wonderGuard
-                        && evTo.ability2 != Abilities.wonderGuard
-                        && evTo.ability3 != Abilities.wonderGuard) {
-                    evTo.ability1 = evFrom.ability1;
-                    evTo.ability2 = evFrom.ability2;
-                    evTo.ability3 = evFrom.ability3;
-                }
-            });
-        } else {
-            List<Pokemon> allPokes = this.getPokemonInclFormes();
-            for (Pokemon pk : allPokes) {
-                if (pk == null) {
-                    continue;
-                }
-
-                // Don't remove WG if already in place.
-                if (pk.ability1 != Abilities.wonderGuard
-                        && pk.ability2 != Abilities.wonderGuard
-                        && pk.ability3 != Abilities.wonderGuard) {
-                    // Pick first ability
-                    pk.ability1 = this.pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether);
-
-                    // Second ability?
-                    if (ensureTwoAbilities || this.random.nextDouble() < 0.5) {
-                        // Yes, second ability
-                        pk.ability2 = this.pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
-                                pk.ability1);
-                    } else {
-                        // Nope
-                        pk.ability2 = 0;
-                    }
-
-                    // Third ability?
-                    if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
-                                pk.ability1, pk.ability2);
-                    }
-                }
-            }
-        }
 
         List<Pokemon> allPokes = this.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
@@ -4291,19 +4325,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> tmHMs = new ArrayList<>(this.getTMMoves());
         tmHMs.addAll(this.getHMMoves());
 
-        if (followEvolutions) {
-            copyUpEvolutionsHelper(pk -> randomizePokemonMoveCompatibility(
-                    pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
-            (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
-                    evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
-            ), null, true);
-        }
-        else {
-            for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-                randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), tmHMs,
-                        requiredEarlyOn, preferSameType);
-            }
-        }
+		if (followEvolutions) {
+			copyUpEvolutionsHelper.apply(true, false,
+					pk -> randomizePokemonMoveCompatibility(pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
+					(evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(evFrom, evTo,
+							compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType));
+		} else {
+			for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+				randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), tmHMs, requiredEarlyOn,
+						preferSameType);
+			}
+		}
 
         // Set the new compatibility
         this.setTMHMCompatibility(compat);
@@ -4410,14 +4442,16 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void ensureTMEvolutionSanity() {
         Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
-        copyUpEvolutionsHelper(pk -> {}, ((evFrom, evTo, toMonIsFinalEvo) -> {
-            boolean[] fromCompat = compat.get(evFrom);
-            boolean[] toCompat = compat.get(evTo);
-            for (int i = 1; i < toCompat.length; i++) {
-                toCompat[i] |= fromCompat[i];
-            }
-        }), null, true);
+		// Don't do anything with the base, just copy upwards to ensure later evolutions
+		// retain learn compatibility
+		copyUpEvolutionsHelper.apply(true, true, pk -> {}, 
+				(evFrom, evTo, toMonIsFinalEvo) -> {
+					boolean[] fromCompat = compat.get(evFrom);
+					boolean[] toCompat = compat.get(evTo);
+					for (int i = 1; i < toCompat.length; i++) {
+						toCompat[i] |= fromCompat[i];
+					}
+				});
         this.setTMHMCompatibility(compat);
     }
 
@@ -4558,11 +4592,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> priorityTutors = new ArrayList<Integer>();
 
         if (followEvolutions) {
-            copyUpEvolutionsHelper(pk -> randomizePokemonMoveCompatibility(
-                    pk, compat.get(pk), mts, priorityTutors, preferSameType),
-                    (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
-                            evFrom, evTo, compat.get(evFrom), compat.get(evTo), mts, preferSameType
-                    ), null, true);
+			copyUpEvolutionsHelper.apply(true, true,
+					pk -> randomizePokemonMoveCompatibility(pk, compat.get(pk), mts, priorityTutors, preferSameType),
+					(evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(evFrom, evTo,
+							compat.get(evFrom), compat.get(evTo), mts, preferSameType));
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -4620,13 +4653,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
         // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
-        copyUpEvolutionsHelper(pk -> {}, ((evFrom, evTo, toMonIsFinalEvo) -> {
-            boolean[] fromCompat = compat.get(evFrom);
-            boolean[] toCompat = compat.get(evTo);
-            for (int i = 1; i < toCompat.length; i++) {
-                toCompat[i] |= fromCompat[i];
-            }
-        }), null, true);
+        copyUpEvolutionsHelper.apply(true, true, pk -> {}, 
+				(evFrom, evTo, toMonIsFinalEvo) -> {
+					boolean[] fromCompat = compat.get(evFrom);
+					boolean[] toCompat = compat.get(evTo);
+					for (int i = 1; i < toCompat.length; i++) {
+						toCompat[i] |= fromCompat[i];
+					}
+				});
         this.setMoveTutorCompatibility(compat);
     }
 
@@ -6046,96 +6080,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         recStack.remove(pk);
         return false;
-    }
-
-    private interface BasePokemonAction {
-        void applyTo(Pokemon pk);
-    }
-
-    private interface EvolvedPokemonAction {
-        void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo);
-    }
-
-    private interface CosmeticFormAction {
-        void applyTo(Pokemon pk, Pokemon baseForme);
-    }
-
-    /**
-     * Universal implementation for things that have "copy X up evolutions"
-     * support.
-     *  @param bpAction
-     *            Method to run on all base or no-copy Pokemon
-     * @param epAction
-     *            Method to run on all evolved Pokemon with a linear chain of
-     * @param copySplitEvos
-     *            If true, treat split evolutions the same way as base Pokemon
-     */
-    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
-                                        EvolvedPokemonAction splitAction, boolean copySplitEvos) {
-        List<Pokemon> allPokes = this.getPokemonInclFormes();
-        for (Pokemon pk : allPokes) {
-            if (pk != null) {
-                pk.temporaryFlag = false;
-            }
-        }
-
-        // Get evolution data.
-        PokemonSet<Pokemon> basicPokes = new PokemonSet<>(getPokemonInclFormes()).filterBasic();
-        PokemonSet<Pokemon> splitEvos = new PokemonSet<>(getPokemonInclFormes()).filterSplitEvolutions();
-        PokemonSet<Pokemon> middleEvos = new PokemonSet<>(getPokemon()).filterMiddleEvolutions(copySplitEvos);
-
-        for (Pokemon pk : basicPokes) {
-            bpAction.applyTo(pk);
-            pk.temporaryFlag = true;
-        }
-
-        if (!copySplitEvos) {
-            for (Pokemon pk : splitEvos) {
-                bpAction.applyTo(pk);
-                pk.temporaryFlag = true;
-            }
-        }
-
-        // go "up" evolutions looking for pre-evos to do first
-        for (Pokemon pk : allPokes) {
-            if (pk != null && !pk.temporaryFlag) {
-
-                // Non-randomized pokes at this point must have
-                // a linear chain of single evolutions down to
-                // a randomized poke.
-                Stack<Evolution> currentStack = new Stack<>();
-                Evolution ev = pk.evolutionsTo.get(0);
-                while (!ev.from.temporaryFlag) {
-                    currentStack.push(ev);
-                    ev = ev.from.evolutionsTo.get(0);
-                }
-
-                // Now "ev" is set to an evolution from a Pokemon that has had
-                // the base action done on it to one that hasn't.
-                // Do the evolution action for everything left on the stack.
-
-                if (copySplitEvos && splitAction != null && splitEvos.contains(ev.to)) {
-                    splitAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
-                } else {
-                    epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
-                }
-                ev.to.temporaryFlag = true;
-                while (!currentStack.isEmpty()) {
-                    ev = currentStack.pop();
-                    if (copySplitEvos && splitAction != null && splitEvos.contains(pk)) {
-                        splitAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
-                    } else {
-                        epAction.applyTo(ev.from, ev.to, !middleEvos.contains(ev.to));
-                    }
-                    ev.to.temporaryFlag = true;
-                }
-
-            }
-        }
-    }
-
-    private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction) {
-        copyUpEvolutionsHelper(bpAction, epAction, null, false);
     }
 
     private boolean checkForUnusedMove(List<Move> potentialList, List<Integer> alreadyUsed) {
