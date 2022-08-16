@@ -59,12 +59,6 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         addAll(pokemonSet);
     }
 
-    private void addAll(List<? extends T> pokemonList) {
-        pokemonList.forEach(pk -> {
-            if (pk != null) add(pk);
-        });
-    }
-
     public PokemonSet<T> filter(Predicate<T> predicate) {
         PokemonSet<T> filtered = new PokemonSet<>();
         for (T pk : this) {
@@ -137,6 +131,16 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
         return filter(pk -> pk.primaryType == type || pk.secondaryType == type);
     }
 
+    @Override
+    public boolean add(T pk) {
+        // does not add null, and the return of add()
+        // should correspond to whether the set is changed
+        if (pk == null) {
+            return false;
+        }
+        return super.add(pk);
+    }
+
     @SuppressWarnings("unchecked")
     public boolean addEvolutionaryRelatives() {
         PokemonSet<Pokemon> relatives = new PokemonSet<>();
@@ -148,7 +152,8 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
     public T getRandom(Random random) {
         List<T> randomPickableFrom = new ArrayList<>(this);
-        return randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
+        return randomPickableFrom.size() == 0 ? null :
+                randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
     }
 
     // TODO: come up with a collector or the like, so streams can be used for longer operations

@@ -97,7 +97,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         restrictionsSet = true;
         altFormesList = this.getAltFormes();
-        megaEvolutionsList = this.getMegaEvolutions();
         if (restrictions != null) {
             // temporary until I figure out if allPokemon() should be a PokemonSet
             PokemonSet<Pokemon> allPokemonSet = new PokemonSet<>(getPokemon());
@@ -145,6 +144,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     megaEvolutionsList.add(megaEvo);
                 }
             }
+        } else {
+            restrictedPokemonInclAltFormes.addAll(getPokemonInclFormes());
+            megaEvolutionsList = this.getMegaEvolutions();
         }
 
         restrictedPokemon = restrictedPokemonInclAltFormes.filter(pk -> !altFormesList.contains(pk));
