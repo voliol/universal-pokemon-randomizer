@@ -1238,10 +1238,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public List<Pokemon> getAltFormes() {
+	public PokemonSet<Pokemon> getAltFormes() {
 		int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
-		return pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1,
-				Gen4Constants.pokemonCount + formeCount + 1);
+		return new PokemonSet<>(pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1,
+				Gen4Constants.pokemonCount + formeCount + 1));
 	}
 
 	@Override
@@ -1256,8 +1256,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public List<Pokemon> getIrregularFormes() {
-		return new ArrayList<>();
+	public PokemonSet<Pokemon> getIrregularFormes() {
+		return new PokemonSet<>();
 	}
 
 	@Override

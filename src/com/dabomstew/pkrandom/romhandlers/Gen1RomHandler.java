@@ -2848,7 +2848,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     
     private void loadPokemonPalettes() {
 		int palIndex = romEntry.getValue("MonPaletteIndicesOffset");
-		for (Pokemon pk : allPokemonWithoutNull()) {
+		for (Pokemon pk : getPokemonSet()) {
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
 			gen1pk.paletteID = (PaletteID.values()[rom[palIndex + gen1pk.number]]); // they are in Pok�dex order
 		}
@@ -2857,7 +2857,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 	@Override
 	public void savePokemonPalettes() {
 		int palIndex = romEntry.getValue("MonPaletteIndicesOffset");
-		for (Pokemon pk : allPokemonWithoutNull()) {
+		for (Pokemon pk : getPokemonSet()) {
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
 			rom[palIndex + gen1pk.number] = (byte) gen1pk.paletteID.ordinal(); // they are in Pok�dex order
 		}

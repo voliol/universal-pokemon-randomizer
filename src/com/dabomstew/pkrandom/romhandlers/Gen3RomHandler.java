@@ -4357,7 +4357,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void loadPokemonPalettes() {
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
-        for (Pokemon pk : allPokemonWithoutNull()) {
+        for (Pokemon pk : getPokemonSet()) {
             int pokeNumber = pokedexToInternal[pk.number];
 
             int normalPalOffset = readPointer(normalPaletteTableOffset + pokeNumber * 8);
@@ -4377,7 +4377,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public void savePokemonPalettes() {
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
-        for (Pokemon pk : allPokemonWithoutNull()) {
+        for (Pokemon pk : getPokemonSet()) {
             int pokeNumber = pokedexToInternal[pk.number];
 
             int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;

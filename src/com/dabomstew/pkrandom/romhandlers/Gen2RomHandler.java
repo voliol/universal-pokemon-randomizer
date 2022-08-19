@@ -2897,7 +2897,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 	private void loadPokemonPalettes() {
         // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = romEntry.getValue("PokemonPalettes") + 8;
-        for (Pokemon pk : allPokemonWithoutNull()) {
+        for (Pokemon pk : getPokemonSet()) {
             int num = pk.number - 1;
             
             int normalPaletteOffset = palOffset + num * 8;
@@ -2917,7 +2917,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 	@Override
 	public void savePokemonPalettes() {
 		int palOffset = romEntry.getValue("PokemonPalettes") + 8;
-		for (Pokemon pk : allPokemonWithoutNull()) {
+		for (Pokemon pk : getPokemonSet()) {
 			int num = pk.number - 1;
 
 			byte[] normalPaletteBytes = pk.normalPalette.toBytes();

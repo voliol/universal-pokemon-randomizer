@@ -408,13 +408,13 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	}
 
 	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
-	// is separate methods called in loadedROM()/loadedRom() methods. Even though
+	// is separate methods called in loadROM()/loadedRom() methods. Even though
 	// one call in AbstractRomHandler should suffice.
 	protected void loadPokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokespritesNARC = readNARC(NARCpath);
-            for (Pokemon pk : allPokemonWithoutNull()) {
+            for (Pokemon pk : getPokemonSet()) {
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.number);
                 pk.normalPalette = readPalette(pokespritesNARC, normalPaletteIndex);
                 
@@ -443,7 +443,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 
-            for (Pokemon pk : allPokemonWithoutNull()) {
+            for (Pokemon pk : getPokemonSet()) {
 
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.number);
                 byte[] normalPaletteBytes = pk.normalPalette.toBytes();
