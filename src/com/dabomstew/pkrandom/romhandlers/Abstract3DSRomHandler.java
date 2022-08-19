@@ -79,14 +79,11 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
     protected abstract void loadedROM(String productCode, String titleId);
 
-    protected abstract void savingROM() throws IOException;
-
     protected abstract String getGameAcronym();
 
     @Override
     public boolean saveRomFile(String filename, long seed) {
         try {
-            savingROM();
             baseRom.saveAsNCCH(filename, getGameAcronym(), seed);
         } catch (IOException | NoSuchAlgorithmException e) {
             if (e.getMessage().contains("Access is denied")) {
@@ -101,7 +98,6 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
     @Override
     public boolean saveRomDirectory(String filename) {
         try {
-            savingROM();
             baseRom.saveAsLayeredFS(filename);
         } catch (IOException e) {
             throw new RandomizerIOException(e);

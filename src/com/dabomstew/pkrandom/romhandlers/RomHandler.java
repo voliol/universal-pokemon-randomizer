@@ -53,10 +53,8 @@ public interface RomHandler {
     // =======================
 
     boolean loadRom(String filename);
-
-    boolean saveRomFile(String filename, long seed);
-
-    boolean saveRomDirectory(String filename);
+    
+    boolean saveRom(String filename, long seed, boolean saveAsDirectory);
 
     String loadedFilename();
 
