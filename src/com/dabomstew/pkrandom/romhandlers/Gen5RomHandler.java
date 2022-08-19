@@ -847,11 +847,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return pokemonListInclFormes;
     }
 
-    @Override
-    public List<Pokemon> getAltFormes() {
-        int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
-        return pokemonListInclFormes.subList(Gen5Constants.pokemonCount + 1, Gen5Constants.pokemonCount + formeCount + 1);
-    }
+	@Override
+	public PokemonSet<Pokemon> getAltFormes() {
+		int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
+		return new PokemonSet<>(pokemonListInclFormes.subList(Gen5Constants.pokemonCount + 1,
+				Gen5Constants.pokemonCount + formeCount + 1));
+	}
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
@@ -864,10 +865,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
-    @Override
-    public List<Pokemon> getIrregularFormes() {
-        return Gen5Constants.getIrregularFormes(romEntry.romType).stream().map(i -> pokes[i]).collect(Collectors.toList());
-    }
+	@Override
+	public PokemonSet<Pokemon> getIrregularFormes() {
+		return Gen5Constants.getIrregularFormes(romEntry.romType)
+				.stream().map(i -> pokes[i])
+				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+	}
 
     @Override
     public boolean hasFunctionalFormes() {
