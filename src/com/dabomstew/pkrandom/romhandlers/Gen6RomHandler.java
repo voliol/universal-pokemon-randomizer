@@ -1016,11 +1016,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return pokemonListInclFormes;
     }
 
-    @Override
-    public List<Pokemon> getAltFormes() {
-        int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
-        return pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1, Gen6Constants.pokemonCount + formeCount + 1);
-    }
+	@Override
+	public PokemonSet<Pokemon> getAltFormes() {
+		int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
+		return new PokemonSet<>(pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1,
+				Gen6Constants.pokemonCount + formeCount + 1));
+	}
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
@@ -1033,10 +1034,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
-    @Override
-    public List<Pokemon> getIrregularFormes() {
-        return Gen6Constants.getIrregularFormes(romEntry.romType).stream().map(i -> pokes[i]).collect(Collectors.toList());
-    }
+	@Override
+	public PokemonSet<Pokemon> getIrregularFormes() {
+		return Gen6Constants.getIrregularFormes(romEntry.romType)
+				.stream().map(i -> pokes[i])
+				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+	}
 
     @Override
     public boolean hasFunctionalFormes() {

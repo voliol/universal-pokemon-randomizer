@@ -92,13 +92,17 @@ public interface RomHandler {
 
     List<Pokemon> getPokemonInclFormes();
 
-    List<Pokemon> getAltFormes();
+    PokemonSet<Pokemon> getAltFormes();
+    
+    PokemonSet<Pokemon> getPokemonSet();
+    
+    PokemonSet<Pokemon> getPokemonSetInclFormes();
 
     List<MegaEvolution> getMegaEvolutions();
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
 
-    List<Pokemon> getIrregularFormes();
+    PokemonSet<Pokemon> getIrregularFormes();
 
     // ==================================
     // Methods to set up Gen Restrictions

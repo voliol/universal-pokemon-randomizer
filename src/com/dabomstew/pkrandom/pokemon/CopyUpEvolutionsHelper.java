@@ -47,6 +47,10 @@ public class CopyUpEvolutionsHelper<T extends Pokemon> {
     }
 
     private final Supplier<PokemonSet<T>> pokemonSetSupplier;
+    
+    public CopyUpEvolutionsHelper(PokemonSet<T> pokemonSet) {
+    	this.pokemonSetSupplier = () -> pokemonSet;
+    }
 
     public CopyUpEvolutionsHelper(Supplier<PokemonSet<T>> pokemonSetSupplier) {
         this.pokemonSetSupplier = pokemonSetSupplier;
