@@ -95,11 +95,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
     protected abstract void loadedROM(String romCode, byte version);
 
-    protected abstract void savingROM();
-
     @Override
     public boolean saveRomFile(String filename, long seed) {
-        savingROM();
         try {
             baseRom.saveTo(filename);
         } catch (IOException e) {

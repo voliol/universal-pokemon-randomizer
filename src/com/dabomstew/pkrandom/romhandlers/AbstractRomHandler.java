@@ -1,9 +1,5 @@
 package com.dabomstew.pkrandom.romhandlers;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
 /*----------------------------------------------------------------------------*/
 /*--  AbstractRomHandler.java - a base class for all rom handlers which     --*/
 /*--                            implements the majority of the actual       --*/
@@ -33,11 +29,16 @@ import java.io.IOException;
 /*----------------------------------------------------------------------------*/
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
 
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
@@ -6970,4 +6971,34 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	protected abstract void savePokemonPalettes();
 
+    
+    @Override
+	public boolean saveRom(String filename, long seed, boolean saveAsDirectory) {
+    	try {
+    		prepareSaveRom();
+    		return saveAsDirectory ? saveRomDirectory(filename) : saveRomFile(filename, seed);
+    	} catch (RandomizerIOException e) {
+    		e.printStackTrace();
+    		return false;
+    	}
+	}
+
+	/**
+	 * Writes the remaining things to the ROM, before it is written to file. When
+	 * overridden, this should be called as a superclass method.
+	 */
+	protected void prepareSaveRom() {
+		savePokemonStats();
+		saveMoves();
+		savePokemonPalettes();
+	}
+
+	protected abstract void saveMoves();
+
+	protected abstract void savePokemonStats();
+
+	protected abstract boolean saveRomFile(String filename, long seed);
+	
+	protected abstract boolean saveRomDirectory(String filename);
+	
 }
