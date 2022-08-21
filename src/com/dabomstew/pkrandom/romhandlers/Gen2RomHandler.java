@@ -1277,8 +1277,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> getAltFormes() {
-        return new ArrayList<>();
+    public PokemonSet<Pokemon> getAltFormes() {
+        return new PokemonSet<>();
     }
 
     @Override
@@ -1292,8 +1292,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> getIrregularFormes() {
-        return new ArrayList<>();
+    public PokemonSet<Pokemon> getIrregularFormes() {
+        return new PokemonSet<>();
     }
 
     @Override
@@ -1541,8 +1541,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> bannedForStaticPokemon() {
-        return Collections.singletonList(pokes[Species.unown]); // Unown banned
+    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
+    	PokemonSet<Pokemon> banned = new PokemonSet<>();
+    	banned.add(pokes[Species.unown]); // Unown banned
+        return banned; 
     }
 
     @Override
@@ -2718,7 +2720,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        List<Pokemon> pokemonIncluded = this.mainPokemonList;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

@@ -1093,12 +1093,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return pokemonListInclFormes;
     }
 
-    @Override
-    public List<Pokemon> getAltFormes() {
-        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-        return pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1);
-    }
+	@Override
+	public PokemonSet<Pokemon> getAltFormes() {
+		int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+		int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+		return new PokemonSet<>(pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1));
+	}
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
@@ -1111,10 +1111,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return pokeNum != 0 ? !pokes[pokeNum].actuallyCosmetic ? pokes[pokeNum] : pokes[pokeNum].baseForme : pk;
     }
 
-    @Override
-    public List<Pokemon> getIrregularFormes() {
-        return Gen7Constants.getIrregularFormes(romEntry.romType).stream().map(i -> pokes[i]).collect(Collectors.toList());
-    }
+	@Override
+	public PokemonSet<Pokemon> getIrregularFormes() {
+		return Gen7Constants.getIrregularFormes(romEntry.romType)
+				.stream().map(i -> pokes[i])
+				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+	}
 
     @Override
     public boolean hasFunctionalFormes() {
@@ -3384,10 +3386,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    // TODO: identical to Gen 6 implementation (and very similar to Gen 4/5) => merge (?)
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        List<Pokemon> pokemonIncluded = this.mainPokemonListInclFormes;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemonInclAltFormes;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

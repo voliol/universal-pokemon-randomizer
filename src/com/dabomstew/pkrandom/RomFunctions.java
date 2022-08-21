@@ -38,67 +38,6 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class RomFunctions {
 
-    public static Set<Pokemon> getBasicPokemon(RomHandler baseRom) {
-        List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
-        Set<Pokemon> basicPokes = new TreeSet<>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() < 1) {
-                    basicPokes.add(pkmn);
-                }
-            }
-        }
-        return basicPokes;
-    }
-
-    public static Set<Pokemon> getSplitEvolutions(RomHandler baseRom) {
-        List<Pokemon> allPokes = baseRom.getPokemonInclFormes();
-        Set<Pokemon> splitEvos = new TreeSet<>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() > 0) {
-                    Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (!onlyEvo.carryStats) {
-                        splitEvos.add(pkmn);
-                    }
-                }
-            }
-        }
-        return splitEvos;
-    }
-
-    public static Set<Pokemon> getMiddleEvolutions(RomHandler baseRom, boolean includeSplitEvos) {
-        List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> middleEvolutions = new TreeSet<>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() > 0) {
-                    Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (onlyEvo.carryStats || includeSplitEvos) {
-                        middleEvolutions.add(pkmn);
-                    }
-                }
-            }
-        }
-        return middleEvolutions;
-    }
-
-    public static Set<Pokemon> getFinalEvolutions(RomHandler baseRom, boolean includeSplitEvos) {
-        List<Pokemon> allPokes = baseRom.getPokemon();
-        Set<Pokemon> finalEvolutions = new TreeSet<>();
-        for (Pokemon pkmn : allPokes) {
-            if (pkmn != null) {
-                if (pkmn.evolutionsTo.size() == 1 && pkmn.evolutionsFrom.size() == 0) {
-                    Evolution onlyEvo = pkmn.evolutionsTo.get(0);
-                    if (onlyEvo.carryStats || includeSplitEvos) {
-                        finalEvolutions.add(pkmn);
-                    }
-                }
-            }
-        }
-        return finalEvolutions;
-    }
-
     /**
      * Get the 4 moves known by a Pokemon at a particular level.
      * 
