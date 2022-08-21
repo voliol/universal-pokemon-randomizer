@@ -783,9 +783,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void savingROM() {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
         try {
             writeCode(code);
             writeGARC(romEntry.getFile("WildPokemon"), encounterGarc);
@@ -796,7 +795,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         int k = Gen7Constants.bsSize;
         int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
         int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
@@ -965,7 +965,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         extraEvolution.evolutionsTo.remove(0);
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         int moveCount = Gen7Constants.getMoveCount(romEntry.romType);
         byte[][] movesData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
         for (int i = 1; i <= moveCount; i++) {

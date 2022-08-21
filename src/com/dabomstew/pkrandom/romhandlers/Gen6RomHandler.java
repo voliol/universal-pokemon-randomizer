@@ -710,9 +710,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void savingROM() throws IOException {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+    	super.prepareSaveRom();
         try {
             writeCode(code);
             writeGARC(romEntry.getFile("TextStrings"), stringsGarc);
@@ -742,7 +741,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return "Unpatched";
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         int k = Gen6Constants.getBsSize(romEntry.romType);
         byte[] duplicateData = pokeGarc.files.get(Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType) + 1).get(0);
         for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
@@ -927,7 +927,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         feebasEvolution.evolutionsTo.add(beautyEvolution);
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
         byte[][] miniArchive = new byte[0][0];
         if (romEntry.romType == Gen6Constants.Type_ORAS) {

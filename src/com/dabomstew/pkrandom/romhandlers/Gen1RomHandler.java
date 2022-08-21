@@ -402,12 +402,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return null;
     }
 
-    @Override
-    public void savingRom() {
-        savePokemonStats();
-        saveMoves();
-    }
-
     private String[] readMoveNames() {
         int moveCount = romEntry.getValue("MoveCount");
         int offset = romEntry.getValue("MoveNamesOffset");
@@ -693,7 +687,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         int movesOffset = romEntry.getValue("MoveDataOffset");
         for (Move m : moves) {
             if (m != null) {
@@ -744,7 +739,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         // Write pokemon names
         int offs = romEntry.getValue("PokemonNamesOffset");
         int nameLength = romEntry.getValue("PokemonNamesLength");

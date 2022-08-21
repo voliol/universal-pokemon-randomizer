@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -7479,4 +7480,33 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void setPickupItems(List<PickupItem> pickupItems) {
         // do nothing
     }
+    
+    @Override
+	public boolean saveRom(String filename, long seed, boolean saveAsDirectory) {
+    	try {
+    		prepareSaveRom();
+    		return saveAsDirectory ? saveRomDirectory(filename) : saveRomFile(filename, seed);
+    	} catch (RandomizerIOException e) {
+    		e.printStackTrace();
+    		return false;
+    	}
+	}
+
+	/**
+	 * Writes the remaining things to the ROM, before it is written to file. When
+	 * overridden, this should be called as a superclass method.
+	 */
+	protected void prepareSaveRom() {
+		savePokemonStats();
+		saveMoves();
+	}
+
+	protected abstract void saveMoves();
+
+	protected abstract void savePokemonStats();
+
+	protected abstract boolean saveRomFile(String filename, long seed);
+	
+	protected abstract boolean saveRomDirectory(String filename);
+	
 }
