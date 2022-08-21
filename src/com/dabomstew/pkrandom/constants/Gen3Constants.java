@@ -61,20 +61,19 @@ public class Gen3Constants {
 
     public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
-    public static final String rsFrontSpritesPointerPrefix = "05E0";
+    // pointer block 1
+    public static final int pokemonFrontSpritesPointer = 0x128, pokemonBackSpritesPointer = 0x12C,
+    		pokemonNormalPalettesPointer = 0x130, pokemonShinyPalettesPointer = 0x134,
+    		pokemonIconSpritesPointer = 0x138, pokemonIconPalettesPointer = 0x13C,
+    		pokemonNamesPointer = 0x144, moveNamesPointer = 0x148, decorationNamesPointer = 0x14C;
 
-    public static final String rsFrontSpritesPointerSuffix = "1068191C";
-
-    public static final String rsPokemonPalettesPointerPrefix = "04D90148006817E0";
-
-    public static final String rsPokemonPalettesPointerSuffix = "080C064A11404840";
+    // pointer block 2
+    public static final int pokemonStatsPointer = 0x1BC, abilityNamesPointer = 0x1C0, 
+    		abilityDescriptionsPointer = 0x1C4, itemDataPointer = 0x1C8, moveDataPointer = 0x1CC,
+    		ballSpritesPointer = 0x1D0, ballPalettesPointer = 0x1D4;    
 
     private static final String runningShoesCheckPrefixRS = "0440002C1DD08620", runningShoesCheckPrefixFRLG = "02200540002D29D0",
             runningShoesCheckPrefixE = "0640002E1BD08C20";
-
-    public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
-            efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
-            efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;
 
     public static final byte[] emptyPokemonSig = new byte[] { 0x32, (byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32,
             0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00, (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F,
