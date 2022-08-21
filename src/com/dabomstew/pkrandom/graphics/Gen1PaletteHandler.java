@@ -76,16 +76,14 @@ public class Gen1PaletteHandler extends PaletteHandler<Gen1Pokemon> {
 
 	private PaletteID getRandomPaletteID(Type type) {
 		PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(type);
-		PaletteID paletteID = typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
-		return paletteID;
+		return typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
 	}
 
 	private class BasePokemonIDAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Gen1Pokemon> {
 
 		@Override
 		public void applyTo(Gen1Pokemon pk) {
-			PaletteID newPaletteID = typeSanity ? getRandomPaletteID(pk.primaryType) : getRandomPaletteID();
-			pk.paletteID = newPaletteID;
+			pk.paletteID = typeSanity ? getRandomPaletteID(pk.primaryType) : getRandomPaletteID();
 		}
 
 	}

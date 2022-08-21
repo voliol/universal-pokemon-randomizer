@@ -27,9 +27,6 @@ import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.pokemon.Type;
-//import com.dabomstew.pkrandom.romhandlers.BasePokemonAction;
-//import com.dabomstew.pkrandom.romhandlers.CopyUpEvolutionsHelper;
-//import com.dabomstew.pkrandom.romhandlers.EvolvedPokemonAction;
 
 /**
  * A {@link PaletteHandler} for Gen 2 games (G/S/C).

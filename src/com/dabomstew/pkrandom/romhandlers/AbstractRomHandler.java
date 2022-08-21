@@ -6945,10 +6945,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
-//        getPaletteHandler().randomizePokemonPalettes(copyUpEvolutionsHelper, typeSanity, evolutionSanity, shinyFromNormal);
+        getPaletteHandler().randomizePokemonPalettes(getPokemonSet(), typeSanity, evolutionSanity, shinyFromNormal);
     }
 
-    public abstract PaletteHandler getPaletteHandler();
+    public abstract PaletteHandler<Pokemon> getPaletteHandler();
 
     // just for testing
     protected final void dumpAllPokemonSprites() {
