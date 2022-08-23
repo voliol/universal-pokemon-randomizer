@@ -216,7 +216,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler<Pokemon> {
 	}
 
 	private String getSourceFileAdress(String fileKey) {
-		return "src/main/java/com/dabomstew/pkrandom/graphics/" + getResourceAdress(fileKey);
+		return "src/com/dabomstew/pkrandom/graphics/" + getResourceAdress(fileKey);
 	}
 
 	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {
