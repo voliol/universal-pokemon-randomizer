@@ -489,6 +489,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pokemonListInclFormes = Arrays.asList(pokes);
         pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen5Constants.pokemonCount + 1));
         loadMoves();
+        loadPokemonPalettes();
 
         abilityNames = getStrings(false, romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, romEntry.getInt("ItemNamesTextOffset"));

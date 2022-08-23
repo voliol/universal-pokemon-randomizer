@@ -714,7 +714,7 @@ public class Gen5Constants {
         kyuremMap.put(2,"-B");
         map.put(Species.kyurem, kyuremMap);
 
-        Map<Integer,String> keldeoMap = new HashMap();
+        Map<Integer,String> keldeoMap = new HashMap<>();
         keldeoMap.put(1,"-R");
         map.put(Species.keldeo, keldeoMap);
 

@@ -31,7 +31,7 @@ import java.util.List;
  * indices of a given {@link Palette} should be grouped together, or when the
  * Color in one slot should be the average of some other.
  * <p>
- * For the syntax, see {@link #ParsedDescription(String)}.
+ * For the syntax, see {@link #PalettePartDescription(String)}.
  */
 public class PalettePartDescription {
 
@@ -83,7 +83,7 @@ public class PalettePartDescription {
 	}
 
 	/**
-	 * 
+	 * Constructs a PalettePartDescription from a String
 	 * @param unparsed The String containing the description pre-parsing. Its syntax
 	 *                 is described below.
 	 *                 <p>
