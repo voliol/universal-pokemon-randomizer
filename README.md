@@ -4,6 +4,22 @@ With significant contributions from darkeye, cleartonic
 
 Based on the Universal Pokemon Randomizer by Dabomstew
 
+Palette branch 
+by voliol
+
+# Branch Info
+
+This is a branch for implementing/porting palette randomization into UPR ZX. For a longer description, see the readme of the 
+branch it came from: https://github.com/voliol/universal-pokemon-randomizer/blob/paltest/README.md
+
+As I implement the palette framework, I've taken the time to do some refactoring. This is partially a selfish endeavor to calm my own mind, 
+but also works to counteract the code bloat that adding a major feature like this naturally entails. 
+
+I hope to see it make its way into UPR ZX proper, see this issue: https://github.com/Ajarmar/universal-pokemon-randomizer-zx/issues/510
+
+
+**The rest of the readme is from the version of the UPR ZX this was branched from:**
+
 # Info
 
 This fork was originally made to make some minor tweaks and fixes, but became a bit more ambitious since 2020. There are several new features and supported games (including 3DS games) compared to the original Universal Pokemon Randomizer.
