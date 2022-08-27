@@ -30,6 +30,7 @@ import java.awt.Graphics2D;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -111,52 +112,51 @@ public class GFXFunctions {
 		return new IndexColorModel(bits, size, r, g, b, a);
 	}
 
-	public static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height, int bpp) {
-        return drawTiledZOrderImage(data, palette, offset, width, height, 8, 8, bpp);
-    }
+	public static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
+			int bpp) {
+		return drawTiledZOrderImage(data, palette, offset, width, height, 8, 8, bpp);
+	}
 
-    private static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
-                                                int tileWidth, int tileHeight, int bpp) {
-        if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
-            throw new IllegalArgumentException("Bits per pixel must be a multiple of 2.");
-        }
-        int pixelsPerByte = 8 / bpp;
-        if (width * height / pixelsPerByte + offset > data.length) {
-            throw new IllegalArgumentException("Invalid input image.");
-        }
+	private static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
+			int tileWidth, int tileHeight, int bpp) {
+		if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
+			throw new IllegalArgumentException("Bits per pixel must be a multiple of 2.");
+		}
+		int pixelsPerByte = 8 / bpp;
+		if (width * height / pixelsPerByte + offset > data.length) {
+			throw new IllegalArgumentException("Invalid input image.");
+		}
 
-        int bytesPerTile = tileWidth * tileHeight / pixelsPerByte;
-        int numTiles = width * height / (tileWidth * tileHeight);
-        int widthInTiles = width / tileWidth;
+		int bytesPerTile = tileWidth * tileHeight / pixelsPerByte;
+		int numTiles = width * height / (tileWidth * tileHeight);
+		int widthInTiles = width / tileWidth;
 
-        BufferedImage bim = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage bim = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-        for (int tile = 0; tile < numTiles; tile++) {
-            int tileX = tile % widthInTiles;
-            int tileY = tile / widthInTiles;
-            for (int yT = 0; yT < tileHeight; yT++) {
-                for (int xT = 0; xT < tileWidth; xT++) {
-                    int value = data[tile * bytesPerTile + yT * tileWidth / pixelsPerByte + xT / pixelsPerByte + offset] & 0xFF;
-                    if (pixelsPerByte != 1) {
-                        value = (value >>> ((xT+1) % pixelsPerByte) * bpp) & ((1 << bpp) - 1);
-                    }
+		for (int tile = 0; tile < numTiles; tile++) {
+			int tileX = tile % widthInTiles;
+			int tileY = tile / widthInTiles;
+			for (int yT = 0; yT < tileHeight; yT++) {
+				for (int xT = 0; xT < tileWidth; xT++) {
+					int value = data[tile * bytesPerTile + yT * tileWidth / pixelsPerByte + xT / pixelsPerByte + offset]
+							& 0xFF;
+					if (pixelsPerByte != 1) {
+						value = (value >>> ((xT + 1) % pixelsPerByte) * bpp) & ((1 << bpp) - 1);
+					}
 
-                    int withinTile = yT * tileWidth + xT;
-                    int subX = (withinTile & 0b000001) |
-                            (withinTile & 0b000100) >>> 1 |
-                            (withinTile & 0b010000) >>> 2;
-                    int subY = (withinTile & 0b000010) >>> 1 |
-                            (withinTile & 0b001000) >>> 2 |
-                            (withinTile & 0b100000) >>> 3;
-                    bim.setRGB(tileX * tileWidth + subX, tileY * tileHeight + subY, palette[value]);
-                }
-            }
-        }
+					int withinTile = yT * tileWidth + xT;
+					int subX = (withinTile & 0b000001) | (withinTile & 0b000100) >>> 1 | (withinTile & 0b010000) >>> 2;
+					int subY = (withinTile & 0b000010) >>> 1 | (withinTile & 0b001000) >>> 2
+							| (withinTile & 0b100000) >>> 3;
+					bim.setRGB(tileX * tileWidth + subX, tileY * tileHeight + subY, palette[value]);
+				}
+			}
+		}
 
-        return bim;
-    }
+		return bim;
+	}
 
-    /**
+	/**
 	 * Reads the data from an image read from a 4bpp .png file, returning it in the
 	 * format used by Gen III-V games.
 	 * <p>
@@ -165,51 +165,51 @@ public class GFXFunctions {
 	 */
 	// TODO: it makes sense for this to be handled by its own class(es).
 	public static byte[] readTiledImageData(BufferedImage bim) {
-	
+
 		int bpp = 4;
 		int tileWidth = DEFAULT_TILE_WIDTH;
 		int tileHeight = DEFAULT_TILE_HEIGHT;
-	
+
 		if (bim.getRaster().getNumBands() != 1) {
 			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .png file.");
 		}
-	
+
 		if (bim.getRaster().getSampleModel().getSampleSize(0) != bpp) {
 			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .png file.");
 		}
-	
+
 		if (bim.getWidth() % tileWidth != 0 || bim.getHeight() % tileHeight != 0) {
 			throw new IllegalArgumentException(
 					"Invalid input; image must be dividable into " + tileWidth + "x" + tileHeight + " pixel tiles.");
 		}
-	
+
 		byte[] data = new byte[bim.getWidth() * bim.getHeight() / 2];
-	
+
 		int numTiles = bim.getWidth() * bim.getHeight() / (tileWidth * tileHeight);
 		int widthInTiles = bim.getWidth() / tileWidth;
-	
+
 		int next = 0;
 		for (int tileNum = 0; tileNum < numTiles; tileNum++) {
 			int tileX = tileNum % widthInTiles;
 			int tileY = tileNum / widthInTiles;
-	
+
 			for (int yT = 0; yT < tileHeight; yT++) {
 				for (int xT = 0; xT < tileWidth; xT += 2) {
-	
+
 					int low = bim.getData().getSample(tileX * tileWidth + xT, tileY * tileHeight + yT, 0);
 					int high = bim.getData().getSample(tileX * tileWidth + xT + 1, tileY * tileHeight + yT, 0);
 					data[next] = (byte) (low + (high << 4));
 					next++;
-	
+
 				}
 			}
-	
+
 		}
 		return data;
 	}
 
 	@Deprecated
-    public static int conv16BitColorToARGB(int palValue) {
+	public static int conv16BitColorToARGB(int palValue) {
 		System.out.println(
 				"GFXFunctions.conv16BitColorToARGB(int) is deprecated. Use graphics.Palette.toARGB() instead, or graphics.Color.convHighColorWordToARGB() in cases where you don't load a full palette.");
 		int red = (int) ((palValue & 0x1F) * 8.25);
@@ -218,16 +218,16 @@ public class GFXFunctions {
 		return 0xFF000000 | (red << 16) | (green << 8) | blue;
 	}
 
-    @Deprecated
-    public static int conv3DS16BitColorToARGB(int palValue) {
+	@Deprecated
+	public static int conv3DS16BitColorToARGB(int palValue) {
 		System.out.println(
 				"GFXFunctions.conv3DS16BitColorToARGB(int) is deprecated. Use graphics.Color.conv3DSColorWordToARGB() instead.");
-        int alpha = (int) ((palValue & 0x1) * 0xFF);
-        int blue = (int) (((palValue & 0x3E) >> 1) * 8.25);
-        int green = (int) (((palValue & 0x7C0) >> 6) * 8.25);
-        int red = (int) (((palValue & 0xF800) >> 11) * 8.25);
-        return (alpha << 24) | (red << 16) | (green << 8) | blue;
-    }
+		int alpha = (int) ((palValue & 0x1) * 0xFF);
+		int blue = (int) (((palValue & 0x3E) >> 1) * 8.25);
+		int green = (int) (((palValue & 0x7C0) >> 6) * 8.25);
+		int red = (int) (((palValue & 0xF800) >> 11) * 8.25);
+		return (alpha << 24) | (red << 16) | (green << 8) | blue;
+	}
 
 	/**
 	 * Returns a copy of the input {@link BufferedImage} where a given color is
@@ -285,11 +285,11 @@ public class GFXFunctions {
 			queued[x][y] = true;
 		}
 	}
-    
+
 	/**
 	 * Stiches multiple {@link BufferedImage}s together in a grid. <br>
 	 * If all input BufferedImages have {@link IndexColorModel}s with the same
-	 * colors in the same order (e.g. a Pokémon front image and the corresponding
+	 * colors in the same order (e.g. a PokÃ©mon front image and the corresponding
 	 * back image, both being non-shiny/shiny), then so will the returned
 	 * BufferedImage.
 	 * 
@@ -326,9 +326,11 @@ public class GFXFunctions {
 	private static BufferedImage initializeStitchedImage(BufferedImage[][] bims, int[] rowWidths, int[] columnHeights) {
 		int stitchedWidth = IntStream.of(rowWidths).sum();
 		int stitchedHeight = IntStream.of(columnHeights).sum();
+		stitchedWidth = Math.max(stitchedWidth, 1);
+		stitchedHeight = Math.max(stitchedHeight, 1);
 		BufferedImage stitched;
-		if (allSameIndexedPalette(withoutNull(flatten(bims)))) {
-			IndexColorModel colorModel = (IndexColorModel) bims[0][0].getColorModel();
+		if (allSameIndexedPalette(bims)) {
+			IndexColorModel colorModel = (IndexColorModel) firstNonNull(bims).getColorModel();
 			stitched = new BufferedImage(stitchedWidth, stitchedHeight, BufferedImage.TYPE_BYTE_INDEXED, colorModel);
 		} else {
 			stitched = new BufferedImage(stitchedWidth, stitchedHeight, BufferedImage.TYPE_INT_ARGB);
@@ -337,26 +339,56 @@ public class GFXFunctions {
 	}
 
 	/**
-	 * Returns true if all {@link BufferedImages} have {@link IndexColorModels} with
-	 * the same colors in the same order.
-	 * 
-	 * @param bims An array of {@link BufferedImages} with no nulls.
+	 * Returns the first BufferedImage to not be null in a jagged 2D array, or null
+	 * if all elements are/the array is empty.
 	 */
-	private static boolean allSameIndexedPalette(BufferedImage[] bims) {
-		if (!(bims[0].getColorModel() instanceof IndexColorModel)) {
+	private static BufferedImage firstNonNull(BufferedImage[][] bims) {
+		for (BufferedImage[] row : bims) {
+			for (BufferedImage bim : row) {
+				if (bim != null) {
+					return bim;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns true if all non-null {@link BufferedImage}s in a jagged 2D array 
+	 * have {@link IndexColorModel}s with the same colors in the same order.
+	 *
+	 * @param bims     A jagged 2D array of {@link BufferedImage}s.
+	 */
+	private static boolean allSameIndexedPalette(BufferedImage[][] bims) {
+		BufferedImage base = firstNonNull(bims);
+		if (base == null) {
 			return false;
 		}
-		IndexColorModel indexed1 = (IndexColorModel) bims[0].getColorModel();
+		if (!(base.getColorModel()instanceof IndexColorModel indexed1)) {
+			return false;
+		}
 
+		return allSameIndexedPalette(indexed1, flatten(bims));
+	}
+
+	/**
+	 * Takes an indexed color model, and returns true if all non-null
+	 * {@link BufferedImage}s have {@link IndexColorModel}s with the same colors in
+	 * the same order as the given one.
+	 * 
+	 * @param indexed1 An indexed color model
+	 * @param bims     An array of {@link BufferedImage}s.
+	 */
+	private static boolean allSameIndexedPalette(IndexColorModel indexed1, BufferedImage[] bims) {
 		for (int i = 1; i < bims.length; i++) {
+			if (bims[i] != null) {
 
-			if (!(bims[i].getColorModel() instanceof IndexColorModel)) {
-				return false;
-			}
-			IndexColorModel indexed2 = (IndexColorModel) bims[i].getColorModel();
-
-			if (!sameRGBs(indexed1, indexed2)) {
-				return false;
+				if (!(bims[i].getColorModel() instanceof IndexColorModel indexed2)) {
+					return false;
+				}
+				if (!sameRGBs(indexed1, indexed2)) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -386,24 +418,6 @@ public class GFXFunctions {
 		}
 
 		return flattened;
-	}
-
-	private static BufferedImage[] withoutNull(BufferedImage[] bims) {
-		int length = 0;
-		for (BufferedImage bim : bims) {
-			if (bim != null) {
-				length++;
-			}
-		}
-		BufferedImage[] withoutNull = new BufferedImage[length];
-		int i = 0;
-		for (BufferedImage bim : bims) {
-			if (bim != null) {
-				withoutNull[i] = bim;
-				i++;
-			}
-		}
-		return withoutNull;
 	}
 
 	private static void drawOnStitchedImage(BufferedImage stitched, BufferedImage[][] bims, int gridWidth,

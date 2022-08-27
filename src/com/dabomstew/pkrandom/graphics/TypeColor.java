@@ -53,10 +53,8 @@ public class TypeColor extends Color {
 
 		String fileString = readAllFromTextFile(fileName);
 		Matcher matcher = Pattern.compile(TOKEN_REGEX).matcher(fileString);
-		System.out.println("== Tokens: ==");
 		while (matcher.find()) {
 			String token = matcher.group();
-			System.out.println(token);
 
 			if (token.matches(TYPE_TOKEN_REGEX)) {
 				if (type != null) {

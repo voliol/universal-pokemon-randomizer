@@ -1,4 +1,4 @@
-Bulbasaur	[]
+Bulbasaur	[3,4,5,16,6/12,13,14,15]
 Ivysaur		[]
 Venusaur	[]
 Charmander	[]

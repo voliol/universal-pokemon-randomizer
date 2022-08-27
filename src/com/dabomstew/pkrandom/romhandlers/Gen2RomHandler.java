@@ -2950,8 +2950,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         
         int picWidth = back ? 6 : pk.picDimensions & 0x0F;
         int picHeight = back ? 6 : (pk.picDimensions >> 4) & 0x0F;
-        
-        byte[] data = readSpriteData(picPointer, picWidth, picHeight);
+
+        byte [] data;
+        try {
+            data = readSpriteData(picPointer, picWidth, picHeight);
+        } catch (Exception e) {
+            return null;
+        }
         int w = picWidth * 8;
         int h = picHeight * 8;
 

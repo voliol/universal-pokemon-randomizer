@@ -666,6 +666,8 @@ public class Randomizer {
         // Test output for placement history
         // romHandler.renderPlacementHistory();
 
+        romHandler.randomizePokemonPalettes(true, true, true);
+
         // Intro Pokemon...
         romHandler.randomizeIntroPokemon();
 
