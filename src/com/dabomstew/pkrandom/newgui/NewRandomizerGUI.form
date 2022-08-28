@@ -3321,7 +3321,7 @@
               </grid>
             </children>
           </grid>
-          <grid id="900f1" layout-manager="GridBagLayout">
+          <grid id="900f1" binding="graphicsPanel" layout-manager="GridBagLayout">
             <constraints>
               <tabbedpane title="Graphics"/>
             </constraints>

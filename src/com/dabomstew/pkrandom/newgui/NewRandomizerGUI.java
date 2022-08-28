@@ -303,6 +303,7 @@ public class NewRandomizerGUI {
     private JCheckBox ppalFollowTypesCheckBox;
     private JCheckBox ppalFollowEvolutionsCheckBox;
     private JCheckBox ppalShinyFromNormalCheckBox;
+    private JPanel graphicsPanel;
 
     private static JFrame frame;
 
@@ -2205,6 +2206,9 @@ public class NewRandomizerGUI {
 				shGuaranteeXItemsCheckBox, puUnchangedRadioButton, puRandomRadioButton, puBanBadItemsCheckBox)
 				.forEach(this::setInitialButtonState);
 
+        Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
+                ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox).forEach(this::setInitialButtonState);
+
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
 				miscFastestTextCheckBox, miscRunningShoesIndoorsCheckBox, miscRandomizePCPotionCheckBox,
 				miscAllowPikachuEvolutionCheckBox, miscGiveNationalDexAtCheckBox, miscUpdateTypeEffectivenessCheckBox,
@@ -2536,6 +2540,17 @@ public class NewRandomizerGUI {
             puUnchangedRadioButton.setEnabled(true);
             puUnchangedRadioButton.setSelected(true);
             puRandomRadioButton.setEnabled(true);
+
+            // Graphics
+            boolean graphicsSupport = romHandler.generationOfPokemon() < 6; // TODO: is this the RomHandler's job?
+            graphicsPanel.setVisible(graphicsSupport);
+            ppalUnchangedRadioButton.setEnabled(graphicsSupport);
+            ppalUnchangedRadioButton.setSelected(graphicsSupport);
+            ppalRandomRadioButton.setEnabled(graphicsSupport);
+            ppalFollowTypesCheckBox.setEnabled(false);
+            ppalFollowEvolutionsCheckBox.setEnabled(false);
+            ppalShinyFromNormalCheckBox.setEnabled(false);
+            ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler));
 
             int mtsAvailable = romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
@@ -3248,6 +3263,20 @@ public class NewRandomizerGUI {
         } else {
             puBanBadItemsCheckBox.setEnabled(false);
             puBanBadItemsCheckBox.setSelected(false);
+        }
+
+        if (ppalRandomRadioButton.isSelected() && ppalRandomRadioButton.isVisible() &&
+                ppalRandomRadioButton.isEnabled()) {
+            ppalFollowTypesCheckBox.setEnabled(true);
+            ppalFollowEvolutionsCheckBox.setEnabled(true);
+            ppalShinyFromNormalCheckBox.setEnabled(true);
+        } else {
+            ppalFollowTypesCheckBox.setEnabled(false);
+            ppalFollowTypesCheckBox.setSelected(false);
+            ppalFollowEvolutionsCheckBox.setEnabled(false);
+            ppalFollowEvolutionsCheckBox.setSelected(false);
+            ppalShinyFromNormalCheckBox.setEnabled(false);
+            ppalShinyFromNormalCheckBox.setSelected(false);
         }
     }
 
