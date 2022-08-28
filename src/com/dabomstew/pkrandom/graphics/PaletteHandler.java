@@ -31,7 +31,7 @@ import com.dabomstew.pkrandom.pokemon.PokemonSet;
  * should be done elsewhere, with implementations of this class only handling
  * changes done to said palettes.
  */
-public abstract class PaletteHandler<T extends Pokemon> {
+public abstract class PaletteHandler<T extends Pokemon> { // TODO: Think deeper about whether this should be a generic
 
 	protected Random random;
 

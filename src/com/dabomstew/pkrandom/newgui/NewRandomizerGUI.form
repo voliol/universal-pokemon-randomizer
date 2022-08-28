@@ -3321,6 +3321,134 @@
               </grid>
             </children>
           </grid>
+          <grid id="900f1" layout-manager="GridBagLayout">
+            <constraints>
+              <tabbedpane title="Graphics"/>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="f8597" layout-manager="GridBagLayout">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.1" weighty="0.0"/>
+                </constraints>
+                <properties>
+                  <enabled value="true"/>
+                </properties>
+                <border type="none" title-resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" title-key="GUI.ppalPanel.title">
+                  <font style="1"/>
+                </border>
+                <children>
+                  <component id="4ac3a" class="javax.swing.JRadioButton" binding="ppalUnchangedRadioButton">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="0" left="0" bottom="0" right="140" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.fiUnchangedRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.fiUnchangedRadioButton.toolTipText"/>
+                    </properties>
+                  </component>
+                  <hspacer id="83fde">
+                    <constraints>
+                      <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.1" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
+                  <vspacer id="2537c">
+                    <constraints>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </vspacer>
+                  <hspacer id="aa5b1">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
+                  <vspacer id="eb22a">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </vspacer>
+                  <component id="17f6d" class="javax.swing.JRadioButton" binding="ppalRandomRadioButton">
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.fiRandomRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.fiRandomRadioButton.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="57659" class="javax.swing.JCheckBox" binding="ppalFollowTypesCheckBox">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalFollowTypesCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalFollowTypesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="879ec" class="javax.swing.JCheckBox" binding="ppalFollowEvolutionsCheckBox">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUIppalFollowEvolutionsCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalFollowEvolutionsCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="7f7e0" class="javax.swing.JCheckBox" binding="ppalShinyFromNormalCheckBox">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalShinyFromNormalCheckBox.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalShinyFromNormalCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <hspacer id="806e6">
+                <constraints>
+                  <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+              </hspacer>
+              <vspacer id="c2aa7">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.1"/>
+                </constraints>
+              </vspacer>
+              <hspacer id="9d91d">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+              </hspacer>
+              <vspacer id="d973e">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="0.0" weighty="0.0"/>
+                </constraints>
+              </vspacer>
+            </children>
+          </grid>
           <grid id="e8bbb" binding="baseTweaksPanel" layout-manager="GridBagLayout">
             <constraints>
               <tabbedpane title-resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" title-key="GUI.miscTweaksPanel.title"/>
@@ -3893,6 +4021,10 @@
     <group name="pickupItemButtonGroup">
       <member id="62bb6"/>
       <member id="478a"/>
+    </group>
+    <group name="pokemonPalettesButtonGroup">
+      <member id="4ac3a"/>
+      <member id="17f6d"/>
     </group>
   </buttonGroups>
   <inspectionSuppressions>

@@ -665,8 +665,10 @@ public class Randomizer {
 
         // Test output for placement history
         // romHandler.renderPlacementHistory();
-
-        romHandler.randomizePokemonPalettes(true, true, true);
+        
+        if (settings.getPokemonPalettesMod() == Settings.PokemonPalettesMod.RANDOM) {
+        	romHandler.randomizePokemonPalettes(settings);
+        }
 
         // Intro Pokemon...
         romHandler.randomizeIntroPokemon();

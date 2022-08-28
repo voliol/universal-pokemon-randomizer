@@ -298,6 +298,11 @@ public class NewRandomizerGUI {
     private JComboBox tpComboBox;
     private JCheckBox tpBetterMovesetsCheckBox;
     private JCheckBox paEnsureTwoAbilitiesCheckbox;
+    private JRadioButton ppalUnchangedRadioButton;
+    private JRadioButton ppalRandomRadioButton;
+    private JCheckBox ppalFollowTypesCheckBox;
+    private JCheckBox ppalFollowEvolutionsCheckBox;
+    private JCheckBox ppalShinyFromNormalCheckBox;
 
     private static JFrame frame;
 
@@ -561,7 +566,9 @@ public class NewRandomizerGUI {
         tmLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
         mtLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
         noIrregularAltFormesCheckBox.addActionListener(e -> enableOrDisableSubControls());
-        ptIsDualTypeCheckBox.addActionListener(e->enableOrDisableSubControls());
+        ptIsDualTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        ppalUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -1680,6 +1687,12 @@ public class NewRandomizerGUI {
         puRandomRadioButton.setSelected(settings.getPickupItemsMod() == Settings.PickupItemsMod.RANDOM);
         puBanBadItemsCheckBox.setSelected(settings.isBanBadRandomPickupItems());
 
+        ppalUnchangedRadioButton.setSelected(settings.getPokemonPalettesMod() == Settings.PokemonPalettesMod.UNCHANGED);
+        ppalRandomRadioButton.setSelected(settings.getPokemonPalettesMod() == Settings.PokemonPalettesMod.RANDOM);
+        ppalFollowTypesCheckBox.setSelected(settings.isPokemonPalettesFollowTypes());
+        ppalFollowEvolutionsCheckBox.setSelected(settings.isPokemonPalettesFollowEvolutions());
+        ppalShinyFromNormalCheckBox.setSelected(settings.isPokemonPalettesShinyFromNormal());
+
         int mtsSelected = settings.getCurrentMiscTweaks();
         int mtCount = MiscTweak.allTweaks.size();
 
@@ -1876,6 +1889,11 @@ public class NewRandomizerGUI {
 
         settings.setPickupItemsMod(puUnchangedRadioButton.isSelected(), puRandomRadioButton.isSelected());
         settings.setBanBadRandomPickupItems(puBanBadItemsCheckBox.isSelected());
+
+        settings.setPokemonPalettesMod(ppalUnchangedRadioButton.isSelected(), ppalRandomRadioButton.isSelected());
+        settings.setPokemonPalettesFollowTypes(ppalFollowTypesCheckBox.isSelected());
+        settings.setPokemonPalettesFollowEvolutions(ppalFollowEvolutionsCheckBox.isSelected());
+        settings.setPokemonPalettesShinyFromNormal(ppalShinyFromNormalCheckBox.isSelected());
 
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
@@ -2603,6 +2621,12 @@ public class NewRandomizerGUI {
         puBanBadItemsCheckBox.setVisible(true);
         puBanBadItemsCheckBox.setEnabled(false);
         puBanBadItemsCheckBox.setSelected(false);
+        ppalUnchangedRadioButton.setVisible(true);
+        ppalUnchangedRadioButton.setEnabled(false);
+        ppalUnchangedRadioButton.setSelected(false);
+        ppalRandomRadioButton.setVisible(true);
+        ppalRandomRadioButton.setEnabled(false);
+        ppalRandomRadioButton.setSelected(false);
         miscBWExpPatchCheckBox.setVisible(true);
         miscBWExpPatchCheckBox.setEnabled(false);
         miscBWExpPatchCheckBox.setSelected(false);

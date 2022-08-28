@@ -661,7 +661,7 @@ public interface RomHandler {
     // Graphics
     // ========
     
-    void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
+    void randomizePokemonPalettes(Settings settings);
 
     PaletteHandler<Pokemon> getPaletteHandler();
 

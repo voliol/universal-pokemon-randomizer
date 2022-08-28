@@ -6944,6 +6944,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void randomizePokemonPalettes(Settings settings) {
+        // I personally don't think it should be the responsibility of the RomHandlers to
+        // communicate with the Settings - isn't that the role of the Randomizer class?
+        // This (overloading the method) is a compromise. // voliol 2022-08-28
+        randomizePokemonPalettes(settings.isPokemonPalettesFollowTypes(), settings.isPokemonPalettesFollowEvolutions(),
+                settings.isPokemonPalettesShinyFromNormal());
+    }
+
     public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
         getPaletteHandler().randomizePokemonPalettes(getPokemonSet(), typeSanity, evolutionSanity, shinyFromNormal);
     }

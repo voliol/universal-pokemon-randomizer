@@ -316,6 +316,15 @@ public class Settings {
 
     private PickupItemsMod pickupItemsMod = PickupItemsMod.UNCHANGED;
     private boolean banBadRandomPickupItems;
+    
+    public enum PokemonPalettesMod {
+        UNCHANGED, RANDOM
+    }
+
+    private PokemonPalettesMod pokemonPalettesMod = PokemonPalettesMod.UNCHANGED;
+    private boolean pokemonPalettesFollowTypes;
+    private boolean pokemonPalettesFollowEvolutions;
+    private boolean pokemonPalettesShinyFromNormal;
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
@@ -2300,8 +2309,44 @@ public class Settings {
     public void setBanBadRandomPickupItems(boolean banBadRandomPickupItems) {
         this.banBadRandomPickupItems = banBadRandomPickupItems;
     }
+    
+    public PokemonPalettesMod getPokemonPalettesMod() {
+    	return pokemonPalettesMod;
+    }
 
-    private static int makeByteSelected(boolean... bools) {
+    public void setPokemonPalettesMod(boolean... bools) {
+        setPokemonPalettesMod(getEnum(PokemonPalettesMod.class, bools));
+    }
+    
+    public void setPokemonPalettesMod(PokemonPalettesMod pokemonPalettesMod) {
+    	this.pokemonPalettesMod = pokemonPalettesMod;
+    }
+
+    public boolean isPokemonPalettesFollowTypes() {
+		return pokemonPalettesFollowTypes;
+	}
+
+	public void setPokemonPalettesFollowTypes(boolean pokemonPalettesFollowTypes) {
+		this.pokemonPalettesFollowTypes = pokemonPalettesFollowTypes;
+	}
+
+	public boolean isPokemonPalettesFollowEvolutions() {
+		return pokemonPalettesFollowEvolutions;
+	}
+
+	public void setPokemonPalettesFollowEvolutions(boolean pokemonPalettesFollowEvolutions) {
+		this.pokemonPalettesFollowEvolutions = pokemonPalettesFollowEvolutions;
+	}
+
+	public boolean isPokemonPalettesShinyFromNormal() {
+		return pokemonPalettesShinyFromNormal;
+	}
+
+	public void setPokemonPalettesShinyFromNormal(boolean pokemonPalettesShinyFromNormal) {
+		this.pokemonPalettesShinyFromNormal = pokemonPalettesShinyFromNormal;
+	}
+
+	private static int makeByteSelected(boolean... bools) {
         if (bools.length > 8) {
             throw new IllegalArgumentException("Can't set more than 8 bits in a byte!");
         }
