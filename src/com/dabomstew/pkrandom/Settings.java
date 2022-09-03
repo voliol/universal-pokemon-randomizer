@@ -49,7 +49,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 51;
+    public static final int LENGTH_OF_SETTINGS_DATA = 52;
 
     private CustomNamesSet customNames;
 
@@ -592,6 +592,13 @@ public class Settings {
         // 50 elite four unique pokemon (3 bits)
         out.write(eliteFourUniquePokemonNumber);
 
+        // 51 Pokémon palette randomization
+        out.write(makeByteSelected(pokemonPalettesMod == PokemonPalettesMod.UNCHANGED,
+                pokemonPalettesMod == PokemonPalettesMod.RANDOM,
+                pokemonPalettesFollowTypes,
+                pokemonPalettesFollowEvolutions,
+                pokemonPalettesShinyFromNormal));
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -881,6 +888,14 @@ public class Settings {
         settings.setBanIrregularAltFormes(restoreState(data[49], 3));
 
         settings.setEliteFourUniquePokemonNumber(data[50] & 0x7);
+
+        settings.setPokemonPalettesMod(restoreEnum(PokemonPalettesMod.class, data[51],
+                0, // UNCHANGED
+                1 // RANDOM
+        ));
+        settings.setPokemonPalettesFollowTypes(restoreState(data[51], 2));
+        settings.setPokemonPalettesFollowEvolutions(restoreState(data[51], 3));
+        settings.setPokemonPalettesShinyFromNormal(restoreState(data[51], 4));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
