@@ -28,13 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class RomFunctions {
 
@@ -98,7 +93,7 @@ public class RomFunctions {
                 string[j] = Character.toUpperCase(current);
                 docap = false;
             } else {
-                if (!docap && !Character.isLetter(current) && current != '\'' && current != '’') {
+                if (!docap && !Character.isLetter(current) && current != '\'' && current != '?') {
                     docap = true;
                 }
             }
@@ -341,7 +336,7 @@ public class RomFunctions {
                 }
                 if ((currLineCC + reqLength > maxLineLength)
                         || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.' || currLineLastChar == '?'
-                        || currLineLastChar == '!' || currLineLastChar == '…' || currLineLastChar == ','))) {
+                        || currLineLastChar == '!' || currLineLastChar == '?' || currLineLastChar == ','))) {
                     // new line
                     // Save current line, if applicable
                     if (currLineWC > 0) {

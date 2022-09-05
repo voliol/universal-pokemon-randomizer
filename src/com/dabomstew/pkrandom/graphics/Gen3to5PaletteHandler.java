@@ -149,7 +149,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler<Pokemon> {
 
 	public PalettePartDescription[] getPalettePartDescriptions(Pokemon pk,
 			List<PaletteDescription> paletteDescriptions) {
-		int paletteIndex = pk.number - 1;
+		int paletteIndex = pk.getNumber() - 1;
 		boolean validIndex = paletteIndex <= paletteDescriptions.size();
 		return PalettePartDescription
 				.allFrom(validIndex ? paletteDescriptions.get(paletteIndex) : PaletteDescription.BLANK);

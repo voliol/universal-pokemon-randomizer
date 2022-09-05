@@ -457,7 +457,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private void autoNameDesc() {
-		String autoName = getCurrentPokemon().name;
+		String autoName = getCurrentPokemon().getName();
 		descNameField.setText(autoName);
 	}
 

@@ -363,10 +363,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
             pokes = new Pokemon[pokemonCount + formeCount + 1];
             for (int i = 1; i <= pokemonCount; i++) {
-                pokes[i] = new Pokemon();
-                pokes[i].number = i;
+                pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
-                pokes[i].name = pokeNames[i];
+                pokes[i].setName(pokeNames[i]);
             }
 
             absolutePokeNumByBaseForme = new HashMap<>();
@@ -378,18 +377,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             int prevSpecies = 0;
             Map<Integer,Integer> currentMap = new HashMap<>();
             for (int k: formeMappings.keySet()) {
-                pokes[i] = new Pokemon();
-                pokes[i].number = i;
+                pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
                 FormeInfo fi = formeMappings.get(k);
-                int realBaseForme = pokes[fi.baseForme].baseForme == null ? fi.baseForme : pokes[fi.baseForme].baseForme.number;
-                pokes[i].name = pokeNames[realBaseForme];
-                pokes[i].baseForme = pokes[fi.baseForme];
-                pokes[i].formeNumber = fi.formeNumber;
-                if (pokes[i].actuallyCosmetic) {
-                    pokes[i].formeSuffix = pokes[i].baseForme.formeSuffix;
+                int realBaseForme = pokes[fi.baseForme].getBaseForme() == null ? fi.baseForme : pokes[fi.baseForme].getBaseForme().getNumber();
+                pokes[i].setName(pokeNames[realBaseForme]);
+                pokes[i].setBaseForme(pokes[fi.baseForme]);
+                pokes[i].setFormeNumber(fi.formeNumber);
+                if (pokes[i].isActuallyCosmetic()) {
+                    pokes[i].setFormeSuffix(pokes[i].getBaseForme().getFormeSuffix());
                 } else {
-                    pokes[i].formeSuffix = Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber);
+                    pokes[i].setFormeSuffix(Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber));
                 }
                 if (realBaseForme == prevSpecies) {
                     formNum++;
@@ -416,30 +414,30 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
-        pkmn.hp = stats[Gen7Constants.bsHPOffset] & 0xFF;
-        pkmn.attack = stats[Gen7Constants.bsAttackOffset] & 0xFF;
-        pkmn.defense = stats[Gen7Constants.bsDefenseOffset] & 0xFF;
-        pkmn.speed = stats[Gen7Constants.bsSpeedOffset] & 0xFF;
-        pkmn.spatk = stats[Gen7Constants.bsSpAtkOffset] & 0xFF;
-        pkmn.spdef = stats[Gen7Constants.bsSpDefOffset] & 0xFF;
+        pkmn.setHp(stats[Gen7Constants.bsHPOffset] & 0xFF);
+        pkmn.setAttack(stats[Gen7Constants.bsAttackOffset] & 0xFF);
+        pkmn.setDefense(stats[Gen7Constants.bsDefenseOffset] & 0xFF);
+        pkmn.setSpeed(stats[Gen7Constants.bsSpeedOffset] & 0xFF);
+        pkmn.setSpatk(stats[Gen7Constants.bsSpAtkOffset] & 0xFF);
+        pkmn.setSpdef(stats[Gen7Constants.bsSpDefOffset] & 0xFF);
         // Type
-        pkmn.primaryType = Gen7Constants.typeTable[stats[Gen7Constants.bsPrimaryTypeOffset] & 0xFF];
-        pkmn.secondaryType = Gen7Constants.typeTable[stats[Gen7Constants.bsSecondaryTypeOffset] & 0xFF];
+        pkmn.setPrimaryType(Gen7Constants.typeTable[stats[Gen7Constants.bsPrimaryTypeOffset] & 0xFF]);
+        pkmn.setSecondaryType(Gen7Constants.typeTable[stats[Gen7Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
-        if (pkmn.secondaryType == pkmn.primaryType) {
-            pkmn.secondaryType = null;
+        if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+            pkmn.setSecondaryType(null);
         }
-        pkmn.catchRate = stats[Gen7Constants.bsCatchRateOffset] & 0xFF;
-        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen7Constants.bsGrowthCurveOffset]);
+        pkmn.setCatchRate(stats[Gen7Constants.bsCatchRateOffset] & 0xFF);
+        pkmn.setGrowthCurve(ExpCurve.fromByte(stats[Gen7Constants.bsGrowthCurveOffset]));
 
-        pkmn.ability1 = stats[Gen7Constants.bsAbility1Offset] & 0xFF;
-        pkmn.ability2 = stats[Gen7Constants.bsAbility2Offset] & 0xFF;
-        pkmn.ability3 = stats[Gen7Constants.bsAbility3Offset] & 0xFF;
-        if (pkmn.ability1 == pkmn.ability2) {
-            pkmn.ability2 = 0;
+        pkmn.setAbility1(stats[Gen7Constants.bsAbility1Offset] & 0xFF);
+        pkmn.setAbility2(stats[Gen7Constants.bsAbility2Offset] & 0xFF);
+        pkmn.setAbility3(stats[Gen7Constants.bsAbility3Offset] & 0xFF);
+        if (pkmn.getAbility1() == pkmn.getAbility2()) {
+            pkmn.setAbility2(0);
         }
 
-        pkmn.callRate = stats[Gen7Constants.bsCallRateOffset] & 0xFF;
+        pkmn.setCallRate(stats[Gen7Constants.bsCallRateOffset] & 0xFF);
 
         // Held Items?
         int item1 = FileFunctions.read2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset);
@@ -447,20 +445,20 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         if (item1 == item2) {
             // guaranteed
-            pkmn.guaranteedHeldItem = item1;
-            pkmn.commonHeldItem = 0;
-            pkmn.rareHeldItem = 0;
-            pkmn.darkGrassHeldItem = -1;
+            pkmn.setGuaranteedHeldItem(item1);
+            pkmn.setCommonHeldItem(0);
+            pkmn.setRareHeldItem(0);
+            pkmn.setDarkGrassHeldItem(-1);
         } else {
-            pkmn.guaranteedHeldItem = 0;
-            pkmn.commonHeldItem = item1;
-            pkmn.rareHeldItem = item2;
-            pkmn.darkGrassHeldItem = -1;
+            pkmn.setGuaranteedHeldItem(0);
+            pkmn.setCommonHeldItem(item1);
+            pkmn.setRareHeldItem(item2);
+            pkmn.setDarkGrassHeldItem(-1);
         }
 
         int formeCount = stats[Gen7Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            if (!altFormes.keySet().contains(pkmn.number)) {
+            if (!altFormes.keySet().contains(pkmn.getNumber())) {
                 int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
                 if (firstFormeOffset != 0) {
                     int j = 0;
@@ -469,11 +467,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     Set<Integer> altFormesWithCosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).keySet();
                     for (int i = 1; i < formeCount; i++) {
                         if (j == 0 || j > jMax) {
-                            altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                            altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                             if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(firstFormeOffset+i-1)) {
                                 if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(firstFormeOffset+i-1)) { // Skip ignored forms (identical or confusing cosmetic forms)
-                                    pkmn.cosmeticForms += 1;
-                                    pkmn.realCosmeticFormNumbers.add(i);
+                                    pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
+                                    pkmn.getRealCosmeticFormNumbers().add(i);
                                 }
                             }
                         } else {
@@ -487,19 +485,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 } else {
-                    if (pkmn.number != Species.arceus && pkmn.number != Species.genesect && pkmn.number != Species.xerneas && pkmn.number != Species.silvally) {
+                    if (pkmn.getNumber() != Species.arceus && pkmn.getNumber() != Species.genesect && pkmn.getNumber() != Species.xerneas && pkmn.getNumber() != Species.silvally) {
                         // Reason for exclusions:
                         // Arceus/Genesect/Silvally: to avoid confusion
                         // Xerneas: Should be handled automatically?
-                        pkmn.cosmeticForms = formeCount;
+                        pkmn.setCosmeticForms(formeCount);
                     }
                 }
             } else {
-                if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(pkmn.number)) {
-                    pkmn.cosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).getOrDefault(pkmn.number,0);
+                if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(pkmn.getNumber())) {
+                    pkmn.setCosmeticForms(Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).getOrDefault(pkmn.getNumber(),0));
                 }
-                if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(pkmn.number)) {
-                    pkmn.actuallyCosmetic = true;
+                if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(pkmn.getNumber())) {
+                    pkmn.setActuallyCosmetic(true);
                 }
             }
         }
@@ -518,8 +516,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void populateEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
-                pkmn.evolutionsFrom.clear();
-                pkmn.evolutionsTo.clear();
+                pkmn.getEvolutionsFrom().clear();
+                pkmn.getEvolutionsTo().clear();
             }
         }
 
@@ -567,14 +565,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             default:
                                 break;
                         }
-                        if (pk.baseForme != null && pk.baseForme.number == Species.rockruff && pk.formeNumber > 0) {
-                            evol.from = pk.baseForme;
-                            pk.baseForme.evolutionsFrom.add(evol);
-                            pokes[absolutePokeNumByBaseForme.get(species).get(evol.forme)].evolutionsTo.add(evol);
+                        if (pk.getBaseForme() != null && pk.getBaseForme().getNumber() == Species.rockruff && pk.getFormeNumber() > 0) {
+                            evol.from = pk.getBaseForme();
+                            pk.getBaseForme().getEvolutionsFrom().add(evol);
+                            pokes[absolutePokeNumByBaseForme.get(species).get(evol.forme)].getEvolutionsTo().add(evol);
                         }
-                        if (!pk.evolutionsFrom.contains(evol)) {
-                            pk.evolutionsFrom.add(evol);
-                            if (!pk.actuallyCosmetic) {
+                        if (!pk.getEvolutionsFrom().contains(evol)) {
+                            pk.getEvolutionsFrom().add(evol);
+                            if (!pk.isActuallyCosmetic()) {
                                 if (evol.forme > 0) {
                                     // The forme number for the evolution might represent an actual alt forme, or it
                                     // might simply represent a cosmetic forme. If it represents an actual alt forme,
@@ -587,7 +585,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                                         species = absolutePokeNumByBaseFormeMap.get(evol.forme);
                                     }
                                 }
-                                pokes[species].evolutionsTo.add(evol);
+                                pokes[species].getEvolutionsTo().add(evol);
                             }
                         }
                     }
@@ -595,19 +593,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
                 // Nincada's Shedinja evo is hardcoded into the game's executable,
                 // so if the Pokemon is Nincada, then let's and put it as one of its evolutions
-                if (pk.number == Species.nincada) {
+                if (pk.getNumber() == Species.nincada) {
                     Pokemon shedinja = pokes[Species.shedinja];
                     Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
                     evol.forme = -1;
                     evol.level = 20;
-                    pk.evolutionsFrom.add(evol);
-                    shedinja.evolutionsTo.add(evol);
+                    pk.getEvolutionsFrom().add(evol);
+                    shedinja.getEvolutionsTo().add(evol);
                 }
 
                 // Split evos shouldn't carry stats unless the evo is Nincada's
                 // In that case, we should have Ninjask carry stats
-                if (pk.evolutionsFrom.size() > 1) {
-                    for (Evolution e : pk.evolutionsFrom) {
+                if (pk.getEvolutionsFrom().size() > 1) {
+                    for (Evolution e : pk.getEvolutionsFrom()) {
                         if (e.type != EvolutionType.LEVEL_CREATE_EXTRA) {
                             e.carryStats = false;
                         }
@@ -622,8 +620,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void populateMegaEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
-                pkmn.megaEvolutionsFrom.clear();
-                pkmn.megaEvolutionsTo.clear();
+                pkmn.getMegaEvolutionsFrom().clear();
+                pkmn.getMegaEvolutionsTo().clear();
             }
         }
 
@@ -640,19 +638,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     if (method >= 1) {
                         int argument = readWord(megaEvoEntry, evo * 8 + 4);
                         int megaSpecies = absolutePokeNumByBaseForme
-                                .getOrDefault(pk.number,dummyAbsolutePokeNums)
+                                .getOrDefault(pk.getNumber(),dummyAbsolutePokeNums)
                                 .getOrDefault(formNum,0);
                         MegaEvolution megaEvo = new MegaEvolution(pk, pokes[megaSpecies], method, argument);
-                        if (!pk.megaEvolutionsFrom.contains(megaEvo)) {
-                            pk.megaEvolutionsFrom.add(megaEvo);
-                            pokes[megaSpecies].megaEvolutionsTo.add(megaEvo);
+                        if (!pk.getMegaEvolutionsFrom().contains(megaEvo)) {
+                            pk.getMegaEvolutionsFrom().add(megaEvo);
+                            pokes[megaSpecies].getMegaEvolutionsTo().add(megaEvo);
                         }
                         megaEvolutions.add(megaEvo);
                     }
                 }
                 // split evos don't carry stats
-                if (pk.megaEvolutionsFrom.size() > 1) {
-                    for (MegaEvolution e : pk.megaEvolutionsFrom) {
+                if (pk.getMegaEvolutionsFrom().size() > 1) {
+                    for (MegaEvolution e : pk.getMegaEvolutionsFrom()) {
                         e.carryStats = false;
                     }
                 }
@@ -821,35 +819,35 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private void saveBasicPokeStats(Pokemon pkmn, byte[] stats) {
-        stats[Gen7Constants.bsHPOffset] = (byte) pkmn.hp;
-        stats[Gen7Constants.bsAttackOffset] = (byte) pkmn.attack;
-        stats[Gen7Constants.bsDefenseOffset] = (byte) pkmn.defense;
-        stats[Gen7Constants.bsSpeedOffset] = (byte) pkmn.speed;
-        stats[Gen7Constants.bsSpAtkOffset] = (byte) pkmn.spatk;
-        stats[Gen7Constants.bsSpDefOffset] = (byte) pkmn.spdef;
-        stats[Gen7Constants.bsPrimaryTypeOffset] = Gen7Constants.typeToByte(pkmn.primaryType);
-        if (pkmn.secondaryType == null) {
+        stats[Gen7Constants.bsHPOffset] = (byte) pkmn.getHp();
+        stats[Gen7Constants.bsAttackOffset] = (byte) pkmn.getAttack();
+        stats[Gen7Constants.bsDefenseOffset] = (byte) pkmn.getDefense();
+        stats[Gen7Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
+        stats[Gen7Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
+        stats[Gen7Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
+        stats[Gen7Constants.bsPrimaryTypeOffset] = Gen7Constants.typeToByte(pkmn.getPrimaryType());
+        if (pkmn.getSecondaryType() == null) {
             stats[Gen7Constants.bsSecondaryTypeOffset] = stats[Gen7Constants.bsPrimaryTypeOffset];
         } else {
-            stats[Gen7Constants.bsSecondaryTypeOffset] = Gen7Constants.typeToByte(pkmn.secondaryType);
+            stats[Gen7Constants.bsSecondaryTypeOffset] = Gen7Constants.typeToByte(pkmn.getSecondaryType());
         }
-        stats[Gen7Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
-        stats[Gen7Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+        stats[Gen7Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
+        stats[Gen7Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
 
-        stats[Gen7Constants.bsAbility1Offset] = (byte) pkmn.ability1;
-        stats[Gen7Constants.bsAbility2Offset] = pkmn.ability2 != 0 ? (byte) pkmn.ability2 : (byte) pkmn.ability1;
-        stats[Gen7Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+        stats[Gen7Constants.bsAbility1Offset] = (byte) pkmn.getAbility1();
+        stats[Gen7Constants.bsAbility2Offset] = pkmn.getAbility2() != 0 ? (byte) pkmn.getAbility2() : (byte) pkmn.getAbility1();
+        stats[Gen7Constants.bsAbility3Offset] = (byte) pkmn.getAbility3();
 
-        stats[Gen7Constants.bsCallRateOffset] = (byte) pkmn.callRate;
+        stats[Gen7Constants.bsCallRateOffset] = (byte) pkmn.getCallRate();
 
         // Held items
-        if (pkmn.guaranteedHeldItem > 0) {
-            FileFunctions.write2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset, pkmn.guaranteedHeldItem);
-            FileFunctions.write2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset, pkmn.guaranteedHeldItem);
+        if (pkmn.getGuaranteedHeldItem() > 0) {
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset, pkmn.getGuaranteedHeldItem());
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset, pkmn.getGuaranteedHeldItem());
             FileFunctions.write2ByteInt(stats, Gen7Constants.bsDarkGrassHeldItemOffset, 0);
         } else {
-            FileFunctions.write2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset, pkmn.commonHeldItem);
-            FileFunctions.write2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsCommonHeldItemOffset, pkmn.getCommonHeldItem());
+            FileFunctions.write2ByteInt(stats, Gen7Constants.bsRareHeldItemOffset, pkmn.getRareHeldItem());
             FileFunctions.write2ByteInt(stats, Gen7Constants.bsDarkGrassHeldItemOffset, 0);
         }
 
@@ -866,11 +864,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + Gen7Constants.getFormeCount(romEntry.romType); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
-                if (pk.number == Species.nincada) {
+                if (pk.getNumber() == Species.nincada) {
                     writeShedinjaEvolution();
                 }
                 int evosWritten = 0;
-                for (Evolution evo : pk.evolutionsFrom) {
+                for (Evolution evo : pk.getEvolutionsFrom()) {
                     Pokemon toPK = evo.to;
                     writeWord(evoEntry, evosWritten * 8, evo.type.toIndex(7));
                     writeWord(evoEntry, evosWritten * 8 + 2, evo.type.usesLevel() ? 0 : evo.extraInfo);
@@ -903,11 +901,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // "Random Every Level" evolutions are selected, we end up clearing out Nincada's
         // vanilla evolutions. In that case, there's no point in even worrying about
         // Shedinja, so just return.
-        if (nincada.evolutionsFrom.size() < 2) {
+        if (nincada.getEvolutionsFrom().size() < 2) {
             return;
         }
-        Pokemon primaryEvolution = nincada.evolutionsFrom.get(0).to;
-        Pokemon extraEvolution = nincada.evolutionsFrom.get(1).to;
+        Pokemon primaryEvolution = nincada.getEvolutionsFrom().get(0).to;
+        Pokemon extraEvolution = nincada.getEvolutionsFrom().get(1).to;
 
         // In the game's executable, there's a hardcoded check to see if the Pokemon
         // that just evolved is now a Ninjask after evolving; if it is, then we start
@@ -918,7 +916,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         int offset = find(code, Gen7Constants.ninjaskSpeciesPrefix);
         if (offset > 0) {
             offset += Gen7Constants.ninjaskSpeciesPrefix.length() / 2; // because it was a prefix
-            FileFunctions.writeFullInt(code, offset, primaryEvolution.number);
+            FileFunctions.writeFullInt(code, offset, primaryEvolution.getNumber());
         }
 
         // In the game's executable, there's a hardcoded value to indicate what "extra"
@@ -946,11 +944,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
 
             // Write Nincada's new extra evolution in the new free space.
-            writeLong(code, offset + 120, extraEvolution.number);
+            writeLong(code, offset + 120, extraEvolution.getNumber());
 
             // Second parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
             // new forme number
-            code[offset] = (byte) extraEvolution.formeNumber;
+            code[offset] = (byte) extraEvolution.getFormeNumber();
 
             // First parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
             // new species number. Write a pc-relative load to what we wrote before.
@@ -962,8 +960,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         // Now that we've handled the hardcoded Shedinja evolution, delete it so that
         // we do *not* handle it in WriteEvolutions
-        nincada.evolutionsFrom.remove(1);
-        extraEvolution.evolutionsTo.remove(0);
+        nincada.getEvolutionsFrom().remove(1);
+        extraEvolution.getEvolutionsTo().remove(0);
     }
 
     @Override
@@ -1108,8 +1106,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.number,dummyAbsolutePokeNums).getOrDefault(forme,0);
-        return pokeNum != 0 ? !pokes[pokeNum].actuallyCosmetic ? pokes[pokeNum] : pokes[pokeNum].baseForme : pk;
+        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.getNumber(),dummyAbsolutePokeNums).getOrDefault(forme,0);
+        return pokeNum != 0 ? !pokes[pokeNum].isActuallyCosmetic() ? pokes[pokeNum] : pokes[pokeNum].getBaseForme() : pk;
     }
 
 	@Override
@@ -1136,7 +1134,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(giftsFile, offset);
                 Pokemon pokemon = pokes[species];
                 int forme = giftsFile[offset + 2];
-                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -1164,17 +1162,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon starter = newStarters.get(i);
                 int forme = 0;
                 boolean checkCosmetics = true;
-                if (starter.formeNumber > 0) {
-                    forme = starter.formeNumber;
-                    starter = starter.baseForme;
+                if (starter.getFormeNumber() > 0) {
+                    forme = starter.getFormeNumber();
+                    starter = starter.getBaseForme();
                     checkCosmetics = false;
                 }
-                if (checkCosmetics && starter.cosmeticForms > 0) {
-                    forme = starter.getCosmeticFormNumber(this.random.nextInt(starter.cosmeticForms));
-                } else if (!checkCosmetics && starter.cosmeticForms > 0) {
-                    forme += starter.getCosmeticFormNumber(this.random.nextInt(starter.cosmeticForms));
+                if (checkCosmetics && starter.getCosmeticForms() > 0) {
+                    forme = starter.getCosmeticFormNumber(this.random.nextInt(starter.getCosmeticForms()));
+                } else if (!checkCosmetics && starter.getCosmeticForms() > 0) {
+                    forme += starter.getCosmeticFormNumber(this.random.nextInt(starter.getCosmeticForms()));
                 }
-                writeWord(giftsFile, offset, starter.number);
+                writeWord(giftsFile, offset, starter.getNumber());
                 giftsFile[offset + 2] = (byte) forme;
             }
             writeGARC(romEntry.getFile("StaticPokemon"), staticGarc);
@@ -1194,9 +1192,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         int starterTextIndex = romEntry.getInt("StarterTextOffset");
         List<String> starterText = getStrings(true, starterTextIndex);
         if (romEntry.romType == Gen7Constants.Type_USUM) {
-            String rowletDescriptor = newStarters.get(0).name + starterText.get(1).substring(6);
-            String littenDescriptor = newStarters.get(1).name + starterText.get(2).substring(6);
-            String popplioDescriptor = newStarters.get(2).name + starterText.get(3).substring(7);
+            String rowletDescriptor = newStarters.get(0).getName() + starterText.get(1).substring(6);
+            String littenDescriptor = newStarters.get(1).getName() + starterText.get(2).substring(6);
+            String popplioDescriptor = newStarters.get(2).getName() + starterText.get(3).substring(7);
             starterText.set(1, rowletDescriptor);
             starterText.set(2, littenDescriptor);
             starterText.set(3, popplioDescriptor);
@@ -1205,15 +1203,15 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int optionOffset = i + 14;
                 Pokemon starter = newStarters.get(i);
                 String confirmationText = String.format("So, you wanna go with the %s-type Pokémon\\n%s?[VAR 0114(0005)]",
-                        starter.primaryType.camelCase(), starter.name);
-                String optionText = starter.name;
+                        starter.getPrimaryType().camelCase(), starter.getName());
+                String optionText = starter.getName();
                 starterText.set(confirmationOffset, confirmationText);
                 starterText.set(optionOffset, optionText);
             }
         } else {
-            String rowletDescriptor = newStarters.get(0).name + starterText.get(11).substring(6);
-            String littenDescriptor = newStarters.get(1).name + starterText.get(12).substring(6);
-            String popplioDescriptor = newStarters.get(2).name + starterText.get(13).substring(7);
+            String rowletDescriptor = newStarters.get(0).getName() + starterText.get(11).substring(6);
+            String littenDescriptor = newStarters.get(1).getName() + starterText.get(12).substring(6);
+            String popplioDescriptor = newStarters.get(2).getName() + starterText.get(13).substring(7);
             starterText.set(11, rowletDescriptor);
             starterText.set(12, littenDescriptor);
             starterText.set(13, popplioDescriptor);
@@ -1222,11 +1220,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int confirmationOffset = i + 4;
                 int flavorOffset = i + 35;
                 Pokemon starter = newStarters.get(i);
-                String optionText = String.format("The %s-type %s", starter.primaryType.camelCase(), starter.name);
+                String optionText = String.format("The %s-type %s", starter.getPrimaryType().camelCase(), starter.getName());
                 String confirmationText = String.format("Will you choose the %s-type Pokémon\\n%s?[VAR 0114(0008)]",
-                        starter.primaryType.camelCase(), starter.name);
+                        starter.getPrimaryType().camelCase(), starter.getName());
                 String flavorSubstring = starterText.get(flavorOffset).substring(starterText.get(flavorOffset).indexOf("\\n"));
-                String flavorText = String.format("The %s-type %s", starter.primaryType.camelCase(), starter.name) + flavorSubstring;
+                String flavorText = String.format("The %s-type %s", starter.getPrimaryType().camelCase(), starter.getName()) + flavorSubstring;
                 starterText.set(optionOffset, optionText);
                 starterText.set(confirmationOffset, confirmationText);
                 starterText.set(flavorOffset, flavorText);
@@ -1369,7 +1367,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         // If the forme is purely cosmetic, just use the base forme as the Pokemon
         // for this encounter (the cosmetic forme will be stored in the encounter).
-        if (forme <= pokemon.cosmeticForms || forme == 30 || forme == 31) {
+        if (forme <= pokemon.getCosmeticForms() || forme == 30 || forme == 31) {
             return pokemon;
         } else {
             int speciesWithForme = absolutePokeNumByBaseForme
@@ -1722,13 +1720,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     trpoke[pokeOffs + 7] = tp.speedEVs;
                     FileFunctions.writeFullInt(trpoke, pokeOffs + 8, tp.IVs);
                     writeWord(trpoke, pokeOffs + 14, tp.level);
-                    writeWord(trpoke, pokeOffs + 16, tp.pokemon.number);
+                    writeWord(trpoke, pokeOffs + 16, tp.pokemon.getNumber());
                     writeWord(trpoke, pokeOffs + 18, tp.forme);
                     pokeOffs += 20;
                     writeWord(trpoke, pokeOffs, tp.heldItem);
                     pokeOffs += 4;
                     if (tp.resetMoves) {
-                        int[] pokeMoves = RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(tp.pokemon, tp.forme).number, movesets, tp.level);
+                        int[] pokeMoves = RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(tp.pokemon, tp.forme).getNumber(), movesets, tp.level);
                         for (int m = 0; m < 4; m++) {
                             writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
                         }
@@ -1796,24 +1794,24 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     // Finds the highest stat for the purposes of setting the aura boost on Beast Lusamine's Pokemon.
     // In the case where two or more stats are tied for the highest stat, it randomly selects one.
     private int getAuraNumberForHighestStat(Pokemon boostedPokemon) {
-        int currentBestStat = boostedPokemon.attack;
+        int currentBestStat = boostedPokemon.getAttack();
         int auraNumber = 1;
-        boolean useDefenseAura = boostedPokemon.defense > currentBestStat || (boostedPokemon.defense == currentBestStat && random.nextBoolean());
+        boolean useDefenseAura = boostedPokemon.getDefense() > currentBestStat || (boostedPokemon.getDefense() == currentBestStat && random.nextBoolean());
         if (useDefenseAura) {
-            currentBestStat = boostedPokemon.defense;
+            currentBestStat = boostedPokemon.getDefense();
             auraNumber = 2;
         }
-        boolean useSpAtkAura = boostedPokemon.spatk > currentBestStat || (boostedPokemon.spatk == currentBestStat && random.nextBoolean());
+        boolean useSpAtkAura = boostedPokemon.getSpatk() > currentBestStat || (boostedPokemon.getSpatk() == currentBestStat && random.nextBoolean());
         if (useSpAtkAura) {
-            currentBestStat = boostedPokemon.spatk;
+            currentBestStat = boostedPokemon.getSpatk();
             auraNumber = 3;
         }
-        boolean useSpDefAura = boostedPokemon.spdef > currentBestStat || (boostedPokemon.spdef == currentBestStat && random.nextBoolean());
+        boolean useSpDefAura = boostedPokemon.getSpdef() > currentBestStat || (boostedPokemon.getSpdef() == currentBestStat && random.nextBoolean());
         if (useSpDefAura) {
-            currentBestStat = boostedPokemon.spdef;
+            currentBestStat = boostedPokemon.getSpdef();
             auraNumber = 4;
         }
-        boolean useSpeedAura = boostedPokemon.speed > currentBestStat || (boostedPokemon.speed == currentBestStat && random.nextBoolean());
+        boolean useSpeedAura = boostedPokemon.getSpeed() > currentBestStat || (boostedPokemon.getSpeed() == currentBestStat && random.nextBoolean());
         if (useSpeedAura) {
             auraNumber = 5;
         }
@@ -1846,7 +1844,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     learnt.add(ml);
                     moveDataLoc += 4;
                 }
-                movesets.put(pkmn.number, learnt);
+                movesets.put(pkmn.getNumber(), learnt);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -1861,7 +1859,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
             for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
-                List<MoveLearnt> learnt = movesets.get(pkmn.number);
+                List<MoveLearnt> learnt = movesets.get(pkmn.getNumber());
                 int sizeNeeded = learnt.size() * 4 + 4;
                 byte[] moveset = new byte[sizeNeeded];
                 int j = 0;
@@ -1892,7 +1890,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata = eggMovesGarc.files.get(i).get(0);
                 int formeReference = readWord(movedata, 0);
-                if (formeReference != pkmn.number) {
+                if (formeReference != pkmn.getNumber()) {
                     altFormeEggMoveFiles.put(pkmn, formeReference);
                 }
                 int numberOfEggMoves = readWord(movedata, 2);
@@ -1901,7 +1899,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     int move = readWord(movedata, 4 + (j * 2));
                     moves.add(move);
                 }
-                eggMoves.put(pkmn.number, moves);
+                eggMoves.put(pkmn.getNumber(), moves);
             }
             Iterator<Pokemon> iter = altFormeEggMoveFiles.keySet().iterator();
             while (iter.hasNext()) {
@@ -1917,7 +1915,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         int move = readWord(movedata, 4 + (j * 2));
                         moves.add(move);
                     }
-                    eggMoves.put(altForme.number, moves);
+                    eggMoves.put(altForme.getNumber(), moves);
                     formeNumber++;
                     fileNumber++;
                     altForme = getAltFormeOfPokemon(originalForme, formeNumber);
@@ -1939,10 +1937,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata = eggMovesGarc.files.get(i).get(0);
                 int formeReference = readWord(movedata, 0);
-                if (formeReference != pkmn.number) {
+                if (formeReference != pkmn.getNumber()) {
                     altFormeEggMoveFiles.put(pkmn, formeReference);
                 }
-                List<Integer> moves = eggMoves.get(pkmn.number);
+                List<Integer> moves = eggMoves.get(pkmn.getNumber());
                 for (int j = 0; j < moves.size(); j++) {
                     writeWord(movedata, 4 + (j * 2), moves.get(j));
                 }
@@ -1955,7 +1953,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon altForme = getAltFormeOfPokemon(originalForme, formeNumber);
                 while (!originalForme.equals(altForme)) {
                     byte[] movedata = eggMovesGarc.files.get(fileNumber).get(0);
-                    List<Integer> moves = eggMoves.get(altForme.number);
+                    List<Integer> moves = eggMoves.get(altForme.getNumber());
                     for (int j = 0; j < moves.size(); j++) {
                         writeWord(movedata, 4 + (j * 2), moves.get(j));
                     }
@@ -2023,7 +2021,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
                 Pokemon pokemon = pokes[species];
                 int forme = staticEncountersFile[offset + 2];
-                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -2064,11 +2062,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i: totemIndices) {
                 int offset = i * 0x38;
                 TotemPokemon totem = totemIter.next();
-                if (totem.pkmn.formeNumber > 0) {
-                    totem.forme = totem.pkmn.formeNumber;
-                    totem.pkmn = totem.pkmn.baseForme;
+                if (totem.pkmn.getFormeNumber() > 0) {
+                    totem.forme = totem.pkmn.getFormeNumber();
+                    totem.pkmn = totem.pkmn.getBaseForme();
                 }
-                writeWord(staticEncountersFile, offset, totem.pkmn.number);
+                writeWord(staticEncountersFile, offset, totem.pkmn.getNumber());
                 staticEncountersFile[offset + 2] = (byte) totem.forme;
                 staticEncountersFile[offset + 3] = (byte) totem.level;
                 if (totem.heldItem == 0) {
@@ -2086,11 +2084,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 for (Integer allyIndex: totem.allies.keySet()) {
                     offset = allyIndex * 0x38;
                     StaticEncounter ally = totem.allies.get(allyIndex);
-                    if (ally.pkmn.formeNumber > 0) {
-                        ally.forme = ally.pkmn.formeNumber;
-                        ally.pkmn = ally.pkmn.baseForme;
+                    if (ally.pkmn.getFormeNumber() > 0) {
+                        ally.forme = ally.pkmn.getFormeNumber();
+                        ally.pkmn = ally.pkmn.getBaseForme();
                     }
-                    writeWord(staticEncountersFile, offset, ally.pkmn.number);
+                    writeWord(staticEncountersFile, offset, ally.pkmn.getNumber());
                     staticEncountersFile[offset + 2] = (byte) ally.forme;
                     staticEncountersFile[offset + 3] = (byte) ally.level;
                     if (ally.heldItem == 0) {
@@ -2132,7 +2130,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(giftsFile, offset);
                 Pokemon pokemon = pokes[species];
                 int forme = giftsFile[offset + 2];
-                if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -2170,7 +2168,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
         Pokemon pokemon = pokes[species];
         int forme = staticEncountersFile[offset + 2];
-        if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+        if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
             int speciesWithForme = absolutePokeNumByBaseForme
                     .getOrDefault(species, dummyAbsolutePokeNums)
                     .getOrDefault(forme, 0);
@@ -2235,7 +2233,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
             StaticEncounter lowLevelAssembly = new StaticEncounter();
             Pokemon pokemon = pokes[species];
-            if (forme > pokemon.cosmeticForms && forme != 30 && forme != 31) {
+            if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
                 int speciesWithForme = absolutePokeNumByBaseForme
                         .getOrDefault(species, dummyAbsolutePokeNums)
                         .getOrDefault(forme, 0);
@@ -2272,7 +2270,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 3; i < numberOfGifts; i++) {
                 int offset = i * 0x14;
                 StaticEncounter se = staticIter.next();
-                writeWord(giftsFile, offset, se.pkmn.number);
+                writeWord(giftsFile, offset, se.pkmn.getNumber());
                 giftsFile[offset + 2] = (byte) se.forme;
                 giftsFile[offset + 3] = (byte) se.level;
                 writeWord(giftsFile, offset + 8, se.heldItem);
@@ -2285,7 +2283,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 if (skipIndices.contains(i)) continue;
                 int offset = i * 0x38;
                 StaticEncounter se = staticIter.next();
-                writeWord(staticEncountersFile, offset, se.pkmn.number);
+                writeWord(staticEncountersFile, offset, se.pkmn.getNumber());
                 staticEncountersFile[offset + 2] = (byte) se.forme;
                 staticEncountersFile[offset + 3] = (byte) se.level;
                 if (se.heldItem == 0) {
@@ -2416,8 +2414,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void positiveCallRates() {
         for (Pokemon pk: pokes) {
             if (pk == null) continue;
-            if (pk.callRate <= 0) {
-                pk.callRate = 5;
+            if (pk.getCallRate() <= 0) {
+                pk.setCallRate(5);
             }
         }
     }
@@ -2553,7 +2551,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
-            byte[] data = pokeGarc.files.get(pkmn.number).get(0);
+            byte[] data = pokeGarc.files.get(pkmn.getNumber()).get(0);
             for (int j = 0; j < 13; j++) {
                 data[Gen7Constants.bsTMHMCompatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
             }
@@ -2680,12 +2678,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 extraEvolutions.clear();
-                for (Evolution evo : pkmn.evolutionsFrom) {
+                for (Evolution evo : pkmn.getEvolutionsFrom()) {
                     if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
                         // read move
                         int move = evo.extraInfo;
                         int levelLearntAt = 1;
-                        for (MoveLearnt ml : movesets.get(evo.from.number)) {
+                        for (MoveLearnt ml : movesets.get(evo.from.getNumber())) {
                             if (ml.move == move) {
                                 levelLearntAt = ml.level;
                                 break;
@@ -2711,7 +2709,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     if (evo.type == EvolutionType.TRADE_ITEM) {
                         // Get the current item & evolution
                         int item = evo.extraInfo;
-                        if (evo.from.number == Species.slowpoke) {
+                        if (evo.from.getNumber() == Species.slowpoke) {
                             // Slowpoke is awkward - he already has a level evo
                             // So we can't do Level up w/ Held Item for him
                             // Put Water Stone instead
@@ -2737,15 +2735,15 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // (22)
                         // Based on what species we're currently dealing with
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
-                        evo.extraInfo = (evo.from.number == Species.karrablast ? Species.shelmet : Species.karrablast);
+                        evo.extraInfo = (evo.from.getNumber() == Species.karrablast ? Species.shelmet : Species.karrablast);
                         addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
                     // TBD: Pancham, Sliggoo? Sylveon?
                 }
 
-                pkmn.evolutionsFrom.addAll(extraEvolutions);
+                pkmn.getEvolutionsFrom().addAll(extraEvolutions);
                 for (Evolution ev : extraEvolutions) {
-                    ev.to.evolutionsTo.add(ev);
+                    ev.to.getEvolutionsTo().add(ev);
                 }
             }
         }
@@ -2776,7 +2774,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 Evolution extraEntry = null;
-                for (Evolution evo : pkmn.evolutionsFrom) {
+                for (Evolution evo : pkmn.getEvolutionsFrom()) {
                     if (wildsRandomized) {
                         if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
                             // Replace w/ level 35
@@ -2800,8 +2798,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     }
                 }
                 if (extraEntry != null) {
-                    pkmn.evolutionsFrom.add(extraEntry);
-                    extraEntry.to.evolutionsTo.add(extraEntry);
+                    pkmn.getEvolutionsFrom().add(extraEntry);
+                    extraEntry.to.getEvolutionsTo().add(extraEntry);
                 }
             }
         }
@@ -2814,9 +2812,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 extraEvolutions.clear();
-                for (Evolution evo : pkmn.evolutionsFrom) {
+                for (Evolution evo : pkmn.getEvolutionsFrom()) {
                     if (evo.type == EvolutionType.HAPPINESS_DAY) {
-                        if (evo.from.number == Species.eevee) {
+                        if (evo.from.getNumber() == Species.eevee) {
                             // We can't set Eevee to evolve into Espeon with happiness at night because that's how
                             // Umbreon works in the original game. Instead, make Eevee: == sun stone => Espeon
                             evo.type = EvolutionType.STONE;
@@ -2831,7 +2829,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-                        if (evo.from.number == Species.eevee) {
+                        if (evo.from.getNumber() == Species.eevee) {
                             // We can't set Eevee to evolve into Umbreon with happiness at day because that's how
                             // Espeon works in the original game. Instead, make Eevee: == moon stone => Umbreon
                             evo.type = EvolutionType.STONE;
@@ -2848,7 +2846,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     } else if (evo.type == EvolutionType.LEVEL_ITEM_DAY) {
                         int item = evo.extraInfo;
                         // Make sure we don't already have an evo for the same item at night (e.g., when using Change Impossible Evos)
-                        if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
+                        if (evo.from.getEvolutionsFrom().stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Night
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
@@ -2859,7 +2857,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     } else if (evo.type == EvolutionType.LEVEL_ITEM_NIGHT) {
                         int item = evo.extraInfo;
                         // Make sure we don't already have an evo for the same item at day (e.g., when using Change Impossible Evos)
-                        if (evo.from.evolutionsFrom.stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
+                        if (evo.from.getEvolutionsFrom().stream().noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
                             // Add an extra evo for Level w/ Item During Day
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
@@ -2868,7 +2866,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             extraEvolutions.add(extraEntry);
                         }
                     } else if (evo.type == EvolutionType.LEVEL_DAY) {
-                        if (evo.from.number == Species.rockruff) {
+                        if (evo.from.getNumber() == Species.rockruff) {
                             // We can't set Rockruff to evolve into Lycanroc-Midday with level at night because that's how
                             // Lycanroc-Midnight works in the original game. Instead, make Rockruff: == sun stone => Lycanroc-Midday
                             evo.type = EvolutionType.STONE;
@@ -2879,7 +2877,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             evo.type = EvolutionType.LEVEL;
                         }
                     } else if (evo.type == EvolutionType.LEVEL_NIGHT) {
-                        if (evo.from.number == Species.rockruff) {
+                        if (evo.from.getNumber() == Species.rockruff) {
                             // We can't set Rockruff to evolve into Lycanroc-Midnight with level at night because that's how
                             // Lycanroc-Midday works in the original game. Instead, make Rockruff: == moon stone => Lycanroc-Midnight
                             evo.type = EvolutionType.STONE;
@@ -2898,9 +2896,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
                     }
                 }
-                pkmn.evolutionsFrom.addAll(extraEvolutions);
+                pkmn.getEvolutionsFrom().addAll(extraEvolutions);
                 for (Evolution ev : extraEvolutions) {
-                    ev.to.evolutionsTo.add(ev);
+                    ev.to.getEvolutionsTo().add(ev);
                 }
             }
         }
@@ -3082,7 +3080,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             return 0;
         }
 
-        List<Integer> abilityList = Arrays.asList(tp.pokemon.ability1, tp.pokemon.ability2, tp.pokemon.ability3);
+        List<Integer> abilityList = Arrays.asList(tp.pokemon.getAbility1(), tp.pokemon.getAbility2(), tp.pokemon.getAbility3());
         return abilityList.get(tp.abilitySlot - 1);
     }
 
@@ -3293,7 +3291,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon givenPokemon = pokes[givenSpecies];
                 Pokemon requestedPokemon = pokes[requestedSpecies];
                 int forme = tradesFile[offset + 4];
-                if (forme > givenPokemon.cosmeticForms && forme != 30 && forme != 31) {
+                if (forme > givenPokemon.getCosmeticForms() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(givenSpecies, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -3334,13 +3332,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int offset = i * 0x34;
                 Pokemon givenPokemon = trade.givenPokemon;
                 int forme = 0;
-                if (givenPokemon.formeNumber > 0) {
-                    forme = givenPokemon.formeNumber;
-                    givenPokemon = givenPokemon.baseForme;
+                if (givenPokemon.getFormeNumber() > 0) {
+                    forme = givenPokemon.getFormeNumber();
+                    givenPokemon = givenPokemon.getBaseForme();
                 }
-                FileFunctions.write2ByteInt(tradesFile, offset, givenPokemon.number);
+                FileFunctions.write2ByteInt(tradesFile, offset, givenPokemon.getNumber());
                 tradesFile[offset + 4] = (byte) forme;
-                FileFunctions.write2ByteInt(tradesFile, offset + 0x2C, trade.requestedPokemon.number);
+                FileFunctions.write2ByteInt(tradesFile, offset + 0x2C, trade.requestedPokemon.getNumber());
                 tradeStrings.set(FileFunctions.read2ByteInt(tradesFile, offset + 2), trade.nickname);
                 tradeStrings.set(FileFunctions.read2ByteInt(tradesFile, offset + 0x18), trade.otName);
                 FileFunctions.writeFullInt(tradesFile, offset + 0x10, trade.otId);
@@ -3366,10 +3364,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void updateHardcodedTradeText(IngameTrade oldTrade, IngameTrade newTrade, List<String> tradeStrings, List<Integer> hardcodedTextOffsets) {
         for (int offset : hardcodedTextOffsets) {
             String hardcodedText = tradeStrings.get(offset);
-            String oldRequestedName = oldTrade.requestedPokemon.name;
-            String oldGivenName = oldTrade.givenPokemon.name;
-            String newRequestedName = newTrade.requestedPokemon.name;
-            String newGivenName = newTrade.givenPokemon.name;
+            String oldRequestedName = oldTrade.requestedPokemon.getName();
+            String oldGivenName = oldTrade.givenPokemon.getName();
+            String newRequestedName = newTrade.requestedPokemon.getName();
+            String newGivenName = newTrade.givenPokemon.getName();
             hardcodedText = hardcodedText.replace(oldRequestedName, newRequestedName);
             hardcodedText = hardcodedText.replace(oldGivenName, newGivenName);
             tradeStrings.set(offset, hardcodedText);
@@ -3396,14 +3394,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         for (Pokemon pk : pokes) {
             if (pk != null) {
                 keepEvos.clear();
-                for (Evolution evol : pk.evolutionsFrom) {
+                for (Evolution evol : pk.getEvolutionsFrom()) {
                     if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
                         keepEvos.add(evol);
                     } else {
-                        evol.to.evolutionsTo.remove(evol);
+                        evol.to.getEvolutionsTo().remove(evol);
                     }
                 }
-                pk.evolutionsFrom.retainAll(keepEvos);
+                pk.getEvolutionsFrom().retainAll(keepEvos);
             }
         }
 
@@ -3415,12 +3413,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i <= pokemonCount; i++) {
                 byte[] babyFile = babyGarc.getFile(i);
                 Pokemon baby = pokes[i];
-                while (baby.evolutionsTo.size() > 0) {
+                while (baby.getEvolutionsTo().size() > 0) {
                     // Grab the first "to evolution" even if there are multiple
-                    baby = baby.evolutionsTo.get(0).from;
+                    baby = baby.getEvolutionsTo().get(0).from;
                 }
-                writeWord(babyFile, 0, baby.number);
-                writeWord(masterFile, i * 2, baby.number);
+                writeWord(babyFile, 0, baby.getNumber());
+                writeWord(masterFile, i * 2, baby.getNumber());
                 babyGarc.setFile(i, babyFile);
             }
             babyGarc.setFile(pokemonCount + 1, masterFile);
@@ -3637,7 +3635,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 //                pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
 //            }
 //        }
-    	int pkIndex = pk.number;
+    	int pkIndex = pk.getNumber();
     	
         byte[] iconBytes = pokeGraphicsGARC.files.get(pkIndex).get(0);
         BFLIM icon = new BFLIM(iconBytes);
@@ -3729,7 +3727,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         if (numDamagingMoves >= 2) {
             items.add(Items.assaultVest);
         }
-        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 7);
+        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType(), 7);
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen7Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {
@@ -3758,16 +3756,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             if (Gen7Constants.abilityBoostingItems.containsKey(ability)) {
                 items.addAll(Gen7Constants.abilityBoostingItems.get(ability));
             }
-            if (tp.pokemon.primaryType == Type.POISON || tp.pokemon.secondaryType == Type.POISON) {
+            if (tp.pokemon.getPrimaryType() == Type.POISON || tp.pokemon.getSecondaryType() == Type.POISON) {
                 items.add(Items.blackSludge);
             }
-            List<Integer> speciesItems = Gen7Constants.speciesBoostingItems.get(tp.pokemon.number);
+            List<Integer> speciesItems = Gen7Constants.speciesBoostingItems.get(tp.pokemon.getNumber());
             if (speciesItems != null) {
                 for (int i = 0; i < frequencyBoostCount; i++) {
                     items.addAll(speciesItems);
                 }
             }
-            if (!tp.pokemon.evolutionsFrom.isEmpty() && tp.level >= 20) {
+            if (!tp.pokemon.getEvolutionsFrom().isEmpty() && tp.level >= 20) {
                 // eviolite can be too good for early game, so we gate it behind a minimum level.
                 // We go with the same level as the option for "No early wonder guard".
                 items.add(Items.eviolite);

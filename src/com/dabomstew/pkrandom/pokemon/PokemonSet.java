@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * parameter. The "filter" methods also return new PokemonSet objects. <br>
  * <br>
  * For more complex operations, use .stream() and finally collect it into a new
- * PokemonSet using .collect(Collectors.toCollection(() -> new PokemonSet<>())).
+ * PokemonSet using .collect(Collectors.toCollection(PokemonSet::new)).
  */
 public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
@@ -35,13 +35,13 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		toCheck.add(original);
 		while (!toCheck.isEmpty()) {
 			Pokemon check = toCheck.poll();
-			for (Evolution ev : check.evolutionsFrom) {
+			for (Evolution ev : check.getEvolutionsFrom()) {
 				if (!results.contains(ev.to)) {
 					results.add(ev.to);
 					toCheck.add(ev.to);
 				}
 			}
-			for (Evolution ev : check.evolutionsTo) {
+			for (Evolution ev : check.getEvolutionsTo()) {
 				if (!results.contains(ev.from)) {
 					results.add(ev.from);
 					toCheck.add(ev.from);
@@ -73,13 +73,13 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	}
 
 	public PokemonSet<T> filterBasic() {
-		return filter(pk -> pk.evolutionsTo.size() < 1);
+		return filter(pk -> pk.getEvolutionsTo().size() < 1);
 	}
 
 	public PokemonSet<T> filterSplitEvolutions() {
 		return filter(pk -> {
-			if (pk.evolutionsTo.size() > 0) {
-				Evolution onlyEvo = pk.evolutionsTo.get(0);
+			if (pk.getEvolutionsTo().size() > 0) {
+				Evolution onlyEvo = pk.getEvolutionsTo().get(0);
 				return !onlyEvo.carryStats;
 			}
 			return false;
@@ -90,8 +90,8 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	// filter out formes
 	public PokemonSet<T> filterMiddleEvolutions(boolean includeSplitEvos) {
 		return filter(pk -> {
-			if (pk.evolutionsTo.size() == 1 && pk.evolutionsFrom.size() > 0) {
-				Evolution onlyEvo = pk.evolutionsTo.get(0);
+			if (pk.getEvolutionsTo().size() == 1 && pk.getEvolutionsFrom().size() > 0) {
+				Evolution onlyEvo = pk.getEvolutionsTo().get(0);
 				return (onlyEvo.carryStats || includeSplitEvos);
 			}
 			return false;
@@ -102,8 +102,8 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	// filter out formes
 	public PokemonSet<T> filterFinalEvolutions(boolean includeSplitEvos) {
 		return filter(pk -> {
-			if (pk.evolutionsTo.size() == 1 && pk.evolutionsFrom.size() == 0) {
-				Evolution onlyEvo = pk.evolutionsTo.get(0);
+			if (pk.getEvolutionsTo().size() == 1 && pk.getEvolutionsFrom().size() == 0) {
+				Evolution onlyEvo = pk.getEvolutionsTo().get(0);
 				return onlyEvo.carryStats || includeSplitEvos;
 			}
 			return false;
@@ -119,7 +119,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	 * @param end   The upper end of the range, inclusive.
 	 */
 	public PokemonSet<T> filterFromNumberRange(int start, int end) {
-		return filter(pk -> start <= pk.number && pk.number <= end);
+		return filter(pk -> start <= pk.getNumber() && pk.getNumber() <= end);
 	}
 
 	/**
@@ -136,11 +136,11 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	}
 
 	public PokemonSet<T> filterByType(Type type) {
-		return filter(pk -> pk.primaryType == type || pk.secondaryType == type);
+		return filter(pk -> pk.getPrimaryType() == type || pk.getSecondaryType() == type);
 	}
 
 	public PokemonSet<T> filterCosmetic() {
-		return filter(pk -> pk.actuallyCosmetic);
+		return filter(Pokemon::isActuallyCosmetic);
 	}
 
 	@Override
@@ -168,7 +168,4 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 				: randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
 	}
 
-	// TODO: come up with a collector or the like, so streams can be used for longer
-	// operations
-	// (this.filter() is a good shorthand)
 }

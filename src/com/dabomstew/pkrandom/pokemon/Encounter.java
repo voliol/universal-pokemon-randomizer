@@ -40,9 +40,9 @@ public class Encounter {
             return "ERROR";
         }
         if (maxLevel == 0) {
-            return pokemon.name + " Lv" + level;
+            return pokemon.getName() + " Lv" + level;
         } else {
-            return pokemon.name + " Lvs " + level + "-" + maxLevel;
+            return pokemon.getName() + " Lvs " + level + "-" + maxLevel;
         }
     }
 

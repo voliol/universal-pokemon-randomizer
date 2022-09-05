@@ -725,35 +725,35 @@ public class MoveSynergy {
     public static List<Move> getStatMoveSynergy(Pokemon pk, List<Move> moveList) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
-        if ((double)pk.hp / (double)pk.bst() < 1.0/8) {
+        if ((double) pk.getHp() / (double)pk.bst() < 1.0/8) {
             synergisticMoves.add(Moves.painSplit);
             synergisticMoves.add(Moves.endeavor);
         }
 
-        if ((double)pk.hp / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.getHp() / (double)pk.bst() >= 1.0/4) {
             synergisticMoves.add(Moves.waterSpout);
             synergisticMoves.add(Moves.eruption);
             synergisticMoves.add(Moves.counter);
             synergisticMoves.add(Moves.mirrorCoat);
         }
 
-        if (pk.attack * 2 < pk.defense) {
+        if (pk.getAttack() * 2 < pk.getDefense()) {
             synergisticMoves.add(Moves.powerTrick);
         }
 
-        if ((double)(pk.attack + pk.spatk) / (double)pk.bst() < 1.0/4) {
+        if ((double)(pk.getAttack() + pk.getSpatk()) / (double)pk.bst() < 1.0/4) {
             synergisticMoves.add(Moves.powerSplit);
         }
 
-        if ((double)(pk.defense + pk.spdef) / (double)pk.bst() < 1.0/4) {
+        if ((double)(pk.getDefense() + pk.getSpdef()) / (double)pk.bst() < 1.0/4) {
             synergisticMoves.add(Moves.guardSplit);
         }
 
-        if ((double)pk.speed / (double)pk.bst() < 1.0/8) {
+        if ((double) pk.getSpeed() / (double)pk.bst() < 1.0/8) {
             synergisticMoves.add(Moves.gyroBall);
         }
 
-        if ((double)pk.speed / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.getSpeed() / (double)pk.bst() >= 1.0/4) {
             synergisticMoves.add(Moves.electroBall);
         }
 
@@ -767,28 +767,28 @@ public class MoveSynergy {
     public static List<Move> getStatMoveAntiSynergy(Pokemon pk, List<Move> moveList) {
         List<Integer> antiSynergisticMoves = new ArrayList<>();
 
-        if ((double)pk.hp / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.getHp() / (double)pk.bst() >= 1.0/4) {
             antiSynergisticMoves.add(Moves.painSplit);
             antiSynergisticMoves.add(Moves.endeavor);
         }
 
-        if (pk.defense * 2 < pk.attack) {
+        if (pk.getDefense() * 2 < pk.getAttack()) {
             antiSynergisticMoves.add(Moves.powerTrick);
         }
 
-        if ((double)(pk.attack + pk.spatk) / (double)pk.bst() >= 1.0/3) {
+        if ((double)(pk.getAttack() + pk.getSpatk()) / (double)pk.bst() >= 1.0/3) {
             antiSynergisticMoves.add(Moves.powerSplit);
         }
 
-        if ((double)(pk.defense + pk.spdef) / (double)pk.bst() >= 1.0/3) {
+        if ((double)(pk.getDefense() + pk.getSpdef()) / (double)pk.bst() >= 1.0/3) {
             antiSynergisticMoves.add(Moves.guardSplit);
         }
 
-        if ((double)pk.speed / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.getSpeed() / (double)pk.bst() >= 1.0/4) {
             antiSynergisticMoves.add(Moves.gyroBall);
         }
 
-        if ((double)pk.speed / (double)pk.bst() < 1.0/8) {
+        if ((double) pk.getSpeed() / (double)pk.bst() < 1.0/8) {
             antiSynergisticMoves.add(Moves.electroBall);
         }
 

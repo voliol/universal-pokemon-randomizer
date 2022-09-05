@@ -113,10 +113,10 @@ public class CopyUpEvolutionsHelper<T extends Pokemon> {
                 // a linear chain of single evolutions down to
                 // a randomized poke.
                 Stack<Evolution> currentStack = new Stack<>();
-                Evolution ev = pk.evolutionsTo.get(0);
+                Evolution ev = pk.getEvolutionsTo().get(0);
                 while (!ev.from.temporaryFlag) {
                     currentStack.push(ev);
-                    ev = ev.from.evolutionsTo.get(0);
+                    ev = ev.from.getEvolutionsTo().get(0);
                 }
 
                 // Now "ev" is set to an evolution from a Pokemon that has had

@@ -86,7 +86,7 @@ public class Gen2PaletteHandler extends PaletteHandler<Pokemon> {
 		}
 
 		private void setNormalPaletteRandom(Pokemon pk) {
-			pk.normalPalette = typeSanity ? getRandom2ColorPalette(pk.primaryType, pk.secondaryType)
+			pk.normalPalette = typeSanity ? getRandom2ColorPalette(pk.getPrimaryType(), pk.getSecondaryType())
 					: getRandom2ColorPalette();
 		}
 
@@ -106,13 +106,13 @@ public class Gen2PaletteHandler extends PaletteHandler<Pokemon> {
 			Palette palette = evFrom.normalPalette.clone();
 
 			if (typeSanity) {
-				if (evTo.primaryType != evFrom.primaryType) {
-					Color newBrightColor = Gen2TypeColors.getRandomBrightColor(evTo.primaryType, random);
+				if (evTo.getPrimaryType() != evFrom.getPrimaryType()) {
+					Color newBrightColor = Gen2TypeColors.getRandomBrightColor(evTo.getPrimaryType(), random);
 					palette.setColor(0, newBrightColor);
 
-				} else if (evTo.secondaryType != evFrom.secondaryType) {
+				} else if (evTo.getSecondaryType() != evFrom.getSecondaryType()) {
 					Color newDarkColor = Gen2TypeColors.getRandomDarkColor(
-							evTo.secondaryType == null ? evTo.primaryType : evTo.secondaryType, random);
+							evTo.getSecondaryType() == null ? evTo.getPrimaryType() : evTo.getSecondaryType(), random);
 					palette.setColor(1, newDarkColor);
 				}
 			}

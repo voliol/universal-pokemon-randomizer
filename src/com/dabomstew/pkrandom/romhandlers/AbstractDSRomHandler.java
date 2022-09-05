@@ -412,10 +412,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             String NARCpath = getNARCPath("PokemonGraphics");
             NARCArchive pokespritesNARC = readNARC(NARCpath);
             for (Pokemon pk : getPokemonSet()) {
-                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.number);
+                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
                 pk.normalPalette = readPalette(pokespritesNARC, normalPaletteIndex);
                 
-                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.number);
+                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
                 pk.shinyPalette = readPalette(pokespritesNARC, shinyPaletteIndex);
             }
 
@@ -442,12 +442,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
             for (Pokemon pk : getPokemonSet()) {
 
-                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.number);
+                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
                 byte[] normalPaletteBytes = pk.normalPalette.toBytes();
                 normalPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, normalPaletteBytes);
                 pokeGraphicsNARC.files.set(normalPaletteIndex, normalPaletteBytes);
                 
-                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.number);
+                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
                 byte[] shinyPaletteBytes = pk.shinyPalette.toBytes();
                 shinyPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, shinyPaletteBytes);
                 pokeGraphicsNARC.files.set(shinyPaletteIndex, shinyPaletteBytes);

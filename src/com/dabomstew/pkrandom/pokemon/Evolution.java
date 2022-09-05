@@ -47,8 +47,8 @@ public class Evolution implements Comparable<Evolution> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + from.number;
-        result = prime * result + to.number;
+        result = prime * result + from.getNumber();
+        result = prime * result + to.getNumber();
         result = prime * result + type.ordinal();
         return result;
     }
@@ -67,18 +67,18 @@ public class Evolution implements Comparable<Evolution> {
 
     @Override
     public int compareTo(Evolution o) {
-        if (this.from.number < o.from.number) {
+        if (this.from.getNumber() < o.from.getNumber()) {
             return -1;
-        } else if (this.from.number > o.from.number) {
+        } else if (this.from.getNumber() > o.from.getNumber()) {
             return 1;
-        } else if (this.to.number < o.to.number) {
+        } else if (this.to.getNumber() < o.to.getNumber()) {
             return -1;
-        } else if (this.to.number > o.to.number) {
+        } else if (this.to.getNumber() > o.to.getNumber()) {
             return 1;
         } else return Integer.compare(this.type.ordinal(), o.type.ordinal());
     }
 
     public String toFullName() {
-        return to.name + formeSuffix;
+        return to.getName() + formeSuffix;
     }
 }

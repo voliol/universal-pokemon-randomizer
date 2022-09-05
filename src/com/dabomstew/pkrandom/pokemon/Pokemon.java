@@ -1,8 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
-/*--  Pokemon.java - represents an individual Pokemon, and contains         --*/
-/*--                 common Pokemon-related functions.                      --*/
+/*--  Pokemon.java                                                          --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
@@ -34,52 +33,71 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Represents a Pokémon species or forme.
+ */
 public class Pokemon implements Comparable<Pokemon> {
 
-    public String name;
-    public int number;
+    private String name;
+    private final int number;
 
-    public String formeSuffix = "";
-    public Pokemon baseForme = null;
-    public int formeNumber = 0;
-    public int cosmeticForms = 0;
-    public int formeSpriteIndex = 0;
-    public boolean actuallyCosmetic = false;
-    public List<Integer> realCosmeticFormNumbers = new ArrayList<>();
+    private String formeSuffix = "";
+    private Pokemon baseForme = null;
+    private int formeNumber = 0;
+    private int cosmeticForms = 0;
+    private int formeSpriteIndex = 0;
+    private boolean actuallyCosmetic = false;
+    private List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
-    public Type primaryType, secondaryType;
+    private Type primaryType;
+    private Type secondaryType;
 
-    public int hp, attack, defense, spatk, spdef, speed, special;
+    private int hp;
+    private int attack;
+    private int defense;
+    private int spatk;
+    private int spdef;
+    private int speed;
+    private int special;
 
-    public int ability1, ability2, ability3;
+    private int ability1;
+    private int ability2;
+    private int ability3;
 
-    public int catchRate, expYield;
+    private int catchRate;
+    private int expYield;
 
-    public int guaranteedHeldItem, commonHeldItem, rareHeldItem, darkGrassHeldItem;
+    private int guaranteedHeldItem;
+    private int commonHeldItem;
+    private int rareHeldItem;
+    private int darkGrassHeldItem;
 
-    public int genderRatio;
+    private int genderRatio;
 
-    public int picDimensions;
+    private int frontSpritePointer;
+    private int picDimensions;
 
-    public int callRate;
+    private int callRate;
 
-    public ExpCurve growthCurve;
+    private ExpCurve growthCurve;
     
     public Palette normalPalette, shinyPalette;
 
-    public List<Evolution> evolutionsFrom = new ArrayList<>();
-    public List<Evolution> evolutionsTo = new ArrayList<>();
+    private List<Evolution> evolutionsFrom = new ArrayList<>();
+    private List<Evolution> evolutionsTo = new ArrayList<>();
 
-    public List<MegaEvolution> megaEvolutionsFrom = new ArrayList<>();
-    public List<MegaEvolution> megaEvolutionsTo = new ArrayList<>();
+    private List<MegaEvolution> megaEvolutionsFrom = new ArrayList<>();
+    private List<MegaEvolution> megaEvolutionsTo = new ArrayList<>();
 
     protected List<Integer> shuffledStatsOrder;
 
-    // A flag to use for things like recursive stats copying.
-    // Must not rely on the state of this flag being preserved between calls.
+    /** A flag to use for things like recursive stats copying.
+     * Must not rely on the state of this flag being preserved between calls.
+     **/
     public boolean temporaryFlag;
 
-    public Pokemon() {
+    public Pokemon(int number) {
+        this.number = number;
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
 
@@ -325,4 +343,301 @@ public class Pokemon implements Comparable<Pokemon> {
         return realCosmeticFormNumbers.isEmpty() ? num : realCosmeticFormNumbers.get(num);
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public String getFormeSuffix() {
+        return formeSuffix;
+    }
+
+    public void setFormeSuffix(String formeSuffix) {
+        this.formeSuffix = formeSuffix;
+    }
+
+    public Pokemon getBaseForme() {
+        return baseForme;
+    }
+
+    public void setBaseForme(Pokemon baseForme) {
+        this.baseForme = baseForme;
+    }
+
+    public int getFormeNumber() {
+        return formeNumber;
+    }
+
+    public void setFormeNumber(int formeNumber) {
+        this.formeNumber = formeNumber;
+    }
+
+    public int getCosmeticForms() {
+        return cosmeticForms;
+    }
+
+    public void setCosmeticForms(int cosmeticForms) {
+        this.cosmeticForms = cosmeticForms;
+    }
+
+    public int getFormeSpriteIndex() {
+        return formeSpriteIndex;
+    }
+
+    public void setFormeSpriteIndex(int formeSpriteIndex) {
+        this.formeSpriteIndex = formeSpriteIndex;
+    }
+
+    public boolean isActuallyCosmetic() {
+        return actuallyCosmetic;
+    }
+
+    public void setActuallyCosmetic(boolean actuallyCosmetic) {
+        this.actuallyCosmetic = actuallyCosmetic;
+    }
+
+    public List<Integer> getRealCosmeticFormNumbers() {
+        return realCosmeticFormNumbers;
+    }
+
+    public void setRealCosmeticFormNumbers(List<Integer> realCosmeticFormNumbers) {
+        this.realCosmeticFormNumbers = realCosmeticFormNumbers;
+    }
+
+    public Type getPrimaryType() {
+        return primaryType;
+    }
+
+    public void setPrimaryType(Type primaryType) {
+        this.primaryType = primaryType;
+    }
+
+    public Type getSecondaryType() {
+        return secondaryType;
+    }
+
+    public void setSecondaryType(Type secondaryType) {
+        this.secondaryType = secondaryType;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public int getAttack() {
+        return attack;
+    }
+
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
+
+    public int getDefense() {
+        return defense;
+    }
+
+    public void setDefense(int defense) {
+        this.defense = defense;
+    }
+
+    public int getSpatk() {
+        return spatk;
+    }
+
+    public void setSpatk(int spatk) {
+        this.spatk = spatk;
+    }
+
+    public int getSpdef() {
+        return spdef;
+    }
+
+    public void setSpdef(int spdef) {
+        this.spdef = spdef;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public int getSpecial() {
+        return special;
+    }
+
+    public void setSpecial(int special) {
+        this.special = special;
+    }
+
+    public int getAbility1() {
+        return ability1;
+    }
+
+    public void setAbility1(int ability1) {
+        this.ability1 = ability1;
+    }
+
+    public int getAbility2() {
+        return ability2;
+    }
+
+    public void setAbility2(int ability2) {
+        this.ability2 = ability2;
+    }
+
+    public int getAbility3() {
+        return ability3;
+    }
+
+    public void setAbility3(int ability3) {
+        this.ability3 = ability3;
+    }
+
+    public int getCatchRate() {
+        return catchRate;
+    }
+
+    public void setCatchRate(int catchRate) {
+        this.catchRate = catchRate;
+    }
+
+    public int getExpYield() {
+        return expYield;
+    }
+
+    public void setExpYield(int expYield) {
+        this.expYield = expYield;
+    }
+
+    public int getGuaranteedHeldItem() {
+        return guaranteedHeldItem;
+    }
+
+    public void setGuaranteedHeldItem(int guaranteedHeldItem) {
+        this.guaranteedHeldItem = guaranteedHeldItem;
+    }
+
+    public int getCommonHeldItem() {
+        return commonHeldItem;
+    }
+
+    public void setCommonHeldItem(int commonHeldItem) {
+        this.commonHeldItem = commonHeldItem;
+    }
+
+    public int getRareHeldItem() {
+        return rareHeldItem;
+    }
+
+    public void setRareHeldItem(int rareHeldItem) {
+        this.rareHeldItem = rareHeldItem;
+    }
+
+    public int getDarkGrassHeldItem() {
+        return darkGrassHeldItem;
+    }
+
+    public void setDarkGrassHeldItem(int darkGrassHeldItem) {
+        this.darkGrassHeldItem = darkGrassHeldItem;
+    }
+
+    public int getGenderRatio() {
+        return genderRatio;
+    }
+
+    public void setGenderRatio(int genderRatio) {
+        this.genderRatio = genderRatio;
+    }
+
+    public int getFrontSpritePointer() {
+        return frontSpritePointer;
+    }
+
+    public void setFrontSpritePointer(int frontSpritePointer) {
+        this.frontSpritePointer = frontSpritePointer;
+    }
+
+    public int getPicDimensions() {
+        return picDimensions;
+    }
+
+    public void setPicDimensions(int picDimensions) {
+        this.picDimensions = picDimensions;
+    }
+
+    public int getCallRate() {
+        return callRate;
+    }
+
+    public void setCallRate(int callRate) {
+        this.callRate = callRate;
+    }
+
+    public ExpCurve getGrowthCurve() {
+        return growthCurve;
+    }
+
+    public void setGrowthCurve(ExpCurve growthCurve) {
+        this.growthCurve = growthCurve;
+    }
+
+    /**
+     * Returns a (modifiable!) {@link List} of {@link Evolution}s where this Pokémon species is what the evolution is
+     * "from".<br>
+     * E.g. if the Pokémon is Gloom, this would return a List with two elements, one being the Evolution from
+     * Gloom to Vileplume, and the other being the Evolution from Gloom to Bellossom.
+     */
+    public List<Evolution> getEvolutionsFrom() {
+        return evolutionsFrom;
+    }
+
+    public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {
+        this.evolutionsFrom = evolutionsFrom;
+    }
+
+    /**
+     * Returns a (modifiable!) {@link List} of {@link Evolution}s where this Pokémon species is what the evolution is
+     * "to".<br>
+     * E.g. if the Pokémon is Gloom, this would return a List with one element, being the Evolution from
+     * Oddish to Gloom.<br>
+     * Normally this List has only one or zero elements, because no two vanilla Pokémon evolve into
+     * the same third Pokémon.
+     */
+    public List<Evolution> getEvolutionsTo() {
+        return evolutionsTo;
+    }
+
+    public void setEvolutionsTo(List<Evolution> evolutionsTo) {
+        this.evolutionsTo = evolutionsTo;
+    }
+
+    public List<MegaEvolution> getMegaEvolutionsFrom() {
+        return megaEvolutionsFrom;
+    }
+
+    public void setMegaEvolutionsFrom(List<MegaEvolution> megaEvolutionsFrom) {
+        this.megaEvolutionsFrom = megaEvolutionsFrom;
+    }
+
+    public List<MegaEvolution> getMegaEvolutionsTo() {
+        return megaEvolutionsTo;
+    }
+
+    public void setMegaEvolutionsTo(List<MegaEvolution> megaEvolutionsTo) {
+        this.megaEvolutionsTo = megaEvolutionsTo;
+    }
 }
