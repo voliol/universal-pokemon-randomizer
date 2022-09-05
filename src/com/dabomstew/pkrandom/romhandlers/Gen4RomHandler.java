@@ -1085,9 +1085,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected void savingROM() {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
         try {
             writeARM9(arm9);
         } catch (IOException e) {
@@ -1110,7 +1109,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         for (int i = 1; i <= Gen4Constants.moveCount; i++) {
             byte[] data = moveNarc.files.get(i);
             writeWord(data, 0, moves[i].effectIndex);
@@ -1136,7 +1136,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         // Update the "a/an X" list too, if it exists
         List<String> namesList = getStrings(romEntry.getInt("PokemonNamesTextOffset"));
         int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
@@ -1215,11 +1216,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return pokemonListInclFormes; // No formes for now
     }
 
-    @Override
-    public List<Pokemon> getAltFormes() {
-        int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
-        return pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1, Gen4Constants.pokemonCount + formeCount + 1);
-    }
+	@Override
+	public PokemonSet<Pokemon> getAltFormes() {
+		int formeCount = Gen4Constants.getFormeCount(romEntry.romType);
+		return new PokemonSet<>(pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1,
+				Gen4Constants.pokemonCount + formeCount + 1));
+	}
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
@@ -1233,8 +1235,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Pokemon> getIrregularFormes() {
-        return new ArrayList<>();
+    public PokemonSet<Pokemon> getIrregularFormes() {
+        return new PokemonSet<>();
     }
 
     @Override
@@ -3089,8 +3091,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Pokemon> getBannedFormesForTrainerPokemon() {
-        List<Pokemon> banned = new ArrayList<>();
+    public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
+        PokemonSet<Pokemon> banned = new PokemonSet<>();
         if (romEntry.romType != Gen4Constants.Type_DP) {
             Pokemon giratinaOrigin = this.getAltFormeOfPokemon(pokes[Species.giratina], 1);
             if (giratinaOrigin != null) {
@@ -5175,7 +5177,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        List<Pokemon> pokemonIncluded = this.mainPokemonList;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {
@@ -5579,7 +5581,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
         checkPokemonRestrictions();
         List<Pokemon> validPokemon = new ArrayList<>();
-        for (Pokemon pk : this.mainPokemonList) {
+        for (Pokemon pk : this.restrictedPokemon) {
             if (pk.getNumber() <= maxValue && (!blockNonMales || pk.getGenderRatio() <= 0xFD)) {
                 validPokemon.add(pk);
             }

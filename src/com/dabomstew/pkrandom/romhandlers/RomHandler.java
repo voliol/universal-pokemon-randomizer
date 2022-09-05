@@ -53,10 +53,8 @@ public interface RomHandler {
     // =======================
 
     boolean loadRom(String filename);
-
-    boolean saveRomFile(String filename, long seed);
-
-    boolean saveRomDirectory(String filename);
+    
+    boolean saveRom(String filename, long seed, boolean saveAsDirectory);
 
     String loadedFilename();
 
@@ -92,13 +90,17 @@ public interface RomHandler {
 
     List<Pokemon> getPokemonInclFormes();
 
-    List<Pokemon> getAltFormes();
+    PokemonSet<Pokemon> getAltFormes();
+    
+    PokemonSet<Pokemon> getPokemonSet();
+    
+    PokemonSet<Pokemon> getPokemonSetInclFormes();
 
     List<MegaEvolution> getMegaEvolutions();
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
 
-    List<Pokemon> getIrregularFormes();
+    PokemonSet<Pokemon> getIrregularFormes();
 
     // ==================================
     // Methods to set up Gen Restrictions
@@ -227,7 +229,7 @@ public interface RomHandler {
 
     boolean hasWildAltFormes();
 
-    List<Pokemon> bannedForWildEncounters();
+    PokemonSet<Pokemon> getBannedForWildEncounters();
 
     void randomizeWildHeldItems(Settings settings);
 
@@ -337,7 +339,7 @@ public interface RomHandler {
 
     boolean hasStaticAltFormes();
 
-    List<Pokemon> bannedForStaticPokemon();
+    PokemonSet<Pokemon> getBannedForStaticPokemon();
 
     boolean forceSwapStaticMegaEvos();
 
@@ -649,9 +651,9 @@ public interface RomHandler {
 
     boolean hasFunctionalFormes();
 
-    List<Pokemon> getAbilityDependentFormes();
+    PokemonSet<Pokemon> getAbilityDependentFormes();
 
-    List<Pokemon> getBannedFormesForPlayerPokemon();
+    PokemonSet<Pokemon> getBannedFormesForPlayerPokemon();
 
-    List<Pokemon> getBannedFormesForTrainerPokemon();
+    PokemonSet<Pokemon> getBannedFormesForTrainerPokemon();
 }

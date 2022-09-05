@@ -720,9 +720,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected void savingROM() {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
         try {
             writeARM9(arm9);
         } catch (IOException e) {
@@ -742,7 +741,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         for (int i = 1; i <= Gen5Constants.moveCount; i++) {
             byte[] data = moveNarc.files.get(i);
             data[2] = Gen5Constants.moveCategoryToByte(moves[i].category);
@@ -767,7 +767,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
 
         int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
@@ -834,11 +835,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return pokemonListInclFormes;
     }
 
-    @Override
-    public List<Pokemon> getAltFormes() {
-        int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
-        return pokemonListInclFormes.subList(Gen5Constants.pokemonCount + 1, Gen5Constants.pokemonCount + formeCount + 1);
-    }
+	@Override
+	public PokemonSet<Pokemon> getAltFormes() {
+		int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
+		return new PokemonSet<>(pokemonListInclFormes.subList(Gen5Constants.pokemonCount + 1,
+				Gen5Constants.pokemonCount + formeCount + 1));
+	}
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
@@ -851,10 +853,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
-    @Override
-    public List<Pokemon> getIrregularFormes() {
-        return Gen5Constants.getIrregularFormes(romEntry.romType).stream().map(i -> pokes[i]).collect(Collectors.toList());
-    }
+	@Override
+	public PokemonSet<Pokemon> getIrregularFormes() {
+		return Gen5Constants.getIrregularFormes(romEntry.romType)
+				.stream().map(i -> pokes[i])
+				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+	}
 
     @Override
     public boolean hasFunctionalFormes() {
@@ -3923,7 +3927,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        List<Pokemon> pokemonIncluded = this.mainPokemonList;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

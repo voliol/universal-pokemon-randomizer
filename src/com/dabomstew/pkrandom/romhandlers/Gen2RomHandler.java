@@ -342,12 +342,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return null;
     }
 
-    @Override
-    public void savingRom() {
-        savePokemonStats();
-        saveMoves();
-    }
-
     private void loadPokemonStats() {
         pokes = new Pokemon[Gen2Constants.pokemonCount + 1];
         // Fetch our names
@@ -366,7 +360,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         // Write pokemon names
         int offs = romEntry.getValue("PokemonNamesOffset");
         int len = romEntry.getValue("PokemonNamesLength");
@@ -702,7 +697,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         int offs = romEntry.getValue("MoveDataOffset");
         for (int i = 1; i <= 251; i++) {
             rom[offs + (i - 1) * 7 + 1] = (byte) moves[i].effectIndex;
@@ -1276,8 +1272,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> getAltFormes() {
-        return new ArrayList<>();
+    public PokemonSet<Pokemon> getAltFormes() {
+        return new PokemonSet<>();
     }
 
     @Override
@@ -1291,8 +1287,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> getIrregularFormes() {
-        return new ArrayList<>();
+    public PokemonSet<Pokemon> getIrregularFormes() {
+        return new PokemonSet<>();
     }
 
     @Override
@@ -1540,8 +1536,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> bannedForStaticPokemon() {
-        return Collections.singletonList(pokes[Species.unown]); // Unown banned
+    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
+    	PokemonSet<Pokemon> banned = new PokemonSet<>();
+    	banned.add(pokes[Species.unown]); // Unown banned
+        return banned; 
     }
 
     @Override
@@ -2717,7 +2715,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        List<Pokemon> pokemonIncluded = this.mainPokemonList;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

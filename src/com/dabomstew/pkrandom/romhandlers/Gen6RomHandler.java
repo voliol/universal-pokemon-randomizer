@@ -708,9 +708,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void savingROM() throws IOException {
-        savePokemonStats();
-        saveMoves();
+    protected void prepareSaveRom() {
+    	super.prepareSaveRom();
         try {
             writeCode(code);
             writeGARC(romEntry.getFile("TextStrings"), stringsGarc);
@@ -740,7 +739,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return "Unpatched";
     }
 
-    private void savePokemonStats() {
+    @Override
+    protected void savePokemonStats() {
         int k = Gen6Constants.getBsSize(romEntry.romType);
         byte[] duplicateData = pokeGarc.files.get(Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType) + 1).get(0);
         for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType); i++) {
@@ -925,7 +925,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         feebasEvolution.getEvolutionsTo().add(beautyEvolution);
     }
 
-    private void saveMoves() {
+    @Override
+    protected void saveMoves() {
         int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
         byte[][] miniArchive = new byte[0][0];
         if (romEntry.romType == Gen6Constants.Type_ORAS) {
@@ -1014,11 +1015,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return pokemonListInclFormes;
     }
 
-    @Override
-    public List<Pokemon> getAltFormes() {
-        int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
-        return pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1, Gen6Constants.pokemonCount + formeCount + 1);
-    }
+	@Override
+	public PokemonSet<Pokemon> getAltFormes() {
+		int formeCount = Gen6Constants.getFormeCount(romEntry.romType);
+		return new PokemonSet<>(pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1,
+				Gen6Constants.pokemonCount + formeCount + 1));
+	}
 
     @Override
     public List<MegaEvolution> getMegaEvolutions() {
@@ -1031,10 +1033,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
-    @Override
-    public List<Pokemon> getIrregularFormes() {
-        return Gen6Constants.getIrregularFormes(romEntry.romType).stream().map(i -> pokes[i]).collect(Collectors.toList());
-    }
+	@Override
+	public PokemonSet<Pokemon> getIrregularFormes() {
+		return Gen6Constants.getIrregularFormes(romEntry.romType)
+				.stream().map(i -> pokes[i])
+				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+	}
 
     @Override
     public boolean hasFunctionalFormes() {
@@ -2975,12 +2979,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Pokemon> bannedForStaticPokemon() {
-        return Gen6Constants.actuallyCosmeticForms
+    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
+        return new PokemonSet<>(Gen6Constants.actuallyCosmeticForms
                 .stream()
                 .filter(index -> index < Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.romType))
                 .map(index -> pokes[index])
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -3810,7 +3814,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        List<Pokemon> pokemonIncluded = this.mainPokemonListInclFormes;
+        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemonInclAltFormes;
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

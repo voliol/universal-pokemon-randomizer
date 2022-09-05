@@ -673,11 +673,7 @@ public class Randomizer {
         romHandler.writeCheckValueToROM(checkValue);
 
         // Save
-        if (saveAsDirectory) {
-            romHandler.saveRomDirectory(filename);
-        } else {
-            romHandler.saveRomFile(filename, seed);
-        }
+        romHandler.saveRom(filename, seed, saveAsDirectory);
 
         // Log tail
         String gameName = romHandler.getROMName();
