@@ -3677,10 +3677,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
 
-        List<Pokemon> romPokemon = getPokemonInclFormes() // TODO: parse this
+        List<Pokemon> romPokemon = getPokemonInclFormes()
                 .stream()
                 .filter(pk -> pk == null || !pk.actuallyCosmetic)
-                .collect(Collectors.toList());
+                .toList();
 
         PokemonSet<Pokemon> banned = getBannedFormesForPlayerPokemon();
         pickedStarters = new ArrayList<>();
@@ -3692,9 +3692,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(getIrregularFormes());
         }
         // loop to add chosen pokemon to banned, preventing it from being a random option.
-        for (int i = 0; i < customStarters.length; i = i + 1){
-            if (!(customStarters[i] - 1 == 0)){
-                banned.add(romPokemon.get(customStarters[i] - 1));
+        for (int customStarter : customStarters) {
+            if (!(customStarter - 1 == 0)) {
+                banned.add(romPokemon.get(customStarter - 1));
             }
         }
         if (customStarters[0] - 1 == 0){
@@ -3954,17 +3954,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         .stream()
                                         .filter(mega -> mega.method == 1)
                                         .map(mega -> mega.from)
-                                        .distinct()
                                         .filter(pokemonLeft::contains)
-                                        .collect(Collectors.toCollection(() -> new PokemonSet<>()));
+                                        .collect(Collectors.toCollection(PokemonSet::new));
                         if (megaEvoPokemonLeft.isEmpty()) {
                             megaEvoPokemonLeft = megaEvolutionsList
                                             .stream()
                                             .filter(mega -> mega.method == 1)
                                             .map(mega -> mega.from)
-                                            .distinct()
                                             .filter(restrictedPokemon::contains)
-                                            .collect(Collectors.toCollection(() -> new PokemonSet<>()));
+                                            .collect(Collectors.toCollection(PokemonSet::new));
                         }
                         newPK = pickStaticPowerLvlReplacement(
                                 megaEvoPokemonLeft,
@@ -4159,8 +4157,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         .stream()
                         .filter(mega -> mega.method == 1)
                         .map(mega -> mega.from)
-                        .distinct()
-                        .collect(Collectors.toCollection(() -> new PokemonSet<>()));
+                        .collect(Collectors.toCollection(PokemonSet::new));
         PokemonSet<Pokemon> megaEvoPokemonLeft = new PokemonSet<>(megaEvoPokemon).filter(pokemonLeft::contains);
         if (megaEvoPokemonLeft.isEmpty()) {
             megaEvoPokemonLeft = new PokemonSet<>(megaEvoPokemon).filter(fullList::contains);
@@ -6391,8 +6388,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     .stream()
                     .filter(mega -> mega.method == 1)
                     .map(mega -> mega.from)
-                    .distinct()
-                    .collect(Collectors.toCollection(() -> new PokemonSet<>()));
+                    .collect(Collectors.toCollection(PokemonSet::new));
         } else {
             pickFrom = cachedAll;
         }

@@ -13,7 +13,7 @@ import java.util.function.Predicate;
  * parameter. The "filter" methods also return new PokemonSet objects. <br>
  * <br>
  * For more complex operations, use .stream() and finally collect it into a new
- * PokemonSet using .collect(Collectors.toCollection(() -> new PokemonSet<>())).
+ * PokemonSet using .collect(Collectors.toCollection(PokemonSet::new)).
  */
 public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
@@ -168,7 +168,4 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 				: randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
 	}
 
-	// TODO: come up with a collector or the like, so streams can be used for longer
-	// operations
-	// (this.filter() is a good shorthand)
 }
