@@ -47,7 +47,7 @@ public abstract class PaletteHandler<T extends Pokemon> { // TODO: Think deeper 
 												  boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
 
 	protected void setShinyPaletteFromNormal(Pokemon pk) {
-		pk.shinyPalette = pk.normalPalette.clone();
+		pk.setShinyPalette(pk.getNormalPalette().clone());
 	}
 
 }

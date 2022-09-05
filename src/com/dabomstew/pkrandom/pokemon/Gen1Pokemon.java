@@ -38,11 +38,10 @@ public class Gen1Pokemon extends Pokemon {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4);
     }
 
-	// these are only public to mirror the fields in Pokemon being public, I would
-	// prefer encapsulating them --voliol
-	public int frontSpritePointer, backSpritePointer;
+    private int frontSpritePointer;
+    private int backSpritePointer;
 	
-	public PaletteID paletteID;
+	private PaletteID paletteID;
 
 	@Override
 	public void copyShuffledStatsUpEvolution(Pokemon evolvesFrom) {
@@ -150,5 +149,31 @@ public class Gen1Pokemon extends Pokemon {
         return "Pokemon [name=" + getName() + ", number=" + getNumber() + ", primaryType=" + getPrimaryType() + ", secondaryType="
                 + getSecondaryType() + ", hp=" + getHp() + ", attack=" + getAttack() + ", defense=" + getDefense() + ", special=" + getSpecial()
                 + ", speed=" + getSpeed() + "]";
+    }
+
+    @Override
+    public int getFrontSpritePointer() {
+        return frontSpritePointer;
+    }
+
+    @Override
+    public void setFrontSpritePointer(int frontSpritePointer) {
+        this.frontSpritePointer = frontSpritePointer;
+    }
+
+    public int getBackSpritePointer() {
+        return backSpritePointer;
+    }
+
+    public void setBackSpritePointer(int backSpritePointer) {
+        this.backSpritePointer = backSpritePointer;
+    }
+
+    public PaletteID getPaletteID() {
+        return paletteID;
+    }
+
+    public void setPaletteID(PaletteID paletteID) {
+        this.paletteID = paletteID;
     }
 }

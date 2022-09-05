@@ -4298,10 +4298,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int pokeNumber = pokedexToInternal[pk.getNumber()];
 
             int normalPalOffset = readPointer(normalPaletteTableOffset + pokeNumber * 8);
-            pk.normalPalette = readPalette(normalPalOffset);
+            pk.setNormalPalette(readPalette(normalPalOffset));
 
             int shinyPalOffset = readPointer(shinyPaletteTableOffset + pokeNumber * 8);
-            pk.shinyPalette = readPalette(shinyPalOffset);
+            pk.setShinyPalette(readPalette(shinyPalOffset));
         }
     }
 
@@ -4318,10 +4318,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int pokeNumber = pokedexToInternal[pk.getNumber()];
 
             int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
-            rewritePalette(normalPalPointerOffset, pk.normalPalette);
+            rewritePalette(normalPalPointerOffset, pk.getNormalPalette());
 
             int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
-            rewritePalette(shinyPalPointerOffset, pk.shinyPalette);
+            rewritePalette(shinyPalPointerOffset, pk.getShinyPalette());
         }
     }
 
@@ -4414,7 +4414,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             trueSprite = DSDecmp.Decompress(rom, spriteOffset);
         }
 
-        Palette palette = shiny ? pk.shinyPalette : pk.normalPalette;
+        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         int[] convPalette = palette.toARGB();
         if (transparentBackground) {
             convPalette[0] = 0;

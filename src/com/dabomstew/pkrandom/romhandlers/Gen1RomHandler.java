@@ -792,7 +792,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         pkmn.setExpYield(rom[offset + Gen1Constants.bsExpYieldOffset] & 0xFF);
         pkmn.setGrowthCurve(ExpCurve.fromByte(rom[offset + Gen1Constants.bsGrowthCurveOffset]));
         pkmn.setFrontSpritePointer(readWord(offset + Gen1Constants.bsFrontSpriteOffset));
-        pkmn.backSpritePointer = readWord(offset + Gen1Constants.bsBackSpriteOffset);
+        pkmn.setBackSpritePointer(readWord(offset + Gen1Constants.bsBackSpriteOffset));
         
         pkmn.setGuaranteedHeldItem(-1);
         pkmn.setCommonHeldItem(-1);
@@ -2830,9 +2830,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             fsBank = 0x9;
         } else if (idx < 0x4A) {
             fsBank = 0xA;
-        } else if (idx < 0x74 || idx == 0x74 && pk.frontSpritePointer > 0x7000) {
+        } else if (idx < 0x74 || idx == 0x74 && pk.getFrontSpritePointer() > 0x7000) {
             fsBank = 0xB;
-        } else if (idx < 0x99 || idx == 0x99 && pk.frontSpritePointer > 0x7000) {
+        } else if (idx < 0x99 || idx == 0x99 && pk.getFrontSpritePointer() > 0x7000) {
             fsBank = 0xC;
         } else {
             fsBank = 0xD;
@@ -2844,7 +2844,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		int palIndex = romEntry.getValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonSet()) {
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
-			gen1pk.paletteID = (PaletteID.values()[rom[palIndex + gen1pk.getNumber()]]); // they are in Pokédex order
+			gen1pk.setPaletteID((PaletteID.values()[rom[palIndex + gen1pk.getNumber()]])); // they are in Pokédex order
 		}
 	}
 
@@ -2853,7 +2853,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		int palIndex = romEntry.getValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonSet()) {
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
-			rom[palIndex + gen1pk.getNumber()] = (byte) gen1pk.paletteID.ordinal(); // they are in Pokédex order
+			rom[palIndex + gen1pk.getNumber()] = (byte) gen1pk.getPaletteID().ordinal(); // they are in Pokédex order
 		}
 	}
     
@@ -2877,7 +2877,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     	
     	// assumes the backsprites are in the same bank as the frontSprites
     	int spriteBank = calculateFrontSpriteBank(pk);
-        int spriteOffset = calculateOffset(spriteBank, back ? pk.backSpritePointer : pk.frontSpritePointer);
+        int spriteOffset = calculateOffset(spriteBank, back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer());
         
         Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
         sprite.decompress();
@@ -2890,7 +2890,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // Palette?
         int[] convPalette;
         if (romEntry.getValue("MonPaletteIndicesOffset") > 0 && romEntry.getValue("SGBPalettesOffset") > 0) {
-            int palIndex = pk.paletteID.ordinal();
+            int palIndex = pk.getPaletteID().ordinal();
             int palOffset = romEntry.getValue("SGBPalettesOffset") + palIndex * 8;
             if (romEntry.isYellow && romEntry.nonJapanese == 1) {
                 // Non-japanese Yellow can use GBC palettes instead.

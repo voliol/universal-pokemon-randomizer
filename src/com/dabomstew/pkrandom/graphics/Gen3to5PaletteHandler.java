@@ -121,7 +121,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler<Pokemon> {
 		for (Entry<Pokemon, TypeBaseColorList> entry : typeBaseColorLists.entrySet()) {
 
 			Pokemon pk = entry.getKey();
-			Palette palette = pk.normalPalette;
+			Palette palette = pk.getNormalPalette();
 			TypeBaseColorList typeBaseColorList = entry.getValue();
 			PalettePartDescription[] palettePartDescriptions = getPalettePartDescriptions(pk, paletteDescriptions);
 

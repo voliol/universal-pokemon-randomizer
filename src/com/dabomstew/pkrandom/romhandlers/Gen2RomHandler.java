@@ -2891,10 +2891,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int num = pk.getNumber() - 1;
             
             int normalPaletteOffset = palOffset + num * 8;
-            pk.normalPalette = read2ColorPalette(normalPaletteOffset);
+            pk.setNormalPalette(read2ColorPalette(normalPaletteOffset));
             
             int shinyPaletteOffset = palOffset + num * 8 + 4;
-            pk.shinyPalette = read2ColorPalette(shinyPaletteOffset);
+            pk.setShinyPalette(read2ColorPalette(shinyPaletteOffset));
             
         }
     }
@@ -2910,14 +2910,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 		for (Pokemon pk : getPokemonSet()) {
 			int num = pk.getNumber() - 1;
 
-			byte[] normalPaletteBytes = pk.normalPalette.toBytes();
+			byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
 			// assuming the Pokemon do not have another internal order
 			for (int j = 0; j < normalPaletteBytes.length; j++) {
 				int byteOffset = palOffset + num * 8 + j;
 				rom[byteOffset] = normalPaletteBytes[j];
 			}
 
-			byte[] shinyPaletteBytes = pk.shinyPalette.toBytes();
+			byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
 			// assuming the Pokemon do not have another internal order
 			for (int j = 0; j < shinyPaletteBytes.length; j++) {
 				int byteOffset = palOffset + num * 8 + 4 + j;
@@ -2956,7 +2956,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         // White and black are always in the palettes at positions 0 and 3, 
         // so only the middle colors are stored and need to be read.
-        Palette palette = shiny ? pk.shinyPalette : pk.normalPalette;
+        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         int[] convPalette = new int[] { 0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000 };
 
         BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);

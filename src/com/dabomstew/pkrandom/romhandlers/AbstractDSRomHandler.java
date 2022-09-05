@@ -413,10 +413,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             NARCArchive pokespritesNARC = readNARC(NARCpath);
             for (Pokemon pk : getPokemonSet()) {
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
-                pk.normalPalette = readPalette(pokespritesNARC, normalPaletteIndex);
+                pk.setNormalPalette(readPalette(pokespritesNARC, normalPaletteIndex));
                 
                 int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
-                pk.shinyPalette = readPalette(pokespritesNARC, shinyPaletteIndex);
+                pk.setShinyPalette(readPalette(pokespritesNARC, shinyPaletteIndex));
             }
 
         } catch (IOException e) {
@@ -443,12 +443,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             for (Pokemon pk : getPokemonSet()) {
 
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
-                byte[] normalPaletteBytes = pk.normalPalette.toBytes();
+                byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
                 normalPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, normalPaletteBytes);
                 pokeGraphicsNARC.files.set(normalPaletteIndex, normalPaletteBytes);
                 
                 int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
-                byte[] shinyPaletteBytes = pk.shinyPalette.toBytes();
+                byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
                 shinyPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, shinyPaletteBytes);
                 pokeGraphicsNARC.files.set(shinyPaletteIndex, shinyPaletteBytes);
 

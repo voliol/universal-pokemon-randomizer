@@ -4324,7 +4324,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
 		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
 		
-		Palette palette = shiny ? pk.shinyPalette : pk.normalPalette;
+		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
 		int convPalette[] = palette.toARGB();
 		if (transparentBackground) {
 			convPalette[0] = 0;

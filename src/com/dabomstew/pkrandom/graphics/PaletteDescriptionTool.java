@@ -314,7 +314,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
 		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
 		for (Pokemon pk : romHandler.getPokemonSet()) {
-			originalPalettes.put(pk, pk.normalPalette);
+			originalPalettes.put(pk, pk.getNormalPalette());
 		}
 		paletteDescriptions
 				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY, false).toArray(new PaletteDescription[0]));
@@ -400,8 +400,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private void randomizePalette(Pokemon pk, String paletteDescriptionBody) {
-		pk.normalPalette = originalPalettes.get(pk).clone();
-		Palette palette = pk.normalPalette;
+		pk.setNormalPalette(originalPalettes.get(pk).clone());
+		Palette palette = pk.getNormalPalette();
 		PalettePopulator pp = new PalettePopulator(RND);
 		TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, false, RND);
 		PalettePartDescription[] palettePartDescriptions = PalettePartDescription.allFrom(paletteDescriptionBody);
@@ -423,7 +423,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			unchangedNote = descNoteField.getText();
 
 			Pokemon pk = getCurrentPokemon();
-			pk.normalPalette = originalPalettes.get(pk).clone();
+			pk.setNormalPalette(originalPalettes.get(pk).clone());
 			originalImage.setImage(getPokemonImage(pk, false));
 			shinyImage.setImage(getPokemonImage(pk, true));
 			newRandomizedExample();

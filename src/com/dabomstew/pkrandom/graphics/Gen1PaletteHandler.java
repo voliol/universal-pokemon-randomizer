@@ -83,7 +83,7 @@ public class Gen1PaletteHandler extends PaletteHandler<Gen1Pokemon> {
 
 		@Override
 		public void applyTo(Gen1Pokemon pk) {
-			pk.paletteID = typeSanity ? getRandomPaletteID(pk.getPrimaryType()) : getRandomPaletteID();
+			pk.setPaletteID(typeSanity ? getRandomPaletteID(pk.getPrimaryType()) : getRandomPaletteID());
 		}
 
 	}
@@ -95,13 +95,13 @@ public class Gen1PaletteHandler extends PaletteHandler<Gen1Pokemon> {
 			PaletteID newPaletteID;
 			if (typeSanity && !evTo.getPrimaryType().equals(evFrom.getPrimaryType())) {
 				PaletteID[] typeIDs = TYPE_PALETTE_IDS.get(evTo.getPrimaryType());
-				newPaletteID = contains(typeIDs, evFrom.paletteID) ? evFrom.paletteID
+				newPaletteID = contains(typeIDs, evFrom.getPaletteID()) ? evFrom.getPaletteID()
 						: getRandomPaletteID(evTo.getPrimaryType());
 
 			} else {
-				newPaletteID = evFrom.paletteID;
+				newPaletteID = evFrom.getPaletteID();
 			}
-			evTo.paletteID = newPaletteID;
+			evTo.setPaletteID(newPaletteID);
 		}
 
 	}

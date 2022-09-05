@@ -81,7 +81,8 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private ExpCurve growthCurve;
     
-    public Palette normalPalette, shinyPalette;
+    private Palette normalPalette;
+    private Palette shinyPalette;
 
     private List<Evolution> evolutionsFrom = new ArrayList<>();
     private List<Evolution> evolutionsTo = new ArrayList<>();
@@ -595,6 +596,22 @@ public class Pokemon implements Comparable<Pokemon> {
         this.growthCurve = growthCurve;
     }
 
+    public Palette getNormalPalette() {
+        return normalPalette;
+    }
+
+    public void setNormalPalette(Palette normalPalette) {
+        this.normalPalette = normalPalette;
+    }
+
+    public Palette getShinyPalette() {
+        return shinyPalette;
+    }
+
+    public void setShinyPalette(Palette shinyPalette) {
+        this.shinyPalette = shinyPalette;
+    }
+
     /**
      * Returns a (modifiable!) {@link List} of {@link Evolution}s where this Pokémon species is what the evolution is
      * "from".<br>
@@ -640,4 +657,5 @@ public class Pokemon implements Comparable<Pokemon> {
     public void setMegaEvolutionsTo(List<MegaEvolution> megaEvolutionsTo) {
         this.megaEvolutionsTo = megaEvolutionsTo;
     }
+
 }

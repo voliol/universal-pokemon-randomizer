@@ -5867,7 +5867,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
 
-		Palette palette = shiny ? pk.shinyPalette : pk.normalPalette;
+		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
 		int[] convPalette = palette.toARGB();
 		if (transparentBackground) {
 			convPalette[0] = 0;
