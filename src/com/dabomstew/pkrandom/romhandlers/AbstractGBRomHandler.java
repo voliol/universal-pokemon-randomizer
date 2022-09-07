@@ -251,13 +251,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		boolean shiny = random.nextInt(10) == 0;
 		boolean gen1 = generationOfPokemon() == 1;
 
-		BufferedImage bim = getPokemonImage(gen1 ? (Gen1Pokemon) pk : pk, false, gen1 ? shiny : false, true, false);
-
-		return bim;
+		return getPokemonImage(pk, false, !gen1 && shiny, true, false);
 	}
 
-	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of
-	// the pattern to replace it
+	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
 	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
 

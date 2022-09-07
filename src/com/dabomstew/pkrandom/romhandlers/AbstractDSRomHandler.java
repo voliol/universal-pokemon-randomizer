@@ -460,32 +460,31 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
     
-    @Override
-    protected List<BufferedImage> getAllPokemonImages() {
-        List<BufferedImage> bims = new ArrayList<>();
-        
-        String NARCPath = getNARCPath("PokemonGraphics");
-        NARCArchive pokeGraphicsNARC;
-        try {
-            pokeGraphicsNARC = readNARC(NARCPath);
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
-        }
-        
-        for (int i = 1; i < getPokemon().size(); i++) {
-            Pokemon pk = getPokemon().get(i);
-           
-            BufferedImage frontNormal = getPokemonImage(pk, pokeGraphicsNARC, false, false, false, true);
-            BufferedImage backNormal = getPokemonImage(pk, pokeGraphicsNARC, true, false, false, false);
-        	BufferedImage frontShiny = getPokemonImage(pk, pokeGraphicsNARC, false, true, false, true); 
-        	BufferedImage backShiny = getPokemonImage(pk, pokeGraphicsNARC, true, true, false, false); 
-            	
-        	BufferedImage combined = GFXFunctions.stitchToGrid(new BufferedImage[][] {{frontNormal, backNormal}, {frontShiny, backShiny}});
-            bims.add(combined);
-        }
-        return bims;
-    }
-    
+	@Override
+	protected List<BufferedImage> getAllPokemonImages() {
+		List<BufferedImage> bims = new ArrayList<>();
+
+		String NARCPath = getNARCPath("PokemonGraphics");
+		NARCArchive pokeGraphicsNARC;
+		try {
+			pokeGraphicsNARC = readNARC(NARCPath);
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+
+		for (Pokemon pk : getPokemonSet()) {
+			BufferedImage frontNormal = getPokemonImage(pk, pokeGraphicsNARC, false, false, false, true);
+			BufferedImage backNormal = getPokemonImage(pk, pokeGraphicsNARC, true, false, false, false);
+			BufferedImage frontShiny = getPokemonImage(pk, pokeGraphicsNARC, false, true, false, true);
+			BufferedImage backShiny = getPokemonImage(pk, pokeGraphicsNARC, true, true, false, false);
+
+			BufferedImage combined = GFXFunctions
+					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+			bims.add(combined);
+		}
+		return bims;
+	}
+
 	@Override
 	public final BufferedImage getMascotImage() {
 		try {
@@ -499,17 +498,15 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 			boolean shiny = random.nextInt(10) == 0;
 
-			BufferedImage bim = getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
-
-			return bim;
+			return getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 	}
     
     // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-    public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-            boolean transparentBackground, boolean includePalette);
+	public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+			boolean transparentBackground, boolean includePalette);
 
     // because RomEntry is an inner class it can't be accessed here, so an abstract
     // method is needed.

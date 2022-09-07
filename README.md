@@ -11,6 +11,7 @@ by voliol
 
 This is a branch for implementing/porting palette randomization into UPR ZX. For a longer description, see the readme of the 
 branch it came from: https://github.com/voliol/universal-pokemon-randomizer/blob/paltest/README.md
+For technical notes, see GRAPHICS_GUIDE.md.
 
 As I implement the palette framework, I've taken the time to do some refactoring. This is partially a selfish endeavor to calm my own mind, 
 but also works to counteract the code bloat that adding a major feature like this naturally entails. 

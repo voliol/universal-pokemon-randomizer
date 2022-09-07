@@ -3623,19 +3623,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-	public BufferedImage getPokemonImage(Pokemon pk, GARCArchive pokeGraphicsGARC, boolean back, boolean shiny,
+	public BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
 			boolean transparentBackground, boolean includePalette) {
-    	if (back || shiny) {
-    		return null;
-    	}
-           
-//        int pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
-//        if (romEntry.romType == Gen7Constants.Type_SM) {
-//            while (pkIndex == 1109 || pkIndex == 1117) {
-//                pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
-//            }
-//        }
-    	int pkIndex = pk.getNumber();
+
+        // for now picks icon randomly, instead of by the given Pokemon
+        int pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
+        if (romEntry.romType == Gen7Constants.Type_SM) {
+            while (pkIndex == 1109 || pkIndex == 1117) {
+                pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
+            }
+        }
     	
         byte[] iconBytes = pokeGraphicsGARC.files.get(pkIndex).get(0);
         BFLIM icon = new BFLIM(iconBytes);

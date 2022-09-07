@@ -2865,27 +2865,27 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new Palette(paletteBytes);
     }
 
-    @Override
-    public BufferedImage getPokemonImage(Pokemon uncheckedPk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
-    	if (!(uncheckedPk instanceof Gen1Pokemon)) {
-    		throw new IllegalArgumentException("Argument \"uncheckedPk\" is not a Gen1Pokemon");
-    	}
-    	Gen1Pokemon pk = (Gen1Pokemon) uncheckedPk;
-    	if (shiny) {
-    		return null;
-    	}
+	@Override
+	public BufferedImage getPokemonImage(Pokemon uncheckedPk, boolean back, boolean shiny,
+			boolean transparentBackground, boolean includePalette) {
+		if (!(uncheckedPk instanceof Gen1Pokemon pk)) {
+			throw new IllegalArgumentException("Argument \"uncheckedPk\" is not a Gen1Pokemon");
+		}
+		if (shiny) {
+			return null;
+		}
     	
-    	// assumes the backsprites are in the same bank as the frontSprites
-    	int spriteBank = calculateFrontSpriteBank(pk);
-        int spriteOffset = calculateOffset(spriteBank, back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer());
-        
-        Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
-        sprite.decompress();
-        sprite.transpose();
-        int w = sprite.getWidth();
-        int h = sprite.getHeight();
-        
-        byte[] data = sprite.getFlattenedData();
+		// assumes the backsprites are in the same bank as the frontSprites
+		int spriteBank = calculateFrontSpriteBank(pk);
+		int spriteOffset = calculateOffset(spriteBank, back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer());
+
+		Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
+		sprite.decompress();
+		sprite.transpose();
+		int w = sprite.getWidth();
+		int h = sprite.getHeight();
+
+		byte[] data = sprite.getFlattenedData();
 
         // Palette?
         int[] convPalette;

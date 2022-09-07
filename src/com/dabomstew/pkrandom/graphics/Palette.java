@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.graphics;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.function.Function;
 
 /**
  * A palette, containing multiple {@link Color}s.
@@ -75,13 +76,31 @@ public class Palette implements Cloneable {
 		return 1 << bitsPerColor;
 	}
 
-	private static int[] bytesToARGBValues(byte[] bytes) {
-		int[] RGBValues = new int[bytes.length / 2];
-		for (int i = 0; i < RGBValues.length; i++) {
-			int word = (bytes[i * 2] & 0xFF) + ((bytes[i * 2 + 1] & 0xFF) << 8);
-			RGBValues[i] = Color.convHighColorWordToARGB(word);
+	public static Palette read3DSIconPalette(byte[] iconBytes) {
+		int paletteCount = readWord(iconBytes, 2);
+		byte[] rawPalette = Arrays.copyOfRange(iconBytes, 4, 4 + paletteCount * 2);
+		int[] RGBValues = bytes3DSToARGBValues(rawPalette);
+		return new Palette(RGBValues);
+	}
+
+	private static int[] bytesToARGBValues(byte[] bytes, Function<Integer, Integer> convWordToARGBFunction) {
+		int[] ARGBValues = new int[bytes.length / 2];
+		for (int i = 0; i < ARGBValues.length; i++) {
+			ARGBValues[i] = convWordToARGBFunction.apply(readWord(bytes, i * 2));
 		}
-		return RGBValues;
+		return ARGBValues;
+	}
+
+	private static int[] bytesToARGBValues(byte[] bytes) {
+		return bytesToARGBValues(bytes, Color::convHighColorWordToARGB);
+	}
+
+	private static int[] bytes3DSToARGBValues(byte[] bytes) {
+		return bytesToARGBValues(bytes, Color::conv3DSColorWordToARGB);
+	}
+
+	private static int readWord(byte[] data, int offset) {
+		return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
 	}
 
 	public Palette() {

@@ -21,14 +21,8 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.imageio.ImageIO;
 
 /**
  * An RGB color, usually to be contained by a {@link Palette}, and methods for
@@ -36,39 +30,6 @@ import javax.imageio.ImageIO;
  * color words (16 bits, little endian) as used by the ROMs.
  */
 public class Color implements Cloneable {
-
-	public static void main(String[] args) {
-
-		int tileWidth = 50;
-		int tileHeight = 50;
-		int tileSize = 5;
-
-		RandomColorSelector rcs = new RandomColorSelector(new Random(), RandomColorSelector.Mode.HSV, hsv -> {
-			double j = (double) (1);
-			return j;
-		}, new double[] { 300, 0.5, 0.5 }, new double[] { 360, 1, 1 });
-
-		BufferedImage bim = new BufferedImage(tileWidth * tileSize, tileWidth * tileSize, BufferedImage.TYPE_INT_RGB);
-		for (int x = 0; x < tileWidth; x++) {
-			for (int y = 0; y < tileHeight; y++) {
-				Color c = rcs.getRandomColor();
-
-				for (int tx = 0; tx < tileSize; tx++) {
-					for (int ty = 0; ty < tileSize; ty++) {
-						bim.setRGB(x * tileSize + tx, y * tileSize + ty, c.toARGB());
-					}
-				}
-			}
-		}
-
-		try {
-			ImageIO.write(bim, "png", new File("sample.png"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 
 	private static final Color DEFAULT_COLOR = new Color(255, 255, 255);
 
@@ -141,8 +102,8 @@ public class Color implements Cloneable {
 	public static int conv3DSColorWordToARGB(int word) {
 		int alpha = (int) ((word & 0x1) * 0xFF);
         int blue = (int) (((word & 0x3E) >> 1) * 8.25);
-        int green = (int) (((word & 0x7C0) >> 6) * 8.25);
-        int red = (int) (((word & 0xF800) >> 11) * 8.25);
+		int green = (int) (((word & 0x7C0) >> 6) * 8.25);
+		int red = (int) (((word & 0xF800) >> 11) * 8.25);
 		return (alpha << 24) | (red << 16) | (green << 8) | blue;
 	}
 

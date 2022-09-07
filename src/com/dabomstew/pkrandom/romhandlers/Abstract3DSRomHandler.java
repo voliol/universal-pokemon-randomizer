@@ -371,17 +371,9 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			throw new RandomizerIOException(e);
 		}
 
-		for (int i = 1; i < getPokemon().size(); i++) {
-			Pokemon pk = getPokemon().get(i);
-
-			BufferedImage frontNormal = getPokemonImage(pk, pokeGraphicsGARC, false, false, false, true);
-			BufferedImage backNormal = getPokemonImage(pk, pokeGraphicsGARC, true, false, false, false);
-			BufferedImage frontShiny = getPokemonImage(pk, pokeGraphicsGARC, false, true, false, true);
-			BufferedImage backShiny = getPokemonImage(pk, pokeGraphicsGARC, true, true, false, false);
-
-			BufferedImage combined = GFXFunctions
-					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
-			bims.add(combined);
+		for (Pokemon pk : getPokemonSet()) {
+			BufferedImage icon = getPokemonIcon(pk, pokeGraphicsGARC, false, true);
+			bims.add(icon);
 		}
 		return bims;
 	}
@@ -397,19 +389,14 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			Pokemon pk = randomPokemon();
 			String GARCPath = getGARCPath("PokemonGraphics");
 			GARCArchive pokeGraphicsGARC = readGARC(GARCPath, false);
-			boolean shiny = random.nextInt(10) == 0;
 
-			BufferedImage bim = getPokemonImage(pk, pokeGraphicsGARC, false, shiny, true, false);
-
-			return bim;
+			return getPokemonIcon(pk, pokeGraphicsGARC, true, false);
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 	}
 
-	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of
-	// the pattern to replace it
-	public abstract BufferedImage getPokemonImage(Pokemon pk, GARCArchive pokeGraphicsGARC, boolean back, boolean shiny,
+	public abstract BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
 			boolean transparentBackground, boolean includePalette);
 
 	// because RomEntry is an inner class it can't be accessed here 

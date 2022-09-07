@@ -131,7 +131,8 @@ public class GFXFunctions {
 		int numTiles = width * height / (tileWidth * tileHeight);
 		int widthInTiles = width / tileWidth;
 
-		BufferedImage bim = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage bim = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_INDEXED,
+				indexColorModelFromPalette(palette, bpp));
 
 		for (int tile = 0; tile < numTiles; tile++) {
 			int tileX = tile % widthInTiles;

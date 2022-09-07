@@ -29,6 +29,7 @@ import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.N3DSTxtHandler;
@@ -4071,31 +4072,23 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-	public BufferedImage getPokemonImage(Pokemon pk, GARCArchive pokeGraphicsGARC, boolean back, boolean shiny,
+	public BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC, 
 			boolean transparentBackground, boolean includePalette) {
-    	if (back || shiny) {
-    		return null;
-    	}
-    	
-//    	int pkIndex = this.random.nextInt(pokespritesGARC.files.size()-2)+1;
-    	int pkIndex = pk.getNumber();
 
-        byte[] icon = pokeGraphicsGARC.files.get(pkIndex).get(0);
-        int paletteCount = readWord(icon,2);
-        byte[] rawPalette = Arrays.copyOfRange(icon,4,4+paletteCount*2);
-        int[] palette = new int[paletteCount];
-        for (int i = 0; i < paletteCount; i++) {
-            palette[i] = GFXFunctions.conv3DS16BitColorToARGB(readWord(rawPalette, i * 2));
-        }
+        // for now picks icon randomly, instead of by the given Pokemon
+    	int pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size()-2)+1;
 
-        int width = 64;
-        int height = 32;
-        // Get the picture and uncompress it.
-        byte[] uncompressedPic = Arrays.copyOfRange(icon,4+paletteCount*2,4+paletteCount*2+width*height);
+		byte[] icon = pokeGraphicsGARC.files.get(pkIndex).get(0);
+		Palette palette = Palette.read3DSIconPalette(icon);
 
-        int bpp = paletteCount <= 0x10 ? 4 : 8;
-        // Output to 64x144 tiled image to prepare for unscrambling
-        BufferedImage bim = GFXFunctions.drawTiledZOrderImage(uncompressedPic, palette, 0, width, height, bpp);
+		int width = 64;
+		int height = 32;
+		// Get the picture and uncompress it.
+		byte[] uncompressedPic = Arrays.copyOfRange(icon, 4 + palette.size() * 2,
+				4 + palette.size() * 2 + width * height);
+
+		int bpp = palette.size() <= 0x10 ? 4 : 8;
+		BufferedImage bim = GFXFunctions.drawTiledZOrderImage(uncompressedPic, palette.toARGB(), 0, width, height, bpp);
 
         // Unscramble the above onto a 96x96 canvas
         BufferedImage finalImage = new BufferedImage(40, 30, BufferedImage.TYPE_INT_ARGB);
