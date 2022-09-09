@@ -304,6 +304,8 @@ public class NewRandomizerGUI {
     private JCheckBox ppalFollowEvolutionsCheckBox;
     private JCheckBox ppalShinyFromNormalCheckBox;
     private JPanel graphicsPanel;
+    private JLabel ppalNotExistLabel;
+    private JLabel ppalPartiallyImplementedLabel;
 
     private static JFrame frame;
 
@@ -645,6 +647,8 @@ public class NewRandomizerGUI {
         versionLabel.setText(String.format(bundle.getString("GUI.versionLabel.text"), Version.VERSION_STRING));
         mtNoExistLabel.setVisible(false);
         mtNoneAvailableLabel.setVisible(false);
+        ppalNotExistLabel.setVisible(false);
+        ppalPartiallyImplementedLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);
         liveTweaksPanel.setVisible(false);
         websiteLinkLabel.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
@@ -2218,6 +2222,8 @@ public class NewRandomizerGUI {
 
         mtNoExistLabel.setVisible(false);
         mtNoneAvailableLabel.setVisible(false);
+        ppalNotExistLabel.setVisible(false);
+        ppalPartiallyImplementedLabel.setVisible(false);
 
         liveTweaksPanel.setVisible(false);
         miscTweaksPanel.setVisible(true);
@@ -2542,15 +2548,21 @@ public class NewRandomizerGUI {
             puRandomRadioButton.setEnabled(true);
 
             // Graphics
-            boolean graphicsSupport = romHandler.generationOfPokemon() < 6; // TODO: is this the RomHandler's job?
-            graphicsPanel.setVisible(graphicsSupport);
-            ppalUnchangedRadioButton.setEnabled(graphicsSupport);
-            ppalUnchangedRadioButton.setSelected(graphicsSupport);
-            ppalRandomRadioButton.setEnabled(graphicsSupport);
+            boolean ppalSupport = romHandler.generationOfPokemon() < 6; // TODO: is this the RomHandler's job?
+            ppalNotExistLabel.setVisible(!ppalSupport);
+            boolean ppalPartialSupport = romHandler.generationOfPokemon() == 4 || romHandler.generationOfPokemon() == 5;
+            ppalPartiallyImplementedLabel.setVisible(ppalPartialSupport);
+            ppalUnchangedRadioButton.setVisible(ppalSupport);
+            ppalUnchangedRadioButton.setEnabled(ppalSupport);
+            ppalUnchangedRadioButton.setSelected(ppalSupport);
+            ppalRandomRadioButton.setVisible(ppalSupport);
+            ppalRandomRadioButton.setEnabled(ppalSupport);
+            ppalFollowTypesCheckBox.setVisible(ppalSupport);
             ppalFollowTypesCheckBox.setEnabled(false);
+            ppalFollowEvolutionsCheckBox.setVisible(ppalSupport);
             ppalFollowEvolutionsCheckBox.setEnabled(false);
+            ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler) && ppalSupport);
             ppalShinyFromNormalCheckBox.setEnabled(false);
-            ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler));
 
             int mtsAvailable = romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
