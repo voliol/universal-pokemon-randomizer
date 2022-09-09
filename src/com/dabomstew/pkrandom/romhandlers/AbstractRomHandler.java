@@ -111,7 +111,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         restrictionsSet = true;
-        altFormes = this.getAltFormes();
+        altFormes = getAltFormes();
         if (restrictions != null) {
             megaEvolutionsList = new ArrayList<>();
             List<Pokemon> allPokemon = this.getPokemon();
@@ -1012,6 +1012,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 translateMap.put(pickedLeft, pickedRight);
             } else {
                 Pokemon pickedLeft = remainingLeft.getRandom(random);
+                remainingLeft.remove(pickedLeft);
                 Pokemon pickedRight = remainingRight.getRandom(random);
                 while (pickedLeft.getNumber() == pickedRight.getNumber() && remainingRight.size() != 1) {
                     // Reroll for a different pokemon if at all possible
