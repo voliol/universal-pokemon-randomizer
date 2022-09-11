@@ -54,12 +54,43 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	public PokemonSet() {
 	}
 
+	/**
+	 * Create a PokemonSet from an existing collection with the same generic type or
+	 * a subclass of it.
+	 */
 	public PokemonSet(Collection<? extends T> pokemonList) {
 		addAll(pokemonList);
 	}
 
+	/**
+	 * Create a PokemonSet from an existing collection with the same generic type or
+	 * a subclass of it.
+	 */
 	public PokemonSet(PokemonSet<? extends T> pokemonSet) {
 		addAll(pokemonSet);
+	}
+
+	/**
+	 * Create a PokemonSet from an existing collection with any generic type
+	 * (extending Pokemon). Only works if the objects in pokemonSet can be safely
+	 * cast to the generic type of the new PokemonSet. E.g. if you have a
+	 * {@literal PokemonSet<Pokemon>} you know contains only Gen1Pokemon, you can
+	 * use this to "cast" it to {@literal PokemonSet<Gen1Pokemon>}<br>
+	 * Throws a ClassCastException if this can't be done.<br>
+	 * <br>
+	 * Use this method sparsely.
+	 */
+	// This might indeed be against the point of having generics...
+	@SuppressWarnings("unchecked")
+	public PokemonSet(PokemonSet<?> pokemonSet, T example) {
+		for (Pokemon pk : pokemonSet) {
+			if (example.getClass().isInstance(pk)) {
+				add((T) pk);
+			} else {
+				throw new ClassCastException("Can't cast " + pk + " of class " + pk.getClass()  + " to " +
+						example.getClass() + ".");
+			}
+		}
 	}
 
 	public PokemonSet<T> filter(Predicate<T> predicate) {
@@ -111,7 +142,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	}
 
 	/**
-	 * Filters so that a Pokémon is only included if its number is within the
+	 * Filters so that a Pokemon is only included if its number is within the
 	 * range.<br>
 	 * Note that alternate formes have different numbers than the base form.
 	 *
@@ -125,7 +156,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	/**
 	 * Filters so that a Pokémon is only included if its *base* number is within
 	 * the range.<br>
-	 * Note this means any alternate forms of a Pokémon with a valid number are
+	 * Note this means any alternate forms of a Pokemon with a valid number are
 	 * included.
 	 *
 	 * @param start The lower end of the range, inclusive.
