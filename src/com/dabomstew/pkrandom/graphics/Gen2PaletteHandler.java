@@ -37,7 +37,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
  * "dark colors", as those descriptors generally correspond to each of the color
  * slots.
  */
-public class Gen2PaletteHandler extends PaletteHandler<Pokemon> {
+public class Gen2PaletteHandler extends PaletteHandler {
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;

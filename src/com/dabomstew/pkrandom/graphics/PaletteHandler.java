@@ -31,7 +31,7 @@ import com.dabomstew.pkrandom.pokemon.PokemonSet;
  * should be done elsewhere, with implementations of this class only handling
  * changes done to said palettes.
  */
-public abstract class PaletteHandler<T extends Pokemon> { // TODO: Think deeper about whether this should be a generic
+public abstract class PaletteHandler {
 
 	protected Random random;
 
@@ -43,7 +43,7 @@ public abstract class PaletteHandler<T extends Pokemon> { // TODO: Think deeper 
 		this.random = new Random(seed);
 	}
 
-	public abstract void randomizePokemonPalettes(PokemonSet<T> pokemonSet,
+	public abstract void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet,
 												  boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
 
 	protected void setShinyPaletteFromNormal(Pokemon pk) {

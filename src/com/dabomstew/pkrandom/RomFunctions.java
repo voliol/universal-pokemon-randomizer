@@ -93,7 +93,7 @@ public class RomFunctions {
                 string[j] = Character.toUpperCase(current);
                 docap = false;
             } else {
-                if (!docap && !Character.isLetter(current) && current != '\'' && current != 'â€?') {
+                if (!docap && !Character.isLetter(current) && current != '\'' && current != 'â€™') {
                     docap = true;
                 }
             }

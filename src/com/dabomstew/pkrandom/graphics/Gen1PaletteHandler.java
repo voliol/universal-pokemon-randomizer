@@ -29,7 +29,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 /**
  * A {@link PaletteHandler} for Gen 1 games (R/B/Y).
  */
-public class Gen1PaletteHandler extends PaletteHandler<Gen1Pokemon> {
+public class Gen1PaletteHandler extends PaletteHandler {
 
 	private static final PaletteID DEFAULT_PALETTE_ID = PaletteID.MEWMON;
 	private static final EnumMap<Type, PaletteID[]> TYPE_PALETTE_IDS = initTypePaletteIDs();
@@ -61,12 +61,13 @@ public class Gen1PaletteHandler extends PaletteHandler<Gen1Pokemon> {
 	}
 
 	@Override
-	public void randomizePokemonPalettes(PokemonSet<Gen1Pokemon> pokemonSet, boolean typeSanity,
+	public void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet, boolean typeSanity,
 										 boolean evolutionSanity, boolean shinyFromNormal) {
 		// obviously shinyFromNormal is not used, it is here for a hopefully prettier
 		// class structure
 		this.typeSanity = typeSanity;
-		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
+		PokemonSet<Gen1Pokemon> gen1PokemonSet = new PokemonSet<>(pokemonSet, new Gen1Pokemon(0));
+		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> gen1PokemonSet);
 		cueh.apply(evolutionSanity, true, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
 	}
 

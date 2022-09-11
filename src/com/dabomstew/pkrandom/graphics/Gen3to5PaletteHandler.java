@@ -55,7 +55,7 @@ import com.dabomstew.pkrandom.pokemon.PokemonSet;
  * {@link TypeBaseColorList}, which uses its types to come up with appropriate
  * base colors.
  */
-public class Gen3to5PaletteHandler extends PaletteHandler<Pokemon> {
+public class Gen3to5PaletteHandler extends PaletteHandler {
 
 	/**
 	 * An identifier for the related resource files. ROMs that share a

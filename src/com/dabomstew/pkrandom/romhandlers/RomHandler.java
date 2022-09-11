@@ -663,6 +663,6 @@ public interface RomHandler {
     
     void randomizePokemonPalettes(Settings settings);
 
-    PaletteHandler<Pokemon> getPaletteHandler();
+    PaletteHandler getPaletteHandler();
 
 }
