@@ -98,10 +98,10 @@ public class Color implements Cloneable {
 		int blue = (int) (((word & 0x7C00) >> 10) * 8.25);
 		return 0xFF000000 | (red << 16) | (green << 8) | blue;
 	}
-	
+
 	public static int conv3DSColorWordToARGB(int word) {
 		int alpha = (int) ((word & 0x1) * 0xFF);
-        int blue = (int) (((word & 0x3E) >> 1) * 8.25);
+		int blue = (int) (((word & 0x3E) >> 1) * 8.25);
 		int green = (int) (((word & 0x7C0) >> 6) * 8.25);
 		int red = (int) (((word & 0xF800) >> 11) * 8.25);
 		return (alpha << 24) | (red << 16) | (green << 8) | blue;
@@ -172,6 +172,32 @@ public class Color implements Cloneable {
 
 	public int[] toInts() {
 		return new int[] { r, g, b };
+	}
+
+	public double[] toHSV() {
+		// using this formula: https://www.rapidtables.com/convert/color/rgb-to-hsv.html
+		double rFloat = ((double) r) / 255;
+		double gFloat = ((double) g) / 255;
+		double bFloat = ((double) b) / 255;
+
+		double cMax = Math.max(Math.max(rFloat, gFloat), bFloat);
+		double cMin = Math.min(Math.min(rFloat, gFloat), bFloat);
+		double delta = cMax - cMin;
+
+		double h;
+		if (delta == 0) {
+			h = 0;
+		} else if (cMax == rFloat) {
+			h = 60 * (((gFloat - bFloat) / delta) % 6);
+		} else if (cMax == gFloat) {
+			h = 60 * (((bFloat - rFloat) / delta) + 2);
+		} else { // cMax == bFloat
+			h = 60 * (((rFloat - gFloat) / delta) + 4);
+		} 
+		double s = cMax == 0 ? 0 : delta / cMax;
+		double v = cMax;
+
+		return new double[] { h, s, v };
 	}
 
 	public int getComp(int i) {

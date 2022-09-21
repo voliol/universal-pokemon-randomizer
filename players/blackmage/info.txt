@@ -1,0 +1,6 @@
+[NAME:Black Mage]
+[DESCRIPTION:The black mage from Final Fantasy I.]
+[FROM:Final Fantasy I]
+[CREATOR:Square]
+[ADAPTER:Voliol]
+[CATEGORY:GAMES]

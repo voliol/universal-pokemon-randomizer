@@ -1,0 +1,6 @@
+[NAME:Chris]
+[DESCRIPTION:The vanilla player character in Pokémon Gold/Silver, and one of them in Crystal. Also known as Ethan and Gold.]
+[FROM:Pokémon - Generation II]
+[CREATOR:Gamefreak]
+[ADAPTER:N/A]
+[CATEGORY:POKEMON]

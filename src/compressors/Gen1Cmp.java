@@ -13,12 +13,9 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.graphics.GBCImage;
 
 public class Gen1Cmp {
-
-	private static final int COLORS_IN_PALETTE = 4;
-	private static final int MAX_WIDTH_IN_TILES = 15;
-	private static final int MAX_WIDTH_IN_PIXELS = MAX_WIDTH_IN_TILES * 8;
 
 	private static final String IN_ADRESS = "compresstest/in";
 	private static final String OUT_ADRESS = "compresstest/out";
@@ -83,40 +80,9 @@ public class Gen1Cmp {
 	private static int[][] succeeded = new int[3][2];
 	private static int[][] failed = new int[3][2];
 
-	private static String hexchars = "0123456789ABCDEF";
-
 	public static void main(String[] args) {
-
-		for (byte b : MANUAL_RED_DATA) {
-			int high = (b >> 4) & 0xF;
-			int low = b & 0xF;
-			System.out.print(hexchars.charAt(high));
-			System.out.print(hexchars.charAt(low));
-			System.out.print(".");
-		}
-		System.out.print("\n-------------------------");
 		
-		BufferedImage red = null;
-		try {
-			red = ImageIO.read(new File("red_f.png"));
-		} catch (IOException e) {
-		}
-
-		Gen1Cmp redcmp = new Gen1Cmp(red);
-		for (int i = 0; i < redcmp.bitplane1.length; i++) {
-			byte b1 = redcmp.bitplane2[i];
-			int high1 = (b1 >> 4) & 0xF;
-			int low1 = b1 & 0xF;
-			System.out.print(hexchars.charAt(high1));
-			System.out.print(hexchars.charAt(low1));
-
-			byte b2 = redcmp.bitplane1[i];
-			int high2 = (b2 >> 4) & 0xF;
-			int low2 = b2 & 0xF;
-			System.out.print(hexchars.charAt(high2));
-			System.out.print(hexchars.charAt(low2));
-		}
-		System.out.println("\n-------------------------");
+		testBlastoise();
 
 		System.out.println("starting test of gen 1 compression");
 		for (String name : TEST_FILE_NAMES) {
@@ -126,9 +92,8 @@ public class Gen1Cmp {
 		System.out.println("Succed: " + Arrays.deepToString(succeeded));
 		System.out.println("Failed: " + Arrays.deepToString(failed));
 
-		testBlastoise();
 	}
-
+	
 	private static void testBlastoise() {
 		BufferedImage blast = null;
 		try {
@@ -160,14 +125,11 @@ public class Gen1Cmp {
 			} catch (IOException e) {
 			}
 
-			testfilename = name;
-			Gen1Cmp a = new Gen1Cmp(bim);
-			a.compress();
-			mode = a.bestMode - 1;
-			order = a.bestOrder;
-			tested[mode][order]++;
+			//byte[] compressed = compressed(bim);
+			byte[] compressed = null;
+			tested[bestMode - 1][bestOrder]++;
 
-			byte[] rom = Arrays.copyOf(a.compressed, 0x100000);
+			byte[] rom = Arrays.copyOf(compressed, 0x100000);
 			Gen1Decmp sprite = new Gen1Decmp(rom, 0);
 			sprite.decompress();
 			sprite.transpose();
@@ -190,71 +152,28 @@ public class Gen1Cmp {
 		}
 	}
 
-	private static String testfilename;
-
 	private int widthInTiles;
 	private int heightInTiles;
 	private byte[] bitplane1, bitplane2;
 
-	private int currentBit;
-	private int currentByte;
-
-	private byte[] compressed;
-	private int bestMode, bestOrder;
-
-	public Gen1Cmp(BufferedImage bim) {
-		if (!hasCompatibleColorModel(bim)) {
-			throw new IllegalArgumentException("Image has an invalid/unsupported ColorModel.");
-		}
-
-		this.widthInTiles = bim.getWidth() / 8;
-		this.heightInTiles = bim.getHeight() / 8;
-		if (widthInTiles > MAX_WIDTH_IN_TILES || heightInTiles > MAX_WIDTH_IN_TILES) { // allows non-square images
-			throw new IllegalArgumentException("Width or height of image exceeds " + MAX_WIDTH_IN_TILES + " tiles ("
-					+ MAX_WIDTH_IN_PIXELS + " pixels).");
-		}
-
-		prepareBitplanes(bim);
+	private static int bestMode, bestOrder;
+	
+	public static byte[] compress(BufferedImage bim) {
+		return compress(new GBCImage(bim));
+	}
+	
+	public static byte[] compress(GBCImage image) {
+		return compress(image.getData(), image.getWidthInTiles(), image.getHeightInTiles());
 	}
 
-	private boolean hasCompatibleColorModel(BufferedImage bim) {
-		return bim.getColorModel()instanceof IndexColorModel indexColorModel
-				&& indexColorModel.getMapSize() == COLORS_IN_PALETTE;
-	}
-
-	private void prepareBitplanes(BufferedImage in) {
-
-		BufferedImage bitplane1Image = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
-		BufferedImage bitplane2Image = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
-		for (int x = 0; x < in.getWidth(); x++) {
-			for (int y = 0; y < in.getHeight(); y++) {
-				int sample = in.getData().getSample(x, y, 0);
-				if (sample >= 2) {
-					bitplane1Image.setRGB(x, y, 0xffffffff);
-				}
-				if (sample % 2 == 1) {
-					bitplane2Image.setRGB(x, y, 0xffffffff);
-				}
-			}
-		}
-
-		try {
-			ImageIO.write(bitplane1Image, "png", new File(OUT_ADRESS + "/" + testfilename + "_bp1.png"));
-			ImageIO.write(bitplane2Image, "png", new File(OUT_ADRESS + "/" + testfilename + "_bp2.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		this.bitplane1 = GFXFunctions.readTiledImageData(bitplane1Image, 1);
-		this.bitplane2 = GFXFunctions.readTiledImageData(bitplane2Image, 1);
-	}
-
-	public void compress() {
+	public static byte[] compress(byte[] data, int widthInTiles, int heightInTiles) {
 		byte[] shortest = null;
+		
+		Gen1Cmp a = new Gen1Cmp();
 
 		for (int mode = 1; mode <= 3; mode++) {
 			for (int order = 0; order < 2; order++) {
-				byte[] compressed2 = compressUsingModeAndOrder(mode, order);
+				byte[] compressed2 = a.compressUsingModeAndOrder(mode, order);
 				if (shortest == null || compressed2.length < shortest.length) {
 					shortest = compressed2;
 					bestMode = mode;
@@ -263,7 +182,7 @@ public class Gen1Cmp {
 			}
 		}
 
-		this.compressed = shortest;
+		return shortest;
 	}
 
 	private byte[] compressUsingModeAndOrder(int mode, int order) {

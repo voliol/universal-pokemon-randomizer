@@ -1,9 +1,9 @@
 package compressors;
 
 /**
- * Pokemon Gen 2 sprite decompressor Source:
+ * Pokemon Gen 2 image decompressor Source:
  * https://github.com/pret/pokemon-reverse-engineering-tools/blob/master/pokemontools/lz.py 
- * (and gfx.py for flatten())
+ * (and gfx.py for flatten())<br>
  * Ported to Java by Dabomstew
  *
  */

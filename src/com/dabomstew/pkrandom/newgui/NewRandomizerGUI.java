@@ -306,6 +306,18 @@ public class NewRandomizerGUI {
     private JPanel graphicsPanel;
     private JLabel ppalNotExistLabel;
     private JLabel ppalPartiallyImplementedLabel;
+    private JRadioButton pcsUnchangedRadioButton;
+    private JRadioButton pcsCustomRadioButton;
+    private JRadioButton pcsRandomRadioButton;
+    private JComboBox pcsCustomComboBox;
+    private JLabel pcsCustomInfoLabel;
+    private JLabel pcsCustomNameInfoLabel;
+    private JLabel pcsCustomInfoDescriptionLabel;
+    private JLabel pcsCustomInfoFromLabel;
+    private JLabel pcsCustomInfoCreatorLabel;
+    private JLabel pcsCustomInfoAdapterLabel;
+    private JLabel pcsCustomTrainerIcon;
+    private JLabel pcsCustomWalkIcon;
 
     private static JFrame frame;
 

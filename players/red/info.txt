@@ -1,0 +1,6 @@
+[NAME:Red]
+[DESCRIPTION:The vanilla player character in Generation I.]
+[FROM:Pokémon - Generation I]
+[CREATOR:Gamefreak]
+[ADAPTER:N/A]
+[CATEGORY:POKEMON]

@@ -50,12 +50,11 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
-import com.dabomstew.pkrandom.graphics.Gen1PaletteHandler;
-import com.dabomstew.pkrandom.graphics.PaletteID;
+import com.dabomstew.pkrandom.graphics.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Decmp;
+
+import javax.imageio.ImageIO;
 
 public class Gen1RomHandler extends AbstractGBCRomHandler {
 
@@ -2817,7 +2816,25 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             System.arraycopy(extraDataBlock, 0, rom, extraSpaceOffset, extraDataBlock.length);
         }
     }
-    
+
+    private void changeTrainerSprites(String name) {
+        BufferedImage walk = null;
+        BufferedImage bike = null;
+        try {
+            walk = ImageIO.read(new File( "players/" + name + "/gb_walk.png"));
+            bike = ImageIO.read(new File( "players/" + name + "/gb_bike.png"));
+        } catch (IOException ignored) {
+        }
+
+        int walkOffset = romEntry.getValue("PlayerWalkSpriteOffset");
+        writeImage(walkOffset, new GBCImage(walk));
+        int bikeOffset = romEntry.getValue("PlayerBikeSpriteOffset");
+        writeImage(bikeOffset, new GBCImage(bike));
+    }
+
+    protected void writeImage(int offset, GBCImage image) {
+        writeBytes(offset, image.getData());
+    }
 
     private int calculateFrontSpriteBank(Gen1Pokemon pk) {
         int idx = pokeNumToRBYTable[pk.getNumber()];
@@ -2850,6 +2867,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
 	@Override
 	public void savePokemonPalettes() {
+        changeTrainerSprites("link");
 		int palIndex = romEntry.getValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonSet()) {
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
