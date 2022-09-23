@@ -1,6 +1,6 @@
 package com.dabomstew.pkrandom.graphics;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
@@ -114,4 +114,7 @@ public class GBCImage {
 		// TODO
 	}
 
+	public Image getImage() { //TODO: should GBCimage extend BufferedImage instead?
+		return image;
+	}
 }

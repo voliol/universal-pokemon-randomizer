@@ -32,6 +32,8 @@ import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.graphics.GBCImage;
+import com.dabomstew.pkrandom.graphics.PlayerCharacterImages;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -46,6 +48,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -310,14 +313,8 @@ public class NewRandomizerGUI {
     private JRadioButton pcsCustomRadioButton;
     private JRadioButton pcsRandomRadioButton;
     private JComboBox pcsCustomComboBox;
-    private JLabel pcsCustomInfoLabel;
-    private JLabel pcsCustomNameInfoLabel;
-    private JLabel pcsCustomInfoDescriptionLabel;
-    private JLabel pcsCustomInfoFromLabel;
-    private JLabel pcsCustomInfoCreatorLabel;
-    private JLabel pcsCustomInfoAdapterLabel;
-    private JLabel pcsCustomTrainerIcon;
-    private JLabel pcsCustomWalkIcon;
+    private JLabel pcsNotExistLabel;
+    private GraphicsPackInfo pcsCustomInfo;
 
     private static JFrame frame;
 
@@ -584,6 +581,9 @@ public class NewRandomizerGUI {
         ptIsDualTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
         ppalUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        pcsUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        pcsCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        pcsRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -661,6 +661,7 @@ public class NewRandomizerGUI {
         mtNoneAvailableLabel.setVisible(false);
         ppalNotExistLabel.setVisible(false);
         ppalPartiallyImplementedLabel.setVisible(false);
+        pcsNotExistLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);
         liveTweaksPanel.setVisible(false);
         websiteLinkLabel.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
@@ -2223,7 +2224,9 @@ public class NewRandomizerGUI {
 				.forEach(this::setInitialButtonState);
 
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
-                ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox).forEach(this::setInitialButtonState);
+                ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
+                pcsRandomRadioButton, pcsCustomRadioButton, pcsUnchangedRadioButton)
+                .forEach(this::setInitialButtonState);
 
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
 				miscFastestTextCheckBox, miscRunningShoesIndoorsCheckBox, miscRandomizePCPotionCheckBox,
@@ -2575,6 +2578,43 @@ public class NewRandomizerGUI {
             ppalFollowEvolutionsCheckBox.setEnabled(false);
             ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler) && ppalSupport);
             ppalShinyFromNormalCheckBox.setEnabled(false);
+
+            boolean pcsSupport = romHandler.generationOfPokemon() == 1;
+            pcsNotExistLabel.setVisible(!pcsSupport);
+            pcsUnchangedRadioButton.setVisible(pcsSupport);
+            pcsUnchangedRadioButton.setEnabled(pcsSupport);
+            pcsUnchangedRadioButton.setSelected(ppalSupport);
+            pcsCustomRadioButton.setVisible(pcsSupport);
+            pcsCustomRadioButton.setEnabled(pcsSupport);
+            pcsRandomRadioButton.setVisible(pcsSupport);
+            pcsRandomRadioButton.setEnabled(pcsSupport);
+            pcsCustomComboBox.setVisible(pcsSupport);
+            pcsCustomComboBox.setEnabled(false);
+            if (pcsSupport) {
+                System.out.println("filling combobox...");
+                DefaultComboBoxModel<PlayerCharacterImages> comboBoxModel = new DefaultComboBoxModel<>();
+                pcsCustomComboBox.setModel(comboBoxModel);
+                File players = new File("players");
+                for (File file : players.listFiles()) {
+                    if (file.isDirectory()) {
+                        try {
+                            comboBoxModel.addElement(new PlayerCharacterImages(file.getAbsolutePath()));
+                        } catch (Exception e) {
+                            System.out.println("could not load " + file);
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                System.out.println(comboBoxModel);
+            }
+            pcsCustomInfo.setVisible(pcsSupport);
+            pcsCustomInfo.setEnabled(false);
+            // TODO: move this somewhere more reasonable
+            pcsCustomComboBox.addItemListener(e -> {
+                PlayerCharacterImages pcs = (PlayerCharacterImages) e.getItem();
+                pcsCustomInfo.setGraphicsPack(pcs);
+            });
+
 
             int mtsAvailable = romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
@@ -3302,6 +3342,9 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setEnabled(false);
             ppalShinyFromNormalCheckBox.setSelected(false);
         }
+
+        pcsCustomComboBox.setEnabled(pcsCustomRadioButton.isSelected() &&
+                pcsCustomRadioButton.isVisible() && pcsCustomRadioButton.isEnabled());
     }
 
     private void initTweaksPanel() {

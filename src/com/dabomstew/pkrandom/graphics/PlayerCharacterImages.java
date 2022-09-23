@@ -21,8 +21,8 @@ public class PlayerCharacterImages implements Comparable<PlayerCharacterImages> 
         POKEMON, GAMES, OTHER;
     }
 
-    private static List<String> readFileLines(File file) {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+    private static List<String> readFileLines(String filename) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             return br.lines().collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -30,8 +30,7 @@ public class PlayerCharacterImages implements Comparable<PlayerCharacterImages> 
     }
 
     public static void main(String[] args) {
-        File f = new File("players/link/info.txt");
-        PlayerCharacterImages a = new PlayerCharacterImages(f);
+        PlayerCharacterImages a = new PlayerCharacterImages("players/link");
         System.out.println(a);
     }
 
@@ -47,8 +46,8 @@ public class PlayerCharacterImages implements Comparable<PlayerCharacterImages> 
     private GBCImage walkSprite;
     private GBCImage bikeSprite;
 
-    public PlayerCharacterImages(File file) {
-        this(readFileLines(file));
+    public PlayerCharacterImages(String pathname) {
+        this(readFileLines(pathname + "/info.txt"));
     }
 
     public PlayerCharacterImages(List<String> lines) {
@@ -150,6 +149,26 @@ public class PlayerCharacterImages implements Comparable<PlayerCharacterImages> 
 
     public GBCImage getBikeSprite() {
         return bikeSprite;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public String getOriginalCreator() {
+        return originalCreator;
+    }
+
+    public String getAdapter() {
+        return adapter;
     }
 
     @Override

@@ -1,6 +1,6 @@
 [NAME:Link]
 [DESCRIPTION:The playable character of the Zelda series.]
-[FROM:Legend of Zelda: Link's Awakening]
+[FROM:Legend of Zelda\: Link's Awakening]
 [CREATOR:Nintendo]
 [ADAPTER:Voliol]
 [CATEGORY:GAMES]
