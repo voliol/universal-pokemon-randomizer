@@ -2822,7 +2822,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         BufferedImage bike = null;
         try {
             walk = ImageIO.read(new File( "players/" + name + "/gb_walk.png"));
-            bike = ImageIO.read(new File( "players/" + name + "/gb_bike.png"));
+            File bikeFile = new File( "players/" + name + "/gb_bike.png");
+            bike = !bikeFile.exists() ? walk : ImageIO.read(bikeFile);
         } catch (IOException ignored) {
         }
 
@@ -2867,7 +2868,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
 	@Override
 	public void savePokemonPalettes() {
-        changeTrainerSprites("link");
+        changeTrainerSprites("mario"); // TODO: connect to the gui
 		int palIndex = romEntry.getValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonSet()) {
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;

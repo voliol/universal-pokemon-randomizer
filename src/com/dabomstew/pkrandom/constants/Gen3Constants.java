@@ -236,7 +236,7 @@ public class Gen3Constants {
 
     public static final List<Integer> frlgEarlyRequiredHMMoves = Collections.singletonList(Moves.cut);
 
-    private static List<String> rsShopNames = Arrays.asList(
+    private static final List<String> rsShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -263,7 +263,7 @@ public class Gen3Constants {
             "Pokémon League Poké Mart"
     );
 
-    private static List<String> frlgShopNames = Arrays.asList(
+    private static final List<String> frlgShopNames = Arrays.asList(
             "Trainer Tower Poké Mart",
             "Two Island Market Stall (Initial)",
             "Two Island Market Stall (After Saving Lostelle)",
@@ -289,7 +289,7 @@ public class Gen3Constants {
             "Six Island Poké Mart"
     );
 
-    private static List<String> emShopNames = Arrays.asList(
+    private static final List<String> emShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",

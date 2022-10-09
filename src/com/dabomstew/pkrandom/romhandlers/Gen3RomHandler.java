@@ -43,6 +43,8 @@ import com.dabomstew.pkrandom.pokemon.*;
 import compressors.DSCmp;
 import compressors.DSDecmp;
 
+import javax.imageio.ImageIO;
+
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -4312,6 +4314,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
+        changePlayerImages("may");
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
@@ -4325,8 +4328,74 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    private void changePlayerImages(String name) {
+        try {
+            changePlayerOverworldSprites(name);
+        } catch (IOException e) {
+            System.out.println("Could not change player overworld sprites.");
+            e.printStackTrace();
+        }
+        try {
+            changePlayerFrontImage(name);
+        } catch (IOException e) {
+            System.out.println("Could not change player front image.");
+        }
+        try {
+            changePlayerMiscImages(name);
+        } catch (IOException e) {
+            System.out.println("Could not change miscellanous player images (back, map icon, etc.)");
+        }
+    }
+
+    private void changePlayerOverworldSprites(String name) throws IOException {
+        // TODO: how do these work? are they in a table?
+        //  rewriteImage/rewriteCompressedData supposes an indirect pointer
+//        BufferedImage walk = ImageIO.read(new File("players/" + name + "/walking.png"));
+//        int walkOffset = romEntry.getValue("PlayerWalkSpriteOffset");
+//        writeOverworldImage(walkOffset, walk);
+//
+//        BufferedImage run = ImageIO.read(new File("players/" + name + "/running.png"));
+//        int runOffset = romEntry.getValue("PlayerRunSpriteOffset");
+//        writeOverworldImage(runOffset, run);
+    }
+
+    private void changePlayerFrontImage(String name) throws IOException {
+        BufferedImage image = ImageIO.read(new File("players/" + name + "/front_pic.png"));
+        int playerTrainerID = 1; // May in Ruby TODO: support brendan as well, FR/LG/E.
+        writeTrainerImage(playerTrainerID, image);
+    }
+
+    private void changePlayerMiscImages(String name) throws IOException {
+        // TODO: how do these misc images work? are they in a table?
+        //  rewriteImage/rewriteCompressedData supposes an indirect pointer
+//        BufferedImage back = ImageIO.read(new File("players/" + name + "/back.png"));
+//        int backImageOffset = romEntry.getValue("PlayerBackImage");
+//        rewriteImage(backImageOffset, back);
+//        int backPaletteOffset = romEntry.getValue("PlayerBackPalette");
+//        rewritePalette(backPaletteOffset, Palette.readImagePalette(back));
+//
+//        BufferedImage icon = ImageIO.read(new File("players/" + name + "/icon.png"));
+    }
+
+    private void writeOverworldImage(int offset, BufferedImage image) {
+    }
+
+    private void writeTrainerImage(int trainerNumber, BufferedImage image) {
+        int imageTableOffset = romEntry.getValue("TrainerImages");
+        int paletteTableOffset = romEntry.getValue("TrainerPalettes");
+
+        int imagePointerOffset = imageTableOffset + trainerNumber * 8;
+        rewriteImage(imagePointerOffset, image);
+        int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
+        rewritePalette(palettePointerOffset, Palette.readImagePalette(image));
+    }
+
     private void rewritePalette(int pointerOffset, Palette palette) {
         rewriteCompressedData(pointerOffset, palette.toBytes());
+    }
+
+    private void rewriteImage(int pointerOffset, BufferedImage image) {
+        rewriteCompressedData(pointerOffset, GFXFunctions.readTiledImageData(image));
     }
 
     /*

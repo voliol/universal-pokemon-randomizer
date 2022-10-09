@@ -1,0 +1,6 @@
+[NAME:Mario]
+[DESCRIPTION:The protagonist of the Super Mario series.]
+[FROM:Super Mario Bros. 3]
+[CREATOR:Nintendo]
+[ADAPTER:Voliol]
+[CATEGORY:GAMES]
