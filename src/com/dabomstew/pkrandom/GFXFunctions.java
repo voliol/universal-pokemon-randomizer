@@ -114,6 +114,45 @@ public class GFXFunctions {
 		return new IndexColorModel(bits, size, r, g, b, a);
 	}
 
+	/**
+	 * Splits a {@link BufferedImage} into even rectangular pieces, given the
+	 * dimensions these should be, and returns an array of these pieces. Throws an
+	 * exception if the dimensions of the BufferedImage is not divisible by the
+	 * piece dimensions. <br>
+	 * <br>
+	 * This method allows for easier handling of "sheets" of images, since the
+	 * return is the same regardless whether the pieces are laid out horizontally,
+	 * vertically, or even in a 2D grid. Pieces are read row-for-row, left-to-right,
+	 * top to bottom. I.e.: <br>
+	 * -----<br>
+	 * |0|1|<br>
+	 * |2|3|<br>
+	 * -----<br>
+	 *
+	 * @param bim         The BufferedImage to split.
+	 * @param pieceWidth  The width of each of the returned pieces, in pixels.
+	 * @param pieceHeight The height of each of the returned pieces, in pixels.
+	 */
+	public static BufferedImage[] splitImage(BufferedImage bim, int pieceWidth, int pieceHeight) {
+		if (bim.getWidth() % pieceWidth != 0 || bim.getHeight() % pieceHeight != 0) {
+			throw new IllegalArgumentException("Image (" + bim.getWidth() + "x" + bim.getHeight() + " pixels) "
+					+ "can't be evenly split into pieces of " + pieceWidth + "x" + pieceHeight + " pixels.");
+		}
+
+		int widthInPieces = bim.getWidth() / pieceWidth;
+		int heightInPieces = bim.getHeight() / pieceHeight;
+		BufferedImage[] pieces = new BufferedImage[widthInPieces * heightInPieces];
+
+		for (int pieceY = 0; pieceY < heightInPieces; pieceY++) {
+			for (int pieceX = 0; pieceX < widthInPieces; pieceX++) {
+				int x = pieceX * pieceWidth;
+				int y = pieceY * pieceHeight;
+				pieces[pieceY * widthInPieces + pieceX] = bim.getSubimage(x, y, pieceWidth, pieceHeight);
+			}
+		}
+		return pieces;
+	}
+
 	public static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
 			int bpp) {
 		return drawTiledZOrderImage(data, palette, offset, width, height, 8, 8, bpp);

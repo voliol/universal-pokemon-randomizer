@@ -1,0 +1,5 @@
+[NAME:May (Emerald)]
+[DESCRIPTION:One of the vanilla player characters in Pokémon Emerald.]
+[FROM:Pokémon]
+[CREATOR:Gamefreak]
+[CATEGORY:POKEMON]

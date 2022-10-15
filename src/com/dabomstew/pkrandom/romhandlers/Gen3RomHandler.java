@@ -4314,17 +4314,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
-        changePlayerImages("may");
+        changePlayerImages("frisk");
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
             int pokeNumber = pokedexToInternal[pk.getNumber()];
 
             int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
-            rewritePalette(normalPalPointerOffset, pk.getNormalPalette());
+            rewriteCompressedPalette(normalPalPointerOffset, pk.getNormalPalette());
 
             int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
-            rewritePalette(shinyPalPointerOffset, pk.getShinyPalette());
+            rewriteCompressedPalette(shinyPalPointerOffset, pk.getShinyPalette());
         }
     }
 
@@ -4347,19 +4347,67 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void changePlayerOverworldSprites(String name) throws IOException {
-        // TODO: how do these work? are they in a table?
-        //  rewriteImage/rewriteCompressedData supposes an indirect pointer
-//        BufferedImage walk = ImageIO.read(new File("players/" + name + "/walking.png"));
-//        int walkOffset = romEntry.getValue("PlayerWalkSpriteOffset");
-//        writeOverworldImage(walkOffset, walk);
-//
-//        BufferedImage run = ImageIO.read(new File("players/" + name + "/running.png"));
-//        int runOffset = romEntry.getValue("PlayerRunSpriteOffset");
-//        writeOverworldImage(runOffset, run);
+	private void changePlayerOverworldSprites(String name) throws IOException {
+		// TODO: how do these work? are they in a table?
+		// rewriteImage/rewriteCompressedData supposes an indirect pointer
+		// probably useful:
+		// https://github.com/pret/pokeemerald/wiki/Adding-new-overworlds
+
+		String playerToReplace = "May";
+
+		BufferedImage walk = ImageIO.read(new File("players/" + name + "/walking.png"));
+        BufferedImage[] walkFrames = GFXFunctions.splitImage(walk, 16, 32);
+		int walkImageNumber = romEntry.getValue(playerToReplace + "WalkingImage");
+		writeOverworldImages(walkImageNumber, 9, walkFrames);
+
+		BufferedImage run = ImageIO.read(new File("players/" + name + "/running.png"));
+        BufferedImage[] runFrames = GFXFunctions.splitImage(run, 16, 32);
+		int runImageNumber = romEntry.getValue(playerToReplace + "RunningImage");
+		writeOverworldImages(runImageNumber, 9, runFrames);
+
+        BufferedImage fishing = ImageIO.read(new File("players/" + name + "/fishing.png"));
+        BufferedImage[] fishingFrames = GFXFunctions.splitImage(fishing, 32, 32);
+        int fishingImageNumber = romEntry.getValue(playerToReplace + "FishingImage");
+        writeOverworldImages(fishingImageNumber, 12, fishingFrames);
+
+        changePlayerOverworldPalettes(playerToReplace, walk);
+
     }
 
-    private void changePlayerFrontImage(String name) throws IOException {
+    private void changePlayerOverworldPalettes(String playerToReplace, BufferedImage walk) {
+        int paletteTableOffset = romEntry.getValue("OverworldPalettes");
+
+        int normalPaletteNumber = romEntry.getValue(playerToReplace + "NormalPalette");
+        int normalPointerOffset = paletteTableOffset + normalPaletteNumber * 8;
+        Palette normalPalette = Palette.readImagePalette(walk);
+        writeBytes(readPointer(normalPointerOffset), normalPalette.toBytes());
+
+        int reflectionPaletteNumber = romEntry.getValue(playerToReplace + "ReflectionPalette");
+        int reflectionPointerOffset = paletteTableOffset + reflectionPaletteNumber * 8;
+        Palette reflectionPalette = normalPalette;
+        writeBytes(readPointer(reflectionPointerOffset), reflectionPalette.toBytes());
+    }
+
+    private void writeOverworldImages(int firstImageNumber, int numberOfImages, BufferedImage[] images) {
+        if (images.length < numberOfImages) {
+            throw new IllegalArgumentException("images contains too few elements.");
+        }
+
+		int imageTableOffset = romEntry.getValue("OverworldSpriteImages");
+		for (int i = 0; i < numberOfImages; i++) {
+			int imagePointerOffset = imageTableOffset + (firstImageNumber + i) * 8;
+			int imageOffset = readPointer(imagePointerOffset);
+			int imageLength = readWord(imagePointerOffset + 4);
+
+            byte[] imageData = GFXFunctions.readTiledImageData(images[i]);
+            if (imageData.length != imageLength) {
+                throw new IllegalArgumentException("Wrong image size.");
+            }
+            writeBytes(imageOffset, imageData);
+		}
+	}
+
+	private void changePlayerFrontImage(String name) throws IOException {
         BufferedImage image = ImageIO.read(new File("players/" + name + "/front_pic.png"));
         int playerTrainerID = 1; // May in Ruby TODO: support brendan as well, FR/LG/E.
         writeTrainerImage(playerTrainerID, image);
@@ -4377,24 +4425,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 //        BufferedImage icon = ImageIO.read(new File("players/" + name + "/icon.png"));
     }
 
-    private void writeOverworldImage(int offset, BufferedImage image) {
-    }
-
     private void writeTrainerImage(int trainerNumber, BufferedImage image) {
         int imageTableOffset = romEntry.getValue("TrainerImages");
         int paletteTableOffset = romEntry.getValue("TrainerPalettes");
 
         int imagePointerOffset = imageTableOffset + trainerNumber * 8;
-        rewriteImage(imagePointerOffset, image);
+        rewriteCompressedImage(imagePointerOffset, image);
         int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
-        rewritePalette(palettePointerOffset, Palette.readImagePalette(image));
+        rewriteCompressedPalette(palettePointerOffset, Palette.readImagePalette(image));
     }
 
-    private void rewritePalette(int pointerOffset, Palette palette) {
+    private void rewriteCompressedPalette(int pointerOffset, Palette palette) {
         rewriteCompressedData(pointerOffset, palette.toBytes());
     }
 
-    private void rewriteImage(int pointerOffset, BufferedImage image) {
+    private void rewriteCompressedImage(int pointerOffset, BufferedImage image) {
         rewriteCompressedData(pointerOffset, GFXFunctions.readTiledImageData(image));
     }
 
