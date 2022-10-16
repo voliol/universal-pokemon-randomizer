@@ -22,6 +22,7 @@ package com.dabomstew.pkrandom.graphics;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.io.*;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -36,6 +37,26 @@ public class Palette implements Cloneable {
 	private final static int DEFAULT_PALETTE_SIZE = 16;
 
 	private Color[] colors;
+
+	/**
+	 * Reads a Palette from a file. The file has to be in JASC format.
+	 */
+	public static Palette readFromFile(File file) throws IOException {
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			if (!br.readLine().equals("JASC-PAL")) {
+				throw new IOException("Not JASC-formatted palette.");
+			}
+			br.readLine(); // I do not know what the second line in JASC files means, the "0100".
+			int length = Integer.parseInt(br.readLine());
+			Color[] colors = new Color[length];
+			for (int i = 0; i < length; i++) {
+				colors[i] = new Color(br.readLine());
+			}
+			return new Palette(colors);
+		} catch (Exception e) {
+			throw new IOException("Palette format is invalid or corrupt. Only JASC-formatted palettes can be read.", e);
+		}
+	}
 
 	/**
 	 * Reads the palette of an image with indexed colors, returning a Palette object
