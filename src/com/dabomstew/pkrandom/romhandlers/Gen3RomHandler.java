@@ -4314,7 +4314,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
-        changePlayerImages("frisk");
+        changePlayerImages("may", "May");
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
@@ -4328,32 +4328,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void changePlayerImages(String name) {
+    private void changePlayerImages(String name, String playerToReplace) {
         try {
-            changePlayerOverworldSprites(name);
+            changePlayerOverworldSprites(name, playerToReplace);
         } catch (IOException e) {
             System.out.println("Could not change player overworld sprites.");
             e.printStackTrace();
         }
         try {
-            changePlayerFrontImage(name);
+            changePlayerTrainerImages(name, playerToReplace);
         } catch (IOException e) {
             System.out.println("Could not change player front image.");
         }
         try {
-            changePlayerMiscImages(name);
+            changePlayerMiscImages(name, playerToReplace);
         } catch (IOException e) {
             System.out.println("Could not change miscellanous player images (back, map icon, etc.)");
         }
     }
 
-	private void changePlayerOverworldSprites(String name) throws IOException {
+	private void changePlayerOverworldSprites(String name, String playerToReplace) throws IOException {
 		// TODO: how do these work? are they in a table?
 		// rewriteImage/rewriteCompressedData supposes an indirect pointer
 		// probably useful:
 		// https://github.com/pret/pokeemerald/wiki/Adding-new-overworlds
-
-		String playerToReplace = "May";
 
 		BufferedImage walk = ImageIO.read(new File("players/" + name + "/walking.png"));
         BufferedImage[] walkFrames = GFXFunctions.splitImage(walk, 16, 32);
@@ -4370,11 +4368,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int fishingImageNumber = romEntry.getValue(playerToReplace + "FishingImage");
         writeOverworldImages(fishingImageNumber, 12, fishingFrames);
 
-        changePlayerOverworldPalettes(playerToReplace, walk);
+        changePlayerOverworldPalettes(name, playerToReplace, walk);
 
     }
 
-    private void changePlayerOverworldPalettes(String playerToReplace, BufferedImage walk) {
+    private void changePlayerOverworldPalettes(String name, String playerToReplace, BufferedImage walk) throws IOException {
         int paletteTableOffset = romEntry.getValue("OverworldPalettes");
 
         int normalPaletteNumber = romEntry.getValue(playerToReplace + "NormalPalette");
@@ -4384,7 +4382,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         int reflectionPaletteNumber = romEntry.getValue(playerToReplace + "ReflectionPalette");
         int reflectionPointerOffset = paletteTableOffset + reflectionPaletteNumber * 8;
-        Palette reflectionPalette = normalPalette;
+        Palette reflectionPalette = Palette.readFromFile(new File("players/" + name + "/reflection.pal"));
         writeBytes(readPointer(reflectionPointerOffset), reflectionPalette.toBytes());
     }
 
@@ -4407,13 +4405,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	private void changePlayerFrontImage(String name) throws IOException {
-        BufferedImage image = ImageIO.read(new File("players/" + name + "/front_pic.png"));
-        int playerTrainerID = 1; // May in Ruby TODO: support brendan as well, FR/LG/E.
-        writeTrainerImage(playerTrainerID, image);
+	private void changePlayerTrainerImages(String name, String playerToReplace) throws IOException {
+        BufferedImage front = ImageIO.read(new File("players/" + name + "/front_pic.png"));
+        int playerTrainerFrontNumber = 1; // May in Ruby TODO: support brendan as well, FR/LG/E.
+        writeTrainerImage(playerTrainerFrontNumber, front);
+
+        BufferedImage back = ImageIO.read(new File("players/" + name + "/back_pic.png"));
+        int playerTrainerBackNumber = romEntry.getValue(playerToReplace + "BackImage");
+        writeTrainerBackImage(playerTrainerBackNumber, back);
     }
 
-    private void changePlayerMiscImages(String name) throws IOException {
+    private void changePlayerMiscImages(String name, String playerToReplace) throws IOException {
         // TODO: how do these misc images work? are they in a table?
         //  rewriteImage/rewriteCompressedData supposes an indirect pointer
 //        BufferedImage back = ImageIO.read(new File("players/" + name + "/back.png"));
@@ -4433,6 +4435,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         rewriteCompressedImage(imagePointerOffset, image);
         int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
         rewriteCompressedPalette(palettePointerOffset, Palette.readImagePalette(image));
+    }
+
+    private void writeTrainerBackImage(int trainerNumber, BufferedImage image) {
+        int imageTableOffset = romEntry.getValue("TrainerBackImages");
+        int imagePointerOffset = imageTableOffset + trainerNumber * 8;
+        rewriteCompressedImage(imagePointerOffset, image);
     }
 
     private void rewriteCompressedPalette(int pointerOffset, Palette palette) {
