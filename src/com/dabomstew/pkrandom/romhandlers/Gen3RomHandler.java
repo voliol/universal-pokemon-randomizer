@@ -4314,7 +4314,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
-        changePlayerImages("may", "May");
+        changePlayerImages("may_e", "May");
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
@@ -4331,28 +4331,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void changePlayerImages(String name, String playerToReplace) {
         try {
             changePlayerOverworldSprites(name, playerToReplace);
-        } catch (IOException e) {
-            System.out.println("Could not change player overworld sprites.");
-            e.printStackTrace();
-        }
-        try {
             changePlayerTrainerImages(name, playerToReplace);
-        } catch (IOException e) {
-            System.out.println("Could not change player front image.");
-        }
-        try {
             changePlayerMiscImages(name, playerToReplace);
         } catch (IOException e) {
-            System.out.println("Could not change miscellanous player images (back, map icon, etc.)");
+            throw new RandomizerIOException("Could not change player images.", e);
         }
     }
 
 	private void changePlayerOverworldSprites(String name, String playerToReplace) throws IOException {
-		// TODO: how do these work? are they in a table?
-		// rewriteImage/rewriteCompressedData supposes an indirect pointer
-		// probably useful:
-		// https://github.com/pret/pokeemerald/wiki/Adding-new-overworlds
-
+        // TODO: support pokeruby-style combined "normal.png" and pokeemerald-style split "walking.png", "running.png"
 		BufferedImage walk = ImageIO.read(new File("players/" + name + "/walking.png"));
         BufferedImage[] walkFrames = GFXFunctions.splitImage(walk, 16, 32);
 		int walkImageNumber = romEntry.getValue(playerToReplace + "WalkingImage");
@@ -4415,16 +4402,31 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         writeTrainerBackImage(playerTrainerBackNumber, back);
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    private static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     private void changePlayerMiscImages(String name, String playerToReplace) throws IOException {
-        // TODO: how do these misc images work? are they in a table?
-        //  rewriteImage/rewriteCompressedData supposes an indirect pointer
-//        BufferedImage back = ImageIO.read(new File("players/" + name + "/back.png"));
-//        int backImageOffset = romEntry.getValue("PlayerBackImage");
-//        rewriteImage(backImageOffset, back);
-//        int backPaletteOffset = romEntry.getValue("PlayerBackPalette");
-//        rewritePalette(backPaletteOffset, Palette.readImagePalette(back));
-//
-//        BufferedImage icon = ImageIO.read(new File("players/" + name + "/icon.png"));
+        changePlayerMapIcon(name, playerToReplace);
+        //TODO: cutscene graphics (the bike)
+    }
+
+    private void changePlayerMapIcon(String name, String playerToReplace) throws IOException {
+        BufferedImage icon = ImageIO.read(new File("players/" + name + "/icon.png"));
+        if (icon.getWidth() != 16 || icon.getHeight() != 16) {
+            throw new IOException("Invalid map icon size, must be 16x16 pixels.");
+        }
+        int iconImageOffset = romEntry.getValue(playerToReplace + "MapIconImage");
+        writeBytes(iconImageOffset, GFXFunctions.readTiledImageData(icon));
+        int iconPaletteOffset = romEntry.getValue(playerToReplace + "MapIconPalette");
+        writeBytes(iconPaletteOffset, Palette.readImagePalette(icon).toBytes());
     }
 
     private void writeTrainerImage(int trainerNumber, BufferedImage image) {
