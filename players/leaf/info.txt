@@ -1,0 +1,5 @@
+[NAME:Leaf]
+[DESCRIPTION:One of the vanilla player characters in Pokémon FireRed/LeafGreen.]
+[FROM:Pokémon]
+[CREATOR:Gamefreak]
+[CATEGORY:POKEMON]

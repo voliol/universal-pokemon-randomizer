@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.graphics.PaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.PaletteID;
 
 public class Gen1Pokemon extends Pokemon {
 

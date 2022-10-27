@@ -43,9 +43,9 @@ import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.PPTxtHandler;
 
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
-import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
+import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import compressors.DSDecmp;
 

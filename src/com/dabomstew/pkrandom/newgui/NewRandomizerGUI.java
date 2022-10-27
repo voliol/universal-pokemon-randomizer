@@ -32,8 +32,8 @@ import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.graphics.GBCImage;
-import com.dabomstew.pkrandom.graphics.PlayerCharacterImages;
+import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -48,7 +48,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -2579,7 +2578,7 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler) && ppalSupport);
             ppalShinyFromNormalCheckBox.setEnabled(false);
 
-            boolean pcsSupport = romHandler.generationOfPokemon() == 1;
+            boolean pcsSupport = romHandler.generationOfPokemon() < 6; // TODO: responsibility of the RomHandler?
             pcsNotExistLabel.setVisible(!pcsSupport);
             pcsUnchangedRadioButton.setVisible(pcsSupport);
             pcsUnchangedRadioButton.setEnabled(pcsSupport);
@@ -2592,13 +2591,13 @@ public class NewRandomizerGUI {
             pcsCustomComboBox.setEnabled(false);
             if (pcsSupport) {
                 System.out.println("filling combobox...");
-                DefaultComboBoxModel<PlayerCharacterImages> comboBoxModel = new DefaultComboBoxModel<>();
+                DefaultComboBoxModel<PlayerCharacterGraphics> comboBoxModel = new DefaultComboBoxModel<>();
                 pcsCustomComboBox.setModel(comboBoxModel);
                 File players = new File("players");
                 for (File file : players.listFiles()) {
                     if (file.isDirectory()) {
                         try {
-                            comboBoxModel.addElement(new PlayerCharacterImages(file.getAbsolutePath()));
+                            comboBoxModel.addElement(new Gen3PlayerCharacterGraphics(file.getName(), "May"));
                         } catch (Exception e) {
                             System.out.println("could not load " + file);
                             e.printStackTrace();
@@ -2611,7 +2610,7 @@ public class NewRandomizerGUI {
             pcsCustomInfo.setEnabled(false);
             // TODO: move this somewhere more reasonable
             pcsCustomComboBox.addItemListener(e -> {
-                PlayerCharacterImages pcs = (PlayerCharacterImages) e.getItem();
+                PlayerCharacterGraphics pcs = (PlayerCharacterGraphics) e.getItem();
                 pcsCustomInfo.setGraphicsPack(pcs);
             });
 

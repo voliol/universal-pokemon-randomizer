@@ -1,10 +1,11 @@
 package com.dabomstew.pkrandom.newgui;
 
-import com.dabomstew.pkrandom.graphics.GBCImage;
-import com.dabomstew.pkrandom.graphics.PlayerCharacterImages;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.nio.Buffer;
 
 public class GraphicsPackInfo {
     private static final BufferedImage EMPTY_IMAGE = new BufferedImage(1, 1, 1);
@@ -12,10 +13,6 @@ public class GraphicsPackInfo {
 
     private JPanel ImagesPanel;
     private JPanel InfoPanel;
-    private JLabel frontImageLabel;
-    private final ImageIcon frontImageIcon = new ImageIcon();
-    private JLabel walkSpriteLabel;
-    private final ImageIcon walkSpriteIcon = new ImageIcon();
     private JLabel nameInfoLabel;
     private JLabel descriptionInfoLabel;
     private JLabel fromInfoLabel;
@@ -29,34 +26,36 @@ public class GraphicsPackInfo {
     private JPanel form;
 
     public GraphicsPackInfo() {
-        this.frontImageLabel.setIcon(frontImageIcon);
-        this.walkSpriteLabel.setIcon(walkSpriteIcon);
         setGraphicsPack(null);
     }
 
-    public void setGraphicsPack(PlayerCharacterImages pcs) { // TODO: generalize to not only player character sprites
-        if (pcs == null) {
+    public void setGraphicsPack(GraphicsPack graphicsPack) { // TODO: generalize to not only player character sprites
+        if (graphicsPack == null) {
             setNullGraphicsPack();
         } else {
-            GBCImage frontImage = pcs.getFrontImage();
-            frontImageLabel.setVisible(frontImage != null);
-            frontImageIcon.setImage(frontImage != null ? frontImage.getImage() : EMPTY_IMAGE);
-            GBCImage walkSprite = pcs.getWalkSprite();
-            walkSpriteLabel.setVisible(walkSprite != null);
-            walkSpriteIcon.setImage(walkSprite != null ? walkSprite.getImage() : EMPTY_IMAGE);
+            setSampleImages(graphicsPack);
+            nameLabel.setText(graphicsPack.getName());
+            descriptionTextArea.setText(graphicsPack.getDescription());
+            fromLabel.setText(graphicsPack.getFrom());
+            creatorLabel.setText(graphicsPack.getOriginalCreator());
+            adapterLabel.setText(graphicsPack.getAdapter());
+        }
+    }
 
-            nameLabel.setText(pcs.getName());
-            descriptionTextArea.setText(pcs.getDescription());
-            fromLabel.setText(pcs.getFrom());
-            creatorLabel.setText(pcs.getOriginalCreator());
-            adapterLabel.setText(pcs.getAdapter());
+    private void setSampleImages(GraphicsPack graphicsPack) {
+        for (Component c : ImagesPanel.getComponents()) {
+            ImagesPanel.remove(c);
+        }
+        BufferedImage[] sampleImages = graphicsPack.getSampleImages();
+        for (BufferedImage sampleImage : sampleImages) {
+            if (sampleImage != null) {
+                JLabel imageLabel = new JLabel(new ImageIcon(sampleImage));
+                ImagesPanel.add(imageLabel);
+            }
         }
     }
 
     private void setNullGraphicsPack() {
-        frontImageLabel.setVisible(false);
-        walkSpriteLabel.setVisible(false);
-
         nameLabel.setText(EMPTY_TEXT);
         descriptionTextArea.setText(EMPTY_TEXT);
         fromLabel.setText(EMPTY_TEXT);

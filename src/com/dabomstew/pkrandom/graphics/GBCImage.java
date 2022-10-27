@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
 
 /**
  * A 2bpp image used by a Gen 1 or Gen 2 game. 
@@ -36,7 +37,7 @@ public class GBCImage {
 				}
 			}
 		}
-		colors.sort((c1, c2) -> Double.compare(new Color(c2).toHSV()[2], new Color(c1).toHSV()[2]));
+		colors.sort((c1, c2) -> Double.compare(new com.dabomstew.pkrandom.graphics.palettes.Color(c2).toHSV()[2], new Color(c1).toHSV()[2]));
 
 		BufferedImage fixed = new BufferedImage(bim.getWidth(), bim.getHeight(), BufferedImage.TYPE_BYTE_INDEXED,
 				GFXFunctions.indexColorModelFromPalette(toArray(colors), bpp));

@@ -35,15 +35,14 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
-import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
+import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 
 import compressors.DSCmp;
 import compressors.DSDecmp;
-
-import javax.imageio.ImageIO;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
@@ -4314,7 +4313,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
-        changePlayerImages("may_e", "May");
+        changePlayerImages(new Gen3PlayerCharacterGraphics("frisk", "May"));
         int normalPaletteTableOffset = romEntry.getValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
@@ -4328,48 +4327,51 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void changePlayerImages(String name, String playerToReplace) {
+    private void changePlayerImages(Gen3PlayerCharacterGraphics pcg) {
         try {
-            changePlayerOverworldSprites(name, playerToReplace);
-            changePlayerTrainerImages(name, playerToReplace);
-            changePlayerMiscImages(name, playerToReplace);
-        } catch (IOException e) {
+            changePlayerOverworldSprites(pcg);
+            changePlayerTrainerImages(pcg);
+            changePlayerMiscImages(pcg);
+        } catch (IOException e) { // what to do with the exceptions, when the files are handled by a separate class?
             throw new RandomizerIOException("Could not change player images.", e);
         }
     }
 
-	private void changePlayerOverworldSprites(String name, String playerToReplace) throws IOException {
-        // TODO: support pokeruby-style combined "normal.png" and pokeemerald-style split "walking.png", "running.png"
-		BufferedImage walk = ImageIO.read(new File("players/" + name + "/walking.png"));
-        BufferedImage[] walkFrames = GFXFunctions.splitImage(walk, 16, 32);
-		int walkImageNumber = romEntry.getValue(playerToReplace + "WalkingImage");
-		writeOverworldImages(walkImageNumber, 9, walkFrames);
-
-		BufferedImage run = ImageIO.read(new File("players/" + name + "/running.png"));
-        BufferedImage[] runFrames = GFXFunctions.splitImage(run, 16, 32);
-		int runImageNumber = romEntry.getValue(playerToReplace + "RunningImage");
-		writeOverworldImages(runImageNumber, 9, runFrames);
-
-        BufferedImage fishing = ImageIO.read(new File("players/" + name + "/fishing.png"));
-        BufferedImage[] fishingFrames = GFXFunctions.splitImage(fishing, 32, 32);
-        int fishingImageNumber = romEntry.getValue(playerToReplace + "FishingImage");
-        writeOverworldImages(fishingImageNumber, 12, fishingFrames);
-
-        changePlayerOverworldPalettes(name, playerToReplace, walk);
+	private void changePlayerOverworldSprites(Gen3PlayerCharacterGraphics pcg) throws IOException {
+        changePlayerOverworldImages(pcg);
+        changePlayerOverworldPalettes(pcg);
 
     }
 
-    private void changePlayerOverworldPalettes(String name, String playerToReplace, BufferedImage walk) throws IOException {
+    private void changePlayerOverworldImages(Gen3PlayerCharacterGraphics pcg) {
+        BufferedImage walk = pcg.getWalkImage();
+        // TODO: move frame splitting to graphics class
+        BufferedImage[] walkFrames = GFXFunctions.splitImage(walk, 16, 32);
+        int walkImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "WalkingImage");
+        writeOverworldImages(walkImageNumber, 9, walkFrames);
+
+        BufferedImage run = pcg.getRunImage();
+        BufferedImage[] runFrames = GFXFunctions.splitImage(run, 16, 32);
+        int runImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "RunningImage");
+        writeOverworldImages(runImageNumber, 9, runFrames);
+
+        BufferedImage fishing = pcg.getFishingImage();
+        BufferedImage[] fishingFrames = GFXFunctions.splitImage(fishing, 32, 32);
+        int fishingImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "FishingImage");
+        writeOverworldImages(fishingImageNumber, 12, fishingFrames);
+    }
+
+    private void changePlayerOverworldPalettes(Gen3PlayerCharacterGraphics pcg)  {
         int paletteTableOffset = romEntry.getValue("OverworldPalettes");
 
-        int normalPaletteNumber = romEntry.getValue(playerToReplace + "NormalPalette");
+        int normalPaletteNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "NormalPalette");
         int normalPointerOffset = paletteTableOffset + normalPaletteNumber * 8;
-        Palette normalPalette = Palette.readImagePalette(walk);
+        Palette normalPalette = pcg.getOverworldNormalPalette();
         writeBytes(readPointer(normalPointerOffset), normalPalette.toBytes());
 
-        int reflectionPaletteNumber = romEntry.getValue(playerToReplace + "ReflectionPalette");
+        int reflectionPaletteNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "ReflectionPalette");
         int reflectionPointerOffset = paletteTableOffset + reflectionPaletteNumber * 8;
-        Palette reflectionPalette = Palette.readFromFile(new File("players/" + name + "/reflection.pal"));
+        Palette reflectionPalette = pcg.getOverworldReflectionPalette();
         writeBytes(readPointer(reflectionPointerOffset), reflectionPalette.toBytes());
     }
 
@@ -4392,16 +4394,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	private void changePlayerTrainerImages(String name, String playerToReplace) throws IOException {
-        BufferedImage front = ImageIO.read(new File("players/" + name + "/front_pic.png"));
+	private void changePlayerTrainerImages(Gen3PlayerCharacterGraphics pcg) {
+        BufferedImage front = pcg.getFrontImage();
         int playerTrainerFrontNumber = 1; // May in Ruby TODO: support brendan as well, FR/LG/E.
         writeTrainerImage(playerTrainerFrontNumber, front);
 
-        BufferedImage back = ImageIO.read(new File("players/" + name + "/back_pic.png"));
-        int playerTrainerBackNumber = romEntry.getValue(playerToReplace + "BackImage");
+        BufferedImage back = pcg.getBackImage();
+        int playerTrainerBackNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "BackImage");
         writeTrainerBackImage(playerTrainerBackNumber, back);
     }
 
+    // TODO: remove when no longer useful for debugging
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
     private static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -4413,20 +4416,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return new String(hexChars);
     }
 
-    private void changePlayerMiscImages(String name, String playerToReplace) throws IOException {
-        changePlayerMapIcon(name, playerToReplace);
+    private void changePlayerMiscImages(Gen3PlayerCharacterGraphics pcg) {
+        changePlayerMapIcon(pcg);
         //TODO: cutscene graphics (the bike)
     }
 
-    private void changePlayerMapIcon(String name, String playerToReplace) throws IOException {
-        BufferedImage icon = ImageIO.read(new File("players/" + name + "/icon.png"));
-        if (icon.getWidth() != 16 || icon.getHeight() != 16) {
-            throw new IOException("Invalid map icon size, must be 16x16 pixels.");
-        }
-        int iconImageOffset = romEntry.getValue(playerToReplace + "MapIconImage");
-        writeBytes(iconImageOffset, GFXFunctions.readTiledImageData(icon));
-        int iconPaletteOffset = romEntry.getValue(playerToReplace + "MapIconPalette");
-        writeBytes(iconPaletteOffset, Palette.readImagePalette(icon).toBytes());
+    private void changePlayerMapIcon(Gen3PlayerCharacterGraphics pcg) {
+        BufferedImage image = pcg.getMapIconImage();
+        int iconImageOffset = romEntry.getValue(pcg.getPlayerToReplaceName() + "MapIconImage");
+        writeBytes(iconImageOffset, GFXFunctions.readTiledImageData(image));
+        Palette palette = pcg.getMapIconPalette();
+        int iconPaletteOffset = romEntry.getValue(pcg.getPlayerToReplaceName() + "MapIconPalette");
+        writeBytes(iconPaletteOffset, palette.toBytes());
     }
 
     private void writeTrainerImage(int trainerNumber, BufferedImage image) {

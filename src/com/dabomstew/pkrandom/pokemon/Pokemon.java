@@ -25,7 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.constants.Species;
-import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.util.ArrayList;
 import java.util.Arrays;

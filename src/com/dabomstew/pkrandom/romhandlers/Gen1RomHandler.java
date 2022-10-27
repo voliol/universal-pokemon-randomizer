@@ -51,6 +51,10 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.*;
+import com.dabomstew.pkrandom.graphics.palettes.Gen1PaletteHandler;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
+import com.dabomstew.pkrandom.graphics.palettes.PaletteID;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Decmp;
 
