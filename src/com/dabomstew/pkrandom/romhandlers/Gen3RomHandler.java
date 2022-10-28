@@ -27,6 +27,9 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -36,6 +39,7 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
@@ -4339,27 +4343,44 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 	private void changePlayerOverworldSprites(Gen3PlayerCharacterGraphics pcg) throws IOException {
         changePlayerOverworldImages(pcg);
-        changePlayerOverworldPalettes(pcg);
+		changePlayerOverworldPalettes(pcg);
+	}
 
-    }
+	private void changePlayerOverworldImages(Gen3PlayerCharacterGraphics pcg) {
+        changePlayerOverworldImage(pcg, PlayerCharacterGraphics::getWalkImage, 16,
+                32, 9, "WalkingImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getRunImage, 16,
+                32, 9, "RunningImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getMachBikeImage, 32,
+                32, 9, "MachBikeImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getAcroBikeImage, 32,
+                32, 27, "AcroBikeImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getSurfingImage, 32,
+                32, 6, "SurfingImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getUnderwaterImage, 32,
+                32, 4, "UnderwaterImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getFieldMoveImage, 32,
+                32, 5, "FieldMoveImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getFieldMoveImage, 32,
+                32, 12, "FishingImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getWateringImage, 32,
+                32, 6, "WateringImage");
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getDecoratingImage, 16,
+                32, 1, "DecoratingImage");
+	}
 
-    private void changePlayerOverworldImages(Gen3PlayerCharacterGraphics pcg) {
-        BufferedImage walk = pcg.getWalkImage();
-        // TODO: move frame splitting to graphics class
-        BufferedImage[] walkFrames = GFXFunctions.splitImage(walk, 16, 32);
-        int walkImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "WalkingImage");
-        writeOverworldImages(walkImageNumber, 9, walkFrames);
-
-        BufferedImage run = pcg.getRunImage();
-        BufferedImage[] runFrames = GFXFunctions.splitImage(run, 16, 32);
-        int runImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "RunningImage");
-        writeOverworldImages(runImageNumber, 9, runFrames);
-
-        BufferedImage fishing = pcg.getFishingImage();
-        BufferedImage[] fishingFrames = GFXFunctions.splitImage(fishing, 32, 32);
-        int fishingImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "FishingImage");
-        writeOverworldImages(fishingImageNumber, 12, fishingFrames);
-    }
+	private void changePlayerOverworldImage(Gen3PlayerCharacterGraphics pcg,
+			Function<Gen3PlayerCharacterGraphics, BufferedImage> imageGetter, int pieceWidth, int pieceHeight,
+			int numberOfPieces, String key) {
+		BufferedImage image = imageGetter.apply(pcg);
+		if (image == null) {
+			System.out.println("Did not write image for key \"" + key + "\" as it was not found/null-valued.");
+		} else {
+			BufferedImage[] frames = GFXFunctions.splitImage(image, pieceWidth, pieceHeight);
+			int imageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + key);
+			writeOverworldImages(imageNumber, numberOfPieces, frames);
+		}
+	}
 
     private void changePlayerOverworldPalettes(Gen3PlayerCharacterGraphics pcg)  {
         int paletteTableOffset = romEntry.getValue("OverworldPalettes");

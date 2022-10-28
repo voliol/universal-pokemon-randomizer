@@ -116,9 +116,9 @@ public class GFXFunctions {
 
 	/**
 	 * Splits a {@link BufferedImage} into even rectangular pieces, given the
-	 * dimensions these should be, and returns an array of these pieces. Throws an
-	 * exception if the dimensions of the BufferedImage is not divisible by the
-	 * piece dimensions. <br>
+	 * dimensions these should be, and returns an array of these pieces. Throws am
+	 * {@link IllegalArgumentException} if the dimensions of the BufferedImage is
+	 * not divisible by the piece dimensions. <br>
 	 * <br>
 	 * This method allows for easier handling of "sheets" of images, since the
 	 * return is the same regardless whether the pieces are laid out horizontally,

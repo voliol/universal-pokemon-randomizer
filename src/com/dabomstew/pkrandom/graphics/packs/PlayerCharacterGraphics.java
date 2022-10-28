@@ -4,47 +4,47 @@ import java.awt.image.BufferedImage;
 
 public abstract class PlayerCharacterGraphics extends GraphicsPack {
 
-    private static final String PLAYERS_DIR_PATH = "players";
+	private static final String PLAYERS_DIR_PATH = "players";
 
-    private BufferedImage frontImage = null;
-    private BufferedImage backImage = null;
-    private BufferedImage walkImage = null;
-    private BufferedImage bikeImage = null;
+	private BufferedImage frontImage = null;
+	private BufferedImage backImage = null;
+	private BufferedImage walkImage = null;
+	private BufferedImage bikeImage = null;
 
-    public PlayerCharacterGraphics(String name) {
-        super( PLAYERS_DIR_PATH + "/" + name);
-    }
+	public PlayerCharacterGraphics(String name) {
+		super(PLAYERS_DIR_PATH + "/" + name);
+	}
 
-    public BufferedImage getFrontImage() {
-        return frontImage;
-    }
+	public BufferedImage getFrontImage() {
+		return frontImage;
+	}
 
-    protected void setFrontImage(BufferedImage frontImage) {
-        this.frontImage = frontImage;
-    }
+	protected void setFrontImage(BufferedImage frontImage) {
+		this.frontImage = frontImage;
+	}
 
-    public BufferedImage getBackImage() {
-        return backImage;
-    }
+	public BufferedImage getBackImage() {
+		return backImage;
+	}
 
-    protected void setBackImage(BufferedImage backImage) {
-        this.backImage = backImage;
-    }
+	protected void setBackImage(BufferedImage backImage) {
+		this.backImage = backImage;
+	}
 
-    public BufferedImage getWalkImage() {
-        return walkImage;
-    }
+	public BufferedImage getWalkImage() {
+		return walkImage;
+	}
 
-    protected void setWalkImage(BufferedImage walkImage) {
-        this.walkImage = walkImage;
-    }
+	protected void setWalkImage(BufferedImage walkImage) {
+		this.walkImage = walkImage;
+	}
 
-    public BufferedImage getBikeImage() {
-        return bikeImage;
-    }
+	public BufferedImage getBikeImage() {
+		return bikeImage;
+	}
 
-    protected void setBikeImage(BufferedImage bikeImage) {
-        this.bikeImage = bikeImage;
-    }
+	protected void setBikeImage(BufferedImage bikeImage) {
+		this.bikeImage = bikeImage;
+	}
 
 }

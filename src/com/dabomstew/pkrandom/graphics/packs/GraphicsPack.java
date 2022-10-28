@@ -16,164 +16,181 @@ import java.util.stream.Collectors;
 
 public abstract class GraphicsPack implements Comparable<GraphicsPack> {
 
-    private static final String NAME_TOKEN = "NAME";
-    private static final String DESC_TOKEN = "DESCRIPTION";
-    private static final String FROM_TOKEN = "FROM";
-    private static final String ORIG_CREATOR_TOKEN = "CREATOR";
-    private static final String ADAPTER_TOKEN = "ADAPTER";
-    private static final String CATEGORY_TOKEN = "CATEGORY";
+	private static final String NAME_TOKEN = "NAME";
+	private static final String DESC_TOKEN = "DESCRIPTION";
+	private static final String FROM_TOKEN = "FROM";
+	private static final String ORIG_CREATOR_TOKEN = "CREATOR";
+	private static final String ADAPTER_TOKEN = "ADAPTER";
+	private static final String CATEGORY_TOKEN = "CATEGORY";
 
-    private enum Category {
-        POKEMON, GAMES, OTHER
-    }
+	private enum Category {
+		POKEMON, GAMES, OTHER
+	}
 
-    private final String path;
-    private String name;
-    private String description;
-    private String from;
-    private String originalCreator;
-    private String adapter = "N/A";
-    private Category category;
+	private final String path;
+	private String name;
+	private String description;
+	private String from;
+	private String originalCreator;
+	private String adapter = "N/A";
+	private Category category;
 
-    private static List<String> readFileLines(String filename) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            return br.lines().collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	private static List<String> readFileLines(String filename) {
+		try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+			return br.lines().collect(Collectors.toList());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    public GraphicsPack(String path) {
-        this.path = path;
-        List<String> lines = readFileLines(path + "/info.txt");
-        String[][] tokens = splitIntoTokens(lines);
-        parseTokens(tokens);
-        checkVitalTokensAssigned();
-    }
+	public GraphicsPack(String path) {
+		this.path = path;
+		List<String> lines = readFileLines(path + "/info.txt");
+		String[][] tokens = splitIntoTokens(lines);
+		parseTokens(tokens);
+		checkVitalTokensAssigned();
+	}
 
-    private String[][] splitIntoTokens(List<String> lines) {
-        List<String[]> tokens = new ArrayList<>();
-        for (String line : lines) {
-            Matcher tokenMatcher = Pattern.compile("\\[([^\\[\\]]*)]").matcher(line);
-            tokenMatcher.useTransparentBounds(true);
-            while (tokenMatcher.find()) {
-                String[] token = tokenMatcher.group(1).split("(?<!\\\\):");
-                for (int i = 0; i < token.length; i++) {
-                    token[i] = token[i].replace("\\:", ":");
-                }
-                tokens.add(token);
-            }
-        }
-        return tokens.toArray(new String[0][]);
-    }
+	private String[][] splitIntoTokens(List<String> lines) {
+		List<String[]> tokens = new ArrayList<>();
+		for (String line : lines) {
+			Matcher tokenMatcher = Pattern.compile("\\[([^\\[\\]]*)]").matcher(line);
+			tokenMatcher.useTransparentBounds(true);
+			while (tokenMatcher.find()) {
+				String[] token = tokenMatcher.group(1).split("(?<!\\\\):");
+				for (int i = 0; i < token.length; i++) {
+					token[i] = token[i].replace("\\:", ":");
+				}
+				tokens.add(token);
+			}
+		}
+		return tokens.toArray(new String[0][]);
+	}
 
-    private void parseTokens(String[][] tokens) {
-        for (String[] token : tokens) {
-            switch (token[0]) {
-                case NAME_TOKEN -> this.name = token[1];
-                case DESC_TOKEN -> this.description = token[1];
-                case FROM_TOKEN -> this.from = token[1];
-                case ORIG_CREATOR_TOKEN -> this.originalCreator = token[1];
-                case ADAPTER_TOKEN -> this.adapter = token[1];
-                case CATEGORY_TOKEN -> this.category = Category.valueOf(token[1]);
-                default -> System.out.println("Undefined PlayerCharacterSprites token: " + token[0]);
-            }
-        }
-    }
+	private void parseTokens(String[][] tokens) {
+		for (String[] token : tokens) {
+			switch (token[0]) {
+			case NAME_TOKEN -> this.name = token[1];
+			case DESC_TOKEN -> this.description = token[1];
+			case FROM_TOKEN -> this.from = token[1];
+			case ORIG_CREATOR_TOKEN -> this.originalCreator = token[1];
+			case ADAPTER_TOKEN -> this.adapter = token[1];
+			case CATEGORY_TOKEN -> this.category = Category.valueOf(token[1]);
+			default -> System.out.println("Undefined PlayerCharacterSprites token: " + token[0]);
+			}
+		}
+	}
 
-    private void checkVitalTokensAssigned() {
-        boolean anyMissed = false;
-        List<String> vitalMissed = new ArrayList<>();
-        if (name == null) {
-            vitalMissed.add(NAME_TOKEN);
-            anyMissed = true;
-        }
-        if (description == null) {
-            vitalMissed.add(DESC_TOKEN);
-            anyMissed = true;
-        }
-        if (from == null) {
-            vitalMissed.add(FROM_TOKEN);
-            anyMissed = true;
-        }
-        if (originalCreator == null) {
-            vitalMissed.add(ORIG_CREATOR_TOKEN);
-            anyMissed = true;
-        }
-        if (category == null) {
-            vitalMissed.add(CATEGORY_TOKEN);
-            anyMissed = true;
-        }
-        if (anyMissed) {
-            throw new RuntimeException("Could not initiate PlayerCharacterSprites object \"" + this + "\"; " +
-                    "missing token(s): " + String.join(", ", vitalMissed));
-        }
-    }
+	private void checkVitalTokensAssigned() {
+		boolean anyMissed = false;
+		List<String> vitalMissed = new ArrayList<>();
+		if (name == null) {
+			vitalMissed.add(NAME_TOKEN);
+			anyMissed = true;
+		}
+		if (description == null) {
+			vitalMissed.add(DESC_TOKEN);
+			anyMissed = true;
+		}
+		if (from == null) {
+			vitalMissed.add(FROM_TOKEN);
+			anyMissed = true;
+		}
+		if (originalCreator == null) {
+			vitalMissed.add(ORIG_CREATOR_TOKEN);
+			anyMissed = true;
+		}
+		if (category == null) {
+			vitalMissed.add(CATEGORY_TOKEN);
+			anyMissed = true;
+		}
+		if (anyMissed) {
+			throw new RuntimeException("Could not initiate PlayerCharacterSprites object \"" + this + "\"; "
+					+ "missing token(s): " + String.join(", ", vitalMissed));
+		}
+	}
 
-    protected BufferedImage loadImage(String filename) {
-        try {
-            return ImageIO.read(new File( path + "/" + filename));
-        } catch (IOException e) {
-            return null;
-        }
-    }
+	/**
+	 * Tries to load an image with the filename. Returns null if it can't be
+	 * read/doesn't exist.
+	 */
+	protected BufferedImage loadImage(String filename) {
+		try {
+			return ImageIO.read(new File(path + "/" + filename));
+		} catch (IOException e) {
+			return null;
+		}
+	}
 
-    protected Palette loadPalette(String filename) {
-        try {
-            return Palette.readFromFile(new File(path + "/" + filename));
-        } catch (IOException e) {
-            return null;
-        }
-    }
+	/**
+	 * Tries to load an image with the filename, and the width and height in pixels.
+	 * Returns null if it can't be read/doesn't exist, or the dimensions don't
+	 * match.
+	 */
+	protected BufferedImage loadImage(String filename, int width, int height) {
+		BufferedImage image = loadImage(filename);
+		if (image == null || image.getWidth() != width || image.getHeight() != height) {
+			return null;
+		}
+		return image;
+	}
 
-    public String getName() {
-        return name;
-    }
+	protected Palette loadPalette(String filename) {
+		try {
+			return Palette.readFromFile(new File(path + "/" + filename));
+		} catch (IOException e) {
+			return null;
+		}
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getFrom() {
-        return from;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public String getOriginalCreator() {
-        return originalCreator;
-    }
+	public String getFrom() {
+		return from;
+	}
 
-    public String getAdapter() {
-        return adapter;
-    }
+	public String getOriginalCreator() {
+		return originalCreator;
+	}
 
-    @Override
-    public String toString() {
-        return name;
-    }
+	public String getAdapter() {
+		return adapter;
+	}
 
-    @Override
-    public int compareTo(GraphicsPack o) {
-        if (o == null) {
-            throw new NullPointerException("null value not comparable.");
-        }
-        if (o.category != category) {
-            return category.compareTo(o.category);
-        }
-        if (!o.from.equals(from)) {
-            return from.compareTo(o.from);
-        }
-        if (!o.name.equals(name)) {
-            return name.compareTo(o.name);
-        }
-        if (!o.originalCreator.equals(originalCreator)) {
-            return originalCreator.compareTo(o.originalCreator);
-        }
-        return adapter.compareTo(o.adapter);
-    }
+	@Override
+	public String toString() {
+		return name;
+	}
 
-    /**
-     * Returns a sample of the images, to be used for UI purposes.
-     */
-    public abstract BufferedImage[] getSampleImages();
+	@Override
+	public int compareTo(GraphicsPack o) {
+		if (o == null) {
+			throw new NullPointerException("null value not comparable.");
+		}
+		if (o.category != category) {
+			return category.compareTo(o.category);
+		}
+		if (!o.from.equals(from)) {
+			return from.compareTo(o.from);
+		}
+		if (!o.name.equals(name)) {
+			return name.compareTo(o.name);
+		}
+		if (!o.originalCreator.equals(originalCreator)) {
+			return originalCreator.compareTo(o.originalCreator);
+		}
+		return adapter.compareTo(o.adapter);
+	}
+
+	/**
+	 * Returns a sample of the images, to be used for UI purposes.
+	 */
+	public abstract BufferedImage[] getSampleImages();
 
 }
