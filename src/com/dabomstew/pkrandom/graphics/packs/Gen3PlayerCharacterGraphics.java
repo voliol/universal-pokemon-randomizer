@@ -25,7 +25,7 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 	private BufferedImage wateringImage = null;
 	private BufferedImage decoratingImage = null;
 
-	private BufferedImage underwaterImages = null;
+	private BufferedImage underwaterImage = null;
 
 	private Palette overworldReflectionPalette = null;
 
@@ -52,6 +52,8 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 
 		this.overworldReflectionPalette = loadPalette("reflection.pal");
 
+		this.underwaterImage = loadImage("underwater.png");
+
 		this.mapIconImage = loadImage("icon.png", SMALL_SPRITE_WIDTH, SMALL_SPRITE_HEIGHT);
 	}
 
@@ -62,7 +64,7 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 		BufferedImage walk, run;
 		if (normal != null) {
 			walk = normal.getSubimage(0, 0, 144, 32); // pokeruby style
-			run = normal.getSubimage(144, 32, 144, 32);
+			run = normal.getSubimage(144, 0, 144, 32);
 		} else {
 			walk = loadImage("walking.png"); // pokeemerald style
 			run = loadImage("running.png");
@@ -120,7 +122,7 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 	}
 
 	public BufferedImage getUnderwaterImage() {
-		return underwaterImages;
+		return underwaterImage;
 	}
 
 	public Palette getOverworldNormalPalette() {
@@ -144,6 +146,6 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 
 	@Override
 	public BufferedImage[] getSampleImages() {
-		return new BufferedImage[] { getFrontImage(), getWalkImage() };
+		return new BufferedImage[] { getFrontImage(), getWalkImage()};
 	}
 }

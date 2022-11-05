@@ -4355,30 +4355,78 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 32, 9, "MachBikeImage");
         changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getAcroBikeImage, 32,
                 32, 27, "AcroBikeImage");
-        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getSurfingImage, 32,
-                32, 6, "SurfingImage");
-        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getUnderwaterImage, 32,
-                32, 4, "UnderwaterImage");
+        changePlayerSurfingImage(pcg);
+        changePlayerUnderwaterImage(pcg);
         changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getFieldMoveImage, 32,
                 32, 5, "FieldMoveImage");
-        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getFieldMoveImage, 32,
+        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getFishingImage, 32,
                 32, 12, "FishingImage");
-        changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getWateringImage, 32,
-                32, 6, "WateringImage");
+        changePlayerWateringImage(pcg);
         changePlayerOverworldImage(pcg, Gen3PlayerCharacterGraphics::getDecoratingImage, 16,
                 32, 1, "DecoratingImage");
 	}
 
-	private void changePlayerOverworldImage(Gen3PlayerCharacterGraphics pcg,
-			Function<Gen3PlayerCharacterGraphics, BufferedImage> imageGetter, int pieceWidth, int pieceHeight,
-			int numberOfPieces, String key) {
+    private void changePlayerWateringImage(Gen3PlayerCharacterGraphics pcg) {
+        // TODO
+    }
+
+    private void changePlayerUnderwaterImage(Gen3PlayerCharacterGraphics pcg) {
+        BufferedImage underwater = pcg.getUnderwaterImage();
+        if (underwater == null) {
+            return;
+        }
+        BufferedImage[] split = GFXFunctions.splitImage(underwater, 32, 32);
+        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "UnderwaterImage");
+        if (split.length <= 9 && split.length >= 3) {
+            int imagesToWrite = split.length == 9 ? 9 : 3;
+            for (int i = 0; i < imagesToWrite; i++) {
+                writeOverworldImage(firstImageNumber + i, split[i]);
+            }
+        } else {
+            throw new IllegalStateException("invalid underwater image");
+        }
+    }
+
+    private void changePlayerSurfingImage(Gen3PlayerCharacterGraphics pcg) {
+        BufferedImage surfing = pcg.getSurfingImage();
+        if (surfing == null) {
+            return;
+        }
+        BufferedImage[] frames = GFXFunctions.splitImage(surfing, 32, 32);
+        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "SurfingImage");
+        if (frames.length == 9) {
+            for (int i = 0; i < 9; i++) {
+                writeOverworldImage(firstImageNumber + i, frames[i]);
+            }
+        } else if (frames.length == 6) { //decomp style, the order is a bit jumbled
+            // normal sitting
+            writeOverworldImage(firstImageNumber, frames[0]);
+            writeOverworldImage(firstImageNumber + 1, frames[2]);
+            writeOverworldImage(firstImageNumber + 2, frames[4]);
+            // jumping
+            writeOverworldImage(firstImageNumber + 9, frames[1]);
+            writeOverworldImage(firstImageNumber + 10, frames[3]);
+            writeOverworldImage(firstImageNumber + 11, frames[5]);
+        }
+    }
+
+    private void changePlayerOverworldImage(Gen3PlayerCharacterGraphics pcg,
+			Function<Gen3PlayerCharacterGraphics, BufferedImage> imageGetter, int frameWidth, int frameHeight,
+            int numberOfFrames, String key) {
 		BufferedImage image = imageGetter.apply(pcg);
 		if (image == null) {
 			System.out.println("Did not write image for key \"" + key + "\" as it was not found/null-valued.");
-		} else {
-			BufferedImage[] frames = GFXFunctions.splitImage(image, pieceWidth, pieceHeight);
-			int imageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + key);
-			writeOverworldImages(imageNumber, numberOfPieces, frames);
+            return;
+		}
+
+        BufferedImage[] frames = GFXFunctions.splitImage(image, frameWidth, frameHeight);
+        if (frames.length != numberOfFrames) {
+            throw new IllegalStateException("Given image split into wrong number of frames. Was " +
+                    frames.length + " should have been " + numberOfFrames + ".");
+        }
+        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + key);
+        for (int i = 0; i < frames.length; i++) {
+			writeOverworldImage(firstImageNumber + i, frames[i]);
 		}
 	}
 
@@ -4395,25 +4443,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         Palette reflectionPalette = pcg.getOverworldReflectionPalette();
         writeBytes(readPointer(reflectionPointerOffset), reflectionPalette.toBytes());
     }
-
-    private void writeOverworldImages(int firstImageNumber, int numberOfImages, BufferedImage[] images) {
-        if (images.length < numberOfImages) {
-            throw new IllegalArgumentException("images contains too few elements.");
-        }
-
-		int imageTableOffset = romEntry.getValue("OverworldSpriteImages");
-		for (int i = 0; i < numberOfImages; i++) {
-			int imagePointerOffset = imageTableOffset + (firstImageNumber + i) * 8;
-			int imageOffset = readPointer(imagePointerOffset);
-			int imageLength = readWord(imagePointerOffset + 4);
-
-            byte[] imageData = GFXFunctions.readTiledImageData(images[i]);
-            if (imageData.length != imageLength) {
-                throw new IllegalArgumentException("Wrong image size.");
-            }
-            writeBytes(imageOffset, imageData);
-		}
-	}
 
 	private void changePlayerTrainerImages(Gen3PlayerCharacterGraphics pcg) {
         BufferedImage front = pcg.getFrontImage();
@@ -4449,6 +4478,24 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         Palette palette = pcg.getMapIconPalette();
         int iconPaletteOffset = romEntry.getValue(pcg.getPlayerToReplaceName() + "MapIconPalette");
         writeBytes(iconPaletteOffset, palette.toBytes());
+    }
+
+    /**
+     * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
+     * The given image must be as large as the one it is overwriting.
+     */
+    private void writeOverworldImage(int imageNumber, BufferedImage image) {
+        int imageTableOffset = romEntry.getValue("OverworldSpriteImages");
+
+        int imagePointerOffset = imageTableOffset + imageNumber * 8;
+        int imageOffset = readPointer(imagePointerOffset);
+        int imageLength = readWord(imagePointerOffset + 4);
+
+        byte[] imageData = GFXFunctions.readTiledImageData(image);
+        if (imageData.length != imageLength) {
+            throw new IllegalArgumentException("Wrong image size.");
+        }
+        writeBytes(imageOffset, imageData);
     }
 
     private void writeTrainerImage(int trainerNumber, BufferedImage image) {
