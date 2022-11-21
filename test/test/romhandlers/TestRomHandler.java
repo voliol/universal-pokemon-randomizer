@@ -1,6 +1,7 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 
@@ -13,6 +14,21 @@ import java.util.Random;
 public class TestRomHandler extends AbstractRomHandler {
     public TestRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
+    }
+
+    @Override
+    public PaletteHandler getPaletteHandler() {
+        return null;
+    }
+
+    @Override
+    protected List<BufferedImage> getAllPokemonImages() {
+        return null;
+    }
+
+    @Override
+    protected void savePokemonPalettes() {
+
     }
 
     public PokemonSet<Pokemon> getRestrictedPokemon() {
@@ -119,6 +135,11 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
+    public boolean supportsStarterHeldItems() {
+        return false;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
         return null;
     }
@@ -166,6 +187,11 @@ public class TestRomHandler extends AbstractRomHandler {
     @Override
     public boolean hasWildAltFormes() {
         return false;
+    }
+
+    @Override
+    public void enableGuaranteedPokemonCatching() {
+
     }
 
     @Override
