@@ -5,6 +5,7 @@ import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.awt.image.BufferedImage;
 
+// TODO: does it even make sense to have a unified class for all of Gen3? Probably not?
 public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 
 	// TODO: are these correct/indicative?
@@ -101,10 +102,6 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 		return acroBikeImage;
 	}
 
-	public BufferedImage getSurfingImage() {
-		return surfingImage;
-	}
-
 	public BufferedImage getFieldMoveImage() {
 		return fieldMoveImage;
 	}
@@ -119,10 +116,6 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 
 	public BufferedImage getDecoratingImage() {
 		return decoratingImage;
-	}
-
-	public BufferedImage getUnderwaterImage() {
-		return underwaterImage;
 	}
 
 	public Palette getOverworldNormalPalette() {
@@ -146,6 +139,40 @@ public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
 
 	@Override
 	public BufferedImage[] getSampleImages() {
-		return new BufferedImage[] { getFrontImage(), getWalkImage()};
+		return new BufferedImage[] { getFrontImage(), getWalkImage() };
 	}
+
+	/**
+	 * Gets the frames of the player surfing/sitting, as an array of
+	 * {@link BufferedImage}s. The array may contain duplicate and/or null values.
+	 * The order is:<br>
+	 * [down_0, up_0, side_0, down_1, up_1, side_1, down_2, up_2, side_2, down_jump,
+	 * up_jump, side_jump]
+	 */
+	public BufferedImage[] getSurfingImages() {
+		BufferedImage[] frames;
+		BufferedImage[] split = GFXFunctions.splitImage(surfingImage, 32, 32);
+		if (split.length == 12) { // all frames in the order given above
+			frames = split;
+		} else if (split.length == 6) { // [down_012, down_jump, up_012, up_jump, side_012, side_jump]
+			frames = new BufferedImage[] { 
+					split[0], split[2], split[4], split[0], split[2], split[4], 
+					split[0], split[2], split[4], split[1], split[3], split[5] };
+		} else {
+			frames = null;
+		}
+		return frames;
+	}
+
+	/**
+	 * Gets the frames of the player underwater, as an array of
+	 * {@link BufferedImage}s. The array may contain duplicate and/or null values.
+	 * The order is:<br>
+	 * [down_0, up_0, side_0, down_1, up_1, side_1, down_2, up_2, side_2]
+	 */
+	public BufferedImage[] getUnderwaterImages() {
+		// TODO
+		return null;
+	}
+
 }

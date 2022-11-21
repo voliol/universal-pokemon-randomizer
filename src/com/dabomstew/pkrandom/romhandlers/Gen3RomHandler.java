@@ -4388,7 +4388,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void changePlayerSurfingImage(Gen3PlayerCharacterGraphics pcg) {
-        BufferedImage surfing = pcg.getSurfingImage();
+        BufferedImage surfing = pcg.getSurfingImages();
         if (surfing == null) {
             return;
         }

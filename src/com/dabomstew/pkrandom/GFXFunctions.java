@@ -28,6 +28,8 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
@@ -85,6 +87,17 @@ public class GFXFunctions {
 		}
 
 		return bim;
+	}
+
+	/**
+	 * Takes a palette in the form of a {@link Palette} object and returns an
+	 * {@link IndexColorModel}.
+	 *
+	 * @param palette A Palette object.
+	 * @param bits    The number of bits each pixel occupies.
+	 */
+	public static IndexColorModel indexColorModelFromPalette(Palette palette, int bits) {
+		return indexColorModelFromPalette(palette.toARGB(), bits);
 	}
 
 	/**
