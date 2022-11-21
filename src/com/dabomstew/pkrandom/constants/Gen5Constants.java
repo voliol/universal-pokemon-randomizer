@@ -375,6 +375,10 @@ public class Gen5Constants {
 
     public static final String friendshipValueForEvoLocator = "DC282FD3";
 
+    public static final String perfectOddsBranchLocator = "08DB002801D0012000E0";
+
+    public static final String lowHealthMusicLocator = "00D10127";
+
     public static final List<Integer> consumableHeldItems = setupAllConsumableItems();
 
     private static List<Integer> setupAllConsumableItems() {

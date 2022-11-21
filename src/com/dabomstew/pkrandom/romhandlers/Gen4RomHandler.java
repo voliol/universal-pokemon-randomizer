@@ -1602,15 +1602,26 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public List<Integer> getStarterHeldItems() {
-		// do nothing
-		return new ArrayList<>();
+	public boolean supportsStarterHeldItems() {
+		return romEntry.romType == Gen4Constants.Type_DP || romEntry.romType == Gen4Constants.Type_Plat;
 	}
 
-	@Override
-	public void setStarterHeldItems(List<Integer> items) {
-		// do nothing
-	}
+    @Override
+    public List<Integer> getStarterHeldItems() {
+        int starterScriptNumber = romEntry.getInt("StarterPokemonScriptOffset");
+        int starterHeldItemOffset = romEntry.getInt("StarterPokemonHeldItemOffset");
+        byte[] file = scriptNarc.files.get(starterScriptNumber);
+        int item = FileFunctions.read2ByteInt(file, starterHeldItemOffset);
+        return Arrays.asList(item);
+    }
+
+    @Override
+    public void setStarterHeldItems(List<Integer> items) {
+        int starterScriptNumber = romEntry.getInt("StarterPokemonScriptOffset");
+        int starterHeldItemOffset = romEntry.getInt("StarterPokemonHeldItemOffset");
+        byte[] file = scriptNarc.files.get(starterScriptNumber);
+        FileFunctions.write2ByteInt(file, starterHeldItemOffset, items.get(0));
+    }
 
 	@Override
 	public List<Move> getMoves() {
@@ -5343,49 +5354,54 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	@Override
-	public int miscTweaksAvailable() {
-		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
-		available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
-		available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
-		if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
-			available |= MiscTweak.FASTEST_TEXT.getValue();
-		}
-		available |= MiscTweak.BAN_LUCKY_EGG.getValue();
-		if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
-			available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
-		}
-		available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
-		available |= MiscTweak.FASTER_HP_AND_EXP_BARS.getValue();
-		if (romEntry.tweakFiles.get("FastDistortionWorldTweak") != null) {
-			available |= MiscTweak.FAST_DISTORTION_WORLD.getValue();
-		}
-		return available;
-	}
+    @Override
+    public int miscTweaksAvailable() {
+        int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+        available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
+        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
+        if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
+            available |= MiscTweak.FASTEST_TEXT.getValue();
+        }
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
+            available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+        }
+        available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
+        available |= MiscTweak.FASTER_HP_AND_EXP_BARS.getValue();
+        if (romEntry.tweakFiles.get("FastDistortionWorldTweak") != null) {
+            available |= MiscTweak.FAST_DISTORTION_WORLD.getValue();
+        }
+        if (romEntry.romType == Gen4Constants.Type_Plat || romEntry.romType == Gen4Constants.Type_HGSS) {
+            available |= MiscTweak.UPDATE_ROTOM_FORME_TYPING.getValue();
+        }
+        return available;
+    }
 
-	@Override
-	public void applyMiscTweak(MiscTweak tweak) {
-		if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
-			applyCamelCaseNames();
-		} else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-			randomizeCatchingTutorial();
-		} else if (tweak == MiscTweak.FASTEST_TEXT) {
-			applyFastestText();
-		} else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
-			allowedItems.banSingles(Items.luckyEgg);
-			nonBadItems.banSingles(Items.luckyEgg);
-		} else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
-			patchForNationalDex();
-		} else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
-			applyRunWithoutRunningShoesPatch();
-		} else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
-			patchFasterBars();
-		} else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-			updateTypeEffectiveness();
-		} else if (tweak == MiscTweak.FAST_DISTORTION_WORLD) {
-			applyFastDistortionWorld();
-		}
-	}
+    @Override
+    public void applyMiscTweak(MiscTweak tweak) {
+        if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+            applyCamelCaseNames();
+        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
+            randomizeCatchingTutorial();
+        } else if (tweak == MiscTweak.FASTEST_TEXT) {
+            applyFastestText();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Items.luckyEgg);
+            nonBadItems.banSingles(Items.luckyEgg);
+        } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
+            patchForNationalDex();
+        } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
+            applyRunWithoutRunningShoesPatch();
+        } else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
+            patchFasterBars();
+        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+            updateTypeEffectiveness();
+        } else if (tweak == MiscTweak.FAST_DISTORTION_WORLD) {
+            applyFastDistortionWorld();
+        } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
+            updateRotomFormeTyping();
+        }
+    }
 
 	@Override
 	public boolean isEffectivenessUpdated() {
@@ -5634,12 +5650,42 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		scriptNarc.files.set(Gen4Constants.ptSpearPillarPortalScriptFile, spearPillarPortalScript);
 	}
 
+    private void updateRotomFormeTyping() {
+        pokes[Species.Gen4Formes.rotomH].setSecondaryType(Type.FIRE);
+        pokes[Species.Gen4Formes.rotomW].setSecondaryType(Type.WATER);
+        pokes[Species.Gen4Formes.rotomFr].setSecondaryType(Type.ICE);
+        pokes[Species.Gen4Formes.rotomFa].setSecondaryType(Type.FLYING);
+        pokes[Species.Gen4Formes.rotomM].setSecondaryType(Type.GRASS);
+    }
+
+    @Override
+    public void enableGuaranteedPokemonCatching() {
+        try {
+            byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
+            int offset = find(battleOverlay, Gen4Constants.perfectOddsBranchLocator);
+            if (offset > 0) {
+                // In Cmd_handleballthrow (name taken from pokeemerald decomp), the middle of the function checks
+                // if the odds of catching a Pokemon is greater than 254; if it is, then the Pokemon is automatically
+                // caught. In ASM, this is represented by:
+                // cmp r1, #0xFF
+                // bcc oddsLessThanOrEqualTo254
+                // The below code just nops these two instructions so that we *always* act like our odds are 255,
+                // and Pokemon are automatically caught no matter what.
+                battleOverlay[offset] = 0x00;
+                battleOverlay[offset + 1] = 0x00;
+                battleOverlay[offset + 2] = 0x00;
+                battleOverlay[offset + 3] = 0x00;
+                writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
 	@Override
 	public void applyCorrectStaticMusic(Map<Integer, Integer> specialMusicStaticChanges) {
 		List<Integer> replaced = new ArrayList<>();
 		String newIndexToMusicPrefix;
 		int newIndexToMusicPoolOffset;
-
 		switch (romEntry.romType) {
 		case Gen4Constants.Type_DP:
 		case Gen4Constants.Type_Plat:

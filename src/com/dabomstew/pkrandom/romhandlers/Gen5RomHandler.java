@@ -71,32 +71,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         super(random, logStream);
     }
 
-    @Override
-    public void changeCatchRates(Settings settings) {
-        int minimumCatchRateLevel = settings.getMinimumCatchRateLevel();
-
-        int normalMin, legendaryMin;
-        switch (minimumCatchRateLevel) {
-            case 1:
-            default:
-                normalMin = 50;
-                legendaryMin = 25;
-                break;
-            case 2:
-                normalMin = 100;
-                legendaryMin = 45;
-                break;
-            case 3:
-                normalMin = 180;
-                legendaryMin = 75;
-                break;
-            case 4:
-                normalMin = legendaryMin = 255;
-                break;
-        }
-        minimumCatchRate(normalMin, legendaryMin);
-    }
-
     private static class OffsetWithinEntry {
         private int entry;
         private int offset;
@@ -1017,6 +991,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
         return GlobalConstants.getStatChanges(generation);
+    }
+
+    @Override
+    public boolean supportsStarterHeldItems() {
+        return false;
     }
 
     @Override
@@ -2435,6 +2414,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (romEntry.romType == Gen5Constants.Type_BW2) {
             available |= MiscTweak.FORCE_CHALLENGE_MODE.getValue();
         }
+        available |= MiscTweak.DISABLE_LOW_HP_MUSIC.getValue();
         return available;
     }
 
@@ -2470,6 +2450,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             updateTypeEffectiveness();
         } else if (tweak == MiscTweak.FORCE_CHALLENGE_MODE) {
             forceChallengeMode();
+        } else if (tweak == MiscTweak.DISABLE_LOW_HP_MUSIC) {
+            disableLowHpMusic();
         }
     }
 
@@ -2645,6 +2627,50 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             arm9[offset + 1] = 0x20;
             arm9[offset + 2] = 0x70;
             arm9[offset + 3] = 0x47;
+        }
+    }
+
+    private void disableLowHpMusic() {
+        try {
+            byte[] lowHealthMusicOverlay = readOverlay(romEntry.getInt("LowHealthMusicOvlNumber"));
+            int offset = find(lowHealthMusicOverlay, Gen5Constants.lowHealthMusicLocator);
+            if (offset > 0) {
+                // The game calls a function that returns 2 if the Pokemon has low HP. The ASM looks like this:
+                // bl funcThatReturns2IfThePokemonHasLowHp
+                // cmp r0, #0x2
+                // bne pokemonDoesNotHaveLowHp
+                // mov r7, #0x1
+                // The offset variable is currently pointing at the bne instruction. If we change that bne to an unconditional
+                // branch, the game will never think the player's Pokemon has low HP (for the purposes of changing the music).
+                lowHealthMusicOverlay[offset + 1] = (byte)0xE0;
+                writeOverlay(romEntry.getInt("LowHealthMusicOvlNumber"), lowHealthMusicOverlay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    @Override
+    public void enableGuaranteedPokemonCatching() {
+        try {
+            byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
+            int offset = find(battleOverlay, Gen5Constants.perfectOddsBranchLocator);
+            if (offset > 0) {
+                // The game checks to see if your odds are greater then or equal to 255 using the following
+                // code. Note that they compare to 0xFF000 instead of 0xFF; it looks like all catching code
+                // probabilities are shifted like this?
+                // mov r0, #0xFF
+                // lsl r0, r0, #0xC
+                // cmp r7, r0
+                // blt oddsLessThanOrEqualTo254
+                // The below code just nops the branch out so it always acts like our odds are 255, and
+                // Pokemon are automatically caught no matter what.
+                battleOverlay[offset] = 0x00;
+                battleOverlay[offset + 1] = 0x00;
+                writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -4325,7 +4351,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
 		
 		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-		int convPalette[] = palette.toARGB();
+		int[] convPalette = palette.toARGB();
 		if (transparentBackground) {
 			convPalette[0] = 0;
 		}

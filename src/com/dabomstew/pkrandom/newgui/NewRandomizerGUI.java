@@ -306,6 +306,8 @@ public class NewRandomizerGUI {
     private JPanel graphicsPanel;
     private JLabel ppalNotExistLabel;
     private JLabel ppalPartiallyImplementedLabel;
+    private JCheckBox miscUpdateRotomFormeTypingCheckBox;
+    private JCheckBox miscDisableLowHPMusicCheckBox;
 
     private static JFrame frame;
 
@@ -2342,11 +2344,11 @@ public class NewRandomizerGUI {
             }
             populateDropdowns();
 
-            boolean hasStarterHeldItems = (pokemonGeneration == 2 || pokemonGeneration == 3);
-            spRandomizeStarterHeldItemsCheckBox.setEnabled(hasStarterHeldItems);
-            spRandomizeStarterHeldItemsCheckBox.setVisible(hasStarterHeldItems);
+            boolean supportsStarterHeldItems = romHandler.supportsStarterHeldItems();
+            spRandomizeStarterHeldItemsCheckBox.setEnabled(supportsStarterHeldItems);
+            spRandomizeStarterHeldItemsCheckBox.setVisible(supportsStarterHeldItems);
             spBanBadItemsCheckBox.setEnabled(false);
-            spBanBadItemsCheckBox.setVisible(hasStarterHeldItems);
+            spBanBadItemsCheckBox.setVisible(supportsStarterHeldItems);
 
             stpUnchangedRadioButton.setEnabled(true);
             stpUnchangedRadioButton.setSelected(true);

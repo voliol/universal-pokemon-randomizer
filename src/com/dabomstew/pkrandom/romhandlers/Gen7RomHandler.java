@@ -501,6 +501,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
+
+        // The above code will add all alternate cosmetic forms to realCosmeticFormNumbers as necessary, but it will
+        // NOT add the base form. For example, if we are currently looking at Mimikyu, it will add Totem Mimikyu to
+        // the list of realCosmeticFormNumbers, but it will not add normal-sized Mimikyu. Without any corrections,
+        // this will make base Mimikyu impossible to randomly select. The simplest way to fix this is to just add
+        // the base form to the realCosmeticFormNumbers here if that list was populated above.
+        if (pkmn.getRealCosmeticFormNumbers().size() > 0) {
+            pkmn.getRealCosmeticFormNumbers().add(0);
+            pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1); // getCosmeticForms++;
+        }
     }
 
     private String[] readPokemonNames() {
@@ -916,7 +926,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         int offset = find(code, Gen7Constants.ninjaskSpeciesPrefix);
         if (offset > 0) {
             offset += Gen7Constants.ninjaskSpeciesPrefix.length() / 2; // because it was a prefix
-            FileFunctions.writeFullInt(code, offset, primaryEvolution.getNumber());
+            FileFunctions.writeFullInt(code, offset, primaryEvolution.getBaseNumber());
         }
 
         // In the game's executable, there's a hardcoded value to indicate what "extra"
@@ -944,7 +954,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
 
             // Write Nincada's new extra evolution in the new free space.
-            writeLong(code, offset + 120, extraEvolution.getNumber());
+            writeLong(code, offset + 120, extraEvolution.getBaseNumber());
 
             // Second parameter of pml::pokepara::CoreParam::ChangeMonsNo is the
             // new forme number
@@ -1143,7 +1153,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 se.pkmn = pokemon;
                 se.forme = forme;
                 se.level = giftsFile[offset + 3];
-                se.heldItem = FileFunctions.read2ByteInt(giftsFile, offset + 8);
                 starters.add(se);
             }
         } catch (IOException e) {
@@ -1255,14 +1264,41 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean supportsStarterHeldItems() {
+        return true;
+    }
+
+    @Override
     public List<Integer> getStarterHeldItems() {
-        // do nothing
-        return new ArrayList<>();
+        List<Integer> starterHeldItems = new ArrayList<>();
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            for (int i = 0; i < 3; i++) {
+                int offset = i * 0x14;
+                int item = FileFunctions.read2ByteInt(giftsFile, offset + 8);
+                starterHeldItems.add(item);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return starterHeldItems;
     }
 
     @Override
     public void setStarterHeldItems(List<Integer> items) {
-        // do nothing
+        try {
+            GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
+            byte[] giftsFile = staticGarc.files.get(0).get(0);
+            for (int i = 0; i < 3; i++) {
+                int offset = i * 0x14;
+                int item = items.get(i);
+                FileFunctions.write2ByteInt(giftsFile, offset + 8, item);
+            }
+            writeGARC(romEntry.getFile("StaticPokemon"), staticGarc);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     @Override
@@ -2370,15 +2406,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void applyMiscTweak(MiscTweak tweak) {
         if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
-        }
-        if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Items.luckyEgg);
             nonBadItems.banSingles(Items.luckyEgg);
-        }
-        if (tweak == MiscTweak.SOS_BATTLES_FOR_ALL) {
+        } else if (tweak == MiscTweak.SOS_BATTLES_FOR_ALL) {
             positiveCallRates();
-        }
-        if (tweak == MiscTweak.RETAIN_ALT_FORMES) {
+        } else if (tweak == MiscTweak.RETAIN_ALT_FORMES) {
             try {
                 patchFormeReversion();
             } catch (IOException e) {
@@ -2417,6 +2450,29 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             if (pk.getCallRate() <= 0) {
                 pk.setCallRate(5);
             }
+        }
+    }
+
+    public void enableGuaranteedPokemonCatching() {
+        try {
+            byte[] battleCRO = readFile(romEntry.getFile("Battle"));
+            int offset = find(battleCRO, Gen7Constants.perfectOddsBranchLocator);
+            if (offset > 0) {
+                // The game checks to see if your odds are greater then or equal to 255 using the following
+                // code. Note that they compare to 0xFF000 instead of 0xFF; it looks like all catching code
+                // probabilities are shifted like this?
+                // cmp r7, #0xFF000
+                // blt oddsLessThanOrEqualTo254
+                // The below code just nops the branch out so it always acts like our odds are 255, and
+                // Pokemon are automatically caught no matter what.
+                battleCRO[offset] = 0x00;
+                battleCRO[offset + 1] = 0x00;
+                battleCRO[offset + 2] = 0x00;
+                battleCRO[offset + 3] = 0x00;
+                writeFile(romEntry.getFile("Battle"), battleCRO);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 
