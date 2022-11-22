@@ -98,12 +98,11 @@ public class PalettePartDescription {
 	 *                 <p>
 	 *                 Color slots are ordered from brightest to darkest.
 	 *                 <p>
-	 *                 Gen 5 palettes may look strange and too-high contrast. This
-	 *                 is because the PalettePopulator class is originally made for
-	 *                 Gen 3 palettes, and those usually have a highlight color Gen
-	 *                 5 palettes lack. A quickfix for this is to assign the first
-	 *                 color slot to "1", that way the highlight is put in the
-	 *                 transparent slot 1, and not seen.
+	 *                 If you use "0" as a color slot, a shade is generated but
+	 *                 not used in the final palette. This can e.g. be used to prevent
+	 *                 the first color slot to be a highlight by putting "0," before it,
+	 *                 or otherwise ensure color slots are as bright/dark/contrasted
+	 *                 as they should be. Very useful for Gen 5 palettes.
 	 *                 <p>
 	 *                 The following letters also have syntactic meaning. They
 	 *                 should be placed at the end of unparsed strings; letters at

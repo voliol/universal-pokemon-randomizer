@@ -175,7 +175,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	private String unchangedBody;
 	private String unchangedNote;
 
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		new PaletteDescriptionTool().setVisible(true);
 	}
 
@@ -431,8 +431,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private Pokemon getCurrentPokemon() {
-		Pokemon pk = romHandler.getPokemon().get(paletteDescriptions.getSelectedIndex() + 1);
-		return pk;
+		return romHandler.getPokemon().get(paletteDescriptions.getSelectedIndex() + 1);
 	}
 
 	private BufferedImage getPokemonImage(Pokemon pk, boolean shiny) {

@@ -58,8 +58,6 @@ import java.util.Random;
  * Artemis251's Emerald Randomizer.
  */
 public class PalettePopulator {
-	
-	//TODO: make Gen 5 palettes look better without the "slot 1" trick.
 
 	private final int VARIA = 10; // 3 of these fuel the variation for sibling palettes - artemis
 	private final int VARIABASE = 3; // base forced change for sibling palettes - artemis
@@ -295,7 +293,9 @@ public class PalettePopulator {
 	private Color[] fitShadesInSlots(Color[] sorted, int[] slots) {
 		Color[] out = new Color[palette.size()];
 		for (int i = 0; i < slots.length; i++) {
-			out[slots[i]] = sorted[i];
+			if (slots[i] != -1) { // permits the "0"-trick in PalettePartDescriptions
+				out[slots[i]] = sorted[i];
+			}
 		}
 		return out;
 	}
