@@ -86,29 +86,29 @@ public class PalettePartDescription {
 	 * Constructs a PalettePartDescription from a String
 	 * @param unparsed The String containing the description pre-parsing. Its syntax
 	 *                 is described below.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 Color slots are listed as comma-separated integers,
 	 *                 representing locations in a certain Palette.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 Color slots range from 1 to the size of the Palette (normally
 	 *                 16). For images that have a transparent background color,
 	 *                 e.g. those of Pokémon, slot 1 is used for that color. Slots
 	 *                 are stored internally and returned as starting from 0, each
 	 *                 slot in the unparsed String being offset by -1.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 Color slots are ordered from brightest to darkest.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 If you use "0" as a color slot, a shade is generated but
 	 *                 not used in the final palette. This can e.g. be used to prevent
 	 *                 the first color slot to be a highlight by putting "0," before it,
 	 *                 or otherwise ensure color slots are as bright/dark/contrasted
 	 *                 as they should be. Very useful for Gen 5 palettes.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 The following letters also have syntactic meaning. They
 	 *                 should be placed at the end of unparsed strings; letters at
 	 *                 the start are ignored to allow for notes e.g. what palette
 	 *                 the description pertains.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 <b>L</b> - Ensures the color is light.<br>
 	 *                 <b>LN</b> - Ensures the color is not light (i.e. dark or
 	 *                 default).<br>
@@ -120,11 +120,12 @@ public class PalettePartDescription {
 	 *                 <b>E</b> - Darkens the last/darkest shade of a color
 	 *                 further.<br>
 	 *                 <b>A</b> - Marks an "average color" description, see below.
-	 *                 <p>
+	 *                 <br><br>
 	 *                 Sibling colors are started with a ";". The shared color
 	 *                 should be repeated at the end preceded by a "-". E.g.
-	 *                 "1,2,3,4;5,6,4-4" .
-	 *                 <p>
+	 *                 "1,2,3,4;5,6,4-4". Keep in mind second sibling colors
+	 *                 tend to be less saturated (more gray) than other colors.
+	 *                 <br><br>
 	 *                 Average color descriptions start with an "A", and mark that
 	 *                 the color in the first given color slot should be the average
 	 *                 of the colors in the following color slots. Average color
