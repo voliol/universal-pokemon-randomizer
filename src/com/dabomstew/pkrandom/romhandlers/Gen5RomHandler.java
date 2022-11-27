@@ -4338,8 +4338,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     protected int calculatePokemonShinyPaletteIndex(int i) {
         return calculatePokemonNormalPaletteIndex(i) + 1; 
     }
-    
-	@Override
+
+    // TODO: remove
+    @Override
+    protected BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC) {
+        return null;
+    }
+
+    @Override
 	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette) {
 		
@@ -4369,7 +4375,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 		return bim;
 	}
 
-	private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
+    // TODO: remove
+    @Override
+    public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
+        return null;
+    }
+
+    private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
 		BufferedImage unscrambled = new BufferedImage(96, 96, BufferedImage.TYPE_BYTE_INDEXED,
 				(IndexColorModel) bim.getColorModel());
 		Graphics g = unscrambled.getGraphics();

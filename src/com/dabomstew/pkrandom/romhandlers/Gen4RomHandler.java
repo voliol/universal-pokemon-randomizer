@@ -5940,6 +5940,111 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return bim;
 	}
 
+	// Temporary
+	@Override
+	public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+										 boolean transparentBackground, boolean includePalette) {
+
+		int spriteIndex = number * 6 + 2 + random.nextInt(2);
+		if (back) {
+			spriteIndex -= 2;
+		}
+		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+
+
+		int normalPaletteIndex = calculatePokemonNormalPaletteIndex(number);
+		Palette normalPalette = readPalette(pokeGraphicsNARC, normalPaletteIndex);
+		int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(number);
+		Palette shinyPalette = readPalette(pokeGraphicsNARC, shinyPaletteIndex);
+
+		Palette palette = shiny ? shinyPalette : normalPalette;
+		int[] convPalette = palette.toARGB();
+		if (transparentBackground) {
+			convPalette[0] = 0;
+		}
+
+		// Deliberately chop off the right half of the image while still
+		// correctly indexing the array.
+		int bpp = 4;
+		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+		for (int y = 0; y < 80; y++) {
+			for (int x = 0; x < 80; x++) {
+				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+				bim.setRGB(x, y, convPalette[value]);
+			}
+		}
+
+		if (includePalette) {
+			for (int j = 0; j < 16; j++) {
+				bim.setRGB(j, 0, convPalette[j]);
+			}
+		}
+
+		return bim;
+	}
+
+	//TODO: remove
+	@Override
+	public BufferedImage ripOtherPoke(int i, NARCArchive narcArchive) {
+		final int deoxysImages = 0, deoxysPals = 0;
+		final int unownImages = 8, unownPals = 2;
+		final int castformImages = 64, castformPals = 4;
+		final int burmyWormadamImages = 72;
+		final int shellosGastroImages = 84;
+		final int cherrimImages = 92;
+		final int arceusImages = 96;
+		final int eggImage = 132, manaphyEggImage = 133;
+		final int shayminImages = 134;
+		final int rotomImages = 138;
+		final int giratinaImages = 150;
+		final int pichuImages = 154;
+
+		int palStart;
+		switch (romEntry.romType) {
+			case Gen4Constants.Type_DP -> palStart = manaphyEggImage + 1;
+			case Gen4Constants.Type_Plat -> palStart = 0; // TODO how does it look?
+			case Gen4Constants.Type_HGSS -> palStart = pichuImages + 4;
+			default -> palStart = 0;
+		}
+
+		System.out.println(i);
+		int[] spriteData = readSpriteData(narcArchive, i);
+
+		int palIndex;
+		if (deoxysImages <= i && i < unownImages) {
+			palIndex = deoxysPals + i % 2;
+		} else if (unownImages <= i && i < castformImages) {
+			palIndex = unownPals + i % 2;
+		} else if ((castformImages <= i && i < shellosGastroImages) || (cherrimImages <= i && i < palStart)) {
+			palIndex = i + castformPals - castformImages;
+		} else if (shellosGastroImages <= i && i < cherrimImages) {
+			palIndex = deoxysPals + i % 2; // TODO
+		} else if (i == 208 || i == 209){
+			palIndex = 210; // substitute
+		} else if (i == 211){
+			palIndex = 212; // shadows ??
+		} else {
+			palIndex = 0;
+		}
+
+		Palette palette = readPalette(narcArchive, palStart + palIndex);
+		System.out.println(palette);
+		int[] convPalette = palette.toARGB();
+		// Deliberately chop off the right half of the image while still
+		// correctly indexing the array.
+		int bpp = 4;
+		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+		for (int y = 0; y < 80; y++) {
+			for (int x = 0; x < 80; x++) {
+				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+				bim.setRGB(x, y, convPalette[value]);
+			}
+		}
+		return bim;
+	}
+
 	private int[] readSpriteData(NARCArchive pokespritesNARC, int spriteIndex) {
 		// read sprite
 		byte[] rawSprite = pokespritesNARC.files.get(spriteIndex);
