@@ -6438,18 +6438,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;
 
+    /**
+     * Picks a type, sometimes based on frequency of non-banned Pokémon of that type. Compare with randomType().
+     * Never picks a type with no non-banned Pokémon, even when weightByFrequency == false.
+     */
     private Type pickType(boolean weightByFrequency, boolean noLegendaries, boolean allowAltFormes) {
         if (totalTypeWeighting == 0) {
-            // Determine weightings
-            for (Type t : Type.values()) {
-                if (typeInGame(t)) {
-                    List<Pokemon> pokemonOfType = allowAltFormes ? pokemonOfTypeInclFormes(t, noLegendaries) :
-                            pokemonOfType(t, noLegendaries);
-                    int pkWithTyping = pokemonOfType.size();
-                    typeWeightings.put(t, pkWithTyping);
-                    totalTypeWeighting += pkWithTyping;
-                }
-            }
+            initTypeWeightings(noLegendaries, allowAltFormes);
         }
 
         if (weightByFrequency) {
@@ -6464,7 +6459,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             return null;
         } else {
-            return randomType();
+            // assumes some type has non-banned Pokémon
+            Type picked;
+            do {
+                picked = randomType();
+            } while (typeWeightings.get(picked) == 0);
+            return picked;
+        }
+    }
+
+    private void initTypeWeightings(boolean noLegendaries, boolean allowAltFormes) {
+        // Determine weightings
+        for (Type t : Type.values()) {
+            if (typeInGame(t)) {
+                List<Pokemon> pokemonOfType = allowAltFormes ? pokemonOfTypeInclFormes(t, noLegendaries) :
+                        pokemonOfType(t, noLegendaries);
+                int pkWithTyping = pokemonOfType.size();
+                typeWeightings.put(t, pkWithTyping);
+                totalTypeWeighting += pkWithTyping;
+            }
         }
     }
 
