@@ -4,22 +4,18 @@ With significant contributions from darkeye, cleartonic
 
 Based on the Universal Pokemon Randomizer by Dabomstew
 
-Palette branch 
+Images branch 
 by voliol
 
 # Branch Info
 
-This is a branch for implementing/porting palette randomization into UPR ZX. For a longer description, see the readme of the 
-branch it came from: https://github.com/voliol/universal-pokemon-randomizer/blob/paltest/README.md
-For technical notes, see GRAPHICS_GUIDE.md.
+This is a branch for various image-related operations, such as changing the playable character's graphics. 
+It builds upon the palettes branch https://github.com/voliol/universal-pokemon-randomizer/tree/palettes, 
+but is much more incomplete than that one is. 
 
-As I implement the palette framework, I've taken the time to do some refactoring. This is partially a selfish endeavor to calm my own mind, 
-but also works to counteract the code bloat that adding a major feature like this naturally entails. 
+I do not know what kind of time/drive I will have working at this going forwards. If you have any questions, contact me through voliol.website@hotmail.com .
 
-I hope to see it make its way into UPR ZX proper, see this issue: https://github.com/Ajarmar/universal-pokemon-randomizer-zx/issues/510
-
-
-**The rest of the readme is from the version of the UPR ZX this was branched from:**
+**The rest of the readme is from the version of the UPR ZX the palette branch was branched from:**
 
 # Info
 
