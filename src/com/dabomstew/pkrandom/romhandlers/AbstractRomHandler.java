@@ -56,7 +56,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private boolean restrictionsSet;
     protected PokemonSet<Pokemon> restrictedPokemon;
-    protected PokemonSet<Pokemon> restrictedPokemonInclAltFormes = new PokemonSet<>();
+    protected PokemonSet<Pokemon> restrictedPokemonInclAltFormes;
     private PokemonSet<Pokemon> nonlegendaryPokemon = new PokemonSet<>();
     private PokemonSet<Pokemon> legendaryPokemon = new PokemonSet<>();
     private PokemonSet<Pokemon> ultraBeasts = new PokemonSet<>();
@@ -112,6 +112,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         restrictionsSet = true;
         altFormes = getAltFormes();
+        restrictedPokemonInclAltFormes = new PokemonSet<>();
         if (restrictions != null) {
             megaEvolutionsList = new ArrayList<>();
             List<Pokemon> allPokemon = this.getPokemon();
