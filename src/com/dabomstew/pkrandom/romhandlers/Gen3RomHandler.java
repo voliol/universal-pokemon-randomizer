@@ -1752,7 +1752,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
-        List<Trainer> theTrainers = new ArrayList<>();
+        List<Trainer> trainers = new ArrayList<>();
         List<String> tcnames = this.getTrainerClassNames();
         for (int i = 1; i < amount; i++) {
             // Trainer entries are 40 bytes
@@ -1837,47 +1837,56 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     tr.pokemon.add(thisPoke);
                 }
             }
-            theTrainers.add(tr);
+            trainers.add(tr);
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Em) {
-            int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
-            Trainer mossdeepSteven = new Trainer();
-            mossdeepSteven.offset = mossdeepStevenOffset;
-            mossdeepSteven.index = amount;
-            mossdeepSteven.poketype = 1; // Custom moves, but no held items
-
-            // This is literally how the game does it too, lol. Have to subtract one because the
-            // trainers internally are one-indexed, but then theTrainers is zero-indexed.
-            Trainer meteorFallsSteven = theTrainers.get(Gen3Constants.emMeteorFallsStevenIndex - 1);
-            mossdeepSteven.trainerclass = meteorFallsSteven.trainerclass;
-            mossdeepSteven.name = meteorFallsSteven.name;
-            mossdeepSteven.fullDisplayName = meteorFallsSteven.fullDisplayName;
-
-            for (int i = 0; i < 3; i++) {
-                int currentOffset = mossdeepStevenOffset + (i * 20);
-                TrainerPokemon thisPoke = new TrainerPokemon();
-                thisPoke.pokemon = pokesInternal[readWord(currentOffset)];
-                thisPoke.IVs = rom[currentOffset + 2];
-                thisPoke.level = rom[currentOffset + 3];
-                for (int move = 0; move < 4; move++) {
-                    thisPoke.moves[move] = readWord(currentOffset + 12 + (move * 2));
-                }
-                mossdeepSteven.pokemon.add(thisPoke);
-            }
-
-            theTrainers.add(mossdeepSteven);
+            addMossdeepStevenTrainer(trainers, amount);
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
-            Gen3Constants.trainerTagsRS(theTrainers, romEntry.romType);
+            Gen3Constants.trainerTagsRS(trainers, romEntry.romType);
         } else if (romEntry.romType == Gen3Constants.RomType_Em) {
-            Gen3Constants.trainerTagsE(theTrainers);
-            Gen3Constants.setMultiBattleStatusEm(theTrainers);
+            Gen3Constants.trainerTagsE(trainers);
+            Gen3Constants.setMultiBattleStatusEm(trainers);
         } else {
-            Gen3Constants.trainerTagsFRLG(theTrainers);
+            Gen3Constants.trainerTagsFRLG(trainers);
         }
-        return theTrainers;
+        return trainers;
+    }
+
+    /**
+     * Adds the Mossdeep Steven battle/{@link Trainer} to a list of Trainers.
+     * @param trainers List of Trainers to add to.
+     * @param index Index of the Mossdeep Steven Trainer. Not to be confused with the offset of the data.
+     */
+    private void addMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+        int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
+        Trainer mossdeepSteven = new Trainer();
+        mossdeepSteven.offset = mossdeepStevenOffset;
+        mossdeepSteven.index = index;
+        mossdeepSteven.poketype = 1; // Custom moves, but no held items
+
+        // This is literally how the game does it too, lol. Have to subtract one because the
+        // trainers internally are one-indexed, but then trainers is zero-indexed.
+        Trainer meteorFallsSteven = trainers.get(Gen3Constants.emMeteorFallsStevenIndex - 1);
+        mossdeepSteven.trainerclass = meteorFallsSteven.trainerclass;
+        mossdeepSteven.name = meteorFallsSteven.name;
+        mossdeepSteven.fullDisplayName = meteorFallsSteven.fullDisplayName;
+
+        for (int i = 0; i < 3; i++) {
+            int currentOffset = mossdeepStevenOffset + (i * 20);
+            TrainerPokemon tp = new TrainerPokemon();
+            tp.pokemon = pokesInternal[readWord(currentOffset)];
+            tp.IVs = rom[currentOffset + 2];
+            tp.level = rom[currentOffset + 3];
+            for (int move = 0; move < 4; move++) {
+                tp.moves[move] = readWord(currentOffset + 12 + (move * 2));
+            }
+            mossdeepSteven.pokemon.add(tp);
+        }
+
+        trainers.add(mossdeepSteven);
     }
 
     @Override
@@ -1892,7 +1901,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Integer> getMainPlaythroughTrainers() {
-        return new ArrayList<>(); // Not implemented
+        return new ArrayList<>(); // TODO: Not implemented
     }
 
     @Override
@@ -1902,11 +1911,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainers, boolean doubleBattleMode) {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
-        Iterator<Trainer> theTrainers = trainerData.iterator();
+        Iterator<Trainer> trainerIterator = trainers.iterator();
         int fso = romEntry.getValue("FreeSpace");
 
         // Get current movesets in case we need to reset them for certain
@@ -1915,7 +1924,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         for (int i = 1; i < amount; i++) {
             int trOffset = baseOffset + i * entryLen;
-            Trainer tr = theTrainers.next();
+            Trainer tr = trainerIterator.next();
             // Do we need to repoint this trainer's data?
             int oldPokeType = rom[trOffset] & 0xFF;
             int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
@@ -1993,18 +2002,22 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Em) {
-            int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
-            Trainer mossdeepSteven = trainerData.get(amount - 1);
+            setMossdeepStevenTrainer(trainers, amount);
+        }
+    }
 
-            for (int i = 0; i < 3; i++) {
-                int currentOffset = mossdeepStevenOffset + (i * 20);
-                TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
-                writeWord(currentOffset, pokedexToInternal[tp.pokemon.getNumber()]);
-                rom[currentOffset + 2] = (byte)tp.IVs;
-                rom[currentOffset + 3] = (byte)tp.level;
-                for (int move = 0; move < 4; move++) {
-                    writeWord(currentOffset + 12 + (move * 2), tp.moves[move]);
-                }
+    private void setMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+        int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
+        Trainer mossdeepSteven = trainers.get(index - 1);
+
+        for (int i = 0; i < 3; i++) {
+            int currentOffset = mossdeepStevenOffset + (i * 20);
+            TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
+            writeWord(currentOffset, pokedexToInternal[tp.pokemon.getNumber()]);
+            rom[currentOffset + 2] = (byte)tp.IVs;
+            rom[currentOffset + 3] = (byte)tp.level;
+            for (int move = 0; move < 4; move++) {
+                writeWord(currentOffset + 12 + (move * 2), tp.moves[move]);
             }
         }
     }
@@ -3381,11 +3394,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
-        List<String> theTrainers = new ArrayList<>();
+        List<String> trainerNames = new ArrayList<>();
         for (int i = 1; i < amount; i++) {
-            theTrainers.add(readVariableLengthString(baseOffset + i * entryLen + 4));
+            trainerNames.add(readVariableLengthString(baseOffset + i * entryLen + 4));
         }
-        return theTrainers;
+        return trainerNames;
     }
 
     @Override
@@ -3394,9 +3407,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
         int nameLen = romEntry.getValue("TrainerNameLength");
-        Iterator<String> theTrainers = trainerNames.iterator();
+        Iterator<String> nameIterator = trainerNames.iterator();
         for (int i = 1; i < amount; i++) {
-            String newName = theTrainers.next();
+            String newName = nameIterator.next();
             writeFixedLengthString(newName, baseOffset + i * entryLen + 4, nameLen);
         }
 
@@ -3423,11 +3436,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerClassNames");
         int amount = romEntry.getValue("TrainerClassCount");
         int length = romEntry.getValue("TrainerClassNameLength");
-        List<String> trainerClasses = new ArrayList<>();
+        List<String> trainerClassNames = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
-            trainerClasses.add(readVariableLengthString(baseOffset + i * length));
+            trainerClassNames.add(readVariableLengthString(baseOffset + i * length));
         }
-        return trainerClasses;
+        return trainerClassNames;
     }
 
     @Override
@@ -3435,9 +3448,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerClassNames");
         int amount = romEntry.getValue("TrainerClassCount");
         int length = romEntry.getValue("TrainerClassNameLength");
-        Iterator<String> trainerClasses = trainerClassNames.iterator();
+        Iterator<String> trainerClassNamesIterator = trainerClassNames.iterator();
         for (int i = 0; i < amount; i++) {
-            writeFixedLengthString(trainerClasses.next(), baseOffset + i * length, length);
+            writeFixedLengthString(trainerClassNamesIterator.next(), baseOffset + i * length, length);
         }
     }
 
