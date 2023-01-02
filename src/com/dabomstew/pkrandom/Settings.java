@@ -345,7 +345,7 @@ public class Settings {
         }
         int version = ByteBuffer.wrap(versionBytes).getInt();
         if (((version >> 24) & 0xFF) > 0 && ((version >> 24) & 0xFF) <= 172) {
-            throw new UnsupportedOperationException("The settings file is too old to update. Please download v4.0.2 of the randomizer (or earlier) to update it.");
+            throw new UnsupportedOperationException("The settings file is too old to update and cannot be loaded.");
         }
         if (version > VERSION) {
             throw new UnsupportedOperationException("Cannot read settings from a newer version of the randomizer.");

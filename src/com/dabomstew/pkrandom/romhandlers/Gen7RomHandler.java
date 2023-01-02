@@ -1255,9 +1255,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
         Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
+        int aegislashBlade = Species.SMFormes.aegislashB;
+        if (romEntry.romType == Gen7Constants.Type_USUM) {
+            aegislashBlade = Species.USUMFormes.aegislashB;
+        }
         switch(generation) {
             case 8:
-                map.put(859,new StatChange(Stat.ATK.val | Stat.SPATK.val,140,140));
+                map.put(aegislashBlade, new StatChange(Stat.ATK.val | Stat.SPATK.val, 140, 140));
                 break;
         }
         return map;

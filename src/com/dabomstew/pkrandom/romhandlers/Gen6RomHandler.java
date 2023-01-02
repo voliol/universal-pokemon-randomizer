@@ -1154,10 +1154,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
         switch(generation) {
             case 7:
-                map.put(781,new StatChange(Stat.SPDEF.val,105));
+                map.put(Species.Gen6Formes.alakazamMega, new StatChange(Stat.SPDEF.val, 105));
                 break;
             case 8:
-                map.put(776,new StatChange(Stat.ATK.val | Stat.SPATK.val,140,140));
+                map.put(Species.Gen6Formes.aegislashB, new StatChange(Stat.ATK.val | Stat.SPATK.val, 140, 140));
                 break;
         }
         return map;

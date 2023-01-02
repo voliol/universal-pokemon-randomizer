@@ -549,6 +549,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				|| (romEntry.romType == Gen4Constants.Type_HGSS
 						&& romEntry.tweakFiles.containsKey("NewRoamerSubroutineTweak"));
 
+		try {
+			computeCRC32sForRom();
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+
+		
 		// We want to guarantee that the catching tutorial in HGSS has Ethan/Lyra's new
 		// Pokemon. We also
 		// want to allow the option of randomizing the enemy Pokemon too. Unfortunately,
@@ -562,12 +569,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			int extendBy = romEntry.getInt("Arm9ExtensionSize");
 			arm9 = extendARM9(arm9, extendBy, romEntry.getString("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
 			genericIPSPatch(arm9, "NewCatchingTutorialSubroutineTweak");
-		}
-
-		try {
-			computeCRC32sForRom();
-		} catch (IOException e) {
-			throw new RandomizerIOException(e);
 		}
 
 		// Having this in the constructor would be preferred,
@@ -1340,16 +1341,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				// Fix starter text
 				List<String> spStrings = getStrings(romEntry.getInt("StarterScreenTextOffset"));
-				String[] intros = new String[] { "So, you like", "Youâ€™ll take", "Do you want" };
+				String[] intros = new String[] { "So, you like", "You’ll take", "Do you want" };
 				for (int i = 0; i < 3; i++) {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "Professor Elm: " + intros[i] + " \\vFF00\\z000" + color
 							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType().camelCase()
-							+ "-type PokÃ©mon?";
+							+ "-type Pokémon?";
 					spStrings.set(i + 1, newStarterDesc);
 					String altStarterDesc = "\\vFF00\\z000" + color + newStarter.getName() + "\\vFF00\\z0000, the "
-							+ newStarter.getPrimaryType().camelCase() + "-type PokÃ©mon, is\\nin this PokÃ© Ball!";
+							+ newStarter.getPrimaryType().camelCase() + "-type Pokémon, is\\nin this Poké Ball!";
 					spStrings.set(i + 4, altStarterDesc);
 				}
 				setStrings(romEntry.getInt("StarterScreenTextOffset"), spStrings);
@@ -1576,7 +1577,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.getNumber())
-							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this PokÃ©mon?";
+							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
 					spStrings.set(i + 1, newStarterDesc);
 				}
 				// rewrite starter picking screen
@@ -1585,13 +1586,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// what rival says after we get the Pokemon
 					List<String> lakeStrings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					lakeStrings.set(Gen4Constants.dpStarterStringIndex,
-							"\\v0103\\z0000: Fwaaah!\\nYour PokÃ©mon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other peopleâ€™s\\nPokÃ©mon, though...\\pBut we had to use them...\\nThey wonâ€™t mind, will they?\\p");
+							"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), lakeStrings);
 				} else {
 					// what rival says after we get the Pokemon
 					List<String> r201Strings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					r201Strings.set(Gen4Constants.ptStarterStringIndex,
-							"\\v0103\\z0000\\z0000: Then, I choose you!\\nIâ€™m picking this one!\\p");
+							"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), r201Strings);
 				}
 			} catch (IOException e) {
@@ -3170,6 +3171,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 	}
+	
+
+    @Override
+    public PokemonSet<Pokemon> getBannedForWildEncounters() {
+        // Ban Unown in DPPt because you can't get certain letters outside of Solaceon Ruins.
+        // Ban Unown in HGSS because they don't show up unless you complete a puzzle in the Ruins of Alph.
+    	return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
+    }
 
 	@Override
 	public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
@@ -5786,6 +5795,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public boolean isRomValid() {
 		if (romEntry.arm9ExpectedCRC32 != actualArm9CRC32) {
+			System.out.println(actualArm9CRC32);
 			return false;
 		}
 

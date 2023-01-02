@@ -333,10 +333,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         allowedItems = Gen2Constants.allowedItems.copy();
         nonBadItems = Gen2Constants.nonBadItems.copy();
         actualCRC32 = FileFunctions.getCRC32(rom);
-        // VietCrystal: exclude Burn Heal, Calcium, and Elixir
+        // VietCrystal: exclude Burn Heal, Calcium, TwistedSpoon, and Elixir
         // crashes your game if used, glitches out your inventory if carried
         if (isVietCrystal) {
-            allowedItems.banSingles(Gen2Items.burnHeal, Gen2Items.calcium, Gen2Items.elixer);
+            allowedItems.banSingles(Gen2Items.burnHeal, Gen2Items.calcium, Gen2Items.elixer, Gen2Items.twistedSpoon);
         }
     }
 
@@ -1553,6 +1553,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public boolean canChangeStaticPokemon() {
         return (romEntry.getValue("StaticPokemonSupport") > 0);
     }
+    
+    @Override
+    public PokemonSet<Pokemon> getBannedForWildEncounters() {
+        // Ban Unown because they don't show up unless you complete a puzzle in the Ruins of Alph.
+        return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
+    }
 
     @Override
     public boolean hasStaticAltFormes() {
@@ -1561,9 +1567,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public PokemonSet<Pokemon> getBannedForStaticPokemon() {
-    	PokemonSet<Pokemon> banned = new PokemonSet<>();
-    	banned.add(pokes[Species.unown]); // Unown banned
-        return banned; 
+    	return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
     }
 
     @Override

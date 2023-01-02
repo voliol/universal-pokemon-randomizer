@@ -171,6 +171,8 @@ public class Gen3Constants {
 
     public static final int cacophonyIndex = 76, airLockIndex = 77, highestAbilityIndex = 77;
 
+    public static final int emMeteorFallsStevenIndex = 804;
+
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {
@@ -710,7 +712,7 @@ public class Gen3Constants {
         tag(trs, "THEMED:WALLY-STRONG", 0x207, 0x290, 0x291, 0x292, 0x293, 0x294);
 
         // Steven
-        tag(trs, 0x324, "UBER");
+        tag(trs, emMeteorFallsStevenIndex, "UBER");
 
     }
 

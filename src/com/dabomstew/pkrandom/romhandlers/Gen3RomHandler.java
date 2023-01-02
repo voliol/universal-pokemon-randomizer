@@ -1840,6 +1840,35 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             theTrainers.add(tr);
         }
 
+        if (romEntry.romType == Gen3Constants.RomType_Em) {
+            int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
+            Trainer mossdeepSteven = new Trainer();
+            mossdeepSteven.offset = mossdeepStevenOffset;
+            mossdeepSteven.index = amount;
+            mossdeepSteven.poketype = 1; // Custom moves, but no held items
+
+            // This is literally how the game does it too, lol. Have to subtract one because the
+            // trainers internally are one-indexed, but then theTrainers is zero-indexed.
+            Trainer meteorFallsSteven = theTrainers.get(Gen3Constants.emMeteorFallsStevenIndex - 1);
+            mossdeepSteven.trainerclass = meteorFallsSteven.trainerclass;
+            mossdeepSteven.name = meteorFallsSteven.name;
+            mossdeepSteven.fullDisplayName = meteorFallsSteven.fullDisplayName;
+
+            for (int i = 0; i < 3; i++) {
+                int currentOffset = mossdeepStevenOffset + (i * 20);
+                TrainerPokemon thisPoke = new TrainerPokemon();
+                thisPoke.pokemon = pokesInternal[readWord(currentOffset)];
+                thisPoke.IVs = rom[currentOffset + 2];
+                thisPoke.level = rom[currentOffset + 3];
+                for (int move = 0; move < 4; move++) {
+                    thisPoke.moves[move] = readWord(currentOffset + 12 + (move * 2));
+                }
+                mossdeepSteven.pokemon.add(thisPoke);
+            }
+
+            theTrainers.add(mossdeepSteven);
+        }
+
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
             Gen3Constants.trainerTagsRS(theTrainers, romEntry.romType);
         } else if (romEntry.romType == Gen3Constants.RomType_Em) {
@@ -1963,6 +1992,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         }
 
+        if (romEntry.romType == Gen3Constants.RomType_Em) {
+            int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
+            Trainer mossdeepSteven = trainerData.get(amount - 1);
+
+            for (int i = 0; i < 3; i++) {
+                int currentOffset = mossdeepStevenOffset + (i * 20);
+                TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
+                writeWord(currentOffset, pokedexToInternal[tp.pokemon.getNumber()]);
+                rom[currentOffset + 2] = (byte)tp.IVs;
+                rom[currentOffset + 3] = (byte)tp.level;
+                for (int move = 0; move < 4; move++) {
+                    writeWord(currentOffset + 12 + (move * 2), tp.moves[move]);
+                }
+            }
+        }
     }
 
     private void writeWildArea(int offset, int numOfEntries, EncounterSet encounters) {
