@@ -34,15 +34,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.Gen1Pokemon;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
@@ -50,6 +49,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected byte[] rom;
     protected byte[] originalRom;
     private String loadedFN;
+
+    private FreedSpace freedSpace = new FreedSpace();
 
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -221,8 +222,73 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
         return true;
     }
-    
-	@Override
+
+    protected void freeSpace(int offset, int length) {
+        if (length < 1) {
+            throw new IllegalArgumentException("length must be at least 1.");
+        }
+
+        for (int i = 0; i < length; i++) {
+            writeByte(offset + i, getFreeSpaceByte());
+        }
+
+        freedSpace.free(offset, length);
+    }
+
+    protected int findAndUnfreeSpace(int length, int offset) {
+        // by default align to 4 bytes to make sure things don't break
+        return findAndUnfreeSpace(length, offset, true);
+    }
+
+    protected int findAndUnfreeSpace(int length, int offset, boolean longAligned) {
+        int foundOffset = freedSpace.findAndUnfree(length);
+        if (foundOffset == -1 || !isRomSpaceUnused(foundOffset, length)) {
+            foundOffset = findUnusedRomSpace(length, offset, longAligned);
+        }
+        return foundOffset;
+    }
+
+    private boolean isRomSpaceUnused(int offset, int length) {
+        // manual check if the space is still free, because findUnusedRomSpace() /
+        // the deprecated RomFunctions methods can in theory use the freed spaces "by accident".
+        for (int i = 0; i < length; i++) {
+            if (rom[offset + i] != getFreeSpaceByte()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int findUnusedRomSpace(int length, int offset, boolean longAligned) {
+        int foundOffset;
+        byte freeSpace = getFreeSpaceByte();
+        if (!longAligned) {
+            // Find 2 more than necessary and return 2 into it,
+            // to preserve stuff like FF terminators for strings
+            // 161: and FFFF terminators for movesets
+            byte[] searchNeedle = new byte[length + 2];
+            for (int i = 0; i < length + 2; i++) {
+                searchNeedle[i] = freeSpace;
+            }
+            foundOffset = RomFunctions.searchForFirst(rom, offset, searchNeedle) + 2;
+        } else {
+            // Find 5 more than necessary and return into it as necessary for
+            // 4-alignment,
+            // to preserve stuff like FF terminators for strings
+            // 161: and FFFF terminators for movesets
+            byte[] searchNeedle = new byte[length + 5];
+            for (int i = 0; i < length + 5; i++) {
+                searchNeedle[i] = freeSpace;
+            }
+            foundOffset = (RomFunctions.searchForFirst(rom, offset, searchNeedle) + 5) & ~3;
+        }
+        return foundOffset;
+    }
+
+    protected abstract byte getFreeSpaceByte();
+
+
+    @Override
 	protected List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (int i = 1; i < getPokemon().size(); i++) {

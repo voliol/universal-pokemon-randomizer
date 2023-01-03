@@ -1371,6 +1371,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    // TODO: deprecate if rewriteVariableLengthString() can/should always be used instead
     private void writeVariableLengthString(String str, int offset) {
         byte[] translated = translateString(str);
         System.arraycopy(translated, 0, rom, offset, translated.length);
@@ -1944,7 +1945,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // now, do we need to repoint?
             int pointerToPokes;
             if (newDataSize > oldDataSize) {
-                int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, newDataSize, fso, true);
+                int writeSpace = findAndUnfreeSpace(newDataSize, fso, true);
                 if (writeSpace < fso) {
                     throw new RandomizerIOException("ROM is full");
                 }
@@ -2135,7 +2136,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (newMoveCount > currentMoveCount) {
                 // Repoint for more space
                 int newBytesNeeded = newMoveCount * entrySize + entrySize * 2;
-                int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, newBytesNeeded, fso);
+                int writeSpace = findAndUnfreeSpace(newBytesNeeded, fso);
                 if (writeSpace < fso) {
                     throw new RandomizerIOException("ROM is full");
                 }
@@ -2610,8 +2611,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 String newItemDesc = RomFunctions.rewriteDescriptionForNewLineSize(moveDesc, "\\n", limitPerLine, ssd);
                 // Find freespace
                 int fsBytesNeeded = translateString(newItemDesc).length + 1;
-                int newItemDescOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, fsBytesNeeded,
-                        fsOffset);
+                int newItemDescOffset = findAndUnfreeSpace(fsBytesNeeded, fsOffset);
                 if (newItemDescOffset < fsOffset) {
                     String nl = System.getProperty("line.separator");
                     log("Couldn't insert new item description." + nl);
@@ -2642,7 +2642,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 newText = newText.replace(tmpMoveName, moveName);
                 // insert the new text into free space
                 int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset = RomFunctions.freeSpaceFinder(rom, (byte) 0xFF, fsBytesNeeded, fsOffset);
+                int newOffset = findAndUnfreeSpace(fsBytesNeeded, fsOffset);
                 if (newOffset < fsOffset) {
                     String nl = System.getProperty("line.separator");
                     log("Couldn't insert new TM text." + nl);
@@ -2759,7 +2759,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 newText = newText.replace(tmpMoveName, moveName);
                 // insert the new text into free space
                 int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, fsBytesNeeded, fsOffset);
+                int newOffset = findAndUnfreeSpace(fsBytesNeeded, fsOffset);
                 if (newOffset < fsOffset) {
                     String nl = System.getProperty("line.separator");
                     log("Couldn't insert new Move Tutor text." + nl);
@@ -2957,7 +2957,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 44, fso);
+            int writeSpace = findAndUnfreeSpace(44, fso); // TODO: "44" should be a constant
             if (writeSpace < fso) {
                 log("Patch unsuccessful." + nl);
                 // Somehow this ROM is full
@@ -2976,7 +2976,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 10, fso);
+            int writeSpace = findAndUnfreeSpace(10, fso); // TODO: "10" should be a constant
             if (writeSpace < fso) {
                 // Somehow this ROM is full
                 log("Patch unsuccessful." + nl);
@@ -3034,7 +3034,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 27, fso);
+            int writeSpace = findAndUnfreeSpace(27, fso); // TODO: "27" should be a constant
             if (writeSpace < fso) {
                 // Somehow this ROM is full
                 log("Patch unsuccessful." + nl);
@@ -4454,13 +4454,27 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return compressed.length;
     }
 
+    private void rewriteVariableLengthString(int pointerOffset, String string) {
+        byte[] translated = translateString(string);
+        byte[] newData = Arrays.copyOf(translated, translated.length + 1);
+        newData[newData.length - 1] = (byte) 0xFF;
+
+        int dataOffset = readPointer(pointerOffset);
+        int oldLength = lengthOfStringAt(dataOffset) + 1;
+        System.out.println(oldLength + "\t" + readVariableLengthString(dataOffset));
+
+        freeSpace(dataOffset, oldLength);
+        repointAndWriteToFreeSpace(pointerOffset, newData);
+    }
+
     /*
      * Returns the new offset of the data.
      */
     // TODO: refactor old functions to use this
     private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
         int freeSpaceOffset = romEntry.getValue("FreeSpace");
-        int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, data.length, freeSpaceOffset);
+        int newOffset = findAndUnfreeSpace(data.length, freeSpaceOffset);
+        // TODO: is this conditional throw needed?
         if (newOffset < freeSpaceOffset) {
             throw new RandomizerIOException("ROM is full");
         }
@@ -4471,10 +4485,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return newOffset;
     }
 
-    private void freeSpace(int offset, int length) {
-        for (int i = 0; i < length; i++) {
-            writeByte(offset + i, Gen3Constants.freeSpaceByte);
-        }
+    @Override
+    protected byte getFreeSpaceByte() {
+        return Gen3Constants.freeSpaceByte;
     }
     
     @Override

@@ -101,12 +101,18 @@ public class RomFunctions {
         return new String(string);
     }
 
+    @Deprecated
     public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset) {
+        System.out.print("RomFunctions.freeSpaceFinder() is deprecated, " +
+                "use AbstractGBRomHandler.findAndUnfreeSpace() instead.");
         // by default align to 4 bytes to make sure things don't break
         return freeSpaceFinder(rom, freeSpace, amount, offset, true);
     }
 
+    @Deprecated
     public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset, boolean longAligned) {
+        System.out.print("RomFunctions.freeSpaceFinder() is deprecated, " +
+                "use AbstractGBRomHandler.findAndUnfreeSpace() instead.");
         if (!longAligned) {
             // Find 2 more than necessary and return 2 into it,
             // to preserve stuff like FF terminators for strings
@@ -176,7 +182,7 @@ public class RomFunctions {
         return results;
     }
 
-    private static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
+    public static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
         int currentMatchStart = beginOffset;
         int currentCharacterPosition = 0;
 
