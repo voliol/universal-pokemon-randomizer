@@ -130,6 +130,7 @@ public class FreedSpace {
 
     public int findAndUnfree(int length) {
         System.out.println(getLengthSum() + " bytes in " + freedChunks.size() + " chunks." );
+        System.out.println(this);
         System.out.println("Looking for " + length + " bytes.");
 
         for (int i = 0; i < freedChunks.size(); i++) {

@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -4374,28 +4375,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void rewriteCompressedData(int pointerOffset, byte[] uncompressed, int[] secondaryPointerOffsets) {
-        byte[] compressed = DSCmp.compressLZ10(uncompressed);
-        int dataOffset = readPointer(pointerOffset);
-        int oldLength = compressedDataLength(dataOffset);
-
-        for (int secondaryPointerOffset : secondaryPointerOffsets) {
-            if (readPointer(secondaryPointerOffset) != dataOffset) {
-                throw new RandomizerIOException("Invalid secondary pointer.");
-            }
-        }
-
-        if (oldLength != compressed.length) {
-            freeSpace(dataOffset, oldLength);
-        }
-
-        if (oldLength < compressed.length) {
-            int newOffset = repointAndWriteToFreeSpace(pointerOffset, compressed);
-            for (int secondaryPointerOffset : secondaryPointerOffsets) {
-                writePointer(secondaryPointerOffset, newOffset);
-            }
-        } else {
-            writeBytes(dataOffset, compressed);
-        }
+        new DataRewriter<byte[]>().rewriteData(pointerOffset, uncompressed, secondaryPointerOffsets,
+                DSCmp::compressLZ10, this::compressedDataLength);
+        // TODO: perhaps shouldn't be "new" each time... might be slow
     }
 
     /*
@@ -4412,16 +4394,43 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void rewriteVariableLengthString(int pointerOffset, String string) {
+        new DataRewriter<String>().rewriteData(pointerOffset, string, this::variableLengthStringToBytes,
+                (oldDataOffset) -> lengthOfStringAt(oldDataOffset) + 1);
+    }
+
+    // TODO: I imagine another method like this could already exist, have a look at that
+    private byte[] variableLengthStringToBytes(String string) {
         byte[] translated = translateString(string);
         byte[] newData = Arrays.copyOf(translated, translated.length + 1);
         newData[newData.length - 1] = (byte) 0xFF;
+        return newData;
+    }
 
-        int dataOffset = readPointer(pointerOffset);
-        int oldLength = lengthOfStringAt(dataOffset) + 1;
-        System.out.println(oldLength + "\t" + readVariableLengthString(dataOffset));
+    private class DataRewriter<E> {
 
-        freeSpace(dataOffset, oldLength);
-        repointAndWriteToFreeSpace(pointerOffset, newData);
+        public void rewriteData (int pointerOffset, E object,
+                                    Function<E, byte[]> newDataFunction,
+                                    Function<Integer, Integer> lengthOfOldFunction) {
+            rewriteData(pointerOffset, object, new int[0], newDataFunction, lengthOfOldFunction);
+        }
+
+        public void rewriteData (int pointerOffset, E object, int[] secondaryPointerOffsets,
+                                  Function<E, byte[]> newDataFunction,
+                                  Function<Integer, Integer> lengthOfOldFunction) {
+            byte[] newData = newDataFunction.apply(object);
+            int oldDataOffset = readPointer(pointerOffset);
+            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
+            freeSpace(oldDataOffset, oldLength);
+            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
+
+            for (int spo : secondaryPointerOffsets) {
+                if (readPointer(spo) != oldDataOffset) {
+                    throw new RandomizerIOException("Invalid secondary pointer.");
+                }
+                writePointer(spo, newDataOffset);
+            }
+        }
+
     }
 
     /*
