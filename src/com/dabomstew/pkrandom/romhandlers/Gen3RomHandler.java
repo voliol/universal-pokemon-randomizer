@@ -1362,11 +1362,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int len = Math.min(translated.length, length);
         System.arraycopy(translated, 0, rom, offset, len);
         if (len < length) {
-            rom[offset + len] = (byte) Gen3Constants.textTerminator;
+            writeByte(offset + len, (byte) Gen3Constants.textTerminator);
             len++;
         }
         while (len < length) {
-            rom[offset + len] = 0;
+            writeByte(offset + len, (byte) 0x00);
             len++;
         }
     }
@@ -1375,7 +1375,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void writeVariableLengthString(String str, int offset) {
         byte[] translated = translateString(str);
         System.arraycopy(translated, 0, rom, offset, translated.length);
-        rom[offset + translated.length] = (byte) 0xFF;
+        writeByte(offset + translated.length, (byte) 0xFF);
     }
 
     private int lengthOfStringAt(int offset) {
@@ -1431,10 +1431,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeLong(int offset, int value) {
-        rom[offset] = (byte) (value & 0xFF);
-        rom[offset + 1] = (byte) ((value >> 8) & 0xFF);
-        rom[offset + 2] = (byte) ((value >> 16) & 0xFF);
-        rom[offset + 3] = (byte) (((value >> 24) & 0xFF));
+        writeBytes(offset, new byte[] { (byte) (value & 0xFF),
+                (byte) ((value >> 8) & 0xFF),
+                (byte) ((value >> 16) & 0xFF),
+                (byte) ((value >> 24) & 0xFF) });
     }
 
     @Override
@@ -1934,11 +1934,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
 
             // write out new data first...
-            rom[trOffset] = (byte) tr.poketype;
-            rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
+            writeByte(trOffset, (byte) tr.poketype);
+            writeByte(trOffset + (entryLen - 8), (byte) newPokeCount);
             if (doubleBattleMode) {
                 if (!tr.skipImportant()) {
-                    rom[trOffset + (entryLen - 16)] = 0x01;
+                    writeByte(trOffset + (entryLen - 16), (byte) 0x01);
                 }
             }
 
@@ -2015,8 +2015,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int currentOffset = mossdeepStevenOffset + (i * 20);
             TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
             writeWord(currentOffset, pokedexToInternal[tp.pokemon.getNumber()]);
-            rom[currentOffset + 2] = (byte)tp.IVs;
-            rom[currentOffset + 3] = (byte)tp.level;
+            writeByte(currentOffset + 2, (byte) tp.IVs);
+            writeByte(currentOffset + 3, (byte) tp.level);
             for (int move = 0; move < 4; move++) {
                 writeWord(currentOffset + 12 + (move * 2), tp.moves[move]);
             }
@@ -2155,17 +2155,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // If no repoint, the padding goes over the old moves/terminator.
             if (newMoveCount != currentMoveCount) {
                 if (jamboMovesetHack) {
-                    rom[moveDataLoc] = 0x00;
-                    rom[moveDataLoc + 1] = 0x00;
-                    rom[moveDataLoc + 2] = (byte) 0xFF;
-                    rom[moveDataLoc + 3] = 0x00;
-                    rom[moveDataLoc + 4] = 0x00;
-                    rom[moveDataLoc + 5] = 0x00;
+                    writeBytes(moveDataLoc, new byte[] { 0x00, 0x00, (byte) 0xFF, 0x00, 0x00, 0x00 });
                 } else {
-                    rom[moveDataLoc] = (byte) 0xFF;
-                    rom[moveDataLoc + 1] = (byte) 0xFF;
-                    rom[moveDataLoc + 2] = 0x00;
-                    rom[moveDataLoc + 3] = 0x00;
+                    writeBytes(moveDataLoc, new byte[] { (byte) 0xFF, (byte) 0xFF, 0x00, 0x00 });
                 }
             }
 
@@ -2176,15 +2168,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private int writeMLToOffset(int offset, MoveLearnt ml) {
         if (jamboMovesetHack) {
             writeWord(offset, ml.move);
-            rom[offset + 2] = (byte) ml.level;
+            writeByte(offset + 2, (byte) ml.level);
             return 3;
         } else {
-            rom[offset] = (byte) (ml.move & 0xFF);
+            writeByte(offset, (byte) (ml.move & 0xFF));
             int levelPart = (ml.level << 1) & 0xFE;
             if (ml.move > 255) {
                 levelPart++;
             }
-            rom[offset + 1] = (byte) levelPart;
+            writeByte(offset + 1, (byte) levelPart);
             return 2;
         }
     }
@@ -2369,7 +2361,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int startingSpeciesOffset = romEntry.getValue("StaticFirstBattleSpeciesOffset");
             writeWord(startingSpeciesOffset, pokedexToInternal[startingFirstBattle.pkmn.getNumber()]);
             int startingLevelOffset = romEntry.getValue("StaticFirstBattleLevelOffset");
-            rom[startingLevelOffset] = (byte) startingFirstBattle.level;
+            writeByte(startingLevelOffset, (byte) startingFirstBattle.level);
         } else if (romEntry.codeTweaks.get("GhostMarowakTweak") != null) {
             StaticEncounter ghostMarowak = staticPokemon.get(romEntry.getValue("GhostMarowakOffset"));
             int[] ghostMarowakSpeciesOffsets = romEntry.arrayEntries.get("GhostMarowakSpeciesOffsets");
@@ -2378,7 +2370,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
             int[] ghostMarowakLevelOffsets = romEntry.arrayEntries.get("GhostMarowakLevelOffsets");
             for (int i = 0; i < ghostMarowakLevelOffsets.length; i++) {
-                rom[ghostMarowakLevelOffsets[i]] = (byte) ghostMarowak.level;
+                writeByte(ghostMarowakLevelOffsets[i], (byte) ghostMarowak.level);
             }
 
             // The code for creating Ghost Marowak tries to ensure the Pokemon is female. If the Pokemon
@@ -2388,7 +2380,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int ghostMarowakGenderOffset = romEntry.getValue("GhostMarowakGenderOffset");
             if (ghostMarowak.pkmn.getGenderRatio() == 0 || ghostMarowak.pkmn.getGenderRatio() == 0xFF) {
                 // 0x00 is 100% male, and 0xFF is indeterminate gender
-                rom[ghostMarowakGenderOffset] = (byte) ghostMarowak.pkmn.getGenderRatio();
+                writeByte(ghostMarowakGenderOffset, (byte) ghostMarowak.pkmn.getGenderRatio());
             }
         }
 
@@ -2489,7 +2481,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // The constant 0x2000000 is actually in the function twice, so we'll replace the first instance
         // with Latios's ID. First, change the "ldr r2, [pc, #0x68]" near the start of the function to
         // "ldr r2, [pc, #0x15C]" so it points to the second usage of 0x2000000
-        rom[offset + 22] = 0x57;
+        writeByte(offset + 22, (byte) 0x57);
 
         // In the space formerly occupied by the first 0x2000000, write Latios's ID
         FileFunctions.writeFullInt(rom, offset + 128, pokedexToInternal[Species.latios]);
@@ -2497,10 +2489,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // Where the original function computes Latios's ID by setting r0 to 0xCC << 1, just pc-relative
         // load our constant. We have four bytes of space to play with, and we need to make sure the offset
         // from the pc is 4-byte aligned; we need to nop for alignment and then perform the load.
-        rom[offset + 12] = 0x00;
-        rom[offset + 13] = 0x00;
-        rom[offset + 14] = 0x1C;
-        rom[offset + 15] = 0x48;
+        writeBytes(offset + 12, new byte[] { 0x00, 0x00, 0x1C, 0x48 });
 
         offset = romEntry.getValue("CreateInitialRoamerMonFunctionStartOffset");
 
@@ -2509,16 +2498,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // some reason, Ruby very rarely does "pop { pc }" even though that seemingly works fine. By doing
         // that, we only need one instruction to return to the caller, giving us four bytes to write
         // Latios's species ID.
-        rom[offset + 182] = 0x00;
-        rom[offset + 183] = (byte) 0xBD;
+        writeBytes(offset + 182, new byte[] { 0x00, (byte) 0xBD});
         FileFunctions.writeFullInt(rom, offset + 184, pokedexToInternal[Species.latios]);
 
         // Now write a pc-relative load to this new species ID constant over the original move and lsl. Similar
         // to before, we need to write a nop first for alignment, then pc-relative load into r6.
-        rom[offset + 10] = 0x00;
-        rom[offset + 11] = 0x00;
-        rom[offset + 12] = 0x2A;
-        rom[offset + 13] = 0x4E;
+        writeBytes(offset + 10, new byte[] { 0x00, 0x00, 0x2A, 0x4E });
     }
 
     private void applyEmeraldRoamerPatch() {
@@ -2528,7 +2513,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // some room for it; the constant 0x03005D8C is actually in the function twice, so we'll replace the first
         // instance with Latios's ID. First, change the "ldr r0, [pc, #0xC]" at the start of the function to
         // "ldr r0, [pc, #0x104]", so it points to the second usage of 0x03005D8C
-        rom[offset + 14] = 0x41;
+        writeByte(offset + 14, (byte) 0x41);
 
         // In the space formerly occupied by the first 0x03005D8C, write Latios's ID
         FileFunctions.writeFullInt(rom, offset + 28, pokedexToInternal[Species.latios]);
@@ -2537,17 +2522,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // shift doesn't actually matter, because 0 << 0x10 = 0, and [non-zero] << 0x10 = [non-zero].
         // Let's move the compare up to take its place and then load Latios's ID into r3 for use in another
         // branch later.
-        rom[offset + 8] = 0x00;
-        rom[offset + 9] = 0x28;
-        rom[offset + 10] = 0x04;
-        rom[offset + 11] = 0x4B;
+        writeBytes(offset + 8, new byte[] { 0x00, 0x28, 0x04, 0x4B });
 
         // Lastly, in the branch that normally does r2 = 0xCC << 0x1 to compute Latios's ID, just mov r3
         // into r2, since it was loaded with his ID with the above code.
-        rom[offset + 48] = 0x1A;
-        rom[offset + 49] = 0x46;
-        rom[offset + 50] = 0x00;
-        rom[offset + 51] = 0x00;
+        writeBytes(offset + 48, new byte[] { 0x1A, 0x46, 0x00, 0x00 });
     }
 
     @Override
@@ -2701,7 +2680,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             boolean[] flags = compatEntry.getValue();
             int compatOffset = offset + (pokedexToInternal[pkmn.getNumber()]) * 8;
             for (int j = 0; j < 8; j++) {
-                rom[compatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
+                writeByte(compatOffset + j, getByteFromFlags(flags, j * 8 + 1));
             }
         }
     }
@@ -2816,7 +2795,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             boolean[] flags = compatEntry.getValue();
             int compatOffset = offset + pokedexToInternal[pkmn.getNumber()] * bytesRequired;
             for (int j = 0; j < bytesRequired; j++) {
-                rom[compatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
+                writeByte(compatOffset + j, getByteFromFlags(flags, j * 8 + 1));
             }
         }
     }
@@ -2874,6 +2853,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return RomFunctions.search(haystack, searchFor);
     }
 
+    // TODO: should this not convert to byte[] and then use writeBytes()?
     private void writeHexString(String hexString, int offset) {
         if (hexString.length() % 2 != 0) {
             return; // error
@@ -2903,10 +2883,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // But MOVS R1, 0x0 (the version I know) is 2-byte
             // So we just use it twice...
             // the equivalent of nop'ing the second time.
-            rom[deoxysObOffset] = 0x00;
-            rom[deoxysObOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-            rom[deoxysObOffset + 2] = 0x00;
-            rom[deoxysObOffset + 3] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+            writeBytes(deoxysObOffset, new byte[] { 0x00, Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                    0x00, Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
             // Look for the mew check too... it's 0x16 ahead
             if (readWord(deoxysObOffset + Gen3Constants.mewObeyOffsetFromDeoxysObey) == (((Gen3Constants.gbaCmpRxOpcode | Gen3Constants.gbaR0) << 8) | (Species.mew))) {
                 // Bingo, thats CMP R0, 0x97
@@ -2982,9 +2960,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 log("Patch unsuccessful." + nl);
                 return;
             }
-            rom[pkDexOffset] = 4;
+            writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
             writePointer(pkDexOffset + 1, writeSpace);
-            rom[pkDexOffset + 5] = 0; // NOP
+            writeByte(pkDexOffset + 5, (byte) 0); // NOP
 
             // Now write our new routine
             writeHexString(Gen3Constants.frlgNatDexScript, writeSpace);
@@ -3017,7 +2995,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (oakAideCheckOffs > 0) {
                 oakAideCheckOffs += Gen3Constants.frlgOakAideCheckPrefix.length() / 2; // because it was a prefix
                 // Change the bne instruction to an unconditional branch to always use National Dex
-                rom[oakAideCheckOffs + 1] = (byte) 0xE0;
+                writeByte(oakAideCheckOffs + 1, (byte) 0xE0);
             }
         } else {
             // Find the original pokedex script
@@ -3206,18 +3184,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int offset = find(rom, Gen3Constants.friendshipValueForEvoLocator);
         if (offset > 0) {
             // Amount of required happiness for HAPPINESS evolutions.
-            if (rom[offset] == (byte)219) {
-                rom[offset] = (byte)159;
+            if (rom[offset] == (byte) 219) {
+                writeByte(offset, (byte) 159);
             }
             // FRLG doesn't have code to handle time-based evolutions.
             if (romEntry.romType != Gen3Constants.RomType_FRLG) {
                 // Amount of required happiness for HAPPINESS_DAY evolutions.
-                if (rom[offset + 38] == (byte)219) {
-                    rom[offset + 38] = (byte)159;
+                if (rom[offset + 38] == (byte) 219) { // TODO: 219 (or 220) should be a constant
+                    writeByte(offset + 38, (byte) 159); // TODO: 159 (or 160) should be a constant
                 }
                 // Amount of required happiness for HAPPINESS_NIGHT evolutions.
                 if (rom[offset + 66] == (byte)219) {
-                    rom[offset + 66] = (byte)159;
+                    writeByte(offset + 66, (byte) 159);
                 }
             }
         }
@@ -3615,8 +3593,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int frontSprites = romEntry.getValue("FrontSprites");
             int palettes = romEntry.getValue("PokemonPalettes");
 
-            rom[romEntry.getValue("IntroCryOffset")] = (byte) introPokemon;
-            rom[romEntry.getValue("IntroOtherOffset")] = (byte) introPokemon;
+            writeByte(romEntry.getValue("IntroCryOffset"), (byte) introPokemon);
+            writeByte(romEntry.getValue("IntroOtherOffset"), (byte) introPokemon);
 
             int spriteBase = romEntry.getValue("IntroSpriteOffset");
             writePointer(spriteBase, frontSprites + introPokemon * 8);
@@ -3632,7 +3610,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int cryCommand = romEntry.getValue("IntroCryOffset");
             int otherCommand = romEntry.getValue("IntroOtherOffset");
 
-            if (introPokemon > 255) {
+            if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
                 rom[cryCommand] = (byte) 0xFF;
                 rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
 
@@ -3927,7 +3905,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (Gen3Constants.allowedItems.isTM(itemHere)) {
                 // Cache replaced TMs to duplicate repeats
                 if (givenTMs[itemHere] != 0) {
-                    rom[offset] = (byte) givenTMs[itemHere];
+                    writeByte(offset, (byte) givenTMs[itemHere]);
                 } else {
                     // Replace this with a TM from the list
                     int tm = iterTMs.next();
@@ -4029,7 +4007,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeFixedLengthString(trade.nickname, entryOffset, 12);
             writeWord(entryOffset + 12, pokedexToInternal[trade.givenPokemon.getNumber()]);
             for (int i = 0; i < 6; i++) {
-                rom[entryOffset + 14 + i] = (byte) trade.ivs[i];
+                writeByte(entryOffset + 14 + i, (byte) trade.ivs[i]);
             }
             writeWord(entryOffset + 24, trade.otId);
             writeWord(entryOffset + 40, trade.item);
@@ -4166,22 +4144,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 if (opponent != null) {
 
                     int oppValue = pokedexToInternal[opponent.getNumber()];
-                    rom[oppOffset] = (byte) oppValue;
-                    rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+                    writeBytes(oppOffset, new byte[] {(byte) oppValue,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
                 }
             } else {
                 Pokemon opponent = randomPokemonLimited(510, true);
                 if (opponent != null) {
                     int oppValue = pokedexToInternal[opponent.getNumber()];
                     if (oppValue > 255) {
-                        rom[oppOffset] = (byte) 0xFF;
-                        rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-
-                        rom[oppOffset + 2] = (byte) (oppValue - 0xFF);
-                        rom[oppOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1;
+                        writeBytes(oppOffset, new byte[] {(byte) 0xFF,
+                                Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                                (byte) (oppValue - 0xFF),
+                                Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
                     } else {
-                        rom[oppOffset] = (byte) oppValue;
-                        rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+                        writeBytes(oppOffset, new byte[] {(byte) oppValue,
+                                Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
 
                         writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
                     }
@@ -4195,15 +4172,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (playerMon != null) {
                 int plyValue = pokedexToInternal[playerMon.getNumber()];
                 if (plyValue > 255) {
-                    rom[playerOffset] = (byte) 0xFF;
-                    rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-
-                    rom[playerOffset + 2] = (byte) (plyValue - 0xFF);
-                    rom[playerOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1;
+                    writeBytes(playerOffset, new byte[] {(byte) 0xFF,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                            (byte) (plyValue - 0xFF),
+                            Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
                 } else {
-                    rom[playerOffset] = (byte) plyValue;
-                    rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-
+                    writeBytes(playerOffset, new byte[] {(byte) plyValue,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
                     writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
                 }
             }
@@ -4213,7 +4188,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void applyRunningShoesIndoorsPatch() {
         if (romEntry.getValue("RunIndoorsTweakOffset") != 0) {
-            rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
+            writeByte(romEntry.getValue("RunIndoorsTweakOffset"), (byte) 0x00);
         }
     }
 
@@ -4226,9 +4201,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         } else if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
             int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
-            rom[tsvOffset] = 4; // slow = medium
-            rom[tsvOffset + 1] = 1; // medium = fast
-            rom[tsvOffset + 2] = 0; // fast = instant
+            byte[] newTextSpeedValues = new byte[] {4, // slow = medium
+                    1, // medium = fast
+                    0}; // fast = instant
+            writeBytes(tsvOffset, newTextSpeedValues);
         }
     }
 
@@ -4316,24 +4292,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
         int currentOffset = romEntry.getValue("TypeEffectivenessOffset");
         for (TypeRelationship relationship : typeEffectivenessTable) {
-            rom[currentOffset] = Gen3Constants.typeToByte(relationship.attacker);
-            rom[currentOffset + 1] = Gen3Constants.typeToByte(relationship.defender);
-            byte effectivenessInternal = 0;
-            switch (relationship.effectiveness) {
-                case DOUBLE:
-                    effectivenessInternal = 20;
-                    break;
-                case NEUTRAL:
-                    effectivenessInternal = 10;
-                    break;
-                case HALF:
-                    effectivenessInternal = 5;
-                    break;
-                case ZERO:
-                    effectivenessInternal = 0;
-                    break;
-            }
-            rom[currentOffset + 2] = effectivenessInternal;
+            byte effectivenessInternal = switch (relationship.effectiveness) {
+                case DOUBLE -> 20;
+                case NEUTRAL -> 10;
+                case HALF -> 5;
+                case ZERO -> 0;
+                default -> 0;
+            };
+            byte[] effectivenessData = new byte[] {Gen3Constants.typeToByte(relationship.attacker),
+                    Gen3Constants.typeToByte(relationship.defender), effectivenessInternal};
+            writeBytes(currentOffset, effectivenessData);
             currentOffset += 3;
         }
 	}
@@ -4363,10 +4331,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // bls oddsLessThanOrEqualTo254
             // The below code just nops these two instructions so that we *always* act like our odds are 255,
             // and Pokemon are automatically caught no matter what.
-            rom[offset] = 0x00;
-            rom[offset + 1] = 0x00;
-            rom[offset + 2] = 0x00;
-            rom[offset + 3] = 0x00;
+            writeBytes(offset, new byte[] {0x00, 0x00, 0x00, 0x00});
         }
     }
 

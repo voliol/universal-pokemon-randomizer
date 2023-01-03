@@ -37,7 +37,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.FreedSpace;
+import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
