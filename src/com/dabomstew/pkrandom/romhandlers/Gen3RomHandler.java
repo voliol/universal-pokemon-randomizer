@@ -1194,18 +1194,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int moveCount = romEntry.getValue("MoveCount");
         int offs = romEntry.getValue("MoveData");
         for (int i = 1; i <= moveCount; i++) {
-            rom[offs + i * 0xC] = (byte) moves[i].effectIndex;
-            rom[offs + i * 0xC + 1] = (byte) moves[i].power;
-            rom[offs + i * 0xC + 2] = Gen3Constants.typeToByte(moves[i].type);
+
             int hitratio = (int) Math.round(moves[i].hitratio);
-            if (hitratio < 0) {
-                hitratio = 0;
-            }
-            if (hitratio > 100) {
-                hitratio = 100;
-            }
-            rom[offs + i * 0xC + 3] = (byte) hitratio;
-            rom[offs + i * 0xC + 4] = (byte) moves[i].pp;
+            hitratio = Math.max(hitratio, 0);
+            hitratio = Math.min(hitratio, 100);
+
+            // TODO: where does this 0xC come from?
+            writeBytes(offs + i * 0xC, new byte[] { (byte) moves[i].effectIndex,
+                    (byte) moves[i].power, Gen3Constants.typeToByte(moves[i].type),
+                    (byte) hitratio, (byte) moves[i].pp });
         }
     }
 
@@ -1253,28 +1250,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void saveBasicPokeStats(Pokemon pkmn, int offset) {
-        rom[offset + Gen3Constants.bsHPOffset] = (byte) pkmn.getHp();
-        rom[offset + Gen3Constants.bsAttackOffset] = (byte) pkmn.getAttack();
-        rom[offset + Gen3Constants.bsDefenseOffset] = (byte) pkmn.getDefense();
-        rom[offset + Gen3Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
-        rom[offset + Gen3Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
-        rom[offset + Gen3Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
-        rom[offset + Gen3Constants.bsPrimaryTypeOffset] = Gen3Constants.typeToByte(pkmn.getPrimaryType());
-        if (pkmn.getSecondaryType() == null) {
-            rom[offset + Gen3Constants.bsSecondaryTypeOffset] = rom[offset + Gen3Constants.bsPrimaryTypeOffset];
-        } else {
-            rom[offset + Gen3Constants.bsSecondaryTypeOffset] = Gen3Constants.typeToByte(pkmn.getSecondaryType());
-        }
-        rom[offset + Gen3Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
-        rom[offset + Gen3Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
+        writeByte(offset + Gen3Constants.bsHPOffset, (byte) pkmn.getHp());
+        writeByte(offset + Gen3Constants.bsAttackOffset, (byte) pkmn.getAttack());
+        writeByte(offset + Gen3Constants.bsDefenseOffset, (byte) pkmn.getDefense());
+        writeByte(offset + Gen3Constants.bsSpeedOffset, (byte) pkmn.getSpeed());
+        writeByte(offset + Gen3Constants.bsSpAtkOffset, (byte) pkmn.getSpatk());
+        writeByte(offset + Gen3Constants.bsSpDefOffset, (byte) pkmn.getSpdef());
+        writeByte(offset + Gen3Constants.bsPrimaryTypeOffset, Gen3Constants.typeToByte(pkmn.getPrimaryType()));
+        writeByte(offset + Gen3Constants.bsSecondaryTypeOffset, Gen3Constants.typeToByte(
+                pkmn.getSecondaryType() == null ? pkmn.getPrimaryType() : pkmn.getSecondaryType()
+        ));
+        writeByte(offset + Gen3Constants.bsCatchRateOffset, (byte) pkmn.getCatchRate());
+        writeByte(offset + Gen3Constants.bsGrowthCurveOffset, pkmn.getGrowthCurve().toByte());
 
-        rom[offset + Gen3Constants.bsAbility1Offset] = (byte) pkmn.getAbility1();
-        if (pkmn.getAbility2() == 0) {
-            // required to not break evos with random ability
-            rom[offset + Gen3Constants.bsAbility2Offset] = (byte) pkmn.getAbility1();
-        } else {
-            rom[offset + Gen3Constants.bsAbility2Offset] = (byte) pkmn.getAbility2();
-        }
+        writeByte(offset + Gen3Constants.bsAbility1Offset, (byte) pkmn.getAbility1());
+        writeByte(offset + Gen3Constants.bsAbility2Offset, (byte) (
+                pkmn.getAbility2() == 0 ? pkmn.getAbility1() :
+                        pkmn.getAbility2())); // required to not break evos with random ability
 
         // Held items
         if (pkmn.getGuaranteedHeldItem() > 0) {
@@ -1285,7 +1277,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeWord(offset + Gen3Constants.bsRareHeldItemOffset, pkmn.getRareHeldItem());
         }
 
-        rom[offset + Gen3Constants.bsGenderRatioOffset] = (byte) pkmn.getGenderRatio();
+        writeByte(offset + Gen3Constants.bsGenderRatioOffset, (byte) pkmn.getGenderRatio());
     }
 
     private void loadPokemonNames() {
