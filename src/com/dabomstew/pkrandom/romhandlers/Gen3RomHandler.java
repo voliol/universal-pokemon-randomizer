@@ -1910,87 +1910,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
         Iterator<Trainer> trainerIterator = trainers.iterator();
-        int fso = romEntry.getValue("FreeSpace");
-
-        // Get current movesets in case we need to reset them for certain
-        // trainer mons.
-        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
         for (int i = 1; i < amount; i++) {
             int trOffset = baseOffset + i * entryLen;
             Trainer tr = trainerIterator.next();
-            // Do we need to repoint this trainer's data?
-            int oldPokeType = rom[trOffset] & 0xFF;
-            int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
-            int newPokeCount = tr.pokemon.size();
-            int newDataSize = newPokeCount * ((tr.poketype & 1) == 1 ? 16 : 8);
-            int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
+            System.out.println(i + "" + tr);
 
-            // write out new data first...
+            // When rewriting the Pokémon data (in particular the pointer),
+            // it needs to use parts of the old trainer data - thus those are overwritten after
+            int pokemonPointerOffset = trOffset + (entryLen - 4);
+            new DataRewriter<Trainer>().rewriteData(pokemonPointerOffset, tr,
+                    this::trainerPokemonToBytes, (oldDataOffset) -> readTrainerPokemonDataLength(trOffset));
+
             writeByte(trOffset, (byte) tr.poketype);
-            writeByte(trOffset + (entryLen - 8), (byte) newPokeCount);
+            writeByte(trOffset + (entryLen - 8), (byte) tr.pokemon.size());
             if (doubleBattleMode) {
                 if (!tr.skipImportant()) {
                     writeByte(trOffset + (entryLen - 16), (byte) 0x01);
-                }
-            }
-
-            // now, do we need to repoint?
-            int pointerToPokes;
-            if (newDataSize > oldDataSize) {
-                int writeSpace = findAndUnfreeSpace(newDataSize, fso, true);
-                if (writeSpace < fso) {
-                    throw new RandomizerIOException("ROM is full");
-                }
-                writePointer(trOffset + (entryLen - 4), writeSpace);
-                pointerToPokes = writeSpace;
-            } else {
-                pointerToPokes = readPointer(trOffset + (entryLen - 4));
-            }
-
-            Iterator<TrainerPokemon> pokes = tr.pokemon.iterator();
-
-            // Write out Pokemon data!
-            if (tr.pokemonHaveCustomMoves()) {
-                // custom moves, blocks of 16 bytes
-                for (int poke = 0; poke < newPokeCount; poke++) {
-                    TrainerPokemon tp = pokes.next();
-                    // Add 1 to offset integer division truncation
-                    writeWord(pointerToPokes + poke * 16, Math.min(255, 1 + (tp.IVs * 255) / 31));
-                    writeWord(pointerToPokes + poke * 16 + 2, tp.level);
-                    writeWord(pointerToPokes + poke * 16 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
-                    int movesStart;
-                    if (tr.pokemonHaveItems()) {
-                        writeWord(pointerToPokes + poke * 16 + 6, tp.heldItem);
-                        movesStart = 8;
-                    } else {
-                        movesStart = 6;
-                        writeWord(pointerToPokes + poke * 16 + 14, 0);
-                    }
-                    if (tp.resetMoves) {
-                        int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), movesets, tp.level);
-                        for (int m = 0; m < 4; m++) {
-                            writeWord(pointerToPokes + poke * 16 + movesStart + m * 2, pokeMoves[m]);
-                        }
-                    } else {
-                        writeWord(pointerToPokes + poke * 16 + movesStart, tp.moves[0]);
-                        writeWord(pointerToPokes + poke * 16 + movesStart + 2, tp.moves[1]);
-                        writeWord(pointerToPokes + poke * 16 + movesStart + 4, tp.moves[2]);
-                        writeWord(pointerToPokes + poke * 16 + movesStart + 6, tp.moves[3]);
-                    }
-                }
-            } else {
-                // no moves, blocks of 8 bytes
-                for (int poke = 0; poke < newPokeCount; poke++) {
-                    TrainerPokemon tp = pokes.next();
-                    writeWord(pointerToPokes + poke * 8, Math.min(255, 1 + (tp.IVs * 255) / 31));
-                    writeWord(pointerToPokes + poke * 8 + 2, tp.level);
-                    writeWord(pointerToPokes + poke * 8 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
-                    if (tr.pokemonHaveItems()) {
-                        writeWord(pointerToPokes + poke * 8 + 6, tp.heldItem);
-                    } else {
-                        writeWord(pointerToPokes + poke * 8 + 6, 0);
-                    }
                 }
             }
         }
@@ -1998,6 +1934,69 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (romEntry.romType == Gen3Constants.RomType_Em) {
             setMossdeepStevenTrainer(trainers, amount);
         }
+    }
+
+    private byte[] trainerPokemonToBytes(Trainer trainer) {
+        int dataSize = trainer.pokemon.size() * (trainer.pokemonHaveCustomMoves() ? 16 : 8);;
+        byte[] pokemonData = new byte[dataSize];
+
+        // Get current movesets in case we need to reset them for certain
+        // trainer mons.
+        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
+
+        if (trainer.pokemonHaveCustomMoves()) {
+            // custom moves, blocks of 16 bytes
+            for (int tpIndex = 0; tpIndex < trainer.pokemon.size(); tpIndex++) {
+                TrainerPokemon tp = trainer.pokemon.get(tpIndex);
+                // Add 1 to offset integer division truncation
+                writeWord(pokemonData, tpIndex * 16, Math.min(255, 1 + (tp.IVs * 255) / 31));
+                writeWord(pokemonData,tpIndex * 16 + 2, tp.level);
+                writeWord(pokemonData,tpIndex * 16 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
+                int movesStart;
+                if (trainer.pokemonHaveItems()) {
+                    writeWord(pokemonData, + tpIndex * 16 + 6, tp.heldItem);
+                    movesStart = 8;
+                } else {
+                    movesStart = 6;
+                    writeWord(pokemonData, tpIndex * 16 + 14, 0);
+                }
+                if (tp.resetMoves) {
+                    int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), movesets,
+                            tp.level);
+                    for (int m = 0; m < 4; m++) {
+                        writeWord(pokemonData, tpIndex * 16 + movesStart + m * 2, pokeMoves[m]);
+                    }
+                } else {
+                    writeWord(pokemonData, tpIndex * 16 + movesStart, tp.moves[0]);
+                    writeWord(pokemonData, + tpIndex * 16 + movesStart + 2, tp.moves[1]);
+                    writeWord(pokemonData, + tpIndex * 16 + movesStart + 4, tp.moves[2]);
+                    writeWord(pokemonData, + tpIndex * 16 + movesStart + 6, tp.moves[3]);
+                }
+            }
+        } else {
+            // no moves, blocks of 8 bytes
+            for (int tpIndex = 0; tpIndex < trainer.pokemon.size(); tpIndex++) {
+                TrainerPokemon tp = trainer.pokemon.get(tpIndex);
+                writeWord(pokemonData, tpIndex * 8, Math.min(255, 1 + (tp.IVs * 255) / 31));
+                writeWord(pokemonData, tpIndex * 8 + 2, tp.level);
+                writeWord(pokemonData, tpIndex * 8 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
+                if (trainer.pokemonHaveItems()) {
+                    writeWord(pokemonData, tpIndex * 8 + 6, tp.heldItem);
+                } else {
+                    writeWord(pokemonData, + tpIndex * 8 + 6, 0);
+                }
+            }
+        }
+
+        return pokemonData;
+    }
+
+    private int readTrainerPokemonDataLength(int trainerOffset) {
+        int entryLen = romEntry.getValue("TrainerEntrySize");
+
+        int pokeType = rom[trainerOffset] & 0xFF;
+        int pokeCount = rom[trainerOffset + (entryLen - 8)] & 0xFF;
+        return pokeCount * ((pokeType & 1) == 1 ? 16 : 8);
     }
 
     private void setMossdeepStevenTrainer(List<Trainer> trainers, int index) {
@@ -2129,8 +2128,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (newMoveCount > currentMoveCount) {
                 // Repoint for more space
                 int newBytesNeeded = newMoveCount * entrySize + entrySize * 2;
-                int writeSpace = findAndUnfreeSpace(newBytesNeeded, fso);
-                if (writeSpace < fso) {
+                int writeSpace;
+                try {
+                    writeSpace = findAndUnfreeSpace(newBytesNeeded);
+                } catch (RandomizerIOException e) {
                     throw new RandomizerIOException("ROM is full");
                 }
                 writePointer(offsToPtr, writeSpace);
@@ -2583,10 +2584,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 String newItemDesc = RomFunctions.rewriteDescriptionForNewLineSize(moveDesc, "\\n", limitPerLine, ssd);
                 // Find freespace
                 int fsBytesNeeded = translateString(newItemDesc).length + 1;
-                int newItemDescOffset = findAndUnfreeSpace(fsBytesNeeded, fsOffset);
-                if (newItemDescOffset < fsOffset) {
+                int newItemDescOffset;
+                try {
+                    newItemDescOffset = findAndUnfreeSpace(fsBytesNeeded);
+                } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new item description." + nl);
+                    log("Couldn't insert new item description." + nl + ". ROM full.");
                     return;
                 }
                 writeVariableLengthString(newItemDesc, newItemDescOffset);
@@ -2614,10 +2617,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 newText = newText.replace(tmpMoveName, moveName);
                 // insert the new text into free space
                 int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset = findAndUnfreeSpace(fsBytesNeeded, fsOffset);
-                if (newOffset < fsOffset) {
+                int newOffset;
+                try {
+                    newOffset = findAndUnfreeSpace(fsBytesNeeded);
+                } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new TM text." + nl);
+                    log("Couldn't insert new TM text." + nl + ". ROM full.");
                     return;
                 }
                 writeVariableLengthString(newText, newOffset);
@@ -2731,10 +2736,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 newText = newText.replace(tmpMoveName, moveName);
                 // insert the new text into free space
                 int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset = findAndUnfreeSpace(fsBytesNeeded, fsOffset);
-                if (newOffset < fsOffset) {
+                int newOffset;
+                try {
+                    newOffset = findAndUnfreeSpace(fsBytesNeeded);
+                } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new Move Tutor text." + nl);
+                    log("Couldn't insert new Move Tutor text" + nl + ". ROM full.");
                     return;
                 }
                 writeVariableLengthString(newText, newOffset);
@@ -2928,9 +2935,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = findAndUnfreeSpace(44, fso); // TODO: "44" should be a constant
-            if (writeSpace < fso) {
-                log("Patch unsuccessful." + nl);
+            int writeSpace;
+            try {
+                writeSpace = findAndUnfreeSpace(44); // TODO: "44" should be a constant
+            } catch (RandomizerIOException e) {
+                log("Patch unsuccessful; ROM full." + nl);
                 // Somehow this ROM is full
                 return;
             }
@@ -2947,10 +2956,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = findAndUnfreeSpace(10, fso); // TODO: "10" should be a constant
-            if (writeSpace < fso) {
+            int writeSpace;
+            try {
+                writeSpace = findAndUnfreeSpace(10); // TODO: "10" should be a constant
+            } catch (RandomizerIOException e) {
                 // Somehow this ROM is full
-                log("Patch unsuccessful." + nl);
+                log("Patch unsuccessful; ROM full." + nl);
                 return;
             }
             writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
@@ -3005,10 +3016,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = findAndUnfreeSpace(27, fso); // TODO: "27" should be a constant
-            if (writeSpace < fso) {
+            int writeSpace;
+            try {
+                writeSpace = findAndUnfreeSpace(27); // TODO: "27" should be a constant
+            } catch (RandomizerIOException e) {
                 // Somehow this ROM is full
-                log("Patch unsuccessful." + nl);
+                log("Patch unsuccessful; ROM full." + nl);
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -4438,12 +4451,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
      */
     // TODO: refactor old functions to use this
     private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-        int freeSpaceOffset = romEntry.getValue("FreeSpace");
-        int newOffset = findAndUnfreeSpace(data.length, freeSpaceOffset);
-        // TODO: is this conditional throw needed?
-        if (newOffset < freeSpaceOffset) {
-            throw new RandomizerIOException("ROM is full");
-        }
+        int newOffset = findAndUnfreeSpace(data.length);
 
         writePointer(pointerOffset, newOffset);
         writeBytes(newOffset, data);
@@ -4454,6 +4462,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     protected byte getFreeSpaceByte() {
         return Gen3Constants.freeSpaceByte;
+    }
+
+    @Override
+    protected int getFreeSpaceOffset() {
+        return romEntry.getValue("FreeSpace");
     }
     
     @Override

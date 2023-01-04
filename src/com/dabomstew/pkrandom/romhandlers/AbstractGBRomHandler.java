@@ -235,15 +235,16 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         freedSpace.free(offset, length);
     }
 
-    protected int findAndUnfreeSpace(int length, int offset) {
+    protected int findAndUnfreeSpace(int length) {
         // by default align to 4 bytes to make sure things don't break
-        return findAndUnfreeSpace(length, offset, true);
+        return findAndUnfreeSpace(length, true);
     }
 
-    protected int findAndUnfreeSpace(int length, int offset, boolean longAligned) {
+    // freeSp
+    protected int findAndUnfreeSpace(int length, boolean longAligned) {
         int foundOffset = freedSpace.findAndUnfree(length);
         if (foundOffset == -1 || !isRomSpaceUnused(foundOffset, length)) {
-            foundOffset = findUnusedRomSpace(length, offset, longAligned);
+            foundOffset = findUnusedRomSpace(length,  longAligned);
         }
         return foundOffset;
     }
@@ -259,9 +260,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return true;
     }
 
-    private int findUnusedRomSpace(int length, int offset, boolean longAligned) {
+    private int findUnusedRomSpace(int length, boolean longAligned) {
         int foundOffset;
         byte freeSpace = getFreeSpaceByte();
+        int freeSpaceOffset = getFreeSpaceOffset();
         if (!longAligned) {
             // Find 2 more than necessary and return 2 into it,
             // to preserve stuff like FF terminators for strings
@@ -270,7 +272,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             for (int i = 0; i < length + 2; i++) {
                 searchNeedle[i] = freeSpace;
             }
-            foundOffset = RomFunctions.searchForFirst(rom, offset, searchNeedle) + 2;
+            foundOffset = RomFunctions.searchForFirst(rom, freeSpaceOffset, searchNeedle) + 2;
         } else {
             // Find 5 more than necessary and return into it as necessary for
             // 4-alignment,
@@ -280,13 +282,19 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             for (int i = 0; i < length + 5; i++) {
                 searchNeedle[i] = freeSpace;
             }
-            foundOffset = (RomFunctions.searchForFirst(rom, offset, searchNeedle) + 5) & ~3;
+            foundOffset = (RomFunctions.searchForFirst(rom, freeSpaceOffset, searchNeedle) + 5) & ~3;
         }
+
+        if (foundOffset < freeSpaceOffset) {
+            throw new RandomizerIOException("ROM is full");
+        }
+
         return foundOffset;
     }
 
     protected abstract byte getFreeSpaceByte();
 
+    protected abstract int getFreeSpaceOffset();
 
     @Override
 	protected List<BufferedImage> getAllPokemonImages() {

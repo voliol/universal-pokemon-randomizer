@@ -194,6 +194,10 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return 0;
     }
 
+    protected int getFreeSpaceOffset() {
+        throw new UnsupportedOperationException("No predefined free space in Gen I/II games.");
+    }
+
     protected static boolean romSig(byte[] rom, String sig) {
         try {
             int sigOffset = GBConstants.romSigOffset;
