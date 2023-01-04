@@ -1425,6 +1425,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(Settings settings) {
+        // TODO: adding pokémon to just boss/important trainers is seemingly broken (is it in main ZX too?)
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
