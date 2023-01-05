@@ -240,7 +240,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return findAndUnfreeSpace(length, true);
     }
 
-    // freeSp
     protected int findAndUnfreeSpace(int length, boolean longAligned) {
         int foundOffset = freedSpace.findAndUnfree(length);
         if (foundOffset == -1 || !isRomSpaceUnused(foundOffset, length)) {

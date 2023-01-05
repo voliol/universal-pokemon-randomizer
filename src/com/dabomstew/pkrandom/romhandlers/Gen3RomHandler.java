@@ -132,6 +132,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private int actualOffset;
         private String template;
         private boolean isMoveTutor;
+
+        @Override
+        public String toString() {
+            return String.format("number=%d, mapBank=%d, mapNumber=%d, personNum=%d, offsetInScript=%x, " +
+                    "actualOffset=%x, template=\"%s\", isMoveTutor=%b", number, mapBank, mapNumber, personNum,
+                    offsetInScript, actualOffset, template, isMoveTutor);
+        }
     }
 
     private static List<RomEntry> roms;
@@ -1364,8 +1371,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    // TODO: deprecate if rewriteVariableLengthString() can/should always be used instead
+    @Deprecated
     private void writeVariableLengthString(String str, int offset) {
+        System.out.println("writeVariableLengthString() is deprecated in favor of rewriteVariableLengthString(). " +
+                "A variable length string should always have a pointer to it, and rewriteVariableLengthString() " +
+                "handles that better.");
         byte[] translated = translateString(str);
         System.arraycopy(translated, 0, rom, offset, translated.length);
         writeByte(offset + translated.length, (byte) 0xFF);
@@ -2000,6 +2010,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void setMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+        // TODO: figure out how to write more properly/like the rest of the trainers
+        //       As this is written, can the Mossdeep Steven
+        //       trainer even have pokes added to it?
         int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
         Trainer mossdeepSteven = trainers.get(index - 1);
 
@@ -2566,8 +2579,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         }
 
-        int fsOffset = romEntry.getValue("FreeSpace");
-
         // Item descriptions
         if (romEntry.getValue("MoveDescriptions") > 0) {
             // JP blocked for now - uses different item structure anyway
@@ -2582,18 +2593,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int moveTextPointer = readPointer(moveBaseOffset);
                 String moveDesc = readVariableLengthString(moveTextPointer);
                 String newItemDesc = RomFunctions.rewriteDescriptionForNewLineSize(moveDesc, "\\n", limitPerLine, ssd);
-                // Find freespace
-                int fsBytesNeeded = translateString(newItemDesc).length + 1;
-                int newItemDescOffset;
+
+                int itemDescPointerOffset = itemBaseOffset + Gen3Constants.itemDataDescriptionOffset;
                 try {
-                    newItemDescOffset = findAndUnfreeSpace(fsBytesNeeded);
+                    rewriteVariableLengthString(itemDescPointerOffset, newItemDesc);
                 } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new item description." + nl + ". ROM full.");
+                    log("Couldn't insert new item description; ROM full." + nl);
                     return;
                 }
-                writeVariableLengthString(newItemDesc, newItemDescOffset);
-                writePointer(itemBaseOffset + Gen3Constants.itemDataDescriptionOffset, newItemDescOffset);
             }
         }
 
@@ -2615,31 +2623,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         Gen3Constants.regularTextboxCharsPerLine, ssd);
                 // get rid of the underscores
                 newText = newText.replace(tmpMoveName, moveName);
-                // insert the new text into free space
-                int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset;
+
+                int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
                 try {
-                    newOffset = findAndUnfreeSpace(fsBytesNeeded);
+                    rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
                 } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new TM text." + nl + ". ROM full.");
+                    log("Couldn't insert new TM text. ROM full." + nl);
                     return;
-                }
-                writeVariableLengthString(newText, newOffset);
-                // search for copies of the pointer:
-                // make a needle of the pointer
-                byte[] searchNeedle = new byte[4];
-                System.arraycopy(rom, tte.actualOffset, searchNeedle, 0, 4);
-                // find copies within 500 bytes either way of actualOffset
-                int minOffset = Math.max(0, tte.actualOffset - Gen3Constants.pointerSearchRadius);
-                int maxOffset = Math.min(rom.length, tte.actualOffset + Gen3Constants.pointerSearchRadius);
-                List<Integer> pointerLocs = RomFunctions.search(rom, minOffset, maxOffset, searchNeedle);
-                for (int pointerLoc : pointerLocs) {
-                    // write the new pointer
-                    writePointer(pointerLoc, newOffset);
                 }
             }
         }
+    }
+
+    private int[] searchForPointerCopies(int pointerOffset) {
+        // Somewhat foolhardy, since other data around *could* coincidentally be identical to the pointer,
+        // and would then be erroneously overwritten.
+        // make a needle of the pointer
+        byte[] searchNeedle = new byte[4];
+        System.arraycopy(rom, pointerOffset, searchNeedle, 0, 4);
+        // find copies within pointerSearchRadius bytes either way of actualOffset
+        int minOffset = Math.max(0, pointerOffset - Gen3Constants.pointerSearchRadius);
+        int maxOffset = Math.min(rom.length, pointerOffset + Gen3Constants.pointerSearchRadius);
+        return RomFunctions.search(rom, minOffset, maxOffset, searchNeedle).stream().mapToInt(i -> i).toArray();
     }
 
     private RomFunctions.StringSizeDeterminer ssd = encodedText -> translateString(encodedText).length;
@@ -2715,7 +2721,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (int i = 0; i < moveCount; i++) {
             writeWord(offset + i * 2, moves.get(i));
         }
-        int fsOffset = romEntry.getValue("FreeSpace");
 
         // Move Tutor Text?
         for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
@@ -2734,29 +2739,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         Gen3Constants.regularTextboxCharsPerLine, ssd);
                 // get rid of the underscores
                 newText = newText.replace(tmpMoveName, moveName);
-                // insert the new text into free space
-                int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset;
+
+                int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
                 try {
-                    newOffset = findAndUnfreeSpace(fsBytesNeeded);
+                    rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
                 } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
                     log("Couldn't insert new Move Tutor text" + nl + ". ROM full.");
                     return;
                 }
-                writeVariableLengthString(newText, newOffset);
-                // search for copies of the pointer:
-                // make a needle of the pointer
-                byte[] searchNeedle = new byte[4];
-                System.arraycopy(rom, tte.actualOffset, searchNeedle, 0, 4);
-                // find copies within 500 bytes either way of actualOffset
-                int minOffset = Math.max(0, tte.actualOffset - Gen3Constants.pointerSearchRadius);
-                int maxOffset = Math.min(rom.length, tte.actualOffset + Gen3Constants.pointerSearchRadius);
-                List<Integer> pointerLocs = RomFunctions.search(rom, minOffset, maxOffset, searchNeedle);
-                for (int pointerLoc : pointerLocs) {
-                    // write the new pointer
-                    writePointer(pointerLoc, newOffset);
-                }
+
             }
         }
     }
@@ -4407,11 +4399,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void rewriteVariableLengthString(int pointerOffset, String string) {
-        new DataRewriter<String>().rewriteData(pointerOffset, string, this::variableLengthStringToBytes,
-                (oldDataOffset) -> lengthOfStringAt(oldDataOffset) + 1);
+        rewriteVariableLengthString(pointerOffset, string, new int[0]);
     }
 
-    // TODO: I imagine another method like this could already exist, have a look at that
+    private void rewriteVariableLengthString(int pointerOffset, String string, int[] secondaryPointerOffsets) {
+        new DataRewriter<String>().rewriteData(pointerOffset, string, secondaryPointerOffsets,
+                this::variableLengthStringToBytes, (oldDataOffset) -> lengthOfStringAt(oldDataOffset) + 1);
+    }
+
     private byte[] variableLengthStringToBytes(String string) {
         byte[] translated = translateString(string);
         byte[] newData = Arrays.copyOf(translated, translated.length + 1);
@@ -4421,15 +4416,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private class DataRewriter<E> {
 
-        public void rewriteData (int pointerOffset, E object,
-                                    Function<E, byte[]> newDataFunction,
-                                    Function<Integer, Integer> lengthOfOldFunction) {
+        public void rewriteData(int pointerOffset, E object,
+                                Function<E, byte[]> newDataFunction,
+                                Function<Integer, Integer> lengthOfOldFunction) {
             rewriteData(pointerOffset, object, new int[0], newDataFunction, lengthOfOldFunction);
         }
 
-        public void rewriteData (int pointerOffset, E object, int[] secondaryPointerOffsets,
-                                  Function<E, byte[]> newDataFunction,
-                                  Function<Integer, Integer> lengthOfOldFunction) {
+        public void rewriteData(int pointerOffset, E object, int[] secondaryPointerOffsets,
+                                Function<E, byte[]> newDataFunction,
+                                Function<Integer, Integer> lengthOfOldFunction) {
             byte[] newData = newDataFunction.apply(object);
             int oldDataOffset = readPointer(pointerOffset);
             int oldLength = lengthOfOldFunction.apply(oldDataOffset);
