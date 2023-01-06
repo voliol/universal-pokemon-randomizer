@@ -90,6 +90,8 @@ public class Gen3Constants {
 
     public static final byte freeSpaceByte = (byte) 0xFF;
 
+    public static final int unusedSpaceChunkLength = 0x100, unusedSpaceFrontMargin = 0x10;
+
     public static final int rseStarter2Offset = 2, rseStarter3Offset = 4, frlgStarter2Offset = 515,
             frlgStarter3Offset = 461, frlgStarterRepeatOffset = 5;
 

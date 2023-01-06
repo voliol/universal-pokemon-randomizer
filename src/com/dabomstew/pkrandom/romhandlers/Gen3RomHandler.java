@@ -493,6 +493,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         nonBadItems = Gen3Constants.getNonBadItems(romEntry.romType).copy();
 
         actualCRC32 = FileFunctions.getCRC32(rom);
+
+        freeAllUnusedSpace();
         
         // Having this in the constructor would be preferred, 
         // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
@@ -2594,7 +2596,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     rewriteVariableLengthString(itemDescPointerOffset, newItemDesc);
                 } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new item description; ROM full." + nl);
+                    log("Couldn't insert new item description. " + e.getMessage() + nl);
                     return true;
                 }
             }
@@ -2624,10 +2626,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
                 int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
                 try {
+                    System.out.println(Arrays.toString(secondaryPointerOffsets) + " " + tte.actualOffset);
                     rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
                 } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new TM text. ROM full." + nl);
+                    log("Couldn't insert new TM text. " + e.getMessage() + nl);
                     return;
                 }
             }
@@ -2746,7 +2749,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
                 } catch (RandomizerIOException e) {
                     String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new Move Tutor text" + nl + ". ROM full.");
+                    log("Couldn't insert new Move Tutor text. " + e.getMessage() + nl);
                     return;
                 }
 
@@ -2931,8 +2934,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 writeSpace = findAndUnfreeSpace(44); // TODO: "44" should be a constant
             } catch (RandomizerIOException e) {
-                log("Patch unsuccessful; ROM full." + nl);
-                // Somehow this ROM is full
+                log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -2952,8 +2954,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 writeSpace = findAndUnfreeSpace(10); // TODO: "10" should be a constant
             } catch (RandomizerIOException e) {
-                // Somehow this ROM is full
-                log("Patch unsuccessful; ROM full." + nl);
+                log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
             }
             writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
@@ -3012,8 +3013,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 writeSpace = findAndUnfreeSpace(27); // TODO: "27" should be a constant
             } catch (RandomizerIOException e) {
-                // Somehow this ROM is full
-                log("Patch unsuccessful; ROM full." + nl);
+                log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -4382,7 +4382,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void rewriteCompressedData(int pointerOffset, byte[] uncompressed, int[] secondaryPointerOffsets) {
         new DataRewriter<byte[]>().rewriteData(pointerOffset, uncompressed, secondaryPointerOffsets,
                 DSCmp::compressLZ10, this::compressedDataLength);
-        // TODO: perhaps shouldn't be "new" each time... might be slow
     }
 
     /*
@@ -4432,7 +4431,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
 
             for (int spo : secondaryPointerOffsets) {
-                if (readPointer(spo) != oldDataOffset) {
+                if (spo != pointerOffset && readPointer(spo) != oldDataOffset) {
+                    System.out.println("wanted: " + oldDataOffset);
+                    System.out.println("bad: " + spo);
                     throw new RandomizerIOException("Invalid secondary pointer.");
                 }
                 writePointer(spo, newDataOffset);
@@ -4444,7 +4445,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     /*
      * Returns the new offset of the data.
      */
-    // TODO: refactor old functions to use this
     private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
         int newOffset = findAndUnfreeSpace(data.length);
 
@@ -4459,9 +4459,43 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return Gen3Constants.freeSpaceByte;
     }
 
-    @Override
-    protected int getFreeSpaceOffset() {
-        return romEntry.getValue("FreeSpace");
+    /**
+     * Finds and "frees" space that was unused in the unrandomized ROM, i.e. marks it as available for writing to.<br>
+     * "Unused" in this context refers only to blank data of many "FF"s in a row, NOT stuff like unused graphics,
+     * maps, and music.
+     * <br><br>
+     * The finding is automatic instead of decided wholly by manual offsets. This presents a risk in theory,
+     * of marking "unused" space which isn't, but there is a guiding manual offset and other precautions,
+     * so this risk should be slim.
+     */
+    private void freeAllUnusedSpace() {
+        int unusedSpaceStartOffset = romEntry.getValue("FreeSpace");
+        int unusedSpaceOffset = unusedSpaceStartOffset;
+        int chunkLength = Gen3Constants.unusedSpaceChunkLength;
+        int frontMargin = Gen3Constants.unusedSpaceFrontMargin;
+
+        boolean freedAllUnused = false;
+
+        while (!freedAllUnused) {
+            byte[] searchNeedle = new byte[chunkLength];
+            for (int i = 0; i < chunkLength; i++) {
+                searchNeedle[i] = getFreeSpaceByte();
+            }
+            int foundOffset = RomFunctions.searchForFirst(rom, unusedSpaceOffset, searchNeedle);
+
+            if (foundOffset < unusedSpaceStartOffset) {
+                freedAllUnused = true;
+            } else {
+
+                if (foundOffset > unusedSpaceOffset + chunkLength || foundOffset == unusedSpaceStartOffset) {
+                    freeSpace(foundOffset + frontMargin, chunkLength - frontMargin);
+                } else {
+                    freeSpace(foundOffset, chunkLength);
+                }
+                unusedSpaceOffset = foundOffset + chunkLength;
+            }
+        }
+
     }
     
     @Override

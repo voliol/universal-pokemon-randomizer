@@ -47,7 +47,7 @@ public class FreedSpace {
 
         @Override
         public String toString() {
-            return start + "-" + end;
+            return String.format("%x-%x", start, end);
         }
 
     }
@@ -129,9 +129,9 @@ public class FreedSpace {
     }
 
     public int findAndUnfree(int length) {
-        System.out.println(getLengthSum() + " bytes in " + freedChunks.size() + " chunks." );
-        System.out.println(this);
-        System.out.println("Looking for " + length + " bytes.");
+//        System.out.println(getLengthSum() + " bytes in " + freedChunks.size() + " chunks." );
+//        System.out.println(this);
+//        System.out.println("Looking for " + length + " bytes.");
 
         for (int i = 0; i < freedChunks.size(); i++) {
             FreedChunk fc = freedChunks.get(i);
@@ -157,7 +157,7 @@ public class FreedSpace {
 
     @Override
     public String toString() {
-        return getLengthSum() + " bytes, " + freedChunks;
+        return getLengthSum() + " bytes, " + freedChunks.size() + " chunks, " + freedChunks;
     }
 
 }

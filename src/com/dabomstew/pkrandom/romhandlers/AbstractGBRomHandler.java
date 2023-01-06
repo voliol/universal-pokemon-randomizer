@@ -231,76 +231,39 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         if (length < 1) {
             throw new IllegalArgumentException("length must be at least 1.");
         }
-
         for (int i = 0; i < length; i++) {
             writeByte(offset + i, getFreeSpaceByte());
         }
-
         freedSpace.free(offset, length);
     }
 
+    // TODO: do something about long alignment (if something needs to be done about it)
     protected int findAndUnfreeSpace(int length) {
-        // by default align to 4 bytes to make sure things don't break
-        return findAndUnfreeSpace(length, true);
-    }
+        int foundOffset;
+        do {
+            foundOffset = freedSpace.findAndUnfree(length);
+        } while (isRomSpaceUsed(foundOffset, length));
 
-    protected int findAndUnfreeSpace(int length, boolean longAligned) {
-        int foundOffset = freedSpace.findAndUnfree(length);
-        if (foundOffset == -1 || !isRomSpaceUnused(foundOffset, length)) {
-            foundOffset = findUnusedRomSpace(length,  longAligned);
+        if (foundOffset == -1) {
+            throw new RandomizerIOException("ROM full.");
         }
         return foundOffset;
     }
 
-    private boolean isRomSpaceUnused(int offset, int length) {
-        // manual check if the space is still free, because findUnusedRomSpace() /
-        // the deprecated RomFunctions methods can in theory use the freed spaces "by accident".
+    private boolean isRomSpaceUsed(int offset, int length) {
+        if (offset < 0) return false;
+        // manual check if the space is still unused, because
+        // the deprecated RomFunctions methods (or any future badly written code)
+        // can in theory use the freed spaces "by accident".
         for (int i = 0; i < length; i++) {
             if (rom[offset + i] != getFreeSpaceByte()) {
-                return false;
+                return true;
             }
         }
-        return true;
-    }
-
-    // TODO: actually, this should never be used because then we need to worry about terminators when rewriting
-    //       learnt moves. manually free the unused space instead, and use it as freed space.
-    //       That way parts of it that are written to can be unfreed, and all is well in this world.
-    private int findUnusedRomSpace(int length, boolean longAligned) {
-        int foundOffset;
-        byte freeSpace = getFreeSpaceByte();
-        int freeSpaceOffset = getFreeSpaceOffset();
-        if (!longAligned) {
-            // Find 2 more than necessary and return 2 into it,
-            // to preserve stuff like FF terminators for strings
-            // 161: and FFFF terminators for movesets
-            byte[] searchNeedle = new byte[length + 2];
-            for (int i = 0; i < length + 2; i++) {
-                searchNeedle[i] = freeSpace;
-            }
-            foundOffset = RomFunctions.searchForFirst(rom, freeSpaceOffset, searchNeedle) + 2;
-        } else {
-            // Find 5 more than necessary and return into it as necessary for
-            // 4-alignment,
-            // to preserve stuff like FF terminators for strings
-            // 161: and FFFF terminators for movesets
-            byte[] searchNeedle = new byte[length + 5];
-            for (int i = 0; i < length + 5; i++) {
-                searchNeedle[i] = freeSpace;
-            }
-            foundOffset = (RomFunctions.searchForFirst(rom, freeSpaceOffset, searchNeedle) + 5) & ~3;
-        }
-
-        if (foundOffset < freeSpaceOffset) {
-            throw new RandomizerIOException("ROM is full");
-        }
-
-        return foundOffset;
+        return false;
     }
 
     protected abstract byte getFreeSpaceByte();
-
-    protected abstract int getFreeSpaceOffset();
 
     @Override
 	protected List<BufferedImage> getAllPokemonImages() {
