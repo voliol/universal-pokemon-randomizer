@@ -198,6 +198,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         }
     }
 
+    protected final void writeBytes(byte[] data, int offset, byte[] values) {
+        System.arraycopy(values, 0, data, offset, values.length);
+    }
+
     protected int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
     }
@@ -259,6 +263,9 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return true;
     }
 
+    // TODO: actually, this should never be used because then we need to worry about terminators when rewriting
+    //       learnt moves. manually free the unused space instead, and use it as freed space.
+    //       That way parts of it that are written to can be unfreed, and all is well in this world.
     private int findUnusedRomSpace(int length, boolean longAligned) {
         int foundOffset;
         byte freeSpace = getFreeSpaceByte();
