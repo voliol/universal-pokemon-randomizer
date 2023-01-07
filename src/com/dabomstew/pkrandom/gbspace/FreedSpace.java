@@ -157,7 +157,7 @@ public class FreedSpace {
 
     @Override
     public String toString() {
-        return getLengthSum() + " bytes, " + freedChunks.size() + " chunks, " + freedChunks;
-    }
+		return getLengthSum() + " bytes, " + freedChunks.size() + " chunks, " + freedChunks;
+	}
 
 }
