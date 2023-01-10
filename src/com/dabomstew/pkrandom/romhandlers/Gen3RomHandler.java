@@ -136,6 +136,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private int actualOffset;
         private String template;
         private boolean isMoveTutor;
+
+        @Override
+        public String toString() {
+            return String.format("number=%d, mapBank=%d, mapNumber=%d, personNum=%d, offsetInScript=%x, " +
+                    "actualOffset=%x, template=\"%s\", isMoveTutor=%b", number, mapBank, mapNumber, personNum,
+                    offsetInScript, actualOffset, template, isMoveTutor);
+        }
     }
 
     private static List<RomEntry> roms;
@@ -490,6 +497,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         nonBadItems = Gen3Constants.getNonBadItems(romEntry.romType).copy();
 
         actualCRC32 = FileFunctions.getCRC32(rom);
+
+        freeAllUnusedSpace();
         
         // Having this in the constructor would be preferred, 
         // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
@@ -1199,18 +1208,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int moveCount = romEntry.getValue("MoveCount");
         int offs = romEntry.getValue("MoveData");
         for (int i = 1; i <= moveCount; i++) {
-            rom[offs + i * 0xC] = (byte) moves[i].effectIndex;
-            rom[offs + i * 0xC + 1] = (byte) moves[i].power;
-            rom[offs + i * 0xC + 2] = Gen3Constants.typeToByte(moves[i].type);
+
             int hitratio = (int) Math.round(moves[i].hitratio);
-            if (hitratio < 0) {
-                hitratio = 0;
-            }
-            if (hitratio > 100) {
-                hitratio = 100;
-            }
-            rom[offs + i * 0xC + 3] = (byte) hitratio;
-            rom[offs + i * 0xC + 4] = (byte) moves[i].pp;
+            hitratio = Math.max(hitratio, 0);
+            hitratio = Math.min(hitratio, 100);
+
+            // TODO: where does this 0xC come from?
+            writeBytes(offs + i * 0xC, new byte[] { (byte) moves[i].effectIndex,
+                    (byte) moves[i].power, Gen3Constants.typeToByte(moves[i].type),
+                    (byte) hitratio, (byte) moves[i].pp });
         }
     }
 
@@ -1258,28 +1264,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void saveBasicPokeStats(Pokemon pkmn, int offset) {
-        rom[offset + Gen3Constants.bsHPOffset] = (byte) pkmn.getHp();
-        rom[offset + Gen3Constants.bsAttackOffset] = (byte) pkmn.getAttack();
-        rom[offset + Gen3Constants.bsDefenseOffset] = (byte) pkmn.getDefense();
-        rom[offset + Gen3Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
-        rom[offset + Gen3Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
-        rom[offset + Gen3Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
-        rom[offset + Gen3Constants.bsPrimaryTypeOffset] = Gen3Constants.typeToByte(pkmn.getPrimaryType());
-        if (pkmn.getSecondaryType() == null) {
-            rom[offset + Gen3Constants.bsSecondaryTypeOffset] = rom[offset + Gen3Constants.bsPrimaryTypeOffset];
-        } else {
-            rom[offset + Gen3Constants.bsSecondaryTypeOffset] = Gen3Constants.typeToByte(pkmn.getSecondaryType());
-        }
-        rom[offset + Gen3Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
-        rom[offset + Gen3Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
+        writeByte(offset + Gen3Constants.bsHPOffset, (byte) pkmn.getHp());
+        writeByte(offset + Gen3Constants.bsAttackOffset, (byte) pkmn.getAttack());
+        writeByte(offset + Gen3Constants.bsDefenseOffset, (byte) pkmn.getDefense());
+        writeByte(offset + Gen3Constants.bsSpeedOffset, (byte) pkmn.getSpeed());
+        writeByte(offset + Gen3Constants.bsSpAtkOffset, (byte) pkmn.getSpatk());
+        writeByte(offset + Gen3Constants.bsSpDefOffset, (byte) pkmn.getSpdef());
+        writeByte(offset + Gen3Constants.bsPrimaryTypeOffset, Gen3Constants.typeToByte(pkmn.getPrimaryType()));
+        writeByte(offset + Gen3Constants.bsSecondaryTypeOffset, Gen3Constants.typeToByte(
+                pkmn.getSecondaryType() == null ? pkmn.getPrimaryType() : pkmn.getSecondaryType()
+        ));
+        writeByte(offset + Gen3Constants.bsCatchRateOffset, (byte) pkmn.getCatchRate());
+        writeByte(offset + Gen3Constants.bsGrowthCurveOffset, pkmn.getGrowthCurve().toByte());
 
-        rom[offset + Gen3Constants.bsAbility1Offset] = (byte) pkmn.getAbility1();
-        if (pkmn.getAbility2() == 0) {
-            // required to not break evos with random ability
-            rom[offset + Gen3Constants.bsAbility2Offset] = (byte) pkmn.getAbility1();
-        } else {
-            rom[offset + Gen3Constants.bsAbility2Offset] = (byte) pkmn.getAbility2();
-        }
+        writeByte(offset + Gen3Constants.bsAbility1Offset, (byte) pkmn.getAbility1());
+        writeByte(offset + Gen3Constants.bsAbility2Offset, (byte) (
+                pkmn.getAbility2() == 0 ? pkmn.getAbility1() :
+                        pkmn.getAbility2())); // required to not break evos with random ability
 
         // Held items
         if (pkmn.getGuaranteedHeldItem() > 0) {
@@ -1290,7 +1291,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeWord(offset + Gen3Constants.bsRareHeldItemOffset, pkmn.getRareHeldItem());
         }
 
-        rom[offset + Gen3Constants.bsGenderRatioOffset] = (byte) pkmn.getGenderRatio();
+        writeByte(offset + Gen3Constants.bsGenderRatioOffset, (byte) pkmn.getGenderRatio());
     }
 
     private void loadPokemonNames() {
@@ -1367,19 +1368,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int len = Math.min(translated.length, length);
         System.arraycopy(translated, 0, rom, offset, len);
         if (len < length) {
-            rom[offset + len] = (byte) Gen3Constants.textTerminator;
+            writeByte(offset + len, (byte) Gen3Constants.textTerminator);
             len++;
         }
         while (len < length) {
-            rom[offset + len] = 0;
+            writeByte(offset + len, (byte) 0x00);
             len++;
         }
     }
 
+    @Deprecated
     private void writeVariableLengthString(String str, int offset) {
+        System.out.println("writeVariableLengthString() is deprecated in favor of rewriteVariableLengthString(). " +
+                "A variable length string should always have a pointer to it, and rewriteVariableLengthString() " +
+                "handles that better.");
         byte[] translated = translateString(str);
         System.arraycopy(translated, 0, rom, offset, translated.length);
-        rom[offset + translated.length] = (byte) 0xFF;
+        writeByte(offset + translated.length, (byte) 0xFF);
     }
 
     private int lengthOfStringAt(int offset) {
@@ -1435,10 +1440,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeLong(int offset, int value) {
-        rom[offset] = (byte) (value & 0xFF);
-        rom[offset + 1] = (byte) ((value >> 8) & 0xFF);
-        rom[offset + 2] = (byte) ((value >> 16) & 0xFF);
-        rom[offset + 3] = (byte) (((value >> 24) & 0xFF));
+        writeBytes(offset, new byte[] { (byte) (value & 0xFF),
+                (byte) ((value >> 8) & 0xFF),
+                (byte) ((value >> 16) & 0xFF),
+                (byte) ((value >> 24) & 0xFF) });
     }
 
     @Override
@@ -1757,7 +1762,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
-        List<Trainer> theTrainers = new ArrayList<>();
+        List<Trainer> trainers = new ArrayList<>();
         List<String> tcnames = this.getTrainerClassNames();
         for (int i = 1; i < amount; i++) {
             // Trainer entries are 40 bytes
@@ -1842,48 +1847,57 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     tr.pokemon.add(thisPoke);
                 }
             }
-            theTrainers.add(tr);
+            trainers.add(tr);
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Em) {
-            int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
-            Trainer mossdeepSteven = new Trainer();
-            mossdeepSteven.offset = mossdeepStevenOffset;
-            mossdeepSteven.index = amount;
-            mossdeepSteven.poketype = 1; // Custom moves, but no held items
-
-            // This is literally how the game does it too, lol. Have to subtract one because the
-            // trainers internally are one-indexed, but then theTrainers is zero-indexed.
-            Trainer meteorFallsSteven = theTrainers.get(Gen3Constants.emMeteorFallsStevenIndex - 1);
-            mossdeepSteven.trainerclass = meteorFallsSteven.trainerclass;
-            mossdeepSteven.name = meteorFallsSteven.name;
-            mossdeepSteven.fullDisplayName = meteorFallsSteven.fullDisplayName;
-
-            for (int i = 0; i < 3; i++) {
-                int currentOffset = mossdeepStevenOffset + (i * 20);
-                TrainerPokemon thisPoke = new TrainerPokemon();
-                thisPoke.pokemon = pokesInternal[readWord(currentOffset)];
-                thisPoke.IVs = rom[currentOffset + 2];
-                thisPoke.level = rom[currentOffset + 3];
-                for (int move = 0; move < 4; move++) {
-                    thisPoke.moves[move] = readWord(currentOffset + 12 + (move * 2));
-                }
-                mossdeepSteven.pokemon.add(thisPoke);
-            }
-
-            theTrainers.add(mossdeepSteven);
+            addMossdeepStevenTrainer(trainers, amount);
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
-            Gen3Constants.trainerTagsRS(theTrainers, romEntry.romType);
+            Gen3Constants.trainerTagsRS(trainers, romEntry.romType);
         } else if (romEntry.romType == Gen3Constants.RomType_Em) {
-            Gen3Constants.trainerTagsE(theTrainers);
-            Gen3Constants.setMultiBattleStatusEm(theTrainers);
+            Gen3Constants.trainerTagsE(trainers);
+            Gen3Constants.setMultiBattleStatusEm(trainers);
         } else {
-            Gen3Constants.trainerTagsFRLG(theTrainers);
+            Gen3Constants.trainerTagsFRLG(trainers);
         }
-        return theTrainers;
+        return trainers;
     }
+
+    /**
+     * Adds the Mossdeep Steven battle/{@link Trainer} to a list of Trainers.
+     * @param trainers List of Trainers to add to.
+     * @param index Index of the Mossdeep Steven Trainer. Not to be confused with the offset of the data.
+     */
+	private void addMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+		int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
+		Trainer mossdeepSteven = new Trainer();
+		mossdeepSteven.offset = mossdeepStevenOffset;
+		mossdeepSteven.index = index;
+		mossdeepSteven.poketype = 1; // Custom moves, but no held items
+
+		// This is literally how the game does it too, lol. Have to subtract one because
+		// the trainers internally are one-indexed, but then trainers is zero-indexed.
+		Trainer meteorFallsSteven = trainers.get(Gen3Constants.emMeteorFallsStevenIndex - 1);
+		mossdeepSteven.trainerclass = meteorFallsSteven.trainerclass;
+		mossdeepSteven.name = meteorFallsSteven.name;
+		mossdeepSteven.fullDisplayName = meteorFallsSteven.fullDisplayName;
+
+		for (int i = 0; i < 3; i++) {
+			int currentOffset = mossdeepStevenOffset + (i * 20);
+			TrainerPokemon tp = new TrainerPokemon();
+			tp.pokemon = pokesInternal[readWord(currentOffset)];
+			tp.IVs = rom[currentOffset + 2];
+			tp.level = rom[currentOffset + 3];
+			for (int move = 0; move < 4; move++) {
+				tp.moves[move] = readWord(currentOffset + 12 + (move * 2));
+			}
+			mossdeepSteven.pokemon.add(tp);
+		}
+
+		trainers.add(mossdeepSteven);
+	}
 
     @Override
     public List<Integer> getEvolutionItems() {
@@ -1897,7 +1911,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Integer> getMainPlaythroughTrainers() {
-        return new ArrayList<>(); // Not implemented
+        return new ArrayList<>(); // TODO: Not implemented
     }
 
     @Override
@@ -1906,113 +1920,119 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
 
-    @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-        int baseOffset = romEntry.getValue("TrainerData");
-        int amount = romEntry.getValue("TrainerCount");
-        int entryLen = romEntry.getValue("TrainerEntrySize");
-        Iterator<Trainer> theTrainers = trainerData.iterator();
-        int fso = romEntry.getValue("FreeSpace");
+	@Override
+	public void setTrainers(List<Trainer> trainers, boolean doubleBattleMode) {
+		int baseOffset = romEntry.getValue("TrainerData");
+		int amount = romEntry.getValue("TrainerCount");
+		int entryLen = romEntry.getValue("TrainerEntrySize");
+		Iterator<Trainer> trainerIterator = trainers.iterator();
 
-        // Get current movesets in case we need to reset them for certain
-        // trainer mons.
-        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
+		for (int i = 1; i < amount; i++) {
+			int trOffset = baseOffset + i * entryLen;
+			Trainer tr = trainerIterator.next();
+			System.out.println(i + "" + tr);
 
-        for (int i = 1; i < amount; i++) {
-            int trOffset = baseOffset + i * entryLen;
-            Trainer tr = theTrainers.next();
-            // Do we need to repoint this trainer's data?
-            int oldPokeType = rom[trOffset] & 0xFF;
-            int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
-            int newPokeCount = tr.pokemon.size();
-            int newDataSize = newPokeCount * ((tr.poketype & 1) == 1 ? 16 : 8);
-            int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
+			// When rewriting the Pokémon data (in particular the pointer),
+			// it needs to use parts of the old trainer data - thus those are overwritten
+			// after
+			int pokemonPointerOffset = trOffset + (entryLen - 4);
+			new DataRewriter<Trainer>().rewriteData(pokemonPointerOffset, tr, this::trainerPokemonToBytes,
+					(oldDataOffset) -> readTrainerPokemonDataLength(trOffset));
 
-            // write out new data first...
-            rom[trOffset] = (byte) tr.poketype;
-            rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
-            if (doubleBattleMode) {
-                if (!tr.skipImportant()) {
-                    rom[trOffset + (entryLen - 16)] = 0x01;
-                }
-            }
+			writeByte(trOffset, (byte) tr.poketype);
+			writeByte(trOffset + (entryLen - 8), (byte) tr.pokemon.size());
+			if (doubleBattleMode) {
+				if (!tr.skipImportant()) {
+					writeByte(trOffset + (entryLen - 16), (byte) 0x01);
+				}
+			}
+		}
 
-            // now, do we need to repoint?
-            int pointerToPokes;
-            if (newDataSize > oldDataSize) {
-                int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, newDataSize, fso, true);
-                if (writeSpace < fso) {
-                    throw new RandomizerIOException("ROM is full");
-                }
-                writePointer(trOffset + (entryLen - 4), writeSpace);
-                pointerToPokes = writeSpace;
-            } else {
-                pointerToPokes = readPointer(trOffset + (entryLen - 4));
-            }
+		if (romEntry.romType == Gen3Constants.RomType_Em) {
+			setMossdeepStevenTrainer(trainers, amount);
+		}
+	}
 
-            Iterator<TrainerPokemon> pokes = tr.pokemon.iterator();
+	private byte[] trainerPokemonToBytes(Trainer trainer) {
+		int dataSize = trainer.pokemon.size() * (trainer.pokemonHaveCustomMoves() ? 16 : 8);
+		byte[] pokemonData = new byte[dataSize];
 
-            // Write out Pokemon data!
-            if (tr.pokemonHaveCustomMoves()) {
-                // custom moves, blocks of 16 bytes
-                for (int poke = 0; poke < newPokeCount; poke++) {
-                    TrainerPokemon tp = pokes.next();
-                    // Add 1 to offset integer division truncation
-                    writeWord(pointerToPokes + poke * 16, Math.min(255, 1 + (tp.IVs * 255) / 31));
-                    writeWord(pointerToPokes + poke * 16 + 2, tp.level);
-                    writeWord(pointerToPokes + poke * 16 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
-                    int movesStart;
-                    if (tr.pokemonHaveItems()) {
-                        writeWord(pointerToPokes + poke * 16 + 6, tp.heldItem);
-                        movesStart = 8;
-                    } else {
-                        movesStart = 6;
-                        writeWord(pointerToPokes + poke * 16 + 14, 0);
-                    }
-                    if (tp.resetMoves) {
-                        int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), movesets, tp.level);
-                        for (int m = 0; m < 4; m++) {
-                            writeWord(pointerToPokes + poke * 16 + movesStart + m * 2, pokeMoves[m]);
-                        }
-                    } else {
-                        writeWord(pointerToPokes + poke * 16 + movesStart, tp.moves[0]);
-                        writeWord(pointerToPokes + poke * 16 + movesStart + 2, tp.moves[1]);
-                        writeWord(pointerToPokes + poke * 16 + movesStart + 4, tp.moves[2]);
-                        writeWord(pointerToPokes + poke * 16 + movesStart + 6, tp.moves[3]);
-                    }
-                }
-            } else {
-                // no moves, blocks of 8 bytes
-                for (int poke = 0; poke < newPokeCount; poke++) {
-                    TrainerPokemon tp = pokes.next();
-                    writeWord(pointerToPokes + poke * 8, Math.min(255, 1 + (tp.IVs * 255) / 31));
-                    writeWord(pointerToPokes + poke * 8 + 2, tp.level);
-                    writeWord(pointerToPokes + poke * 8 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
-                    if (tr.pokemonHaveItems()) {
-                        writeWord(pointerToPokes + poke * 8 + 6, tp.heldItem);
-                    } else {
-                        writeWord(pointerToPokes + poke * 8 + 6, 0);
-                    }
-                }
-            }
-        }
+		// Get current movesets in case we need to reset them for certain
+		// trainer mons.
+		Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
-        if (romEntry.romType == Gen3Constants.RomType_Em) {
-            int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
-            Trainer mossdeepSteven = trainerData.get(amount - 1);
+		if (trainer.pokemonHaveCustomMoves()) {
+			// custom moves, blocks of 16 bytes
+			for (int tpIndex = 0; tpIndex < trainer.pokemon.size(); tpIndex++) {
+				TrainerPokemon tp = trainer.pokemon.get(tpIndex);
+				// Add 1 to offset integer division truncation
+				writeWord(pokemonData, tpIndex * 16, Math.min(255, 1 + (tp.IVs * 255) / 31));
+				writeWord(pokemonData, tpIndex * 16 + 2, tp.level);
+				writeWord(pokemonData, tpIndex * 16 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
+				int movesStart;
+				if (trainer.pokemonHaveItems()) {
+					writeWord(pokemonData, +tpIndex * 16 + 6, tp.heldItem);
+					movesStart = 8;
+				} else {
+					movesStart = 6;
+					writeWord(pokemonData, tpIndex * 16 + 14, 0);
+				}
+				if (tp.resetMoves) {
+					int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), movesets, tp.level);
+					for (int m = 0; m < 4; m++) {
+						writeWord(pokemonData, tpIndex * 16 + movesStart + m * 2, pokeMoves[m]);
+					}
+				} else {
+					writeWord(pokemonData, tpIndex * 16 + movesStart, tp.moves[0]);
+					writeWord(pokemonData, +tpIndex * 16 + movesStart + 2, tp.moves[1]);
+					writeWord(pokemonData, +tpIndex * 16 + movesStart + 4, tp.moves[2]);
+					writeWord(pokemonData, +tpIndex * 16 + movesStart + 6, tp.moves[3]);
+				}
+			}
+		} else {
+			// no moves, blocks of 8 bytes
+			for (int tpIndex = 0; tpIndex < trainer.pokemon.size(); tpIndex++) {
+				TrainerPokemon tp = trainer.pokemon.get(tpIndex);
+				writeWord(pokemonData, tpIndex * 8, Math.min(255, 1 + (tp.IVs * 255) / 31));
+				writeWord(pokemonData, tpIndex * 8 + 2, tp.level);
+				writeWord(pokemonData, tpIndex * 8 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
+				if (trainer.pokemonHaveItems()) {
+					writeWord(pokemonData, tpIndex * 8 + 6, tp.heldItem);
+				} else {
+					writeWord(pokemonData, +tpIndex * 8 + 6, 0); // why is there a "+" here?
+				}
+			}
+		}
 
-            for (int i = 0; i < 3; i++) {
-                int currentOffset = mossdeepStevenOffset + (i * 20);
-                TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
-                writeWord(currentOffset, pokedexToInternal[tp.pokemon.getNumber()]);
-                rom[currentOffset + 2] = (byte)tp.IVs;
-                rom[currentOffset + 3] = (byte)tp.level;
-                for (int move = 0; move < 4; move++) {
-                    writeWord(currentOffset + 12 + (move * 2), tp.moves[move]);
-                }
-            }
-        }
-    }
+		return pokemonData;
+	}
+
+	private int readTrainerPokemonDataLength(int trainerOffset) {
+		int entryLen = romEntry.getValue("TrainerEntrySize");
+
+		int pokeType = rom[trainerOffset] & 0xFF;
+		int pokeCount = rom[trainerOffset + (entryLen - 8)] & 0xFF;
+		return pokeCount * ((pokeType & 1) == 1 ? 16 : 8);
+	}
+
+    private void setMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+        // TODO: figure out how to write more properly/like the rest of the trainers
+        //       As this is written, can the Mossdeep Steven
+        //       trainer even have pokes added to it?
+		int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
+		Trainer mossdeepSteven = trainers.get(index - 1);
+
+		for (int i = 0; i < 3; i++) {
+			int currentOffset = mossdeepStevenOffset + (i * 20);
+			TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
+			writeWord(currentOffset, pokedexToInternal[tp.pokemon.getNumber()]);
+			writeByte(currentOffset + 2, (byte) tp.IVs);
+			writeByte(currentOffset + 3, (byte) tp.level);
+			for (int move = 0; move < 4; move++) {
+				writeWord(currentOffset + 12 + (move * 2), tp.moves[move]);
+			}
+		}
+	}
 
     private void writeWildArea(int offset, int numOfEntries, EncounterSet encounters) {
         // Grab the *real* pointer to data
@@ -2063,122 +2083,97 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
-        Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
-        int baseOffset = romEntry.getValue("PokemonMovesets");
-        for (int i = 1; i <= numRealPokemon; i++) {
-            Pokemon pkmn = pokemonList.get(i);
-            int offsToPtr = baseOffset + (pokedexToInternal[pkmn.getNumber()]) * 4;
-            int moveDataLoc = readPointer(offsToPtr);
-            List<MoveLearnt> moves = new ArrayList<>();
-            if (jamboMovesetHack) {
-                while ((rom[moveDataLoc] & 0xFF) != 0x00 || (rom[moveDataLoc + 1] & 0xFF) != 0x00
-                        || (rom[moveDataLoc + 2] & 0xFF) != 0xFF) {
-                    MoveLearnt ml = new MoveLearnt();
-                    ml.level = rom[moveDataLoc + 2] & 0xFF;
-                    ml.move = readWord(moveDataLoc);
-                    moves.add(ml);
-                    moveDataLoc += 3;
-                }
-            } else {
-                while ((rom[moveDataLoc] & 0xFF) != 0xFF || (rom[moveDataLoc + 1] & 0xFF) != 0xFF) {
-                    int move = (rom[moveDataLoc] & 0xFF);
-                    int level = (rom[moveDataLoc + 1] & 0xFE) >> 1;
-                    if ((rom[moveDataLoc + 1] & 0x01) == 0x01) {
-                        move += 0x100;
-                    }
-                    MoveLearnt ml = new MoveLearnt();
-                    ml.level = level;
-                    ml.move = move;
-                    moves.add(ml);
-                    moveDataLoc += 2;
-                }
-            }
-            movesets.put(pkmn.getNumber(), moves);
-        }
-        return movesets;
-    }
+	public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+		Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
+		int baseOffset = romEntry.getValue("PokemonMovesets");
+		for (int i = 1; i <= numRealPokemon; i++) {
+			Pokemon pk = pokemonList.get(i);
+			int pointerOffset = baseOffset + (pokedexToInternal[pk.getNumber()]) * 4;
+			int movesLearntOffset = readPointer(pointerOffset);
+			List<MoveLearnt> moves = readMovesLearnt(movesLearntOffset);
+			movesets.put(pk.getNumber(), moves);
+		}
+		return movesets;
+	}
 
-    @Override
-    public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
-        int baseOffset = romEntry.getValue("PokemonMovesets");
-        int fso = romEntry.getValue("FreeSpace");
-        for (int i = 1; i <= numRealPokemon; i++) {
-            Pokemon pkmn = pokemonList.get(i);
-            int offsToPtr = baseOffset + (pokedexToInternal[pkmn.getNumber()]) * 4;
-            int moveDataLoc = readPointer(offsToPtr);
-            List<MoveLearnt> moves = movesets.get(pkmn.getNumber());
-            int newMoveCount = moves.size();
-            int mloc = moveDataLoc;
-            int entrySize;
-            if (jamboMovesetHack) {
-                while ((rom[mloc] & 0xFF) != 0x00 || (rom[mloc + 1] & 0xFF) != 0x00 || (rom[mloc + 2] & 0xFF) != 0xFF) {
-                    mloc += 3;
-                }
-                entrySize = 3;
-            } else {
-                while ((rom[mloc] & 0xFF) != 0xFF || (rom[mloc + 1] & 0xFF) != 0xFF) {
-                    mloc += 2;
-                }
-                entrySize = 2;
-            }
-            int currentMoveCount = (mloc - moveDataLoc) / entrySize;
+	private List<MoveLearnt> readMovesLearnt(int offset) {
+		List<MoveLearnt> moves = new ArrayList<>();
+		if (jamboMovesetHack) {
+			while ((rom[offset] & 0xFF) != 0x00 || (rom[offset + 1] & 0xFF) != 0x00
+					|| (rom[offset + 2] & 0xFF) != 0xFF) {
+				MoveLearnt ml = new MoveLearnt();
+				ml.level = rom[offset + 2] & 0xFF;
+				ml.move = readWord(offset);
+				moves.add(ml);
+				offset += 3;
+			}
+		} else {
+			while ((rom[offset] & 0xFF) != 0xFF || (rom[offset + 1] & 0xFF) != 0xFF) {
+				int move = (rom[offset] & 0xFF);
+				int level = (rom[offset + 1] & 0xFE) >> 1;
+				if ((rom[offset + 1] & 0x01) == 0x01) {
+					move += 0x100;
+				}
+				MoveLearnt ml = new MoveLearnt();
+				ml.level = level;
+				ml.move = move;
+				moves.add(ml);
+				offset += 2;
+			}
+		}
+		return moves;
+	}
 
-            if (newMoveCount > currentMoveCount) {
-                // Repoint for more space
-                int newBytesNeeded = newMoveCount * entrySize + entrySize * 2;
-                int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, newBytesNeeded, fso);
-                if (writeSpace < fso) {
-                    throw new RandomizerIOException("ROM is full");
-                }
-                writePointer(offsToPtr, writeSpace);
-                moveDataLoc = writeSpace;
-            }
+	@Override
+	public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
+		int baseOffset = romEntry.getValue("PokemonMovesets");
+		for (int i = 1; i <= numRealPokemon; i++) {
+			Pokemon pk = pokemonList.get(i);
+			int pointerOffset = baseOffset + (pokedexToInternal[pk.getNumber()]) * 4;
+			List<MoveLearnt> moves = movesets.get(pk.getNumber());
+			new DataRewriter<List<MoveLearnt>>().rewriteData(pointerOffset, moves, this::movesLearntToBytes,
+					this::lengthOfMovesLearntAt);
+		}
+	}
 
-            // Write new moveset now that space is ensured.
-            for (MoveLearnt ml : moves) {
-                moveDataLoc += writeMLToOffset(moveDataLoc, ml);
-            }
+	private byte[] movesLearntToBytes(List<MoveLearnt> movesLearnt) {
+		int entrySize = jamboMovesetHack ? 3 : 2;
+		byte[] terminator = jamboMovesetHack ? Gen3Constants.jamboMovesLearntTerminator
+				: Gen3Constants.vanillaMovesLearntTerminator;
 
-            // If move count changed, new terminator is required
-            // In the repoint enough space was reserved to add some padding to
-            // make sure the terminator isn't detected as free space.
-            // If no repoint, the padding goes over the old moves/terminator.
-            if (newMoveCount != currentMoveCount) {
-                if (jamboMovesetHack) {
-                    rom[moveDataLoc] = 0x00;
-                    rom[moveDataLoc + 1] = 0x00;
-                    rom[moveDataLoc + 2] = (byte) 0xFF;
-                    rom[moveDataLoc + 3] = 0x00;
-                    rom[moveDataLoc + 4] = 0x00;
-                    rom[moveDataLoc + 5] = 0x00;
-                } else {
-                    rom[moveDataLoc] = (byte) 0xFF;
-                    rom[moveDataLoc + 1] = (byte) 0xFF;
-                    rom[moveDataLoc + 2] = 0x00;
-                    rom[moveDataLoc + 3] = 0x00;
-                }
-            }
+		int bytesNeeded = entrySize * movesLearnt.size() + terminator.length;
+		byte[] bytes = new byte[bytesNeeded];
 
-        }
+		for (int i = 0; i < movesLearnt.size(); i++) {
+			writeMoveLearnt(bytes, i * entrySize, movesLearnt.get(i));
+		}
+		writeBytes(bytes, bytesNeeded - terminator.length, terminator);
 
-    }
+		return bytes;
+	}
 
-    private int writeMLToOffset(int offset, MoveLearnt ml) {
-        if (jamboMovesetHack) {
-            writeWord(offset, ml.move);
-            rom[offset + 2] = (byte) ml.level;
-            return 3;
-        } else {
-            rom[offset] = (byte) (ml.move & 0xFF);
-            int levelPart = (ml.level << 1) & 0xFE;
-            if (ml.move > 255) {
-                levelPart++;
-            }
-            rom[offset + 1] = (byte) levelPart;
-            return 2;
-        }
-    }
+	private void writeMoveLearnt(byte[] data, int offset, MoveLearnt ml) {
+		if (jamboMovesetHack) {
+			writeWord(data, offset, ml.move);
+			data[offset + 2] = (byte) ml.level;
+		} else {
+			data[offset] = (byte) (ml.move & 0xFF);
+			int levelPart = (ml.level << 1) & 0xFE;
+			if (ml.move > 255) {
+				levelPart++;
+			}
+			data[offset + 1] = (byte) levelPart;
+		}
+	}
+
+	/**
+	 * Reads the length of a MoveLearnt-s entry in bytes, including the terminator
+	 * bytes.
+	 */
+	private int lengthOfMovesLearntAt(int offset) {
+		List<MoveLearnt> moves = readMovesLearnt(offset);
+		return movesLearntToBytes(moves).length;
+	}
 
     @Override
     public Map<Integer, List<Integer>> getEggMoves() {
@@ -2360,7 +2355,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int startingSpeciesOffset = romEntry.getValue("StaticFirstBattleSpeciesOffset");
             writeWord(startingSpeciesOffset, pokedexToInternal[startingFirstBattle.pkmn.getNumber()]);
             int startingLevelOffset = romEntry.getValue("StaticFirstBattleLevelOffset");
-            rom[startingLevelOffset] = (byte) startingFirstBattle.level;
+            writeByte(startingLevelOffset, (byte) startingFirstBattle.level);
         } else if (romEntry.codeTweaks.get("GhostMarowakTweak") != null) {
             StaticEncounter ghostMarowak = staticPokemon.get(romEntry.getValue("GhostMarowakOffset"));
             int[] ghostMarowakSpeciesOffsets = romEntry.arrayEntries.get("GhostMarowakSpeciesOffsets");
@@ -2369,7 +2364,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
             int[] ghostMarowakLevelOffsets = romEntry.arrayEntries.get("GhostMarowakLevelOffsets");
             for (int i = 0; i < ghostMarowakLevelOffsets.length; i++) {
-                rom[ghostMarowakLevelOffsets[i]] = (byte) ghostMarowak.level;
+                writeByte(ghostMarowakLevelOffsets[i], (byte) ghostMarowak.level);
             }
 
             // The code for creating Ghost Marowak tries to ensure the Pokemon is female. If the Pokemon
@@ -2379,7 +2374,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int ghostMarowakGenderOffset = romEntry.getValue("GhostMarowakGenderOffset");
             if (ghostMarowak.pkmn.getGenderRatio() == 0 || ghostMarowak.pkmn.getGenderRatio() == 0xFF) {
                 // 0x00 is 100% male, and 0xFF is indeterminate gender
-                rom[ghostMarowakGenderOffset] = (byte) ghostMarowak.pkmn.getGenderRatio();
+                writeByte(ghostMarowakGenderOffset, (byte) ghostMarowak.pkmn.getGenderRatio());
             }
         }
 
@@ -2480,7 +2475,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // The constant 0x2000000 is actually in the function twice, so we'll replace the first instance
         // with Latios's ID. First, change the "ldr r2, [pc, #0x68]" near the start of the function to
         // "ldr r2, [pc, #0x15C]" so it points to the second usage of 0x2000000
-        rom[offset + 22] = 0x57;
+        writeByte(offset + 22, (byte) 0x57);
 
         // In the space formerly occupied by the first 0x2000000, write Latios's ID
         FileFunctions.writeFullInt(rom, offset + 128, pokedexToInternal[Species.latios]);
@@ -2488,10 +2483,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // Where the original function computes Latios's ID by setting r0 to 0xCC << 1, just pc-relative
         // load our constant. We have four bytes of space to play with, and we need to make sure the offset
         // from the pc is 4-byte aligned; we need to nop for alignment and then perform the load.
-        rom[offset + 12] = 0x00;
-        rom[offset + 13] = 0x00;
-        rom[offset + 14] = 0x1C;
-        rom[offset + 15] = 0x48;
+        writeBytes(offset + 12, new byte[] { 0x00, 0x00, 0x1C, 0x48 });
 
         offset = romEntry.getValue("CreateInitialRoamerMonFunctionStartOffset");
 
@@ -2500,16 +2492,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // some reason, Ruby very rarely does "pop { pc }" even though that seemingly works fine. By doing
         // that, we only need one instruction to return to the caller, giving us four bytes to write
         // Latios's species ID.
-        rom[offset + 182] = 0x00;
-        rom[offset + 183] = (byte) 0xBD;
+        writeBytes(offset + 182, new byte[] { 0x00, (byte) 0xBD});
         FileFunctions.writeFullInt(rom, offset + 184, pokedexToInternal[Species.latios]);
 
         // Now write a pc-relative load to this new species ID constant over the original move and lsl. Similar
         // to before, we need to write a nop first for alignment, then pc-relative load into r6.
-        rom[offset + 10] = 0x00;
-        rom[offset + 11] = 0x00;
-        rom[offset + 12] = 0x2A;
-        rom[offset + 13] = 0x4E;
+        writeBytes(offset + 10, new byte[] { 0x00, 0x00, 0x2A, 0x4E });
     }
 
     private void applyEmeraldRoamerPatch() {
@@ -2519,7 +2507,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // some room for it; the constant 0x03005D8C is actually in the function twice, so we'll replace the first
         // instance with Latios's ID. First, change the "ldr r0, [pc, #0xC]" at the start of the function to
         // "ldr r0, [pc, #0x104]", so it points to the second usage of 0x03005D8C
-        rom[offset + 14] = 0x41;
+        writeByte(offset + 14, (byte) 0x41);
 
         // In the space formerly occupied by the first 0x03005D8C, write Latios's ID
         FileFunctions.writeFullInt(rom, offset + 28, pokedexToInternal[Species.latios]);
@@ -2528,17 +2516,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // shift doesn't actually matter, because 0 << 0x10 = 0, and [non-zero] << 0x10 = [non-zero].
         // Let's move the compare up to take its place and then load Latios's ID into r3 for use in another
         // branch later.
-        rom[offset + 8] = 0x00;
-        rom[offset + 9] = 0x28;
-        rom[offset + 10] = 0x04;
-        rom[offset + 11] = 0x4B;
+        writeBytes(offset + 8, new byte[] { 0x00, 0x28, 0x04, 0x4B });
 
         // Lastly, in the branch that normally does r2 = 0xCC << 0x1 to compute Latios's ID, just mov r3
         // into r2, since it was loaded with his ID with the above code.
-        rom[offset + 48] = 0x1A;
-        rom[offset + 49] = 0x46;
-        rom[offset + 50] = 0x00;
-        rom[offset + 51] = 0x00;
+        writeBytes(offset + 48, new byte[] { 0x1A, 0x46, 0x00, 0x00 });
     }
 
     @Override
@@ -2556,106 +2538,116 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return Gen3Constants.hmMoves;
     }
 
-    @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
-        if (!mapLoadingDone) {
-            preprocessMaps();
-            mapLoadingDone = true;
-        }
-        int offset = romEntry.getValue("TmMoves");
-        for (int i = 1; i <= Gen3Constants.tmCount; i++) {
-            writeWord(offset + (i - 1) * 2, moveIndexes.get(i - 1));
-        }
-        int otherOffset = romEntry.getValue("TmMovesDuplicate");
-        if (otherOffset > 0) {
-            // Emerald/FR/LG have *two* TM tables
-            System.arraycopy(rom, offset, rom, otherOffset, Gen3Constants.tmCount * 2);
-        }
+	@Override
+	public void setTMMoves(List<Integer> moveIndexes) {
+		if (!mapLoadingDone) {
+			preprocessMaps();
+			mapLoadingDone = true;
+		}
+		writeTMMoves(moveIndexes);
+		writeTMItemPalettes(moveIndexes);
+		writeTMItemText(moveIndexes);
+		writeTMText(moveIndexes);
+	}
 
-        int iiOffset = romEntry.getValue("ItemImages");
-        if (iiOffset > 0) {
-            int[] pals = romEntry.arrayEntries.get("TmPals");
-            // Update the item image palettes
-            // Gen3 TMs are 289-338
-            for (int i = 0; i < 50; i++) {
-                Move mv = moves[moveIndexes.get(i)];
-                int typeID = Gen3Constants.typeToByte(mv.type);
-                writePointer(iiOffset + (Gen3Constants.tmItemOffset + i) * 8 + 4, pals[typeID]);
-            }
-        }
+	private void writeTMMoves(List<Integer> moveIndexes) {
+		int offset = romEntry.getValue("TmMoves");
+		for (int i = 1; i <= Gen3Constants.tmCount; i++) {
+			writeWord(offset + (i - 1) * 2, moveIndexes.get(i - 1));
+		}
+		int otherOffset = romEntry.getValue("TmMovesDuplicate");
+		if (otherOffset > 0) {
+			// Emerald/FR/LG have *two* TM tables
+			System.arraycopy(rom, offset, rom, otherOffset, Gen3Constants.tmCount * 2);
+		}
+	}
 
-        int fsOffset = romEntry.getValue("FreeSpace");
+	private void writeTMItemPalettes(List<Integer> moveIndexes) {
+		int iiOffset = romEntry.getValue("ItemImages");
+		if (iiOffset > 0) {
+			int[] pals = romEntry.arrayEntries.get("TmPals");
+			// Update the item image palettes
+			// Gen3 TMs are 289-338
+			for (int i = 0; i < 50; i++) {
+				Move mv = moves[moveIndexes.get(i)];
+				int typeID = Gen3Constants.typeToByte(mv.type);
+				writePointer(iiOffset + (Gen3Constants.tmItemOffset + i) * 8 + 4, pals[typeID]);
+			}
+		}
+	}
 
-        // Item descriptions
-        if (romEntry.getValue("MoveDescriptions") > 0) {
-            // JP blocked for now - uses different item structure anyway
-            int idOffset = romEntry.getValue("ItemData");
-            int mdOffset = romEntry.getValue("MoveDescriptions");
-            int entrySize = romEntry.getValue("ItemEntrySize");
-            int limitPerLine = (romEntry.romType == Gen3Constants.RomType_FRLG) ? Gen3Constants.frlgItemDescCharsPerLine
-                    : Gen3Constants.rseItemDescCharsPerLine;
-            for (int i = 0; i < Gen3Constants.tmCount; i++) {
-                int itemBaseOffset = idOffset + (i + Gen3Constants.tmItemOffset) * entrySize;
-                int moveBaseOffset = mdOffset + (moveIndexes.get(i) - 1) * 4;
-                int moveTextPointer = readPointer(moveBaseOffset);
-                String moveDesc = readVariableLengthString(moveTextPointer);
-                String newItemDesc = RomFunctions.rewriteDescriptionForNewLineSize(moveDesc, "\\n", limitPerLine, ssd);
-                // Find freespace
-                int fsBytesNeeded = translateString(newItemDesc).length + 1;
-                int newItemDescOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, fsBytesNeeded,
-                        fsOffset);
-                if (newItemDescOffset < fsOffset) {
-                    String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new item description." + nl);
-                    return;
-                }
-                writeVariableLengthString(newItemDesc, newItemDescOffset);
-                writePointer(itemBaseOffset + Gen3Constants.itemDataDescriptionOffset, newItemDescOffset);
-            }
-        }
+	private boolean writeTMItemText(List<Integer> moveIndexes) {
+		// Item descriptions
+		if (romEntry.getValue("MoveDescriptions") > 0) {
+			// JP blocked for now - uses different item structure anyway
+			int idOffset = romEntry.getValue("ItemData");
+			int mdOffset = romEntry.getValue("MoveDescriptions");
+			int entrySize = romEntry.getValue("ItemEntrySize");
+			int limitPerLine = (romEntry.romType == Gen3Constants.RomType_FRLG) ? Gen3Constants.frlgItemDescCharsPerLine
+					: Gen3Constants.rseItemDescCharsPerLine;
+			for (int i = 0; i < Gen3Constants.tmCount; i++) {
+				int itemBaseOffset = idOffset + (i + Gen3Constants.tmItemOffset) * entrySize;
+				int moveBaseOffset = mdOffset + (moveIndexes.get(i) - 1) * 4;
+				int moveTextPointer = readPointer(moveBaseOffset);
+				String moveDesc = readVariableLengthString(moveTextPointer);
+				String newItemDesc = RomFunctions.rewriteDescriptionForNewLineSize(moveDesc, "\\n", limitPerLine, ssd);
 
-        // TM Text?
-        for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
-            if (tte.actualOffset > 0 && !tte.isMoveTutor) {
-                // create the new TM text
-                int oldPointer = readPointer(tte.actualOffset);
-                if (oldPointer < 0 || oldPointer >= rom.length) {
-                    String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new TM text. Skipping remaining TM text updates." + nl);
-                    return;
-                }
-                String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
-                // temporarily use underscores to stop the move name being split
-                String tmpMoveName = moveName.replace(' ', '_');
-                String unformatted = tte.template.replace("[move]", tmpMoveName);
-                String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n", "\\l", "\\p",
-                        Gen3Constants.regularTextboxCharsPerLine, ssd);
-                // get rid of the underscores
-                newText = newText.replace(tmpMoveName, moveName);
-                // insert the new text into free space
-                int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset = RomFunctions.freeSpaceFinder(rom, (byte) 0xFF, fsBytesNeeded, fsOffset);
-                if (newOffset < fsOffset) {
-                    String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new TM text." + nl);
-                    return;
-                }
-                writeVariableLengthString(newText, newOffset);
-                // search for copies of the pointer:
-                // make a needle of the pointer
-                byte[] searchNeedle = new byte[4];
-                System.arraycopy(rom, tte.actualOffset, searchNeedle, 0, 4);
-                // find copies within 500 bytes either way of actualOffset
-                int minOffset = Math.max(0, tte.actualOffset - Gen3Constants.pointerSearchRadius);
-                int maxOffset = Math.min(rom.length, tte.actualOffset + Gen3Constants.pointerSearchRadius);
-                List<Integer> pointerLocs = RomFunctions.search(rom, minOffset, maxOffset, searchNeedle);
-                for (int pointerLoc : pointerLocs) {
-                    // write the new pointer
-                    writePointer(pointerLoc, newOffset);
-                }
-            }
-        }
-    }
+				int itemDescPointerOffset = itemBaseOffset + Gen3Constants.itemDataDescriptionOffset;
+				try {
+					rewriteVariableLengthString(itemDescPointerOffset, newItemDesc);
+				} catch (RandomizerIOException e) {
+					String nl = System.getProperty("line.separator");
+					log("Couldn't insert new item description. " + e.getMessage() + nl);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private void writeTMText(List<Integer> moveIndexes) {
+		// TM Text?
+		for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
+			if (tte.actualOffset > 0 && !tte.isMoveTutor) {
+				// create the new TM text
+				int oldPointer = readPointer(tte.actualOffset);
+				if (oldPointer < 0 || oldPointer >= rom.length) {
+					String nl = System.getProperty("line.separator");
+					log("Couldn't insert new TM text. Skipping remaining TM text updates." + nl);
+					return;
+				}
+				String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
+				// temporarily use underscores to stop the move name being split
+				String tmpMoveName = moveName.replace(' ', '_');
+				String unformatted = tte.template.replace("[move]", tmpMoveName);
+				String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n", "\\l", "\\p",
+						Gen3Constants.regularTextboxCharsPerLine, ssd);
+				// get rid of the underscores
+				newText = newText.replace(tmpMoveName, moveName);
+
+				int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
+				try {
+					System.out.println(Arrays.toString(secondaryPointerOffsets) + " " + tte.actualOffset);
+					rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
+				} catch (RandomizerIOException e) {
+					String nl = System.getProperty("line.separator");
+					log("Couldn't insert new TM text. " + e.getMessage() + nl);
+					return;
+				}
+			}
+		}
+	}
+
+	private int[] searchForPointerCopies(int pointerOffset) {
+		// Somewhat foolhardy, since other data around *could* coincidentally be
+		// identical to the pointer, and would then be erroneously overwritten.
+		byte[] searchNeedle = new byte[4];
+		System.arraycopy(rom, pointerOffset, searchNeedle, 0, 4);
+		// find copies within pointerSearchRadius bytes either way of actualOffset
+		int minOffset = Math.max(0, pointerOffset - Gen3Constants.pointerSearchRadius);
+		int maxOffset = Math.min(rom.length, pointerOffset + Gen3Constants.pointerSearchRadius);
+		return RomFunctions.search(rom, minOffset, maxOffset, searchNeedle).stream().mapToInt(i -> i).toArray();
+	}
 
     private RomFunctions.StringSizeDeterminer ssd = encodedText -> translateString(encodedText).length;
 
@@ -2693,7 +2685,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             boolean[] flags = compatEntry.getValue();
             int compatOffset = offset + (pokedexToInternal[pkmn.getNumber()]) * 8;
             for (int j = 0; j < 8; j++) {
-                rom[compatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
+                writeByte(compatOffset + j, getByteFromFlags(flags, j * 8 + 1));
             }
         }
     }
@@ -2717,62 +2709,54 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return mts;
     }
 
-    @Override
-    public void setMoveTutorMoves(List<Integer> moves) {
-        if (!hasMoveTutors()) {
-            return;
-        }
-        int moveCount = romEntry.getValue("MoveTutorMoves");
-        int offset = romEntry.getValue("MoveTutorData");
-        if (moveCount != moves.size()) {
-            return;
-        }
-        for (int i = 0; i < moveCount; i++) {
-            writeWord(offset + i * 2, moves.get(i));
-        }
-        int fsOffset = romEntry.getValue("FreeSpace");
+	@Override
+	public void setMoveTutorMoves(List<Integer> moves) {
+		if (!hasMoveTutors()) {
+			return;
+		}
+		int moveCount = romEntry.getValue("MoveTutorMoves");
+		int offset = romEntry.getValue("MoveTutorData");
+		if (moveCount != moves.size()) {
+			return;
+		}
+		for (int i = 0; i < moveCount; i++) {
+			writeWord(offset + i * 2, moves.get(i));
+		}
 
-        // Move Tutor Text?
-        for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
-            if (tte.actualOffset > 0 && tte.isMoveTutor) {
-                // create the new MT text
-                int oldPointer = readPointer(tte.actualOffset);
-                if (oldPointer < 0 || oldPointer >= rom.length) {
-                    throw new RandomizationException(
-                            "Move Tutor Text update failed: couldn't read a move tutor text pointer.");
-                }
-                String moveName = this.moves[moves.get(tte.number)].name;
-                // temporarily use underscores to stop the move name being split
-                String tmpMoveName = moveName.replace(' ', '_');
-                String unformatted = tte.template.replace("[move]", tmpMoveName);
-                String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n", "\\l", "\\p",
-                        Gen3Constants.regularTextboxCharsPerLine, ssd);
-                // get rid of the underscores
-                newText = newText.replace(tmpMoveName, moveName);
-                // insert the new text into free space
-                int fsBytesNeeded = translateString(newText).length + 1;
-                int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, fsBytesNeeded, fsOffset);
-                if (newOffset < fsOffset) {
-                    String nl = System.getProperty("line.separator");
-                    log("Couldn't insert new Move Tutor text." + nl);
-                    return;
-                }
-                writeVariableLengthString(newText, newOffset);
-                // search for copies of the pointer:
-                // make a needle of the pointer
-                byte[] searchNeedle = new byte[4];
-                System.arraycopy(rom, tte.actualOffset, searchNeedle, 0, 4);
-                // find copies within 500 bytes either way of actualOffset
-                int minOffset = Math.max(0, tte.actualOffset - Gen3Constants.pointerSearchRadius);
-                int maxOffset = Math.min(rom.length, tte.actualOffset + Gen3Constants.pointerSearchRadius);
-                List<Integer> pointerLocs = RomFunctions.search(rom, minOffset, maxOffset, searchNeedle);
-                for (int pointerLoc : pointerLocs) {
-                    // write the new pointer
-                    writePointer(pointerLoc, newOffset);
-                }
-            }
-        }
-    }
+		writeMoveTutorText(moves);
+	}
+
+	private void writeMoveTutorText(List<Integer> moves) { // TODO: very similar to writeTMText - merge?
+		// Move Tutor Text?
+		for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
+			if (tte.actualOffset > 0 && tte.isMoveTutor) {
+				// create the new MT text
+				int oldPointer = readPointer(tte.actualOffset);
+				if (oldPointer < 0 || oldPointer >= rom.length) {
+					throw new RandomizationException(
+							"Move Tutor Text update failed: couldn't read a move tutor text pointer.");
+				}
+				String moveName = this.moves[moves.get(tte.number)].name;
+				// temporarily use underscores to stop the move name being split
+				String tmpMoveName = moveName.replace(' ', '_');
+				String unformatted = tte.template.replace("[move]", tmpMoveName);
+				String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n", "\\l", "\\p",
+						Gen3Constants.regularTextboxCharsPerLine, ssd);
+				// get rid of the underscores
+				newText = newText.replace(tmpMoveName, moveName);
+
+				int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
+				try {
+					rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
+				} catch (RandomizerIOException e) {
+					String nl = System.getProperty("line.separator");
+					log("Couldn't insert new Move Tutor text. " + e.getMessage() + nl);
+					return;
+				}
+
+			}
+		}
+	}
 
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {
@@ -2808,7 +2792,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             boolean[] flags = compatEntry.getValue();
             int compatOffset = offset + pokedexToInternal[pkmn.getNumber()] * bytesRequired;
             for (int j = 0; j < bytesRequired; j++) {
-                rom[compatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
+                writeByte(compatOffset + j, getByteFromFlags(flags, j * 8 + 1));
             }
         }
     }
@@ -2866,6 +2850,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return RomFunctions.search(haystack, searchFor);
     }
 
+    // TODO: should this not convert to byte[] and then use writeBytes()?
     private void writeHexString(String hexString, int offset) {
         if (hexString.length() % 2 != 0) {
             return; // error
@@ -2895,10 +2880,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // But MOVS R1, 0x0 (the version I know) is 2-byte
             // So we just use it twice...
             // the equivalent of nop'ing the second time.
-            rom[deoxysObOffset] = 0x00;
-            rom[deoxysObOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-            rom[deoxysObOffset + 2] = 0x00;
-            rom[deoxysObOffset + 3] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+            writeBytes(deoxysObOffset, new byte[] { 0x00, Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                    0x00, Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
             // Look for the mew check too... it's 0x16 ahead
             if (readWord(deoxysObOffset + Gen3Constants.mewObeyOffsetFromDeoxysObey) == (((Gen3Constants.gbaCmpRxOpcode | Gen3Constants.gbaR0) << 8) | (Species.mew))) {
                 // Bingo, thats CMP R0, 0x97
@@ -2933,7 +2916,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void patchForNationalDex() {
         log("--Patching for National Dex at Start of Game--");
         String nl = System.getProperty("line.separator");
-        int fso = romEntry.getValue("FreeSpace");
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.rsPokedexScriptIdentifier);
@@ -2949,10 +2931,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 44, fso);
-            if (writeSpace < fso) {
-                log("Patch unsuccessful." + nl);
-                // Somehow this ROM is full
+            int writeSpace;
+            try {
+                writeSpace = findAndUnfreeSpace(44); // TODO: "44" should be a constant
+            } catch (RandomizerIOException e) {
+                log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -2968,15 +2951,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 10, fso);
-            if (writeSpace < fso) {
-                // Somehow this ROM is full
-                log("Patch unsuccessful." + nl);
+            int writeSpace;
+            try {
+                writeSpace = findAndUnfreeSpace(10); // TODO: "10" should be a constant
+            } catch (RandomizerIOException e) {
+                log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
             }
-            rom[pkDexOffset] = 4;
+            writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
             writePointer(pkDexOffset + 1, writeSpace);
-            rom[pkDexOffset + 5] = 0; // NOP
+            writeByte(pkDexOffset + 5, (byte) 0); // NOP
 
             // Now write our new routine
             writeHexString(Gen3Constants.frlgNatDexScript, writeSpace);
@@ -3009,7 +2993,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (oakAideCheckOffs > 0) {
                 oakAideCheckOffs += Gen3Constants.frlgOakAideCheckPrefix.length() / 2; // because it was a prefix
                 // Change the bne instruction to an unconditional branch to always use National Dex
-                rom[oakAideCheckOffs + 1] = (byte) 0xE0;
+                writeByte(oakAideCheckOffs + 1, (byte) 0xE0);
             }
         } else {
             // Find the original pokedex script
@@ -3026,10 +3010,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             // Find free space for our new routine
-            int writeSpace = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, 27, fso);
-            if (writeSpace < fso) {
-                // Somehow this ROM is full
-                log("Patch unsuccessful." + nl);
+            int writeSpace;
+            try {
+                writeSpace = findAndUnfreeSpace(27); // TODO: "27" should be a constant
+            } catch (RandomizerIOException e) {
+                log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -3198,18 +3183,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int offset = find(rom, Gen3Constants.friendshipValueForEvoLocator);
         if (offset > 0) {
             // Amount of required happiness for HAPPINESS evolutions.
-            if (rom[offset] == (byte)219) {
-                rom[offset] = (byte)159;
+            if (rom[offset] == (byte) 219) {
+                writeByte(offset, (byte) 159);
             }
             // FRLG doesn't have code to handle time-based evolutions.
             if (romEntry.romType != Gen3Constants.RomType_FRLG) {
                 // Amount of required happiness for HAPPINESS_DAY evolutions.
-                if (rom[offset + 38] == (byte)219) {
-                    rom[offset + 38] = (byte)159;
+                if (rom[offset + 38] == (byte) 219) { // TODO: 219 (or 220) should be a constant
+                    writeByte(offset + 38, (byte) 159); // TODO: 159 (or 160) should be a constant
                 }
                 // Amount of required happiness for HAPPINESS_NIGHT evolutions.
                 if (rom[offset + 66] == (byte)219) {
-                    rom[offset + 66] = (byte)159;
+                    writeByte(offset + 66, (byte) 159);
                 }
             }
         }
@@ -3386,11 +3371,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
-        List<String> theTrainers = new ArrayList<>();
+        List<String> trainerNames = new ArrayList<>();
         for (int i = 1; i < amount; i++) {
-            theTrainers.add(readVariableLengthString(baseOffset + i * entryLen + 4));
+            trainerNames.add(readVariableLengthString(baseOffset + i * entryLen + 4));
         }
-        return theTrainers;
+        return trainerNames;
     }
 
     @Override
@@ -3399,9 +3384,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
         int nameLen = romEntry.getValue("TrainerNameLength");
-        Iterator<String> theTrainers = trainerNames.iterator();
+        Iterator<String> nameIterator = trainerNames.iterator();
         for (int i = 1; i < amount; i++) {
-            String newName = theTrainers.next();
+            String newName = nameIterator.next();
             writeFixedLengthString(newName, baseOffset + i * entryLen + 4, nameLen);
         }
 
@@ -3428,11 +3413,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerClassNames");
         int amount = romEntry.getValue("TrainerClassCount");
         int length = romEntry.getValue("TrainerClassNameLength");
-        List<String> trainerClasses = new ArrayList<>();
+        List<String> trainerClassNames = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
-            trainerClasses.add(readVariableLengthString(baseOffset + i * length));
+            trainerClassNames.add(readVariableLengthString(baseOffset + i * length));
         }
-        return trainerClasses;
+        return trainerClassNames;
     }
 
     @Override
@@ -3440,9 +3425,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int baseOffset = romEntry.getValue("TrainerClassNames");
         int amount = romEntry.getValue("TrainerClassCount");
         int length = romEntry.getValue("TrainerClassNameLength");
-        Iterator<String> trainerClasses = trainerClassNames.iterator();
+        Iterator<String> trainerClassNamesIterator = trainerClassNames.iterator();
         for (int i = 0; i < amount; i++) {
-            writeFixedLengthString(trainerClasses.next(), baseOffset + i * length, length);
+            writeFixedLengthString(trainerClassNamesIterator.next(), baseOffset + i * length, length);
         }
     }
 
@@ -3607,8 +3592,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int frontSprites = romEntry.getValue("FrontSprites");
             int palettes = romEntry.getValue("PokemonPalettes");
 
-            rom[romEntry.getValue("IntroCryOffset")] = (byte) introPokemon;
-            rom[romEntry.getValue("IntroOtherOffset")] = (byte) introPokemon;
+            writeByte(romEntry.getValue("IntroCryOffset"), (byte) introPokemon);
+            writeByte(romEntry.getValue("IntroOtherOffset"), (byte) introPokemon);
 
             int spriteBase = romEntry.getValue("IntroSpriteOffset");
             writePointer(spriteBase, frontSprites + introPokemon * 8);
@@ -3624,7 +3609,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int cryCommand = romEntry.getValue("IntroCryOffset");
             int otherCommand = romEntry.getValue("IntroOtherOffset");
 
-            if (introPokemon > 255) {
+            if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
                 rom[cryCommand] = (byte) 0xFF;
                 rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
 
@@ -3919,7 +3904,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (Gen3Constants.allowedItems.isTM(itemHere)) {
                 // Cache replaced TMs to duplicate repeats
                 if (givenTMs[itemHere] != 0) {
-                    rom[offset] = (byte) givenTMs[itemHere];
+                    writeByte(offset, (byte) givenTMs[itemHere]);
                 } else {
                     // Replace this with a TM from the list
                     int tm = iterTMs.next();
@@ -4021,7 +4006,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeFixedLengthString(trade.nickname, entryOffset, 12);
             writeWord(entryOffset + 12, pokedexToInternal[trade.givenPokemon.getNumber()]);
             for (int i = 0; i < 6; i++) {
-                rom[entryOffset + 14 + i] = (byte) trade.ivs[i];
+                writeByte(entryOffset + 14 + i, (byte) trade.ivs[i]);
             }
             writeWord(entryOffset + 24, trade.otId);
             writeWord(entryOffset + 40, trade.item);
@@ -4158,22 +4143,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 if (opponent != null) {
 
                     int oppValue = pokedexToInternal[opponent.getNumber()];
-                    rom[oppOffset] = (byte) oppValue;
-                    rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+                    writeBytes(oppOffset, new byte[] {(byte) oppValue,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
                 }
             } else {
                 Pokemon opponent = randomPokemonLimited(510, true);
                 if (opponent != null) {
                     int oppValue = pokedexToInternal[opponent.getNumber()];
                     if (oppValue > 255) {
-                        rom[oppOffset] = (byte) 0xFF;
-                        rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-
-                        rom[oppOffset + 2] = (byte) (oppValue - 0xFF);
-                        rom[oppOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1;
+                        writeBytes(oppOffset, new byte[] {(byte) 0xFF,
+                                Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                                (byte) (oppValue - 0xFF),
+                                Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
                     } else {
-                        rom[oppOffset] = (byte) oppValue;
-                        rom[oppOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
+                        writeBytes(oppOffset, new byte[] {(byte) oppValue,
+                                Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
 
                         writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
                     }
@@ -4187,15 +4171,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (playerMon != null) {
                 int plyValue = pokedexToInternal[playerMon.getNumber()];
                 if (plyValue > 255) {
-                    rom[playerOffset] = (byte) 0xFF;
-                    rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-
-                    rom[playerOffset + 2] = (byte) (plyValue - 0xFF);
-                    rom[playerOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1;
+                    writeBytes(playerOffset, new byte[] {(byte) 0xFF,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                            (byte) (plyValue - 0xFF),
+                            Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
                 } else {
-                    rom[playerOffset] = (byte) plyValue;
-                    rom[playerOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1;
-
+                    writeBytes(playerOffset, new byte[] {(byte) plyValue,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
                     writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
                 }
             }
@@ -4205,7 +4187,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void applyRunningShoesIndoorsPatch() {
         if (romEntry.getValue("RunIndoorsTweakOffset") != 0) {
-            rom[romEntry.getValue("RunIndoorsTweakOffset")] = 0x00;
+            writeByte(romEntry.getValue("RunIndoorsTweakOffset"), (byte) 0x00);
         }
     }
 
@@ -4218,9 +4200,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         } else if (romEntry.getValue("TextSpeedValuesOffset") > 0) {
             int tsvOffset = romEntry.getValue("TextSpeedValuesOffset");
-            rom[tsvOffset] = 4; // slow = medium
-            rom[tsvOffset + 1] = 1; // medium = fast
-            rom[tsvOffset + 2] = 0; // fast = instant
+            byte[] newTextSpeedValues = new byte[] {4, // slow = medium
+                    1, // medium = fast
+                    0}; // fast = instant
+            writeBytes(tsvOffset, newTextSpeedValues);
         }
     }
 
@@ -4308,24 +4291,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
         int currentOffset = romEntry.getValue("TypeEffectivenessOffset");
         for (TypeRelationship relationship : typeEffectivenessTable) {
-            rom[currentOffset] = Gen3Constants.typeToByte(relationship.attacker);
-            rom[currentOffset + 1] = Gen3Constants.typeToByte(relationship.defender);
-            byte effectivenessInternal = 0;
-            switch (relationship.effectiveness) {
-                case DOUBLE:
-                    effectivenessInternal = 20;
-                    break;
-                case NEUTRAL:
-                    effectivenessInternal = 10;
-                    break;
-                case HALF:
-                    effectivenessInternal = 5;
-                    break;
-                case ZERO:
-                    effectivenessInternal = 0;
-                    break;
-            }
-            rom[currentOffset + 2] = effectivenessInternal;
+            byte effectivenessInternal = switch (relationship.effectiveness) {
+                case DOUBLE -> 20;
+                case NEUTRAL -> 10;
+                case HALF -> 5;
+                case ZERO -> 0;
+                default -> 0;
+            };
+            byte[] effectivenessData = new byte[] {Gen3Constants.typeToByte(relationship.attacker),
+                    Gen3Constants.typeToByte(relationship.defender), effectivenessInternal};
+            writeBytes(currentOffset, effectivenessData);
             currentOffset += 3;
         }
 	}
@@ -4355,10 +4330,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // bls oddsLessThanOrEqualTo254
             // The below code just nops these two instructions so that we *always* act like our odds are 255,
             // and Pokemon are automatically caught no matter what.
-            rom[offset] = 0x00;
-            rom[offset + 1] = 0x00;
-            rom[offset + 2] = 0x00;
-            rom[offset + 3] = 0x00;
+            writeBytes(offset, new byte[] {0x00, 0x00, 0x00, 0x00});
         }
     }
 
@@ -4597,28 +4569,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void rewriteCompressedData(int pointerOffset, byte[] uncompressed, int[] secondaryPointerOffsets) {
-        byte[] compressed = DSCmp.compressLZ10(uncompressed);
-        int dataOffset = readPointer(pointerOffset);
-        int oldLength = compressedDataLength(dataOffset);
-
-        for (int secondaryPointerOffset : secondaryPointerOffsets) {
-            if (readPointer(secondaryPointerOffset) != dataOffset) {
-                throw new RandomizerIOException("Invalid secondary pointer.");
-            }
-        }
-
-        if (oldLength != compressed.length) {
-            freeSpace(dataOffset, oldLength);
-        }
-
-        if (oldLength < compressed.length) {
-            int newOffset = repointAndWriteToFreeSpace(pointerOffset, compressed);
-            for (int secondaryPointerOffset : secondaryPointerOffsets) {
-                writePointer(secondaryPointerOffset, newOffset);
-            }
-        } else {
-            writeBytes(dataOffset, compressed);
-        }
+        new DataRewriter<byte[]>().rewriteData(pointerOffset, uncompressed, secondaryPointerOffsets,
+                DSCmp::compressLZ10, this::compressedDataLength);
     }
 
     /*
@@ -4634,28 +4586,106 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return compressed.length;
     }
 
-    /*
-     * Returns the new offset of the data.
-     */
-    // TODO: refactor old functions to use this
-    private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-        int freeSpaceOffset = romEntry.getValue("FreeSpace");
-        int newOffset = RomFunctions.freeSpaceFinder(rom, Gen3Constants.freeSpaceByte, data.length, freeSpaceOffset);
-        if (newOffset < freeSpaceOffset) {
-            throw new RandomizerIOException("ROM is full");
-        }
+	private void rewriteVariableLengthString(int pointerOffset, String string) {
+		rewriteVariableLengthString(pointerOffset, string, new int[0]);
+	}
 
-        writePointer(pointerOffset, newOffset);
-        writeBytes(newOffset, data);
+	private void rewriteVariableLengthString(int pointerOffset, String string, int[] secondaryPointerOffsets) {
+		new DataRewriter<String>().rewriteData(pointerOffset, string, secondaryPointerOffsets,
+				this::variableLengthStringToBytes, (oldDataOffset) -> lengthOfStringAt(oldDataOffset) + 1);
+	}
 
-        return newOffset;
-    }
+	private byte[] variableLengthStringToBytes(String string) {
+		byte[] translated = translateString(string);
+		byte[] newData = Arrays.copyOf(translated, translated.length + 1);
+		newData[newData.length - 1] = (byte) 0xFF;
+		return newData;
+	}
 
-    private void freeSpace(int offset, int length) {
-        for (int i = 0; i < length; i++) {
-            writeByte(offset + i, Gen3Constants.freeSpaceByte);
-        }
-    }
+	private class DataRewriter<E> {
+
+		public void rewriteData(int pointerOffset, E object, Function<E, byte[]> newDataFunction,
+				Function<Integer, Integer> lengthOfOldFunction) {
+			rewriteData(pointerOffset, object, new int[0], newDataFunction, lengthOfOldFunction);
+		}
+
+		public void rewriteData(int pointerOffset, E object, int[] secondaryPointerOffsets,
+				Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
+			byte[] newData = newDataFunction.apply(object);
+			int oldDataOffset = readPointer(pointerOffset);
+			int oldLength = lengthOfOldFunction.apply(oldDataOffset);
+			freeSpace(oldDataOffset, oldLength);
+			int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
+
+			for (int spo : secondaryPointerOffsets) {
+				if (spo != pointerOffset && readPointer(spo) != oldDataOffset) {
+					System.out.println("wanted: " + oldDataOffset);
+					System.out.println("bad: " + spo);
+					throw new RandomizerIOException("Invalid secondary pointer.");
+				}
+				writePointer(spo, newDataOffset);
+			}
+		}
+
+	}
+
+	/*
+	 * Returns the new offset of the data.
+	 */
+	private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+		int newOffset = findAndUnfreeSpace(data.length);
+
+		writePointer(pointerOffset, newOffset);
+		writeBytes(newOffset, data);
+
+		return newOffset;
+	}
+
+	@Override
+	protected byte getFreeSpaceByte() {
+		return Gen3Constants.freeSpaceByte;
+	}
+
+	/**
+	 * Finds and "frees" space that was unused in the unrandomized ROM, i.e. marks
+	 * it as available for writing to.<br>
+	 * "Unused" in this context refers only to blank data of many "FF"s in a row,
+	 * NOT stuff like unused graphics, maps, and music. <br>
+	 * <br>
+	 * The finding is automatic instead of decided wholly by manual offsets. This
+	 * presents a risk in theory, of marking "unused" space which isn't, but there
+	 * is a guiding manual offset and other precautions, so this risk should be
+	 * slim.
+	 */
+	private void freeAllUnusedSpace() {
+		int unusedSpaceStartOffset = romEntry.getValue("FreeSpace");
+		int unusedSpaceOffset = unusedSpaceStartOffset;
+		int chunkLength = Gen3Constants.unusedSpaceChunkLength;
+		int frontMargin = Gen3Constants.unusedSpaceFrontMargin;
+
+		boolean freedAllUnused = false;
+
+		while (!freedAllUnused) {
+			byte[] searchNeedle = new byte[chunkLength];
+			for (int i = 0; i < chunkLength; i++) {
+				searchNeedle[i] = getFreeSpaceByte();
+			}
+			int foundOffset = RomFunctions.searchForFirst(rom, unusedSpaceOffset, searchNeedle);
+
+			if (foundOffset < unusedSpaceStartOffset) {
+				freedAllUnused = true;
+			} else {
+
+				if (foundOffset > unusedSpaceOffset + chunkLength || foundOffset == unusedSpaceStartOffset) {
+					freeSpace(foundOffset + frontMargin, chunkLength - frontMargin);
+				} else {
+					freeSpace(foundOffset, chunkLength);
+				}
+				unusedSpaceOffset = foundOffset + chunkLength;
+			}
+		}
+
+	}
     
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,

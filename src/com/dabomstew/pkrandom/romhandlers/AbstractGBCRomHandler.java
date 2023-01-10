@@ -190,6 +190,10 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
     }
 
+    protected byte getFreeSpaceByte() {
+        return 0;
+    }
+
     protected static boolean romSig(byte[] rom, String sig) {
         try {
             int sigOffset = GBConstants.romSigOffset;

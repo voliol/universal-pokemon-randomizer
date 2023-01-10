@@ -34,15 +34,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.Gen1Pokemon;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
@@ -50,6 +49,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected byte[] rom;
     protected byte[] originalRom;
     private String loadedFN;
+
+    private FreedSpace freedSpace = new FreedSpace();
 
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -187,42 +188,85 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return readWord(rom, offset);
     }
     
-    protected final void writeByte(int offset, byte value) {
-        rom[offset] = value;
-    }
+	protected final void writeByte(int offset, byte value) {
+		rom[offset] = value;
+	}
 
-    protected final void writeBytes(int offset, byte[] values) {
-        for (int i = 0; i < values.length; i++) {
-            writeByte(offset + i, values[i]);
-        }
-    }
+	protected final void writeBytes(int offset, byte[] values) {
+		for (int i = 0; i < values.length; i++) {
+			writeByte(offset + i, values[i]);
+		}
+	}
 
-    protected int readWord(byte[] data, int offset) {
-        return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
-    }
+	protected final void writeBytes(byte[] data, int offset, byte[] values) {
+		System.arraycopy(values, 0, data, offset, values.length);
+	}
 
-    protected void writeWord(int offset, int value) {
-        writeWord(rom, offset, value);
-    }
+	protected int readWord(byte[] data, int offset) {
+		return (data[offset] & 0xFF) + ((data[offset + 1] & 0xFF) << 8);
+	}
 
-    protected void writeWord(byte[] data, int offset, int value) {
-        data[offset] = (byte) (value % 0x100);
-        data[offset + 1] = (byte) ((value / 0x100) % 0x100);
-    }
+	protected void writeWord(int offset, int value) {
+		writeWord(rom, offset, value);
+	}
 
-    protected boolean matches(byte[] data, int offset, byte[] needle) {
-        for (int i = 0; i < needle.length; i++) {
-            if (offset + i >= data.length) {
-                return false;
-            }
-            if (data[offset + i] != needle[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-	@Override
+	protected void writeWord(byte[] data, int offset, int value) {
+		data[offset] = (byte) (value % 0x100);
+		data[offset + 1] = (byte) ((value / 0x100) % 0x100);
+	}
+
+	protected boolean matches(byte[] data, int offset, byte[] needle) {
+		for (int i = 0; i < needle.length; i++) {
+			if (offset + i >= data.length) {
+				return false;
+			}
+			if (data[offset + i] != needle[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	protected void freeSpace(int offset, int length) {
+		if (length < 1) {
+			throw new IllegalArgumentException("length must be at least 1.");
+		}
+		for (int i = 0; i < length; i++) {
+			writeByte(offset + i, getFreeSpaceByte());
+		}
+		freedSpace.free(offset, length);
+	}
+
+    // TODO: do something about long alignment (if something needs to be done about it)
+	protected int findAndUnfreeSpace(int length) {
+		int foundOffset;
+		do {
+			foundOffset = freedSpace.findAndUnfree(length);
+		} while (isRomSpaceUsed(foundOffset, length));
+
+		if (foundOffset == -1) {
+			throw new RandomizerIOException("ROM full.");
+		}
+		return foundOffset;
+	}
+
+	private boolean isRomSpaceUsed(int offset, int length) {
+		if (offset < 0)
+			return false;
+		// manual check if the space is still unused, because
+		// the deprecated RomFunctions methods (or any future badly written code)
+		// can in theory use the freed spaces "by accident".
+		for (int i = 0; i < length; i++) {
+			if (rom[offset + i] != getFreeSpaceByte()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected abstract byte getFreeSpaceByte();
+
+    @Override
 	protected List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (int i = 1; i < getPokemon().size(); i++) {

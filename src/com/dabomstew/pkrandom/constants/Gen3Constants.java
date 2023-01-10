@@ -90,6 +90,8 @@ public class Gen3Constants {
 
     public static final byte freeSpaceByte = (byte) 0xFF;
 
+    public static final int unusedSpaceChunkLength = 0x100, unusedSpaceFrontMargin = 0x10;
+
     public static final int rseStarter2Offset = 2, rseStarter3Offset = 4, frlgStarter2Offset = 515,
             frlgStarter3Offset = 461, frlgStarterRepeatOffset = 5;
 
@@ -105,6 +107,9 @@ public class Gen3Constants {
     public static final Type[] typeTable = constructTypeTable();
 
     public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
+
+    public static final byte[] vanillaMovesLearntTerminator = new byte[] {(byte) 0xFF, (byte) 0xFF},
+            jamboMovesLearntTerminator = new byte[] {0x00, 0x00, (byte) 0xFF};
 
     public static final int tmCount = 50, hmCount = 8;
 
