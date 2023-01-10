@@ -211,6 +211,38 @@ public class GFXFunctions {
 		return bim;
 	}
 
+	// TODO: move to some more appropriate place, was taken from Gen2Decmp so it only did decompression
+	public static byte[] gen2CutAndTranspose(byte[] data, int width, int height) {
+		if (data == null) {
+			throw new NullPointerException();
+		}
+		int tiles = width * height;
+
+		byte[] newData = new byte[width * height * 16];
+		for (int tile = 0; tile < tiles; tile++) {
+			int oldTileX = tile % width;
+			int oldTileY = tile / width;
+			int newTileNum = oldTileX * height + oldTileY;
+			System.arraycopy(data, tile * 16, newData, newTileNum * 16, 16);
+		}
+		return newData;
+	}
+
+	// TODO: likewise, move somewhere appropriate
+	public static byte[] gen2Flatten(byte[] planar) {
+		byte[] strips = new byte[planar.length * 4];
+		for (int j = 0; j < planar.length / 2; j++) {
+			int bottom = planar[j * 2] & 0xFF;
+			int top = planar[j * 2 + 1] & 0xFF;
+			byte[] strip = new byte[8];
+			for (int i = 7; i >= 0; i--) {
+				strip[7 - i] = (byte) (((bottom >>> i) & 1) + ((top * 2 >>> i) & 2));
+			}
+			System.arraycopy(strip, 0, strips, j * 8, 8);
+		}
+		return strips;
+	}
+
 	/**
 	 * Reads the data from an image read from a 4bpp .png file, returning it in the
 	 * format used by Gen III-V games.

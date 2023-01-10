@@ -4371,43 +4371,43 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void changePlayerUnderwaterImage(Gen3PlayerCharacterGraphics pcg) {
-        BufferedImage underwater = pcg.getUnderwaterImage();
-        if (underwater == null) {
-            return;
-        }
-        BufferedImage[] split = GFXFunctions.splitImage(underwater, 32, 32);
-        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "UnderwaterImage");
-        if (split.length <= 9 && split.length >= 3) {
-            int imagesToWrite = split.length == 9 ? 9 : 3;
-            for (int i = 0; i < imagesToWrite; i++) {
-                writeOverworldImage(firstImageNumber + i, split[i]);
-            }
-        } else {
-            throw new IllegalStateException("invalid underwater image");
-        }
+//        BufferedImage underwater = pcg.getUnderwaterImage();
+//        if (underwater == null) {
+//            return;
+//        }
+//        BufferedImage[] split = GFXFunctions.splitImage(underwater, 32, 32);
+//        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "UnderwaterImage");
+//        if (split.length <= 9 && split.length >= 3) {
+//            int imagesToWrite = split.length == 9 ? 9 : 3;
+//            for (int i = 0; i < imagesToWrite; i++) {
+//                writeOverworldImage(firstImageNumber + i, split[i]);
+//            }
+//        } else {
+//            throw new IllegalStateException("invalid underwater image");
+//        }
     }
 
     private void changePlayerSurfingImage(Gen3PlayerCharacterGraphics pcg) {
-        BufferedImage surfing = pcg.getSurfingImages();
-        if (surfing == null) {
-            return;
-        }
-        BufferedImage[] frames = GFXFunctions.splitImage(surfing, 32, 32);
-        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "SurfingImage");
-        if (frames.length == 9) {
-            for (int i = 0; i < 9; i++) {
-                writeOverworldImage(firstImageNumber + i, frames[i]);
-            }
-        } else if (frames.length == 6) { //decomp style, the order is a bit jumbled
-            // normal sitting
-            writeOverworldImage(firstImageNumber, frames[0]);
-            writeOverworldImage(firstImageNumber + 1, frames[2]);
-            writeOverworldImage(firstImageNumber + 2, frames[4]);
-            // jumping
-            writeOverworldImage(firstImageNumber + 9, frames[1]);
-            writeOverworldImage(firstImageNumber + 10, frames[3]);
-            writeOverworldImage(firstImageNumber + 11, frames[5]);
-        }
+//        BufferedImage surfing = pcg.getSurfingImages();
+//        if (surfing == null) {
+//            return;
+//        }
+//        BufferedImage[] frames = GFXFunctions.splitImage(surfing, 32, 32);
+//        int firstImageNumber = romEntry.getValue(pcg.getPlayerToReplaceName() + "SurfingImage");
+//        if (frames.length == 9) {
+//            for (int i = 0; i < 9; i++) {
+//                writeOverworldImage(firstImageNumber + i, frames[i]);
+//            }
+//        } else if (frames.length == 6) { //decomp style, the order is a bit jumbled
+//            // normal sitting
+//            writeOverworldImage(firstImageNumber, frames[0]);
+//            writeOverworldImage(firstImageNumber + 1, frames[2]);
+//            writeOverworldImage(firstImageNumber + 2, frames[4]);
+//            // jumping
+//            writeOverworldImage(firstImageNumber + 9, frames[1]);
+//            writeOverworldImage(firstImageNumber + 10, frames[3]);
+//            writeOverworldImage(firstImageNumber + 11, frames[5]);
+//        }
     }
 
     private void changePlayerOverworldImage(Gen3PlayerCharacterGraphics pcg,

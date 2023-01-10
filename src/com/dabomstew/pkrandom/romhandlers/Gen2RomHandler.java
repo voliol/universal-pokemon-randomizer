@@ -31,6 +31,7 @@ import com.dabomstew.pkrandom.graphics.palettes.Gen2PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
+import compressors.Gen2Cmp;
 import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
@@ -2910,26 +2911,70 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 		for (Pokemon pk : getPokemonSet()) {
 			int num = pk.getNumber() - 1;
 
-			byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
-			// assuming the Pokemon do not have another internal order
-			for (int j = 0; j < normalPaletteBytes.length; j++) {
-				int byteOffset = palOffset + num * 8 + j;
-				rom[byteOffset] = normalPaletteBytes[j];
-			}
+            int normalPaletteOffset = palOffset + num * 8;
+            writePalette(normalPaletteOffset, pk.getNormalPalette());
 
-			byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
-			// assuming the Pokemon do not have another internal order
-			for (int j = 0; j < shinyPaletteBytes.length; j++) {
-				int byteOffset = palOffset + num * 8 + 4 + j;
-				rom[byteOffset] = shinyPaletteBytes[j];
-			}
-
+            int shinyPaletteOffset = palOffset + num * 8 + 4;
+            writePalette(shinyPaletteOffset, pk.getShinyPalette());
 		}
 	}
 
+    private void writePalette(int offset, Palette palette) {
+        writeBytes(offset, palette.toBytes());
+    }
+
+    public void circleCompression() {
+        Pokemon pk = pokemonList.get(Species.bulbasaur);
+        boolean back = false, shiny = false;
+
+        int picPointer;
+        if (pk.getNumber() == Species.unown) {
+            int unownLetter = random.nextInt(Gen2Constants.unownFormeCount);
+            picPointer = romEntry.getValue("UnownPicPointers") + unownLetter * 6;
+        } else {
+            picPointer = romEntry.getValue("PicPointers") + (pk.getNumber() - 1) * 6;
+        }
+        if (back) {
+            picPointer += 3;
+        }
+
+        byte[] uncompressed = Gen2Decmp.decompress(rom, correctPokemonImageOffset(picPointer));
+        System.out.println(Arrays.toString(uncompressed));
+        byte[] compressed = Gen2Cmp.compress(uncompressed);
+        System.out.println(Arrays.toString(compressed));
+
+        writeBytes(correctPokemonImageOffset(picPointer), compressed);
+
+        byte[] uncompressed2 = Gen2Decmp.decompress(rom, correctPokemonImageOffset(picPointer));
+        System.out.println(Arrays.toString(uncompressed2));
+
+        System.out.println(Arrays.equals(uncompressed, uncompressed2));
+    }
+
+    private int correctPokemonImageOffset(int pointerOffset) {
+        int bank = (rom[pointerOffset] & 0xFF);
+        if (romEntry.isCrystal) {
+            // Crystal pic banks are offset by x36 for whatever reason.
+            bank += 0x36;
+        } else {
+            // Hey, G/S are dumb too! Arbitrarily redirected bank numbers.
+            if (bank == 0x13) {
+                bank = 0x1F;
+            } else if (bank == 0x14) {
+                bank = 0x20;
+            } else if (bank == 0x1F) {
+                bank = 0x2E;
+            }
+        }
+        return calculateOffset(bank, readWord(pointerOffset + 1));
+    }
+
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
-    	// Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
+        // TODO: call stuff here "image..." instead of "pic..." to be in line with other gens
+        if (pk.getNumber() < 20) circleCompression();
+
+        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
         // There is no zero-entry.
         int picPointer;
         if (pk.getNumber() == Species.unown) {
@@ -2947,7 +2992,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         byte [] data;
         try {
-            data = readSpriteData(picPointer, picWidth, picHeight);
+            data = readPokemonImageData(picPointer, picWidth, picHeight);
         } catch (Exception e) {
             return null;
         }
@@ -2960,7 +3005,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int[] convPalette = new int[] { 0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000 };
 
         BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
-        
+
         if (transparentBackground) {
             bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
         }
@@ -2973,26 +3018,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return bim;
     }
 
-    private byte[] readSpriteData(int picPointer, int picWidth, int picHeight) {
-        int picBank = (rom[picPointer] & 0xFF);
-        if (romEntry.isCrystal) {
-            // Crystal pic banks are offset by x36 for whatever reason.
-            picBank += 0x36;
-        } else {
-            // Hey, G/S are dumb too! Arbitrarily redirected bank numbers.
-            if (picBank == 0x13) {
-                picBank = 0x1F;
-            } else if (picBank == 0x14) {
-                picBank = 0x20;
-            } else if (picBank == 0x1F) {
-                picBank = 0x2E;
-            }
-        }
-        int picOffset = calculateOffset(picBank, readWord(picPointer + 1));
-
-        Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
-        byte[] data = mscSprite.getFlattenedData();
-        return data;
+    private byte[] readPokemonImageData(int pointerOffset, int imageWidth, int imageHeight) {
+        int imageOffset = correctPokemonImageOffset(pointerOffset);
+        byte[] data = Gen2Decmp.decompress(rom, imageOffset);
+        byte[] transposed = GFXFunctions.gen2CutAndTranspose(data, imageWidth, imageHeight);
+        return GFXFunctions.gen2Flatten(transposed);
     }
 
 	@Override
