@@ -56,7 +56,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private boolean restrictionsSet;
     protected PokemonSet<Pokemon> restrictedPokemon;
-    protected PokemonSet<Pokemon> restrictedPokemonInclAltFormes = new PokemonSet<>();
+    protected PokemonSet<Pokemon> restrictedPokemonInclAltFormes;
     private PokemonSet<Pokemon> nonlegendaryPokemon = new PokemonSet<>();
     private PokemonSet<Pokemon> legendaryPokemon = new PokemonSet<>();
     private PokemonSet<Pokemon> ultraBeasts = new PokemonSet<>();
@@ -112,6 +112,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         restrictionsSet = true;
         altFormes = getAltFormes();
+        restrictedPokemonInclAltFormes = new PokemonSet<>();
         if (restrictions != null) {
             megaEvolutionsList = new ArrayList<>();
             List<Pokemon> allPokemon = this.getPokemon();
@@ -615,13 +616,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
         // Assume EITHER catch em all OR type themed OR match strength for now
         if (catchEmAll) {
-
             PokemonSet<Pokemon> allPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
             for (EncounterSet area : scrambledEncounters) {
                 PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>(allPokes);
                 pickablePokemon.removeAll(area.bannedPokemon);
                 for (Encounter enc : area.encounters) {
+                    // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
+                    // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
+                    // randomly appears as a static or unless it becomes a random evolution.
+                    if (banned.contains(enc.pokemon)) {
+                        continue;
+                    }
+
                     // Pick a random pokemon
                     if (pickablePokemon.size() == 0) {
                         // Only banned pokes are left, ignore them and pick
@@ -814,7 +821,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             PokemonSet<Pokemon> allPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
             for (EncounterSet area : scrambledEncounters) {
-                // Poke-set
                 PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using catch em all
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
@@ -849,6 +855,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 for (Encounter enc : area.encounters) {
+                    // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
+                    // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
+                    // randomly appears as a static or unless it becomes a random evolution.
+                    if (banned.contains(enc.pokemon)) {
+                        continue;
+                    }
                     // Apply the map
                     enc.pokemon = areaMap.get(enc.pokemon);
                     setFormeForEncounter(enc, enc.pokemon);
@@ -1413,6 +1425,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(Settings settings) {
+        // TODO: adding pokémon to just boss/important trainers is seemingly broken (is it in main ZX too?)
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
@@ -1707,7 +1720,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean giveToImportantPokemon = settings.isRandomizeHeldItemsForImportantTrainerPokemon();
         boolean giveToRegularPokemon = settings.isRandomizeHeldItemsForRegularTrainerPokemon();
         boolean highestLevelOnly = settings.isHighestLevelGetsItemsForTrainers();
-        boolean betterMovesets = settings.isBetterTrainerMovesets();
 
         List<Move> moves = this.getMoves();
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -3097,6 +3109,45 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (generationOfPokemon() == 7) {
                 // Multi-Attack 120 Power
                 updateMovePower(moves, Moves.multiAttack, 120);
+            }
+        }
+
+        if (generation >= 9 && generationOfPokemon() < 9) {
+            // Gen 1
+            // Recover 5 PP
+            updateMovePP(moves, Moves.recover, 5);
+            // Soft-Boiled 5 PP
+            updateMovePP(moves, Moves.softBoiled, 5);
+            // Rest 5 PP
+            updateMovePP(moves, Moves.rest, 5);
+
+            if (generationOfPokemon() >= 2) {
+                // Milk Drink 5 PP
+                updateMovePP(moves, Moves.milkDrink, 5);
+            }
+
+            if (generationOfPokemon() >= 3) {
+                // Slack Off 5 PP
+                updateMovePP(moves, Moves.slackOff, 5);
+            }
+
+            if (generationOfPokemon() >= 4) {
+                // Roost 5 PP
+                updateMovePP(moves, Moves.roost, 5);
+            }
+            
+            if (generationOfPokemon() >= 7) {
+                // Shore Up 5 PP
+                updateMovePP(moves, Moves.shoreUp, 5);
+            }
+
+            if (generationOfPokemon() >= 8) {
+                // Grassy Glide 60 Power
+                updateMovePower(moves, Moves.grassyGlide, 60);
+                // Wicked Blow 75 Power
+                updateMovePower(moves, Moves.wickedBlow, 75);
+                // Glacial Lance 120 Power
+                updateMovePower(moves, Moves.glacialLance, 120);
             }
         }
     }
@@ -5492,26 +5543,30 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void changeCatchRates(Settings settings) {
         int minimumCatchRateLevel = settings.getMinimumCatchRateLevel();
 
-        int normalMin, legendaryMin;
-        switch (minimumCatchRateLevel) {
-            case 1:
-            default:
-                normalMin = 75;
-                legendaryMin = 37;
-                break;
-            case 2:
-                normalMin = 128;
-                legendaryMin = 64;
-                break;
-            case 3:
-                normalMin = 200;
-                legendaryMin = 100;
-                break;
-            case 4:
-                normalMin = legendaryMin = 255;
-                break;
+        if (minimumCatchRateLevel == 5) {
+            enableGuaranteedPokemonCatching();
+        } else {
+            int normalMin, legendaryMin;
+            switch (minimumCatchRateLevel) {
+                case 1:
+                default:
+                    normalMin = 75;
+                    legendaryMin = 37;
+                    break;
+                case 2:
+                    normalMin = 128;
+                    legendaryMin = 64;
+                    break;
+                case 3:
+                    normalMin = 200;
+                    legendaryMin = 100;
+                    break;
+                case 4:
+                    normalMin = legendaryMin = 255;
+                    break;
+            }
+            minimumCatchRate(normalMin, legendaryMin);
         }
-        minimumCatchRate(normalMin, legendaryMin);
     }
 
     @Override
@@ -5929,18 +5984,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;
 
+    /**
+     * Picks a type, sometimes based on frequency of non-banned Pokémon of that type. Compare with randomType().
+     * Never picks a type with no non-banned Pokémon, even when weightByFrequency == false.
+     */
     private Type pickType(boolean weightByFrequency, boolean noLegendaries, boolean allowAltFormes) {
         if (totalTypeWeighting == 0) {
-            // Determine weightings
-            for (Type t : Type.values()) {
-                if (typeInGame(t)) {
-                	PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
-                			.filterByType(t);
-                    int pkWithTyping = pokemonOfType.size();
-                    typeWeightings.put(t, pkWithTyping);
-                    totalTypeWeighting += pkWithTyping;
-                }
-            }
+            initTypeWeightings(noLegendaries, allowAltFormes);
         }
 
         if (weightByFrequency) {
@@ -5955,7 +6005,25 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             return null;
         } else {
-            return randomType();
+            // assumes some type has non-banned Pokémon
+            Type picked;
+            do {
+                picked = randomType();
+            } while (typeWeightings.get(picked) == 0);
+            return picked;
+        }
+    }
+
+    private void initTypeWeightings(boolean noLegendaries, boolean allowAltFormes) {
+        // Determine weightings
+        for (Type t : Type.values()) {
+            if (typeInGame(t)) {
+                PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
+                			.filterByType(t);
+                int pkWithTyping = pokemonOfType.size();
+                typeWeightings.put(t, pkWithTyping);
+                totalTypeWeighting += pkWithTyping;
+            }
         }
     }
 
@@ -6236,7 +6304,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     private PokemonSet<Pokemon> cachedAll;
     private PokemonSet<Pokemon> banned = new PokemonSet<>();
     private PokemonSet<Pokemon> usedAsUnique = new PokemonSet<>();
-
 
     private Pokemon pickTrainerPokeReplacement(Pokemon current, boolean usePowerLevels, Type type,
                                                boolean noLegendaries, boolean wonderGuardAllowed,

@@ -131,6 +131,8 @@ public interface RomHandler {
 
     List<Pokemon> getPickedStarters();
 
+    boolean supportsStarterHeldItems();
+
     List<Integer> getStarterHeldItems();
 
     void setStarterHeldItems(List<Integer> items);
@@ -237,6 +239,8 @@ public interface RomHandler {
     void changeCatchRates(Settings settings);
 
     void minimumCatchRate(int rateNonLegendary, int rateLegendary);
+
+    void enableGuaranteedPokemonCatching();
 
     // ===============
     // Trainer Pokemon

@@ -549,6 +549,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				|| (romEntry.romType == Gen4Constants.Type_HGSS
 						&& romEntry.tweakFiles.containsKey("NewRoamerSubroutineTweak"));
 
+		try {
+			computeCRC32sForRom();
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+
+		
 		// We want to guarantee that the catching tutorial in HGSS has Ethan/Lyra's new
 		// Pokemon. We also
 		// want to allow the option of randomizing the enemy Pokemon too. Unfortunately,
@@ -562,12 +569,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			int extendBy = romEntry.getInt("Arm9ExtensionSize");
 			arm9 = extendARM9(arm9, extendBy, romEntry.getString("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
 			genericIPSPatch(arm9, "NewCatchingTutorialSubroutineTweak");
-		}
-
-		try {
-			computeCRC32sForRom();
-		} catch (IOException e) {
-			throw new RandomizerIOException(e);
 		}
 
 		// Having this in the constructor would be preferred,
@@ -1340,16 +1341,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				// Fix starter text
 				List<String> spStrings = getStrings(romEntry.getInt("StarterScreenTextOffset"));
-				String[] intros = new String[] { "So, you like", "Youâ€™ll take", "Do you want" };
+				String[] intros = new String[] { "So, you like", "You’ll take", "Do you want" };
 				for (int i = 0; i < 3; i++) {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "Professor Elm: " + intros[i] + " \\vFF00\\z000" + color
 							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType().camelCase()
-							+ "-type PokÃ©mon?";
+							+ "-type Pokémon?";
 					spStrings.set(i + 1, newStarterDesc);
 					String altStarterDesc = "\\vFF00\\z000" + color + newStarter.getName() + "\\vFF00\\z0000, the "
-							+ newStarter.getPrimaryType().camelCase() + "-type PokÃ©mon, is\\nin this PokÃ© Ball!";
+							+ newStarter.getPrimaryType().camelCase() + "-type Pokémon, is\\nin this Poké Ball!";
 					spStrings.set(i + 4, altStarterDesc);
 				}
 				setStrings(romEntry.getInt("StarterScreenTextOffset"), spStrings);
@@ -1576,7 +1577,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.getNumber())
-							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this PokÃ©mon?";
+							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
 					spStrings.set(i + 1, newStarterDesc);
 				}
 				// rewrite starter picking screen
@@ -1585,13 +1586,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// what rival says after we get the Pokemon
 					List<String> lakeStrings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					lakeStrings.set(Gen4Constants.dpStarterStringIndex,
-							"\\v0103\\z0000: Fwaaah!\\nYour PokÃ©mon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other peopleâ€™s\\nPokÃ©mon, though...\\pBut we had to use them...\\nThey wonâ€™t mind, will they?\\p");
+							"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), lakeStrings);
 				} else {
 					// what rival says after we get the Pokemon
 					List<String> r201Strings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					r201Strings.set(Gen4Constants.ptStarterStringIndex,
-							"\\v0103\\z0000\\z0000: Then, I choose you!\\nIâ€™m picking this one!\\p");
+							"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), r201Strings);
 				}
 			} catch (IOException e) {
@@ -1602,15 +1603,26 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public List<Integer> getStarterHeldItems() {
-		// do nothing
-		return new ArrayList<>();
+	public boolean supportsStarterHeldItems() {
+		return romEntry.romType == Gen4Constants.Type_DP || romEntry.romType == Gen4Constants.Type_Plat;
 	}
 
-	@Override
-	public void setStarterHeldItems(List<Integer> items) {
-		// do nothing
-	}
+    @Override
+    public List<Integer> getStarterHeldItems() {
+        int starterScriptNumber = romEntry.getInt("StarterPokemonScriptOffset");
+        int starterHeldItemOffset = romEntry.getInt("StarterPokemonHeldItemOffset");
+        byte[] file = scriptNarc.files.get(starterScriptNumber);
+        int item = FileFunctions.read2ByteInt(file, starterHeldItemOffset);
+        return Arrays.asList(item);
+    }
+
+    @Override
+    public void setStarterHeldItems(List<Integer> items) {
+        int starterScriptNumber = romEntry.getInt("StarterPokemonScriptOffset");
+        int starterHeldItemOffset = romEntry.getInt("StarterPokemonHeldItemOffset");
+        byte[] file = scriptNarc.files.get(starterScriptNumber);
+        FileFunctions.write2ByteInt(file, starterHeldItemOffset, items.get(0));
+    }
 
 	@Override
 	public List<Move> getMoves() {
@@ -3159,6 +3171,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 	}
+	
+
+    @Override
+    public PokemonSet<Pokemon> getBannedForWildEncounters() {
+        // Ban Unown in DPPt because you can't get certain letters outside of Solaceon Ruins.
+        // Ban Unown in HGSS because they don't show up unless you complete a puzzle in the Ruins of Alph.
+    	return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
+    }
 
 	@Override
 	public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
@@ -5343,49 +5363,54 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	@Override
-	public int miscTweaksAvailable() {
-		int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
-		available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
-		available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
-		if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
-			available |= MiscTweak.FASTEST_TEXT.getValue();
-		}
-		available |= MiscTweak.BAN_LUCKY_EGG.getValue();
-		if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
-			available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
-		}
-		available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
-		available |= MiscTweak.FASTER_HP_AND_EXP_BARS.getValue();
-		if (romEntry.tweakFiles.get("FastDistortionWorldTweak") != null) {
-			available |= MiscTweak.FAST_DISTORTION_WORLD.getValue();
-		}
-		return available;
-	}
+    @Override
+    public int miscTweaksAvailable() {
+        int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+        available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
+        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
+        if (romEntry.tweakFiles.get("FastestTextTweak") != null) {
+            available |= MiscTweak.FASTEST_TEXT.getValue();
+        }
+        available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        if (romEntry.tweakFiles.get("NationalDexAtStartTweak") != null) {
+            available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+        }
+        available |= MiscTweak.RUN_WITHOUT_RUNNING_SHOES.getValue();
+        available |= MiscTweak.FASTER_HP_AND_EXP_BARS.getValue();
+        if (romEntry.tweakFiles.get("FastDistortionWorldTweak") != null) {
+            available |= MiscTweak.FAST_DISTORTION_WORLD.getValue();
+        }
+        if (romEntry.romType == Gen4Constants.Type_Plat || romEntry.romType == Gen4Constants.Type_HGSS) {
+            available |= MiscTweak.UPDATE_ROTOM_FORME_TYPING.getValue();
+        }
+        return available;
+    }
 
-	@Override
-	public void applyMiscTweak(MiscTweak tweak) {
-		if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
-			applyCamelCaseNames();
-		} else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-			randomizeCatchingTutorial();
-		} else if (tweak == MiscTweak.FASTEST_TEXT) {
-			applyFastestText();
-		} else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
-			allowedItems.banSingles(Items.luckyEgg);
-			nonBadItems.banSingles(Items.luckyEgg);
-		} else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
-			patchForNationalDex();
-		} else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
-			applyRunWithoutRunningShoesPatch();
-		} else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
-			patchFasterBars();
-		} else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-			updateTypeEffectiveness();
-		} else if (tweak == MiscTweak.FAST_DISTORTION_WORLD) {
-			applyFastDistortionWorld();
-		}
-	}
+    @Override
+    public void applyMiscTweak(MiscTweak tweak) {
+        if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
+            applyCamelCaseNames();
+        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
+            randomizeCatchingTutorial();
+        } else if (tweak == MiscTweak.FASTEST_TEXT) {
+            applyFastestText();
+        } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
+            allowedItems.banSingles(Items.luckyEgg);
+            nonBadItems.banSingles(Items.luckyEgg);
+        } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
+            patchForNationalDex();
+        } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
+            applyRunWithoutRunningShoesPatch();
+        } else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
+            patchFasterBars();
+        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
+            updateTypeEffectiveness();
+        } else if (tweak == MiscTweak.FAST_DISTORTION_WORLD) {
+            applyFastDistortionWorld();
+        } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
+            updateRotomFormeTyping();
+        }
+    }
 
 	@Override
 	public boolean isEffectivenessUpdated() {
@@ -5634,12 +5659,42 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		scriptNarc.files.set(Gen4Constants.ptSpearPillarPortalScriptFile, spearPillarPortalScript);
 	}
 
+    private void updateRotomFormeTyping() {
+        pokes[Species.Gen4Formes.rotomH].setSecondaryType(Type.FIRE);
+        pokes[Species.Gen4Formes.rotomW].setSecondaryType(Type.WATER);
+        pokes[Species.Gen4Formes.rotomFr].setSecondaryType(Type.ICE);
+        pokes[Species.Gen4Formes.rotomFa].setSecondaryType(Type.FLYING);
+        pokes[Species.Gen4Formes.rotomM].setSecondaryType(Type.GRASS);
+    }
+
+    @Override
+    public void enableGuaranteedPokemonCatching() {
+        try {
+            byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
+            int offset = find(battleOverlay, Gen4Constants.perfectOddsBranchLocator);
+            if (offset > 0) {
+                // In Cmd_handleballthrow (name taken from pokeemerald decomp), the middle of the function checks
+                // if the odds of catching a Pokemon is greater than 254; if it is, then the Pokemon is automatically
+                // caught. In ASM, this is represented by:
+                // cmp r1, #0xFF
+                // bcc oddsLessThanOrEqualTo254
+                // The below code just nops these two instructions so that we *always* act like our odds are 255,
+                // and Pokemon are automatically caught no matter what.
+                battleOverlay[offset] = 0x00;
+                battleOverlay[offset + 1] = 0x00;
+                battleOverlay[offset + 2] = 0x00;
+                battleOverlay[offset + 3] = 0x00;
+                writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
+            }
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
 	@Override
 	public void applyCorrectStaticMusic(Map<Integer, Integer> specialMusicStaticChanges) {
 		List<Integer> replaced = new ArrayList<>();
 		String newIndexToMusicPrefix;
 		int newIndexToMusicPoolOffset;
-
 		switch (romEntry.romType) {
 		case Gen4Constants.Type_DP:
 		case Gen4Constants.Type_Plat:
@@ -5740,6 +5795,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public boolean isRomValid() {
 		if (romEntry.arm9ExpectedCRC32 != actualArm9CRC32) {
+			System.out.println(actualArm9CRC32);
 			return false;
 		}
 
@@ -5891,6 +5947,111 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 
+		return bim;
+	}
+
+	// Temporary
+	@Override
+	public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+										 boolean transparentBackground, boolean includePalette) {
+
+		int spriteIndex = number * 6 + 2 + random.nextInt(2);
+		if (back) {
+			spriteIndex -= 2;
+		}
+		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+
+
+		int normalPaletteIndex = calculatePokemonNormalPaletteIndex(number);
+		Palette normalPalette = readPalette(pokeGraphicsNARC, normalPaletteIndex);
+		int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(number);
+		Palette shinyPalette = readPalette(pokeGraphicsNARC, shinyPaletteIndex);
+
+		Palette palette = shiny ? shinyPalette : normalPalette;
+		int[] convPalette = palette.toARGB();
+		if (transparentBackground) {
+			convPalette[0] = 0;
+		}
+
+		// Deliberately chop off the right half of the image while still
+		// correctly indexing the array.
+		int bpp = 4;
+		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+		for (int y = 0; y < 80; y++) {
+			for (int x = 0; x < 80; x++) {
+				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+				bim.setRGB(x, y, convPalette[value]);
+			}
+		}
+
+		if (includePalette) {
+			for (int j = 0; j < 16; j++) {
+				bim.setRGB(j, 0, convPalette[j]);
+			}
+		}
+
+		return bim;
+	}
+
+	//TODO: remove
+	@Override
+	public BufferedImage ripOtherPoke(int i, NARCArchive narcArchive) {
+		final int deoxysImages = 0, deoxysPals = 0;
+		final int unownImages = 8, unownPals = 2;
+		final int castformImages = 64, castformPals = 4;
+		final int burmyWormadamImages = 72;
+		final int shellosGastroImages = 84;
+		final int cherrimImages = 92;
+		final int arceusImages = 96;
+		final int eggImage = 132, manaphyEggImage = 133;
+		final int shayminImages = 134;
+		final int rotomImages = 138;
+		final int giratinaImages = 150;
+		final int pichuImages = 154;
+
+		int palStart;
+		switch (romEntry.romType) {
+			case Gen4Constants.Type_DP -> palStart = manaphyEggImage + 1;
+			case Gen4Constants.Type_Plat -> palStart = 0; // TODO how does it look?
+			case Gen4Constants.Type_HGSS -> palStart = pichuImages + 4;
+			default -> palStart = 0;
+		}
+
+		System.out.println(i);
+		int[] spriteData = readSpriteData(narcArchive, i);
+
+		int palIndex;
+		if (deoxysImages <= i && i < unownImages) {
+			palIndex = deoxysPals + i % 2;
+		} else if (unownImages <= i && i < castformImages) {
+			palIndex = unownPals + i % 2;
+		} else if ((castformImages <= i && i < shellosGastroImages) || (cherrimImages <= i && i < palStart)) {
+			palIndex = i + castformPals - castformImages;
+		} else if (shellosGastroImages <= i && i < cherrimImages) {
+			palIndex = deoxysPals + i % 2; // TODO
+		} else if (i == 208 || i == 209){
+			palIndex = 210; // substitute
+		} else if (i == 211){
+			palIndex = 212; // shadows ??
+		} else {
+			palIndex = 0;
+		}
+
+		Palette palette = readPalette(narcArchive, palStart + palIndex);
+		System.out.println(palette);
+		int[] convPalette = palette.toARGB();
+		// Deliberately chop off the right half of the image while still
+		// correctly indexing the array.
+		int bpp = 4;
+		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+		for (int y = 0; y < 80; y++) {
+			for (int x = 0; x < 80; x++) {
+				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+				bim.setRGB(x, y, convPalette[value]);
+			}
+		}
 		return bim;
 	}
 

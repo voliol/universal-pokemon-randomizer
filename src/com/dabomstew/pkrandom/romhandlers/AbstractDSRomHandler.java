@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage;
 /*--  You should have received a copy of the GNU General Public License     --*/
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -43,6 +44,8 @@ import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+
+import javax.imageio.ImageIO;
 
 public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	
@@ -410,13 +413,13 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	protected void loadPokemonPalettes() {
         try {
             String NARCpath = getNARCPath("PokemonGraphics");
-            NARCArchive pokespritesNARC = readNARC(NARCpath);
+            NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
             for (Pokemon pk : getPokemonSet()) {
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
-                pk.setNormalPalette(readPalette(pokespritesNARC, normalPaletteIndex));
+                pk.setNormalPalette(readPalette(pokeGraphicsNARC, normalPaletteIndex));
                 
                 int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
-                pk.setShinyPalette(readPalette(pokespritesNARC, shinyPaletteIndex));
+                pk.setShinyPalette(readPalette(pokeGraphicsNARC, shinyPaletteIndex));
             }
 
         } catch (IOException e) {
@@ -462,6 +465,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     
 	@Override
 	protected List<BufferedImage> getAllPokemonImages() {
+        ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
 		String NARCPath = getNARCPath("PokemonGraphics");
@@ -485,7 +489,38 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		return bims;
 	}
 
-	@Override
+    private void ripAllOtherPokes() {
+        String NARCPath = getNARCPath("OtherPokemonGraphics");
+        NARCArchive pokeGraphicsNARC;
+        try {
+            pokeGraphicsNARC = readNARC(NARCPath);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        for (int i=0; i <= 157; i++) {
+            ripAndDumpOtherPokemon(pokeGraphicsNARC, i);
+        }
+
+//        ripAndDumpOtherPokemon(pokeGraphicsNARC, 208);
+//        ripAndDumpOtherPokemon(pokeGraphicsNARC, 209);
+//        ripAndDumpOtherPokemon(pokeGraphicsNARC, 211);
+    }
+
+    private void ripAndDumpOtherPokemon(NARCArchive pokeGraphicsNARC, int i) {
+        BufferedImage bim = ripOtherPoke(i, pokeGraphicsNARC);
+        String fileAdress = "Pokemon_sprite_dump/gen" + generationOfPokemon() + "/"
+                + String.format("a_%03d.png", i);
+        File outputfile = new File(fileAdress);
+        try {
+            ImageIO.write(bim, "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected abstract BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC);
+
+    @Override
 	public final BufferedImage getMascotImage() {
 		try {
 			dumpAllPokemonSprites();
@@ -507,6 +542,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
 	public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
+
+    // TODO: remove when done testing
+    public abstract BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
+                                         boolean transparentBackground, boolean includePalette);
 
     // because RomEntry is an inner class it can't be accessed here, so an abstract
     // method is needed.
