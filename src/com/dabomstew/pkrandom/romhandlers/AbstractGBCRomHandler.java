@@ -146,14 +146,18 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, length, false);
     }
 
+    protected void writeFixedLengthString(String str, int offset, int length) {
+        writeFixedLengthString(rom, str, offset, length);
+    }
+
     // pads the length with terminators, so length should be at least str's len
     // + 1
-    protected void writeFixedLengthString(String str, int offset, int length) {
+    protected void writeFixedLengthString(byte[] data, String str, int offset, int length) {
         byte[] translated = translateString(str);
         int len = Math.min(translated.length, length);
-        System.arraycopy(translated, 0, rom, offset, len);
+        System.arraycopy(translated, 0, data, offset, len);
         while (len < length) {
-            rom[offset + len] = GBConstants.stringTerminator;
+            data[offset + len] = GBConstants.stringTerminator;
             len++;
         }
     }

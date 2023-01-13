@@ -1630,7 +1630,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public void setTMMoves(List<Integer> moveIndexes) {
         int offset = romEntry.getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.tmCount; i++) {
-            rom[offset + (i - 1)] = moveIndexes.get(i - 1).byteValue();
+            writeByte(offset + (i - 1), moveIndexes.get(i - 1).byteValue());
         }
 
         // TM Text
@@ -2707,39 +2707,51 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // info
         int tableOffset = romEntry.getValue("TradeTableOffset");
         int tableSize = romEntry.getValue("TradeTableSize");
+        int entryLength = getIngameTradeEntryLength();
+        int[] unused = romEntry.arrayEntries.get("TradesUnused");
+        int unusedIndex = 0;
+        int tradeIndex = 0;
+
+        for (int entry = 0; entry < tableSize; entry++) {
+            if (unusedIndex < unused.length && unused[unusedIndex] == entry) {
+                unusedIndex++;
+            } else {
+                IngameTrade trade = trades.get(tradeIndex);
+                int entryOffset = tableOffset + entry * entryLength;
+                writeBytes(entryOffset, ingameTradeToBytes(trade));
+                tradeIndex++;
+            }
+        }
+    }
+
+    private byte[] ingameTradeToBytes(IngameTrade trade) {
         int nicknameLength = romEntry.getValue("TradeNameLength");
         int otLength = romEntry.getValue("TradeOTLength");
-        int[] unused = romEntry.arrayEntries.get("TradesUnused");
-        int unusedOffset = 0;
-        int entryLength = nicknameLength + otLength + 9;
+
+        byte[] data = new byte[getIngameTradeEntryLength()];
+        data[0] = (byte) trade.requestedPokemon.getNumber();
+        data[1] = (byte) trade.givenPokemon.getNumber();
+        if (romEntry.getValue("CanChangeTrainerText") > 0) {
+            writeFixedLengthString(data, trade.nickname, 2, nicknameLength);
+        }
+        data[2 + nicknameLength] = (byte) (trade.ivs[0] << 4 | trade.ivs[1]);
+        data[3 + nicknameLength] = (byte) (trade.ivs[2] << 4 | trade.ivs[3]);
+        data[4 + nicknameLength] = (byte) trade.item;
+        writeWord(data,5 + nicknameLength, trade.otId);
+        if (romEntry.getValue("CanChangeTrainerText") > 0) {
+            writeFixedLengthString(data, trade.otName, 7 + nicknameLength, otLength);
+        }
+        // remove gender req
+        data[7 + nicknameLength + otLength] = 0;
+        return data;
+    }
+
+    private int getIngameTradeEntryLength() {
+        int entryLength = romEntry.getValue("TradeNameLength") + romEntry.getValue("TradeOTLength") + 9;
         if (entryLength % 2 != 0) {
             entryLength++;
         }
-        int tradeOffset = 0;
-
-        for (int entry = 0; entry < tableSize; entry++) {
-            if (unusedOffset < unused.length && unused[unusedOffset] == entry) {
-                unusedOffset++;
-                continue;
-            }
-            IngameTrade trade = trades.get(tradeOffset++);
-            int entryOffset = tableOffset + entry * entryLength;
-            rom[entryOffset + 1] = (byte) trade.requestedPokemon.getNumber();
-            rom[entryOffset + 2] = (byte) trade.givenPokemon.getNumber();
-            if (romEntry.getValue("CanChangeTrainerText") > 0) {
-                writeFixedLengthString(trade.nickname, entryOffset + 3, nicknameLength);
-            }
-            rom[entryOffset + 3 + nicknameLength] = (byte) (trade.ivs[0] << 4 | trade.ivs[1]);
-            rom[entryOffset + 4 + nicknameLength] = (byte) (trade.ivs[2] << 4 | trade.ivs[3]);
-            rom[entryOffset + 5 + nicknameLength] = (byte) trade.item;
-            writeWord(entryOffset + 6 + nicknameLength, trade.otId);
-            if (romEntry.getValue("CanChangeTrainerText") > 0) {
-                writeFixedLengthString(trade.otName, entryOffset + 8 + nicknameLength, otLength);
-            }
-            // remove gender req
-            rom[entryOffset + 8 + nicknameLength + otLength] = 0;
-
-        }
+        return entryLength;
     }
 
     @Override
@@ -3032,9 +3044,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 	public void writeCheckValueToROM(int value) {
 		if (romEntry.getValue("CheckValueOffset") > 0) {
 			int cvOffset = romEntry.getValue("CheckValueOffset");
+            byte[] cvBytes = new byte[4];
 			for (int i = 0; i < 4; i++) {
-				rom[cvOffset + i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
+                cvBytes[i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
 			}
+            writeBytes(cvOffset, cvBytes);
 		}
     }
 }
