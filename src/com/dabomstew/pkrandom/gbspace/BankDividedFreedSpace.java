@@ -26,6 +26,7 @@ public class BankDividedFreedSpace extends FreedSpace {
         int endBank = (start + length - 1) / bankSize;
         return startBank != endBank;
     }
+
     private void splitFreedChunksAtBankBoundaries() {
         int bank = 0;
 
