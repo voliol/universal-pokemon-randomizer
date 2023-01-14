@@ -389,7 +389,7 @@ public interface RomHandler {
     /**
      * Get TM/HM compatibility data from this rom. The result should contain a
      * boolean array for each Pokemon indexed as such:
-     * 
+     * <br>
      * 0: blank (false) / 1 - (getTMCount()) : TM compatibility /
      * (getTMCount()+1) - (getTMCount()+getHMCount()) - HM compatibility
      * 

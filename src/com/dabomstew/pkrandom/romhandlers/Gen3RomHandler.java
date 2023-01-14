@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -85,7 +86,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         private List<StaticPokemon> staticPokemon = new ArrayList<>();
         private List<StaticPokemon> roamingPokemon = new ArrayList<>();
         private List<TMOrMTTextEntry> tmmtTexts = new ArrayList<>();
-        private Map<String, String> codeTweaks = new HashMap<String, String>();
+        private Map<String, String> codeTweaks = new HashMap<>();
         private long expectedCRC32 = -1;
 
         public RomEntry() {
@@ -151,7 +152,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         roms = new ArrayList<>();
         RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen3_offsets.ini"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen3_offsets.ini"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
@@ -336,7 +337,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void loadTextTable(String filename) {
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig(filename + ".tbl"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig(filename + ".tbl"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine();
                 if (!q.trim().isEmpty()) {
@@ -1391,34 +1392,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private static boolean romName(byte[] rom, String name) {
-        try {
-            int sigOffset = Gen3Constants.romNameOffset;
-            byte[] sigBytes = name.getBytes("US-ASCII");
-            for (int i = 0; i < sigBytes.length; i++) {
-                if (rom[sigOffset + i] != sigBytes[i]) {
-                    return false;
-                }
+        int sigOffset = Gen3Constants.romNameOffset;
+        byte[] sigBytes = name.getBytes(StandardCharsets.US_ASCII);
+        for (int i = 0; i < sigBytes.length; i++) {
+            if (rom[sigOffset + i] != sigBytes[i]) {
+                return false;
             }
-            return true;
-        } catch (UnsupportedEncodingException ex) {
-            return false;
         }
+        return true;
 
     }
 
     private static boolean romCode(byte[] rom, String codeToCheck) {
-        try {
-            int sigOffset = Gen3Constants.romCodeOffset;
-            byte[] sigBytes = codeToCheck.getBytes("US-ASCII");
-            for (int i = 0; i < sigBytes.length; i++) {
-                if (rom[sigOffset + i] != sigBytes[i]) {
-                    return false;
-                }
+        int sigOffset = Gen3Constants.romCodeOffset;
+        byte[] sigBytes = codeToCheck.getBytes(StandardCharsets.US_ASCII);
+        for (int i = 0; i < sigBytes.length; i++) {
+            if (rom[sigOffset + i] != sigBytes[i]) {
+                return false;
             }
-            return true;
-        } catch (UnsupportedEncodingException ex) {
-            return false;
         }
+        return true;
 
     }
 
@@ -1679,11 +1672,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             Encounter enc = new Encounter();
             enc.level = rom[dataOffset + i * 4];
             enc.maxLevel = rom[dataOffset + i * 4 + 1];
-            try {
-                enc.pokemon = pokesInternal[readWord(dataOffset + i * 4 + 2)];
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                throw ex;
-            }
+            enc.pokemon = pokesInternal[readWord(dataOffset + i * 4 + 2)];
             thisSet.encounters.add(enc);
         }
         return thisSet;
@@ -1967,7 +1956,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				writeWord(pokemonData, tpIndex * 16 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
 				int movesStart;
 				if (trainer.pokemonHaveItems()) {
-					writeWord(pokemonData, +tpIndex * 16 + 6, tp.heldItem);
+					writeWord(pokemonData, tpIndex * 16 + 6, tp.heldItem);
 					movesStart = 8;
 				} else {
 					movesStart = 6;
@@ -1980,9 +1969,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 					}
 				} else {
 					writeWord(pokemonData, tpIndex * 16 + movesStart, tp.moves[0]);
-					writeWord(pokemonData, +tpIndex * 16 + movesStart + 2, tp.moves[1]);
-					writeWord(pokemonData, +tpIndex * 16 + movesStart + 4, tp.moves[2]);
-					writeWord(pokemonData, +tpIndex * 16 + movesStart + 6, tp.moves[3]);
+					writeWord(pokemonData, tpIndex * 16 + movesStart + 2, tp.moves[1]);
+					writeWord(pokemonData, tpIndex * 16 + movesStart + 4, tp.moves[2]);
+					writeWord(pokemonData, tpIndex * 16 + movesStart + 6, tp.moves[3]);
 				}
 			}
 		} else {
@@ -1992,11 +1981,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				writeWord(pokemonData, tpIndex * 8, Math.min(255, 1 + (tp.IVs * 255) / 31));
 				writeWord(pokemonData, tpIndex * 8 + 2, tp.level);
 				writeWord(pokemonData, tpIndex * 8 + 4, pokedexToInternal[tp.pokemon.getNumber()]);
-				if (trainer.pokemonHaveItems()) {
-					writeWord(pokemonData, tpIndex * 8 + 6, tp.heldItem);
-				} else {
-					writeWord(pokemonData, +tpIndex * 8 + 6, 0); // why is there a "+" here?
-				}
+                writeWord(pokemonData, tpIndex * 8 + 6, trainer.pokemonHaveItems() ? tp.heldItem : 0);
 			}
 		}
 
@@ -2355,12 +2340,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else if (romEntry.codeTweaks.get("GhostMarowakTweak") != null) {
             StaticEncounter ghostMarowak = staticPokemon.get(romEntry.getValue("GhostMarowakOffset"));
             int[] ghostMarowakSpeciesOffsets = romEntry.arrayEntries.get("GhostMarowakSpeciesOffsets");
-            for (int i = 0; i < ghostMarowakSpeciesOffsets.length; i++) {
-                writeWord(ghostMarowakSpeciesOffsets[i], pokedexToInternal[ghostMarowak.pkmn.getNumber()]);
+            for (int offset : ghostMarowakSpeciesOffsets) {
+                writeWord(offset, pokedexToInternal[ghostMarowak.pkmn.getNumber()]);
             }
             int[] ghostMarowakLevelOffsets = romEntry.arrayEntries.get("GhostMarowakLevelOffsets");
-            for (int i = 0; i < ghostMarowakLevelOffsets.length; i++) {
-                writeByte(ghostMarowakLevelOffsets[i], (byte) ghostMarowak.level);
+            for (int offset : ghostMarowakLevelOffsets) {
+                writeByte(offset, (byte) ghostMarowak.level);
             }
 
             // The code for creating Ghost Marowak tries to ensure the Pokemon is female. If the Pokemon
@@ -3226,8 +3211,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public Map<Integer, Shop> getShopItems() {
         List<String> shopNames = Gen3Constants.getShopNames(romEntry.romType);
-        List<Integer> mainGameShops = Arrays.stream(romEntry.arrayEntries.get("MainGameShops")).boxed().collect(Collectors.toList());
-        List<Integer> skipShops = Arrays.stream(romEntry.arrayEntries.get("SkipShops")).boxed().collect(Collectors.toList());
+        List<Integer> mainGameShops = Arrays.stream(romEntry.arrayEntries.get("MainGameShops")).boxed().toList();
+        List<Integer> skipShops = Arrays.stream(romEntry.arrayEntries.get("SkipShops")).boxed().toList();
         Map<Integer, Shop> shopItemsMap = new TreeMap<>();
         int[] shopItemOffsets = romEntry.arrayEntries.get("ShopItemOffsets");
         for (int i = 0; i < shopItemOffsets.length; i++) {
@@ -3257,9 +3242,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             Shop thisShop = shopItems.get(i);
             if (thisShop != null && thisShop.items != null) {
                 int offset = shopItemOffsets[i];
-                Iterator<Integer> iterItems = thisShop.items.iterator();
-                while (iterItems.hasNext()) {
-                    FileFunctions.write2ByteInt(rom, offset, iterItems.next());
+                for (Integer integer : thisShop.items) {
+                    FileFunctions.write2ByteInt(rom, offset, integer);
                     offset += 2;
                 }
             }
@@ -4551,8 +4535,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        List<Integer> items = new ArrayList<>();
-        items.addAll(Gen3Constants.generalPurposeConsumableItems);
+        List<Integer> items = new ArrayList<>(Gen3Constants.generalPurposeConsumableItems);
         if (!consumableOnly) {
             items.addAll(Gen3Constants.generalPurposeItems);
         }

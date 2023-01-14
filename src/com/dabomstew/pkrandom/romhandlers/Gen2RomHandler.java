@@ -35,6 +35,7 @@ import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,7 +115,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         roms = new ArrayList<>();
         RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen2_offsets.ini"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen2_offsets.ini"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
@@ -3031,8 +3032,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int picOffset = calculateOffset(picBank, readWord(picPointer + 1));
 
         Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
-        byte[] data = mscSprite.getFlattenedData();
-        return data;
+        return mscSprite.getFlattenedData();
     }
 
 	@Override

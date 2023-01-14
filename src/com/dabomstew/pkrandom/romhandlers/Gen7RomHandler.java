@@ -39,6 +39,7 @@ import pptxt.N3DSTxtHandler;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -120,7 +121,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         roms = new ArrayList<>();
         RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen7_offsets.ini"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen7_offsets.ini"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
@@ -172,8 +173,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             current.expectedCodeCRC32s[1] = parseRILong("0x" + values[1].trim());
                         } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                            for (int i = 0; i < offsets.length; i++) {
-                                String[] parts = offsets[i].split(":");
+                            for (String offset : offsets) {
+                                String[] parts = offset.split(":");
                                 current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
                             }
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
@@ -458,7 +459,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         int formeCount = stats[Gen7Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            if (!altFormes.keySet().contains(pkmn.getNumber())) {
+            if (!altFormes.containsKey(pkmn.getNumber())) {
                 int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
                 if (firstFormeOffset != 0) {
                     int j = 0;
@@ -1124,7 +1125,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 	public PokemonSet<Pokemon> getIrregularFormes() {
 		return Gen7Constants.getIrregularFormes(romEntry.romType)
 				.stream().map(i -> pokes[i])
-				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+				.collect(Collectors.toCollection(PokemonSet::new));
 	}
 
     @Override
@@ -1554,7 +1555,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // them. This code distinguishes them by appending the number of times they've appeared previously to
             // the area name.
             if (i > 0) {
-                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
+                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).toList();
                 if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
                     int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
                     String updatedLocation = goodLocationList.get(i) + " (" + (numberOfUsages + 1) + ")";
@@ -1772,7 +1773,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         }
                         if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
                             int chosenMove = this.random.nextInt(Arrays.stream(pokeMoves).filter(mv -> mv != 0).toArray().length);
-                            int newZCrystal = Gen7Constants.heldZCrystals.get((int)Gen7Constants.typeToByte(moves[pokeMoves[chosenMove]].type));
+                            int newZCrystal = Gen7Constants.heldZCrystals.get(Gen7Constants.typeToByte(moves[pokeMoves[chosenMove]].type));
                             writeWord(trpoke, pokeOffs - 4, newZCrystal);
                         }
                     } else {
@@ -1782,7 +1783,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         writeWord(trpoke, pokeOffs + 6, tp.moves[3]);
                         if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
                             int chosenMove = this.random.nextInt(Arrays.stream(tp.moves).filter(mv -> mv != 0).toArray().length);
-                            int newZCrystal = Gen7Constants.heldZCrystals.get((int)Gen7Constants.typeToByte(moves[tp.moves[chosenMove]].type));
+                            int newZCrystal = Gen7Constants.heldZCrystals.get(Gen7Constants.typeToByte(moves[tp.moves[chosenMove]].type));
                             writeWord(trpoke, pokeOffs - 4, newZCrystal);
                         }
                     }
@@ -2051,7 +2052,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> totemIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().toList();
 
             // Static encounters
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
@@ -2094,7 +2095,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> totemIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().toList();
             Iterator<TotemPokemon> totemIter = totemPokemon.iterator();
 
             // Static encounters
@@ -2159,7 +2160,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> skipIndices =
                     Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
-            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
+            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().toList());
 
             // Gifts, start at 3 to skip the starters
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -2260,7 +2261,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // storing that value in the right place. If we already modified this code, then we
             // don't care about all of this; we just wrote a "mov r0, #forme" over the ldr instead.
             // Thus, if the original ldr instruction is still there, assume we haven't touched it.
-            int forme = 0;
+            int forme;
             if (FileFunctions.readFullInt(code, formeOffset) == 0xE59D0040) {
                 // Since we haven't modified the code yet, this is Zygarde. For SM, use 10%,
                 // since you can get it fairly early. For USUM, use 50%, since it's only
@@ -2301,7 +2302,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> skipIndices =
                     Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
-            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
+            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().toList());
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             // Gifts, start at 3 to skip the starters
@@ -3744,8 +3745,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        List<Integer> items = new ArrayList<>();
-        items.addAll(Gen7Constants.generalPurposeConsumableItems);
+        List<Integer> items = new ArrayList<>(Gen7Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common
         if (!consumableOnly) {
             frequencyBoostCount = 8; // bigger to account for larger item pool.

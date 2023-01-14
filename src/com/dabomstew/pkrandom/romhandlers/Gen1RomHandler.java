@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -152,7 +153,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         roms = new ArrayList<>();
         RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen1_offsets.ini"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen1_offsets.ini"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
@@ -2798,7 +2799,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 writeData = dataStream.toByteArray();
                 try {
                     dataStream.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
 

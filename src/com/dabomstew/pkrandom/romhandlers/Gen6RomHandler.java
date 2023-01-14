@@ -37,6 +37,7 @@ import pptxt.N3DSTxtHandler;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,7 +121,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         roms = new ArrayList<>();
         RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen6_offsets.ini"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen6_offsets.ini"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
@@ -184,8 +185,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             current.expectedCodeCRC32s[1] = parseRILong("0x" + values[1].trim());
                         } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                            for (int i = 0; i < offsets.length; i++) {
-                                String[] parts = offsets[i].split(":");
+                            for (String offset : offsets) {
+                                String[] parts = offset.split(":");
                                 current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
                             }
                         } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
@@ -429,7 +430,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            if (!altFormes.keySet().contains(pkmn.getNumber())) {
+            if (!altFormes.containsKey(pkmn.getNumber())) {
                 int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
                 if (firstFormeOffset != 0) {
                     for (int i = 1; i < formeCount; i++) {
@@ -1039,7 +1040,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 	public PokemonSet<Pokemon> getIrregularFormes() {
 		return Gen6Constants.getIrregularFormes(romEntry.romType)
 				.stream().map(i -> pokes[i])
-				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+				.collect(Collectors.toCollection(PokemonSet::new));
 	}
 
     @Override
@@ -1053,8 +1054,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
@@ -1090,8 +1090,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
             byte[] displayCRO = readFile(romEntry.getFile("StarterDisplay"));
 
-            List<Integer> starterIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
@@ -1174,8 +1173,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
@@ -1201,8 +1199,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
@@ -2243,8 +2240,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 statics.add(se);
             }
 
-            List<Integer> skipStarters =
-                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+            List<Integer> skipStarters = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
 
             // Gift Pokemon
             count = Gen6Constants.getGiftPokemonCount(romEntry.romType);
@@ -2373,8 +2369,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
 
-            List<Integer> skipStarters =
-                    Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().collect(Collectors.toList());
+            List<Integer> skipStarters = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
 
             // Gift Pokemon
             int giftCount = Gen6Constants.getGiftPokemonCount(romEntry.romType);
@@ -2457,8 +2452,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         AMX localScript = new AMX(boxLegendaryRoomData, 1);
         byte[] data = localScript.decData;
         int[] boxLegendaryScriptOffsets = romEntry.arrayEntries.get("BoxLegendaryScriptOffsets");
-        for (int i = 0; i < boxLegendaryScriptOffsets.length; i++) {
-            FileFunctions.write2ByteInt(data, boxLegendaryScriptOffsets[i], boxLegendarySpecies);
+        for (int offset : boxLegendaryScriptOffsets) {
+            FileFunctions.write2ByteInt(data, offset, boxLegendarySpecies);
         }
         byte[] modifiedScript = localScript.getBytes();
         System.arraycopy(modifiedScript, 0, boxLegendaryRoomData, Gen6Constants.boxLegendaryLocalScriptOffsetXY, modifiedScript.length);
@@ -4191,8 +4186,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        List<Integer> items = new ArrayList<>();
-        items.addAll(Gen6Constants.generalPurposeConsumableItems);
+        List<Integer> items = new ArrayList<>(Gen6Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common
         if (!consumableOnly) {
             frequencyBoostCount = 8; // bigger to account for larger item pool.

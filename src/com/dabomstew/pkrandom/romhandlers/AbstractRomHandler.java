@@ -638,7 +638,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             tempPickable.addAll(noLegendaries ?
                                     nonlegendaryPokemonInclFormes :
                                     restrictedPokemonInclAltFormes);
-                            tempPickable.removeIf(o -> ((Pokemon) o).isActuallyCosmetic());
+                            tempPickable.removeIf(Pokemon::isActuallyCosmetic);
                         } else {
                             tempPickable.addAll(noLegendaries ? getNonlegendaryPokemon() : restrictedPokemon);
                         }
@@ -664,7 +664,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             if (allowAltFormes) {
                                 allPokes.addAll(noLegendaries ? nonlegendaryPokemonInclFormes :
                                         restrictedPokemonInclAltFormes);
-                                allPokes.removeIf(o -> ((Pokemon) o).isActuallyCosmetic());
+                                allPokes.removeIf(Pokemon::isActuallyCosmetic);
                             } else {
                                 allPokes.addAll(noLegendaries ? getNonlegendaryPokemon() : restrictedPokemon);
                             }
@@ -788,7 +788,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
             area1to1EncountersImpl(collapsedEncounters, settings);
             setEncounters(useTimeOfDay, currentEncounters);
-            return;
         } else {
             area1to1EncountersImpl(currentEncounters, settings);
             setEncounters(useTimeOfDay, currentEncounters);
@@ -1977,8 +1976,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         .filter(ml -> ml.level <= tp.level)
                         .filter(ml -> this.random.nextDouble() < preEvoMoveProbability)
                         .map(ml -> moves.get(ml.move))
-                        .distinct()
-                        .collect(Collectors.toList()));
+                        .distinct().toList());
             }
         }
 
@@ -2029,8 +2027,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 moveSelectionPoolAtLevel.addAll(allEggMoves.get(firstEvo.getNumber())
                         .stream()
                         .filter(egm -> this.random.nextDouble() < eggMoveProbability)
-                        .map(moves::get)
-                        .collect(Collectors.toList()));
+                        .map(moves::get).toList());
             }
         }
 
@@ -2219,12 +2216,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 List<Move> physicalMoves = new ArrayList<>(movesAtLevel)
                         .stream()
-                        .filter(mv -> mv.category == MoveCategory.PHYSICAL)
-                        .collect(Collectors.toList());
+                        .filter(mv -> mv.category == MoveCategory.PHYSICAL).toList();
                 List<Move> specialMoves = new ArrayList<>(movesAtLevel)
                         .stream()
-                        .filter(mv -> mv.category == MoveCategory.SPECIAL)
-                        .collect(Collectors.toList());
+                        .filter(mv -> mv.category == MoveCategory.SPECIAL).toList();
 
                 if (atkSpatkRatio < 1 && specialMoves.size() > 0) {
                     atkSpatkRatio = 1 / atkSpatkRatio;
@@ -2267,8 +2262,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         List<Move> requiresOtherMove = movesAtLevel
                                 .stream()
                                 .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number))
-                                .distinct()
-                                .collect(Collectors.toList());
+                                .distinct().toList();
 
                         for (Move dependentMove: requiresOtherMove) {
                             boolean hasRequiredMove = false;
@@ -2412,8 +2406,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Move> requiresOtherMove = movesAtLevel
                 .stream()
-                .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number))
-                .collect(Collectors.toList());
+                .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number)).toList();
 
         for (Move dependentMove: requiresOtherMove) {
             if (MoveSynergy.requiresOtherMove(dependentMove, movesAtLevel).isEmpty()) {
@@ -2478,13 +2471,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         mv.absorbPercent >= mv2.absorbPercent &&
                                         !mv.isChargeMove &&
                                         !mv.isRechargeMove) ||
-                                mv2.power * mv2.hitCount <= 30) &&
+                                        mv2.power * mv2.hitCount <= 30) &&
                                 mv.hitratio >= mv2.hitratio &&
                                 mv.category == mv2.category &&
                                 mv.priority >= mv2.priority &&
                                 mv2.power > 0 &&
-                                mv.power * mv.hitCount > mv2.power * mv2.hitCount)
-                        .collect(Collectors.toList());
+                                mv.power * mv.hitCount > mv2.power * mv2.hitCount).toList();
 //                for (Move obsoleted: obsoleteThis) {
 //                    System.out.println(obsoleted.name + " obsoleted by " + mv.name);
 //                }
@@ -2504,8 +2496,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 otherMv.power <= 0 &&
                                 otherMv.statChangeMoveType == mv.statChangeMoveType &&
                                 (otherMv.statusType == mv.statusType ||
-                                otherMv.statusType == StatusType.NONE))
-                        .collect(Collectors.toList())) {
+                                        otherMv.statusType == StatusType.NONE)).toList()) {
                     List<Move.StatChange> statChanges2 = new ArrayList<>();
                     for (Move.StatChange sc: mv2.statChanges) {
                         if (sc.type != StatChangeType.NONE) {
@@ -2517,8 +2508,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     List<Move.StatChange> statChanges1Filtered = statChanges1
                             .stream()
-                            .filter(sc -> !statChanges2.contains(sc))
-                            .collect(Collectors.toList());
+                            .filter(sc -> !statChanges2.contains(sc)).toList();
                     statChanges2.removeAll(statChanges1);
                     if (!statChanges1Filtered.isEmpty() && statChanges2.isEmpty()) {
                         if (!GlobalConstants.cannotBeObsoletedMoves.contains(mv2.number)) {
@@ -3470,7 +3460,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                    Map<Type, List<Move>> validTypeMoves, Map<Type, List<Move>> validTypeDamagingMoves) {
         List<Move> allMoves = this.getMoves();
         List<Integer> hms = this.getHMMoves();
-        Set<Integer> allBanned = new HashSet<Integer>(noBroken ? this.getGameBreakingMoves() : Collections.emptySet());
+        Set<Integer> allBanned = new HashSet<>(noBroken ? this.getGameBreakingMoves() : Collections.emptySet());
         allBanned.addAll(hms);
         allBanned.addAll(this.getMovesBannedFromLevelup());
         allBanned.addAll(GlobalConstants.zMoves);
@@ -3516,7 +3506,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             totalAvgPower += (avgTypePower);
         }
 
-        totalAvgPower /= (double)validTypeMoves.keySet().size();
+        totalAvgPower /= validTypeMoves.keySet().size();
 
         // Want the average power of each type to be within 25% both directions
         double minAvg = totalAvgPower * 0.75;
@@ -3641,9 +3631,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // tms
         List<Integer> tmMoves = this.getTMMoves();
 
-        for (int i = 0; i < tmMoves.size(); i++) {
-            tmMoves.set(i, Moves.metronome);
-        }
+        Collections.fill(tmMoves, Moves.metronome);
 
         this.setTMMoves(tmMoves);
 
@@ -3651,9 +3639,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (this.hasMoveTutors()) {
             List<Integer> mtMoves = this.getMoveTutorMoves();
 
-            for (int i = 0; i < mtMoves.size(); i++) {
-                mtMoves.set(i, Moves.metronome);
-            }
+            Collections.fill(mtMoves, Moves.metronome);
 
             this.setMoveTutorMoves(mtMoves);
         }
@@ -4535,7 +4521,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> mts = this.getMoveTutorMoves();
 
         // Empty list
-        List<Integer> priorityTutors = new ArrayList<Integer>();
+        List<Integer> priorityTutors = new ArrayList<>();
 
         if (followEvolutions) {
 			copyUpEvolutionsHelper.apply(true, true,
@@ -4639,10 +4625,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // index 0 = singles, 1 = doubles
         List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
+        Map<Integer, List<String>>[] trainerNamesByLength = new Map[] { new TreeMap<Integer, List<String>>(),
                 new TreeMap<Integer, List<String>>() };
 
-        List<String> repeatedTrainerNames = Arrays.asList(new String[] { "GRUNT", "EXECUTIVE", "SHADOW", "ADMIN", "GOON", "EMPLOYEE" });
+        List<String> repeatedTrainerNames = Arrays.asList("GRUNT", "EXECUTIVE", "SHADOW", "ADMIN", "GOON", "EMPLOYEE");
 
         // Read name lists
         for (String trainername : customNames.getTrainerNames()) {
@@ -4764,8 +4750,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // index 0 = singles, index 1 = doubles
-        List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
+        List<String>[] allTrainerClasses = new List[] { new ArrayList<String>(), new ArrayList<String>() };
+        Map<Integer, List<String>>[] trainerClassesByLength = new Map[] { new HashMap<Integer, List<String>>(),
                 new HashMap<Integer, List<String>>() };
 
         // Read names data

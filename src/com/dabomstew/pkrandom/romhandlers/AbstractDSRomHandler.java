@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +57,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x00, (byte) 0x00,
             (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
-    protected String dataFolder;
     private NDSRom baseRom;
     private String loadedFN;
     private boolean arm9Extended = false;
@@ -176,7 +176,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             fis.skip(0x0C);
             byte[] sig = FileFunctions.readFullyIntoBuffer(fis, 4);
             fis.close();
-            return new String(sig, "US-ASCII");
+            return new String(sig, StandardCharsets.US_ASCII);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }

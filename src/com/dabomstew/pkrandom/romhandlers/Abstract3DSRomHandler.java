@@ -39,6 +39,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -262,7 +263,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			fis.skip(ncchStartingOffset + 0x150);
 			byte[] productCode = FileFunctions.readFullyIntoBuffer(fis, 0x10);
 			fis.close();
-			return new String(productCode, "UTF-8").trim();
+			return new String(productCode, StandardCharsets.UTF_8).trim();
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}

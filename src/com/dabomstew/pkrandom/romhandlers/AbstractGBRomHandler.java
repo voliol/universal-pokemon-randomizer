@@ -39,7 +39,6 @@ import java.util.*;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Pokemon;

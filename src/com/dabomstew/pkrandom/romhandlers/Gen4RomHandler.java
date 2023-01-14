@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -128,7 +129,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		roms = new ArrayList<>();
 		RomEntry current = null;
 		try {
-			Scanner sc = new Scanner(FileFunctions.openConfig("gen4_offsets.ini"), "UTF-8");
+			Scanner sc = new Scanner(FileFunctions.openConfig("gen4_offsets.ini"), StandardCharsets.UTF_8);
 			while (sc.hasNextLine()) {
 				String q = sc.nextLine().trim();
 				if (q.contains("//")) {
@@ -1341,16 +1342,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				// Fix starter text
 				List<String> spStrings = getStrings(romEntry.getInt("StarterScreenTextOffset"));
-				String[] intros = new String[] { "So, you like", "You’ll take", "Do you want" };
+				String[] intros = new String[] { "So, you like", "Youï¿½ll take", "Do you want" };
 				for (int i = 0; i < 3; i++) {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "Professor Elm: " + intros[i] + " \\vFF00\\z000" + color
 							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType().camelCase()
-							+ "-type Pokémon?";
+							+ "-type Pokï¿½mon?";
 					spStrings.set(i + 1, newStarterDesc);
 					String altStarterDesc = "\\vFF00\\z000" + color + newStarter.getName() + "\\vFF00\\z0000, the "
-							+ newStarter.getPrimaryType().camelCase() + "-type Pokémon, is\\nin this Poké Ball!";
+							+ newStarter.getPrimaryType().camelCase() + "-type Pokï¿½mon, is\\nin this Pokï¿½ Ball!";
 					spStrings.set(i + 4, altStarterDesc);
 				}
 				setStrings(romEntry.getInt("StarterScreenTextOffset"), spStrings);
@@ -1577,7 +1578,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.getNumber())
-							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
+							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pokï¿½mon?";
 					spStrings.set(i + 1, newStarterDesc);
 				}
 				// rewrite starter picking screen
@@ -1586,13 +1587,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// what rival says after we get the Pokemon
 					List<String> lakeStrings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					lakeStrings.set(Gen4Constants.dpStarterStringIndex,
-							"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
+							"\\v0103\\z0000: Fwaaah!\\nYour Pokï¿½mon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other peopleï¿½s\\nPokï¿½mon, though...\\pBut we had to use them...\\nThey wonï¿½t mind, will they?\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), lakeStrings);
 				} else {
 					// what rival says after we get the Pokemon
 					List<String> r201Strings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					r201Strings.set(Gen4Constants.ptStarterStringIndex,
-							"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\p");
+							"\\v0103\\z0000\\z0000: Then, I choose you!\\nIï¿½m picking this one!\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), r201Strings);
 				}
 			} catch (IOException e) {
@@ -1816,8 +1817,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			int level = 100;
 			int maxLevel = 0;
 			List<Integer> marshGrassEncounterIndices = Gen4Constants.getMarshGrassEncounterIndices(romEntry.romType);
-			for (int j = 0; j < marshGrassEncounterIndices.size(); j++) {
-				EncounterSet marshGrassEncounterSet = encounters.get(marshGrassEncounterIndices.get(j));
+			for (Integer marshGrassEncounterIndex : marshGrassEncounterIndices) {
+				EncounterSet marshGrassEncounterSet = encounters.get(marshGrassEncounterIndex);
 				int currentLevel = marshGrassEncounterSet.encounters.get(6).level;
 				if (currentLevel < level) {
 					level = currentLevel;
@@ -2238,8 +2239,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		// Honey trees
 		int[] honeyTreeOffsets = romEntry.arrayEntries.get("HoneyTreeOffsets");
-		for (int i = 0; i < honeyTreeOffsets.length; i++) {
-			byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffsets[i]);
+		for (int honeyTreeOffset : honeyTreeOffsets) {
+			byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffset);
 			EncounterSet honeyTreeEncounters = encounters.next();
 			offset = find(encounterOverlay, Gen4Constants.honeyTreeLevelPrefixDPPt);
 			if (offset > 0) {
@@ -2293,8 +2294,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		// Great Marsh rotating Pokemon
 		int[] greatMarshOffsets = new int[] { 9, 10 };
-		for (int i = 0; i < greatMarshOffsets.length; i++) {
-			byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
+		for (int greatMarshOffset : greatMarshOffsets) {
+			byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffset);
 			EncounterSet greatMarshEncounters = encounters.next();
 			writeExtraEncountersDPPt(greatMarshData, 0, greatMarshEncounters.encounters);
 		}
@@ -3406,9 +3407,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
 			int value = pkmn.getNumber();
-			for (int i = 0; i < speciesEntries.length; i++) {
-				byte[] file = scriptNARC.files.get(speciesEntries[i].scriptFile);
-				parent.writeWord(file, speciesEntries[i].scriptOffset, value);
+			for (ScriptEntry speciesEntry : speciesEntries) {
+				byte[] file = scriptNARC.files.get(speciesEntry.scriptFile);
+				parent.writeWord(file, speciesEntry.scriptOffset, value);
 			}
 		}
 
@@ -3421,9 +3422,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 
 		public void setForme(NARCArchive scriptNARC, int forme) {
-			for (int i = 0; i < formeEntries.length; i++) {
-				byte[] file = scriptNARC.files.get(formeEntries[i].scriptFile);
-				file[formeEntries[i].scriptOffset] = (byte) forme;
+			for (ScriptEntry formeEntry : formeEntries) {
+				byte[] file = scriptNARC.files.get(formeEntry.scriptFile);
+				file[formeEntry.scriptOffset] = (byte) forme;
 			}
 		}
 
@@ -4584,10 +4585,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public Map<Integer, Shop> getShopItems() {
 		List<String> shopNames = Gen4Constants.getShopNames(romEntry.romType);
-		List<Integer> mainGameShops = Arrays.stream(romEntry.arrayEntries.get("MainGameShops")).boxed()
-				.collect(Collectors.toList());
-		List<Integer> skipShops = Arrays.stream(romEntry.arrayEntries.get("SkipShops")).boxed()
-				.collect(Collectors.toList());
+		List<Integer> mainGameShops = Arrays.stream(romEntry.arrayEntries.get("MainGameShops")).boxed().toList();
+		List<Integer> skipShops = Arrays.stream(romEntry.arrayEntries.get("SkipShops")).boxed().toList();
 		int shopCount = romEntry.getInt("ShopCount");
 		Map<Integer, Shop> shopItemsMap = new TreeMap<>();
 		String shopDataPrefix = romEntry.getString("ShopDataPrefix");
@@ -4908,8 +4907,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				String newSpeciesString = pokes[marillReplacementId].getName();
 				Map<String, String> replacements = new TreeMap<>();
 				replacements.put(originalSpeciesString, newSpeciesString);
-				for (int i = 0; i < textOffsets.length; i++) {
-					replaceAllStringsInEntry(textOffsets[i], replacements);
+				for (int textOffset : textOffsets) {
+					replaceAllStringsInEntry(textOffset, replacements);
 				}
 
 				// Lastly, modify the catching tutorial to use the new Pokemon if we're capable
@@ -5831,8 +5830,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves,
 			int[] pokeMoves) {
-		List<Integer> items = new ArrayList<>();
-		items.addAll(Gen4Constants.generalPurposeConsumableItems);
+		List<Integer> items = new ArrayList<>(Gen4Constants.generalPurposeConsumableItems);
 		int frequencyBoostCount = 6; // Make some very good items more common, but not too common
 		if (!consumableOnly) {
 			frequencyBoostCount = 8; // bigger to account for larger item pool.

@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -59,7 +60,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     protected void readTextTable(String name) {
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig(name + ".tbl"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig(name + ".tbl"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine();
                 if (!q.trim().isEmpty()) {
@@ -81,7 +82,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
                 }
             }
             sc.close();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException ignored) {
         }
 
     }
@@ -195,34 +196,26 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected static boolean romSig(byte[] rom, String sig) {
-        try {
-            int sigOffset = GBConstants.romSigOffset;
-            byte[] sigBytes = sig.getBytes("US-ASCII");
-            for (int i = 0; i < sigBytes.length; i++) {
-                if (rom[sigOffset + i] != sigBytes[i]) {
-                    return false;
-                }
+        int sigOffset = GBConstants.romSigOffset;
+        byte[] sigBytes = sig.getBytes(StandardCharsets.US_ASCII);
+        for (int i = 0; i < sigBytes.length; i++) {
+            if (rom[sigOffset + i] != sigBytes[i]) {
+                return false;
             }
-            return true;
-        } catch (UnsupportedEncodingException ex) {
-            return false;
         }
+        return true;
 
     }
 
     protected static boolean romCode(byte[] rom, String code) {
-        try {
-            int sigOffset = GBConstants.romCodeOffset;
-            byte[] sigBytes = code.getBytes("US-ASCII");
-            for (int i = 0; i < sigBytes.length; i++) {
-                if (rom[sigOffset + i] != sigBytes[i]) {
-                    return false;
-                }
+        int sigOffset = GBConstants.romCodeOffset;
+        byte[] sigBytes = code.getBytes(StandardCharsets.US_ASCII);
+        for (int i = 0; i < sigBytes.length; i++) {
+            if (rom[sigOffset + i] != sigBytes[i]) {
+                return false;
             }
-            return true;
-        } catch (UnsupportedEncodingException ex) {
-            return false;
         }
+        return true;
 
     }
 

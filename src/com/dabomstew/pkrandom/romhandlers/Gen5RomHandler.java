@@ -30,6 +30,7 @@ import java.awt.image.IndexColorModel;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -134,7 +135,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         roms = new ArrayList<>();
         RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen5_offsets.ini"), "UTF-8");
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen5_offsets.ini"), StandardCharsets.UTF_8);
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
                 if (q.contains("//")) {
@@ -850,7 +851,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	public PokemonSet<Pokemon> getIrregularFormes() {
 		return Gen5Constants.getIrregularFormes(romEntry.romType)
 				.stream().map(i -> pokes[i])
-				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+				.collect(Collectors.toCollection(PokemonSet::new));
 	}
 
     @Override
@@ -1858,9 +1859,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         public void setPokemon(Gen5RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
             int value = pkmn.getNumber();
-            for (int i = 0; i < speciesEntries.length; i++) {
-                byte[] file = scriptNARC.files.get(speciesEntries[i].file);
-                parent.writeWord(file, speciesEntries[i].offset, value);
+            for (FileEntry speciesEntry : speciesEntries) {
+                byte[] file = scriptNARC.files.get(speciesEntry.file);
+                parent.writeWord(file, speciesEntry.offset, value);
             }
         }
 
@@ -1873,9 +1874,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         public void setForme(NARCArchive scriptNARC, int forme) {
-            for (int i = 0; i < formeEntries.length; i++) {
-                byte[] file = scriptNARC.files.get(formeEntries[i].file);
-                file[formeEntries[i].offset] = (byte) forme;
+            for (FileEntry formeEntry : formeEntries) {
+                byte[] file = scriptNARC.files.get(formeEntry.file);
+                file[formeEntry.offset] = (byte) forme;
             }
         }
 
@@ -2132,7 +2133,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             List<Pokemon> allowedHiddenHollowPokemon = new ArrayList<>();
             allowedHiddenHollowPokemon.addAll(Arrays.asList(Arrays.copyOfRange(pokes,1,494)));
             allowedHiddenHollowPokemon.addAll(
-                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).collect(Collectors.toList()));
+                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).toList());
 
             try {
                 NARCArchive hhNARC = this.readNARC(romEntry.getFile("HiddenHollows"));
@@ -4007,7 +4008,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int[] shopItemOffsets = romEntry.arrayEntries.get("ShopItemOffsets");
         int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
         int shopCount = romEntry.getInt("ShopCount");
-        List<Integer> shopItems = new ArrayList<>();
         Map<Integer, Shop> shopItemsMap = new TreeMap<>();
 
         try {
@@ -4227,8 +4227,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        List<Integer> items = new ArrayList<>();
-        items.addAll(Gen5Constants.generalPurposeConsumableItems);
+        List<Integer> items = new ArrayList<>(Gen5Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common
         if (!consumableOnly) {
             frequencyBoostCount = 8; // bigger to account for larger item pool.
