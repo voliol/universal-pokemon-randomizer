@@ -727,7 +727,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (hitratio > 255) {
                 hitratio = 255;
             }
-            writeBytes(offs + (i - 1) * 7, new byte[]{(byte) moves[i].effectIndex, (byte) moves[i].power,
+            writeBytes(offs + (i - 1) * 7 + 1, new byte[]{(byte) moves[i].effectIndex, (byte) moves[i].power,
                     Gen2Constants.typeToByte(moves[i].type), (byte) hitratio, (byte) moves[i].pp});
         }
     }
