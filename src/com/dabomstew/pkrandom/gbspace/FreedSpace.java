@@ -83,7 +83,7 @@ public class FreedSpace {
         }
     }
 
-    private void addFreedChunkBefore(FreedChunk toFree, int i) {
+    protected final void addFreedChunkBefore(FreedChunk toFree, int i) {
         FreedChunk neighbor = freedChunks.get(i);
         if (toFree.end >= neighbor.start) {
             throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
@@ -96,7 +96,7 @@ public class FreedSpace {
         }
     }
 
-    private boolean addFreedChunkAfterOrBetween(FreedChunk toFree, int i) {
+    protected final boolean addFreedChunkAfterOrBetween(FreedChunk toFree, int i) {
         FreedChunk leftNeighbor = freedChunks.get(i);
         if (leftNeighbor.end >= toFree.start) {
             throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
@@ -131,18 +131,29 @@ public class FreedSpace {
     }
 
     public int findAndUnfree(int length) {
-        for (int i = 0; i < freedChunks.size(); i++) {
-            FreedChunk fc = freedChunks.get(i);
+        FreedChunk found = find(length);
+        if (found == null) {
+            return -1;
+        }
+        int offset = found.start;
+        unfree(found, length);
+        return offset;
+    }
+
+    protected final FreedChunk find(int length) {
+        for (FreedChunk fc : freedChunks) {
             if (fc.getLength() >= length) {
-                int foundOffset = fc.start;
-                fc.start += length;
-                if (fc.start > fc.end) {
-                    freedChunks.remove(i);
-                }
-                return foundOffset;
+                return fc;
             }
         }
-        return -1;
+        return null;
+    }
+
+    protected final void unfree(FreedChunk toUnfree, int length) {
+        toUnfree.start += length;
+        if (toUnfree.start > toUnfree.end) {
+            freedChunks.remove(toUnfree);
+        }
     }
 
     public int getLengthSum() {

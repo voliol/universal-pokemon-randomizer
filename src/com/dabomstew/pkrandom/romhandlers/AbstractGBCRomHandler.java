@@ -155,6 +155,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     protected void writeFixedLengthString(byte[] data, String str, int offset, int length) {
         byte[] translated = translateString(str);
         int len = Math.min(translated.length, length);
+        // TODO: should use writeBytes();
         System.arraycopy(translated, 0, data, offset, len);
         while (len < length) {
             data[offset + len] = GBConstants.stringTerminator;
@@ -163,7 +164,12 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void writeVariableLengthString(String str, int offset, boolean alreadyTerminated) {
+        writeVariableLengthString(rom, str, offset, alreadyTerminated);
+    }
+
+    protected void writeVariableLengthString(byte[] data, String str, int offset, boolean alreadyTerminated) {
         byte[] translated = translateString(str);
+        // TODO: should use writeBytes();
         System.arraycopy(translated, 0, rom, offset, translated.length);
         if (!alreadyTerminated) {
             rom[offset + translated.length] = GBConstants.stringTerminator;

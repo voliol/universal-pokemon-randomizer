@@ -70,7 +70,7 @@ public class Gen2Constants {
 
     public static final int maxTrainerNameLength = 17;
 
-    public static final int trainerDataTerminatorLength = 1;
+    public static final int trainerDataMiscDataLength = 1, trainerDataTerminatorLength = 1;
 
     public static final byte trainerDataTerminator = (byte) 0xFF;
 

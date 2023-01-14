@@ -49,4 +49,23 @@ public class BankDividedFreedSpace extends FreedSpace {
         return fc.start / bankSize;
     }
 
+    public int findAndUnfreeInBank(int length, int bank) {
+        FreedChunk found = findInBank(length, bank);
+        if (found == null) {
+            return -1;
+        }
+        int offset = found.start;
+        unfree(found, length);
+        return offset;
+    }
+
+    private FreedChunk findInBank(int length, int bank) {
+        for (FreedChunk fc : freedChunks) {
+            if (fc.getLength() >= length && freedChunkStartBank(fc) == bank) {
+                return fc;
+            }
+        }
+        return null;
+    }
+
 }

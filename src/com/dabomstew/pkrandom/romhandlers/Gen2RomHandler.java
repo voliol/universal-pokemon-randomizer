@@ -1270,17 +1270,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (offset != length) {
             throw new IllegalStateException("Trainer data is wrong length. Is: " + offset + ". Should be: " + length);
         }
-
         return data;
     }
 
     private int trainerDataLength(Trainer trainer) {
-        // TODO: Constants
         int trainerNameLength = internalStringLength(trainer.name) + 1;
-        int otherDataLength = 1;
+        int miscDataLength = Gen2Constants.trainerDataMiscDataLength;
         int pokemonDataLength = trainerPokemonDataLength(trainer) * trainer.pokemon.size();
         int terminatorLength = Gen2Constants.trainerDataTerminatorLength;
-        return trainerNameLength + otherDataLength + pokemonDataLength + terminatorLength;
+        return trainerNameLength + miscDataLength + pokemonDataLength + terminatorLength;
     }
 
     private int trainerPokemonDataLength(Trainer trainer) {
