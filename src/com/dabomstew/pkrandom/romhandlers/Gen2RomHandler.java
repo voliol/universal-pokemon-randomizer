@@ -1219,65 +1219,101 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-        int traineroffset = romEntry.getValue("TrainerDataTableOffset");
-        int traineramount = romEntry.getValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
+        int trainerClassTableOffset = romEntry.getValue("TrainerDataTableOffset");
+        int trainerClassAmount = romEntry.getValue("TrainerClassAmount");
+        int[] trainersPerClass = romEntry.arrayEntries.get("TrainerDataClassCounts");
 
-        int[] pointers = new int[traineramount];
-        for (int i = 0; i < traineramount; i++) {
-            int pointer = readWord(traineroffset + i * 2);
-            pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
+        int[] trainerClassPointers = new int[trainerClassAmount];
+        for (int i = 0; i < trainerClassAmount; i++) {
+            int pointer = readWord(trainerClassTableOffset + i * 2);
+            trainerClassPointers[i] = calculateOffset(bankOf(trainerClassTableOffset), pointer);
         }
 
-        // Get current movesets in case we need to reset them for certain
-        // trainer mons.
-        Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-
         Iterator<Trainer> allTrainers = trainerData.iterator();
-        for (int i = 0; i < traineramount; i++) {
-            int offs = pointers[i];
-            int limit = trainerclasslimits[i];
-            for (int trnum = 0; trnum < limit; trnum++) {
+        for (int i = 0; i < trainerClassAmount; i++) {
+            int offset = trainerClassPointers[i];
+
+            for (int trainerNum = 0; trainerNum < trainersPerClass[i]; trainerNum++) {
                 Trainer tr = allTrainers.next();
                 if (tr.trainerclass != i) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
-                // Write their name
-                int trnamelen = internalStringLength(tr.name);
-                writeFixedLengthString(tr.name, offs, trnamelen + 1);
-                offs += trnamelen + 1;
-                // Write out new trainer data
-                rom[offs++] = (byte) tr.poketype;
-                Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
-                for (int tpnum = 0; tpnum < tr.pokemon.size(); tpnum++) {
-                    TrainerPokemon tp = tPokes.next();
-                    rom[offs] = (byte) tp.level;
-                    rom[offs + 1] = (byte) tp.pokemon.getNumber();
-                    offs += 2;
-                    if (tr.pokemonHaveItems()) {
-                        rom[offs] = (byte) tp.heldItem;
-                        offs++;
-                    }
-                    if (tr.pokemonHaveCustomMoves()) {
-                        if (tp.resetMoves) {
-                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), movesets, tp.level);
-                            for (int m = 0; m < 4; m++) {
-                                rom[offs + m] = (byte) pokeMoves[m];
-                            }
-                        } else {
-                            rom[offs] = (byte) tp.moves[0];
-                            rom[offs + 1] = (byte) tp.moves[1];
-                            rom[offs + 2] = (byte) tp.moves[2];
-                            rom[offs + 3] = (byte) tp.moves[3];
-                        }
-                        offs += 4;
-                    }
-                }
-                rom[offs] = (byte) 0xFF;
-                offs++;
+                byte[] trainerBytes = trainerToBytes(tr);
+                writeBytes(offset, trainerBytes);
+                offset += trainerBytes.length;
             }
         }
 
+    }
+
+    private byte[] trainerToBytes(Trainer trainer) {
+        int length = trainerDataLength(trainer);
+        byte[] data = new byte[length];
+        int offset = 0;
+
+        int trainerNameLength = internalStringLength(trainer.name) + 1;
+        writeFixedLengthString(data, trainer.name, 0, trainerNameLength);
+        offset += trainerNameLength;
+
+        data[offset] = (byte) trainer.poketype;
+        offset++;
+
+        for (TrainerPokemon tp : trainer.pokemon) {
+            byte[] tpData = trainerPokemonToBytes(tp, trainer);
+            writeBytes(data, offset, tpData);
+            offset += tpData.length;
+        }
+
+        data[offset] = Gen2Constants.trainerDataTerminator;
+        offset++;
+
+        if (offset != length) {
+            throw new IllegalStateException("Trainer data is wrong length. Is: " + offset + ". Should be: " + length);
+        }
+
+        return data;
+    }
+
+    private int trainerDataLength(Trainer trainer) {
+        // TODO: Constants
+        int trainerNameLength = internalStringLength(trainer.name) + 1;
+        int otherDataLength = 1;
+        int pokemonDataLength = trainerPokemonDataLength(trainer) * trainer.pokemon.size();
+        int terminatorLength = Gen2Constants.trainerDataTerminatorLength;
+        return trainerNameLength + otherDataLength + pokemonDataLength + terminatorLength;
+    }
+
+    private int trainerPokemonDataLength(Trainer trainer) {
+        return 2 + (trainer.pokemonHaveItems() ? 1 : 0) + (trainer.pokemonHaveCustomMoves() ? 4 : 0);
+    }
+
+    private byte[] trainerPokemonToBytes(TrainerPokemon tp, Trainer trainer) {
+        byte[] data = new byte[trainerPokemonDataLength(trainer)];
+        int offset = 0;
+        data[offset] = (byte) tp.level;
+        data[offset + 1] = (byte) tp.pokemon.getNumber();
+        offset += 2;
+        if (trainer.pokemonHaveItems()) {
+            data[offset] = (byte) tp.heldItem;
+            offset++;
+        }
+        if (trainer.pokemonHaveCustomMoves()) {
+            if (tp.resetMoves) {
+                resetTrainerPokemonMoves(tp);
+            }
+            data[offset] = (byte) tp.moves[0];
+            data[offset + 1] = (byte) tp.moves[1];
+            data[offset + 2] = (byte) tp.moves[2];
+            data[offset + 3] = (byte) tp.moves[3];
+        }
+        return data;
+    }
+
+    private void resetTrainerPokemonMoves(TrainerPokemon tp) {
+        // made quickly while refactoring trainer writing, might be applicable in more/better places
+        // (including other gens)
+        // TODO: look at the above
+        tp.moves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), this.getMovesLearnt(), tp.level);
     }
 
     @Override
@@ -1630,7 +1666,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public void setTMMoves(List<Integer> moveIndexes) {
         int offset = romEntry.getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.tmCount; i++) {
-            writeByte(offset + (i - 1), moveIndexes.get(i - 1).byteValue());
+            rom[offset + (i - 1)] = moveIndexes.get(i - 1).byteValue();
         }
 
         // TM Text
@@ -3046,7 +3082,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 			int cvOffset = romEntry.getValue("CheckValueOffset");
             byte[] cvBytes = new byte[4];
 			for (int i = 0; i < 4; i++) {
-                cvBytes[i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
+                rom[cvOffset + i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
 			}
             writeBytes(cvOffset, cvBytes);
 		}

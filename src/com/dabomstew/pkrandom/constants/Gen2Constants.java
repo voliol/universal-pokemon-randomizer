@@ -70,6 +70,10 @@ public class Gen2Constants {
 
     public static final int maxTrainerNameLength = 17;
 
+    public static final int trainerDataTerminatorLength = 1;
+
+    public static final byte trainerDataTerminator = (byte) 0xFF;
+
     public static final int fleeingSetTwoOffset = 0xE, fleeingSetThreeOffset = 0x17;
 
     public static final int mapGroupCount = 26, mapsInLastGroup = 11;
