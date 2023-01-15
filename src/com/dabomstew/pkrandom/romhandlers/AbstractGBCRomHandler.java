@@ -36,12 +36,17 @@ import java.util.Scanner;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gbspace.BankDividedFreedSpace;
+import com.dabomstew.pkrandom.gbspace.FreedSpace;
 
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     private String[] tb;
     private Map<String, Byte> d;
     private int longestTableToken;
+
+    private BankDividedFreedSpace freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
 
     public AbstractGBCRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -184,6 +189,14 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         }
     }
 
+    /**
+     * Make a GB pointer out of the pointer, and write it to the offset.
+     */
+    protected void writeGBPointer(int offset, int pointer) {
+        int gbPointer = makeGBPointer(pointer);
+        writeWord(offset, gbPointer);
+    }
+
     protected int bankOf(int offset) {
         return (offset / GBConstants.bankSize);
     }
@@ -200,6 +213,24 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
     }
 
+    protected int findAndUnfreeSpaceInBank(int length, int bank) {
+        int foundOffset;
+        do {
+            foundOffset = getFreedSpace().findAndUnfreeInBank(length, bank);
+        } while (isRomSpaceUsed(foundOffset, length));
+
+        if (foundOffset == -1) {
+            throw new RandomizerIOException("Bank full.");
+        }
+        return foundOffset;
+    }
+
+    @Override
+    protected BankDividedFreedSpace getFreedSpace() {
+        return freedSpace;
+    }
+
+    @Override
     protected byte getFreeSpaceByte() {
         return 0;
     }

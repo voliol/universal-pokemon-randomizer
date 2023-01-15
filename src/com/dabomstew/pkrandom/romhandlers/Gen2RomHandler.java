@@ -35,6 +35,7 @@ import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1164,36 +1165,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
                 index++;
-                Trainer tr = new Trainer();
-                tr.offset = offs;
+                Trainer tr = readTrainer(offs);
                 tr.index = index;
                 tr.trainerclass = i;
-                String name = readVariableLengthString(offs, false);
-                tr.name = name;
-                tr.fullDisplayName = tcnames.get(i) + " " + name;
-                offs += lengthOfStringAt(offs, false) + 1;
-                int dataType = rom[offs] & 0xFF;
-                tr.poketype = dataType;
-                offs++;
-                while ((rom[offs] & 0xFF) != 0xFF) {
-                    TrainerPokemon tp = new TrainerPokemon();
-                    tp.level = rom[offs] & 0xFF;
-                    tp.pokemon = pokes[rom[offs + 1] & 0xFF];
-                    offs += 2;
-                    if ((dataType & 2) == 2) {
-                        tp.heldItem = rom[offs] & 0xFF;
-                        offs++;
-                    }
-                    if ((dataType & 1) == 1) {
-                        for (int move = 0; move < 4; move++) {
-                            tp.moves[move] = rom[offs + move] & 0xFF;
-                        }
-                        offs += 4;
-                    }
-                    tr.pokemon.add(tp);
-                }
+                tr.fullDisplayName = tcnames.get(i) + " " + tr.name;
+
                 allTrainers.add(tr);
-                offs++;
+                offs += trainerDataLength(tr);
             }
         }
 
@@ -1207,6 +1185,35 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return allTrainers;
     }
 
+
+    private Trainer readTrainer(int offset) {
+        Trainer tr = new Trainer();
+        tr.offset = offset;
+        tr.name = readVariableLengthString(offset, false);
+        offset += lengthOfStringAt(offset, false) + 1;
+        int dataType = rom[offset] & 0xFF;
+        tr.poketype = dataType;
+        offset++;
+        while ((rom[offset] & 0xFF) != 0xFF) {
+            TrainerPokemon tp = new TrainerPokemon();
+            tp.level = rom[offset] & 0xFF;
+            tp.pokemon = pokes[rom[offset + 1] & 0xFF];
+            offset += 2;
+            if ((dataType & 2) == 2) {
+                tp.heldItem = rom[offset] & 0xFF;
+                offset++;
+            }
+            if ((dataType & 1) == 1) {
+                for (int move = 0; move < 4; move++) {
+                    tp.moves[move] = rom[offset + move] & 0xFF;
+                }
+                offset += 4;
+            }
+            tr.pokemon.add(tp);
+        }
+        return tr;
+    }
+
     @Override
     public List<Integer> getMainPlaythroughTrainers() {
         return new ArrayList<>(); // Not implemented
@@ -1217,8 +1224,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
+    boolean freedInTrainerBank = false; // temporary; TODO: remove
+
     @Override
     public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+        System.out.println("setting trainers");
+        if (!freedInTrainerBank) {
+            freeSpaceBetween(0x3B685, 0x3BFFF);
+            freedInTrainerBank = true;
+        }
+
         int trainerClassTableOffset = romEntry.getValue("TrainerDataTableOffset");
         int trainerClassAmount = romEntry.getValue("TrainerClassAmount");
         int[] trainersPerClass = romEntry.arrayEntries.get("TrainerDataClassCounts");
@@ -1231,58 +1246,64 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         Iterator<Trainer> allTrainers = trainerData.iterator();
         for (int i = 0; i < trainerClassAmount; i++) {
-            int offset = trainerClassPointers[i];
+            if (trainersPerClass[i] == 0) continue;
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             for (int trainerNum = 0; trainerNum < trainersPerClass[i]; trainerNum++) {
                 Trainer tr = allTrainers.next();
                 if (tr.trainerclass != i) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
-                byte[] trainerBytes = trainerToBytes(tr);
-                writeBytes(offset, trainerBytes);
-                offset += trainerBytes.length;
+                baos.writeBytes(trainerToBytes(tr));
             }
+
+            byte[] trainersOfClassBytes = baos.toByteArray();
+            int pointerOffset = trainerClassTableOffset + i * 2;
+            int pointer = readWord(trainerClassTableOffset + i * 2);
+            int oldOffset = calculateOffset(bankOf(trainerClassTableOffset), pointer);
+            int oldLength = trainerDataLength(readTrainer(oldOffset));
+            freeSpace(oldOffset, oldLength);
+            repointAndWriteToFreeSpaceInSameBank(pointerOffset, trainersOfClassBytes);
         }
 
     }
 
-    private byte[] trainerToBytes(Trainer trainer) {
-        int length = trainerDataLength(trainer);
-        byte[] data = new byte[length];
-        int offset = 0;
+    /*
+     * Returns the new offset of the data.
+     */
+    private int repointAndWriteToFreeSpaceInSameBank(int pointerOffset, byte[] data) {
+        int newOffset = findAndUnfreeSpaceInBank(data.length, bankOf(pointerOffset));
 
-        int trainerNameLength = internalStringLength(trainer.name) + 1;
-        writeFixedLengthString(data, trainer.name, 0, trainerNameLength);
-        offset += trainerNameLength;
+        writeGBPointer(pointerOffset, newOffset);
+        writeBytes(newOffset, data);
 
-        data[offset] = (byte) trainer.poketype;
-        offset++;
-
-        for (TrainerPokemon tp : trainer.pokemon) {
-            byte[] tpData = trainerPokemonToBytes(tp, trainer);
-            writeBytes(data, offset, tpData);
-            offset += tpData.length;
-        }
-
-        data[offset] = Gen2Constants.trainerDataTerminator;
-        offset++;
-
-        if (offset != length) {
-            throw new IllegalStateException("Trainer data is wrong length. Is: " + offset + ". Should be: " + length);
-        }
-        return data;
+        return newOffset;
     }
 
     private int trainerDataLength(Trainer trainer) {
-        int trainerNameLength = internalStringLength(trainer.name) + 1;
-        int miscDataLength = Gen2Constants.trainerDataMiscDataLength;
-        int pokemonDataLength = trainerPokemonDataLength(trainer) * trainer.pokemon.size();
-        int terminatorLength = Gen2Constants.trainerDataTerminatorLength;
-        return trainerNameLength + miscDataLength + pokemonDataLength + terminatorLength;
+        return trainerToBytes(trainer).length;
     }
 
-    private int trainerPokemonDataLength(Trainer trainer) {
-        return 2 + (trainer.pokemonHaveItems() ? 1 : 0) + (trainer.pokemonHaveCustomMoves() ? 4 : 0);
+    private byte[] trainerToBytes(Trainer trainer) {
+        // sometimes it's practical to use a baos
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        baos.writeBytes(trainerNameToBytes(trainer));
+        baos.write(trainer.poketype);
+        for (TrainerPokemon tp : trainer.pokemon) {
+            baos.writeBytes(trainerPokemonToBytes(tp, trainer));
+        }
+        baos.write(Gen2Constants.trainerDataTerminator);
+
+        return baos.toByteArray();
+    }
+
+    private byte[] trainerNameToBytes(Trainer trainer) {
+        int trainerNameLength = internalStringLength(trainer.name) + 1;
+        byte[] trainerNameBytes = new byte[trainerNameLength];
+        writeFixedLengthString(trainerNameBytes, trainer.name, 0, trainerNameLength);
+        return trainerNameBytes;
     }
 
     private byte[] trainerPokemonToBytes(TrainerPokemon tp, Trainer trainer) {
@@ -1305,6 +1326,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             data[offset + 3] = (byte) tp.moves[3];
         }
         return data;
+    }
+
+    private int trainerPokemonDataLength(Trainer trainer) {
+        return 2 + (trainer.pokemonHaveItems() ? 1 : 0) + (trainer.pokemonHaveCustomMoves() ? 4 : 0);
     }
 
     private void resetTrainerPokemonMoves(TrainerPokemon tp) {
@@ -1596,7 +1621,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public PokemonSet<Pokemon> getBannedForStaticPokemon() {
-    	return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
+        return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
     }
 
     @Override
@@ -2771,7 +2796,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         data[2 + nicknameLength] = (byte) (trade.ivs[0] << 4 | trade.ivs[1]);
         data[3 + nicknameLength] = (byte) (trade.ivs[2] << 4 | trade.ivs[3]);
         data[4 + nicknameLength] = (byte) trade.item;
-        writeWord(data,5 + nicknameLength, trade.otId);
+        writeWord(data, 5 + nicknameLength, trade.otId);
         if (romEntry.getValue("CanChangeTrainerText") > 0) {
             writeFixedLengthString(data, trade.otName, 7 + nicknameLength, otLength);
         }
@@ -2953,15 +2978,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // rock smash, headbutt, sweet scent
         // not softboiled or milk drink
         return Gen2Constants.fieldMoves;
-	}
+    }
 
-	@Override
-	public List<Integer> getEarlyRequiredHMMoves() {
-		// just cut
-		return Gen2Constants.earlyRequiredHMMoves;
-	}
+    @Override
+    public List<Integer> getEarlyRequiredHMMoves() {
+        // just cut
+        return Gen2Constants.earlyRequiredHMMoves;
+    }
 
-	private void loadPokemonPalettes() {
+    private void loadPokemonPalettes() {
         // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = romEntry.getValue("PokemonPalettes") + 8;
         for (Pokemon pk : getPokemonSet()) {
@@ -2977,44 +3002,44 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private Palette read2ColorPalette(int offset) {
-        byte[] paletteBytes = new byte[] {rom[offset], rom[offset+1], rom[offset+2], rom[offset+3]};
+        byte[] paletteBytes = new byte[]{rom[offset], rom[offset + 1], rom[offset + 2], rom[offset + 3]};
         return new Palette(paletteBytes);
     }
 
-	@Override
-	public void savePokemonPalettes() {
-		int palOffset = romEntry.getValue("PokemonPalettes") + 8;
-		for (Pokemon pk : getPokemonSet()) {
-			int num = pk.getNumber() - 1;
+    @Override
+    public void savePokemonPalettes() {
+        int palOffset = romEntry.getValue("PokemonPalettes") + 8;
+        for (Pokemon pk : getPokemonSet()) {
+            int num = pk.getNumber() - 1;
 
-			byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
+            byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
             writeBytes(palOffset + num * 8, normalPaletteBytes);
 
-			byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
+            byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
             writeBytes(palOffset + num * 8 + 4, shinyPaletteBytes);
 
-		}
-	}
+        }
+    }
 
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
-    	// Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
+        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
         // There is no zero-entry.
         int picPointer;
         if (pk.getNumber() == Species.unown) {
             int unownLetter = random.nextInt(Gen2Constants.unownFormeCount);
             picPointer = romEntry.getValue("UnownPicPointers") + unownLetter * 6;
         } else {
-        picPointer = romEntry.getValue("PicPointers") + (pk.getNumber() - 1) * 6;
+            picPointer = romEntry.getValue("PicPointers") + (pk.getNumber() - 1) * 6;
         }
         if (back) {
-        	picPointer += 3;
+            picPointer += 3;
         }
 
         int picWidth = back ? 6 : pk.getPicDimensions() & 0x0F;
         int picHeight = back ? 6 : (pk.getPicDimensions() >> 4) & 0x0F;
 
-        byte [] data;
+        byte[] data;
         try {
             data = readSpriteData(picPointer, picWidth, picHeight);
         } catch (Exception e) {
@@ -3026,7 +3051,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // White and black are always in the palettes at positions 0 and 3, 
         // so only the middle colors are stored and need to be read.
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        int[] convPalette = new int[] { 0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000 };
+        int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
 
         BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
 
@@ -3064,25 +3089,25 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return data;
     }
 
-	@Override
-	public PaletteHandler getPaletteHandler() {
-	    return paletteHandler;
-	}
+    @Override
+    public PaletteHandler getPaletteHandler() {
+        return paletteHandler;
+    }
 
-	@Override
-	public boolean isRomValid() {
-		return romEntry.expectedCRC32 == actualCRC32;
-	}
+    @Override
+    public boolean isRomValid() {
+        return romEntry.expectedCRC32 == actualCRC32;
+    }
 
-	@Override
-	public void writeCheckValueToROM(int value) {
-		if (romEntry.getValue("CheckValueOffset") > 0) {
-			int cvOffset = romEntry.getValue("CheckValueOffset");
+    @Override
+    public void writeCheckValueToROM(int value) {
+        if (romEntry.getValue("CheckValueOffset") > 0) {
+            int cvOffset = romEntry.getValue("CheckValueOffset");
             byte[] cvBytes = new byte[4];
-			for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 rom[cvOffset + i] = (byte) ((value >> (3 - i) * 8) & 0xFF);
-			}
+            }
             writeBytes(cvOffset, cvBytes);
-		}
+        }
     }
 }

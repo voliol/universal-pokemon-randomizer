@@ -50,8 +50,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected byte[] originalRom;
     private String loadedFN;
 
-    private FreedSpace freedSpace = new FreedSpace();
-
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
     }
@@ -234,14 +232,21 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		for (int i = 0; i < length; i++) {
 			writeByte(offset + i, getFreeSpaceByte());
 		}
-		freedSpace.free(offset, length);
+        getFreedSpace().free(offset, length);
 	}
+
+    /**
+     * Both end points included.
+     */
+    protected void freeSpaceBetween(int start, int end) {
+        freeSpace(start, end-start);
+    }
 
     // TODO: do something about long alignment (if something needs to be done about it)
 	protected int findAndUnfreeSpace(int length) {
 		int foundOffset;
 		do {
-			foundOffset = freedSpace.findAndUnfree(length);
+			foundOffset = getFreedSpace().findAndUnfree(length);
 		} while (isRomSpaceUsed(foundOffset, length));
 
 		if (foundOffset == -1) {
@@ -250,7 +255,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		return foundOffset;
 	}
 
-	private boolean isRomSpaceUsed(int offset, int length) {
+	protected boolean isRomSpaceUsed(int offset, int length) {
 		if (offset < 0)
 			return false;
 		// manual check if the space is still unused, because
@@ -263,6 +268,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		}
 		return false;
 	}
+
+    protected abstract FreedSpace getFreedSpace();
 
 	protected abstract byte getFreeSpaceByte();
 

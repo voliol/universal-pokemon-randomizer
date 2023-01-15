@@ -36,6 +36,7 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
@@ -381,6 +382,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private int pickupItemsTableOffset;
     private long actualCRC32;
     private boolean effectivenessUpdated;
+
+    // Misc.
+    private final FreedSpace freedSpace = new FreedSpace();
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -4448,6 +4452,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 		return newOffset;
 	}
+
+    @Override
+    protected FreedSpace getFreedSpace() {
+        return freedSpace;
+    }
 
 	@Override
 	protected byte getFreeSpaceByte() {
