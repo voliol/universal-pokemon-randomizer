@@ -1729,6 +1729,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean supportsTrainerHeldItems() {
+        return true; // because it's likely just Gen I which doesn't
+        // (Gen II doesn't either atm, but that's just because item indexes are missing)
+    }
+
+    @Override
     public void randomizeTrainerHeldItems(Settings settings) {
         boolean giveToBossPokemon = settings.isRandomizeHeldItemsForBossTrainerPokemon();
         boolean giveToImportantPokemon = settings.isRandomizeHeldItemsForImportantTrainerPokemon();

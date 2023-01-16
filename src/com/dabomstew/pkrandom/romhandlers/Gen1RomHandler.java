@@ -1426,6 +1426,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean supportsTrainerHeldItems() {
+        return false;
+    }
+
+    @Override
     public boolean isYellow() {
         return romEntry.isYellow;
     }

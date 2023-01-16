@@ -1365,6 +1365,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean supportsTrainerHeldItems() {
+        // Not a technical issue nor a space-based one, Gen II does support held items for trainers.
+        // Rather, getAllHeldItems() etc. needs to be filled.
+        return false;
+    }
+
+    @Override
     public List<Pokemon> getPokemon() {
         return pokemonList;
     }

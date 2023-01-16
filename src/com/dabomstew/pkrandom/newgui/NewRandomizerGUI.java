@@ -2421,23 +2421,24 @@ public class NewRandomizerGUI {
             tpSwapMegaEvosCheckBox.setVisible(romHandler.hasMegaEvolutions());
             tpDoubleBattleModeCheckBox.setVisible(pokemonGeneration >= 3);
 
-            boolean canAddToBoss = romHandler.canAddPokemonToBossTrainers();
-            boolean canAddToImportant = romHandler.canAddPokemonToImportantTrainers();
-            boolean canAddToRegular = romHandler.canAddPokemonToRegularTrainers();
-            boolean additionalPokemonAvailable = canAddToBoss || canAddToImportant || canAddToRegular;
+            boolean canAddPokesToBoss = romHandler.canAddPokemonToBossTrainers();
+            boolean canAddPokesToImportant = romHandler.canAddPokemonToImportantTrainers();
+            boolean canAddPokesToRegular = romHandler.canAddPokemonToRegularTrainers();
+            boolean additionalPokemonAvailable = canAddPokesToBoss || canAddPokesToImportant || canAddPokesToRegular;
 
             tpAdditionalPokemonForLabel.setVisible(additionalPokemonAvailable);
-            tpBossTrainersCheckBox.setVisible(canAddToBoss);
+            tpBossTrainersCheckBox.setVisible(canAddPokesToBoss);
             tpBossTrainersCheckBox.setEnabled(false);
-            tpBossTrainersSpinner.setVisible(canAddToBoss);
-            tpImportantTrainersCheckBox.setVisible(canAddToImportant);
+            tpBossTrainersSpinner.setVisible(canAddPokesToBoss);
+            tpImportantTrainersCheckBox.setVisible(canAddPokesToImportant);
             tpImportantTrainersCheckBox.setEnabled(false);
-            tpImportantTrainersSpinner.setVisible(canAddToImportant);
-            tpRegularTrainersCheckBox.setVisible(canAddToRegular);
+            tpImportantTrainersSpinner.setVisible(canAddPokesToImportant);
+            tpRegularTrainersCheckBox.setVisible(canAddPokesToRegular);
             tpRegularTrainersCheckBox.setEnabled(false);
-            tpRegularTrainersSpinner.setVisible(canAddToRegular);
+            tpRegularTrainersSpinner.setVisible(canAddPokesToRegular);
 
-            boolean trainersHeldItemSupport = pokemonGeneration >= 3;
+            boolean trainersHeldItemSupport = romHandler.supportsTrainerHeldItems();
+
             tpHeldItemsLabel.setVisible(trainersHeldItemSupport);
             tpBossTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
             tpBossTrainersItemsCheckBox.setEnabled(false);

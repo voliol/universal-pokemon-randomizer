@@ -254,7 +254,15 @@ public interface RomHandler {
 
     void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
 
+    boolean canAddPokemonToBossTrainers();
+
+    boolean canAddPokemonToImportantTrainers();
+
+    boolean canAddPokemonToRegularTrainers();
+
     void randomizeTrainerPokes(Settings settings);
+
+    boolean supportsTrainerHeldItems();
 
     void randomizeTrainerHeldItems(Settings settings);
 
@@ -279,12 +287,6 @@ public interface RomHandler {
     List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
 
     void pickTrainerMovesets(Settings settings);
-
-    boolean canAddPokemonToBossTrainers();
-
-    boolean canAddPokemonToImportantTrainers();
-
-    boolean canAddPokemonToRegularTrainers();
 
     // =========
     // Move Data
