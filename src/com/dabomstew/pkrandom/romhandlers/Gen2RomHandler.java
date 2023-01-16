@@ -35,7 +35,6 @@ import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -283,9 +282,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private PaletteHandler paletteHandler;
 
     // This ROM's data
+    private RomEntry romEntry;
     private Pokemon[] pokes;
     private List<Pokemon> pokemonList;
-    private RomEntry romEntry;
+    private List<Trainer> trainerList;
     private Move[] moves;
     private boolean havePatchedFleeing;
     private String[] itemNames;
@@ -360,6 +360,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         // Not found
         return null;
+    }
+
+    @Override
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
+        // because most other gens write the trainers to ROM each time setTrainers is used,
+        // instead of having a saveTrainers. TODO: make at least the GB games use saveTrainers()
+        saveTrainers();
     }
 
     private void loadPokemonStats() {
@@ -1146,45 +1154,40 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
-        int traineroffset = romEntry.getValue("TrainerDataTableOffset");
-        int traineramount = romEntry.getValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
-
-        int[] pointers = new int[traineramount];
-        for (int i = 0; i < traineramount; i++) {
-            int pointer = readWord(traineroffset + i * 2);
-            pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
+        if (trainerList == null) {
+            loadTrainers();
         }
+        return trainerList;
+    }
 
+    private void loadTrainers() {
+        int trainerClassTableOffset = romEntry.getValue("TrainerDataTableOffset");
+        int trainerClassAmount = romEntry.getValue("TrainerClassAmount");
+        int[] trainersPerClass = romEntry.arrayEntries.get("TrainerDataClassCounts");
         List<String> tcnames = this.getTrainerClassNames();
 
-        List<Trainer> allTrainers = new ArrayList<>();
-        int index = 0;
-        for (int i = 0; i < traineramount; i++) {
-            int offs = pointers[i];
-            int limit = trainerclasslimits[i];
-            for (int trnum = 0; trnum < limit; trnum++) {
-                index++;
-                Trainer tr = readTrainer(offs);
-                tr.index = index;
-                tr.trainerclass = i;
-                tr.fullDisplayName = tcnames.get(i) + " " + tr.name;
+        trainerList = new ArrayList<>();
 
-                allTrainers.add(tr);
-                offs += trainerDataLength(tr);
+        int index = 0;
+        for (int trainerClass = 0; trainerClass < trainerClassAmount; trainerClass++) {
+
+            int pointer = readWord(trainerClassTableOffset + trainerClass * 2);
+            int offset = calculateOffset(bankOf(trainerClassTableOffset), pointer);
+
+            for (int trainerNum = 0; trainerNum < trainersPerClass[trainerClass]; trainerNum++) {
+                index++;
+                Trainer tr = readTrainer(offset);
+                tr.index = index;
+                tr.trainerclass = trainerClass;
+                tr.fullDisplayName = tcnames.get(trainerClass) + " " + tr.name;
+                trainerList.add(tr);
+
+                offset += trainerToBytes(tr).length;
             }
         }
 
-        Gen2Constants.universalTrainerTags(allTrainers);
-        if (romEntry.isCrystal) {
-            Gen2Constants.crystalTags(allTrainers);
-        } else {
-            Gen2Constants.goldSilverTags(allTrainers);
-        }
-
-        return allTrainers;
+        tagTrainers();
     }
-
 
     private Trainer readTrainer(int offset) {
         Trainer tr = new Trainer();
@@ -1214,6 +1217,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return tr;
     }
 
+    private void tagTrainers() {
+        Gen2Constants.universalTrainerTags(trainerList);
+        if (romEntry.isCrystal) {
+            Gen2Constants.crystalTags(trainerList);
+        } else {
+            Gen2Constants.goldSilverTags(trainerList);
+        }
+    }
+
     @Override
     public List<Integer> getMainPlaythroughTrainers() {
         return new ArrayList<>(); // Not implemented
@@ -1224,49 +1236,60 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
-    boolean freedInTrainerBank = false; // temporary; TODO: remove
-
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-        System.out.println("setting trainers");
-        if (!freedInTrainerBank) {
-            freeSpaceBetween(0x3B685, 0x3BFFF);
-            freedInTrainerBank = true;
+    public void setTrainers(List<Trainer> trainers, boolean doubleBattleMode) {
+        this.trainerList = trainers;
+    }
+
+    public void saveTrainers() {
+        if (trainerList == null) {
+            return;
         }
+
+        // TODO: some system to free space depending on RomEntry
+        freeSpaceBetween(0x3B685, 0x3BFFF);
 
         int trainerClassTableOffset = romEntry.getValue("TrainerDataTableOffset");
         int trainerClassAmount = romEntry.getValue("TrainerClassAmount");
         int[] trainersPerClass = romEntry.arrayEntries.get("TrainerDataClassCounts");
 
-        int[] trainerClassPointers = new int[trainerClassAmount];
-        for (int i = 0; i < trainerClassAmount; i++) {
-            int pointer = readWord(trainerClassTableOffset + i * 2);
-            trainerClassPointers[i] = calculateOffset(bankOf(trainerClassTableOffset), pointer);
-        }
-
-        Iterator<Trainer> allTrainers = trainerData.iterator();
-        for (int i = 0; i < trainerClassAmount; i++) {
-            if (trainersPerClass[i] == 0) continue;
+        Iterator<Trainer> allTrainers = getTrainers().iterator();
+        for (int trainerClassNum = 0; trainerClassNum < trainerClassAmount; trainerClassNum++) {
+            if (trainersPerClass[trainerClassNum] == 0) continue;
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-            for (int trainerNum = 0; trainerNum < trainersPerClass[i]; trainerNum++) {
+            for (int trainerNum = 0; trainerNum < trainersPerClass[trainerClassNum]; trainerNum++) {
                 Trainer tr = allTrainers.next();
-                if (tr.trainerclass != i) {
+                if (tr.trainerclass != trainerClassNum) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
                 baos.writeBytes(trainerToBytes(tr));
+                System.out.print(tr + " ");
             }
+            System.out.print("\n");
 
+            // TODO: better rewriting
             byte[] trainersOfClassBytes = baos.toByteArray();
-            int pointerOffset = trainerClassTableOffset + i * 2;
-            int pointer = readWord(trainerClassTableOffset + i * 2);
+            int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
+            int pointer = readWord(trainerClassTableOffset + trainerClassNum * 2);
             int oldOffset = calculateOffset(bankOf(trainerClassTableOffset), pointer);
-            int oldLength = trainerDataLength(readTrainer(oldOffset));
+            int oldLength = lengthOfTrainerClassAt(oldOffset, trainersPerClass[trainerClassNum]);
             freeSpace(oldOffset, oldLength);
             repointAndWriteToFreeSpaceInSameBank(pointerOffset, trainersOfClassBytes);
         }
 
+    }
+
+    private int lengthOfTrainerClassAt(int offset, int numberOfTrainers) {
+        int sum = 0;
+        for (int i = 0; i < numberOfTrainers; i++) {
+            Trainer trainer = readTrainer(offset);
+            int trainerLength = trainerToBytes(trainer).length;
+            sum += trainerLength;
+            offset += trainerLength;
+        }
+        return sum;
     }
 
     /*
@@ -1279,10 +1302,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeBytes(newOffset, data);
 
         return newOffset;
-    }
-
-    private int trainerDataLength(Trainer trainer) {
-        return trainerToBytes(trainer).length;
     }
 
     private byte[] trainerToBytes(Trainer trainer) {
