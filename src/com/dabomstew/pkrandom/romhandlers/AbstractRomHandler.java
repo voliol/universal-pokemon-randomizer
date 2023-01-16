@@ -1424,6 +1424,21 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean canAddPokemonToBossTrainers() {
+        return true;
+    }
+
+    @Override
+    public boolean canAddPokemonToImportantTrainers() {
+        return true;
+    }
+
+    @Override
+    public boolean canAddPokemonToRegularTrainers() {
+        return true;
+    }
+
+    @Override
     public void randomizeTrainerPokes(Settings settings) {
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();

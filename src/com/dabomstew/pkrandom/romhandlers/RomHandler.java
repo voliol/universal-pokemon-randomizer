@@ -280,6 +280,12 @@ public interface RomHandler {
 
     void pickTrainerMovesets(Settings settings);
 
+    boolean canAddPokemonToBossTrainers();
+
+    boolean canAddPokemonToImportantTrainers();
+
+    boolean canAddPokemonToRegularTrainers();
+
     // =========
     // Move Data
     // =========

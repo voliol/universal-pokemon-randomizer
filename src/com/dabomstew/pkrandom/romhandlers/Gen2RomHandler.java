@@ -1359,6 +1359,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean canAddPokemonToRegularTrainers() {
+        // because there isn't enough space in the bank with trainer data
+        return false;
+    }
+
+    @Override
     public List<Pokemon> getPokemon() {
         return pokemonList;
     }

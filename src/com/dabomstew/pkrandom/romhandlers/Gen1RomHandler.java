@@ -1411,6 +1411,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean canAddPokemonToBossTrainers() {
+        return false;
+    }
+
+    @Override
+    public boolean canAddPokemonToImportantTrainers() {
+        return false;
+    }
+
+    @Override
+    public boolean canAddPokemonToRegularTrainers() {
+        return false;
+    }
+
+    @Override
     public boolean isYellow() {
         return romEntry.isYellow;
     }
