@@ -25,7 +25,7 @@ effort - sketching out what a desirable end result would be.
 
 ---------------------------------------
 
-void loadX()	
+void loadXs()	
 Used to load all of X in the ROM into 
 some data structure, which can then be accessed 
 by the randomizing methods.
@@ -33,7 +33,7 @@ Somehow calls readX, directly or indirectly.
 Should only be called once per randomizing.
 E.g. loadPokemon, loadPokemonPalettes, loadTrainers.
 
-void saveX
+void saveXs()
 The reverse of loadX.
 Used to save all of X stored in some data
 structure, and which has possibly been randomized, 
@@ -68,4 +68,16 @@ If the data is compressed, returns the length
 when it is compressed. 
 If the data has terminators, they are counted 
 towards the length.
+
+---------------------------------------
+
+StructureOfX GetXs()
+Returns the internal structure containing X. 
+Should NOT read from ROM, loadX exists for that purpose.
+
+setXs(StructureOfX xs)
+Sets the internal structure containing X.
+Should NOT write to ROM, saveX exists for that purpose. 
+Honestly, this might never have a need.
+
  
