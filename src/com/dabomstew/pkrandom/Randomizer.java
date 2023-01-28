@@ -444,7 +444,7 @@ public class Randomizer {
 
 
         if (settings.isDoubleBattleMode()) {
-            romHandler.doubleBattleMode();
+            romHandler.setDoubleBattleMode();
             trainersChanged = true;
         }
 

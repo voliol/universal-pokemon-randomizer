@@ -39,6 +39,7 @@ public class Trainer implements Comparable<Trainer> {
     public int trainerclass;
     public String fullDisplayName;
     public MultiBattleStatus multiBattleStatus = MultiBattleStatus.NEVER;
+    public boolean forcedDoubleBattle; // for doubleBattleMode. Should probably be combined with multiBattleStatus.
     public int forceStarterPosition = -1;
     // Certain trainers (e.g., trainers in the PWT in BW2) require unique held items for all of their Pokemon to prevent a game crash.
     public boolean requiresUniqueHeldItems;

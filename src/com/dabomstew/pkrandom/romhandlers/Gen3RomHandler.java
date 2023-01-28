@@ -360,12 +360,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private PaletteHandler paletteHandler;
 
     // This ROM's data
+    private RomEntry romEntry;
+
     private Pokemon[] pokes, pokesInternal;
     private List<Pokemon> pokemonList;
     private int numRealPokemon;
+    private List<Trainer> trainers;
     private Move[] moves;
     private boolean jamboMovesetHack;
-    private RomEntry romEntry;
     private boolean havePatchedObedience;
     private String[] tb;
     public Map<String, Byte> d;
@@ -1759,10 +1761,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
+        if (trainers == null) {
+            loadTrainers();
+        }
+        return trainers;
+    }
+
+    private void loadTrainers() {
+        trainers = new ArrayList<>();
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
-        List<Trainer> trainers = new ArrayList<>();
         List<String> tcnames = this.getTrainerClassNames();
         for (int i = 1; i < amount; i++) {
             // Trainer entries are 40 bytes
@@ -1851,7 +1860,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Em) {
-            addMossdeepStevenTrainer(trainers, amount);
+            readMossdeepStevenTrainer();
         }
 
         if (romEntry.romType == Gen3Constants.RomType_Ruby || romEntry.romType == Gen3Constants.RomType_Sapp) {
@@ -1862,19 +1871,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else {
             Gen3Constants.trainerTagsFRLG(trainers);
         }
-        return trainers;
     }
 
     /**
-     * Adds the Mossdeep Steven battle/{@link Trainer} to a list of Trainers.
-     * @param trainers List of Trainers to add to.
-     * @param index Index of the Mossdeep Steven Trainer. Not to be confused with the offset of the data.
+     * Reads the Mossdeep Steven battle/{@link Trainer} from ROM and adds it to the end of the trainers list.
      */
-	private void addMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+	private void readMossdeepStevenTrainer() {
 		int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
 		Trainer mossdeepSteven = new Trainer();
 		mossdeepSteven.offset = mossdeepStevenOffset;
-		mossdeepSteven.index = index;
+		mossdeepSteven.index = trainers.size();
 		mossdeepSteven.poketype = 1; // Custom moves, but no held items
 
 		// This is literally how the game does it too, lol. Have to subtract one because
@@ -1919,39 +1925,45 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return Arrays.stream(romEntry.arrayEntries.get("EliteFourIndices")).boxed().collect(Collectors.toList());
     }
 
-
 	@Override
-	public void setTrainers(List<Trainer> trainers, boolean doubleBattleMode) {
-		int baseOffset = romEntry.getValue("TrainerData");
-		int amount = romEntry.getValue("TrainerCount");
-		int entryLen = romEntry.getValue("TrainerEntrySize");
-		Iterator<Trainer> trainerIterator = trainers.iterator();
-
-		for (int i = 1; i < amount; i++) {
-			int trOffset = baseOffset + i * entryLen;
-			Trainer tr = trainerIterator.next();
-			System.out.println(i + "" + tr);
-
-			// When rewriting the Pokémon data (in particular the pointer),
-			// it needs to use parts of the old trainer data - thus those are overwritten
-			// after
-			int pokemonPointerOffset = trOffset + (entryLen - 4);
-			new DataRewriter<Trainer>().rewriteData(pokemonPointerOffset, tr, this::trainerPokemonToBytes,
-					(oldDataOffset) -> readTrainerPokemonDataLength(trOffset));
-
-			writeByte(trOffset, (byte) tr.poketype);
-			writeByte(trOffset + (entryLen - 8), (byte) tr.pokemon.size());
-			if (doubleBattleMode) {
-				if (!tr.skipImportant()) {
-					writeByte(trOffset + (entryLen - 16), (byte) 0x01);
-				}
-			}
-		}
-
-		if (romEntry.romType == Gen3Constants.RomType_Em) {
-			setMossdeepStevenTrainer(trainers, amount);
-		}
+	public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
 	}
+
+    @Override
+    protected void saveTrainers() {
+        if (trainers == null) {
+            throw new IllegalStateException("Trainers are not loaded");
+        }
+
+        int baseOffset = romEntry.getValue("TrainerData");
+        int amount = romEntry.getValue("TrainerCount");
+        int entryLen = romEntry.getValue("TrainerEntrySize");
+        Iterator<Trainer> trainerIterator = trainers.iterator();
+
+        for (int i = 1; i < amount; i++) {
+            int trOffset = baseOffset + i * entryLen;
+            Trainer tr = trainerIterator.next();
+            System.out.println(i + "" + tr);
+
+            // When rewriting the Pokémon data (in particular the pointer),
+            // it needs to use parts of the old trainer data - thus those are overwritten
+            // after
+            int pokemonPointerOffset = trOffset + (entryLen - 4);
+            new DataRewriter<Trainer>().rewriteData(pokemonPointerOffset, tr, this::trainerPokemonToBytes,
+                    (oldDataOffset) -> readTrainerPokemonDataLength(trOffset));
+
+            writeByte(trOffset, (byte) tr.poketype);
+            writeByte(trOffset + (entryLen - 8), (byte) tr.pokemon.size());
+            if (tr.forcedDoubleBattle) {
+                writeByte(trOffset + (entryLen - 16), (byte) 0x01);
+            }
+        }
+
+        if (romEntry.romType == Gen3Constants.RomType_Em) {
+            writeMossdeepStevenTrainer();
+        }
+    }
 
 	private byte[] trainerPokemonToBytes(Trainer trainer) {
 		int dataSize = trainer.pokemon.size() * (trainer.pokemonHaveCustomMoves() ? 16 : 8);
@@ -2015,12 +2027,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		return pokeCount * ((pokeType & 1) == 1 ? 16 : 8);
 	}
 
-    private void setMossdeepStevenTrainer(List<Trainer> trainers, int index) {
+    /**
+     * Writes the Mossdeep Steven battle/{@link Trainer} to ROM. Assumes this is always the last trainer in
+     * trainers list.
+     */
+    private void writeMossdeepStevenTrainer() {
         // TODO: figure out how to write more properly/like the rest of the trainers
         //       As this is written, can the Mossdeep Steven
         //       trainer even have pokes added to it?
 		int mossdeepStevenOffset = romEntry.getValue("MossdeepStevenTeamOffset");
-		Trainer mossdeepSteven = trainers.get(index - 1);
+		Trainer mossdeepSteven = trainers.get(trainers.size() - 1);
 
 		for (int i = 0; i < 3; i++) {
 			int currentOffset = mossdeepStevenOffset + (i * 20);

@@ -112,7 +112,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     @Override
     public String getGameUpdateVersion() {
-        // do nothing, as DS games don't have external game updates
+        // do nothing, as GB games don't have external game updates
         return null;
     }
 
@@ -123,6 +123,17 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         long crc = FileFunctions.getCRC32(originalRom);
         logStream.println("Original ROM CRC32: " + String.format("%08X", crc));
     }
+
+    @Override
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
+        // because most other gens write the trainers to ROM each time setTrainers is used,
+        // instead of having a saveTrainers. (obviously those other gens shouldn't do that either,
+        // but code's never perfect)
+        saveTrainers();
+    }
+
+    abstract protected void saveTrainers();
 
     @Override
     public boolean canChangeStaticPokemon() {

@@ -285,7 +285,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private RomEntry romEntry;
     private Pokemon[] pokes;
     private List<Pokemon> pokemonList;
-    private List<Trainer> trainerList;
+    private List<Trainer> trainers;
     private Move[] moves;
     private boolean havePatchedFleeing;
     private String[] itemNames;
@@ -360,14 +360,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         // Not found
         return null;
-    }
-
-    @Override
-    protected void prepareSaveRom() {
-        super.prepareSaveRom();
-        // because most other gens write the trainers to ROM each time setTrainers is used,
-        // instead of having a saveTrainers. TODO: make at least the GB games use saveTrainers()
-        saveTrainers();
     }
 
     private void loadPokemonStats() {
@@ -1154,10 +1146,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
-        if (trainerList == null) {
+        if (trainers == null) {
             loadTrainers();
         }
-        return trainerList;
+        return trainers;
     }
 
     private void loadTrainers() {
@@ -1166,7 +1158,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int[] trainersPerClass = romEntry.arrayEntries.get("TrainerDataClassCounts");
         List<String> tcnames = this.getTrainerClassNames();
 
-        trainerList = new ArrayList<>();
+        trainers = new ArrayList<>();
 
         int index = 0;
         for (int trainerClass = 0; trainerClass < trainerClassAmount; trainerClass++) {
@@ -1180,7 +1172,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 tr.index = index;
                 tr.trainerclass = trainerClass;
                 tr.fullDisplayName = tcnames.get(trainerClass) + " " + tr.name;
-                trainerList.add(tr);
+                trainers.add(tr);
 
                 offset += trainerToBytes(tr).length;
             }
@@ -1218,11 +1210,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void tagTrainers() {
-        Gen2Constants.universalTrainerTags(trainerList);
+        Gen2Constants.universalTrainerTags(trainers);
         if (romEntry.isCrystal) {
-            Gen2Constants.crystalTags(trainerList);
+            Gen2Constants.crystalTags(trainers);
         } else {
-            Gen2Constants.goldSilverTags(trainerList);
+            Gen2Constants.goldSilverTags(trainers);
         }
     }
 
@@ -1237,13 +1229,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainers, boolean doubleBattleMode) {
-        this.trainerList = trainers;
+    public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
     }
 
-    public void saveTrainers() {
-        if (trainerList == null) {
-            return;
+    @Override
+    protected void saveTrainers() {
+        if (trainers == null) {
+            throw new IllegalStateException("Trainers are not loaded");
         }
 
         // TODO: some system to free space depending on RomEntry

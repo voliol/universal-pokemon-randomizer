@@ -327,9 +327,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private PaletteHandler paletteHandler;
 
     // This ROM's data
+    private RomEntry romEntry;
     private Pokemon[] pokes;
     private List<Pokemon> pokemonList;
-    private RomEntry romEntry;
+    private List<Trainer> trainers;
     private Move[] moves;
     private String[] itemNames;
     private String[] mapNames;
@@ -1269,7 +1270,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return false;
     }
 
-    public List<Trainer> getTrainers() {
+    @Override
+    public List<Trainer> getTrainers() { // TODO: this is the same in all of the GB romhandlers, can it be moved "up"?
+        if (trainers == null) {
+            loadTrainers();
+        }
+        return trainers;
+    }
+
+    private void loadTrainers() {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
@@ -1282,7 +1291,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         List<String> tcnames = getTrainerClassesForText();
 
-        List<Trainer> allTrainers = new ArrayList<>();
+        trainers = new ArrayList<>();
         int index = 0;
         for (int i = 1; i <= traineramount; i++) {
             int offs = pointers[i];
@@ -1319,16 +1328,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     }
                 }
                 offs++;
-                allTrainers.add(tr);
+                trainers.add(tr);
             }
         }
-        Gen1Constants.tagTrainersUniversal(allTrainers);
+        Gen1Constants.tagTrainersUniversal(trainers);
         if (romEntry.isYellow) {
-            Gen1Constants.tagTrainersYellow(allTrainers);
+            Gen1Constants.tagTrainersYellow(trainers);
         } else {
-            Gen1Constants.tagTrainersRB(allTrainers);
+            Gen1Constants.tagTrainersRB(trainers);
         }
-        return allTrainers;
     }
 
     @Override
@@ -1341,7 +1349,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    @Override
+    public void setTrainers(List<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
+    @Override
+    protected void saveTrainers() {
+        if (trainers == null) {
+            throw new IllegalStateException("Trainers are not loaded");
+        }
+
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
@@ -1352,12 +1370,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             pointers[i] = calculateOffset(bankOf(traineroffset), tPointer);
         }
 
-        Iterator<Trainer> allTrainers = trainerData.iterator();
+        Iterator<Trainer> trainerIterator = trainers.iterator();
         for (int i = 1; i <= traineramount; i++) {
             int offs = pointers[i];
             int limit = trainerclasslimits[i];
             for (int trnum = 0; trnum < limit; trnum++) {
-                Trainer tr = allTrainers.next();
+                Trainer tr = trainerIterator.next();
                 if (tr.trainerclass != i) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }

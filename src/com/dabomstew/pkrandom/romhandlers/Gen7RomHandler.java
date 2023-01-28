@@ -1717,7 +1717,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             GARCArchive trainers = this.readGARC(romEntry.getFile("TrainerData"),true);
@@ -1734,12 +1734,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
 
-                if (doubleBattleMode) {
-                    if (!tr.skipImportant()) {
-                        if (trainer[offset+2] == 0) {
-                            trainer[offset+2] = 1;
-                            trainer[offset+12] |= 0x8; // Flag that needs to be set for trainers not to attack their own pokes
-                        }
+                if (tr.forcedDoubleBattle) {
+                    if (trainer[offset+2] == 0) {
+                        trainer[offset+2] = 1;
+                        trainer[offset+12] |= 0x8; // Flag that needs to be set for trainers not to attack their own pokes
                     }
                 }
 

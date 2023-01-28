@@ -252,7 +252,7 @@ public interface RomHandler {
 
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
-    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
+    void setTrainers(List<Trainer> trainerData);
 
     boolean canAddPokemonToBossTrainers();
 
@@ -282,7 +282,7 @@ public interface RomHandler {
 
     void addTrainerPokemon(Settings settings);
 
-    void doubleBattleMode();
+    void setDoubleBattleMode();
 
     List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
 

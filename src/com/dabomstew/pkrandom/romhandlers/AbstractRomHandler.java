@@ -1725,7 +1725,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers);
     }
 
     @Override
@@ -1794,7 +1794,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers);
     }
 
     private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset) {
@@ -1824,7 +1824,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> currentTrainers = this.getTrainers();
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", isORAS ? 0 : 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers);
     }
 
     @Override
@@ -1851,7 +1851,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers);
     }
 
     @Override
@@ -1862,7 +1862,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t: currentTrainers) {
             applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers);
     }
 
     @Override
@@ -1922,19 +1922,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                 t.pokemon.add(secondToLastIndex, newPokemon);
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers);
     }
 
     @Override
-    public void doubleBattleMode() {
-        List<Trainer> currentTrainers = this.getTrainers();
-        for (Trainer t: currentTrainers) {
-            if (t.pokemon.size() != 1 || t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
-                continue;
+    public void setDoubleBattleMode() {
+        for (Trainer tr : getTrainers()) {
+            if (tr.pokemon.size() == 1 && tr.multiBattleStatus != Trainer.MultiBattleStatus.ALWAYS && !trainerShouldNotGetBuffs(tr)) {
+                tr.pokemon.add(tr.pokemon.get(0).copy());
             }
-            t.pokemon.add(t.pokemon.get(0).copy());
+            if (!tr.skipImportant()) {
+                tr.forcedDoubleBattle = true;
+            }
         }
-        this.setTrainers(currentTrainers, true);
+        this.setTrainers(getTrainers()); // TODO: line might have to be outside this method. "setTrainers" is bad any ways
     }
 
     private Map<Integer, List<MoveLearnt>> allLevelUpMoves;
@@ -2376,7 +2377,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        setTrainers(trainers, false);
+        setTrainers(trainers);
     }
 
     private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean doubleBattleMode) {
@@ -3657,7 +3658,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        this.setTrainers(trainers, false);
+        this.setTrainers(trainers);
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();

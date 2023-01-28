@@ -1341,16 +1341,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				// Fix starter text
 				List<String> spStrings = getStrings(romEntry.getInt("StarterScreenTextOffset"));
-				String[] intros = new String[] { "So, you like", "You’ll take", "Do you want" };
+				String[] intros = new String[] { "So, you like", "Youï¿½ll take", "Do you want" };
 				for (int i = 0; i < 3; i++) {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "Professor Elm: " + intros[i] + " \\vFF00\\z000" + color
 							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType().camelCase()
-							+ "-type Pokémon?";
+							+ "-type Pokï¿½mon?";
 					spStrings.set(i + 1, newStarterDesc);
 					String altStarterDesc = "\\vFF00\\z000" + color + newStarter.getName() + "\\vFF00\\z0000, the "
-							+ newStarter.getPrimaryType().camelCase() + "-type Pokémon, is\\nin this Poké Ball!";
+							+ newStarter.getPrimaryType().camelCase() + "-type Pokï¿½mon, is\\nin this Pokï¿½ Ball!";
 					spStrings.set(i + 4, altStarterDesc);
 				}
 				setStrings(romEntry.getInt("StarterScreenTextOffset"), spStrings);
@@ -1577,7 +1577,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.getNumber())
-							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pokémon?";
+							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pokï¿½mon?";
 					spStrings.set(i + 1, newStarterDesc);
 				}
 				// rewrite starter picking screen
@@ -1586,13 +1586,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// what rival says after we get the Pokemon
 					List<String> lakeStrings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					lakeStrings.set(Gen4Constants.dpStarterStringIndex,
-							"\\v0103\\z0000: Fwaaah!\\nYour Pokémon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people’s\\nPokémon, though...\\pBut we had to use them...\\nThey won’t mind, will they?\\p");
+							"\\v0103\\z0000: Fwaaah!\\nYour Pokï¿½mon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other peopleï¿½s\\nPokï¿½mon, though...\\pBut we had to use them...\\nThey wonï¿½t mind, will they?\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), lakeStrings);
 				} else {
 					// what rival says after we get the Pokemon
 					List<String> r201Strings = getStrings(romEntry.getInt("StarterLocationTextOffset"));
 					r201Strings.set(Gen4Constants.ptStarterStringIndex,
-							"\\v0103\\z0000\\z0000: Then, I choose you!\\nI’m picking this one!\\p");
+							"\\v0103\\z0000\\z0000: Then, I choose you!\\nIï¿½m picking this one!\\p");
 					setStrings(romEntry.getInt("StarterLocationTextOffset"), r201Strings);
 				}
 			} catch (IOException e) {
@@ -2960,7 +2960,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+	public void setTrainers(List<Trainer> trainerData) {
 		if (romEntry.romType == Gen4Constants.Type_HGSS) {
 			fixAbilitySlotValuesForHGSS(trainerData);
 		}
@@ -2984,16 +2984,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				int numPokes = tr.pokemon.size();
 				trainer[3] = (byte) numPokes;
 
-				if (doubleBattleMode) {
-					if (!tr.skipImportant()) {
-						// If we set this flag for partner trainers (e.g., Cheryl), then the double wild
-						// battles
-						// will turn into trainer battles with glitchy trainers.
-						boolean excludedPartnerTrainer = romEntry.romType != Gen4Constants.Type_HGSS
-								&& Gen4Constants.partnerTrainerIndices.contains(tr.index);
-						if (trainer[16] == 0 && !excludedPartnerTrainer) {
-							trainer[16] |= 3;
-						}
+				if (tr.forcedDoubleBattle) {
+					// If we set this flag for partner trainers (e.g., Cheryl), then the double wild
+					// battles will turn into trainer battles with glitchy trainers.
+					boolean excludedPartnerTrainer = romEntry.romType != Gen4Constants.Type_HGSS
+							&& Gen4Constants.partnerTrainerIndices.contains(tr.index);
+					if (trainer[16] == 0 && !excludedPartnerTrainer) {
+						trainer[16] |= 3;
 					}
 				}
 
@@ -3052,97 +3049,102 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			this.writeNARC(romEntry.getFile("TrainerData"), trainers);
 			this.writeNARC(romEntry.getFile("TrainerPokemon"), trpokes);
-
-			// In Gen 4, the game prioritizes showing the special double battle intro over
-			// almost any
-			// other kind of intro. Since the trainer music is tied to the intro, this
-			// results in the
-			// vast majority of "special" trainers losing their intro and music in double
-			// battle mode.
-			// To fix this, the below code patches the executable to skip the case for the
-			// special
-			// double battle intro (by changing a beq to an unconditional branch); this
-			// slightly breaks
-			// battles that are double battles in the original game, but the trade-off is
-			// worth it.
-
-			// Then, also patch various subroutines that control the "Trainer Eye" event and
-			// text boxes
-			// related to this in order to make double battles work on all trainers
-			if (doubleBattleMode) {
-				String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.romType);
-				int offset = find(arm9, doubleBattleFixPrefix);
-				if (offset > 0) {
-					offset += doubleBattleFixPrefix.length() / 2; // because it was a prefix
-					arm9[offset] = (byte) 0xE0;
-				} else {
-					throw new RandomizationException("Double Battle Mode not supported for this game");
-				}
-
-				String doubleBattleFlagReturnPrefix = romEntry.getString("DoubleBattleFlagReturnPrefix");
-				String doubleBattleWalkingPrefix1 = romEntry.getString("DoubleBattleWalkingPrefix1");
-				String doubleBattleWalkingPrefix2 = romEntry.getString("DoubleBattleWalkingPrefix2");
-				String doubleBattleTextBoxPrefix = romEntry.getString("DoubleBattleTextBoxPrefix");
-
-				// After getting the double battle flag, return immediately instead of
-				// converting it to a 1 for
-				// non-zero values/0 for zero
-				offset = find(arm9, doubleBattleFlagReturnPrefix);
-				if (offset > 0) {
-					offset += doubleBattleFlagReturnPrefix.length() / 2; // because it was a prefix
-					writeWord(arm9, offset, 0xBD08);
-				} else {
-					throw new RandomizationException("Double Battle Mode not supported for this game");
-				}
-
-				// Instead of doing "double trainer walk" for nonzero values, do it only for
-				// value == 2
-				offset = find(arm9, doubleBattleWalkingPrefix1);
-				if (offset > 0) {
-					offset += doubleBattleWalkingPrefix1.length() / 2; // because it was a prefix
-					arm9[offset] = (byte) 0x2; // cmp r0, #0x2
-					arm9[offset + 3] = (byte) 0xD0; // beq DOUBLE_TRAINER_WALK
-				} else {
-					throw new RandomizationException("Double Battle Mode not supported for this game");
-				}
-
-				// Instead of checking if the value was exactly 1 after checking that it was
-				// nonzero, check that it's
-				// 2 again lol
-				offset = find(arm9, doubleBattleWalkingPrefix2);
-				if (offset > 0) {
-					offset += doubleBattleWalkingPrefix2.length() / 2; // because it was a prefix
-					arm9[offset] = (byte) 0x2;
-				} else {
-					throw new RandomizationException("Double Battle Mode not supported for this game");
-				}
-
-				// Once again, compare a value to 2 instead of just checking that it's nonzero
-				offset = find(arm9, doubleBattleTextBoxPrefix);
-				if (offset > 0) {
-					offset += doubleBattleTextBoxPrefix.length() / 2; // because it was a prefix
-					writeWord(arm9, offset, 0x46C0);
-					writeWord(arm9, offset + 2, 0x2802);
-					arm9[offset + 5] = (byte) 0xD0;
-				} else {
-					throw new RandomizationException("Double Battle Mode not supported for this game");
-				}
-
-				// This NARC has some data that controls how text boxes are handled at the end
-				// of a trainer battle.
-				// Changing this byte from 4 -> 0 makes it check if the "double battle" flag is
-				// exactly 2 instead of
-				// checking "flag & 2", which makes the single trainer double battles use the
-				// single battle
-				// handling (since we set their flag to 3 instead of 2)
-				NARCArchive battleSkillSubSeq = readNARC(romEntry.getFile("BattleSkillSubSeq"));
-				byte[] trainerEndFile = battleSkillSubSeq.files.get(romEntry.getInt("TrainerEndFileNumber"));
-				trainerEndFile[romEntry.getInt("TrainerEndTextBoxOffset")] = 0;
-				writeNARC(romEntry.getFile("BattleSkillSubSeq"), battleSkillSubSeq);
-
-			}
 		} catch (IOException ex) {
 			throw new RandomizerIOException(ex);
+		}
+	}
+
+	@Override
+	public void setDoubleBattleMode() {
+		super.setDoubleBattleMode();
+		// In Gen 4, the game prioritizes showing the special double battle intro over
+		// almost any
+		// other kind of intro. Since the trainer music is tied to the intro, this
+		// results in the
+		// vast majority of "special" trainers losing their intro and music in double
+		// battle mode.
+		// To fix this, the below code patches the executable to skip the case for the
+		// special
+		// double battle intro (by changing a beq to an unconditional branch); this
+		// slightly breaks
+		// battles that are double battles in the original game, but the trade-off is
+		// worth it.
+
+		// Then, also patch various subroutines that control the "Trainer Eye" event and
+		// text boxes
+		// related to this in order to make double battles work on all trainers
+		try {
+			String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.romType);
+			int offset = find(arm9, doubleBattleFixPrefix);
+			if (offset > 0) {
+				offset += doubleBattleFixPrefix.length() / 2; // because it was a prefix
+				arm9[offset] = (byte) 0xE0;
+			} else {
+				throw new RandomizationException("Double Battle Mode not supported for this game");
+			}
+
+			String doubleBattleFlagReturnPrefix = romEntry.getString("DoubleBattleFlagReturnPrefix");
+			String doubleBattleWalkingPrefix1 = romEntry.getString("DoubleBattleWalkingPrefix1");
+			String doubleBattleWalkingPrefix2 = romEntry.getString("DoubleBattleWalkingPrefix2");
+			String doubleBattleTextBoxPrefix = romEntry.getString("DoubleBattleTextBoxPrefix");
+
+			// After getting the double battle flag, return immediately instead of
+			// converting it to a 1 for
+			// non-zero values/0 for zero
+			offset = find(arm9, doubleBattleFlagReturnPrefix);
+			if (offset > 0) {
+				offset += doubleBattleFlagReturnPrefix.length() / 2; // because it was a prefix
+				writeWord(arm9, offset, 0xBD08);
+			} else {
+				throw new RandomizationException("Double Battle Mode not supported for this game");
+			}
+
+			// Instead of doing "double trainer walk" for nonzero values, do it only for
+			// value == 2
+			offset = find(arm9, doubleBattleWalkingPrefix1);
+			if (offset > 0) {
+				offset += doubleBattleWalkingPrefix1.length() / 2; // because it was a prefix
+				arm9[offset] = (byte) 0x2; // cmp r0, #0x2
+				arm9[offset + 3] = (byte) 0xD0; // beq DOUBLE_TRAINER_WALK
+			} else {
+				throw new RandomizationException("Double Battle Mode not supported for this game");
+			}
+
+			// Instead of checking if the value was exactly 1 after checking that it was
+			// nonzero, check that it's
+			// 2 again lol
+			offset = find(arm9, doubleBattleWalkingPrefix2);
+			if (offset > 0) {
+				offset += doubleBattleWalkingPrefix2.length() / 2; // because it was a prefix
+				arm9[offset] = (byte) 0x2;
+			} else {
+				throw new RandomizationException("Double Battle Mode not supported for this game");
+			}
+
+			// Once again, compare a value to 2 instead of just checking that it's nonzero
+			offset = find(arm9, doubleBattleTextBoxPrefix);
+			if (offset > 0) {
+				offset += doubleBattleTextBoxPrefix.length() / 2; // because it was a prefix
+				writeWord(arm9, offset, 0x46C0);
+				writeWord(arm9, offset + 2, 0x2802);
+				arm9[offset + 5] = (byte) 0xD0;
+			} else {
+				throw new RandomizationException("Double Battle Mode not supported for this game");
+			}
+
+			// This NARC has some data that controls how text boxes are handled at the end
+			// of a trainer battle.
+			// Changing this byte from 4 -> 0 makes it check if the "double battle" flag is
+			// exactly 2 instead of
+			// checking "flag & 2", which makes the single trainer double battles use the
+			// single battle
+			// handling (since we set their flag to 3 instead of 2)
+			NARCArchive battleSkillSubSeq = readNARC(romEntry.getFile("BattleSkillSubSeq"));
+			byte[] trainerEndFile = battleSkillSubSeq.files.get(romEntry.getInt("TrainerEndFileNumber"));
+			trainerEndFile[romEntry.getInt("TrainerEndTextBoxOffset")] = 0;
+			writeNARC(romEntry.getFile("BattleSkillSubSeq"), battleSkillSubSeq);
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
 		}
 	}
 
