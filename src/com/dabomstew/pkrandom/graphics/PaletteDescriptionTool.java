@@ -74,8 +74,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
  * A developer tool for filling in files with {@link PaletteDescription}s, and
  * see how each related image looks with accordingly randomized palettes.
  * <p>
- * Which file to fill is decided automatically, depending on the
- * {@link Gen3to5PaletteHandler#paletteFilesID} assigned.
+ * Which file to fill is decided automatically, depending on the paletteFilesID assigned.
  * <p>
  * Currently only works for Pokémon palettes.
  */
