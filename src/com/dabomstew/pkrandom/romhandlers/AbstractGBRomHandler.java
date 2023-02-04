@@ -37,6 +37,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
@@ -250,21 +251,41 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
      * Both end points included.
      */
     protected void freeSpaceBetween(int start, int end) {
-        freeSpace(start, end-start);
+        freeSpace(start, end - start);
     }
 
-    // TODO: do something about long alignment (if something needs to be done about it)
 	protected int findAndUnfreeSpace(int length) {
-		int foundOffset;
-		do {
-			foundOffset = getFreedSpace().findAndUnfree(length);
-		} while (isRomSpaceUsed(foundOffset, length));
-
-		if (foundOffset == -1) {
-			throw new RandomizerIOException("ROM full.");
-		}
-		return foundOffset;
+        return findAndUnfreeSpace(length, true);
 	}
+
+    /**
+     * At least Pokémon palettes in R/S/FR/LG need to be long aligned,
+     * probably more types of data than that though. If they are not long aligned,
+     * the games soft-lock and/or crash, which isn't fun to debug.
+     * If you aren't very sure about not needing to long-align, don't use this method directly.
+     *
+     * @param length The number of bytes to find space for.
+     * @param longAligned Does the found adress need to be long-aligned?
+     */
+    protected int findAndUnfreeSpace(int length, boolean longAligned) {
+        int foundOffset;
+        length += longAligned ? GBConstants.longSize : 0;
+        do {
+            foundOffset = getFreedSpace().findAndUnfree(length);
+        } while (isRomSpaceUsed(foundOffset, length));
+
+        if (foundOffset == -1) {
+            throw new RandomizerIOException("ROM full.");
+        }
+
+        if (longAligned) {
+            int shift = GBConstants.longSize - (foundOffset % GBConstants.longSize);
+            shift = shift == GBConstants.longSize ? 0 : shift;
+            freeSpace(foundOffset + length - (4 - shift), 4 - shift);
+            foundOffset += shift;
+        }
+        return foundOffset;
+    }
 
 	protected boolean isRomSpaceUsed(int offset, int length) {
 		if (offset < 0)

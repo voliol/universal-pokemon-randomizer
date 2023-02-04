@@ -36,6 +36,8 @@ public class GBConstants {
 
     public static final int minRomSize = 0x80000, maxRomSize = 0x200000;
 
+    public static final int longSize = 4; // at least for GBA, probably for GB and GBC as well
+
     public static final int jpFlagOffset = 0x14A, versionOffset = 0x14C, crcOffset = 0x14E, romSigOffset = 0x134,
             isGBCOffset = 0x143, romCodeOffset = 0x13F;
 
