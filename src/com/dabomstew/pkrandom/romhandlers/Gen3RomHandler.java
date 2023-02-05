@@ -2563,7 +2563,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		writeTMMoves(moveIndexes);
 		writeTMItemPalettes(moveIndexes);
 		writeTMItemText(moveIndexes);
-		writeTMText(moveIndexes);
+		writeTMOrMTText(moveIndexes, false);
 	}
 
 	private void writeTMMoves(List<Integer> moveIndexes) {
@@ -2619,39 +2619,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			}
 		}
 		return false;
-	}
-
-	private void writeTMText(List<Integer> moveIndexes) {
-		// TM Text?
-		for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
-			if (tte.actualOffset > 0 && !tte.isMoveTutor) {
-				// create the new TM text
-				int oldPointer = readPointer(tte.actualOffset);
-				if (oldPointer < 0 || oldPointer >= rom.length) {
-					String nl = System.getProperty("line.separator");
-					log("Couldn't insert new TM text. Skipping remaining TM text updates." + nl);
-					return;
-				}
-				String moveName = this.moves[moveIndexes.get(tte.number - 1)].name;
-				// temporarily use underscores to stop the move name being split
-				String tmpMoveName = moveName.replace(' ', '_');
-				String unformatted = tte.template.replace("[move]", tmpMoveName);
-				String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n", "\\l", "\\p",
-						Gen3Constants.regularTextboxCharsPerLine, ssd);
-				// get rid of the underscores
-				newText = newText.replace(tmpMoveName, moveName);
-
-				int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
-				try {
-					System.out.println(Arrays.toString(secondaryPointerOffsets) + " " + tte.actualOffset);
-					rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
-				} catch (RandomizerIOException e) {
-					String nl = System.getProperty("line.separator");
-					log("Couldn't insert new TM text. " + e.getMessage() + nl);
-					return;
-				}
-			}
-		}
 	}
 
 	private int[] searchForPointerCopies(int pointerOffset) {
@@ -2726,38 +2693,48 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
 	@Override
-	public void setMoveTutorMoves(List<Integer> moves) {
+	public void setMoveTutorMoves(List<Integer> moveIndexes) {
 		if (!hasMoveTutors()) {
 			return;
 		}
-		int moveCount = romEntry.getValue("MoveTutorMoves");
-		int offset = romEntry.getValue("MoveTutorData");
-		if (moveCount != moves.size()) {
-			return;
-		}
-		for (int i = 0; i < moveCount; i++) {
-			writeWord(offset + i * 2, moves.get(i));
-		}
-
-		writeMoveTutorText(moves);
+        writeMoveTutorMoves(moveIndexes);
+        writeTMOrMTText(moveIndexes, true);
 	}
 
-	private void writeMoveTutorText(List<Integer> moves) { // TODO: very similar to writeTMText - merge?
-		// Move Tutor Text?
+    private void writeMoveTutorMoves(List<Integer> moveIndexes) {
+        int moveCount = romEntry.getValue("MoveTutorMoves");
+        int offset = romEntry.getValue("MoveTutorData");
+        if (moveCount != moveIndexes.size()) {
+            throw new IllegalArgumentException("Wrong amount of move tutor moves.");
+        }
+        for (int i = 0; i < moveCount; i++) {
+            writeWord(offset + i * 2, moveIndexes.get(i));
+        }
+    }
+
+    /**
+     * Writes the (event?) text for TM or move tutor moves.
+     * @param moveIndexes A list of move indexes
+     * @param moveTutor false: TM / true: Move tutor
+     */
+    private void writeTMOrMTText(List<Integer> moveIndexes, boolean moveTutor) {
+        String nl = System.getProperty("line.separator"); // TODO: should just "/n" do?
+        String desc = moveTutor ? "Move Tutor" : "TM";
 		for (TMOrMTTextEntry tte : romEntry.tmmtTexts) {
-			if (tte.actualOffset > 0 && tte.isMoveTutor) {
-				// create the new MT text
+			if (tte.actualOffset > 0 && (tte.isMoveTutor == moveTutor)) {
+				// create the new text
 				int oldPointer = readPointer(tte.actualOffset);
 				if (oldPointer < 0 || oldPointer >= rom.length) {
-					throw new RandomizationException(
-							"Move Tutor Text update failed: couldn't read a move tutor text pointer.");
+                    log("Move Tutor Text update failed: couldn't read a " + desc + " text pointer." + nl);
+                    return;
 				}
-				String moveName = this.moves[moves.get(tte.number)].name;
+                int moveIndex = moveIndexes.get(moveTutor ? tte.number : tte.number - 1);
+				String moveName = this.moves[moveIndex].name;
 				// temporarily use underscores to stop the move name being split
 				String tmpMoveName = moveName.replace(' ', '_');
 				String unformatted = tte.template.replace("[move]", tmpMoveName);
-				String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n", "\\l", "\\p",
-						Gen3Constants.regularTextboxCharsPerLine, ssd);
+				String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n",
+                        "\\l", "\\p", Gen3Constants.regularTextboxCharsPerLine, ssd);
 				// get rid of the underscores
 				newText = newText.replace(tmpMoveName, moveName);
 
@@ -2765,8 +2742,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				try {
 					rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
 				} catch (RandomizerIOException e) {
-					String nl = System.getProperty("line.separator");
-					log("Couldn't insert new Move Tutor text. " + e.getMessage() + nl);
+					log("Couldn't insert new " + desc + " text. " + e.getMessage() + nl);
 					return;
 				}
 

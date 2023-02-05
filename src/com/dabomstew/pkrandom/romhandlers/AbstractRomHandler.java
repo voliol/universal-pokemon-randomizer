@@ -1935,7 +1935,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 tr.forcedDoubleBattle = true;
             }
         }
-        this.setTrainers(getTrainers()); // TODO: line might have to be outside this method. "setTrainers" is bad any ways
+        this.setTrainers(getTrainers());
+        // TODO: line above might have to be outside this method, otherwise subclasses calling
+        //  super.setDoubleBattleMode() will only get saved if they don't depend on a setTrainers() after.
+        //  Though "setTrainers" is bad any ways; "saveTrainers" is preferred.
     }
 
     private Map<Integer, List<MoveLearnt>> allLevelUpMoves;
