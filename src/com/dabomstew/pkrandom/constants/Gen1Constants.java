@@ -47,6 +47,8 @@ public class Gen1Constants {
 
     public static final int champRivalOffsetFromGymLeaderMoves = 0x44;
 
+    public static final int pokemonCount = 151;
+
     public static final int tmCount = 50, hmCount = 5;
 
     public static final int[] gymLeaderTMs = new int[] { 34, 11, 24, 21, 6, 46, 38, 27 };

@@ -97,6 +97,10 @@ public interface RomHandler {
     
     PokemonSet<Pokemon> getPokemonSetInclFormes();
 
+    PokemonSet<Pokemon> getRestrictedPokemon();
+
+    PokemonSet<Pokemon> getRestrictedPokemonInclAltFormes();
+
     List<MegaEvolution> getMegaEvolutions();
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);

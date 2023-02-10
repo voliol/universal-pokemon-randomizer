@@ -299,6 +299,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 	    return new PokemonSet<>(getPokemonInclFormes()); // TODO: unmodifiable?
 	}
 
+    @Override
+    public PokemonSet<Pokemon> getRestrictedPokemon() {
+        checkPokemonRestrictions();
+        return restrictedPokemon;
+    }
+
+    @Override
+    public PokemonSet<Pokemon> getRestrictedPokemonInclAltFormes() {
+        checkPokemonRestrictions();
+        return restrictedPokemonInclAltFormes;
+    }
+
 	private PokemonSet<Pokemon> getRestrictedPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
 	    PokemonSet<Pokemon> allowedPokes = new PokemonSet<>();
 	    if (allowAltFormes) {

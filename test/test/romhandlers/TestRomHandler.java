@@ -31,14 +31,6 @@ public class TestRomHandler extends AbstractRomHandler {
 
     }
 
-    public PokemonSet<Pokemon> getRestrictedPokemon() {
-        return restrictedPokemon;
-    }
-
-    public PokemonSet<Pokemon> getRestrictedPokemonInclAltFormes() {
-        return restrictedPokemonInclAltFormes;
-    }
-
     @Override
     public boolean loadRom(String filename) {
         return false;
