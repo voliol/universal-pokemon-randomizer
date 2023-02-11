@@ -171,6 +171,7 @@ public class RomHandlerTest {
         Settings settings = new Settings();
         settings.setLimitPokemon(true);
         settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[] {1}));
+        // except for the above line's "relativesAllowed: true", identical to the "WithNoRelatives" method...
 
         romHandler.setPokemonPool(settings);
         for (Pokemon pk : romHandler.getRestrictedPokemon()) {
@@ -190,7 +191,32 @@ public class RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getROMNames")
     public void restrictedPokemonWithRelativesAlwaysContainsRelatedPokemonFromWrongGeneration(String romName) {
-        fail();
+        loadROM(romName);
+        assumeTrue(romHandler.generationOfPokemon() >= 2);
+
+        Settings settings = new Settings();
+        settings.setLimitPokemon(true);
+        settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[] {1}));
+
+        romHandler.setPokemonPool(settings);
+        PokemonSet<Pokemon> restrictedPokemon = romHandler.getRestrictedPokemon();
+        for (Pokemon pk : restrictedPokemon) {
+            PokemonSet<Pokemon> related = PokemonSet.related(pk);
+            Pokemon fromRightGen = null;
+            Pokemon fromWrongGen = null;
+            for (Pokemon relative : related) {
+                if (relative.getNumber() <= Gen1Constants.pokemonCount) {
+                    fromRightGen = relative;
+                } else {
+                    fromWrongGen = relative;
+                }
+            }
+            if (fromRightGen != null && fromWrongGen != null) {
+                assertTrue(restrictedPokemon.contains(fromWrongGen), fromWrongGen.getName() + " is missing from " +
+                        "restrictedPokemon. It is from the wrong Gen, though as it is related to " + fromRightGen.getName() +
+                        " from the right (Gen I), it is allowed.");
+            }
+        }
     }
 
     private GenRestrictions genRestrictionsFromBools(boolean relativesAllowed, int[] gensAllowed) {
