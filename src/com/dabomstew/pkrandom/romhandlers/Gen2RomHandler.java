@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.config.RomInfoReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Gen2PaletteHandler;
@@ -145,25 +146,25 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
                                 TMTextEntry tte = new TMTextEntry();
-                                tte.number = parseRIInt(parts[0]);
-                                tte.offset = parseRIInt(parts[1]);
+                                tte.number = RomInfoReader.parseInt(parts[0]);
+                                tte.offset = RomInfoReader.parseInt(parts[1]);
                                 tte.template = parts[2];
                                 current.tmTexts.add(tte);
                             }
                         } else if (r[0].equals("Game")) {
                             current.romCode = r[1];
                         } else if (r[0].equals("Version")) {
-                            current.version = parseRIInt(r[1]);
+                            current.version = RomInfoReader.parseInt(r[1]);
                         } else if (r[0].equals("NonJapanese")) {
-                            current.nonJapanese = parseRIInt(r[1]);
+                            current.nonJapanese = RomInfoReader.parseInt(r[1]);
                         } else if (r[0].equals("Type")) {
                             current.isCrystal = r[1].equalsIgnoreCase("Crystal");
                         } else if (r[0].equals("ExtraTableFile")) {
                             current.extraTableFile = r[1];
                         } else if (r[0].equals("CRCInHeader")) {
-                            current.crcInHeader = parseRIInt(r[1]);
+                            current.crcInHeader = RomInfoReader.parseInt(r[1]);
                         } else if (r[0].equals("CRC32")) {
-                            current.expectedCRC32 = parseRILong("0x" + r[1]);
+                            current.expectedCRC32 = RomInfoReader.parseLong("0x" + r[1]);
                         } else if (r[0].endsWith("Tweak")) {
                             current.codeTweaks.put(r[0], r[1]);
                         } else if (r[0].equals("CopyFrom")) {
@@ -200,12 +201,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                                     int[] offs = new int[offsets.length];
                                     int c = 0;
                                     for (String off : offsets) {
-                                        offs[c++] = parseRIInt(off);
+                                        offs[c++] = RomInfoReader.parseInt(off);
                                     }
                                     current.arrayEntries.put(r[0], offs);
                                 }
                             } else {
-                                int offs = parseRIInt(r[1]);
+                                int offs = RomInfoReader.parseInt(r[1]);
                                 current.entries.put(r[0], offs);
                             }
                         }
@@ -234,7 +235,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
             int[] offsets = new int[romOffsets.length];
             for (int i = 0; i < offsets.length; i++) {
-                offsets[i] = parseRIInt(romOffsets[i]);
+                offsets[i] = RomInfoReader.parseInt(romOffsets[i]);
             }
             switch (segments[0]) {
                 case "Species":
@@ -246,36 +247,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
         return sp;
-    }
-
-    private static int parseRIInt(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Integer.parseInt(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
-    }
-
-    private static long parseRILong(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Long.parseLong(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
     }
     
     // Sub-handlers

@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.config.RomInfoReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -174,11 +175,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 6);
                                 TMOrMTTextEntry tte = new TMOrMTTextEntry();
-                                tte.number = parseRIInt(parts[0]);
-                                tte.mapBank = parseRIInt(parts[1]);
-                                tte.mapNumber = parseRIInt(parts[2]);
-                                tte.personNum = parseRIInt(parts[3]);
-                                tte.offsetInScript = parseRIInt(parts[4]);
+                                tte.number = RomInfoReader.parseInt(parts[0]);
+                                tte.mapBank = RomInfoReader.parseInt(parts[1]);
+                                tte.mapNumber = RomInfoReader.parseInt(parts[2]);
+                                tte.personNum = RomInfoReader.parseInt(parts[3]);
+                                tte.offsetInScript = RomInfoReader.parseInt(parts[4]);
                                 tte.template = parts[5];
                                 tte.isMoveTutor = false;
                                 current.tmmtTexts.add(tte);
@@ -187,11 +188,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 6);
                                 TMOrMTTextEntry tte = new TMOrMTTextEntry();
-                                tte.number = parseRIInt(parts[0]);
-                                tte.mapBank = parseRIInt(parts[1]);
-                                tte.mapNumber = parseRIInt(parts[2]);
-                                tte.personNum = parseRIInt(parts[3]);
-                                tte.offsetInScript = parseRIInt(parts[4]);
+                                tte.number = RomInfoReader.parseInt(parts[0]);
+                                tte.mapBank = RomInfoReader.parseInt(parts[1]);
+                                tte.mapNumber = RomInfoReader.parseInt(parts[2]);
+                                tte.personNum = RomInfoReader.parseInt(parts[3]);
+                                tte.offsetInScript = RomInfoReader.parseInt(parts[4]);
                                 tte.template = parts[5];
                                 tte.isMoveTutor = true;
                                 current.tmmtTexts.add(tte);
@@ -199,7 +200,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         } else if (r[0].equals("Game")) {
                             current.romCode = r[1];
                         } else if (r[0].equals("Version")) {
-                            current.version = parseRIInt(r[1]);
+                            current.version = RomInfoReader.parseInt(r[1]);
                         } else if (r[0].equals("Type")) {
                             if (r[1].equalsIgnoreCase("Ruby")) {
                                 current.romType = Gen3Constants.RomType_Ruby;
@@ -215,10 +216,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         } else if (r[0].equals("TableFile")) {
                             current.tableFile = r[1];
                         } else if (r[0].equals("CopyStaticPokemon")) {
-                            int csp = parseRIInt(r[1]);
+                            int csp = RomInfoReader.parseInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
                         } else if (r[0].equals("CRC32")) {
-                            current.expectedCRC32 = parseRILong("0x" + r[1]);
+                            current.expectedCRC32 = RomInfoReader.parseLong("0x" + r[1]);
                         } else if (r[0].endsWith("Tweak")) {
                             current.codeTweaks.put(r[0], r[1]);
                         } else if (r[0].equals("CopyFrom")) {
@@ -253,12 +254,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                     int[] offs = new int[offsets.length];
                                     int c = 0;
                                     for (String off : offsets) {
-                                        offs[c++] = parseRIInt(off);
+                                        offs[c++] = RomInfoReader.parseInt(off);
                                     }
                                     current.arrayEntries.put(r[0], offs);
                                 }
                             } else {
-                                int offs = parseRIInt(r[1]);
+                                int offs = RomInfoReader.parseInt(r[1]);
                                 current.entries.put(r[0], offs);
                             }
                         }
@@ -272,36 +273,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    private static int parseRIInt(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Integer.parseInt(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
-    }
-
-    private static long parseRILong(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Long.parseLong(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
-    }
-
     private static StaticPokemon parseStaticPokemon(String staticPokemonString) {
         StaticPokemon sp = new StaticPokemon();
         String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
@@ -312,7 +283,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
             int[] offsets = new int [romOffsets.length];
             for (int i = 0; i < offsets.length; i++) {
-                offsets[i] = parseRIInt(romOffsets[i]);
+                offsets[i] = RomInfoReader.parseInt(romOffsets[i]);
             }
             switch (segments[0]) {
                 case "Species":

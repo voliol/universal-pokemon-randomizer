@@ -40,10 +40,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.config.RomInfoReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -142,125 +144,84 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         private String template;
     }
 
+    public static void main(String[] args) {
+        System.out.println(roms);
+    }
+
     private static void loadROMInfo() {
         roms = new ArrayList<>();
-        Gen1RomEntry current = null;
-        try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen1_offsets.ini"), "UTF-8");
-            while (sc.hasNextLine()) {
-                String q = sc.nextLine().trim();
-                if (q.contains("//")) {
-                    q = q.substring(0, q.indexOf("//")).trim();
-                }
-                if (!q.isEmpty()) {
-                    if (q.startsWith("[") && q.endsWith("]")) {
-                        // New rom
-                        current = new Gen1RomEntry(q.substring(1, q.length() - 1));
-                        roms.add(current);
-                    } else {
-                        String[] r = q.split("=", 2);
-                        if (r.length == 1) {
-                            System.err.println("invalid entry " + q);
-                            continue;
-                        }
-                        if (r[1].endsWith("\r\n")) {
-                            r[1] = r[1].substring(0, r[1].length() - 2);
-                        }
-                        r[1] = r[1].trim();
-                        r[0] = r[0].trim();
-                        // Static Pokemon?
-                        if (r[0].equals("StaticPokemon{}")) {
-                            current.staticPokemon.add(parseStaticPokemon(r[1]));
-                        } else if (r[0].equals("StaticPokemonGhostMarowak{}")) {
-                            StaticPokemon ghostMarowak = parseStaticPokemon(r[1]);
-                            current.staticPokemon.add(ghostMarowak);
-                            current.ghostMarowakOffsets = ghostMarowak.speciesOffsets;
-                        } else if (r[0].equals("TMText[]")) {
-                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 3);
-                                TMTextEntry tte = new TMTextEntry();
-                                tte.number = parseRIInt(parts[0]);
-                                tte.offset = parseRIInt(parts[1]);
-                                tte.template = parts[2];
-                                current.tmTexts.add(tte);
-                            }
-                        } else if (r[0].equals("Game")) {
-                            current.setRomCode(r[1]);
-                        } else if (r[0].equals("Version")) {
-                            current.version = parseRIInt(r[1]);
-                        } else if (r[0].equals("NonJapanese")) {
-                            current.nonJapanese = parseRIInt(r[1]);
-                        } else if (r[0].equals("Type")) {
-                            current.isYellow = r[1].equalsIgnoreCase("Yellow");
-                        } else if (r[0].equals("ExtraTableFile")) {
-                            current.extraTableFile = r[1];
-                        } else if (r[0].equals("CRCInHeader")) {
-                            current.crcInHeader = parseRIInt(r[1]);
-                        } else if (r[0].equals("CRC32")) {
-                            current.expectedCRC32 = parseRILong("0x" + r[1]);
-                        } else if (r[0].endsWith("Tweak")) {
-                            current.tweakFiles.put(r[0], r[1]);
-                        } else if (r[0].equals("ExtraTypes")) {
-                            // remove the containers
-                            r[1] = r[1].substring(1, r[1].length() - 1);
-                            String[] parts = r[1].split(",");
-                            for (String part : parts) {
-                                String[] iParts = part.split("=");
-                                int typeId = Integer.parseInt(iParts[0], 16);
-                                String typeName = iParts[1].trim();
-                                Type theType = Type.valueOf(typeName);
-                                current.extraTypeLookup.put(typeId, theType);
-                                current.extraTypeReverse.put(theType, typeId);
-                            }
-                        } else if (r[0].equals("CopyFrom")) {
-                            for (Gen1RomEntry otherEntry : roms) {
-                                if (r[1].equalsIgnoreCase(otherEntry.getName())) {
-                                    // copy from here
-                                    boolean cSP = (current.getIntValue("CopyStaticPokemon") == 1);
-                                    boolean cTT = (current.getIntValue("CopyTMText") == 1);
-                                    current.arrayEntries.putAll(otherEntry.arrayEntries);
-                                    current.entries.putAll(otherEntry.entries);
-                                    if (cSP) {
-                                        current.staticPokemon.addAll(otherEntry.staticPokemon);
-                                        current.ghostMarowakOffsets = otherEntry.ghostMarowakOffsets;
-                                        current.entries.put("StaticPokemonSupport", 1);
-                                    } else {
-                                        current.entries.put("StaticPokemonSupport", 0);
-                                    }
-                                    if (cTT) {
-                                        current.tmTexts.addAll(otherEntry.tmTexts);
-                                    }
-                                    current.extraTableFile = otherEntry.extraTableFile;
-                                }
-                            }
-                        } else {
-                            if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                                String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                                if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
-                                    current.arrayEntries.put(r[0], new int[0]);
-                                } else {
-                                    int[] offs = new int[offsets.length];
-                                    int c = 0;
-                                    for (String off : offsets) {
-                                        offs[c++] = parseRIInt(off);
-                                    }
-                                    current.arrayEntries.put(r[0], offs);
-                                }
-
-                            } else {
-                                int offs = parseRIInt(r[1]);
-                                current.entries.put(r[0], offs);
-                            }
-                        }
-                    }
-                }
+        Map<String, BiConsumer<Gen1RomEntry, String>> specialKeyMethods = new HashMap<>();
+        specialKeyMethods.put("Game", RomEntry::setRomCode);
+        specialKeyMethods.put("Version", (current, value) -> current.version = RomInfoReader.parseInt(value));
+        specialKeyMethods.put("NonJapanese", (current, value) -> current.nonJapanese = RomInfoReader.parseInt(value));
+        specialKeyMethods.put("Type", (current, value) -> current.isYellow = value.equalsIgnoreCase("Yellow"));
+        specialKeyMethods.put("ExtraTableFile", (current, value) -> current.extraTableFile = value);
+        specialKeyMethods.put("CRCInHeader", (current, value) -> current.crcInHeader = RomInfoReader.parseInt(value));
+        specialKeyMethods.put("CRC32", (current, value) -> current.expectedCRC32 = RomInfoReader.parseLong("0x" + value));
+        specialKeyMethods.put("StaticPokemon{}", (current, value) ->
+                current.staticPokemon.add(parseStaticPokemon(value)));
+        specialKeyMethods.put("StaticPokemonGhostMarowak{}", (current, value) -> {
+            StaticPokemon ghostMarowak = parseStaticPokemon(value);
+            current.staticPokemon.add(ghostMarowak);
+            current.ghostMarowakOffsets = ghostMarowak.speciesOffsets;
+        });
+        specialKeyMethods.put("TMText[]", (current, value) -> {
+            if (value.startsWith("[") && value.endsWith("]")) {
+                String[] parts = value.substring(1, value.length() - 1).split(",", 3);
+                TMTextEntry tte = new TMTextEntry();
+                tte.number = RomInfoReader.parseInt(parts[0]);
+                tte.offset = RomInfoReader.parseInt(parts[1]);
+                tte.template = parts[2];
+                current.tmTexts.add(tte);
             }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found!");
-        }
+        });
+        specialKeyMethods.put("ExtraTypes", (current, value) -> {
+            // remove the containers
+            value = value.substring(1, value.length() - 1);
+            String[] parts = value.split(",");
+            for (String part : parts) {
+                String[] iParts = part.split("=");
+                int typeId = Integer.parseInt(iParts[0], 16);
+                String typeName = iParts[1].trim();
+                Type theType = Type.valueOf(typeName);
+                current.extraTypeLookup.put(typeId, theType);
+                current.extraTypeReverse.put(theType, typeId);
+            }
+        });
 
+        try {
+            RomInfoReader<Gen1RomEntry> rir = new RomInfoReader<>("gen1_offsets.ini", Gen1RomEntry::new,
+                    specialKeyMethods);
+            rir.readAllRomEntries(roms);
+        } catch (IOException e) {
+            // TODO proper error messaging
+            e.printStackTrace();
+        }
     }
+
+    // TODO: "CopyFrom"
+//                        } else if (r[0].equals("CopyFrom")) {
+//                            for (Gen1RomEntry otherEntry : roms) {
+//                                if (r[1].equalsIgnoreCase(otherEntry.getName())) {
+//                                    // copy from here
+//                                    boolean cSP = (current.getIntValue("CopyStaticPokemon") == 1);
+//                                    boolean cTT = (current.getIntValue("CopyTMText") == 1);
+//                                    current.arrayValues.putAll(otherEntry.arrayValues);
+//                                    current.entries.putAll(otherEntry.entries);
+//                                    if (cSP) {
+//                                        current.staticPokemon.addAll(otherEntry.staticPokemon);
+//                                        current.ghostMarowakOffsets = otherEntry.ghostMarowakOffsets;
+//                                        current.entries.put("StaticPokemonSupport", 1);
+//                                    } else {
+//                                        current.entries.put("StaticPokemonSupport", 0);
+//                                    }
+//                                    if (cTT) {
+//                                        current.tmTexts.addAll(otherEntry.tmTexts);
+//                                    }
+//                                    current.extraTableFile = otherEntry.extraTableFile;
+//                                }
+//                            }
+//                        }
 
     private static StaticPokemon parseStaticPokemon(String staticPokemonString) {
         StaticPokemon sp = new StaticPokemon();
@@ -272,7 +233,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
             int[] offsets = new int [romOffsets.length];
             for (int i = 0; i < offsets.length; i++) {
-                offsets[i] = parseRIInt(romOffsets[i]);
+                offsets[i] = RomInfoReader.parseInt(romOffsets[i]);
             }
             switch (segments[0]) {
                 case "Species":
@@ -284,36 +245,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             }
         }
         return sp;
-    }
-
-    private static int parseRIInt(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Integer.parseInt(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
-    }
-
-    private static long parseRILong(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Long.parseLong(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
     }
     
     // Sub-handlers

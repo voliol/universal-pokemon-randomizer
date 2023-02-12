@@ -7,9 +7,10 @@ public abstract class RomEntry {
     protected final String name;
     protected String romCode;
     protected int romType;
-    protected Map<String, Integer> intEntries = new HashMap<>();
-    protected Map<String, String> stringEntries = new HashMap<>();
-    protected Map<String, int[]> arrayEntries = new HashMap<>();
+    protected Map<String, Integer> intValues = new HashMap<>();
+    protected Map<String, String> stringValues = new HashMap<>();
+    protected Map<String, int[]> arrayValues = new HashMap<>();
+    protected Map<String, String> tweakFiles = new HashMap<>();
 
     public RomEntry(String name) {
         this.name = name;
@@ -27,25 +28,56 @@ public abstract class RomEntry {
         this.romCode = romCode;
     }
 
+    public int getRomType() {
+        return romType;
+    }
+
+    public void setRomType(int romType) {
+        this.romType = romType;
+    }
+
     public int getIntValue(String key) {
-        if (!intEntries.containsKey(key)) {
-            intEntries.put(key, 0);
+        if (!intValues.containsKey(key)) {
+            intValues.put(key, 0);
         }
-        return intEntries.get(key);
+        return intValues.get(key);
+    }
+
+    public void putIntValue(String key, int value) {
+        intValues.put(key, value);
     }
 
     public String getStringValue(String key) {
-        if (!stringEntries.containsKey(key)) {
-            stringEntries.put(key, "");
+        if (!stringValues.containsKey(key)) {
+            stringValues.put(key, "");
         }
-        return stringEntries.get(key);
+        return stringValues.get(key);
+    }
+
+    public void putStringValue(String key, String value) {
+        stringValues.put(key, value);
     }
 
     public int[] getArrayValue(String key) {
-        if (!arrayEntries.containsKey(key)) {
-            arrayEntries.put(key, new int[0]);
+        if (!arrayValues.containsKey(key)) {
+            arrayValues.put(key, new int[0]);
         }
-        return arrayEntries.get(key);
+        return arrayValues.get(key);
+    }
+
+    public void putArrayValue(String key, int[] value) {
+        arrayValues.put(key, value);
+    }
+
+    public String getTweakFile(String key) {
+        if (!tweakFiles.containsKey(key)) {
+            tweakFiles.put(key, "");
+        }
+        return tweakFiles.get(key);
+    }
+
+    public void putTweakFile(String key, String value) {
+        tweakFiles.put(key, value);
     }
 
 }
