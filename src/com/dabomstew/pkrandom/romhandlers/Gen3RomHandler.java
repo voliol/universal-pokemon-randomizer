@@ -2810,7 +2810,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public String getROMName() {
-        return romEntry.name;
+        // TODO: one of several methods which is identical between the RomHandlers,
+        //  just because the RomEntry classes are strangely separated.
+        return "Pokemon" + romEntry.name;
     }
 
     @Override
