@@ -39,8 +39,8 @@ public class Generation {
         generationMap.put("Diamond", GEN4);
         generationMap.put("Pearl", GEN4);
         generationMap.put("Platinum", GEN4);
-        generationMap.put("Heart Gold", GEN4);
-        generationMap.put("Soul Silver", GEN4);
+        generationMap.put("HeartGold", GEN4);
+        generationMap.put("SoulSilver", GEN4);
         generationMap.put("Black", GEN5);
         generationMap.put("White", GEN5);
         generationMap.put("Black 2", GEN5);

@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -22,22 +23,25 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * Unit tests for the RomHandler classes.
  */
 public class RomHandlerTest {
-    
-    private static final String TEST_ROMS_PATH = "test/roms";
-    private static final String[] ALL_ROMS = {"Crystal (U)", "Ruby (U)", "Ruby (S)", "Ruby (F)", "Fire Red (U) 1.0", "Fire Red (U) 1.1", "Emerald (G)", "Emerald (J)", "Pearl (U)"};
 
     // update if the amount of supported generation increases,
     // and expect some test cases to need updating too, though hopefully only in a minor way
     private static final int HIGHEST_GENERATION = 7;
 
-    private RomHandler romHandler;
+    private static final String TEST_ROMS_PATH = "test/roms";
 
     public static String[] getRomNames() {
-        return ALL_ROMS;
+        return Roms.ALL_ROMS;
     }
+
+    private RomHandler romHandler;
+
 
     private void loadROM(String romName) {
         Generation gen = Generation.GAME_TO_GENERATION.get(stripToBaseRomName(romName));
+        if (gen == null) {
+            throw new IllegalArgumentException("Could not find the generation of " + romName);
+        }
         String fullRomName = TEST_ROMS_PATH + "/" + romName + gen.getFileSuffix();
         RomHandler.Factory factory = gen.createFactory();
         if (!factory.isLoadable(fullRomName)) {
@@ -72,7 +76,7 @@ public class RomHandlerTest {
     @MethodSource("getRomNames")
     public void romNameIsCorrect(String romName) {
         loadROM(romName);
-        assertEquals(romName, romHandler.getROMName());
+        assertEquals("Pokemon " + romName, romHandler.getROMName());
     }
 
     @ParameterizedTest
