@@ -1,44 +1,45 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.constants.Gen1Constants;
-import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
-import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * Unit tests for the RomHandler classes. Currently, can only load GBA games.
+ * Unit tests for the RomHandler classes.
  */
 public class RomHandlerTest {
-
-    private static final String GBA_FORMAT = "test/roms/%s.gba";
-    private static final String[] ALL_ROMS = {"Ruby (U)", "Ruby (S)", "Ruby (F)", "Emerald (U)", "Emerald (J)"};
+    
+    private static final String TEST_ROMS_PATH = "test/roms";
+    private static final String[] ALL_ROMS = {"Crystal (U)", "Ruby (U)", "Ruby (S)", "Ruby (F)", "Fire Red (U) 1.0", "Fire Red (U) 1.1", "Emerald (G)", "Emerald (J)", "Pearl (U)"};
 
     // update if the amount of supported generation increases,
     // and expect some test cases to need updating too, though hopefully only in a minor way
     private static final int HIGHEST_GENERATION = 7;
 
-    private final Gen3RomHandler.Factory factory = new Gen3RomHandler.Factory();
     private RomHandler romHandler;
 
-    public static String[] getROMNames() {
+    public static String[] getRomNames() {
         return ALL_ROMS;
     }
 
     private void loadROM(String romName) {
-        String fullRomName = String.format(GBA_FORMAT, romName);
+        Generation gen = Generation.GAME_TO_GENERATION.get(stripToBaseRomName(romName));
+        String fullRomName = TEST_ROMS_PATH + "/" + romName + gen.getFileSuffix();
+        RomHandler.Factory factory = gen.createFactory();
         if (!factory.isLoadable(fullRomName)) {
             throw new IllegalArgumentException("ROM is not loadable.");
         }
@@ -46,36 +47,74 @@ public class RomHandlerTest {
         romHandler.loadRom(fullRomName);
     }
 
+    /**
+     * Strips the ROM name into just its base - e.g. "Crystal (S)" => "Crystal" and "Fire Red (U)(1.1)" => "Fire Red".
+     * @param romName The full name of the ROM
+     */
+    private String stripToBaseRomName(String romName) {
+        return romName.split("\\(")[0].trim();
+    }
+
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void loadingDoesNotGiveNullRomHandler(String romName) {
         loadROM(romName);
         assertNotNull(romHandler);
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7})
+    public void allSupportedRomsFromGenerationTestable(int genNumber) {
+        fail();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void romNameIsCorrect(String romName) {
+        loadROM(romName);
+        assertEquals(romName, romHandler.getROMName());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void pokemonListIsNotEmpty(String romName) {
         loadROM(romName);
         assertFalse(romHandler.getPokemon().isEmpty());
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void firstPokemonInPokemonListIsNull(String romName) {
         loadROM(romName);
         assertNull(romHandler.getPokemon().get(0));
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
-    public void numberOfPokemonInPokemonListEqualsGen3Constant(String romName) {
+    @MethodSource("getRomNames")
+    public void numberOfPokemonInPokemonListEqualsPokemonCountConstant(String romName) {
         loadROM(romName);
-        assertEquals(Gen3Constants.pokemonCount + 1, romHandler.getPokemon().size());
+        // Because Gen 7 doesn't have a pokemonCount constant really
+        // Also, I personally won't be working much on those games...
+        assumeFalse(romHandler.generationOfPokemon() == 7);
+
+        int pokemonCount = getPokemonCount();
+        assertEquals(pokemonCount + 1, romHandler.getPokemon().size());
+    }
+
+    private int getPokemonCount() {
+        return switch (romHandler.generationOfPokemon()) {
+            case 1 -> Gen1Constants.pokemonCount;
+            case 2 -> Gen2Constants.pokemonCount;
+            case 3 -> Gen3Constants.pokemonCount;
+            case 4 -> Gen4Constants.pokemonCount;
+            case 5 -> Gen5Constants.pokemonCount;
+            case 6 -> Gen6Constants.pokemonCount;
+            default -> 0;
+        };
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void pokemonSetIncludesAllNonNullPokemonInPokemonList(String romName) {
         loadROM(romName);
         List<Pokemon> pokemonList = romHandler.getPokemon();
@@ -88,7 +127,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void pokemonSetOnlyHasPokemonAlsoInPokemonList(String romName) {
         loadROM(romName);
         List<Pokemon> pokemonList = romHandler.getPokemon();
@@ -100,7 +139,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void restrictedPokemonAreSameAsPokemonSetWithNoRestrictionsSet(String romName) {
         loadROM(romName);
         romHandler.setPokemonPool(null);
@@ -108,7 +147,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void restrictedPokemonWithNoRelativesDoesNotContainUnrelatedPokemonFromWrongGeneration(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.generationOfPokemon() >= 2);
@@ -133,7 +172,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void restrictedPokemonWithNoRelativesDoesNotContainRelatedPokemonFromWrongGeneration(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.generationOfPokemon() >= 2);
@@ -163,7 +202,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void restrictedPokemonWithRelativesDoesNotContainUnrelatedPokemonFromWrongGeneration(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.generationOfPokemon() >= 2);
@@ -189,7 +228,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void restrictedPokemonWithRelativesAlwaysContainsRelatedPokemonFromWrongGeneration(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.generationOfPokemon() >= 2);
@@ -229,14 +268,14 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void movesAreNotNull(String romName) {
         loadROM(romName);
         assertNotNull(romHandler.getMoves());
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void movesAreNotEmpty(String romName) {
         loadROM(romName);
         System.out.println(romHandler.getMoves());
@@ -244,7 +283,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getROMNames")
+    @MethodSource("getRomNames")
     public void firstMoveIsNull(String romName) {
         loadROM(romName);
         assertNull(romHandler.getMoves().get(0));
