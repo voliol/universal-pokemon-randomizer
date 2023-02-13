@@ -112,13 +112,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return Gen1Constants.typeToByte(type);
     }
 
-    private static class Gen1RomEntry extends RomEntry {
-        private int version, nonJapanese;
-        private String extraTableFile;
+    private static class Gen1RomEntry extends AbstractGBCRomEntry {
         private boolean isYellow;
-        private long expectedCRC32 = -1;
-        private int crcInHeader = -1;
-        private final List<TMTextEntry> tmTexts = new ArrayList<>();
         private final List<StaticPokemon> staticPokemon = new ArrayList<>();
         private int[] ghostMarowakOffsets = new int[0];
         private final Map<Integer, Type> extraTypeLookup = new HashMap<>();
@@ -139,12 +134,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 } else {
                     intValues.put("StaticPokemonSupport", 0);
                 }
-
-                if (getIntValue("CopyTMText") == 1) {
-                    tmTexts.addAll(gen1Other.tmTexts);
-                }
-
-                extraTableFile = gen1Other.extraTableFile;
             }
 
         }
@@ -154,12 +143,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     static {
         loadROMInfo();
-    }
-
-    private static class TMTextEntry {
-        private int number;
-        private int offset;
-        private String template;
     }
 
     private static void loadROMInfo() {
@@ -182,11 +165,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         specialKeyMethods.put("TMText[]", (current, value) -> {
             if (value.startsWith("[") && value.endsWith("]")) {
                 String[] parts = value.substring(1, value.length() - 1).split(",", 3);
-                TMTextEntry tte = new TMTextEntry();
-                tte.number = RomInfoReader.parseInt(parts[0]);
-                tte.offset = RomInfoReader.parseInt(parts[1]);
-                tte.template = parts[2];
-                current.tmTexts.add(tte);
+                int number = RomInfoReader.parseInt(parts[0]);
+                int offset = RomInfoReader.parseInt(parts[1]);
+                String template = parts[2];
+                TMTextEntry tte = new TMTextEntry(number, offset, template);
+                current.addTMText(tte);
             }
         });
         specialKeyMethods.put("ExtraTypes", (current, value) -> {
@@ -269,8 +252,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         xAccNerfed = false;
         clearTextTables();
         readTextTable("gameboy_jpn");
-        if (romEntry.extraTableFile != null && !romEntry.extraTableFile.equalsIgnoreCase("none")) {
-            readTextTable(romEntry.extraTableFile);
+        String extraTableFile = romEntry.getExtraTableFile();
+        if (extraTableFile != null && !extraTableFile.equalsIgnoreCase("none")) {
+            readTextTable(extraTableFile);
         }
         loadPokedexOrder();
         loadPokemonStats();
@@ -303,14 +287,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // Check for specific CRC first
         int crcInHeader = ((rom[GBConstants.crcOffset] & 0xFF) << 8) | (rom[GBConstants.crcOffset + 1] & 0xFF);
         for (Gen1RomEntry re : roms) {
-            if (romSig(rom, re.getRomCode()) && re.version == version && re.nonJapanese == nonjap
-                    && re.crcInHeader == crcInHeader) {
+            if (romSig(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap
+                    && re.getCrcInHeader() == crcInHeader) {
                 return re;
             }
         }
         // Now check for non-specific-CRC entries
         for (Gen1RomEntry re : roms) {
-            if (romSig(rom, re.getRomCode()) && re.version == version && re.nonJapanese == nonjap && re.crcInHeader == -1) {
+            if (romSig(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap && re.getCrcInHeader() == -1) {
                 return re;
             }
         }
@@ -1639,10 +1623,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // TM Text
         String[] moveNames = readMoveNames();
-        for (TMTextEntry tte : romEntry.tmTexts) {
-            String moveName = moveNames[moveNumToRomTable[moveIndexes.get(tte.number - 1)]];
-            String text = tte.template.replace("%m", moveName);
-            writeVariableLengthString(text, tte.offset, true);
+        for (TMTextEntry tte : romEntry.getTMTexts()) {
+            String moveName = moveNames[moveNumToRomTable[moveIndexes.get(tte.getNumber() - 1)]];
+            String text = tte.getTemplate().replace("%m", moveName);
+            writeVariableLengthString(text, tte.getOffset(), true);
         }
     }
 
@@ -1720,7 +1704,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public String getROMCode() {
-        return romEntry.getRomCode() + " (" + romEntry.version + "/" + romEntry.nonJapanese + ")";
+        return romEntry.getRomCode() + " (" + romEntry.getVersion() + "/" + romEntry.getNonJapanese() + ")";
     }
 
     @Override
@@ -2846,7 +2830,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
             int palIndex = pk.getPaletteID().ordinal();
             int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
-            if (romEntry.isYellow && romEntry.nonJapanese == 1) {
+            if (romEntry.isYellow && romEntry.getNonJapanese() == 1) {
                 // Non-japanese Yellow can use GBC palettes instead.
                 // Stored directly after regular SGB palettes.
                 palOffset += 320;
@@ -2878,7 +2862,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
 	@Override
 	public boolean isRomValid() {
-		return romEntry.expectedCRC32 == actualCRC32;
+		return romEntry.getExpectedCRC32() == actualCRC32;
 	}
 
 }
