@@ -27,7 +27,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
@@ -120,15 +118,35 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         private boolean isYellow;
         private long expectedCRC32 = -1;
         private int crcInHeader = -1;
-        private Map<String, String> tweakFiles = new HashMap<>();
-        private List<TMTextEntry> tmTexts = new ArrayList<>();
-        private List<StaticPokemon> staticPokemon = new ArrayList<>();
+        private final List<TMTextEntry> tmTexts = new ArrayList<>();
+        private final List<StaticPokemon> staticPokemon = new ArrayList<>();
         private int[] ghostMarowakOffsets = new int[0];
-        private Map<Integer, Type> extraTypeLookup = new HashMap<>();
-        private Map<Type, Integer> extraTypeReverse = new HashMap<>();
+        private final Map<Integer, Type> extraTypeLookup = new HashMap<>();
+        private final Map<Type, Integer> extraTypeReverse = new HashMap<>();
 
         public Gen1RomEntry(String name) {
             super(name);
+        }
+
+        @Override
+        public void copyFrom(RomEntry other) {
+            super.copyFrom(other);
+            if (other instanceof Gen1RomEntry gen1Other) {
+                if (getIntValue("CopyStaticPokemon") == 1) {
+                    staticPokemon.addAll(gen1Other.staticPokemon);
+                    ghostMarowakOffsets = gen1Other.ghostMarowakOffsets;
+                    intValues.put("StaticPokemonSupport", 1);
+                } else {
+                    intValues.put("StaticPokemonSupport", 0);
+                }
+
+                if (getIntValue("CopyTMText") == 1) {
+                    tmTexts.addAll(gen1Other.tmTexts);
+                }
+
+                extraTableFile = gen1Other.extraTableFile;
+            }
+
         }
     }
 
@@ -142,10 +160,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         private int number;
         private int offset;
         private String template;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(roms);
     }
 
     private static void loadROMInfo() {
@@ -199,30 +213,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    // TODO: "CopyFrom"
-//                        } else if (r[0].equals("CopyFrom")) {
-//                            for (Gen1RomEntry otherEntry : roms) {
-//                                if (r[1].equalsIgnoreCase(otherEntry.getName())) {
-//                                    // copy from here
-//                                    boolean cSP = (current.getIntValue("CopyStaticPokemon") == 1);
-//                                    boolean cTT = (current.getIntValue("CopyTMText") == 1);
-//                                    current.arrayValues.putAll(otherEntry.arrayValues);
-//                                    current.entries.putAll(otherEntry.entries);
-//                                    if (cSP) {
-//                                        current.staticPokemon.addAll(otherEntry.staticPokemon);
-//                                        current.ghostMarowakOffsets = otherEntry.ghostMarowakOffsets;
-//                                        current.entries.put("StaticPokemonSupport", 1);
-//                                    } else {
-//                                        current.entries.put("StaticPokemonSupport", 0);
-//                                    }
-//                                    if (cTT) {
-//                                        current.tmTexts.addAll(otherEntry.tmTexts);
-//                                    }
-//                                    current.extraTableFile = otherEntry.extraTableFile;
-//                                }
-//                            }
-//                        }
-
     private static StaticPokemon parseStaticPokemon(String staticPokemonString) {
         StaticPokemon sp = new StaticPokemon();
         String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
@@ -236,12 +226,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 offsets[i] = RomInfoReader.parseInt(romOffsets[i]);
             }
             switch (segments[0]) {
-                case "Species":
-                    sp.speciesOffsets = offsets;
-                    break;
-                case "Level":
-                    sp.levelOffsets = offsets;
-                    break;
+                case "Species" -> sp.speciesOffsets = offsets;
+                case "Level" -> sp.levelOffsets = offsets;
             }
         }
         return sp;
@@ -2014,13 +2000,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
 
-        if (romEntry.tweakFiles.get("BWXPTweak") != null) {
+        if (romEntry.getTweakFile("BWXPTweak") != null) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
         }
-        if (romEntry.tweakFiles.get("XAccNerfTweak") != null) {
+        if (romEntry.getTweakFile("XAccNerfTweak") != null) {
             available |= MiscTweak.NERF_X_ACCURACY.getValue();
         }
-        if (romEntry.tweakFiles.get("CritRateTweak") != null) {
+        if (romEntry.getTweakFile("CritRateTweak") != null) {
             available |= MiscTweak.FIX_CRIT_RATE.getValue();
         }
         if (romEntry.getIntValue("TextDelayFunctionOffset") != 0) {
@@ -2126,7 +2112,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private boolean genericIPSPatch(String ctName) {
-        String patchName = romEntry.tweakFiles.get(ctName);
+        String patchName = romEntry.getTweakFile(ctName);
         if (patchName == null) {
             return false;
         }

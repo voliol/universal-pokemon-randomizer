@@ -59,6 +59,13 @@ public class RomInfoReader<T extends RomEntry> {
         this.scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
         this.initiator = initiator;
         this.specialKeyMethods = specialKeyMethods;
+        specialKeyMethods.put("CopyFrom", (current, value) -> {
+            for (T other : romEntries) {
+                if (value.equalsIgnoreCase(other.getName())) {
+                    current.copyFrom(other);
+                }
+            }
+        });
     }
 
     public void readAllRomEntries(Collection<T> romEntries) {

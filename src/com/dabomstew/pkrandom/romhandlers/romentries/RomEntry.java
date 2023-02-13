@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +80,12 @@ public abstract class RomEntry {
 
     public void putTweakFile(String key, String value) {
         tweakFiles.put(key, value);
+    }
+
+    public void copyFrom(RomEntry other) {
+        intValues.putAll(other.intValues);
+        stringValues.putAll(other.stringValues);
+        arrayValues.putAll(other.arrayValues);
     }
 
 }
