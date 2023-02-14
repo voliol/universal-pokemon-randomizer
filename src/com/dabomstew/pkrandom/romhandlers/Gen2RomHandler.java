@@ -37,9 +37,6 @@ import compressors.Gen2Decmp;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
 
@@ -2035,7 +2032,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
-        if (romEntry.getTweakFile("BWXPTweak") != null) {
+        if (romEntry.hasTweakFile("BWXPTweak")) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
         }
         if (romEntry.getIntValue("TextDelayFunctionOffset") != 0) {
@@ -2089,11 +2086,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void applyBWEXPPatch() {
-        String patchName = romEntry.getTweakFile("BWXPTweak");
-        if (patchName == null) {
+        if (!romEntry.hasTweakFile("BWXPTweak")) {
             return;
         }
-
+        String patchName = romEntry.getTweakFile("BWXPTweak");
         try {
             FileFunctions.applyPatch(rom, patchName);
         } catch (IOException e) {

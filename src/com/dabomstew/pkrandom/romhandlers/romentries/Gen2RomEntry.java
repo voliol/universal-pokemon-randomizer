@@ -79,7 +79,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
     }
 
     private void setCrystal(String unparsed) {
-        crystal = unparsed.equalsIgnoreCase("Yellow");
+        crystal = unparsed.equalsIgnoreCase("Crystal");
     }
 
     public List<Gen2RomHandler.StaticPokemon> getStaticPokemon() {

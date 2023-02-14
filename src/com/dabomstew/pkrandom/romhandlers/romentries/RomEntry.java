@@ -13,7 +13,7 @@ public abstract class RomEntry {
     protected Map<String, Integer> intValues = new HashMap<>();
     protected Map<String, String> stringValues = new HashMap<>();
     protected Map<String, int[]> arrayValues = new HashMap<>();
-    protected Map<String, String> tweakFiles = new HashMap<>();
+    protected Map<String, String> tweakFiles = new HashMap<>(); // TODO: is this a good name?
 
     public RomEntry(String name) {
         this.name = name;
@@ -77,6 +77,10 @@ public abstract class RomEntry {
             tweakFiles.put(key, "");
         }
         return tweakFiles.get(key);
+    }
+
+    public boolean hasTweakFile(String key) {
+        return getTweakFile(key).equals("");
     }
 
     public void putTweakFile(String key, String value) {

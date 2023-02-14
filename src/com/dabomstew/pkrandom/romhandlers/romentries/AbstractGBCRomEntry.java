@@ -6,38 +6,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public class AbstractGBCRomEntry extends RomEntry {
+public class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
     protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends RomEntryReader<T> {
 
         public GBCRomEntryReader(String fileName) throws IOException {
             super(fileName);
             putSpecialKeyMethod("Game", RomEntry::setRomCode);
-            putSpecialKeyMethod("Version", AbstractGBCRomEntry::setVersion);
             putSpecialKeyMethod("NonJapanese", AbstractGBCRomEntry::setNonJapanese);
             putSpecialKeyMethod("ExtraTableFile", AbstractGBCRomEntry::setExtraTableFile);
             putSpecialKeyMethod("CRCInHeader", AbstractGBCRomEntry::setCRCInHeader);
-            putSpecialKeyMethod("CRC32", AbstractGBCRomEntry::setExpectedCRC32);
             putSpecialKeyMethod("TMText[]", AbstractGBCRomEntry::addTMText);
         }
     }
 
-    private int version, nonJapanese;
+    private int nonJapanese;
     private String extraTableFile;
     private int crcInHeader = -1;
-    private long expectedCRC32 = -1;
     private final List<GBCTMTextEntry> tmTexts = new ArrayList<>();
 
     public AbstractGBCRomEntry(String name) {
         super(name);
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    private void setVersion(String unparsed) {
-        this.version = RomEntryReader.parseInt(unparsed);
     }
 
     public int getNonJapanese() {
@@ -62,14 +51,6 @@ public class AbstractGBCRomEntry extends RomEntry {
 
     private void setCRCInHeader(String unparsed) {
         this.crcInHeader = RomEntryReader.parseInt(unparsed);
-    }
-
-    public long getExpectedCRC32() {
-        return expectedCRC32;
-    }
-
-    private void setExpectedCRC32(String unparsed) {
-        this.expectedCRC32 = RomEntryReader.parseLong("0x" + unparsed);
     }
 
     private void addTMText(String unparsed)  {
