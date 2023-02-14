@@ -1,10 +1,11 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
-
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A description of a ROM
+ */
 public abstract class RomEntry {
     protected final String name;
     protected String romCode;

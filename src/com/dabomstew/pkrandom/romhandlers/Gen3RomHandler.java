@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.config.RomInfoReader;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntryReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -175,11 +175,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 6);
                                 TMOrMTTextEntry tte = new TMOrMTTextEntry();
-                                tte.number = RomInfoReader.parseInt(parts[0]);
-                                tte.mapBank = RomInfoReader.parseInt(parts[1]);
-                                tte.mapNumber = RomInfoReader.parseInt(parts[2]);
-                                tte.personNum = RomInfoReader.parseInt(parts[3]);
-                                tte.offsetInScript = RomInfoReader.parseInt(parts[4]);
+                                tte.number = RomEntryReader.parseInt(parts[0]);
+                                tte.mapBank = RomEntryReader.parseInt(parts[1]);
+                                tte.mapNumber = RomEntryReader.parseInt(parts[2]);
+                                tte.personNum = RomEntryReader.parseInt(parts[3]);
+                                tte.offsetInScript = RomEntryReader.parseInt(parts[4]);
                                 tte.template = parts[5];
                                 tte.isMoveTutor = false;
                                 current.tmmtTexts.add(tte);
@@ -188,11 +188,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
                                 String[] parts = r[1].substring(1, r[1].length() - 1).split(",", 6);
                                 TMOrMTTextEntry tte = new TMOrMTTextEntry();
-                                tte.number = RomInfoReader.parseInt(parts[0]);
-                                tte.mapBank = RomInfoReader.parseInt(parts[1]);
-                                tte.mapNumber = RomInfoReader.parseInt(parts[2]);
-                                tte.personNum = RomInfoReader.parseInt(parts[3]);
-                                tte.offsetInScript = RomInfoReader.parseInt(parts[4]);
+                                tte.number = RomEntryReader.parseInt(parts[0]);
+                                tte.mapBank = RomEntryReader.parseInt(parts[1]);
+                                tte.mapNumber = RomEntryReader.parseInt(parts[2]);
+                                tte.personNum = RomEntryReader.parseInt(parts[3]);
+                                tte.offsetInScript = RomEntryReader.parseInt(parts[4]);
                                 tte.template = parts[5];
                                 tte.isMoveTutor = true;
                                 current.tmmtTexts.add(tte);
@@ -200,7 +200,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         } else if (r[0].equals("Game")) {
                             current.romCode = r[1];
                         } else if (r[0].equals("Version")) {
-                            current.version = RomInfoReader.parseInt(r[1]);
+                            current.version = RomEntryReader.parseInt(r[1]);
                         } else if (r[0].equals("Type")) {
                             if (r[1].equalsIgnoreCase("Ruby")) {
                                 current.romType = Gen3Constants.RomType_Ruby;
@@ -216,10 +216,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         } else if (r[0].equals("TableFile")) {
                             current.tableFile = r[1];
                         } else if (r[0].equals("CopyStaticPokemon")) {
-                            int csp = RomInfoReader.parseInt(r[1]);
+                            int csp = RomEntryReader.parseInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
                         } else if (r[0].equals("CRC32")) {
-                            current.expectedCRC32 = RomInfoReader.parseLong("0x" + r[1]);
+                            current.expectedCRC32 = RomEntryReader.parseLong("0x" + r[1]);
                         } else if (r[0].endsWith("Tweak")) {
                             current.codeTweaks.put(r[0], r[1]);
                         } else if (r[0].equals("CopyFrom")) {
@@ -254,12 +254,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                     int[] offs = new int[offsets.length];
                                     int c = 0;
                                     for (String off : offsets) {
-                                        offs[c++] = RomInfoReader.parseInt(off);
+                                        offs[c++] = RomEntryReader.parseInt(off);
                                     }
                                     current.arrayEntries.put(r[0], offs);
                                 }
                             } else {
-                                int offs = RomInfoReader.parseInt(r[1]);
+                                int offs = RomEntryReader.parseInt(r[1]);
                                 current.entries.put(r[0], offs);
                             }
                         }
@@ -283,7 +283,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
             int[] offsets = new int [romOffsets.length];
             for (int i = 0; i < offsets.length; i++) {
-                offsets[i] = RomInfoReader.parseInt(romOffsets[i]);
+                offsets[i] = RomEntryReader.parseInt(romOffsets[i]);
             }
             switch (segments[0]) {
                 case "Species":

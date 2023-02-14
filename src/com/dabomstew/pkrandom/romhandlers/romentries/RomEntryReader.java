@@ -1,10 +1,9 @@
-package com.dabomstew.pkrandom.config;
-
-import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
+package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
@@ -12,7 +11,7 @@ import java.util.function.Function;
 
 import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
-public class RomInfoReader<T extends RomEntry> {
+public abstract class RomEntryReader<T extends RomEntry> {
 
     public static int parseInt(String s) {
         int radix = 10;
@@ -51,21 +50,15 @@ public class RomInfoReader<T extends RomEntry> {
     private T current;
     private Collection<T> romEntries;
 
-    private final Function<String, T> initiator;
-    private final Map<String, BiConsumer<T, String>> specialKeyMethods;
+    private final Map<String, BiConsumer<T, String>> specialKeyMethods = new HashMap<>();
 
-    public RomInfoReader(String fileName, Function<String, T> initiator, Map<String,
-            BiConsumer<T, String>> specialKeyMethods) throws IOException {
+    public RomEntryReader(String fileName) throws IOException {
         this.scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
-        this.initiator = initiator;
-        this.specialKeyMethods = specialKeyMethods;
-        specialKeyMethods.put("CopyFrom", (current, value) -> {
-            for (T other : romEntries) {
-                if (value.equalsIgnoreCase(other.getName())) {
-                    current.copyFrom(other);
-                }
-            }
-        });
+        putSpecialKeyMethod("CopyFrom", this::copyFrom);
+    }
+
+    protected void putSpecialKeyMethod(String key, BiConsumer<T, String> method) {
+        specialKeyMethods.put(key, method);
     }
 
     public void readAllRomEntries(Collection<T> romEntries) {
@@ -93,9 +86,11 @@ public class RomInfoReader<T extends RomEntry> {
     }
 
     private void startNewRomEntry(String line) {
-        current = initiator.apply(line.substring(1, line.length() - 1));
+        current = initiateRomEntry(line.substring(1, line.length() - 1));
         romEntries.add(current);
     }
+
+    protected abstract T initiateRomEntry(String name);
 
     private String removeComments(String line) {
         if (line.contains(COMMENT_PREFIX)) {
@@ -170,6 +165,14 @@ public class RomInfoReader<T extends RomEntry> {
     private void addIntValue(String[] valuePair) {
         int value = parseInt(valuePair[1]);
         current.putIntValue(valuePair[0], value);
+    }
+
+    private void copyFrom(T romEntry, String value) {
+        for (T other : romEntries) {
+            if (value.equalsIgnoreCase(other.getName())) {
+                romEntry.copyFrom(other);
+            }
+        }
     }
 
 }
