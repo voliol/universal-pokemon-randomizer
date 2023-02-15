@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 public class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
@@ -33,7 +32,7 @@ public class AbstractGBCRomEntry extends AbstractGBRomEntry {
     }
 
     private void setNonJapanese(String unparsed) {
-        this.nonJapanese = RomEntryReader.parseInt(unparsed);
+        this.nonJapanese = BaseRomEntryReader.parseInt(unparsed);
     }
 
     public String getExtraTableFile() {
@@ -48,15 +47,15 @@ public class AbstractGBCRomEntry extends AbstractGBRomEntry {
         return crcInHeader;
     }
 
-    private void setCRCInHeader(String unparsed) {
-        this.crcInHeader = RomEntryReader.parseInt(unparsed);
+    private void setCRCInHeader(String s) {
+        this.crcInHeader = BaseRomEntryReader.parseInt(s);
     }
 
-    private void addTMText(String unparsed)  {
-        if (unparsed.startsWith("[") && unparsed.endsWith("]")) {
-            String[] parts = unparsed.substring(1, unparsed.length() - 1).split(",", 3);
-            int number = RomEntryReader.parseInt(parts[0]);
-            int offset = RomEntryReader.parseInt(parts[1]);
+    private void addTMText(String s)  {
+        if (s.startsWith("[") && s.endsWith("]")) {
+            String[] parts = s.substring(1, s.length() - 1).split(",", 3);
+            int number = BaseRomEntryReader.parseInt(parts[0]);
+            int offset = BaseRomEntryReader.parseInt(parts[1]);
             String template = parts[2];
             GBCTMTextEntry tte = new GBCTMTextEntry(number, offset, template);
             tmTexts.add(tte);

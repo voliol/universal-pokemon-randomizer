@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,8 +8,23 @@ import java.util.Map;
  * A description of a ROM
  */
 public abstract class RomEntry {
+
+    protected abstract static class RomEntryReader<T extends RomEntry> extends BaseRomEntryReader<T> {
+
+        public RomEntryReader(String fileName) throws IOException {
+            super(fileName);
+            putSpecialKeyMethod("Game", RomEntry::setRomCode);
+            putSpecialKeyMethod("Version", RomEntry::setVersion);
+            putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
+            putKeySuffixMethod("Locator", RomEntry::putStringValue);
+            putKeySuffixMethod("Prefix", RomEntry::putStringValue);
+        }
+
+    }
+
     protected final String name;
     protected String romCode;
+    protected int version;
     protected int romType;
     protected Map<String, Integer> intValues = new HashMap<>();
     protected Map<String, String> stringValues = new HashMap<>();
@@ -22,6 +38,7 @@ public abstract class RomEntry {
     public RomEntry(RomEntry original) {
         this.name = original.name;
         this.romCode = original.romCode;
+        this.version = original.version;
         this.romType = original.romType;
         intValues.putAll(original.intValues);
         stringValues.putAll(original.stringValues);
@@ -39,6 +56,14 @@ public abstract class RomEntry {
 
     public void setRomCode(String romCode) {
         this.romCode = romCode;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    private void setVersion(String s) {
+        this.version = BaseRomEntryReader.parseInt(s);
     }
 
     public int getRomType() {
@@ -71,7 +96,7 @@ public abstract class RomEntry {
         stringValues.put(key, value);
     }
 
-    public void putStringValue(String[] valuePair) {
+    private void putStringValue(String[] valuePair) {
         putStringValue(valuePair[0], valuePair[1]);
     }
 
@@ -101,7 +126,7 @@ public abstract class RomEntry {
         tweakFiles.put(key, value);
     }
 
-    public void putTweakFile(String[] valuePair) {
+    private void putTweakFile(String[] valuePair) {
         putTweakFile(valuePair[0], valuePair[1]);
     }
 

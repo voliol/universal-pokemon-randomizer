@@ -49,7 +49,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
                 String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 int[] offsets = new int[romOffsets.length];
                 for (int i = 0; i < offsets.length; i++) {
-                    offsets[i] = RomEntryReader.parseInt(romOffsets[i]);
+                    offsets[i] = BaseRomEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesOffsets = offsets;
@@ -59,15 +59,15 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             return new Gen3RomHandler.StaticPokemon(speciesOffsets, levelOffsets);
         }
 
-        private static Gen3RomHandler.TMOrMTTextEntry parseTMOrMTEntry(String unparsed, boolean isMoveTutor) {
-            if (unparsed.startsWith("[") && unparsed.endsWith("]")) {
-                String[] parts = unparsed.substring(1, unparsed.length() - 1).split(",", 6);
+        private static Gen3RomHandler.TMOrMTTextEntry parseTMOrMTEntry(String s, boolean isMoveTutor) {
+            if (s.startsWith("[") && s.endsWith("]")) {
+                String[] parts = s.substring(1, s.length() - 1).split(",", 6);
                 Gen3RomHandler.TMOrMTTextEntry tte = new Gen3RomHandler.TMOrMTTextEntry();
-                tte.number = RomEntryReader.parseInt(parts[0]);
-                tte.mapBank = RomEntryReader.parseInt(parts[1]);
-                tte.mapNumber = RomEntryReader.parseInt(parts[2]);
-                tte.personNum = RomEntryReader.parseInt(parts[3]);
-                tte.offsetInScript = RomEntryReader.parseInt(parts[4]);
+                tte.number = BaseRomEntryReader.parseInt(parts[0]);
+                tte.mapBank = BaseRomEntryReader.parseInt(parts[1]);
+                tte.mapNumber = BaseRomEntryReader.parseInt(parts[2]);
+                tte.personNum = BaseRomEntryReader.parseInt(parts[3]);
+                tte.offsetInScript = BaseRomEntryReader.parseInt(parts[4]);
                 tte.template = parts[5];
                 tte.isMoveTutor = isMoveTutor;
                 return tte;
@@ -77,7 +77,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
     }
 
     public static void readEntriesFromInfoFile(String fileName, Collection<Gen3RomEntry> romEntries) throws IOException {
-        RomEntryReader<Gen3RomEntry> rer = new Gen3RomEntry.Gen3RomEntryReader<>(fileName);
+        BaseRomEntryReader<Gen3RomEntry> rer = new Gen3RomEntry.Gen3RomEntryReader<>(fileName);
         rer.readAllRomEntries(romEntries);
     }
 
@@ -100,17 +100,17 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         tmmtTexts.addAll(original.tmmtTexts);
     }
 
-    private void setRomType(String unparsed) {
-        if (unparsed.equalsIgnoreCase("Ruby")) {
+    private void setRomType(String s) {
+        if (s.equalsIgnoreCase("Ruby")) {
             setRomType(Gen3Constants.RomType_Ruby);
-        } else if (unparsed.equalsIgnoreCase("Sapp")) {
+        } else if (s.equalsIgnoreCase("Sapp")) {
             setRomType(Gen3Constants.RomType_Sapp);
-        } else if (unparsed.equalsIgnoreCase("Em")) {
+        } else if (s.equalsIgnoreCase("Em")) {
             setRomType(Gen3Constants.RomType_Em);
-        } else if (unparsed.equalsIgnoreCase("FRLG")) {
+        } else if (s.equalsIgnoreCase("FRLG")) {
             setRomType(Gen3Constants.RomType_FRLG);
         } else {
-            System.err.println("unrecognised rom type: " + unparsed);
+            System.err.println("unrecognised rom type: " + s);
         }
     }
 
@@ -122,40 +122,39 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         this.tableFile = tableFile;
     }
 
-    private void setCopyStaticPokemon(String unparsed) {
-        int csp = RomEntryReader.parseInt(unparsed);
-        copyStaticPokemon = (csp > 0);
+    private void setCopyStaticPokemon(String s) {
+        this.copyStaticPokemon = BaseRomEntryReader.parseBoolean(s);
     }
 
     public List<Gen3RomHandler.StaticPokemon> getStaticPokemon() {
         return Collections.unmodifiableList(staticPokemon);
     }
 
-    private void addStaticPokemon(String unparsed) {
-        staticPokemon.add(Gen3RomEntryReader.parseStaticPokemon(unparsed));
+    private void addStaticPokemon(String s) {
+        staticPokemon.add(Gen3RomEntryReader.parseStaticPokemon(s));
     }
 
     public List<Gen3RomHandler.StaticPokemon> getRoamingPokemon() {
         return Collections.unmodifiableList(roamingPokemon);
     }
 
-    private void addRoamingPokemon(String unparsed) {
-        roamingPokemon.add(Gen3RomEntryReader.parseStaticPokemon(unparsed));
+    private void addRoamingPokemon(String s) {
+        roamingPokemon.add(Gen3RomEntryReader.parseStaticPokemon(s));
     }
 
     public List<Gen3RomHandler.TMOrMTTextEntry> getTMMTTexts() {
         return Collections.unmodifiableList(tmmtTexts);
     }
 
-    private void addTMText(String unparsed) {
-        Gen3RomHandler.TMOrMTTextEntry tte = Gen3RomEntryReader.parseTMOrMTEntry(unparsed, false);
+    private void addTMText(String s) {
+        Gen3RomHandler.TMOrMTTextEntry tte = Gen3RomEntryReader.parseTMOrMTEntry(s, false);
         if (tte != null) {
             tmmtTexts.add(tte);
         }
     }
 
-    private void addMoveTutorText(String unparsed) {
-        Gen3RomHandler.TMOrMTTextEntry tte = Gen3RomEntryReader.parseTMOrMTEntry(unparsed, true);
+    private void addMoveTutorText(String s) {
+        Gen3RomHandler.TMOrMTTextEntry tte = Gen3RomEntryReader.parseTMOrMTEntry(s, true);
         if (tte != null) {
             tmmtTexts.add(tte);
         }

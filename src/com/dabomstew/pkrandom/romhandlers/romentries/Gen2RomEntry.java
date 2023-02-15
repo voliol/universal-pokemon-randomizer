@@ -33,18 +33,18 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
             return (T) new Gen2RomEntry(name);
         }
 
-        public static Gen2RomHandler.StaticPokemon parseStaticPokemon(String unparsed, boolean gameCorner) {
+        public static Gen2RomHandler.StaticPokemon parseStaticPokemon(String s, boolean gameCorner) {
             int[] speciesOffsets = new int[0];
             int[] levelOffsets = new int[0];
             String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
             Pattern r = Pattern.compile(pattern);
-            Matcher m = r.matcher(unparsed);
+            Matcher m = r.matcher(s);
             while (m.find()) {
                 String[] segments = m.group().split("=");
                 String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 int[] offsets = new int[romOffsets.length];
                 for (int i = 0; i < offsets.length; i++) {
-                    offsets[i] = RomEntryReader.parseInt(romOffsets[i]);
+                    offsets[i] = BaseRomEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesOffsets = offsets;
@@ -63,7 +63,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
     }
 
     public static void readEntriesFromInfoFile(String fileName, Collection<Gen2RomEntry> romEntries) throws IOException {
-        RomEntryReader<Gen2RomEntry> rer = new Gen2RomEntry.Gen2RomEntryReader<>(fileName);
+        BaseRomEntryReader<Gen2RomEntry> rer = new Gen2RomEntry.Gen2RomEntryReader<>(fileName);
         rer.readAllRomEntries(romEntries);
     }
 
@@ -78,20 +78,20 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
         return crystal;
     }
 
-    private void setCrystal(String unparsed) {
-        crystal = unparsed.equalsIgnoreCase("Crystal");
+    private void setCrystal(String s) {
+        crystal = s.equalsIgnoreCase("Crystal");
     }
 
     public List<Gen2RomHandler.StaticPokemon> getStaticPokemon() {
         return Collections.unmodifiableList(staticPokemon);
     }
 
-    private void addStaticPokemon(String unparsed) {
-        staticPokemon.add(Gen2RomEntryReader.parseStaticPokemon(unparsed, false));
+    private void addStaticPokemon(String s) {
+        staticPokemon.add(Gen2RomEntryReader.parseStaticPokemon(s, false));
     }
 
-    private void addStaticPokemonGameCorner(String unparsed) {
-        staticPokemon.add(Gen2RomEntryReader.parseStaticPokemon(unparsed, true));
+    private void addStaticPokemonGameCorner(String s) {
+        staticPokemon.add(Gen2RomEntryReader.parseStaticPokemon(s, true));
     }
 
     @Override

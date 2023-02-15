@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 
 import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
-public abstract class RomEntryReader<T extends RomEntry> {
+public abstract class BaseRomEntryReader<T extends RomEntry> {
 
     public static int parseInt(String s) {
         int radix = 10;
@@ -42,22 +42,27 @@ public abstract class RomEntryReader<T extends RomEntry> {
         }
     }
 
+    public static boolean parseBoolean(String s) {
+        return (parseInt(s) > 0);
+    }
+
     private static final String COMMENT_PREFIX = "//";
 
     private final Scanner scanner;
     private T current;
     private Collection<T> romEntries;
 
+    private final Map<String, BiConsumer<T, String[]>> keyPrefixMethods = new HashMap<>();
     private final Map<String, BiConsumer<T, String[]>> keySuffixMethods = new HashMap<>();
     private final Map<String, BiConsumer<T, String>> specialKeyMethods = new HashMap<>();
 
-    public RomEntryReader(String fileName) throws IOException {
+    public BaseRomEntryReader(String fileName) throws IOException {
         this.scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
-        putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
-        putKeySuffixMethod("Locator", RomEntry::putStringValue);
-        putKeySuffixMethod("Prefix", RomEntry::putStringValue);
-        putSpecialKeyMethod("Game", RomEntry::setRomCode);
         putSpecialKeyMethod("CopyFrom", this::copyFrom);
+    }
+
+    protected void putKeyPrefixMethod(String key, BiConsumer<T, String[]> method) {
+        keyPrefixMethods.put(key, method);
     }
 
     protected void putKeySuffixMethod(String key, BiConsumer<T, String[]> method) {
@@ -112,6 +117,12 @@ public abstract class RomEntryReader<T extends RomEntry> {
             throw new RuntimeException(); // TODO: what exactly to throw here
         }
 
+        BiConsumer<T, String[]> keyPrefixMethod = checkForKeyPrefixMethod(valuePair);
+        if (keyPrefixMethod != null) {
+            keyPrefixMethod.accept(current, valuePair);
+            return;
+        }
+
         BiConsumer<T, String[]> keySuffixMethod = checkForKeySuffixMethod(valuePair);
         if (keySuffixMethod != null) {
             keySuffixMethod.accept(current, valuePair);
@@ -125,6 +136,15 @@ public abstract class RomEntryReader<T extends RomEntry> {
         }
 
         addNormalValue(valuePair);
+    }
+
+    private BiConsumer<T, String[]> checkForKeyPrefixMethod(String[] valuePair) {
+        for (Map.Entry<String, BiConsumer<T, String[]>> ksmEntry : keyPrefixMethods.entrySet()) {
+            if (valuePair[0].startsWith(ksmEntry.getKey())) {
+                return ksmEntry.getValue();
+            }
+        }
+        return null;
     }
 
     private BiConsumer<T, String[]> checkForKeySuffixMethod(String[] valuePair) {

@@ -32,18 +32,18 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
             return (T) new Gen1RomEntry(name);
         }
 
-        public static Gen1RomHandler.StaticPokemon parseStaticPokemon(String unparsed) {
+        public static Gen1RomHandler.StaticPokemon parseStaticPokemon(String s) {
             int[] speciesOffsets = new int[0];
             int[] levelOffsets = new int[0];
             String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
             Pattern r = Pattern.compile(pattern);
-            Matcher m = r.matcher(unparsed);
+            Matcher m = r.matcher(s);
             while (m.find()) {
                 String[] segments = m.group().split("=");
                 String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 int[] offsets = new int[romOffsets.length];
                 for (int i = 0; i < offsets.length; i++) {
-                    offsets[i] = RomEntryReader.parseInt(romOffsets[i]);
+                    offsets[i] = BaseRomEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesOffsets = offsets;
@@ -55,7 +55,7 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
     }
 
     public static void readEntriesFromInfoFile(String fileName, Collection<Gen1RomEntry> romEntries) throws IOException {
-        RomEntryReader<Gen1RomEntry> rer = new Gen1RomEntryReader<>(fileName);
+        BaseRomEntryReader<Gen1RomEntry> rer = new Gen1RomEntryReader<>(fileName);
         rer.readAllRomEntries(romEntries);
     }
 
@@ -73,24 +73,24 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
         return yellow;
     }
 
-    private void setYellow(String unparsed) {
-        yellow = unparsed.equalsIgnoreCase("Yellow");
+    private void setYellow(String s) {
+        yellow = s.equalsIgnoreCase("Yellow");
     }
 
     public List<Gen1RomHandler.StaticPokemon> getStaticPokemon() {
         return Collections.unmodifiableList(staticPokemon);
     }
 
-    private void addStaticPokemon(String unparsed) {
-        staticPokemon.add(Gen1RomEntryReader.parseStaticPokemon(unparsed));
+    private void addStaticPokemon(String s) {
+        staticPokemon.add(Gen1RomEntryReader.parseStaticPokemon(s));
     }
 
     public int[] getGhostMarowakOffsets() {
         return ghostMarowakOffsets;
     }
 
-    private void addStaticPokemonGhostMarowak(String unparsed) {
-        Gen1RomHandler.StaticPokemon ghostMarowak = Gen1RomEntryReader.parseStaticPokemon(unparsed);
+    private void addStaticPokemonGhostMarowak(String s) {
+        Gen1RomHandler.StaticPokemon ghostMarowak = Gen1RomEntryReader.parseStaticPokemon(s);
         staticPokemon.add(ghostMarowak);
         ghostMarowakOffsets = ghostMarowak.getSpeciesOffsets();
     }
@@ -103,10 +103,10 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
         return extraTypeReverse;
     }
 
-    private void addExtraTypes(String unparsed) {
+    private void addExtraTypes(String s) {
         // remove the containers
-        unparsed = unparsed.substring(1, unparsed.length() - 1);
-        String[] parts = unparsed.split(",");
+        s = s.substring(1, s.length() - 1);
+        String[] parts = s.split(",");
         for (String part : parts) {
             String[] iParts = part.split("=");
             int typeId = Integer.parseInt(iParts[0], 16);

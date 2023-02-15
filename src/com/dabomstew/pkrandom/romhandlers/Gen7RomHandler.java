@@ -27,7 +27,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.romhandlers.romentries.RomEntryReader;
+import com.dabomstew.pkrandom.romhandlers.romentries.BaseRomEntryReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.BFLIM;
@@ -164,13 +164,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             RomFileEntry entry = new RomFileEntry();
                             entry.path = path.trim();
                             entry.expectedCRC32s = new long[2];
-                            entry.expectedCRC32s[0] = RomEntryReader.parseLong("0x" + crcs[0].trim());
-                            entry.expectedCRC32s[1] = RomEntryReader.parseLong("0x" + crcs[1].trim());
+                            entry.expectedCRC32s[0] = BaseRomEntryReader.parseLong("0x" + crcs[0].trim());
+                            entry.expectedCRC32s[1] = BaseRomEntryReader.parseLong("0x" + crcs[1].trim());
                             current.files.put(key, entry);
                         } else if (r[0].equals("CodeCRC32")) {
                             String[] values = r[1].substring(1, r[1].length() - 1).split(",");
-                            current.expectedCodeCRC32s[0] = RomEntryReader.parseLong("0x" + values[0].trim());
-                            current.expectedCodeCRC32s[1] = RomEntryReader.parseLong("0x" + values[1].trim());
+                            current.expectedCodeCRC32s[0] = BaseRomEntryReader.parseLong("0x" + values[0].trim());
+                            current.expectedCodeCRC32s[1] = BaseRomEntryReader.parseLong("0x" + values[1].trim());
                         } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
                             for (int i = 0; i < offsets.length; i++) {
@@ -178,7 +178,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                                 current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
                             }
                         } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
-                            int offs = RomEntryReader.parseInt(r[1]);
+                            int offs = BaseRomEntryReader.parseInt(r[1]);
                             current.numbers.put(r[0], offs);
                         } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -188,7 +188,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                                 int[] offs = new int[offsets.length];
                                 int c = 0;
                                 for (String off : offsets) {
-                                    offs[c++] = RomEntryReader.parseInt(off);
+                                    offs[c++] = BaseRomEntryReader.parseInt(off);
                                 }
                                 current.arrayEntries.put(r[0], offs);
                             }

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.RomEntryReader;
+import com.dabomstew.pkrandom.romhandlers.romentries.BaseRomEntryReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -196,14 +196,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             String[] values = r[1].substring(1, r[1].length() - 1).split(",");
                             RomFileEntry entry = new RomFileEntry();
                             entry.path = values[0].trim();
-                            entry.expectedCRC32 = RomEntryReader.parseLong("0x" + values[1].trim());
+                            entry.expectedCRC32 = BaseRomEntryReader.parseLong("0x" + values[1].trim());
                             current.files.put(key, entry);
                         } else if (r[0].equals("Arm9CRC32")) {
-                            current.arm9ExpectedCRC32 = RomEntryReader.parseLong("0x" + r[1]);
+                            current.arm9ExpectedCRC32 = BaseRomEntryReader.parseLong("0x" + r[1]);
                         } else if (r[0].startsWith("OverlayCRC32<")) {
                             String keyString = r[0].split("<")[1].split(">")[0];
-                            int key = RomEntryReader.parseInt(keyString);
-                            long value = RomEntryReader.parseLong("0x" + r[1]);
+                            int key = BaseRomEntryReader.parseInt(keyString);
+                            long value = BaseRomEntryReader.parseLong("0x" + r[1]);
                             current.overlayExpectedCRC32s.put(key, value);
                         } else if (r[0].equals("StaticPokemon{}")) {
                             current.staticPokemon.add(parseStaticPokemon(r[1]));
@@ -219,9 +219,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             int c = 0;
                             for (String off : offsets) {
                                 String[] parts = off.split(":");
-                                file = RomEntryReader.parseInt(parts[0]);
-                                reqOffs[c] = RomEntryReader.parseInt(parts[1]);
-                                givOffs[c++] = RomEntryReader.parseInt(parts[2]);
+                                file = BaseRomEntryReader.parseInt(parts[0]);
+                                reqOffs[c] = BaseRomEntryReader.parseInt(parts[1]);
+                                givOffs[c++] = BaseRomEntryReader.parseInt(parts[2]);
                             }
                             TradeScript ts = new TradeScript();
                             ts.fileNum = file;
@@ -229,16 +229,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             ts.givenOffsets = givOffs;
                             current.tradeScripts.add(ts);
                         } else if (r[0].equals("StaticPokemonSupport")) {
-                            int spsupport = RomEntryReader.parseInt(r[1]);
+                            int spsupport = BaseRomEntryReader.parseInt(r[1]);
                             current.staticPokemonSupport = (spsupport > 0);
                         } else if (r[0].equals("CopyStaticPokemon")) {
-                            int csp = RomEntryReader.parseInt(r[1]);
+                            int csp = BaseRomEntryReader.parseInt(r[1]);
                             current.copyStaticPokemon = (csp > 0);
                         } else if (r[0].equals("CopyRoamingPokemon")) {
-                            int crp = RomEntryReader.parseInt(r[1]);
+                            int crp = BaseRomEntryReader.parseInt(r[1]);
                             current.copyRoamingPokemon = (crp > 0);
                         } else if (r[0].equals("CopyTradeScripts")) {
-                            int cts = RomEntryReader.parseInt(r[1]);
+                            int cts = BaseRomEntryReader.parseInt(r[1]);
                             current.copyTradeScripts = (cts > 0);
                         } else if (r[0].startsWith("StarterOffsets")) {
                             String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
@@ -247,15 +247,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             for (String off : offsets) {
                                 String[] parts = off.split(":");
                                 OffsetWithinEntry owe = new OffsetWithinEntry();
-                                owe.entry = RomEntryReader.parseInt(parts[0]);
-                                owe.offset = RomEntryReader.parseInt(parts[1]);
+                                owe.entry = BaseRomEntryReader.parseInt(parts[0]);
+                                owe.offset = BaseRomEntryReader.parseInt(parts[1]);
                                 offs[c++] = owe;
                             }
                             current.offsetArrayEntries.put(r[0], offs);
                         } else if (r[0].endsWith("Tweak")) {
                             current.tweakFiles.put(r[0], r[1]);
                         } else if (r[0].equals("IsBlack")) {
-                            int isBlack = RomEntryReader.parseInt(r[1]);
+                            int isBlack = BaseRomEntryReader.parseInt(r[1]);
                             current.isBlack = (isBlack > 0);
                         } else {
                             if (r[1].startsWith("[") && r[1].endsWith("]")) {
@@ -266,13 +266,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                     int[] offs = new int[offsets.length];
                                     int c = 0;
                                     for (String off : offsets) {
-                                        offs[c++] = RomEntryReader.parseInt(off);
+                                        offs[c++] = BaseRomEntryReader.parseInt(off);
                                     }
                                     current.arrayEntries.put(r[0], offs);
                                 }
                             } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")
                                     || r[0].endsWith("Size") || r[0].endsWith("Index")) {
-                                int offs = RomEntryReader.parseInt(r[1]);
+                                int offs = BaseRomEntryReader.parseInt(r[1]);
                                 current.numbers.put(r[0], offs);
                             } else {
                                 current.strings.put(r[0], r[1]);
@@ -298,7 +298,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             FileEntry[] entries = new FileEntry[offsets.length];
             for (int i = 0; i < entries.length; i++) {
                 String[] parts = offsets[i].split(":");
-                entries[i] = new FileEntry(RomEntryReader.parseInt(parts[0]), RomEntryReader.parseInt(parts[1]));
+                entries[i] = new FileEntry(BaseRomEntryReader.parseInt(parts[0]), BaseRomEntryReader.parseInt(parts[1]));
             }
             switch (segments[0]) {
                 case "Species":
@@ -327,14 +327,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 case "Species":
                     int[] speciesOverlayOffsets = new int[offsets.length];
                     for (int i = 0; i < speciesOverlayOffsets.length; i++) {
-                        speciesOverlayOffsets[i] = RomEntryReader.parseInt(offsets[i]);
+                        speciesOverlayOffsets[i] = BaseRomEntryReader.parseInt(offsets[i]);
                     }
                     rp.speciesOverlayOffsets = speciesOverlayOffsets;
                     break;
                 case "Level":
                     int[] levelOverlayOffsets = new int[offsets.length];
                     for (int i = 0; i < levelOverlayOffsets.length; i++) {
-                        levelOverlayOffsets[i] = RomEntryReader.parseInt(offsets[i]);
+                        levelOverlayOffsets[i] = BaseRomEntryReader.parseInt(offsets[i]);
                     }
                     rp.levelOverlayOffsets = levelOverlayOffsets;
                     break;
@@ -342,7 +342,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     FileEntry[] entries = new FileEntry[offsets.length];
                     for (int i = 0; i < entries.length; i++) {
                         String[] parts = offsets[i].split(":");
-                        entries[i] = new FileEntry(RomEntryReader.parseInt(parts[0]), RomEntryReader.parseInt(parts[1]));
+                        entries[i] = new FileEntry(BaseRomEntryReader.parseInt(parts[0]), BaseRomEntryReader.parseInt(parts[1]));
                     }
                     rp.speciesScriptOffsets = entries;
                     break;

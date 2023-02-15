@@ -8,7 +8,6 @@ public abstract class AbstractGBRomEntry extends RomEntry {
 
         public GBRomEntryReader(String fileName) throws IOException {
             super(fileName);
-            putSpecialKeyMethod("Version", AbstractGBRomEntry::setVersion);
             putSpecialKeyMethod("CRC32", AbstractGBRomEntry::setExpectedCRC32);
         }
     }
@@ -26,20 +25,12 @@ public abstract class AbstractGBRomEntry extends RomEntry {
         this.expectedCRC32 = original.expectedCRC32;
     }
 
-    public int getVersion() {
-        return version;
-    }
-
-    private void setVersion(String unparsed) {
-        this.version = RomEntryReader.parseInt(unparsed);
-    }
-
     public long getExpectedCRC32() {
         return expectedCRC32;
     }
 
-    private void setExpectedCRC32(String unparsed) {
-        this.expectedCRC32 = RomEntryReader.parseLong("0x" + unparsed);
+    private void setExpectedCRC32(String s) {
+        this.expectedCRC32 = BaseRomEntryReader.parseLong("0x" + s);
     }
 
 }
