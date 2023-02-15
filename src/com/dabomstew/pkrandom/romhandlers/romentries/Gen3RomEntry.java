@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 public class Gen3RomEntry extends AbstractGBRomEntry {
 
-    protected static class Gen3RomEntryReader<T extends Gen3RomEntry> extends RomEntryReader<T> {
+    protected static class Gen3RomEntryReader<T extends Gen3RomEntry> extends GBRomEntryReader<T> {
 
         public Gen3RomEntryReader(String fileName) throws IOException {
             super(fileName);
@@ -89,6 +89,15 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
 
     public Gen3RomEntry(String name) {
         super(name);
+    }
+
+    public Gen3RomEntry(Gen3RomEntry original) {
+        super(original);
+        this.tableFile = original.tableFile;
+        this.copyStaticPokemon = original.copyStaticPokemon;
+        staticPokemon.addAll(original.staticPokemon);
+        roamingPokemon.addAll(original.roamingPokemon);
+        tmmtTexts.addAll(original.tmmtTexts);
     }
 
     private void setRomType(String unparsed) {

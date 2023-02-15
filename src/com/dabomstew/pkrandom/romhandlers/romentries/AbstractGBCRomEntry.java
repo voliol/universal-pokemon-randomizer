@@ -8,11 +8,10 @@ import java.util.function.Function;
 
 public class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
-    protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends RomEntryReader<T> {
+    protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends GBRomEntryReader<T> {
 
         public GBCRomEntryReader(String fileName) throws IOException {
             super(fileName);
-            putSpecialKeyMethod("Game", RomEntry::setRomCode);
             putSpecialKeyMethod("NonJapanese", AbstractGBCRomEntry::setNonJapanese);
             putSpecialKeyMethod("ExtraTableFile", AbstractGBCRomEntry::setExtraTableFile);
             putSpecialKeyMethod("CRCInHeader", AbstractGBCRomEntry::setCRCInHeader);

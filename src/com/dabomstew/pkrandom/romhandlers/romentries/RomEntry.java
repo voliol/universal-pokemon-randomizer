@@ -19,6 +19,16 @@ public abstract class RomEntry {
         this.name = name;
     }
 
+    public RomEntry(RomEntry original) {
+        this.name = original.name;
+        this.romCode = original.romCode;
+        this.romType = original.romType;
+        intValues.putAll(original.intValues);
+        stringValues.putAll(original.stringValues);
+        arrayValues.putAll(original.arrayValues);
+        tweakFiles.putAll(original.tweakFiles);
+    }
+
     public String getName() {
         return name;
     }
@@ -61,6 +71,10 @@ public abstract class RomEntry {
         stringValues.put(key, value);
     }
 
+    public void putStringValue(String[] valuePair) {
+        putStringValue(valuePair[0], valuePair[1]);
+    }
+
     public int[] getArrayValue(String key) {
         if (!arrayValues.containsKey(key)) {
             arrayValues.put(key, new int[0]);
@@ -85,6 +99,10 @@ public abstract class RomEntry {
 
     public void putTweakFile(String key, String value) {
         tweakFiles.put(key, value);
+    }
+
+    public void putTweakFile(String[] valuePair) {
+        putTweakFile(valuePair[0], valuePair[1]);
     }
 
     public void copyFrom(RomEntry other) {

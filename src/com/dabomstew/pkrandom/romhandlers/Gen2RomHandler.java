@@ -81,10 +81,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // TODO proper error messaging
             e.printStackTrace();
         }
-
-        // TODO: add "Locator" and "Prefix" / RomEntry stingValue support.
-//        } else if (r[0].endsWith("Locator") || r[0].endsWith("Prefix")) {
-//            current.strings.put(r[0], r[1]);
     }
     
     // Sub-handlers

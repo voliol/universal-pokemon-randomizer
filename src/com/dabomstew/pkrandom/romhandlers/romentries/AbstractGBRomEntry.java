@@ -4,9 +4,9 @@ import java.io.IOException;
 
 public abstract class AbstractGBRomEntry extends RomEntry {
 
-    protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends RomEntryReader<T> {
+    protected abstract static class GBRomEntryReader<T extends AbstractGBRomEntry> extends RomEntryReader<T> {
 
-        public GBCRomEntryReader(String fileName) throws IOException {
+        public GBRomEntryReader(String fileName) throws IOException {
             super(fileName);
             putSpecialKeyMethod("Version", AbstractGBRomEntry::setVersion);
             putSpecialKeyMethod("CRC32", AbstractGBRomEntry::setExpectedCRC32);
@@ -18,6 +18,12 @@ public abstract class AbstractGBRomEntry extends RomEntry {
 
     public AbstractGBRomEntry(String name) {
         super(name);
+    }
+
+    public AbstractGBRomEntry(AbstractGBRomEntry original) {
+        super(original);
+        this.version = original.version;
+        this.expectedCRC32 = original.expectedCRC32;
     }
 
     public int getVersion() {
