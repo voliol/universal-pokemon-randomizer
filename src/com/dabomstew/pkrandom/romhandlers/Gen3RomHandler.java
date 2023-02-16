@@ -94,7 +94,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // TODO proper error messaging
             e.printStackTrace();
         }
-
     }
 
     private void loadTextTable(String filename) {

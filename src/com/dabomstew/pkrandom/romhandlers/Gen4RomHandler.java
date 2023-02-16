@@ -83,30 +83,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// TODO proper error messaging
 			e.printStackTrace();
 		}
-
-		// TODO: do something about Gen4 having string entries by default, and GB having ints.
-		
-//						} else {
-//							if (r[1].startsWith("[") && r[1].endsWith("]")) {
-//								String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-//								if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
-//									current.arrayEntries.put(r[0], new int[0]);
-//								} else {
-//									int[] offs = new int[offsets.length];
-//									int c = 0;
-//									for (String off : offsets) {
-//										offs[c++] = BaseRomEntryReader.parseInt(off);
-//									}
-//									current.arrayEntries.put(r[0], offs);
-//								}
-//							} else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")
-//									|| r[0].endsWith("Size") || r[0].endsWith("Index")) {
-//								int offs = BaseRomEntryReader.parseInt(r[1]);
-//								current.numbers.put(r[0], offs);
-//							} else {
-//								current.strings.put(r[0], r[1]);
-//							}
-//						}
 	}
 
 	// Sub-handlers

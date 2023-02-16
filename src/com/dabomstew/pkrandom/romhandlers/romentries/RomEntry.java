@@ -11,8 +11,8 @@ public abstract class RomEntry {
 
     protected abstract static class RomEntryReader<T extends RomEntry> extends BaseRomEntryReader<T> {
 
-        public RomEntryReader(String fileName) throws IOException {
-            super(fileName);
+        public RomEntryReader(String fileName, BaseRomEntryReader.DefaultReadMode defaultReadMode) throws IOException {
+            super(fileName, defaultReadMode);
             putSpecialKeyMethod("Game", RomEntry::setRomCode);
             putSpecialKeyMethod("Version", RomEntry::setVersion);
             putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
@@ -85,6 +85,10 @@ public abstract class RomEntry {
         intValues.put(key, value);
     }
 
+    protected void putIntValue(String[] valuePair) {
+        putIntValue(valuePair[0], BaseRomEntryReader.parseInt(valuePair[1]));
+    }
+
     public String getStringValue(String key) {
         if (!stringValues.containsKey(key)) {
             stringValues.put(key, "");
@@ -96,7 +100,7 @@ public abstract class RomEntry {
         stringValues.put(key, value);
     }
 
-    private void putStringValue(String[] valuePair) {
+    protected void putStringValue(String[] valuePair) {
         putStringValue(valuePair[0], valuePair[1]);
     }
 

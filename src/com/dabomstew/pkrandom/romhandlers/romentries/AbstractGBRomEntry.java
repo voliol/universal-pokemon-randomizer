@@ -7,7 +7,7 @@ public abstract class AbstractGBRomEntry extends RomEntry {
     protected abstract static class GBRomEntryReader<T extends AbstractGBRomEntry> extends RomEntryReader<T> {
 
         public GBRomEntryReader(String fileName) throws IOException {
-            super(fileName);
+            super(fileName, DefaultReadMode.INT);
             putSpecialKeyMethod("CRC32", AbstractGBRomEntry::setExpectedCRC32);
         }
     }

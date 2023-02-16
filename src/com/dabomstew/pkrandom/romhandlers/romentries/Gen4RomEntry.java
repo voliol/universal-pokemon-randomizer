@@ -31,6 +31,11 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
             putKeyPrefixMethod("File<", Gen4RomEntry::addFile);
             putKeyPrefixMethod("OverlayCRC32<", Gen4RomEntry::addOverlayExpectedCRC32);
             putKeySuffixMethod("MarillCryScripts", Gen4RomEntry::setMarillCryScriptEntries);
+            putKeySuffixMethod("Offset", RomEntry::putIntValue);
+            putKeySuffixMethod("Count", RomEntry::putIntValue);
+            putKeySuffixMethod("Number", RomEntry::putIntValue);
+            putKeySuffixMethod("Size", RomEntry::putIntValue);
+            putKeySuffixMethod("Index", RomEntry::putIntValue);
         }
 
         /**

@@ -46,9 +46,16 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
         return (parseInt(s) > 0);
     }
 
+    /**
+     * An enum for dictating whether to read values as ints or Strings by default.
+     * Protected so subclasses have to make the choice, instead of the code using them.
+     */
+    protected enum DefaultReadMode { INT, STRING }
+
     private static final String COMMENT_PREFIX = "//";
 
     private final Scanner scanner;
+    private final DefaultReadMode defaultReadMode;
     private T current;
     private Collection<T> romEntries;
 
@@ -56,8 +63,9 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
     private final Map<String, BiConsumer<T, String[]>> keySuffixMethods = new HashMap<>();
     private final Map<String, BiConsumer<T, String>> specialKeyMethods = new HashMap<>();
 
-    public BaseRomEntryReader(String fileName) throws IOException {
+    public BaseRomEntryReader(String fileName, BaseRomEntryReader.DefaultReadMode defaultReadMode) throws IOException {
         this.scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+        this.defaultReadMode = defaultReadMode;
         putSpecialKeyMethod("CopyFrom", this::copyFrom);
     }
 
@@ -174,7 +182,10 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
         if (isArrayValuePair(valuePair)) {
             addArrayValue(valuePair);
         } else {
-            addIntValue(valuePair);
+            switch (defaultReadMode) {
+                case INT -> addIntValue(valuePair);
+                case STRING -> addStringValue(valuePair);
+            }
         }
     }
 
@@ -182,7 +193,7 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
         return valuePair[1].startsWith("[") && valuePair[1].endsWith("]");
     }
 
-    private void addArrayValue(String[] valuePair) {
+    protected void addArrayValue(String[] valuePair) {
         String[] unparsed = valuePair[1].substring(1, valuePair[1].length() - 1).split(",");
         if (unparsed.length == 1 && unparsed[0].trim().isEmpty()) {
             current.putArrayValue(valuePair[0], new int[0]);
@@ -199,6 +210,11 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
     private void addIntValue(String[] valuePair) {
         int value = parseInt(valuePair[1]);
         current.putIntValue(valuePair[0], value);
+    }
+
+    // TODO: kind of redundant with private method in RomEntry class
+    private void addStringValue(String[] valuePair) {
+        current.putStringValue(valuePair[0], valuePair[1]);
     }
 
     private void copyFrom(T romEntry, String value) {
