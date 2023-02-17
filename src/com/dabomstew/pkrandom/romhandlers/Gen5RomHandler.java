@@ -27,12 +27,9 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -72,21 +69,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         super(random, logStream);
     }
 
-    public static class OffsetWithinEntry { // TODO: isn't this the same as ScriptInFileEntry???
-        private final int entry;
-        private final int offset;
-
-        public OffsetWithinEntry(int entry, int offset) {
-            this.entry = entry;
-            this.offset = offset;
-        }
-    }
-
-    private static class RomFileEntry {
-        public String path;
-        public long expectedCRC32;
-    }
-
     private static List<Gen5RomEntry> roms;
 
     static {
@@ -98,7 +80,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             Gen5RomEntry.readEntriesFromInfoFile("gen5_offsets.ini", roms);
         } catch (IOException e) {
-            // TODO proper error messaging
+            // TODO: proper error messaging
             e.printStackTrace();
         }
     }
@@ -586,8 +568,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         NARCArchive scriptNARC = scriptNarc;
         List<Pokemon> starters = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            OffsetWithinEntry[] thisStarter = romEntry.getOffsetArrayEntry("StarterOffsets" + (i + 1));
-            starters.add(pokes[readWord(scriptNARC.files.get(thisStarter[0].entry), thisStarter[0].offset)]);
+            InFileEntry[] thisStarter = romEntry.getOffsetArrayEntry("StarterOffsets" + (i + 1));
+            starters.add(pokes[readWord(scriptNARC.files.get(thisStarter[0].getFile()), thisStarter[0].getOffset())]);
         }
         return starters;
     }
@@ -603,9 +585,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             NARCArchive scriptNARC = scriptNarc;
             for (int i = 0; i < 3; i++) {
                 int starter = newStarters.get(i).getNumber();
-                OffsetWithinEntry[] thisStarter = romEntry.getOffsetArrayEntry("StarterOffsets" + (i + 1));
-                for (OffsetWithinEntry entry : thisStarter) {
-                    writeWord(scriptNARC.files.get(entry.entry), entry.offset, starter);
+                InFileEntry[] thisStarter = romEntry.getOffsetArrayEntry("StarterOffsets" + (i + 1));
+                for (InFileEntry entry : thisStarter) {
+                    writeWord(scriptNARC.files.get(entry.getFile()), entry.getOffset(), starter);
                 }
             }
             // GIVE ME BACK MY PURRLOIN
@@ -1557,9 +1539,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public static class RoamingPokemon {
         private int[] speciesOverlayOffsets;
         private int[] levelOverlayOffsets;
-        private ScriptInFileEntry[] speciesScriptOffsets;
+        private InFileEntry[] speciesScriptOffsets;
 
-        public RoamingPokemon(int[] speciesOverlayOffsets, int[] levelOverlayOffsets, ScriptInFileEntry[] speciesScriptOffsets) {
+        public RoamingPokemon(int[] speciesOverlayOffsets, int[] levelOverlayOffsets, InFileEntry[] speciesScriptOffsets) {
             this.speciesOverlayOffsets = speciesOverlayOffsets;
             this.levelOverlayOffsets = levelOverlayOffsets;
             this.speciesScriptOffsets = speciesScriptOffsets;
@@ -1578,7 +1560,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 parent.writeWord(overlay, speciesOverlayOffset, value);
             }
             parent.writeOverlay(parent.romEntry.getIntValue("RoamerOvlNumber"), overlay);
-            for (ScriptInFileEntry speciesScriptOffset : speciesScriptOffsets) {
+            for (InFileEntry speciesScriptOffset : speciesScriptOffsets) {
                 byte[] file = scriptNARC.files.get(speciesScriptOffset.getFile());
                 parent.writeWord(file, speciesScriptOffset.getOffset(), value);
             }

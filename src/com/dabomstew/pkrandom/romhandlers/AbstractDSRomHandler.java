@@ -56,7 +56,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x00, (byte) 0x00,
             (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
-    protected String dataFolder;
     private NDSRom baseRom;
     private String loadedFN;
     private boolean arm9Extended = false;
@@ -196,7 +195,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
     protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
 
-    protected int readWord(byte[] data, int offset) {
+    public int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
     }
 
@@ -209,7 +208,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return readLong(data, offset) + offset + 4;
     }
 
-    protected void writeWord(byte[] data, int offset, int value) {
+    public void writeWord(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
@@ -551,7 +550,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     // method is needed.
     // a refactoring might be better, but is outside of the scope for the changes
     // I'm making now
-    // - voliol 2022-01-13
+    // - voliol 2022-01-13 //TODO
     public abstract String getNARCPath(String fileName);
 
 }

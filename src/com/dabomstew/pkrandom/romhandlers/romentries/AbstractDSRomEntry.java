@@ -1,9 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
-
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,19 +27,19 @@ public class AbstractDSRomEntry extends RomEntry {
         }
 
         public static DSStaticPokemon parseStaticPokemon(String s) {
-            ScriptInFileEntry[] speciesEntries = new ScriptInFileEntry[0];
-            ScriptInFileEntry[] levelEntries = new ScriptInFileEntry[0];
-            ScriptInFileEntry[] formeEntries = new ScriptInFileEntry[0];
+            InFileEntry[] speciesEntries = new InFileEntry[0];
+            InFileEntry[] levelEntries = new InFileEntry[0];
+            InFileEntry[] formeEntries = new InFileEntry[0];
             String pattern = "[A-z]+=\\[([0-9]+:0x[0-9a-fA-F]+,?\\s?)+]";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(s);
             while (m.find()) {
                 String[] segments = m.group().split("=");
                 String[] offsets = segments[1].substring(1, segments[1].length() - 1).split(",");
-                ScriptInFileEntry[] entries = new ScriptInFileEntry[offsets.length];
+                InFileEntry[] entries = new InFileEntry[offsets.length];
                 for (int i = 0; i < entries.length; i++) {
                     String[] parts = offsets[i].split(":");
-                    entries[i] = new ScriptInFileEntry(BaseRomEntryReader.parseInt(parts[0]), BaseRomEntryReader.parseInt(parts[1]));
+                    entries[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]), BaseRomEntryReader.parseInt(parts[1]));
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesEntries = entries;
@@ -154,6 +153,13 @@ public class AbstractDSRomEntry extends RomEntry {
         staticPokemon.add(DSRomEntryReader.parseStaticPokemon(s));
     }
 
+    // Sub-optimal use of protection levels, this exists just to support removing game corner pokes in Gen4RomEntry.
+    // Should consider whether private fields like staticPokemon should just be protected to allow subclasses
+    // to use them directly.
+    protected void removeStaticPokemonIf(Predicate<DSStaticPokemon> filter) {
+        staticPokemon.removeIf(filter);
+    }
+
     @Override
     public void copyFrom(RomEntry other) {
         super.copyFrom(other);
@@ -161,9 +167,6 @@ public class AbstractDSRomEntry extends RomEntry {
             files.putAll(dsOther.files);
             if (isCopyStaticPokemon()) {
                 staticPokemon.addAll(dsOther.staticPokemon);
-//                if (ignoreGameCornerStatics) {
-//                    staticPokemon.removeIf(staticPokemon -> staticPokemon instanceof Gen4RomHandler.StaticPokemonGameCorner);
-//                } // TODO:reimplement
                 setStaticPokemonSupport(true);
             } else {
                 setStaticPokemonSupport(false);

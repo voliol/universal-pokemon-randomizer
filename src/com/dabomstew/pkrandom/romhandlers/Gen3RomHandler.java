@@ -186,7 +186,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public void loadedRom() {
         for (Gen3RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && (rom[0xBC] & 0xFF) == re.getVersion()) {
-                romEntry = new Gen3RomEntry(re); // clone so we can modify // TODO
+                romEntry = new Gen3RomEntry(re); // clone so we can modify
                 break;
             }
         }

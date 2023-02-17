@@ -16,8 +16,6 @@ public abstract class RomEntry {
             putSpecialKeyMethod("Game", RomEntry::setRomCode);
             putSpecialKeyMethod("Version", RomEntry::setVersion);
             putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
-            putKeySuffixMethod("Locator", RomEntry::putStringValue);
-            putKeySuffixMethod("Prefix", RomEntry::putStringValue);
         }
 
     }

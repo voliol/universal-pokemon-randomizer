@@ -39,8 +39,8 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
         }
 
         private static Gen4RomHandler.StaticPokemonGameCorner parseStaticPokemonGameCorner(String staticPokemonString) {
-            ScriptInFileEntry[] speciesEntries = new ScriptInFileEntry[0];
-            ScriptInFileEntry[] levelEntries = new ScriptInFileEntry[0];
+            InFileEntry[] speciesEntries = new InFileEntry[0];
+            InFileEntry[] levelEntries = new InFileEntry[0];
             Gen4RomHandler.TextEntry[] textEntries = new Gen4RomHandler.TextEntry[0];
             String pattern = "[A-z]+=\\[([0-9]+:0x[0-9a-fA-F]+,?\\s?)+]";
             Pattern r = Pattern.compile(pattern);
@@ -50,18 +50,18 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
                 String[] offsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 switch (segments[0]) {
                     case "Species" -> {
-                        speciesEntries = new ScriptInFileEntry[offsets.length];
+                        speciesEntries = new InFileEntry[offsets.length];
                         for (int i = 0; i < speciesEntries.length; i++) {
                             String[] parts = offsets[i].split(":");
-                            speciesEntries[i] = new ScriptInFileEntry(BaseRomEntryReader.parseInt(parts[0]),
+                            speciesEntries[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]),
                                     BaseRomEntryReader.parseInt(parts[1]));
                         }
                     }
                     case "Level" -> {
-                        levelEntries = new ScriptInFileEntry[offsets.length];
+                        levelEntries = new InFileEntry[offsets.length];
                         for (int i = 0; i < levelEntries.length; i++) {
                             String[] parts = offsets[i].split(":");
-                            levelEntries[i] = new ScriptInFileEntry(BaseRomEntryReader.parseInt(parts[0]),
+                            levelEntries[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]),
                                     BaseRomEntryReader.parseInt(parts[1]));
                         }
                     }
@@ -81,8 +81,8 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
         private static Gen4RomHandler.RoamingPokemon parseRoamingPokemon(String roamingPokemonString) {
             int[] speciesCodeOffsets = new int[0];
             int[] levelCodeOffsets = new int[0];
-            ScriptInFileEntry[] speciesScriptOffsets = new ScriptInFileEntry[0];
-            ScriptInFileEntry[] genderOffsets = new ScriptInFileEntry[0];
+            InFileEntry[] speciesScriptOffsets = new InFileEntry[0];
+            InFileEntry[] genderOffsets = new InFileEntry[0];
             String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]|[A-z]+=\\[([0-9]+:0x[0-9a-fA-F]+,?\\s?)+]";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(roamingPokemonString);
@@ -103,18 +103,18 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
                         }
                     }
                     case "Script" -> {
-                        speciesScriptOffsets = new ScriptInFileEntry[offsets.length];
+                        speciesScriptOffsets = new InFileEntry[offsets.length];
                         for (int i = 0; i < speciesScriptOffsets.length; i++) {
                             String[] parts = offsets[i].split(":");
-                            speciesScriptOffsets[i] = new ScriptInFileEntry(BaseRomEntryReader.parseInt(parts[0]),
+                            speciesScriptOffsets[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]),
                                     BaseRomEntryReader.parseInt(parts[1]));
                         }
                     }
                     case "Gender" -> {
-                        genderOffsets = new ScriptInFileEntry[offsets.length];
+                        genderOffsets = new InFileEntry[offsets.length];
                         for (int i = 0; i < genderOffsets.length; i++) {
                             String[] parts = offsets[i].split(":");
-                            genderOffsets[i] = new ScriptInFileEntry(BaseRomEntryReader.parseInt(parts[0]),
+                            genderOffsets[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]),
                                     BaseRomEntryReader.parseInt(parts[1]));
                         }
                     }
@@ -167,7 +167,7 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
     private final Map<Integer, Gen4RomHandler.TextEntry> tmTextsGameCorner = new HashMap<>();
     private final Map<Integer, Integer> tmScriptOffsetsFrontier = new HashMap<>();
     private final Map<Integer, Integer> tmTextsFrontier = new HashMap<>();
-    private final List<ScriptInFileEntry> marillCryScriptEntries = new ArrayList<>();
+    private final List<InFileEntry> marillCryScriptEntries = new ArrayList<>();
 
     public Gen4RomEntry(String name) {
         super(name);
@@ -249,8 +249,8 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
         }
     }
 
-    public List<ScriptInFileEntry> getMarillCryScriptEntries() {
-        return Collections.unmodifiableList(getMarillCryScriptEntries());
+    public List<InFileEntry> getMarillCryScriptEntries() {
+        return Collections.unmodifiableList(marillCryScriptEntries);
     }
 
     private void setMarillCryScriptEntries(String[] valuePair) {
@@ -260,7 +260,7 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
             String[] parts = off.split(":");
             int file = BaseRomEntryReader.parseInt(parts[0]);
             int offset = BaseRomEntryReader.parseInt(parts[1]);
-            ScriptInFileEntry entry = new ScriptInFileEntry(file, offset);
+            InFileEntry entry = new InFileEntry(file, offset);
             marillCryScriptEntries.add(entry);
         }
     }
@@ -269,6 +269,9 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
     public void copyFrom(RomEntry other) {
         super.copyFrom(other);
         if (other instanceof Gen4RomEntry gen4Other) {
+            if (isCopyStaticPokemon() && ignoreGameCornerStatics) {
+                removeStaticPokemonIf(staticPokemon -> staticPokemon instanceof Gen4RomHandler.StaticPokemonGameCorner);
+            }
             if (isCopyRoamingPokemon()) {
                 roamingPokemon.addAll(gen4Other.roamingPokemon);
             }

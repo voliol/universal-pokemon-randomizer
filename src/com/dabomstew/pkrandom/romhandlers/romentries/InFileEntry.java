@@ -1,11 +1,11 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-public class ScriptInFileEntry {
+public class InFileEntry {
 
     private final int file;
     private final int offset;
 
-    public ScriptInFileEntry(int file, int offset) {
+    public InFileEntry(int file, int offset) {
         this.file = file;
         this.offset = offset;
     }

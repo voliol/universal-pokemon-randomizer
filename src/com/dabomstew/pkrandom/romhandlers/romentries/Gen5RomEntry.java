@@ -38,7 +38,7 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
         private static Gen5RomHandler.RoamingPokemon parseRoamingPokemon(String s) {
             int[] speciesOverlayOffsets = new int[0];
             int[] levelOverlayOffsets = new int[0];
-            ScriptInFileEntry[] speciesScriptOffsets = new ScriptInFileEntry[0];
+            InFileEntry[] speciesScriptOffsets = new InFileEntry[0];
             String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]|[A-z]+=\\[([0-9]+:0x[0-9a-fA-F]+,?\\s?)+]";
             Pattern r = Pattern.compile(pattern);
             Matcher m = r.matcher(s);
@@ -59,10 +59,10 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
                         }
                     }
                     case "Script" -> {
-                        speciesScriptOffsets = new ScriptInFileEntry[offsets.length];
+                        speciesScriptOffsets = new InFileEntry[offsets.length];
                         for (int i = 0; i < speciesScriptOffsets.length; i++) {
                             String[] parts = offsets[i].split(":");
-                            speciesScriptOffsets[i] = new ScriptInFileEntry(BaseRomEntryReader.parseInt(parts[0]),
+                            speciesScriptOffsets[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]),
                                     BaseRomEntryReader.parseInt(parts[1]));
                         }
                     }
@@ -82,7 +82,7 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
     private final List<DSStaticPokemon> staticPokemonFakeBall = new ArrayList<>();
     private final List<Gen5RomHandler.RoamingPokemon> roamingPokemon = new ArrayList<>();
     private final List<Gen5RomHandler.TradeScript> tradeScripts = new ArrayList<>();
-    private final Map<String, Gen5RomHandler.OffsetWithinEntry[]> offsetArrayEntries = new HashMap<>();
+    private final Map<String, InFileEntry[]> offsetArrayEntries = new HashMap<>();
 
     public Gen5RomEntry(String name) {
         super(name);
@@ -143,19 +143,19 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
         tradeScripts.add(new Gen5RomHandler.TradeScript(fileNum, requestedOffsets, givenOffsets));
     }
 
-    public Gen5RomHandler.OffsetWithinEntry[] getOffsetArrayEntry(String key) {
+    public InFileEntry[] getOffsetArrayEntry(String key) {
         return offsetArrayEntries.get(key);
     }
 
     private void addStarterOffsets(String[] valuePair) {
         String[] offsets = valuePair[1].substring(1, valuePair[1].length() - 1).split(",");
-        Gen5RomHandler.OffsetWithinEntry[] offs = new Gen5RomHandler.OffsetWithinEntry[offsets.length];
+        InFileEntry[] offs = new InFileEntry[offsets.length];
         int c = 0;
         for (String off : offsets) {
             String[] parts = off.split(":");
             int entry = BaseRomEntryReader.parseInt(parts[0]);
             int offset = BaseRomEntryReader.parseInt(parts[1]);
-            offs[c++] = new Gen5RomHandler.OffsetWithinEntry(entry, offset);
+            offs[c++] = new InFileEntry(entry, offset);
         }
         offsetArrayEntries.put(valuePair[0], offs);
     }

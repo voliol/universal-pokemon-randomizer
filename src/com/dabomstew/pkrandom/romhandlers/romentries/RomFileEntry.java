@@ -2,8 +2,8 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 public class RomFileEntry {
 
-    private String path;
-    private long expectedCRC32;
+    private final String path;
+    private final long expectedCRC32;
 
     public RomFileEntry() {
         this("", 0);

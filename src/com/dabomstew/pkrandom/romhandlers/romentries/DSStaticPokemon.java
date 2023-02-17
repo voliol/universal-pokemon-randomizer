@@ -3,30 +3,30 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 
 public class DSStaticPokemon {
 
-    protected ScriptInFileEntry[] speciesEntries;
-    protected ScriptInFileEntry[] formeEntries;
-    protected ScriptInFileEntry[] levelEntries;
+    protected InFileEntry[] speciesEntries;
+    protected InFileEntry[] formeEntries;
+    protected InFileEntry[] levelEntries;
 
-    public DSStaticPokemon(ScriptInFileEntry[] speciesEntries, ScriptInFileEntry[] formeEntries, ScriptInFileEntry[] levelEntries) {
+    public DSStaticPokemon(InFileEntry[] speciesEntries, InFileEntry[] formeEntries, InFileEntry[] levelEntries) {
         this.speciesEntries = speciesEntries;
         this.formeEntries = formeEntries;
         this.levelEntries = levelEntries;
     }
 
     public Pokemon getPokemon(AbstractDSRomHandler parent, NARCArchive scriptNARC) {
+        // TODO: made AbstractDSRomHandler.readWord/writeWord public for this to work. Kind of ugly.
         return parent.getPokemon().get(parent.readWord(scriptNARC.files.get(speciesEntries[0].getFile()),
                 speciesEntries[0].getOffset()));
     }
 
-    public void setPokemon(AbstractDSRomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
-        int value = pkmn.getNumber();
-        for (int i = 0; i < speciesEntries.length; i++) {
-            byte[] file = scriptNARC.files.get(speciesEntries[i].getFile());
-            parent.writeWord(file, speciesEntries[i].getOffset(), value);
+    public void setPokemon(AbstractDSRomHandler parent, NARCArchive scriptNARC, Pokemon pk) {
+        int value = pk.getNumber();
+        for (InFileEntry speciesEntry : speciesEntries) {
+            byte[] file = scriptNARC.files.get(speciesEntry.getFile());
+            parent.writeWord(file, speciesEntry.getOffset(), value);
         }
     }
 
@@ -39,9 +39,9 @@ public class DSStaticPokemon {
     }
 
     public void setForme(NARCArchive scriptNARC, int forme) {
-        for (int i = 0; i < formeEntries.length; i++) {
-            byte[] file = scriptNARC.files.get(formeEntries[i].getFile());
-            file[formeEntries[i].getOffset()] = (byte) forme;
+        for (InFileEntry formeEntry : formeEntries) {
+            byte[] file = scriptNARC.files.get(formeEntry.getFile());
+            file[formeEntry.getOffset()] = (byte) forme;
         }
     }
 

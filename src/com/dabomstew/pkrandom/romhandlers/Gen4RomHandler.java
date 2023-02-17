@@ -34,10 +34,10 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.AbstractDSRomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen4RomEntry;
-import com.dabomstew.pkrandom.romhandlers.romentries.ScriptInFileEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
@@ -77,7 +77,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private static void loadROMInfo() {
-
 		roms = new ArrayList<>();
 		try {
 			Gen4RomEntry.readEntriesFromInfoFile("gen4_offsets.ini", roms);
@@ -3002,79 +3001,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	public static class StaticPokemon extends DSStaticPokemon {
-
-		public StaticPokemon(ScriptInFileEntry[] speciesEntries, ScriptInFileEntry[] formeEntries, ScriptInFileEntry[] levelEntries) {
-			super(speciesEntries, formeEntries, levelEntries);
-		}
-
-		public Pokemon getPokemon(Gen4RomHandler parent, NARCArchive scriptNARC) {
-			return parent.pokes[parent.readWord(scriptNARC.files.get(speciesEntries[0].getFile()),
-					speciesEntries[0].getOffset())];
-		}
-
-		public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
-			int value = pkmn.getNumber();
-			for (int i = 0; i < speciesEntries.length; i++) {
-				byte[] file = scriptNARC.files.get(speciesEntries[i].getFile());
-				parent.writeWord(file, speciesEntries[i].getOffset(), value);
-			}
-		}
-
-		public int getForme(NARCArchive scriptNARC) {
-			if (formeEntries.length == 0) {
-				return 0;
-			}
-			byte[] file = scriptNARC.files.get(formeEntries[0].getFile());
-			return file[formeEntries[0].getOffset()];
-		}
-
-		public void setForme(NARCArchive scriptNARC, int forme) {
-			for (int i = 0; i < formeEntries.length; i++) {
-				byte[] file = scriptNARC.files.get(formeEntries[i].getFile());
-				file[formeEntries[i].getOffset()] = (byte) forme;
-			}
-		}
-
-		public int getLevelCount() {
-			return levelEntries.length;
-		}
-
-		public int getLevel(NARCArchive scriptNARC, int i) {
-			if (levelEntries.length <= i) {
-				return 1;
-			}
-			byte[] file = scriptNARC.files.get(levelEntries[i].getFile());
-			return file[levelEntries[i].getOffset()];
-		}
-
-		public void setLevel(NARCArchive scriptNARC, int level, int i) {
-			if (levelEntries.length > i) { // Might not have a level entry e.g., it's an egg
-				byte[] file = scriptNARC.files.get(levelEntries[i].getFile());
-				file[levelEntries[i].getOffset()] = (byte) level;
-			}
-		}
-	}
-
-	public static class StaticPokemonGameCorner extends StaticPokemon {
+	public static class StaticPokemonGameCorner extends DSStaticPokemon {
 		private TextEntry[] textEntries;
 
-		public StaticPokemonGameCorner(ScriptInFileEntry[] speciesEntries, ScriptInFileEntry[] levelEntries, TextEntry[] textEntries) {
-			super(speciesEntries, new ScriptInFileEntry[0], levelEntries);
+		public StaticPokemonGameCorner(InFileEntry[] speciesEntries, InFileEntry[] levelEntries, TextEntry[] textEntries) {
+			super(speciesEntries, new InFileEntry[0], levelEntries);
 			this.textEntries = textEntries;
 		}
 
 		@Override
-		public void setPokemon(Gen4RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
+		public void setPokemon(AbstractDSRomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
 			super.setPokemon(parent, scriptNARC, pkmn);
 			for (TextEntry textEntry : textEntries) {
-				List<String> strings = parent.getStrings(textEntry.textIndex);
+				List<String> strings = ((Gen4RomHandler) parent).getStrings(textEntry.textIndex);
 				String originalString = strings.get(textEntry.stringNumber);
 				// For JP, the first thing after the name is "\x0001". For non-JP, it's "\v0203"
 				int postNameIndex = originalString.indexOf("\\");
 				String newString = pkmn.getName().toUpperCase() + originalString.substring(postNameIndex);
 				strings.set(textEntry.stringNumber, newString);
-				parent.setStrings(textEntry.textIndex, strings);
+				((Gen4RomHandler) parent).setStrings(textEntry.textIndex, strings);
 			}
 		}
 	}
@@ -3082,11 +3027,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public static class RoamingPokemon {
 		private int[] speciesCodeOffsets;
 		private int[] levelCodeOffsets;
-		private ScriptInFileEntry[] speciesScriptOffsets;
-		private ScriptInFileEntry[] genderOffsets;
+		private InFileEntry[] speciesScriptOffsets;
+		private InFileEntry[] genderOffsets;
 
-		public RoamingPokemon(int[] speciesCodeOffsets, int[] levelCodeOffsets, ScriptInFileEntry[] speciesScriptOffsets,
-							  ScriptInFileEntry[] genderOffsets) {
+		public RoamingPokemon(int[] speciesCodeOffsets, int[] levelCodeOffsets, InFileEntry[] speciesScriptOffsets,
+							  InFileEntry[] genderOffsets) {
 			this.speciesCodeOffsets = speciesCodeOffsets;
 			this.levelCodeOffsets = levelCodeOffsets;
 			this.speciesScriptOffsets = speciesScriptOffsets;
@@ -3103,7 +3048,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			for (int speciesCodeOffset : speciesCodeOffsets) {
 				parent.writeWord(parent.arm9, speciesCodeOffset, value);
 			}
-			for (ScriptInFileEntry speciesScriptOffset : speciesScriptOffsets) {
+			for (InFileEntry speciesScriptOffset : speciesScriptOffsets) {
 				byte[] file = scriptNARC.files.get(speciesScriptOffset.getFile());
 				parent.writeWord(file, speciesScriptOffset.getOffset(), value);
 			}
@@ -3111,7 +3056,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (pkmn.getGenderRatio() == 0xFE) {
 				gender = 1; // female
 			}
-			for (ScriptInFileEntry genderOffset : genderOffsets) {
+			for (InFileEntry genderOffset : genderOffsets) {
 				byte[] file = scriptNARC.files.get(genderOffset.getFile());
 				parent.writeWord(file, genderOffset.getOffset(), gender);
 			}
@@ -3142,7 +3087,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			NARCArchive scriptNARC = scriptNarc;
 			for (int i = 0; i < romEntry.getStaticPokemon().size(); i++) {
 				int currentOffset = i;
-				StaticPokemon statP = romEntry.getStaticPokemon().get(i);
+				DSStaticPokemon statP = romEntry.getStaticPokemon().get(i);
 				StaticEncounter se = new StaticEncounter();
 				Pokemon newPK = statP.getPokemon(this, scriptNARC);
 				newPK = getAltFormeOfPokemon(newPK, statP.getForme(scriptNARC));
@@ -3218,7 +3163,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			Iterator<StaticEncounter> statics = staticPokemon.iterator();
 			NARCArchive scriptNARC = scriptNarc;
-			for (StaticPokemon statP : romEntry.getStaticPokemon()) {
+			for (DSStaticPokemon statP : romEntry.getStaticPokemon()) {
 				StaticEncounter se = statics.next();
 				statP.setPokemon(this, scriptNARC, se.pkmn);
 				statP.setForme(scriptNARC, se.pkmn.getFormeNumber());
@@ -4501,7 +4446,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// Now modify the Marill's cry in every script it appears in to ensure
 				// consistency
 				int marillReplacementId = Gen4Constants.convertOverworldSpriteToSpecies(marillReplacement);
-				for (ScriptInFileEntry entry : romEntry.getMarillCryScriptEntries()) {
+				for (InFileEntry entry : romEntry.getMarillCryScriptEntries()) {
 					byte[] script = scriptNarc.files.get(entry.getFile());
 					writeWord(script, entry.getOffset(), marillReplacementId);
 					scriptNarc.files.set(entry.getFile(), script);
