@@ -1598,16 +1598,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return "Pokemon " + romEntry.getName();
     }
 
-    @Override
-    public String getROMCode() {
-        return romEntry.getRomCode();
-    }
-
-    @Override
-    public String getSupportLevel() {
-        return "Complete";
-    }
-
     private static int find(byte[] haystack, String hexString) {
         if (hexString.length() % 2 != 0) {
             return -3; // error
@@ -2846,6 +2836,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 	    return paletteHandler;
 	}
 
+    @Override
+    public Gen2RomEntry getRomEntry() {
+        return romEntry;
+    }
+
 	@Override
 	public boolean isRomValid() {
 		return romEntry.getExpectedCRC32() == actualCRC32;
@@ -2860,4 +2855,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 			}
 		}
     }
+
+
 }

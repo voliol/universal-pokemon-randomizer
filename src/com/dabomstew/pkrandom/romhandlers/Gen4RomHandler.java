@@ -34,10 +34,7 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.AbstractDSRomEntry;
-import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen4RomEntry;
-import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
@@ -3724,21 +3721,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public String getROMName() {
-		return "Pokemon " + romEntry.getName();
-	}
-
-	@Override
-	public String getROMCode() {
-		return romEntry.getRomCode();
-	}
-
-	@Override
-	public String getSupportLevel() {
-		return romEntry.hasStaticPokemonSupport() ? "Complete" : "No Static Pokemon";
-	}
-
-	@Override
 	public boolean hasTimeBasedEncounters() {
 		// dppt technically do but we ignore them completely
 		return romEntry.getRomType() == Gen4Constants.Type_HGSS;
@@ -5443,10 +5425,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return items;
 	}
 
-	public String getNARCPath(String fileName) {
-		return romEntry.getFile(fileName);
-	}
-
 	protected int calculatePokemonNormalPaletteIndex(int i) {
 		return i * 6 + 4;
 	}
@@ -5645,6 +5623,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public PaletteHandler getPaletteHandler() {
 		return paletteHandler;
+	}
+
+	@Override
+	public Gen4RomEntry getRomEntry() {
+		return romEntry;
 	}
 
 }

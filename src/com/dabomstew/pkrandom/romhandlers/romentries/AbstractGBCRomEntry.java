@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AbstractGBCRomEntry extends AbstractGBRomEntry {
+public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
     protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends GBRomEntryReader<T> {
 

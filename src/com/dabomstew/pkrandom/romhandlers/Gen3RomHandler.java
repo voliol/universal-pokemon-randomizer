@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen1RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
@@ -2575,23 +2576,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    @Override
-    public String getROMName() {
-        // TODO: one of several methods which is identical between the RomHandlers,
-        //  just because the RomEntry classes are strangely separated.
-        return "Pokemon " + romEntry.getName();
-    }
-
-    @Override
-    public String getROMCode() {
-        return romEntry.getRomCode();
-    }
-
-    @Override
-    public String getSupportLevel() {
-        return (romEntry.getIntValue("StaticPokemonSupport") > 0) ? "Complete" : "No Static Pokemon";
-    }
-
     // For dynamic offsets later
     private int find(String hexString) {
         return find(rom, hexString);
@@ -4327,6 +4311,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;
+    }
+
+    @Override
+    public Gen3RomEntry getRomEntry() {
+        return romEntry;
     }
 
 	@Override

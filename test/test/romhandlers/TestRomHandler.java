@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
@@ -597,5 +598,10 @@ public class TestRomHandler extends AbstractRomHandler {
     @Override
     protected boolean saveRomDirectory(String filename) {
         return false;
+    }
+
+    @Override
+    protected RomEntry getRomEntry() {
+        return null;
     }
 }

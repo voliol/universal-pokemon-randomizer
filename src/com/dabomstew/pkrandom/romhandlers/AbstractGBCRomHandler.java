@@ -33,6 +33,7 @@ import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
+import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
@@ -218,6 +219,14 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
             return false;
         }
 
+    }
+
+    @Override
+    public abstract AbstractGBCRomEntry getRomEntry();
+
+    @Override
+    public String getROMCode() {
+        return getRomEntry().getRomCode() + " (" + getRomEntry().getVersion() + "/" + getRomEntry().getNonJapanese() + ")";
     }
 
 }

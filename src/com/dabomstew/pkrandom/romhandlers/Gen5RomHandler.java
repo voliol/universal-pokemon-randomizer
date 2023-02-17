@@ -2638,21 +2638,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public String getROMName() {
-        return "Pokemon " + romEntry.getName();
-    }
-
-    @Override
-    public String getROMCode() {
-        return romEntry.getRomCode();
-    }
-
-    @Override
-    public String getSupportLevel() {
-        return romEntry.hasStaticPokemonSupport() ? "Complete" : "No Static Pokemon";
-    }
-
-    @Override
     public boolean hasTimeBasedEncounters() {
         return true; // All BW/BW2 do [seasons]
     }
@@ -3944,10 +3929,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return items;
     }
     
-    public String getNARCPath(String fileName) {
-        return romEntry.getFile(fileName);
-    }
-    
     protected int calculatePokemonNormalPaletteIndex(int i) {
         return i * 20 + 18;
     }
@@ -4034,6 +4015,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;
+    }
+
+    @Override
+    public Gen5RomEntry getRomEntry() {
+        return romEntry;
     }
     
 }

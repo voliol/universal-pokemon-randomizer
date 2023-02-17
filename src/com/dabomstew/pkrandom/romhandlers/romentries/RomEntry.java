@@ -132,6 +132,8 @@ public abstract class RomEntry {
         putTweakFile(valuePair[0], valuePair[1]);
     }
 
+    public abstract boolean hasStaticPokemonSupport();
+
     public void copyFrom(RomEntry other) {
         intValues.putAll(other.intValues);
         stringValues.putAll(other.stringValues);

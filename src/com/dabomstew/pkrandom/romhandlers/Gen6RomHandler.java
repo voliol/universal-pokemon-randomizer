@@ -4245,4 +4245,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
         return items;
     }
+
+    @Override
+    protected com.dabomstew.pkrandom.romhandlers.romentries.RomEntry getRomEntry() {
+        throw new UnsupportedOperationException("Gen6RomHandler RomEntry class not part of the RomEntry framework.");
+    }
 }

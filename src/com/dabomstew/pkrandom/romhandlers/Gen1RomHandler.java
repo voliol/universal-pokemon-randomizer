@@ -1610,21 +1610,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // Do nothing
     }
 
-    @Override
-    public String getROMName() {
-        return "Pokemon " + romEntry.getName();
-    }
-
-    @Override
-    public String getROMCode() {
-        return romEntry.getRomCode() + " (" + romEntry.getVersion() + "/" + romEntry.getNonJapanese() + ")";
-    }
-
-    @Override
-    public String getSupportLevel() {
-        return (romEntry.getIntValue("StaticPokemonSupport") > 0) ? "Complete" : "No Static Pokemon";
-    }
-
     private static int find(byte[] haystack, String hexString) {
         if (hexString.length() % 2 != 0) {
             return -3; // error
@@ -2772,6 +2757,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 	public PaletteHandler getPaletteHandler() {
 	    return paletteHandler;
 	}
+
+    @Override
+    public Gen1RomEntry getRomEntry() {
+        return romEntry;
+    }
 
 	@Override
 	public boolean isRomValid() {

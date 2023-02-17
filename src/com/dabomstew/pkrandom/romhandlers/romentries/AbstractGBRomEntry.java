@@ -27,6 +27,11 @@ public abstract class AbstractGBRomEntry extends RomEntry {
         this.expectedCRC32 = original.expectedCRC32;
     }
 
+    @Override
+    public boolean hasStaticPokemonSupport() {
+        return getIntValue("StaticPokemonSupport") > 0;
+    }
+
     public long getExpectedCRC32() {
         return expectedCRC32;
     }
