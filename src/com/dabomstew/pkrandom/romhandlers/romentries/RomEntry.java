@@ -11,8 +11,9 @@ public abstract class RomEntry {
 
     protected abstract static class RomEntryReader<T extends RomEntry> extends BaseRomEntryReader<T> {
 
-        public RomEntryReader(String fileName, BaseRomEntryReader.DefaultReadMode defaultReadMode) throws IOException {
-            super(fileName, defaultReadMode);
+        public RomEntryReader(String fileName, DefaultReadMode defaultReadMode, CopyFromMode copyFromMode)
+                throws IOException {
+            super(fileName, defaultReadMode, copyFromMode);
             putSpecialKeyMethod("Game", RomEntry::setRomCode);
             putSpecialKeyMethod("Version", RomEntry::setVersion);
             putKeySuffixMethod("Tweak", RomEntry::putTweakFile);

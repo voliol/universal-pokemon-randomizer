@@ -13,7 +13,7 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
     protected static class Gen4RomEntryReader<T extends Gen4RomEntry> extends DSRomEntryReader<T> {
 
         public Gen4RomEntryReader(String fileName) throws IOException {
-            super(fileName);
+            super(fileName, CopyFromMode.NAME);
             putSpecialKeyMethod("Type", Gen4RomEntry::setRomType);
             putSpecialKeyMethod("CopyText", Gen4RomEntry::setCopyText);
             putSpecialKeyMethod("IgnoreGameCornerStatics", Gen4RomEntry::setIgnoreGameCornerStatics);

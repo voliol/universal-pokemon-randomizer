@@ -52,10 +52,13 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
      */
     protected enum DefaultReadMode { INT, STRING }
 
+    protected enum CopyFromMode { NAME, ROMCODE }
+
     private static final String COMMENT_PREFIX = "//";
 
     private final Scanner scanner;
     private final DefaultReadMode defaultReadMode;
+    private final CopyFromMode copyFromMode;
     private T current;
     private Collection<T> romEntries;
 
@@ -63,9 +66,11 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
     private final Map<String, BiConsumer<T, String[]>> keySuffixMethods = new HashMap<>();
     private final Map<String, BiConsumer<T, String>> specialKeyMethods = new HashMap<>();
 
-    public BaseRomEntryReader(String fileName, BaseRomEntryReader.DefaultReadMode defaultReadMode) throws IOException {
+    public BaseRomEntryReader(String fileName, DefaultReadMode defaultReadMode,
+                              CopyFromMode copyFromMode) throws IOException {
         this.scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
         this.defaultReadMode = defaultReadMode;
+        this.copyFromMode = copyFromMode;
         putSpecialKeyMethod("CopyFrom", this::copyFrom);
     }
 
@@ -219,10 +224,17 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
 
     private void copyFrom(T romEntry, String value) {
         for (T other : romEntries) {
-            if (value.equalsIgnoreCase(other.getName())) {
+            if (matchesCopyFromValue(other, value)) {
                 romEntry.copyFrom(other);
             }
         }
+    }
+
+    private boolean matchesCopyFromValue(T other, String value) {
+        return switch (copyFromMode) {
+            case NAME -> value.equalsIgnoreCase(other.getName());
+            case ROMCODE -> value.equals(other.getRomCode());
+        };
     }
 
 }

@@ -7,7 +7,7 @@ public abstract class AbstractGBRomEntry extends RomEntry {
     protected abstract static class GBRomEntryReader<T extends AbstractGBRomEntry> extends RomEntryReader<T> {
 
         public GBRomEntryReader(String fileName) throws IOException {
-            super(fileName, DefaultReadMode.INT);
+            super(fileName, DefaultReadMode.INT, CopyFromMode.NAME);
             putSpecialKeyMethod("CRC32", AbstractGBRomEntry::setExpectedCRC32);
             putKeySuffixMethod("Locator", RomEntry::putStringValue);
             putKeySuffixMethod("Prefix", RomEntry::putStringValue);

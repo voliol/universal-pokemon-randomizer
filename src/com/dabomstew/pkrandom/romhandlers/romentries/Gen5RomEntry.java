@@ -13,7 +13,7 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
     protected static class Gen5RomEntryReader<T extends Gen5RomEntry> extends DSRomEntryReader<T> {
 
         public Gen5RomEntryReader(String fileName) throws IOException {
-            super(fileName);
+            super(fileName, CopyFromMode.ROMCODE);
             putSpecialKeyMethod("Type", Gen5RomEntry::setRomType);
             putSpecialKeyMethod("IsBlack", Gen5RomEntry::setBlack);
             putSpecialKeyMethod("CopyTradeScripts", Gen5RomEntry::setCopyTradeScripts);

@@ -10,8 +10,8 @@ public class AbstractDSRomEntry extends RomEntry {
 
     protected abstract static class DSRomEntryReader<T extends AbstractDSRomEntry> extends RomEntryReader<T> {
 
-        public DSRomEntryReader(String fileName) throws IOException {
-            super(fileName, DefaultReadMode.STRING);
+        public DSRomEntryReader(String fileName, CopyFromMode copyFromMode) throws IOException {
+            super(fileName, DefaultReadMode.STRING, copyFromMode);
             putSpecialKeyMethod("Arm9CRC32", AbstractDSRomEntry::setArm9ExpectedCRC32);
             putSpecialKeyMethod("StaticPokemonSupport", AbstractDSRomEntry::setStaticPokemonSupport);
             putSpecialKeyMethod("CopyStaticPokemon", AbstractDSRomEntry::setCopyStaticPokemon);
@@ -106,7 +106,7 @@ public class AbstractDSRomEntry extends RomEntry {
 
     public String getFile(String key) {
         if (!files.containsKey(key)) {
-            files.put(key, new RomFileEntry());
+            throw new IllegalArgumentException("File \"" + key + "\" does not exist.");
         }
         return files.get(key).getPath();
     }
