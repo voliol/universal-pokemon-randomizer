@@ -44,6 +44,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.BasicPokemonAction;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.EvolvedPokemonAction;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -7074,5 +7075,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 	protected abstract boolean saveRomFile(String filename, long seed);
 	
 	protected abstract boolean saveRomDirectory(String filename);
+
+    protected abstract RomEntry getRomEntry();
+
+    @Override
+    public String getROMName() {
+        return "Pokemon " + getRomEntry().getName();
+    }
+
+    @Override
+    public String getROMCode() {
+        return getRomEntry().getRomCode();
+    }
+
+    @Override
+    public String getSupportLevel() {
+        return getRomEntry().hasStaticPokemonSupport() ? "Complete" : "No Static Pokemon";
+    }
 	
 }
