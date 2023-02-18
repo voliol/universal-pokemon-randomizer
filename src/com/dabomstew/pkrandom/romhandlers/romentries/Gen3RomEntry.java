@@ -100,7 +100,8 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         tmmtTexts.addAll(original.tmmtTexts);
     }
 
-    private void setRomType(String s) {
+    @Override
+    protected void setRomType(String s) {
         if (s.equalsIgnoreCase("Ruby")) {
             setRomType(Gen3Constants.RomType_Ruby);
         } else if (s.equalsIgnoreCase("Sapp")) {

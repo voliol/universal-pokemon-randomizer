@@ -173,7 +173,8 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
         super(name);
     }
 
-    private void setRomType(String s) {
+    @Override
+    protected void setRomType(String s) {
         if (s.equalsIgnoreCase("DP")) {
             setRomType(Gen4Constants.Type_DP);
         } else if (s.equalsIgnoreCase("Plat")) {

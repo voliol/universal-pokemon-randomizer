@@ -16,6 +16,7 @@ public abstract class RomEntry {
             super(fileName, defaultReadMode, copyFromMode);
             putSpecialKeyMethod("Game", RomEntry::setRomCode);
             putSpecialKeyMethod("Version", RomEntry::setVersion);
+            putSpecialKeyMethod("Type", RomEntry::setRomType);
             putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
         }
 
@@ -72,6 +73,8 @@ public abstract class RomEntry {
     public void setRomType(int romType) {
         this.romType = romType;
     }
+
+    protected abstract void setRomType(String s);
 
     public int getIntValue(String key) {
         if (!intValues.containsKey(key)) {

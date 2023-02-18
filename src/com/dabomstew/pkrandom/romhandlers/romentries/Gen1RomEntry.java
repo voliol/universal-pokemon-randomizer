@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import com.dabomstew.pkrandom.constants.Gen1Constants;
+import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 
@@ -14,7 +16,6 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
 
         public Gen1RomEntryReader(String fileName) throws IOException {
             super(fileName);
-            putSpecialKeyMethod("Type", Gen1RomEntry::setYellow);
             putSpecialKeyMethod("StaticPokemon{}", Gen1RomEntry::addStaticPokemon);
             putSpecialKeyMethod("StaticPokemonGhostMarowak{}", Gen1RomEntry::addStaticPokemonGhostMarowak);
             putSpecialKeyMethod("ExtraTypes", Gen1RomEntry::addExtraTypes);
@@ -59,7 +60,6 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
         rer.readAllRomEntries(romEntries);
     }
 
-    private boolean yellow;
     private final List<Gen1RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
     private int[] ghostMarowakOffsets = new int[0];
     private final Map<Integer, Type> extraTypeLookup = new HashMap<>();
@@ -70,11 +70,17 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
     }
 
     public boolean isYellow() {
-        return yellow;
+        return romType == Gen1Constants.Type_Yellow;
     }
-
-    private void setYellow(String s) {
-        yellow = s.equalsIgnoreCase("Yellow");
+    @Override
+    protected void setRomType(String s) {
+        if (s.equalsIgnoreCase("RB")) {
+            setRomType(Gen1Constants.Type_RB);
+        } else if (s.equalsIgnoreCase("Yellow")) {
+            setRomType(Gen1Constants.Type_Yellow);
+        } else {
+            System.err.println("unrecognised rom type: " + s);
+        }
     }
 
     public List<Gen1RomHandler.StaticPokemon> getStaticPokemon() {

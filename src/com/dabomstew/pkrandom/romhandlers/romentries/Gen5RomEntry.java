@@ -88,11 +88,14 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
         super(name);
     }
 
-    private void setRomType(String s) {
-        if (s.equalsIgnoreCase("BW2")) {
+    @Override
+    protected void setRomType(String s) {
+        if (s.equalsIgnoreCase("BW1")) {
+            setRomType(Gen5Constants.Type_BW);
+        } else if (s.equalsIgnoreCase("BW2")) {
             setRomType(Gen5Constants.Type_BW2);
         } else {
-            setRomType(Gen5Constants.Type_BW);
+            System.err.println("unrecognised rom type: " + s);
         }
     }
 

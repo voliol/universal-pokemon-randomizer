@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
 
         public Gen2RomEntryReader(String fileName) throws IOException {
             super(fileName);
-            putSpecialKeyMethod("Type", Gen2RomEntry::setCrystal);
             putSpecialKeyMethod("StaticPokemon{}", Gen2RomEntry::addStaticPokemon);
             putSpecialKeyMethod("StaticPokemonGameCorner{}", Gen2RomEntry::addStaticPokemonGameCorner);
         }
@@ -67,7 +67,6 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
         rer.readAllRomEntries(romEntries);
     }
 
-    private boolean crystal;
     private final List<Gen2RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
 
     public Gen2RomEntry(String name) {
@@ -75,11 +74,18 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
     }
 
     public boolean isCrystal() {
-        return crystal;
+        return romType == Gen2Constants.Type_Crystal;
     }
 
-    private void setCrystal(String s) {
-        crystal = s.equalsIgnoreCase("Crystal");
+    @Override
+    protected void setRomType(String s) {
+        if (s.equalsIgnoreCase("GS")) {
+            setRomType(Gen2Constants.Type_GS);
+        } else if (s.equalsIgnoreCase("Yellow")) {
+            setRomType(Gen2Constants.Type_Crystal);
+        } else {
+            System.err.println("unrecognised rom type: " + s);
+        }
     }
 
     public List<Gen2RomHandler.StaticPokemon> getStaticPokemon() {

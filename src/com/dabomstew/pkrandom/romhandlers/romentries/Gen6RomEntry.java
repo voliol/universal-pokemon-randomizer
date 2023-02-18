@@ -36,11 +36,14 @@ public class Gen6RomEntry extends Abstract3DSRomEntry {
         super(name);
     }
 
-    private void setRomType(String s) {
-        if (s.equalsIgnoreCase("ORAS")) {
+    @Override
+    protected void setRomType(String s) {
+        if (s.equalsIgnoreCase("XY")) {
+            setRomType(Gen6Constants.Type_XY);
+        } else if (s.equalsIgnoreCase("ORAS")){
             setRomType(Gen6Constants.Type_ORAS);
         } else {
-            setRomType(Gen6Constants.Type_XY);
+            System.err.println("unrecognised rom type: " + s);
         }
     }
 
