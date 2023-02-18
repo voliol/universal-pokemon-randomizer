@@ -56,7 +56,7 @@ public class AbstractDSRomEntry extends RomEntry {
     private boolean staticPokemonSupport = false;
     private boolean copyStaticPokemon = false;
     private boolean copyRoamingPokemon = false;
-    private final Map<String, RomFileEntry> files = new HashMap<>();
+    private final Map<String, DSFileEntry> files = new HashMap<>();
     private final Map<Integer, Long> overlayExpectedCRC32s = new HashMap<>();
     private final List<DSStaticPokemon> staticPokemon = new ArrayList<>();
 
@@ -113,7 +113,7 @@ public class AbstractDSRomEntry extends RomEntry {
 
     public long getFileExpectedCRC32(String key) {
         if (!files.containsKey(key)) {
-            files.put(key, new RomFileEntry());
+            files.put(key, new DSFileEntry());
         }
         return files.get(key).getExpectedCRC32();
     }
@@ -123,7 +123,7 @@ public class AbstractDSRomEntry extends RomEntry {
         String[] values = valuePair[1].substring(1, valuePair[1].length() - 1).split(",");
         String path = values[0].trim();
         long expectedCRC32 = BaseRomEntryReader.parseLong("0x" + values[1].trim());
-        files.put(key, new RomFileEntry(path, expectedCRC32));
+        files.put(key, new DSFileEntry(path, expectedCRC32));
     }
 
     public Set<Integer> getOverlayExpectedCRC32Keys() {
