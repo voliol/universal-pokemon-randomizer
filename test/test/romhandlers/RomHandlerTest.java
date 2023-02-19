@@ -31,7 +31,7 @@ public class RomHandlerTest {
     private static final String TEST_ROMS_PATH = "test/roms";
 
     public static String[] getRomNames() {
-        return Roms.ALL_ROMS;
+        return Roms.getAllRoms();
     }
 
     private RomHandler romHandler;

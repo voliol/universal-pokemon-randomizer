@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AbstractDSRomEntry extends RomEntry {
+public abstract class AbstractDSRomEntry extends RomEntry {
 
     protected abstract static class DSRomEntryReader<T extends AbstractDSRomEntry> extends RomEntryReader<T> {
 

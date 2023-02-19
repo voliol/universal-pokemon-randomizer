@@ -3,7 +3,7 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 import java.io.IOException;
 import java.util.*;
 
-public class Abstract3DSRomEntry extends RomEntry {
+public abstract class Abstract3DSRomEntry extends RomEntry {
 
     protected abstract static class ThreeDSRomEntryReader<T extends Abstract3DSRomEntry> extends BaseRomEntryReader<T> {
 

@@ -1,65 +1,110 @@
 package test.romhandlers;
 
+import com.dabomstew.pkrandom.romhandlers.romentries.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Constants for all ROM names, to easily test sets of ROMs.
  */
 public class Roms {
 
-    // All of these manual entries could be automatized by reading the .init files
-
-    public static final String[] JAPANESE_GEN_1_ROMS = {"Red (J)", "Green (J)", "Blue (J)", "Yellow (J)"};
-    public static final String[] ENGLISH_GEN_1_ROMS = {"Red (U)", "Blue (U)", "Yellow (U)"};
-    public static final String[] OTHER_GEN_1_ROMS = {};
-    public static final String[] ALL_GEN_1_ROMS = concatenateAll(JAPANESE_GEN_1_ROMS, ENGLISH_GEN_1_ROMS, OTHER_GEN_1_ROMS);
-
-    public static final String[] JAPANESE_GEN_2_ROMS = {};
-    public static final String[] ENGLISH_GEN_2_ROMS = {"Gold (U)", "Silver (U)", "Crystal (U)"};
-    public static final String[] OTHER_GEN_2_ROMS = {};
-    public static final String[] ALL_GEN_2_ROMS = concatenateAll(JAPANESE_GEN_2_ROMS, ENGLISH_GEN_2_ROMS, OTHER_GEN_2_ROMS);
-
-    public static final String[] JAPANESE_GEN_3_ROMS = {};
-    public static final String[] ENGLISH_GEN_3_ROMS = {"Ruby (U)", "Ruby (E)", "Sapphire (U)", "Fire Red (U) 1.0", "Fire Red (U) 1.1"};
-    public static final String[] OTHER_GEN_3_ROMS = {};
-    public static final String[] ALL_GEN_3_ROMS = concatenateAll(JAPANESE_GEN_3_ROMS, ENGLISH_GEN_3_ROMS, OTHER_GEN_3_ROMS);
-
-    public static final String[] JAPANESE_GEN_4_ROMS = {};
-    public static final String[] ENGLISH_GEN_4_ROMS = {"Pearl (U)", "Diamond (U)", "Platinum (U)", "HeartGold (U)", "SoulSilver (U)"};
-    public static final String[] OTHER_GEN_4_ROMS = {};
-    public static final String[] ALL_GEN_4_ROMS = concatenateAll(JAPANESE_GEN_4_ROMS, ENGLISH_GEN_4_ROMS, OTHER_GEN_4_ROMS);
-
-    public static final String[] JAPANESE_GEN_5_ROMS = {};
-    public static final String[] ENGLISH_GEN_5_ROMS = {};
-    public static final String[] OTHER_GEN_5_ROMS = {};
-    public static final String[] ALL_GEN_5_ROMS = concatenateAll(JAPANESE_GEN_5_ROMS, ENGLISH_GEN_5_ROMS, OTHER_GEN_5_ROMS);
-
-    public static final String[] JAPANESE_GEN_6_ROMS = {};
-    public static final String[] ENGLISH_GEN_6_ROMS = {};
-    public static final String[] OTHER_GEN_6_ROMS = {};
-    public static final String[] ALL_GEN_6_ROMS = concatenateAll(JAPANESE_GEN_6_ROMS, ENGLISH_GEN_6_ROMS, OTHER_GEN_6_ROMS);
-
-    public static final String[] JAPANESE_GEN_7_ROMS = {};
-    public static final String[] ENGLISH_GEN_7_ROMS = {};
-    public static final String[] OTHER_GEN_7_ROMS = {};
-    public static final String[] ALL_GEN_7_ROMS = concatenateAll(JAPANESE_GEN_7_ROMS, ENGLISH_GEN_7_ROMS, OTHER_GEN_7_ROMS);
-
-    public static final String[] ALL_ROMS = concatenateAll(ALL_GEN_1_ROMS, ALL_GEN_2_ROMS, ALL_GEN_3_ROMS, ALL_GEN_4_ROMS,
-            ALL_GEN_5_ROMS, ALL_GEN_6_ROMS, ALL_GEN_7_ROMS);
-
-//    public static final String[] ALL_ROMS = {"Crystal (U)", "Ruby (U)", "Ruby (S) 1.1", "Ruby (F) 1.1",
-//            "Fire Red (U) 1.0", "Fire Red (U) 1.1", "Emerald (G)", "Emerald (J)", "Pearl (U)"};
-
-    private static String[] concatenateAll(String[] first, String[]... others) {
-        int length = first.length;
-        for (String[] other : others) {
-            length += other.length;
+    private static List<String> readGen1RomEntryNames() {
+        List<Gen1RomEntry> roms = new ArrayList<>();
+        try {
+            Gen1RomEntry.readEntriesFromInfoFile("gen1_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        String[] concatenated = new String[length];
-        System.arraycopy(first, 0, concatenated, 0, first.length);
-        int offset = first.length;
-        for (String[] other : others) {
-            System.arraycopy(other, 0, concatenated, offset, other.length);
-            offset += other.length;
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static List<String> readGen2RomEntryNames() {
+        List<Gen2RomEntry> roms = new ArrayList<>();
+        try {
+            Gen2RomEntry.readEntriesFromInfoFile("gen2_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return concatenated;
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static List<String> readGen3RomEntryNames() {
+        List<Gen3RomEntry> roms = new ArrayList<>();
+        try {
+            Gen3RomEntry.readEntriesFromInfoFile("gen3_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static List<String> readGen4RomEntryNames() {
+        List<Gen4RomEntry> roms = new ArrayList<>();
+        try {
+            Gen4RomEntry.readEntriesFromInfoFile("gen4_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static List<String> readGen5RomEntryNames() {
+        List<Gen5RomEntry> roms = new ArrayList<>();
+        try {
+            Gen5RomEntry.readEntriesFromInfoFile("gen5_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static List<String> readGen6RomEntryNames() {
+        List<Gen6RomEntry> roms = new ArrayList<>();
+        try {
+            Gen6RomEntry.readEntriesFromInfoFile("gen6_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static List<String> readGen7RomEntryNames() {
+        List<Gen7RomEntry> roms = new ArrayList<>();
+        try {
+            Gen7RomEntry.readEntriesFromInfoFile("gen7_offsets.ini", roms);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return roms.stream().map(RomEntry::getName).collect(Collectors.toList());
+    }
+
+    private static final List<String> ALL_GEN_1_ROMS = readGen1RomEntryNames();
+    private static final List<String> ALL_GEN_2_ROMS = readGen2RomEntryNames();
+    private static final List<String> ALL_GEN_3_ROMS = readGen3RomEntryNames();
+    private static final List<String> ALL_GEN_4_ROMS = readGen4RomEntryNames();
+    private static final List<String> ALL_GEN_5_ROMS = readGen5RomEntryNames();
+    private static final List<String> ALL_GEN_6_ROMS = readGen6RomEntryNames();
+    private static final List<String> ALL_GEN_7_ROMS = readGen7RomEntryNames();
+
+    private static final List<String> ALL_ROMS = combine(ALL_GEN_1_ROMS, ALL_GEN_2_ROMS, ALL_GEN_3_ROMS,
+            ALL_GEN_4_ROMS, ALL_GEN_5_ROMS, ALL_GEN_6_ROMS, ALL_GEN_7_ROMS);
+
+    public static String[] getAllRoms() {
+        return ALL_ROMS.toArray(String[]::new);
+    }
+
+    @SafeVarargs
+    private static List<String> combine(List<String> first, List<String>... others) {
+        List<String> combined = new ArrayList<>(first);
+        for (List<String> other : others) {
+            combined.addAll(other);
+        }
+        return combined;
     }
 }
