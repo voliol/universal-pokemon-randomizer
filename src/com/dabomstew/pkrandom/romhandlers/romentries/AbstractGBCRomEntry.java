@@ -9,8 +9,8 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
     protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends GBRomEntryReader<T> {
 
-        public GBCRomEntryReader(String fileName) throws IOException {
-            super(fileName);
+        protected GBCRomEntryReader() {
+            super();
             putSpecialKeyMethod("NonJapanese", AbstractGBCRomEntry::setNonJapanese);
             putSpecialKeyMethod("ExtraTableFile", AbstractGBCRomEntry::setExtraTableFile);
             putSpecialKeyMethod("CRCInHeader", AbstractGBCRomEntry::setCRCInHeader);
@@ -32,7 +32,7 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
     }
 
     private void setNonJapanese(String unparsed) {
-        this.nonJapanese = BaseRomEntryReader.parseInt(unparsed);
+        this.nonJapanese = IniEntryReader.parseInt(unparsed);
     }
 
     public String getExtraTableFile() {
@@ -48,14 +48,14 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
     }
 
     private void setCRCInHeader(String s) {
-        this.crcInHeader = BaseRomEntryReader.parseInt(s);
+        this.crcInHeader = IniEntryReader.parseInt(s);
     }
 
     private void addTMText(String s)  {
         if (s.startsWith("[") && s.endsWith("]")) {
             String[] parts = s.substring(1, s.length() - 1).split(",", 3);
-            int number = BaseRomEntryReader.parseInt(parts[0]);
-            int offset = BaseRomEntryReader.parseInt(parts[1]);
+            int number = IniEntryReader.parseInt(parts[0]);
+            int offset = IniEntryReader.parseInt(parts[1]);
             String template = parts[2];
             GBCTMTextEntry tte = new GBCTMTextEntry(number, offset, template);
             tmTexts.add(tte);
@@ -67,7 +67,7 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
     }
 
     @Override
-    public void copyFrom(RomEntry other) {
+    public void copyFrom(IniEntry other) {
         super.copyFrom(other);
         if (other instanceof AbstractGBCRomEntry gbcOther) {
             extraTableFile = gbcOther.extraTableFile;

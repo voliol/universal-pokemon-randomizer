@@ -1,42 +1,49 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * A description of a ROM
  */
-public abstract class RomEntry {
+public abstract class RomEntry extends IniEntry {
 
-    protected abstract static class RomEntryReader<T extends RomEntry> extends BaseRomEntryReader<T> {
+    protected abstract static class RomEntryReader<T extends RomEntry> extends IniEntryReader<T> {
 
-        public RomEntryReader(String fileName, DefaultReadMode defaultReadMode, CopyFromMode copyFromMode)
-                throws IOException {
-            super(fileName, defaultReadMode, copyFromMode);
+        protected enum CopyFromMode { NAME, ROMCODE }
+
+        private final CopyFromMode copyFromMode;
+
+        public RomEntryReader(DefaultReadMode defaultReadMode, CopyFromMode copyFromMode) {
+            super(defaultReadMode);
+            this.copyFromMode = copyFromMode;
             putSpecialKeyMethod("Game", RomEntry::setRomCode);
             putSpecialKeyMethod("Version", RomEntry::setVersion);
             putSpecialKeyMethod("Type", RomEntry::setRomType);
             putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
         }
 
+        @Override
+        protected boolean matchesCopyFromValue(T other, String value) {
+            return switch (copyFromMode) {
+                case NAME -> value.equalsIgnoreCase(other.getName());
+                case ROMCODE -> value.equals(other.getRomCode());
+            };
+        }
+
     }
 
-    protected final String name;
     protected String romCode;
     protected int version;
     protected int romType;
-    protected Map<String, Integer> intValues = new HashMap<>();
-    protected Map<String, String> stringValues = new HashMap<>();
-    protected Map<String, int[]> arrayValues = new HashMap<>();
     protected Map<String, String> tweakFiles = new HashMap<>(); // TODO: is this a good name?
 
     public RomEntry(String name) {
-        this.name = name;
+        super(name);
     }
 
     public RomEntry(RomEntry original) {
-        this.name = original.name;
+        super(original.name);
         this.romCode = original.romCode;
         this.version = original.version;
         this.romType = original.romType;
@@ -44,10 +51,6 @@ public abstract class RomEntry {
         stringValues.putAll(original.stringValues);
         arrayValues.putAll(original.arrayValues);
         tweakFiles.putAll(original.tweakFiles);
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getRomCode() {
@@ -63,7 +66,7 @@ public abstract class RomEntry {
     }
 
     private void setVersion(String s) {
-        this.version = BaseRomEntryReader.parseInt(s);
+        this.version = IniEntryReader.parseInt(s);
     }
 
     public int getRomType() {
@@ -75,47 +78,6 @@ public abstract class RomEntry {
     }
 
     protected abstract void setRomType(String s);
-
-    public int getIntValue(String key) {
-        if (!intValues.containsKey(key)) {
-            intValues.put(key, 0);
-        }
-        return intValues.get(key);
-    }
-
-    public void putIntValue(String key, int value) {
-        intValues.put(key, value);
-    }
-
-    protected void putIntValue(String[] valuePair) {
-        putIntValue(valuePair[0], BaseRomEntryReader.parseInt(valuePair[1]));
-    }
-
-    public String getStringValue(String key) {
-        if (!stringValues.containsKey(key)) {
-            stringValues.put(key, "");
-        }
-        return stringValues.get(key);
-    }
-
-    public void putStringValue(String key, String value) {
-        stringValues.put(key, value);
-    }
-
-    protected void putStringValue(String[] valuePair) {
-        putStringValue(valuePair[0], valuePair[1]);
-    }
-
-    public int[] getArrayValue(String key) {
-        if (!arrayValues.containsKey(key)) {
-            arrayValues.put(key, new int[0]);
-        }
-        return arrayValues.get(key);
-    }
-
-    public void putArrayValue(String key, int[] value) {
-        arrayValues.put(key, value);
-    }
 
     public String getTweakFile(String key) {
         if (!tweakFiles.containsKey(key)) {
@@ -137,11 +99,5 @@ public abstract class RomEntry {
     }
 
     public abstract boolean hasStaticPokemonSupport();
-
-    public void copyFrom(RomEntry other) {
-        intValues.putAll(other.intValues);
-        stringValues.putAll(other.stringValues);
-        arrayValues.putAll(other.arrayValues);
-    }
 
 }

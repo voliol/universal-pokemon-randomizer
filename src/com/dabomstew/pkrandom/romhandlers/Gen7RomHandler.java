@@ -27,7 +27,6 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.romhandlers.romentries.BaseRomEntryReader;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.BFLIM;
@@ -71,16 +70,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private static List<Gen7RomEntry> roms;
 
     static {
-        roms = new ArrayList<>();
+        loadROMInfo();
+    }
+
+    private static void loadROMInfo() {
         try {
-            Gen7RomEntry.readEntriesFromInfoFile("gen7_offsets.ini", roms);
+            roms = Gen7RomEntry.READER.readEntriesFromFile("gen7_offsets.ini");
         } catch (IOException e) {
             // TODO: proper error messaging
             e.printStackTrace();
         }
-    }
-
-    private static void loadROMInfo() {
     }
 
     // This ROM

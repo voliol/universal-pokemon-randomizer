@@ -1,8 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
 public class ThreeDSLinkedEncounter {
-    int base;
-    int linked;
+    private final int base;
+    private final int linked;
 
     public ThreeDSLinkedEncounter(int base, int linked) {
         this.base = base;

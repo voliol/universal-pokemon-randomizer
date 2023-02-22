@@ -76,9 +76,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private static void loadROMInfo() {
-        roms = new ArrayList<>();
         try {
-            Gen5RomEntry.readEntriesFromInfoFile("gen5_offsets.ini", roms);
+            roms = Gen5RomEntry.READER.readEntriesFromFile("gen5_offsets.ini");
         } catch (IOException e) {
             // TODO: proper error messaging
             e.printStackTrace();

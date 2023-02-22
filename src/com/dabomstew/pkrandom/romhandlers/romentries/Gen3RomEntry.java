@@ -3,9 +3,7 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,11 +11,10 @@ import java.util.regex.Pattern;
 
 public class Gen3RomEntry extends AbstractGBRomEntry {
 
-    protected static class Gen3RomEntryReader<T extends Gen3RomEntry> extends GBRomEntryReader<T> {
+    public static class Gen3RomEntryReader<T extends Gen3RomEntry> extends GBRomEntryReader<T> {
 
-        public Gen3RomEntryReader(String fileName) throws IOException {
-            super(fileName);
-            putSpecialKeyMethod("Type", Gen3RomEntry::setRomType);
+        protected Gen3RomEntryReader() {
+            super();
             putSpecialKeyMethod("TableFile", Gen3RomEntry::setTableFile);
             putSpecialKeyMethod("CopyStaticPokemon", Gen3RomEntry::setCopyStaticPokemon);
             putSpecialKeyMethod("StaticPokemon{}", Gen3RomEntry::addStaticPokemon);
@@ -34,11 +31,11 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
          */
         @Override
         @SuppressWarnings("unchecked")
-        protected T initiateRomEntry(String name) {
+        protected T initiateEntry(String name) {
             return (T) new Gen3RomEntry(name);
         }
 
-        private static Gen3RomHandler.StaticPokemon parseStaticPokemon(String staticPokemonString) {
+        protected static Gen3RomHandler.StaticPokemon parseStaticPokemon(String staticPokemonString) {
             int[] speciesOffsets = new int[0];
             int[] levelOffsets = new int[0];
             String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
@@ -49,7 +46,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
                 String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 int[] offsets = new int[romOffsets.length];
                 for (int i = 0; i < offsets.length; i++) {
-                    offsets[i] = BaseRomEntryReader.parseInt(romOffsets[i]);
+                    offsets[i] = IniEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesOffsets = offsets;
@@ -59,15 +56,15 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             return new Gen3RomHandler.StaticPokemon(speciesOffsets, levelOffsets);
         }
 
-        private static Gen3RomHandler.TMOrMTTextEntry parseTMOrMTEntry(String s, boolean isMoveTutor) {
+        protected static Gen3RomHandler.TMOrMTTextEntry parseTMOrMTEntry(String s, boolean isMoveTutor) {
             if (s.startsWith("[") && s.endsWith("]")) {
                 String[] parts = s.substring(1, s.length() - 1).split(",", 6);
                 Gen3RomHandler.TMOrMTTextEntry tte = new Gen3RomHandler.TMOrMTTextEntry();
-                tte.number = BaseRomEntryReader.parseInt(parts[0]);
-                tte.mapBank = BaseRomEntryReader.parseInt(parts[1]);
-                tte.mapNumber = BaseRomEntryReader.parseInt(parts[2]);
-                tte.personNum = BaseRomEntryReader.parseInt(parts[3]);
-                tte.offsetInScript = BaseRomEntryReader.parseInt(parts[4]);
+                tte.number = IniEntryReader.parseInt(parts[0]);
+                tte.mapBank = IniEntryReader.parseInt(parts[1]);
+                tte.mapNumber = IniEntryReader.parseInt(parts[2]);
+                tte.personNum = IniEntryReader.parseInt(parts[3]);
+                tte.offsetInScript = IniEntryReader.parseInt(parts[4]);
                 tte.template = parts[5];
                 tte.isMoveTutor = isMoveTutor;
                 return tte;
@@ -76,10 +73,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         }
     }
 
-    public static void readEntriesFromInfoFile(String fileName, Collection<Gen3RomEntry> romEntries) throws IOException {
-        BaseRomEntryReader<Gen3RomEntry> rer = new Gen3RomEntry.Gen3RomEntryReader<>(fileName);
-        rer.readAllRomEntries(romEntries);
-    }
+    public static final Gen3RomEntryReader<Gen3RomEntry> READER = new Gen3RomEntryReader<>();
 
     private String tableFile; // really same as "extraTableFile" used by the Gen1/2 games...
     private boolean copyStaticPokemon;
@@ -124,7 +118,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
     }
 
     private void setCopyStaticPokemon(String s) {
-        this.copyStaticPokemon = BaseRomEntryReader.parseBoolean(s);
+        this.copyStaticPokemon = IniEntryReader.parseBoolean(s);
     }
 
     public List<Gen3RomHandler.StaticPokemon> getStaticPokemon() {
@@ -162,7 +156,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
     }
 
     @Override
-    public void copyFrom(RomEntry other) {
+    public void copyFrom(IniEntry other) {
         super.copyFrom(other);
         if (other instanceof Gen3RomEntry gen3Other) {
             if (copyStaticPokemon) {

@@ -1,16 +1,13 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
-public abstract class BaseRomEntryReader<T extends RomEntry> {
+public abstract class IniEntryReader<T extends IniEntry> {
 
     public static int parseInt(String s) {
         int radix = 10;
@@ -50,28 +47,20 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
      * An enum for dictating whether to read values as ints or Strings by default.
      * Protected so subclasses have to make the choice, instead of the code using them.
      */
-    protected enum DefaultReadMode { INT, STRING }
-
-    protected enum CopyFromMode { NAME, ROMCODE }
+    protected enum DefaultReadMode {INT, STRING}
 
     private static final String COMMENT_PREFIX = "//";
 
-    private final Scanner scanner;
     private final DefaultReadMode defaultReadMode;
-    private final CopyFromMode copyFromMode;
     private T current;
-    private Collection<T> romEntries;
+    private List<T> iniEntries;
 
     private final Map<String, BiConsumer<T, String[]>> keyPrefixMethods = new HashMap<>();
     private final Map<String, BiConsumer<T, String[]>> keySuffixMethods = new HashMap<>();
     private final Map<String, BiConsumer<T, String>> specialKeyMethods = new HashMap<>();
 
-    public BaseRomEntryReader(String fileName, DefaultReadMode defaultReadMode,
-                              CopyFromMode copyFromMode) throws IOException {
-        this.scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+    public IniEntryReader(DefaultReadMode defaultReadMode) {
         this.defaultReadMode = defaultReadMode;
-        this.copyFromMode = copyFromMode;
-        putSpecialKeyMethod("CopyFrom", this::copyFrom);
     }
 
     protected void putKeyPrefixMethod(String key, BiConsumer<T, String[]> method) {
@@ -86,8 +75,9 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
         specialKeyMethods.put(key, method);
     }
 
-    public void readAllRomEntries(Collection<T> romEntries) {
-        this.romEntries = romEntries;
+    public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
+        Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+        this.iniEntries = new ArrayList<>();
 
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
@@ -97,25 +87,27 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
                 continue;
             }
 
-            if (isRomEntryStart(line)) {
-                startNewRomEntry(line);
+            if (isEntryStart(line)) {
+                startNewEntry(line);
             } else if (current != null) {
                 parseAndAddValuePair(line);
             }
 
         }
+        return iniEntries;
     }
 
-    private boolean isRomEntryStart(String line) {
+    private boolean isEntryStart(String line) {
         return line.startsWith("[") && line.endsWith("]");
     }
 
-    private void startNewRomEntry(String line) {
-        current = initiateRomEntry(line.substring(1, line.length() - 1));
-        romEntries.add(current);
+    private void startNewEntry(String line) {
+        current = initiateEntry(line.substring(1, line.length() - 1));
+        iniEntries.add(current);
+        putSpecialKeyMethod("CopyFrom", this::copyFrom);
     }
 
-    protected abstract T initiateRomEntry(String name);
+    protected abstract T initiateEntry(String name);
 
     private String removeComments(String line) {
         if (line.contains(COMMENT_PREFIX)) {
@@ -212,29 +204,34 @@ public abstract class BaseRomEntryReader<T extends RomEntry> {
         }
     }
 
-    private void addIntValue(String[] valuePair) {
+    protected void addIntValue(String[] valuePair) {
+        addIntValue(current, valuePair);
+    }
+
+    protected void addIntValue(T entry, String[] valuePair) {
         int value = parseInt(valuePair[1]);
-        current.putIntValue(valuePair[0], value);
+        entry.putIntValue(valuePair[0], value);
     }
 
-    // TODO: kind of redundant with private method in RomEntry class
-    private void addStringValue(String[] valuePair) {
-        current.putStringValue(valuePair[0], valuePair[1]);
+    protected void addStringValue(String[] valuePair) {
+        addStringValue(current, valuePair);
     }
 
-    private void copyFrom(T romEntry, String value) {
-        for (T other : romEntries) {
+    protected void addStringValue(T entry, String[] valuePair) {
+        entry.putStringValue(valuePair[0], valuePair[1]);
+    }
+
+    private void copyFrom(T entry, String value) {
+        for (T other : iniEntries) {
             if (matchesCopyFromValue(other, value)) {
-                romEntry.copyFrom(other);
+                entry.copyFrom(other);
             }
         }
     }
 
-    private boolean matchesCopyFromValue(T other, String value) {
-        return switch (copyFromMode) {
-            case NAME -> value.equalsIgnoreCase(other.getName());
-            case ROMCODE -> value.equals(other.getRomCode());
-        };
+    protected boolean matchesCopyFromValue(T other, String value) {
+        return value.equalsIgnoreCase(other.getName());
     }
+
 
 }

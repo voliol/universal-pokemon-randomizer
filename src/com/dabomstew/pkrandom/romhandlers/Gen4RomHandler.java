@@ -74,9 +74,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private static void loadROMInfo() {
-		roms = new ArrayList<>();
 		try {
-			Gen4RomEntry.readEntriesFromInfoFile("gen4_offsets.ini", roms);
+			roms = Gen4RomEntry.READER.readEntriesFromFile("gen4_offsets.ini");
 		} catch (IOException e) {
 			// TODO proper error messaging
 			e.printStackTrace();

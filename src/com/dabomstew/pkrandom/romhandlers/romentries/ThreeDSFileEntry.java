@@ -1,8 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
 public class ThreeDSFileEntry {
-    private String path;
-    private long[] expectedCRC32s;
+    private final String path;
+    private final long[] expectedCRC32s;
 
     public ThreeDSFileEntry() {
         this("", new long[2]);

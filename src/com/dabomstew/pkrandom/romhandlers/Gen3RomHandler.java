@@ -88,9 +88,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private static void loadROMInfo() {
-        roms = new ArrayList<>();
         try {
-            Gen3RomEntry.readEntriesFromInfoFile("gen3_offsets.ini", roms);
+            roms = Gen3RomEntry.READER.readEntriesFromFile("gen3_offsets.ini");
         } catch (IOException e) {
             // TODO proper error messaging
             e.printStackTrace();

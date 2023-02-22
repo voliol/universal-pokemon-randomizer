@@ -1,22 +1,21 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import java.io.IOException;
 import java.util.*;
 
 public abstract class Abstract3DSRomEntry extends RomEntry {
 
-    protected abstract static class ThreeDSRomEntryReader<T extends Abstract3DSRomEntry> extends BaseRomEntryReader<T> {
+    protected abstract static class ThreeDSRomEntryReader<T extends Abstract3DSRomEntry> extends RomEntryReader<T> {
 
-        public ThreeDSRomEntryReader(String fileName) throws IOException {
-            super(fileName, DefaultReadMode.STRING, CopyFromMode.ROMCODE);
+        protected ThreeDSRomEntryReader() {
+            super(DefaultReadMode.STRING, CopyFromMode.ROMCODE);
             putSpecialKeyMethod("TitleId", Abstract3DSRomEntry::setTitleID);
             putSpecialKeyMethod("Acronym", Abstract3DSRomEntry::setAcronym);
             putSpecialKeyMethod("CodeCRC32", Abstract3DSRomEntry::setExpectedCodeCRC32s);
             putSpecialKeyMethod("LinkedStaticEncounterOffsets", Abstract3DSRomEntry::addLinkedEncounter);
             putKeyPrefixMethod("File<", Abstract3DSRomEntry::addFile);
-            putKeySuffixMethod("Offset", RomEntry::putIntValue);
-            putKeySuffixMethod("Count", RomEntry::putIntValue);
-            putKeySuffixMethod("Number", RomEntry::putIntValue);
+            putKeySuffixMethod("Offset", this::addIntValue);
+            putKeySuffixMethod("Count", this::addIntValue);
+            putKeySuffixMethod("Number", this::addIntValue);
         }
     }
 
@@ -58,8 +57,8 @@ public abstract class Abstract3DSRomEntry extends RomEntry {
 
     private void setExpectedCodeCRC32s(String s) {
         String[] values = s.substring(1, s.length() - 1).split(",");
-        expectedCodeCRC32s[0] = BaseRomEntryReader.parseLong("0x" + values[0].trim());
-        expectedCodeCRC32s[1] = BaseRomEntryReader.parseLong("0x" + values[1].trim());
+        expectedCodeCRC32s[0] = IniEntryReader.parseLong("0x" + values[0].trim());
+        expectedCodeCRC32s[1] = IniEntryReader.parseLong("0x" + values[1].trim());
     }
 
     public Set<String> getFileKeys() {
@@ -87,8 +86,8 @@ public abstract class Abstract3DSRomEntry extends RomEntry {
         String crcString = values[1].trim() + ", " + values[2].trim();
         String[] crcs = crcString.substring(1, crcString.length() - 1).split(",");
         long[] expectedCRC32s = new long[2];
-        expectedCRC32s[0] = BaseRomEntryReader.parseLong("0x" + crcs[0].trim());
-        expectedCRC32s[1] = BaseRomEntryReader.parseLong("0x" + crcs[1].trim());
+        expectedCRC32s[0] = IniEntryReader.parseLong("0x" + crcs[0].trim());
+        expectedCRC32s[1] = IniEntryReader.parseLong("0x" + crcs[1].trim());
         files.put(key, new ThreeDSFileEntry(path, expectedCRC32s));
     }
 
@@ -106,7 +105,7 @@ public abstract class Abstract3DSRomEntry extends RomEntry {
     }
 
     @Override
-    public void copyFrom(RomEntry other) {
+    public void copyFrom(IniEntry other) {
         super.copyFrom(other);
         if (other instanceof Abstract3DSRomEntry threeDSOther) {
             linkedEncounters.addAll(threeDSOther.linkedEncounters);

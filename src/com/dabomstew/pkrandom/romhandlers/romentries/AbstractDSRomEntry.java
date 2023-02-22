@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -10,8 +9,8 @@ public abstract class AbstractDSRomEntry extends RomEntry {
 
     protected abstract static class DSRomEntryReader<T extends AbstractDSRomEntry> extends RomEntryReader<T> {
 
-        public DSRomEntryReader(String fileName, CopyFromMode copyFromMode) throws IOException {
-            super(fileName, DefaultReadMode.STRING, copyFromMode);
+        protected DSRomEntryReader(CopyFromMode copyFromMode) {
+            super(DefaultReadMode.STRING, copyFromMode);
             putSpecialKeyMethod("Arm9CRC32", AbstractDSRomEntry::setArm9ExpectedCRC32);
             putSpecialKeyMethod("StaticPokemonSupport", AbstractDSRomEntry::setStaticPokemonSupport);
             putSpecialKeyMethod("CopyStaticPokemon", AbstractDSRomEntry::setCopyStaticPokemon);
@@ -19,14 +18,14 @@ public abstract class AbstractDSRomEntry extends RomEntry {
             putKeyPrefixMethod("File<", AbstractDSRomEntry::addFile);
             putKeyPrefixMethod("OverlayCRC32<", AbstractDSRomEntry::addOverlayExpectedCRC32);
             putSpecialKeyMethod("StaticPokemon{}", AbstractDSRomEntry::addStaticPokemon);
-            putKeySuffixMethod("Offset", RomEntry::putIntValue);
-            putKeySuffixMethod("Count", RomEntry::putIntValue);
-            putKeySuffixMethod("Number", RomEntry::putIntValue);
-            putKeySuffixMethod("Size", RomEntry::putIntValue);
-            putKeySuffixMethod("Index", RomEntry::putIntValue);
+            putKeySuffixMethod("Offset", this::addIntValue);
+            putKeySuffixMethod("Count", this::addIntValue);
+            putKeySuffixMethod("Number", this::addIntValue);
+            putKeySuffixMethod("Size", this::addIntValue);
+            putKeySuffixMethod("Index", this::addIntValue);
         }
 
-        public static DSStaticPokemon parseStaticPokemon(String s) {
+        protected static DSStaticPokemon parseStaticPokemon(String s) {
             InFileEntry[] speciesEntries = new InFileEntry[0];
             InFileEntry[] levelEntries = new InFileEntry[0];
             InFileEntry[] formeEntries = new InFileEntry[0];
@@ -39,7 +38,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
                 InFileEntry[] entries = new InFileEntry[offsets.length];
                 for (int i = 0; i < entries.length; i++) {
                     String[] parts = offsets[i].split(":");
-                    entries[i] = new InFileEntry(BaseRomEntryReader.parseInt(parts[0]), BaseRomEntryReader.parseInt(parts[1]));
+                    entries[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]), IniEntryReader.parseInt(parts[1]));
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesEntries = entries;
@@ -69,7 +68,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
     }
 
     private void setArm9ExpectedCRC32(String s) {
-        this.arm9ExpectedCRC32 = BaseRomEntryReader.parseLong("0x" + s);
+        this.arm9ExpectedCRC32 = IniEntryReader.parseLong("0x" + s);
     }
 
     public boolean hasStaticPokemonSupport() {
@@ -81,7 +80,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
     }
 
     private void setStaticPokemonSupport(String s) {
-        this.staticPokemonSupport = BaseRomEntryReader.parseBoolean(s);
+        this.staticPokemonSupport = IniEntryReader.parseBoolean(s);
     }
 
     public boolean isCopyStaticPokemon() {
@@ -89,7 +88,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
     }
 
     private void setCopyStaticPokemon(String s) {
-        this.copyStaticPokemon = BaseRomEntryReader.parseBoolean(s);
+        this.copyStaticPokemon = IniEntryReader.parseBoolean(s);
     }
 
     public boolean isCopyRoamingPokemon() {
@@ -97,7 +96,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
     }
 
     private void setCopyRoamingPokemon(String s) {
-        this.copyRoamingPokemon = BaseRomEntryReader.parseBoolean(s);
+        this.copyRoamingPokemon = IniEntryReader.parseBoolean(s);
     }
 
     public Set<String> getFileKeys() {
@@ -122,7 +121,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
         String key = valuePair[0].split("<")[1].split(">")[0];
         String[] values = valuePair[1].substring(1, valuePair[1].length() - 1).split(",");
         String path = values[0].trim();
-        long expectedCRC32 = BaseRomEntryReader.parseLong("0x" + values[1].trim());
+        long expectedCRC32 = IniEntryReader.parseLong("0x" + values[1].trim());
         files.put(key, new DSFileEntry(path, expectedCRC32));
     }
 
@@ -136,8 +135,8 @@ public abstract class AbstractDSRomEntry extends RomEntry {
 
     private void addOverlayExpectedCRC32(String[] valuePair) {
         String keyString = valuePair[0].split("<")[1].split(">")[0];
-        int key = BaseRomEntryReader.parseInt(keyString);
-        long value = BaseRomEntryReader.parseLong("0x" + valuePair[1]);
+        int key = IniEntryReader.parseInt(keyString);
+        long value = IniEntryReader.parseLong("0x" + valuePair[1]);
         overlayExpectedCRC32s.put(key, value);
     }
 
@@ -161,7 +160,7 @@ public abstract class AbstractDSRomEntry extends RomEntry {
     }
 
     @Override
-    public void copyFrom(RomEntry other) {
+    public void copyFrom(IniEntry other) {
         super.copyFrom(other);
         if (other instanceof AbstractDSRomEntry dsOther) {
             files.putAll(dsOther.files);

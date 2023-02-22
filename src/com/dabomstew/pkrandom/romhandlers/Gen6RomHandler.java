@@ -75,7 +75,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private static void loadROMInfo() {
         roms = new ArrayList<>();
         try {
-            Gen6RomEntry.readEntriesFromInfoFile("gen6_offsets.ini", roms);
+            roms = Gen6RomEntry.READER.readEntriesFromFile("gen6_offsets.ini");
         } catch (IOException e) {
             // TODO: proper error messaging
             e.printStackTrace();

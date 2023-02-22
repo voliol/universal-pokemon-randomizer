@@ -74,9 +74,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private static void loadROMInfo() {
-        roms = new ArrayList<>();
         try {
-            Gen2RomEntry.readEntriesFromInfoFile("gen2_offsets.ini", roms);
+            roms = Gen2RomEntry.READER.readEntriesFromFile("gen2_offsets.ini");
         } catch (IOException e) {
             // TODO proper error messaging
             e.printStackTrace();

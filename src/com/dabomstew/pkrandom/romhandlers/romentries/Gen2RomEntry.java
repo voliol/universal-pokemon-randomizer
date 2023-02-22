@@ -3,9 +3,7 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,10 +11,10 @@ import java.util.regex.Pattern;
 
 public class Gen2RomEntry extends AbstractGBCRomEntry {
 
-    protected static class Gen2RomEntryReader<T extends Gen2RomEntry> extends GBCRomEntryReader<T> {
+    public static class Gen2RomEntryReader<T extends Gen2RomEntry> extends GBCRomEntryReader<T> {
 
-        public Gen2RomEntryReader(String fileName) throws IOException {
-            super(fileName);
+        protected Gen2RomEntryReader() {
+            super();
             putSpecialKeyMethod("StaticPokemon{}", Gen2RomEntry::addStaticPokemon);
             putSpecialKeyMethod("StaticPokemonGameCorner{}", Gen2RomEntry::addStaticPokemonGameCorner);
         }
@@ -29,11 +27,11 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
          */
         @Override
         @SuppressWarnings("unchecked")
-        protected T initiateRomEntry(String name) {
+        protected T initiateEntry(String name) {
             return (T) new Gen2RomEntry(name);
         }
 
-        public static Gen2RomHandler.StaticPokemon parseStaticPokemon(String s, boolean gameCorner) {
+        protected static Gen2RomHandler.StaticPokemon parseStaticPokemon(String s, boolean gameCorner) {
             int[] speciesOffsets = new int[0];
             int[] levelOffsets = new int[0];
             String pattern = "[A-z]+=\\[(0x[0-9a-fA-F]+,?\\s?)+]";
@@ -44,7 +42,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
                 String[] romOffsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 int[] offsets = new int[romOffsets.length];
                 for (int i = 0; i < offsets.length; i++) {
-                    offsets[i] = BaseRomEntryReader.parseInt(romOffsets[i]);
+                    offsets[i] = IniEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
                     case "Species" -> speciesOffsets = offsets;
@@ -62,10 +60,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
         }
     }
 
-    public static void readEntriesFromInfoFile(String fileName, Collection<Gen2RomEntry> romEntries) throws IOException {
-        BaseRomEntryReader<Gen2RomEntry> rer = new Gen2RomEntry.Gen2RomEntryReader<>(fileName);
-        rer.readAllRomEntries(romEntries);
-    }
+    public static final Gen2RomEntryReader<Gen2RomEntry> READER = new Gen2RomEntryReader<>();
 
     private final List<Gen2RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
 
@@ -81,7 +76,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
     protected void setRomType(String s) {
         if (s.equalsIgnoreCase("GS")) {
             setRomType(Gen2Constants.Type_GS);
-        } else if (s.equalsIgnoreCase("Yellow")) {
+        } else if (s.equalsIgnoreCase("Crystal")) {
             setRomType(Gen2Constants.Type_Crystal);
         } else {
             System.err.println("unrecognised rom type: " + s);
@@ -101,7 +96,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
     }
 
     @Override
-    public void copyFrom(RomEntry other) {
+    public void copyFrom(IniEntry other) {
         super.copyFrom(other);
         if (other instanceof Gen2RomEntry gen2Other) {
             if (getIntValue("CopyStaticPokemon") == 1) {

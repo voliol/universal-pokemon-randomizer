@@ -2,15 +2,12 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 
-import java.io.IOException;
-import java.util.Collection;
-
 public class Gen6RomEntry extends Abstract3DSRomEntry {
 
-    private static class Gen6RomEntryReader<T extends Gen6RomEntry> extends ThreeDSRomEntryReader<T> {
+    public static class Gen6RomEntryReader<T extends Gen6RomEntry> extends ThreeDSRomEntryReader<T> {
 
-        public Gen6RomEntryReader(String fileName) throws IOException {
-            super(fileName);
+        protected Gen6RomEntryReader() {
+            super();
             putSpecialKeyMethod("Type", Gen6RomEntry::setRomType);
         }
 
@@ -22,15 +19,12 @@ public class Gen6RomEntry extends Abstract3DSRomEntry {
          */
         @Override
         @SuppressWarnings("unchecked")
-        protected T initiateRomEntry(String name) {
+        protected T initiateEntry(String name) {
             return (T) new Gen6RomEntry(name);
         }
     }
 
-    public static void readEntriesFromInfoFile(String fileName, Collection<Gen6RomEntry> romEntries) throws IOException {
-        BaseRomEntryReader<Gen6RomEntry> rer = new Gen6RomEntry.Gen6RomEntryReader<>(fileName);
-        rer.readAllRomEntries(romEntries);
-    }
+    public static final Gen6RomEntryReader<Gen6RomEntry> READER = new Gen6RomEntryReader<>();
 
     public Gen6RomEntry(String name) {
         super(name);
