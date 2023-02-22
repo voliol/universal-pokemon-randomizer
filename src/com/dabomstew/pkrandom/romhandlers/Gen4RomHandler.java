@@ -5271,10 +5271,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private boolean genericIPSPatch(byte[] data, String ctName) {
-		String patchName = romEntry.getTweakFile(ctName);
-		if (patchName == null) {
-			return false;
+		if (!romEntry.hasTweakFile(ctName)) {
+			throw new RandomizerIOException("IPS Patch " + ctName + " is not supported by this ROM (" +
+					romEntry.getName() + ").");
 		}
+		String patchName = romEntry.getTweakFile(ctName);
 
 		try {
 			FileFunctions.applyPatch(data, patchName);

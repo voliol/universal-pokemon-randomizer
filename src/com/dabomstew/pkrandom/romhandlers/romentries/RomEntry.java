@@ -81,13 +81,13 @@ public abstract class RomEntry extends IniEntry {
 
     public String getTweakFile(String key) {
         if (!tweakFiles.containsKey(key)) {
-            tweakFiles.put(key, "");
+            tweakFiles.put(key, null);
         }
         return tweakFiles.get(key);
     }
 
     public boolean hasTweakFile(String key) {
-        return getTweakFile(key).equals("");
+        return tweakFiles.containsKey(key);
     }
 
     public void putTweakFile(String key, String value) {

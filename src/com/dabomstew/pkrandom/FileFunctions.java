@@ -257,6 +257,7 @@ public class FileFunctions {
     }
 
     private static byte[] getCodeTweakFile(String filename) throws IOException {
+        System.out.println(filename);
         InputStream is = FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/patches/" + filename);
         byte[] buf = readFullyIntoBuffer(is, is.available());
         is.close();
