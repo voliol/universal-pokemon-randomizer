@@ -10,9 +10,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -28,9 +35,23 @@ public class RomHandlerTest {
     private static final int HIGHEST_GENERATION = 7;
 
     private static final String TEST_ROMS_PATH = "test/roms";
+    private static final String LAST_DOT_REGEX = "\\.+(?![^\\.]*\\.)";
 
     public static String[] getRomNames() {
         return Roms.getAllRoms();
+    }
+
+    public static String[] getRomNamesInFolder() {
+        List<String> names;
+        try (Stream<Path> paths = Files.walk(Paths.get(TEST_ROMS_PATH))) {
+            names = paths.filter(Files::isRegularFile)
+                    .map(p -> p.toFile().getName()).filter(s -> !s.endsWith(".txt"))
+                    .map(s -> s.split(LAST_DOT_REGEX)[0])
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return names.toArray(new String[0]);
     }
 
     private RomHandler romHandler;
@@ -66,14 +87,22 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4, 5, 6, 7})
-    public void allSupportedRomsFromGenerationTestable(int genNumber) {
-        fail();
+    @MethodSource("getRomNames")
+    public void romIsTestable(String romName) {
+        try {
+            loadROM(romName);
+            if (!Objects.equals(romHandler.getROMName(), "Pokemon " + romName)) {
+                throw new RuntimeException("Rom mismatch. Wanted to load Pokemon " + romName + ", found "
+                        + romHandler.getROMName());
+            }
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
     @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void romNameIsCorrect(String romName) {
+    @MethodSource("getRomNamesInFolder")
+    public void romNameOfRomInFolderIsCorrect(String romName) {
         loadROM(romName);
         assertEquals("Pokemon " + romName, romHandler.getROMName());
     }
