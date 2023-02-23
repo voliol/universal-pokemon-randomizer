@@ -77,8 +77,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         try {
             roms = Gen2RomEntry.READER.readEntriesFromFile("gen2_offsets.ini");
         } catch (IOException e) {
-            // TODO proper error messaging
-            e.printStackTrace();
+            throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
     
@@ -1353,11 +1352,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             rom[oddEggPokemonOffset + 2 + i] = (byte) move;
             rom[oddEggPokemonOffset + 23 + i] = (byte) pp;
         }
-    }
-
-    @Override
-    public boolean canChangeStaticPokemon() {
-        return (romEntry.getIntValue("StaticPokemonSupport") > 0);
     }
     
     @Override

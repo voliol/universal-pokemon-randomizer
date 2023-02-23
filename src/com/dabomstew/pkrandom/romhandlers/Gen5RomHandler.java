@@ -79,8 +79,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             roms = Gen5RomEntry.READER.readEntriesFromFile("gen5_offsets.ini");
         } catch (IOException e) {
-            // TODO: proper error messaging
-            e.printStackTrace();
+            throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
     
@@ -1602,11 +1601,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 parent.writeWord(file, givenOffsets[i], giv);
             }
         }
-    }
-
-    @Override
-    public boolean canChangeStaticPokemon() {
-        return romEntry.hasStaticPokemonSupport();
     }
 
     @Override

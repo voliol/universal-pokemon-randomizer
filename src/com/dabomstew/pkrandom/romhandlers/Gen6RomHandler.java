@@ -32,7 +32,6 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen5RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen6RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.ThreeDSLinkedEncounter;
 import pptxt.N3DSTxtHandler;
@@ -77,8 +76,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             roms = Gen6RomEntry.READER.readEntriesFromFile("gen6_offsets.ini");
         } catch (IOException e) {
-            // TODO: proper error messaging
-            e.printStackTrace();
+            throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
 
@@ -2036,11 +2034,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
-    }
-
-    @Override
-    public boolean canChangeStaticPokemon() {
-        return romEntry.hasStaticPokemonSupport();
     }
 
     @Override

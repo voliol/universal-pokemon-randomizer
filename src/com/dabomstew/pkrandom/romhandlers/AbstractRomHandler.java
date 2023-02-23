@@ -3820,6 +3820,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         return pickedStarters;
     }
 
+    @Override
+    public boolean canChangeStaticPokemon() {
+        return getRomEntry().hasStaticPokemonSupport();
+    }
 
     @Override
     public void randomizeStaticPokemon(Settings settings) {

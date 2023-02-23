@@ -77,8 +77,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			roms = Gen4RomEntry.READER.readEntriesFromFile("gen4_offsets.ini");
 		} catch (IOException e) {
-			// TODO proper error messaging
-			e.printStackTrace();
+			throw new RuntimeException("Could not read Rom Entries.", e);
 		}
 	}
 
@@ -3728,11 +3727,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public boolean hasWildAltFormes() {
 		return false;
-	}
-
-	@Override
-	public boolean canChangeStaticPokemon() {
-		return romEntry.hasStaticPokemonSupport();
 	}
 
 	@Override

@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen1RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
@@ -91,8 +90,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         try {
             roms = Gen3RomEntry.READER.readEntriesFromFile("gen3_offsets.ini");
         } catch (IOException e) {
-            // TODO proper error messaging
-            e.printStackTrace();
+            throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
 
@@ -3211,11 +3209,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             doubles.add(tClass);
         }
         return doubles;
-    }
-
-    @Override
-    public boolean canChangeStaticPokemon() {
-        return (romEntry.getIntValue("StaticPokemonSupport") > 0);
     }
 
     @Override

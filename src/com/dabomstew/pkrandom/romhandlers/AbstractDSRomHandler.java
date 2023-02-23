@@ -151,11 +151,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean canChangeStaticPokemon() {
-        return false;
-    }
-
-    @Override
     public boolean hasPhysicalSpecialSplit() {
         // Default value for Gen4+.
         // Handlers can override again in case of ROM hacks etc.

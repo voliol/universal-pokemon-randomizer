@@ -126,11 +126,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean canChangeStaticPokemon() {
-        return true;
-    }
-
-    @Override
     public boolean hasPhysicalSpecialSplit() {
         // Default value for Gen1-Gen3.
         // Handlers can override again in case of ROM hacks etc.

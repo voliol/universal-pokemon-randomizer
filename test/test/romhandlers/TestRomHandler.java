@@ -253,11 +253,6 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean canChangeStaticPokemon() {
-        return false;
-    }
-
-    @Override
     public boolean hasStaticAltFormes() {
         return false;
     }

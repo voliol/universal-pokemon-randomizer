@@ -87,7 +87,16 @@ public class FileFunctions {
                 return new FileInputStream(fh);
             }
         }
-        return FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/config/" + filename);
+
+        String resourcePath = "/com/dabomstew/pkrandom/config/" + filename;
+        InputStream is = FileFunctions.class.getResourceAsStream(resourcePath);
+        if (is == null) {
+            // FileNotFoundException is not strictly correct, I think? I believe IOException might be what should
+            // really be used, but this should do as a quickfix.
+            throw new FileNotFoundException("Could not find resource " + resourcePath);
+        }
+        return is;
+
     }
 
     public static CustomNamesSet getCustomNames() throws IOException {

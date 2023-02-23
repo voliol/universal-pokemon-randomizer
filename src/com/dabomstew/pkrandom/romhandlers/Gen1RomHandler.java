@@ -111,15 +111,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private static List<Gen1RomEntry> roms;
 
     static {
-        loadROMInfo();
+        loadRomEntries();
     }
 
-    private static void loadROMInfo() {
+    private static void loadRomEntries() {
         try {
             roms = Gen1RomEntry.READER.readEntriesFromFile("gen1_offsets.ini");
         } catch (IOException e) {
-            // TODO proper error messaging
-            e.printStackTrace();
+            throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
     
@@ -1448,11 +1447,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         return true;
-    }
-
-    @Override
-    public boolean canChangeStaticPokemon() {
-        return (romEntry.getIntValue("StaticPokemonSupport") > 0);
     }
 
     @Override

@@ -52,6 +52,7 @@ public abstract class IniEntryReader<T extends IniEntry> {
     private static final String COMMENT_PREFIX = "//";
 
     private final DefaultReadMode defaultReadMode;
+    private String fileName;
     private T current;
     private List<T> iniEntries;
 
@@ -77,6 +78,7 @@ public abstract class IniEntryReader<T extends IniEntry> {
 
     public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
         Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+        this.fileName = fileName;
         this.iniEntries = new ArrayList<>();
 
         while (scanner.hasNextLine()) {
@@ -119,7 +121,7 @@ public abstract class IniEntryReader<T extends IniEntry> {
     private void parseAndAddValuePair(String line) {
         String[] valuePair = splitIntoValuePair(line);
         if (valuePair == null) {
-            throw new RuntimeException(); // TODO: what exactly to throw here
+            return;
         }
 
         BiConsumer<T, String[]> keyPrefixMethod = checkForKeyPrefixMethod(valuePair);
@@ -164,7 +166,7 @@ public abstract class IniEntryReader<T extends IniEntry> {
     private String[] splitIntoValuePair(String line) {
         String[] valuePair = line.split("=", 2);
         if (valuePair.length == 1) {
-            System.err.println("invalid entry " + line);
+            System.err.println("invalid line in " + fileName + "/" + current.getName() + ": " + line);
             return null;
         }
         if (valuePair[1].endsWith("\r\n")) {
