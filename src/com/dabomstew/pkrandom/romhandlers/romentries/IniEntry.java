@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A superclass for any kind of "entries" which can be expected to be read from .ini files, e.g. the RomEntry classes.
+ * An abstract class for any kind of "entries" which can be expected to be read from .ini files. E.g. the
+ * {@link RomEntry} classes.
  */
 public abstract class IniEntry {
 

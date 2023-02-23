@@ -1,10 +1,16 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
+
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * An abstract {@link RomEntry} to be used by DS games. Thus supports descriptions of the DS (NARC) file system.
+ * Corresponds to {@link AbstractDSRomHandler}.
+ */
 public abstract class AbstractDSRomEntry extends RomEntry {
 
     protected abstract static class DSRomEntryReader<T extends AbstractDSRomEntry> extends RomEntryReader<T> {

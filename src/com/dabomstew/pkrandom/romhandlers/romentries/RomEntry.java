@@ -1,10 +1,18 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import com.dabomstew.pkrandom.constants.Gen2Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A description of a ROM
+ * A description of a specific rom, or version of a rom. The {@code RomEntry} differentiates the rom from
+ * similar roms, and contains data needed to read from, parse, and write to it. E.g. offsets or file names,
+ * or string templates needed to modify TM event text.
+ * <p>
+ * The data in a RomEntry is generally different from that in constant files like {@link Gen2Constants},
+ * because it relates to a specific rom, and not a game or generation as a whole. An offset may not be the same in
+ * "Crystal (U)" and "Crystal (S)", despite both being roms of Pokémon crystal.
  */
 public abstract class RomEntry extends IniEntry {
 

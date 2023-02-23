@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A {@link RomEntry} for Gen 4.
+ */
 public class Gen4RomEntry extends AbstractDSRomEntry {
 
     public static class Gen4RomEntryReader<T extends Gen4RomEntry> extends DSRomEntryReader<T> {

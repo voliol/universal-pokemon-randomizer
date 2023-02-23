@@ -7,6 +7,19 @@ import java.util.function.BiConsumer;
 
 import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
+/**
+ * An abstract class for any kind of {@link IniEntry} reading, presumably from an .ini file, though reading directly
+ * from a {@link Scanner} is also supported.
+ * <br>
+ * {@code IniEntryReader} handles reading int, String, and int[] values as appropriate, and copying values from
+ * another entry. These functions support the base {@code IniEntry} class. Subclasses of {@code IniEntryReader} may
+ * also add functions relevant to whatever "entry" they are reading with
+ * {@link #putSpecialKeyMethod(String, BiConsumer) putSpecialKeyMethod()},
+ * {@link #putKeyPrefixMethod(String, BiConsumer) putKeyPrefixMethod()}, and
+ * {@link #putKeySuffixMethod(String, BiConsumer) putKeySuffixMethod()}.
+ *
+ * @param <T>
+ */
 public abstract class IniEntryReader<T extends IniEntry> {
 
     public static int parseInt(String s) {
@@ -79,6 +92,10 @@ public abstract class IniEntryReader<T extends IniEntry> {
     public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
         Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
         this.fileName = fileName;
+        return readEntriesFromScanner(scanner);
+    }
+
+    public List<T> readEntriesFromScanner(Scanner scanner) {
         this.iniEntries = new ArrayList<>();
 
         while (scanner.hasNextLine()) {

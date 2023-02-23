@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A {@link RomEntry} for Gen 2.
+ */
 public class Gen2RomEntry extends AbstractGBCRomEntry {
 
     public static class Gen2RomEntryReader<T extends Gen2RomEntry> extends GBCRomEntryReader<T> {

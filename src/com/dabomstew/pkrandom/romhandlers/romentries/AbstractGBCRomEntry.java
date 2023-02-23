@@ -1,10 +1,14 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import java.io.IOException;
+import com.dabomstew.pkrandom.romhandlers.AbstractGBCRomHandler;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An abstract {@link RomEntry} to be used by GBC (Gen 1 and 2) games. Corresponds to {@link AbstractGBCRomHandler}.
+ */
 public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
     protected abstract static class GBCRomEntryReader<T extends AbstractGBCRomEntry> extends GBRomEntryReader<T> {

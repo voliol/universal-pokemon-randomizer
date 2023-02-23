@@ -4,11 +4,13 @@ import com.dabomstew.pkrandom.constants.Gen1Constants;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A {@link RomEntry} for Gen 1.
+ */
 public class Gen1RomEntry extends AbstractGBCRomEntry {
 
     public static class Gen1RomEntryReader<T extends Gen1RomEntry> extends GBCRomEntryReader<T> {

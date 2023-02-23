@@ -2,6 +2,9 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.constants.Gen6Constants;
 
+/**
+ * A {@link RomEntry} for Gen 6.
+ */
 public class Gen6RomEntry extends Abstract3DSRomEntry {
 
     public static class Gen6RomEntryReader<T extends Gen6RomEntry> extends ThreeDSRomEntryReader<T> {

@@ -1,5 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+/**
+ * An entry for a file in the 3DS file system, with a path and expected CRC32s.
+ */
 public class ThreeDSFileEntry {
     private final String path;
     private final long[] expectedCRC32s;

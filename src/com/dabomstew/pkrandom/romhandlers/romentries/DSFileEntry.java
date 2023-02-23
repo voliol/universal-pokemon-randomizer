@@ -1,5 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+/**
+ * An entry for a file in the DS (NARC) file system, with a path and expected CRC32.
+ */
 public class DSFileEntry {
 
     private final String path;

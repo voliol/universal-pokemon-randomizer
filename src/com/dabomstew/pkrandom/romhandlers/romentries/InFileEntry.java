@@ -1,5 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+/**
+ * An entry describing an offset in a file, both as integers.
+ */
 public class InFileEntry {
 
     private final int file;

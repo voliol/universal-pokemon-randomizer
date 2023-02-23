@@ -5,6 +5,9 @@ import com.dabomstew.pkrandom.constants.Gen7Constants;
 import java.io.IOException;
 import java.util.Collection;
 
+/**
+ * A {@link RomEntry} for Gen 7.
+ */
 public class Gen7RomEntry extends Abstract3DSRomEntry {
 
     public static class Gen7RomEntryReader<T extends Gen7RomEntry> extends ThreeDSRomEntryReader<T> {

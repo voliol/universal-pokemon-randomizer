@@ -1,7 +1,13 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import com.dabomstew.pkrandom.romhandlers.Abstract3DSRomHandler;
+
 import java.util.*;
 
+/**
+ * An abstract {@link RomEntry} to be used by 3DS games. Thus supports descriptions of the 3DS file system.
+ * Corresponds to {@link Abstract3DSRomHandler}.
+ */
 public abstract class Abstract3DSRomEntry extends RomEntry {
 
     protected abstract static class ThreeDSRomEntryReader<T extends Abstract3DSRomEntry> extends RomEntryReader<T> {
