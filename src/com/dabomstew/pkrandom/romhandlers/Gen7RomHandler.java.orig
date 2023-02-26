@@ -41,6 +41,7 @@ import pptxt.N3DSTxtHandler;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,9 +75,134 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private static void loadROMInfo() {
         try {
+<<<<<<< HEAD
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen7_offsets.ini"), StandardCharsets.UTF_8);
+            while (sc.hasNextLine()) {
+                String q = sc.nextLine().trim();
+                if (q.contains("//")) {
+                    q = q.substring(0, q.indexOf("//")).trim();
+                }
+                if (!q.isEmpty()) {
+                    if (q.startsWith("[") && q.endsWith("]")) {
+                        // New rom
+                        current = new RomEntry();
+                        current.name = q.substring(1, q.length() - 1);
+                        roms.add(current);
+                    } else {
+                        String[] r = q.split("=", 2);
+                        if (r.length == 1) {
+                            System.err.println("invalid entry " + q);
+                            continue;
+                        }
+                        if (r[1].endsWith("\r\n")) {
+                            r[1] = r[1].substring(0, r[1].length() - 2);
+                        }
+                        r[1] = r[1].trim();
+                        if (r[0].equals("Game")) {
+                            current.romCode = r[1];
+                        } else if (r[0].equals("Type")) {
+                            if (r[1].equalsIgnoreCase("USUM")) {
+                                current.romType = Gen7Constants.Type_USUM;
+                            } else {
+                                current.romType = Gen7Constants.Type_SM;
+                            }
+                        } else if (r[0].equals("TitleId")) {
+                            current.titleId = r[1];
+                        } else if (r[0].equals("Acronym")) {
+                            current.acronym = r[1];
+                        } else if (r[0].startsWith("File<")) {
+                            String key = r[0].split("<")[1].split(">")[0];
+                            String[] values = r[1].substring(1, r[1].length() - 1).split(",");
+                            String path = values[0];
+                            String crcString = values[1].trim() + ", " + values[2].trim();
+                            String[] crcs = crcString.substring(1, crcString.length() - 1).split(",");
+                            RomFileEntry entry = new RomFileEntry();
+                            entry.path = path.trim();
+                            entry.expectedCRC32s = new long[2];
+                            entry.expectedCRC32s[0] = parseRILong("0x" + crcs[0].trim());
+                            entry.expectedCRC32s[1] = parseRILong("0x" + crcs[1].trim());
+                            current.files.put(key, entry);
+                        } else if (r[0].equals("CodeCRC32")) {
+                            String[] values = r[1].substring(1, r[1].length() - 1).split(",");
+                            current.expectedCodeCRC32s[0] = parseRILong("0x" + values[0].trim());
+                            current.expectedCodeCRC32s[1] = parseRILong("0x" + values[1].trim());
+                        } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (String offset : offsets) {
+                                String[] parts = offset.split(":");
+                                current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
+                            }
+                        } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
+                            int offs = parseRIInt(r[1]);
+                            current.numbers.put(r[0], offs);
+                        } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
+                                current.arrayEntries.put(r[0], new int[0]);
+                            } else {
+                                int[] offs = new int[offsets.length];
+                                int c = 0;
+                                for (String off : offsets) {
+                                    offs[c++] = parseRIInt(off);
+                                }
+                                current.arrayEntries.put(r[0], offs);
+                            }
+                        } else if (r[0].equals("CopyFrom")) {
+                            for (RomEntry otherEntry : roms) {
+                                if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
+                                    // copy from here
+                                    current.linkedStaticOffsets.putAll(otherEntry.linkedStaticOffsets);
+                                    current.arrayEntries.putAll(otherEntry.arrayEntries);
+                                    current.numbers.putAll(otherEntry.numbers);
+                                    current.strings.putAll(otherEntry.strings);
+                                    current.offsetArrayEntries.putAll(otherEntry.offsetArrayEntries);
+                                    current.files.putAll(otherEntry.files);
+                                }
+                            }
+                        } else {
+                            current.strings.put(r[0],r[1]);
+                        }
+                    }
+                }
+            }
+            sc.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found!");
+        }
+    }
+
+    private static int parseRIInt(String off) {
+        int radix = 10;
+        off = off.trim().toLowerCase();
+        if (off.startsWith("0x") || off.startsWith("&h")) {
+            radix = 16;
+            off = off.substring(2);
+        }
+        try {
+            return Integer.parseInt(off, radix);
+        } catch (NumberFormatException ex) {
+            System.err.println("invalid base " + radix + "number " + off);
+            return 0;
+        }
+    }
+
+    private static long parseRILong(String off) {
+        int radix = 10;
+        off = off.trim().toLowerCase();
+        if (off.startsWith("0x") || off.startsWith("&h")) {
+            radix = 16;
+            off = off.substring(2);
+        }
+        try {
+            return Long.parseLong(off, radix);
+        } catch (NumberFormatException ex) {
+            System.err.println("invalid base " + radix + "number " + off);
+            return 0;
+=======
             roms = Gen7RomEntry.READER.readEntriesFromFile("gen7_offsets.ini");
         } catch (IOException e) {
             throw new RuntimeException("Could not read Rom Entries.", e);
+>>>>>>> master
         }
     }
 
@@ -1880,7 +2006,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<TotemPokemon> totems = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            List<Integer> totemIndices =
+<<<<<<< HEAD
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().toList();
+=======
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Static encounters
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
@@ -1922,7 +2053,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            List<Integer> totemIndices =
+<<<<<<< HEAD
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().toList();
+=======
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
             Iterator<TotemPokemon> totemIter = totemPokemon.iterator();
 
             // Static encounters
@@ -1985,8 +2121,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<StaticEncounter> statics = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> skipIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
-            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
+            List<Integer> skipIndices =
+<<<<<<< HEAD
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().toList());
+=======
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
+>>>>>>> master
 
             // Gifts, start at 3 to skip the starters
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -2126,8 +2268,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             unlinkStaticEncounters(staticPokemon);
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> skipIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
-            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
+            List<Integer> skipIndices =
+<<<<<<< HEAD
+                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().toList());
+=======
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
+>>>>>>> master
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             // Gifts, start at 3 to skip the starters

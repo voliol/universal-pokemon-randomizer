@@ -34,6 +34,9 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen1Constants {
 
+    public static final int Type_RB = 0;
+    public static final int Type_Yellow = 1;
+
     public static final int baseStatsEntrySize = 0x1C;
 
 	public static final int bsHPOffset = 1, bsAttackOffset = 2, bsDefenseOffset = 3, bsSpeedOffset = 4,
@@ -46,6 +49,8 @@ public class Gen1Constants {
     public static final int trainerClassCount = 47;
 
     public static final int champRivalOffsetFromGymLeaderMoves = 0x44;
+
+    public static final int pokemonCount = 151;
 
     public static final int tmCount = 50, hmCount = 5;
 

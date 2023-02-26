@@ -44,6 +44,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.BasicPokemonAction;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.EvolvedPokemonAction;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -298,6 +299,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 	public PokemonSet<Pokemon> getPokemonSetInclFormes() {
 	    return new PokemonSet<>(getPokemonInclFormes()); // TODO: unmodifiable?
 	}
+
+    @Override
+    public PokemonSet<Pokemon> getRestrictedPokemon() {
+        checkPokemonRestrictions();
+        return restrictedPokemon;
+    }
+
+    @Override
+    public PokemonSet<Pokemon> getRestrictedPokemonInclAltFormes() {
+        checkPokemonRestrictions();
+        return restrictedPokemonInclAltFormes;
+    }
 
 	private PokemonSet<Pokemon> getRestrictedPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
 	    PokemonSet<Pokemon> allowedPokes = new PokemonSet<>();
@@ -1424,6 +1437,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTrainerPokes(Settings settings) {
+        // TODO: adding pokémon to just boss/important trainers is seemingly broken (is it in main ZX too?)
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
@@ -3792,6 +3806,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         return pickedStarters;
     }
 
+    @Override
+    public boolean canChangeStaticPokemon() {
+        return getRomEntry().hasStaticPokemonSupport();
+    }
 
     @Override
     public void randomizeStaticPokemon(Settings settings) {
@@ -7047,5 +7065,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 	protected abstract boolean saveRomFile(String filename, long seed);
 	
 	protected abstract boolean saveRomDirectory(String filename);
+
+    protected abstract RomEntry getRomEntry();
+
+    @Override
+    public String getROMName() {
+        return "Pokemon " + getRomEntry().getName();
+    }
+
+    @Override
+    public String getROMCode() {
+        return getRomEntry().getRomCode();
+    }
+
+    @Override
+    public String getSupportLevel() {
+        return getRomEntry().hasStaticPokemonSupport() ? "Complete" : "No Static Pokemon";
+    }
 	
 }

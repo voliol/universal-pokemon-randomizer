@@ -39,6 +39,7 @@ import pptxt.N3DSTxtHandler;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,9 +75,134 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private static void loadROMInfo() {
         roms = new ArrayList<>();
         try {
+<<<<<<< HEAD
+            Scanner sc = new Scanner(FileFunctions.openConfig("gen6_offsets.ini"), StandardCharsets.UTF_8);
+            while (sc.hasNextLine()) {
+                String q = sc.nextLine().trim();
+                if (q.contains("//")) {
+                    q = q.substring(0, q.indexOf("//")).trim();
+                }
+                if (!q.isEmpty()) {
+                    if (q.startsWith("[") && q.endsWith("]")) {
+                        // New rom
+                        current = new RomEntry();
+                        current.name = q.substring(1, q.length() - 1);
+                        roms.add(current);
+                    } else {
+                        String[] r = q.split("=", 2);
+                        if (r.length == 1) {
+                            System.err.println("invalid entry " + q);
+                            continue;
+                        }
+                        if (r[1].endsWith("\r\n")) {
+                            r[1] = r[1].substring(0, r[1].length() - 2);
+                        }
+                        r[1] = r[1].trim();
+                        if (r[0].equals("Game")) {
+                            current.romCode = r[1];
+                        } else if (r[0].equals("Type")) {
+                            if (r[1].equalsIgnoreCase("ORAS")) {
+                                current.romType = Gen6Constants.Type_ORAS;
+                            } else {
+                                current.romType = Gen6Constants.Type_XY;
+                            }
+                        } else if (r[0].equals("TitleId")) {
+                            current.titleId = r[1];
+                        } else if (r[0].equals("Acronym")) {
+                            current.acronym = r[1];
+                        } else if (r[0].equals("CopyFrom")) {
+                            for (RomEntry otherEntry : roms) {
+                                if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
+                                    // copy from here
+                                    current.linkedStaticOffsets.putAll(otherEntry.linkedStaticOffsets);
+                                    current.arrayEntries.putAll(otherEntry.arrayEntries);
+                                    current.numbers.putAll(otherEntry.numbers);
+                                    current.strings.putAll(otherEntry.strings);
+                                    current.offsetArrayEntries.putAll(otherEntry.offsetArrayEntries);
+                                    current.files.putAll(otherEntry.files);
+                                }
+                            }
+                        } else if (r[0].startsWith("File<")) {
+                            String key = r[0].split("<")[1].split(">")[0];
+                            String[] values = r[1].substring(1, r[1].length() - 1).split(",");
+                            String path = values[0];
+                            String crcString = values[1].trim() + ", " + values[2].trim();
+                            String[] crcs = crcString.substring(1, crcString.length() - 1).split(",");
+                            RomFileEntry entry = new RomFileEntry();
+                            entry.path = path.trim();
+                            entry.expectedCRC32s = new long[2];
+                            entry.expectedCRC32s[0] = parseRILong("0x" + crcs[0].trim());
+                            entry.expectedCRC32s[1] = parseRILong("0x" + crcs[1].trim());
+                            current.files.put(key, entry);
+                        } else if (r[0].equals("CodeCRC32")) {
+                            String[] values = r[1].substring(1, r[1].length() - 1).split(",");
+                            current.expectedCodeCRC32s[0] = parseRILong("0x" + values[0].trim());
+                            current.expectedCodeCRC32s[1] = parseRILong("0x" + values[1].trim());
+                        } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            for (String offset : offsets) {
+                                String[] parts = offset.split(":");
+                                current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
+                            }
+                        } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
+                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
+                            if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
+                                current.arrayEntries.put(r[0], new int[0]);
+                            } else {
+                                int[] offs = new int[offsets.length];
+                                int c = 0;
+                                for (String off : offsets) {
+                                    offs[c++] = parseRIInt(off);
+                                }
+                                current.arrayEntries.put(r[0], offs);
+                            }
+                        } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
+                            int offs = parseRIInt(r[1]);
+                            current.numbers.put(r[0], offs);
+                        } else {
+                            current.strings.put(r[0],r[1]);
+                        }
+                    }
+                }
+            }
+            sc.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found!");
+        }
+    }
+
+    private static int parseRIInt(String off) {
+        int radix = 10;
+        off = off.trim().toLowerCase();
+        if (off.startsWith("0x") || off.startsWith("&h")) {
+            radix = 16;
+            off = off.substring(2);
+        }
+        try {
+            return Integer.parseInt(off, radix);
+        } catch (NumberFormatException ex) {
+            System.err.println("invalid base " + radix + "number " + off);
+            return 0;
+        }
+    }
+
+    private static long parseRILong(String off) {
+        int radix = 10;
+        off = off.trim().toLowerCase();
+        if (off.startsWith("0x") || off.startsWith("&h")) {
+            radix = 16;
+            off = off.substring(2);
+        }
+        try {
+            return Long.parseLong(off, radix);
+        } catch (NumberFormatException ex) {
+            System.err.println("invalid base " + radix + "number " + off);
+            return 0;
+=======
             roms = Gen6RomEntry.READER.readEntriesFromFile("gen6_offsets.ini");
         } catch (IOException e) {
             throw new RuntimeException("Could not read Rom Entries.", e);
+>>>>>>> master
         }
     }
 
@@ -888,7 +1014,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+<<<<<<< HEAD
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
+=======
+            List<Integer> starterIndices =
+                    Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -924,7 +1055,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
             byte[] displayCRO = readFile(romEntry.getFile("StarterDisplay"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+<<<<<<< HEAD
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
+=======
+            List<Integer> starterIndices =
+                    Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -985,7 +1121,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
         Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
-        switch (generation) {
+        switch(generation) {
             case 7:
                 map.put(Species.Gen6Formes.alakazamMega, new StatChange(Stat.SPDEF.val, 105));
                 break;
@@ -1007,7 +1143,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+<<<<<<< HEAD
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
+=======
+            List<Integer> starterIndices =
+                    Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -1033,7 +1174,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+<<<<<<< HEAD
+            List<Integer> starterIndices = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
+=======
+            List<Integer> starterIndices =
+                    Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -2069,7 +2215,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 statics.add(se);
             }
 
-            List<Integer> skipStarters = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+<<<<<<< HEAD
+            List<Integer> skipStarters = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
+=======
+            List<Integer> skipStarters =
+                    Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Gift Pokemon
             count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -2198,7 +2349,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
 
-            List<Integer> skipStarters = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+<<<<<<< HEAD
+            List<Integer> skipStarters = Arrays.stream(romEntry.arrayEntries.get("StarterIndices")).boxed().toList();
+=======
+            List<Integer> skipStarters =
+                    Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
+>>>>>>> master
 
             // Gift Pokemon
             int giftCount = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -2280,9 +2436,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         byte[] boxLegendaryRoomData = encounterGarc.getFile(Gen6Constants.boxLegendaryEncounterFileXY);
         AMX localScript = new AMX(boxLegendaryRoomData, 1);
         byte[] data = localScript.decData;
-        int[] boxLegendaryScriptOffsets = romEntry.getArrayValue("BoxLegendaryScriptOffsets");
+<<<<<<< HEAD
+        int[] boxLegendaryScriptOffsets = romEntry.arrayEntries.get("BoxLegendaryScriptOffsets");
         for (int offset : boxLegendaryScriptOffsets) {
             FileFunctions.write2ByteInt(data, offset, boxLegendarySpecies);
+=======
+        int[] boxLegendaryScriptOffsets = romEntry.getArrayValue("BoxLegendaryScriptOffsets");
+        for (int boxLegendaryScriptOffset : boxLegendaryScriptOffsets) {
+            FileFunctions.write2ByteInt(data, boxLegendaryScriptOffset, boxLegendarySpecies);
+>>>>>>> master
         }
         byte[] modifiedScript = localScript.getBytes();
         System.arraycopy(modifiedScript, 0, boxLegendaryRoomData, Gen6Constants.boxLegendaryLocalScriptOffsetXY, modifiedScript.length);
