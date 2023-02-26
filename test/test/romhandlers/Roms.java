@@ -4,13 +4,32 @@ import com.dabomstew.pkrandom.romhandlers.romentries.*;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Constants for all ROM names, to easily test sets of ROMs.
+ * Has methods that return ROM names, to easily test sets of ROMs.
  */
 public class Roms {
+
+    public enum Region {
+        USA('U'), EUROPE_ENGLISH('E'), JAPAN('J'), FRANCE('F'), GERMANY('G'), SPAIN('S'),
+        ITALY('I'), KOREA('K');
+
+        private final char id;
+
+        Region(char id) {
+            this.id = id;
+        }
+    }
+
+    // These are ROMs which are allegedly (according to the .ini files) supported by the UPR.
+    // However, I could not procure the actual ROMs... Rather than running the romIsTestable() testcase each
+    // time to find this out there is this manual list to filter them out.
+    // -- voliol 2023-02-26
+    private static final List<String> UNTESTABLE = Arrays.asList("Green (J)(T-Eng)", "Crystal SpeedChoice v3",
+            "Ruby (U/E) 1.2", "Sapphire (U/E) 1.2", "Emerald (T-Eng)");
 
     private static final List<String> ALL_GEN_1_ROMS;
     private static final List<String> ALL_GEN_2_ROMS;
@@ -34,26 +53,38 @@ public class Roms {
         }
     }
 
-    private static final List<String> ALL_ROMS = combine(ALL_GEN_1_ROMS, ALL_GEN_2_ROMS, ALL_GEN_3_ROMS,
-            ALL_GEN_4_ROMS, ALL_GEN_5_ROMS, ALL_GEN_6_ROMS, ALL_GEN_7_ROMS);
+    private static final List<List<String>> ALL_ROMS_BY_GENERATION = Arrays.asList(ALL_GEN_1_ROMS, ALL_GEN_2_ROMS,
+            ALL_GEN_3_ROMS, ALL_GEN_4_ROMS, ALL_GEN_5_ROMS, ALL_GEN_6_ROMS, ALL_GEN_7_ROMS);
 
     private static List<String> getNames(List<? extends RomEntry> romEntries) {
         return romEntries.stream().map(RomEntry::getName).collect(Collectors.toList());
     }
 
-    @SafeVarargs
-    private static List<String> combine(List<String> first, List<String>... others) {
-        List<String> combined = new ArrayList<>(first);
-        for (List<String> other : others) {
-            combined.addAll(other);
-        }
-        return combined;
-    }
-
     public static String[] getAllRoms() {
-        return ALL_ROMS.toArray(String[]::new);
+        return getRoms(new int[]{1, 2, 3, 4, 5, 6, 7}, Region.values(), true);
     }
 
+    public static String[] getRoms(int[] generations, Region[] regions, boolean includeUntestable) {
+        List<String> roms = new ArrayList<>();
+        for (int gen : generations) {
+            List<String> ofGen = ALL_ROMS_BY_GENERATION.get(gen - 1);
+            if (gen < 6) {
+                ofGen.removeIf(s -> {
+                    for (Region region : regions) {
+                        if (s.contains("(" + region.id)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+            }
+            roms.addAll(ofGen);
+        }
+        if (!includeUntestable) {
+            roms.removeAll(UNTESTABLE);
+        }
 
+        return roms.toArray(new String[0]);
+    }
 
 }

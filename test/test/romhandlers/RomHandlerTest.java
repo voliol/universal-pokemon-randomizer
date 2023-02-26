@@ -8,14 +8,12 @@ import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -35,9 +33,13 @@ public class RomHandlerTest {
     private static final int HIGHEST_GENERATION = 7;
 
     private static final String TEST_ROMS_PATH = "test/roms";
-    private static final String LAST_DOT_REGEX = "\\.+(?![^\\.]*\\.)";
+    private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
+        return Roms.getRoms(new int[] {1,2,3,4,5}, new Roms.Region[] {Roms.Region.USA}, false);
+    }
+
+    public static String[] getAllRomNames() {
         return Roms.getAllRoms();
     }
 
@@ -55,7 +57,6 @@ public class RomHandlerTest {
     }
 
     private RomHandler romHandler;
-
 
     private void loadROM(String romName) {
         Generation gen = Generation.GAME_TO_GENERATION.get(stripToBaseRomName(romName));
@@ -87,7 +88,7 @@ public class RomHandlerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getRomNames")
+    @MethodSource("getAllRomNames")
     public void romIsTestable(String romName) {
         try {
             loadROM(romName);
