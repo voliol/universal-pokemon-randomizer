@@ -2289,7 +2289,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		writeTMItemText(moveIndexes);
 		writeTMText(moveIndexes);
 	}
-        int otherOffset = romEntry.getIntValue("TmMovesDuplicate");
 
 	private void writeTMMoves(List<Integer> moveIndexes) {
 		int offset = romEntry.getIntValue("TmMoves");
@@ -2302,7 +2301,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			System.arraycopy(rom, offset, rom, otherOffset, Gen3Constants.tmCount * 2);
 		}
 	}
-            int[] pals = romEntry.getArrayValue("TmPals");
 
 	private void writeTMItemPalettes(List<Integer> moveIndexes) {
 		int iiOffset = romEntry.getIntValue("ItemImages");

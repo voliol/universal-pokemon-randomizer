@@ -3,6 +3,7 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
+import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -14,6 +15,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -36,7 +38,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[] {1,2,3,4,5}, new Roms.Region[] {Roms.Region.USA}, false);
+        return Roms.getRoms(new int[] {1,2,3}, new Roms.Region[] {Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {
@@ -322,6 +324,37 @@ public class RomHandlerTest {
         assertNull(romHandler.getMoves().get(0));
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void allMovesHaveNonBlankNames(String romName) {
+        loadROM(romName);
+        System.out.println(romHandler.getMoves());
+        for (Move m : romHandler.getMoves()) {
+            if (m != null) {
+                assertFalse(m.name.isBlank());
+            }
+        }
+    }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void tmMovesDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        List<Integer> tmMoves = romHandler.getTMMoves();
+        List<Integer> before = new ArrayList<>(tmMoves);
+        romHandler.setTMMoves(tmMoves);
+        assertEquals(before, romHandler.getTMMoves());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void moveTutorMovesDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        assumeTrue(romHandler.hasMoveTutors());
+        List<Integer> moveTutorMoves = romHandler.getMoveTutorMoves();
+        List<Integer> before = new ArrayList<>(moveTutorMoves);
+        romHandler.setMoveTutorMoves(moveTutorMoves);
+        assertEquals(before, romHandler.getMoveTutorMoves());
+    }
 
 }

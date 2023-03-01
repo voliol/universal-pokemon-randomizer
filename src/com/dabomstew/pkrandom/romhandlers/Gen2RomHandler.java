@@ -1441,7 +1441,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // TM Text
         String[] moveNames = readMoveNames();
         for (GBCTMTextEntry tte : romEntry.getTMTexts()) {
-            String moveName = moveNames[moveIndexes.get(tte.getOffset() - 1)];
+            String moveName = moveNames[moveIndexes.get(tte.getNumber() - 1)];
             String text = tte.getTemplate().replace("%m", moveName);
             writeVariableLengthString(text, tte.getOffset(), true);
         }
