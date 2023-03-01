@@ -2,10 +2,7 @@ package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.pokemon.GenRestrictions;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,10 +12,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -338,6 +332,16 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void movesLearntDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        Map<Integer, List<MoveLearnt>> movesLearnt = romHandler.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> before = new HashMap<>(movesLearnt);
+        romHandler.setMovesLearnt(movesLearnt);
+        assertEquals(before, romHandler.getMovesLearnt());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void tmMovesDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
         List<Integer> tmMoves = romHandler.getTMMoves();
@@ -355,6 +359,30 @@ public class RomHandlerTest {
         List<Integer> before = new ArrayList<>(moveTutorMoves);
         romHandler.setMoveTutorMoves(moveTutorMoves);
         assertEquals(before, romHandler.getMoveTutorMoves());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersAreNotNull(String romName) {
+        loadROM(romName);
+        assertNotNull(romHandler.getTrainers());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersAreNotEmpty(String romName) {
+        loadROM(romName);
+        assertFalse(romHandler.getTrainers().isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        List<Trainer> trainers = romHandler.getTrainers();
+        List<Trainer> before = new ArrayList<>(trainers);
+        romHandler.setTrainers(trainers, false); // obviously a problem with doubleBattleMode...
+        assertEquals(before, romHandler.getTrainers());
     }
 
 }
