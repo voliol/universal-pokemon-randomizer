@@ -1741,12 +1741,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
      * trainers list.
      */
     private void writeMossdeepStevenTrainer() {
-        // TODO: figure out how to write more properly/like the rest of the trainers
-        //       As this is written, can the Mossdeep Steven
-        //       trainer even have pokes added to it?
+        // The Mossdeep Steven trainer is special because it is *not* really a trainer to the game, just Pokemon data.
+        // The randomizer surrounds this data with a Trainer object so it can be randomized.
 		int mossdeepStevenOffset = romEntry.getIntValue("MossdeepStevenTeamOffset");
 		Trainer mossdeepSteven = trainers.get(trainers.size() - 1);
 
+        // The below code *could* be implemented using trainerPokemonToBytes(mossdeepSteven), but then extra
+        // precautions would need to be taken so the mossdeepSteven Trainer's properties aren't changed.
+        // Adding an extra Pokémon is normally fine with Trainers; but it would cause corruption with mossdeepSteven.
+        // ...thus the custom implementation below.
 		for (int i = 0; i < 3; i++) {
 			int currentOffset = mossdeepStevenOffset + (i * 20);
 			TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
