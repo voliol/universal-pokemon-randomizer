@@ -1758,7 +1758,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t : currentTrainers) {
-            if (trainerShouldNotGetBuffs(t)) {
+            if (t.shouldNotGetBuffs()) {
                 continue;
             }
             if (!giveToRegularPokemon && (!t.isImportant() && !t.isBoss())) {
@@ -1890,7 +1890,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (t.isBoss()) {
                 additional = additionalBoss;
             } else if (t.isImportant()) {
-                if (t.skipImportant()) continue;
+                if (t.shouldNotGetBuffs()) continue;
                 additional = additionalImportant;
             } else {
                 additional = additionalNormal;
@@ -1941,10 +1941,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void setDoubleBattleMode() {
         for (Trainer tr : getTrainers()) {
-            if (tr.pokemon.size() == 1 && tr.multiBattleStatus != Trainer.MultiBattleStatus.ALWAYS && !trainerShouldNotGetBuffs(tr)) {
-                tr.pokemon.add(tr.pokemon.get(0).copy());
-            }
-            if (!tr.skipImportant()) {
+            if (!(tr.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || tr.shouldNotGetBuffs())) {
+                if (tr.pokemon.size() == 1) {
+                    tr.pokemon.add(tr.pokemon.get(0).copy());
+                }
                 tr.forcedDoubleBattle = true;
             }
         }
@@ -2591,10 +2591,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         return obsoletedMoves.stream().distinct().collect(Collectors.toList());
-    }
-
-    private boolean trainerShouldNotGetBuffs(Trainer t) {
-        return t.tag != null && (t.tag.startsWith("RIVAL1-") || t.tag.startsWith("FRIEND1-") || t.tag.endsWith("NOTSTRONG"));
     }
 
     public int getRandomAbilitySlot(Pokemon pokemon) {

@@ -39,7 +39,7 @@ public class Trainer implements Comparable<Trainer> {
     public int trainerclass;
     public String fullDisplayName;
     public MultiBattleStatus multiBattleStatus = MultiBattleStatus.NEVER;
-    public boolean forcedDoubleBattle; // for doubleBattleMode. Should probably be combined with multiBattleStatus.
+    public boolean forcedDoubleBattle; // for doubleBattleMode
     public int forceStarterPosition = -1;
     // Certain trainers (e.g., trainers in the PWT in BW2) require unique held items for all of their Pokemon to prevent a game crash.
     public boolean requiresUniqueHeldItems;
@@ -107,8 +107,8 @@ public class Trainer implements Comparable<Trainer> {
         return tag != null && (tag.startsWith("RIVAL") || tag.startsWith("FRIEND") || tag.endsWith("STRONG"));
     }
 
-    public boolean skipImportant() {
-        return ((tag != null) && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.endsWith("NOTSTRONG")));
+    public boolean shouldNotGetBuffs() {
+        return tag != null && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.endsWith("NOTSTRONG"));
     }
 
     public void setPokemonHaveItems(boolean haveItems) {

@@ -401,4 +401,19 @@ public class RomHandlerTest {
         assertEquals(before, romHandler.getTrainers());
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersHaveAtLeastTwoPokemonAfterSettingDoubleBattleMode(String romName) {
+        loadROM(romName);
+        romHandler.setDoubleBattleMode();
+        for (Trainer trainer : romHandler.getTrainers()) {
+            System.out.println(trainer);
+            if (trainer.forcedDoubleBattle) {
+                assertTrue(trainer.pokemon.size() >= 2);
+            } else {
+                System.out.println("Not a forced double battle.");
+            }
+        }
+    }
+
 }
