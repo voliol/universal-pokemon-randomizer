@@ -101,7 +101,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
                 if (currChar == GBConstants.stringTerminator) {
                     break;
                 } else {
-                    string.append("\\x" + String.format("%02X", currChar));
+                    string.append("\\x").append(String.format("%02X", currChar));
                 }
             }
         }

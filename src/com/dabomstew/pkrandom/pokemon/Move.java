@@ -33,9 +33,11 @@ public class Move {
         public double percentChance;
 
         @Override
-        public boolean equals(Object obj) {
-            StatChange other = (StatChange)obj;
-            return this.type == other.type && this.stages == other.stages && this.percentChance == other.percentChance;
+        public boolean equals(Object o) {
+            if (o instanceof StatChange other) {
+                return this.type == other.type && this.stages == other.stages && this.percentChance == other.percentChance;
+            }
+            return false;
         }
 
     }

@@ -2206,21 +2206,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
                 int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
                 int effectivenessInternal = battleOverlay[offset];
-                Effectiveness effectiveness = null;
-                switch (effectivenessInternal) {
-                    case 8:
-                        effectiveness = Effectiveness.DOUBLE;
-                        break;
-                    case 4:
-                        effectiveness = Effectiveness.NEUTRAL;
-                        break;
-                    case 2:
-                        effectiveness = Effectiveness.HALF;
-                        break;
-                    case 0:
-                        effectiveness = Effectiveness.ZERO;
-                        break;
-                }
+                Effectiveness effectiveness = switch (effectivenessInternal) {
+                    case 8 -> Effectiveness.DOUBLE;
+                    case 4 -> Effectiveness.NEUTRAL;
+                    case 2 -> Effectiveness.HALF;
+                    case 0 -> Effectiveness.ZERO;
+                    default -> null;
+                };
                 effectivenessTable[attacker][defender] = effectiveness;
             }
         }
@@ -2233,21 +2225,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
                 Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
                 int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
-                byte effectivenessInternal = 0;
-                switch (effectiveness) {
-                    case DOUBLE:
-                        effectivenessInternal = 8;
-                        break;
-                    case NEUTRAL:
-                        effectivenessInternal = 4;
-                        break;
-                    case HALF:
-                        effectivenessInternal = 2;
-                        break;
-                    case ZERO:
-                        effectivenessInternal = 0;
-                        break;
-                }
+                byte effectivenessInternal = switch (effectiveness) {
+                    case DOUBLE -> 8;
+                    case NEUTRAL -> 4;
+                    case HALF -> 2;
+                    case ZERO -> 0;
+                    default -> 0;
+                };
                 battleOverlay[offset] = effectivenessInternal;
             }
         }
@@ -3992,15 +3976,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 	}
     
     private String getPaletteFilesID() {
-        switch (romEntry.getRomType()) {
-        case Gen5Constants.Type_BW:
-            return "BW";
-        case Gen5Constants.Type_BW2:
-            // TODO: check if this should be identical
-            return "BW";
-        default:
-            return null;
-        }
+        return switch (romEntry.getRomType()) {
+            case Gen5Constants.Type_BW -> "BW";
+            case Gen5Constants.Type_BW2 ->
+                // TODO: check if this should be identical
+                    "BW";
+            default -> null;
+        };
     }
     
     @Override

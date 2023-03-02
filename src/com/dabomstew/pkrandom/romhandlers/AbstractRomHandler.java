@@ -6803,7 +6803,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     ///// Item functions
     private void setItemPlacementHistory(int newItem) {
-        Integer history = getItemPlacementHistory(newItem);
+        int history = getItemPlacementHistory(newItem);
         // System.out.println("Current history: " + newPK.name + " : " + history);
         itemPlacementHistory.put(newItem, history + 1);
     }
@@ -6993,17 +6993,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        return Arrays.asList(0);
+        return List.of(0);
     }
 
     @Override
     public List<Integer> getAllConsumableHeldItems() {
-        return Arrays.asList(0);
+        return List.of(0);
     }
 
     @Override
     public List<Integer> getAllHeldItems() {
-        return Arrays.asList(0);
+        return List.of(0);
     }
 
     @Override

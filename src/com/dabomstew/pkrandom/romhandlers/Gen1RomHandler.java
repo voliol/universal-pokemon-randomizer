@@ -405,88 +405,48 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         switch (move.effectIndex) {
-            case Gen1Constants.noDamageSleepEffect:
-                move.statusType = StatusType.SLEEP;
-                break;
-            case Gen1Constants.damagePoison20PercentEffect:
-            case Gen1Constants.damagePoison40PercentEffect:
-            case Gen1Constants.noDamagePoisonEffect:
-            case Gen1Constants.twineedleEffect:
+            case Gen1Constants.noDamageSleepEffect -> move.statusType = StatusType.SLEEP;
+            case Gen1Constants.damagePoison20PercentEffect, Gen1Constants.damagePoison40PercentEffect,
+                    Gen1Constants.noDamagePoisonEffect, Gen1Constants.twineedleEffect -> {
                 move.statusType = StatusType.POISON;
                 if (move.number == Moves.toxic) {
                     move.statusType = StatusType.TOXIC_POISON;
                 }
-                break;
-            case Gen1Constants.damageBurn10PercentEffect:
-            case Gen1Constants.damageBurn30PercentEffect:
-                move.statusType = StatusType.BURN;
-                break;
-            case Gen1Constants.damageFreeze10PercentEffect:
-            case Gen1Constants.damageFreeze30PercentEffect:
-                move.statusType = StatusType.FREEZE;
-                break;
-            case Gen1Constants.damageParalyze10PercentEffect:
-            case Gen1Constants.damageParalyze30PercentEffect:
-            case Gen1Constants.noDamageParalyzeEffect:
-                move.statusType = StatusType.PARALYZE;
-                break;
-            case Gen1Constants.noDamageConfusionEffect:
-            case Gen1Constants.damageConfusionEffect:
-                move.statusType = StatusType.CONFUSION;
-                break;
+            }
+            case Gen1Constants.damageBurn10PercentEffect, Gen1Constants.damageBurn30PercentEffect ->
+                    move.statusType = StatusType.BURN;
+            case Gen1Constants.damageFreeze10PercentEffect, Gen1Constants.damageFreeze30PercentEffect ->
+                    move.statusType = StatusType.FREEZE;
+            case Gen1Constants.damageParalyze10PercentEffect, Gen1Constants.damageParalyze30PercentEffect,
+                    Gen1Constants.noDamageParalyzeEffect ->
+                    move.statusType = StatusType.PARALYZE;
+            case Gen1Constants.noDamageConfusionEffect, Gen1Constants.damageConfusionEffect ->
+                    move.statusType = StatusType.CONFUSION;
         }
 
         if (move.statusMoveType == StatusMoveType.DAMAGE) {
             switch (move.effectIndex) {
-                case Gen1Constants.damageBurn10PercentEffect:
-                case Gen1Constants.damageFreeze10PercentEffect:
-                case Gen1Constants.damageParalyze10PercentEffect:
-                case Gen1Constants.damageConfusionEffect:
-                    move.statusPercentChance = 10.0;
-                    break;
-                case Gen1Constants.damagePoison20PercentEffect:
-                case Gen1Constants.twineedleEffect:
-                    move.statusPercentChance = 20.0;
-                    break;
-                case Gen1Constants.damageBurn30PercentEffect:
-                case Gen1Constants.damageFreeze30PercentEffect:
-                case Gen1Constants.damageParalyze30PercentEffect:
-                    move.statusPercentChance = 30.0;
-                    break;
-                case Gen1Constants.damagePoison40PercentEffect:
-                    move.statusPercentChance = 40.0;
-                    break;
+                case Gen1Constants.damageBurn10PercentEffect, Gen1Constants.damageFreeze10PercentEffect,
+                        Gen1Constants.damageParalyze10PercentEffect, Gen1Constants.damageConfusionEffect ->
+                        move.statusPercentChance = 10.0;
+                case Gen1Constants.damagePoison20PercentEffect, Gen1Constants.twineedleEffect ->
+                        move.statusPercentChance = 20.0;
+                case Gen1Constants.damageBurn30PercentEffect, Gen1Constants.damageFreeze30PercentEffect,
+                        Gen1Constants.damageParalyze30PercentEffect ->
+                        move.statusPercentChance = 30.0;
+                case Gen1Constants.damagePoison40PercentEffect -> move.statusPercentChance = 40.0;
             }
         }
     }
 
     private void loadMiscMoveInfoFromEffect(Move move) {
         switch (move.effectIndex) {
-            case Gen1Constants.flinch10PercentEffect:
-                move.flinchPercentChance = 10.0;
-                break;
-
-            case Gen1Constants.flinch30PercentEffect:
-                move.flinchPercentChance = 30.0;
-                break;
-
-            case Gen1Constants.damageAbsorbEffect:
-            case Gen1Constants.dreamEaterEffect:
-                move.absorbPercent = 50;
-                break;
-
-            case Gen1Constants.damageRecoilEffect:
-                move.recoilPercent = 25;
-                break;
-
-            case Gen1Constants.chargeEffect:
-            case Gen1Constants.flyEffect:
-                move.isChargeMove = true;
-                break;
-
-            case Gen1Constants.hyperBeamEffect:
-                move.isRechargeMove = true;
-                break;
+            case Gen1Constants.flinch10PercentEffect -> move.flinchPercentChance = 10.0;
+            case Gen1Constants.flinch30PercentEffect -> move.flinchPercentChance = 30.0;
+            case Gen1Constants.damageAbsorbEffect, Gen1Constants.dreamEaterEffect -> move.absorbPercent = 50;
+            case Gen1Constants.damageRecoilEffect -> move.recoilPercent = 25;
+            case Gen1Constants.chargeEffect, Gen1Constants.flyEffect -> move.isChargeMove = true;
+            case Gen1Constants.hyperBeamEffect -> move.isRechargeMove = true;
         }
 
         if (Gen1Constants.increasedCritMoves.contains(move.number)) {
@@ -1304,21 +1264,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             int effectivenessInternal = rom[currentOffset + 2];
             Type attacking = Gen1Constants.typeTable[attackingType];
             Type defending = Gen1Constants.typeTable[defendingType];
-            Effectiveness effectiveness = null;
-            switch (effectivenessInternal) {
-                case 20:
-                    effectiveness = Effectiveness.DOUBLE;
-                    break;
-                case 10:
-                    effectiveness = Effectiveness.NEUTRAL;
-                    break;
-                case 5:
-                    effectiveness = Effectiveness.HALF;
-                    break;
-                case 0:
-                    effectiveness = Effectiveness.ZERO;
-                    break;
-            }
+            Effectiveness effectiveness = switch (effectivenessInternal) {
+                case 20 -> Effectiveness.DOUBLE;
+                case 10 -> Effectiveness.NEUTRAL;
+                case 5 -> Effectiveness.HALF;
+                case 0 -> Effectiveness.ZERO;
+                default -> null;
+            };
             if (effectiveness != null) {
                 TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
                 typeEffectivenessTable.add(relationship);
@@ -2723,9 +2675,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     
     private Palette read4ColorPalette(int offset) {
         byte[] paletteBytes = new byte[8];
-        for (int i=0; i < 8 ; i++) {
-            paletteBytes[i] = rom[offset + i];
-        }
+        System.arraycopy(rom, offset, paletteBytes, 0, 8);
         return new Palette(paletteBytes);
     }
 

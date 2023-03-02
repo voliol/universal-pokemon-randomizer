@@ -32,7 +32,6 @@ public class Trainer implements Comparable<Trainer> {
     public int index;
     public List<TrainerPokemon> pokemon = new ArrayList<>();
     public String tag;
-    public boolean importantTrainer;
     // This value has some flags about the trainer's pokemon (e.g. if they have items or custom moves)
     public int poketype;
     public String name;
