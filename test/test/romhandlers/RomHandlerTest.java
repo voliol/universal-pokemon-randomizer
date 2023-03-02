@@ -4,6 +4,8 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -32,7 +34,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[] {1,2,3}, new Roms.Region[] {Roms.Region.USA}, false);
+        return Roms.getRoms(new int[] {1,2,3,4,5}, new Roms.Region[] {Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {
@@ -83,6 +85,13 @@ public class RomHandlerTest {
         assertNotNull(romHandler);
     }
 
+    /**
+     * Checks all ROMs found as {@link RomEntry}s in the .ini files, to see if they are is testable.
+     * I.e. does the actual ROM exist within the test/roms folder.
+     * <br>
+     * Since running this always checks for Gen 6+ ROMs, which are very slow to handle, it is disabled by default.
+     */
+    @Disabled
     @ParameterizedTest
     @MethodSource("getAllRomNames")
     public void romIsTestable(String romName) {
@@ -97,6 +106,13 @@ public class RomHandlerTest {
         }
     }
 
+    /**
+     * Checks all ROMs in the test/roms folder, to see if they correspond to {@link RomEntry}s in the .ini files.
+     * <br>
+     * Since running this may open Gen 6+ ROMs (if you have any), which are very slow to handle,
+     * it is disabled by default.
+     */
+    @Disabled
     @ParameterizedTest
     @MethodSource("getRomNamesInFolder")
     public void romNameOfRomInFolderIsCorrect(String romName) {
@@ -381,7 +397,7 @@ public class RomHandlerTest {
         loadROM(romName);
         List<Trainer> trainers = romHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
-        romHandler.setTrainers(trainers, false); // obviously a problem with doubleBattleMode...
+        romHandler.setTrainers(trainers);
         assertEquals(before, romHandler.getTrainers());
     }
 

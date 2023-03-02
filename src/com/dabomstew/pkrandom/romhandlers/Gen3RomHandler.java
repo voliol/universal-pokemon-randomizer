@@ -243,13 +243,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         this.determineMapBankSizes();
 
         // map labels
-        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-            int baseMLOffset = find(rom, Gen3Constants.frlgMapLabelsPointerPrefix);
-            romEntry.putIntValue("MapLabels", readPointer(baseMLOffset + 12));
-        } else {
-            int baseMLOffset = find(rom, Gen3Constants.rseMapLabelsPointerPrefix);
-            romEntry.putIntValue("MapLabels", readPointer(baseMLOffset + 12));
-        }
+        String mapLabelsPointerPrefix = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                Gen3Constants.frlgMapLabelsPointerPrefix : Gen3Constants.rseMapLabelsPointerPrefix;
+        int baseMLOffset = find(rom, mapLabelsPointerPrefix);
+        romEntry.putIntValue("MapLabels", readPointer(baseMLOffset + 12));
 
         mapLoadingDone = false;
         loadAbilityNames();
@@ -1206,24 +1203,22 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public List<Pokemon> getStarters() {
         List<Pokemon> starters = new ArrayList<>();
         int baseOffset = romEntry.getIntValue("StarterPokemon");
+        Pokemon starter1 = pokesInternal[readWord(baseOffset)];
+        Pokemon starter2;
+        Pokemon starter3;
         if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp
                 || romEntry.getRomType() == Gen3Constants.RomType_Em) {
             // do something
-            Pokemon starter1 = pokesInternal[readWord(baseOffset)];
-            Pokemon starter2 = pokesInternal[readWord(baseOffset + Gen3Constants.rseStarter2Offset)];
-            Pokemon starter3 = pokesInternal[readWord(baseOffset + Gen3Constants.rseStarter3Offset)];
-            starters.add(starter1);
-            starters.add(starter2);
-            starters.add(starter3);
+            starter2 = pokesInternal[readWord(baseOffset + Gen3Constants.rseStarter2Offset)];
+            starter3 = pokesInternal[readWord(baseOffset + Gen3Constants.rseStarter3Offset)];
         } else {
             // do something else
-            Pokemon starter1 = pokesInternal[readWord(baseOffset)];
-            Pokemon starter2 = pokesInternal[readWord(baseOffset + Gen3Constants.frlgStarter2Offset)];
-            Pokemon starter3 = pokesInternal[readWord(baseOffset + Gen3Constants.frlgStarter3Offset)];
-            starters.add(starter1);
-            starters.add(starter2);
-            starters.add(starter3);
+            starter2 = pokesInternal[readWord(baseOffset + Gen3Constants.frlgStarter2Offset)];
+            starter3 = pokesInternal[readWord(baseOffset + Gen3Constants.frlgStarter3Offset)];
         }
+        starters.add(starter1);
+        starters.add(starter2);
+        starters.add(starter3);
         return starters;
     }
 
@@ -1331,12 +1326,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (item <= 0xFF) {
                 rom[baseOffset] = (byte) item;
                 rom[baseOffset + 2] = 0;
-                rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR2;
             } else {
                 rom[baseOffset] = (byte) 0xFF;
                 rom[baseOffset + 2] = (byte) (item - 0xFF);
-                rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR2;
             }
+            rom[baseOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR2;
         }
     }
 
@@ -1547,7 +1541,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             tr.trainerclass = (rom[trOffset + 2] & 0x80) > 0 ? 1 : 0;
 
             int pokeDataType = rom[trOffset] & 0xFF;
-            boolean doubleBattle = rom[trOffset + (entryLen - 16)] == 0x01;
             int numPokes = rom[trOffset + (entryLen - 8)] & 0xFF;
             int pointerToPokes = readPointer(trOffset + (entryLen - 4));
             tr.poketype = pokeDataType;
@@ -2468,7 +2461,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				// create the new text
 				int oldPointer = readPointer(tte.actualOffset);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
-                    throw new RuntimeException(desc + "text update failed: couldn't read a " + desc
+                    throw new RuntimeException(desc + " text update failed: couldn't read a " + desc
                             + " text pointer." + nl);
                 }
                 int moveIndex = moveIndexes.get(moveTutor ? tte.number : tte.number - 1);

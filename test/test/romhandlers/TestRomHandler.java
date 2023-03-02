@@ -203,8 +203,7 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-
+    public void setTrainers(List<Trainer> trainerData) {
     }
 
     @Override
