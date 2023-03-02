@@ -35,6 +35,8 @@ import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen7RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.ThreeDSLinkedEncounter;
 import pptxt.N3DSTxtHandler;
 
 import java.awt.image.BufferedImage;
@@ -63,185 +65,18 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public Gen7RomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
     }
-
-    private static class OffsetWithinEntry {
-        private int entry;
-        private int offset;
-    }
-
-    private static class RomFileEntry {
-        public String path;
-        public long[] expectedCRC32s;
-    }
-
-    private static class RomEntry {
-        private String name;
-        private String romCode;
-        private String titleId;
-        private String acronym;
-        private int romType;
-        private long[] expectedCodeCRC32s = new long[2];
-        private Map<String, RomFileEntry> files = new HashMap<>();
-        private Map<Integer, Integer> linkedStaticOffsets = new HashMap<>();
-        private Map<String, String> strings = new HashMap<>();
-        private Map<String, Integer> numbers = new HashMap<>();
-        private Map<String, int[]> arrayEntries = new HashMap<>();
-        private Map<String, OffsetWithinEntry[]> offsetArrayEntries = new HashMap<>();
-
-        private int getInt(String key) {
-            if (!numbers.containsKey(key)) {
-                numbers.put(key, 0);
-            }
-            return numbers.get(key);
-        }
-
-        private String getString(String key) {
-            if (!strings.containsKey(key)) {
-                strings.put(key, "");
-            }
-            return strings.get(key);
-        }
-
-        private String getFile(String key) {
-            if (!files.containsKey(key)) {
-                files.put(key, new RomFileEntry());
-            }
-            return files.get(key).path;
-        }
-    }
-
-    private static List<RomEntry> roms;
+    
+    private static List<Gen7RomEntry> roms;
 
     static {
         loadROMInfo();
     }
 
     private static void loadROMInfo() {
-        roms = new ArrayList<>();
-        RomEntry current = null;
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig("gen7_offsets.ini"), "UTF-8");
-            while (sc.hasNextLine()) {
-                String q = sc.nextLine().trim();
-                if (q.contains("//")) {
-                    q = q.substring(0, q.indexOf("//")).trim();
-                }
-                if (!q.isEmpty()) {
-                    if (q.startsWith("[") && q.endsWith("]")) {
-                        // New rom
-                        current = new RomEntry();
-                        current.name = q.substring(1, q.length() - 1);
-                        roms.add(current);
-                    } else {
-                        String[] r = q.split("=", 2);
-                        if (r.length == 1) {
-                            System.err.println("invalid entry " + q);
-                            continue;
-                        }
-                        if (r[1].endsWith("\r\n")) {
-                            r[1] = r[1].substring(0, r[1].length() - 2);
-                        }
-                        r[1] = r[1].trim();
-                        if (r[0].equals("Game")) {
-                            current.romCode = r[1];
-                        } else if (r[0].equals("Type")) {
-                            if (r[1].equalsIgnoreCase("USUM")) {
-                                current.romType = Gen7Constants.Type_USUM;
-                            } else {
-                                current.romType = Gen7Constants.Type_SM;
-                            }
-                        } else if (r[0].equals("TitleId")) {
-                            current.titleId = r[1];
-                        } else if (r[0].equals("Acronym")) {
-                            current.acronym = r[1];
-                        } else if (r[0].startsWith("File<")) {
-                            String key = r[0].split("<")[1].split(">")[0];
-                            String[] values = r[1].substring(1, r[1].length() - 1).split(",");
-                            String path = values[0];
-                            String crcString = values[1].trim() + ", " + values[2].trim();
-                            String[] crcs = crcString.substring(1, crcString.length() - 1).split(",");
-                            RomFileEntry entry = new RomFileEntry();
-                            entry.path = path.trim();
-                            entry.expectedCRC32s = new long[2];
-                            entry.expectedCRC32s[0] = parseRILong("0x" + crcs[0].trim());
-                            entry.expectedCRC32s[1] = parseRILong("0x" + crcs[1].trim());
-                            current.files.put(key, entry);
-                        } else if (r[0].equals("CodeCRC32")) {
-                            String[] values = r[1].substring(1, r[1].length() - 1).split(",");
-                            current.expectedCodeCRC32s[0] = parseRILong("0x" + values[0].trim());
-                            current.expectedCodeCRC32s[1] = parseRILong("0x" + values[1].trim());
-                        } else if (r[0].equals("LinkedStaticEncounterOffsets")) {
-                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                            for (int i = 0; i < offsets.length; i++) {
-                                String[] parts = offsets[i].split(":");
-                                current.linkedStaticOffsets.put(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()));
-                            }
-                        } else if (r[0].endsWith("Offset") || r[0].endsWith("Count") || r[0].endsWith("Number")) {
-                            int offs = parseRIInt(r[1]);
-                            current.numbers.put(r[0], offs);
-                        } else if (r[1].startsWith("[") && r[1].endsWith("]")) {
-                            String[] offsets = r[1].substring(1, r[1].length() - 1).split(",");
-                            if (offsets.length == 1 && offsets[0].trim().isEmpty()) {
-                                current.arrayEntries.put(r[0], new int[0]);
-                            } else {
-                                int[] offs = new int[offsets.length];
-                                int c = 0;
-                                for (String off : offsets) {
-                                    offs[c++] = parseRIInt(off);
-                                }
-                                current.arrayEntries.put(r[0], offs);
-                            }
-                        } else if (r[0].equals("CopyFrom")) {
-                            for (RomEntry otherEntry : roms) {
-                                if (r[1].equalsIgnoreCase(otherEntry.romCode)) {
-                                    // copy from here
-                                    current.linkedStaticOffsets.putAll(otherEntry.linkedStaticOffsets);
-                                    current.arrayEntries.putAll(otherEntry.arrayEntries);
-                                    current.numbers.putAll(otherEntry.numbers);
-                                    current.strings.putAll(otherEntry.strings);
-                                    current.offsetArrayEntries.putAll(otherEntry.offsetArrayEntries);
-                                    current.files.putAll(otherEntry.files);
-                                }
-                            }
-                        } else {
-                            current.strings.put(r[0],r[1]);
-                        }
-                    }
-                }
-            }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            System.err.println("File not found!");
-        }
-    }
-
-    private static int parseRIInt(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Integer.parseInt(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
-        }
-    }
-
-    private static long parseRILong(String off) {
-        int radix = 10;
-        off = off.trim().toLowerCase();
-        if (off.startsWith("0x") || off.startsWith("&h")) {
-            radix = 16;
-            off = off.substring(2);
-        }
-        try {
-            return Long.parseLong(off, radix);
-        } catch (NumberFormatException ex) {
-            System.err.println("invalid base " + radix + "number " + off);
-            return 0;
+            roms = Gen7RomEntry.READER.readEntriesFromFile("gen7_offsets.ini");
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
 
@@ -255,7 +90,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private List<MegaEvolution> megaEvolutions;
     private List<AreaData> areaDataList;
     private Move[] moves;
-    private RomEntry romEntry;
+    private Gen7RomEntry romEntry;
     private byte[] code;
     private List<String> itemNames;
     private List<String> shopNames;
@@ -275,13 +110,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return entryFor(productCode, titleId) != null;
     }
 
-    private static RomEntry entryFor(String productCode, String titleId) {
+    private static Gen7RomEntry entryFor(String productCode, String titleId) {
         if (productCode == null || titleId == null) {
             return null;
         }
 
-        for (RomEntry re : roms) {
-            if (productCode.equals(re.romCode) && titleId.equals(re.titleId)) {
+        for (Gen7RomEntry re : roms) {
+            if (productCode.equals(re.getRomCode()) && titleId.equals(re.getTitleID())) {
                 return re;
             }
         }
@@ -310,16 +145,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         loadMoves();
 
         pokemonListInclFormes = Arrays.asList(pokes);
-        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen7Constants.getPokemonCount(romEntry.romType) + 1));
+        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen7Constants.getPokemonCount(romEntry.getRomType()) + 1));
 
-        itemNames = getStrings(false,romEntry.getInt("ItemNamesTextOffset"));
-        abilityNames = getStrings(false,romEntry.getInt("AbilityNamesTextOffset"));
-        shopNames = Gen7Constants.getShopNames(romEntry.romType);
+        itemNames = getStrings(false,romEntry.getIntValue("ItemNamesTextOffset"));
+        abilityNames = getStrings(false,romEntry.getIntValue("AbilityNamesTextOffset"));
+        shopNames = Gen7Constants.getShopNames(romEntry.getRomType());
 
-        allowedItems = Gen7Constants.getAllowedItems(romEntry.romType).copy();
+        allowedItems = Gen7Constants.getAllowedItems(romEntry.getRomType()).copy();
         nonBadItems = Gen7Constants.nonBadItems.copy();
 
-        if (romEntry.romType == Gen7Constants.Type_SM) {
+        if (romEntry.getRomType() == Gen7Constants.Type_SM) {
             isSM = true;
         }
 
@@ -337,7 +172,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private List<String> getStrings(GARCArchive textGARC, int index) {
         byte[] rawFile = textGARC.files.get(index).get(0);
-        return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.romType));
+        return new ArrayList<>(N3DSTxtHandler.readTexts(rawFile,true,romEntry.getRomType()));
     }
 
     private void setStrings(boolean isStoryText, int index, List<String> strings) {
@@ -348,7 +183,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void setStrings(GARCArchive textGARC, int index, List<String> strings) {
         byte[] oldRawFile = textGARC.files.get(index).get(0);
         try {
-            byte[] newRawFile = N3DSTxtHandler.saveEntry(oldRawFile, strings, romEntry.romType);
+            byte[] newRawFile = N3DSTxtHandler.saveEntry(oldRawFile, strings, romEntry.getRomType());
             textGARC.setFile(index, newRawFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -359,8 +194,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             pokeGarc = this.readGARC(romEntry.getFile("PokemonStats"),true);
             String[] pokeNames = readPokemonNames();
-            int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-            int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+            int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
+            int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
             pokes = new Pokemon[pokemonCount + formeCount + 1];
             for (int i = 1; i <= pokemonCount; i++) {
                 pokes[i] = new Pokemon(i);
@@ -458,18 +293,18 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         int formeCount = stats[Gen7Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            if (!altFormes.keySet().contains(pkmn.getNumber())) {
+            if (!altFormes.containsKey(pkmn.getNumber())) {
                 int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
                 if (firstFormeOffset != 0) {
                     int j = 0;
                     int jMax = 0;
                     int theAltForme = 0;
-                    Set<Integer> altFormesWithCosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).keySet();
+                    Set<Integer> altFormesWithCosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).keySet();
                     for (int i = 1; i < formeCount; i++) {
                         if (j == 0 || j > jMax) {
                             altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-                            if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(firstFormeOffset+i-1)) {
-                                if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(firstFormeOffset+i-1)) { // Skip ignored forms (identical or confusing cosmetic forms)
+                            if (Gen7Constants.getActuallyCosmeticForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) {
+                                if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) { // Skip ignored forms (identical or confusing cosmetic forms)
                                     pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
                                     pkmn.getRealCosmeticFormNumbers().add(i);
                                 }
@@ -480,7 +315,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         }
                         if (altFormesWithCosmeticForms.contains(firstFormeOffset + i - 1)) {
                             j = 1;
-                            jMax = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).get(firstFormeOffset + i - 1);
+                            jMax = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).get(firstFormeOffset + i - 1);
                             theAltForme = firstFormeOffset + i - 1;
                         }
                     }
@@ -493,10 +328,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     }
                 }
             } else {
-                if (!Gen7Constants.getIgnoreForms(romEntry.romType).contains(pkmn.getNumber())) {
-                    pkmn.setCosmeticForms(Gen7Constants.getAltFormesWithCosmeticForms(romEntry.romType).getOrDefault(pkmn.getNumber(),0));
+                if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
+                    pkmn.setCosmeticForms(Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).getOrDefault(pkmn.getNumber(),0));
                 }
-                if (Gen7Constants.getActuallyCosmeticForms(romEntry.romType).contains(pkmn.getNumber())) {
+                if (Gen7Constants.getActuallyCosmeticForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
                     pkmn.setActuallyCosmetic(true);
                 }
             }
@@ -514,9 +349,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private String[] readPokemonNames() {
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
         String[] pokeNames = new String[pokemonCount + 1];
-        List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
+        List<String> nameList = getStrings(false, romEntry.getIntValue("PokemonNamesTextOffset"));
         for (int i = 1; i <= pokemonCount; i++) {
             pokeNames[i] = nameList.get(i);
         }
@@ -534,7 +369,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // Read GARC
         try {
             GARCArchive evoGARC = readGARC(romEntry.getFile("PokemonEvolutions"),true);
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + Gen7Constants.getFormeCount(romEntry.romType); i++) {
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()) + Gen7Constants.getFormeCount(romEntry.getRomType()); i++) {
                 Pokemon pk = pokes[i];
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 boolean skipNext = false;
@@ -564,7 +399,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         switch (et) {
                             case LEVEL_GAME:
                                 evol.type = EvolutionType.LEVEL;
-                                evol.to = pokes[romEntry.getInt("CosmoemEvolutionNumber")];
+                                evol.to = pokes[romEntry.getIntValue("CosmoemEvolutionNumber")];
                                 break;
                             case LEVEL_DAY_GAME:
                                 evol.type = EvolutionType.LEVEL_DAY;
@@ -639,7 +474,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             megaEvolutions = new ArrayList<>();
             GARCArchive megaEvoGARC = readGARC(romEntry.getFile("MegaEvolutions"),true);
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType); i++) {
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()); i++) {
                 Pokemon pk = pokes[i];
                 byte[] megaEvoEntry = megaEvoGARC.files.get(i).get(0);
                 for (int evo = 0; evo < 2; evo++) {
@@ -673,9 +508,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void loadMoves() {
         try {
             moveGarc = this.readGARC(romEntry.getFile("MoveData"),true);
-            int moveCount = Gen7Constants.getMoveCount(romEntry.romType);
+            int moveCount = Gen7Constants.getMoveCount(romEntry.getRomType());
             moves = new Move[moveCount + 1];
-            List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
+            List<String> moveNames = getStrings(false, romEntry.getIntValue("MoveNamesTextOffset"));
             byte[][] movesData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
             for (int i = 1; i <= moveCount; i++) {
                 byte[] moveData = movesData[i];
@@ -807,8 +642,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     protected void savePokemonStats() {
         int k = Gen7Constants.bsSize;
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
+        int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
         byte[] duplicateData = pokeGarc.files.get(pokemonCount + formeCount + 1).get(0);
         for (int i = 1; i <= pokemonCount + formeCount; i++) {
             byte[] pokeData = pokeGarc.files.get(i).get(0);
@@ -871,7 +706,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void writeEvolutions() {
         try {
             GARCArchive evoGARC = readGARC(romEntry.getFile("PokemonEvolutions"),true);
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + Gen7Constants.getFormeCount(romEntry.romType); i++) {
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()) + Gen7Constants.getFormeCount(romEntry.getRomType()); i++) {
                 byte[] evoEntry = evoGARC.files.get(i).get(0);
                 Pokemon pk = pokes[i];
                 if (pk.getNumber() == Species.nincada) {
@@ -976,7 +811,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected void saveMoves() {
-        int moveCount = Gen7Constants.getMoveCount(romEntry.romType);
+        int moveCount = Gen7Constants.getMoveCount(romEntry.getRomType());
         byte[][] movesData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
         for (int i = 1; i <= moveCount; i++) {
             byte[] moveData = movesData[i];
@@ -1006,7 +841,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // all Greninja-A, all Zygarde-C, and all Necrozma-U in the player's
         // party are set back to their base forme. This patches .code such
         // that this reversion does not happen.
-        String saveLoadFormeReversionPrefix = Gen7Constants.getSaveLoadFormeReversionPrefix(romEntry.romType);
+        String saveLoadFormeReversionPrefix = Gen7Constants.getSaveLoadFormeReversionPrefix(romEntry.getRomType());
         int offset = find(code, saveLoadFormeReversionPrefix);
         if (offset > 0) {
             offset += saveLoadFormeReversionPrefix.length() / 2; // because it was a prefix
@@ -1023,7 +858,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             code[offset + 2] = 0x00;
             code[offset + 3] = 0x00;
 
-            if (romEntry.romType == Gen7Constants.Type_USUM) {
+            if (romEntry.getRomType() == Gen7Constants.Type_USUM) {
                 // In Sun/Moon, Greninja-A and Zygarde-C are treated as Mega Pokemon
                 // and handled by the function above. In USUM, they are handled by a
                 // different function, along with Necrozma-U. This stubs the call
@@ -1074,19 +909,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     protected String getGameAcronym() {
-        return romEntry.acronym;
+        return romEntry.getAcronym();
     }
 
     @Override
     protected boolean isGameUpdateSupported(int version) {
-        return version == romEntry.numbers.get("FullyUpdatedVersionNumber");
+        return version == romEntry.getIntValue("FullyUpdatedVersionNumber");
     }
 
     @Override
     protected String getGameVersion() {
-        List<String> titleScreenText = getStrings(false, romEntry.getInt("TitleScreenTextOffset"));
-        if (titleScreenText.size() > romEntry.getInt("UpdateStringOffset")) {
-            return titleScreenText.get(romEntry.getInt("UpdateStringOffset"));
+        List<String> titleScreenText = getStrings(false, romEntry.getIntValue("TitleScreenTextOffset"));
+        if (titleScreenText.size() > romEntry.getIntValue("UpdateStringOffset")) {
+            return titleScreenText.get(romEntry.getIntValue("UpdateStringOffset"));
         }
         // This shouldn't be seen by users, but is correct assuming we accidentally show it to them.
         return "Unpatched";
@@ -1104,8 +939,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
 	@Override
 	public PokemonSet<Pokemon> getAltFormes() {
-		int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
-		int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+		int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
+		int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
 		return new PokemonSet<>(pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1));
 	}
 
@@ -1122,9 +957,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
 	@Override
 	public PokemonSet<Pokemon> getIrregularFormes() {
-		return Gen7Constants.getIrregularFormes(romEntry.romType)
+		return Gen7Constants.getIrregularFormes(romEntry.getRomType())
 				.stream().map(i -> pokes[i])
-				.collect(Collectors.toCollection(() -> new PokemonSet<>()));
+				.collect(Collectors.toCollection(PokemonSet::new));
 	}
 
     @Override
@@ -1198,9 +1033,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     // strings here, and if a string originally referred to the starter in the script,
     // we just hardcode the starter's name if we can get away with it.
     private void setStarterText(List<Pokemon> newStarters) {
-        int starterTextIndex = romEntry.getInt("StarterTextOffset");
+        int starterTextIndex = romEntry.getIntValue("StarterTextOffset");
         List<String> starterText = getStrings(true, starterTextIndex);
-        if (romEntry.romType == Gen7Constants.Type_USUM) {
+        if (romEntry.getRomType() == Gen7Constants.Type_USUM) {
             String rowletDescriptor = newStarters.get(0).getName() + starterText.get(1).substring(6);
             String littenDescriptor = newStarters.get(1).getName() + starterText.get(2).substring(6);
             String popplioDescriptor = newStarters.get(2).getName() + starterText.get(3).substring(7);
@@ -1256,7 +1091,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
         Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
         int aegislashBlade = Species.SMFormes.aegislashB;
-        if (romEntry.romType == Gen7Constants.Type_USUM) {
+        if (romEntry.getRomType() == Gen7Constants.Type_USUM) {
             aegislashBlade = Species.USUMFormes.aegislashB;
         }
         switch(generation) {
@@ -1491,7 +1326,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         byte[] worldData = zoneDataGarc.getFile(1);
         List<String> locationList = createGoodLocationList();
         ZoneData[] zoneData = getZoneData(zoneDataBytes, worldData, locationList, worlds);
-        encounterGarc = readGARC(romEntry.getFile("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.romType));
+        encounterGarc = readGARC(romEntry.getFile("WildPokemon"), Gen7Constants.getRelevantEncounterFiles(romEntry.getRomType()));
         int fileCount = encounterGarc.files.size();
         int numberOfAreas = fileCount / 11;
         AreaData[] areaData = new AreaData[numberOfAreas];
@@ -1539,7 +1374,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     private List<String> createGoodLocationList() {
-        List<String> locationList = getStrings(false, romEntry.getInt("MapNamesTextOffset"));
+        List<String> locationList = getStrings(false, romEntry.getIntValue("MapNamesTextOffset"));
         List<String> goodLocationList = new ArrayList<>(locationList);
         for (int i = 0; i < locationList.size(); i += 2) {
             // The location list contains both areas and subareas. If a subarea is associated with an area, it will
@@ -1554,7 +1389,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // them. This code distinguishes them by appending the number of times they've appeared previously to
             // the area name.
             if (i > 0) {
-                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
+                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).toList();
                 if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
                     int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
                     String updatedLocation = goodLocationList.get(i) + " (" + (numberOfUsages + 1) + ")";
@@ -1669,7 +1504,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     tpk.speedEVs = trpoke[pokeOffs + 7];
                     tpk.IVs = FileFunctions.readFullInt(trpoke, pokeOffs + 8);
                     tpk.level = level;
-                    if (romEntry.romType == Gen7Constants.Type_USUM) {
+                    if (romEntry.getRomType() == Gen7Constants.Type_USUM) {
                         if (i == 78) {
                             if (poke == 3 && tpk.level == 16 && tr.pokemon.get(0).level == 16) {
                                 tpk.level = 14;
@@ -1692,7 +1527,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
                 allTrainers.add(tr);
             }
-            if (romEntry.romType == Gen7Constants.Type_SM) {
+            if (romEntry.getRomType() == Gen7Constants.Type_SM) {
                 Gen7Constants.tagTrainersSM(allTrainers);
                 Gen7Constants.setMultiBattleStatusSM(allTrainers);
             } else {
@@ -1713,7 +1548,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getEliteFourTrainers(boolean isChallengeMode) {
-        return Arrays.stream(romEntry.arrayEntries.get("EliteFourIndices")).boxed().collect(Collectors.toList());
+        return Arrays.stream(romEntry.getArrayValue("EliteFourIndices")).boxed().collect(Collectors.toList());
     }
 
     @Override
@@ -1770,7 +1605,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         }
                         if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
                             int chosenMove = this.random.nextInt(Arrays.stream(pokeMoves).filter(mv -> mv != 0).toArray().length);
-                            int newZCrystal = Gen7Constants.heldZCrystals.get((int)Gen7Constants.typeToByte(moves[pokeMoves[chosenMove]].type));
+                            int newZCrystal = Gen7Constants.heldZCrystals.get(Gen7Constants.typeToByte(moves[pokeMoves[chosenMove]].type));
                             writeWord(trpoke, pokeOffs - 4, newZCrystal);
                         }
                     } else {
@@ -1780,7 +1615,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         writeWord(trpoke, pokeOffs + 6, tp.moves[3]);
                         if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
                             int chosenMove = this.random.nextInt(Arrays.stream(tp.moves).filter(mv -> mv != 0).toArray().length);
-                            int newZCrystal = Gen7Constants.heldZCrystals.get((int)Gen7Constants.typeToByte(moves[tp.moves[chosenMove]].type));
+                            int newZCrystal = Gen7Constants.heldZCrystals.get(Gen7Constants.typeToByte(moves[tp.moves[chosenMove]].type));
                             writeWord(trpoke, pokeOffs - 4, newZCrystal);
                         }
                     }
@@ -1792,7 +1627,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             this.writeGARC(romEntry.getFile("TrainerPokemon"), trpokes);
 
             // In Sun/Moon, Beast Lusamine's Pokemon have aura boosts that are hardcoded.
-            if (romEntry.romType == Gen7Constants.Type_SM) {
+            if (romEntry.getRomType() == Gen7Constants.Type_SM) {
                 Trainer beastLusamine = trainerData.get(Gen7Constants.beastLusamineTrainerIndex);
                 setBeastLusaminePokemonBuffs(beastLusamine);
             }
@@ -1866,8 +1701,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         try {
             GARCArchive movesLearnt = this.readGARC(romEntry.getFile("PokemonMovesets"),true);
-            int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + formeCount; i++) {
+            int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()) + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata;
                 movedata = movesLearnt.files.get(i).get(0);
@@ -1894,8 +1729,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
         try {
             GARCArchive movesLearnt = readGARC(romEntry.getFile("PokemonMovesets"),true);
-            int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType) + formeCount; i++) {
+            int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()) + formeCount; i++) {
                 Pokemon pkmn = pokes[i];
                 List<MoveLearnt> learnt = movesets.get(pkmn.getNumber());
                 int sizeNeeded = learnt.size() * 4 + 4;
@@ -1924,7 +1759,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive eggMovesGarc = this.readGARC(romEntry.getFile("EggMoves"),true);
             TreeMap<Pokemon, Integer> altFormeEggMoveFiles = new TreeMap<>();
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType); i++) {
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()); i++) {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata = eggMovesGarc.files.get(i).get(0);
                 int formeReference = readWord(movedata, 0);
@@ -1971,7 +1806,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive eggMovesGarc = this.readGARC(romEntry.getFile("EggMoves"), true);
             TreeMap<Pokemon, Integer> altFormeEggMoveFiles = new TreeMap<>();
-            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.romType); i++) {
+            for (int i = 1; i <= Gen7Constants.getPokemonCount(romEntry.getRomType()); i++) {
                 Pokemon pkmn = pokes[i];
                 byte[] movedata = eggMovesGarc.files.get(i).get(0);
                 int formeReference = readWord(movedata, 0);
@@ -2009,11 +1844,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public boolean canChangeStaticPokemon() {
-        return true;
-    }
-
-    @Override
     public boolean hasStaticAltFormes() {
         return true;
     }
@@ -2025,7 +1855,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getMainGameLegendaries() {
-        return Arrays.stream(romEntry.arrayEntries.get("MainGameLegendaries")).boxed().collect(Collectors.toList());
+        return Arrays.stream(romEntry.getArrayValue("MainGameLegendaries")).boxed().collect(Collectors.toList());
     }
 
     @Override
@@ -2048,8 +1878,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<TotemPokemon> totems = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
 
             // Static encounters
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
@@ -2091,8 +1920,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
+            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
             Iterator<TotemPokemon> totemIter = totemPokemon.iterator();
 
             // Static encounters
@@ -2155,9 +1983,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<StaticEncounter> statics = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> skipIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
-            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
+            List<Integer> skipIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
 
             // Gifts, start at 3 to skip the starters
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -2225,9 +2052,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private void consolidateLinkedEncounters(List<StaticEncounter> statics) {
         List<StaticEncounter> encountersToRemove = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
-            StaticEncounter baseEncounter = statics.get(entry.getKey());
-            StaticEncounter linkedEncounter = statics.get(entry.getValue());
+        for (ThreeDSLinkedEncounter le : romEntry.getLinkedEncounters()) {
+            StaticEncounter baseEncounter = statics.get(le.getBase());
+            StaticEncounter linkedEncounter = statics.get(le.getLinked());
             baseEncounter.linkedEncounters.add(linkedEncounter);
             encountersToRemove.add(linkedEncounter);
         }
@@ -2238,7 +2065,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private void readAssemblyZygarde(List<StaticEncounter> statics) throws IOException {
         GARCArchive scriptGarc = readGARC(romEntry.getFile("Scripts"), true);
-        int[] scriptLevelOffsets = romEntry.arrayEntries.get("ZygardeScriptLevelOffsets");
+        int[] scriptLevelOffsets = romEntry.getArrayValue("ZygardeScriptLevelOffsets");
         int[] levels = new int[scriptLevelOffsets.length];
         byte[] zygardeAssemblyScriptBytes = scriptGarc.getFile(Gen7Constants.zygardeAssemblyScriptFile);
         AMX zygardeAssemblyScript = new AMX(zygardeAssemblyScriptBytes);
@@ -2258,7 +2085,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // storing that value in the right place. If we already modified this code, then we
             // don't care about all of this; we just wrote a "mov r0, #forme" over the ldr instead.
             // Thus, if the original ldr instruction is still there, assume we haven't touched it.
-            int forme = 0;
+            int forme;
             if (FileFunctions.readFullInt(code, formeOffset) == 0xE59D0040) {
                 // Since we haven't modified the code yet, this is Zygarde. For SM, use 10%,
                 // since you can get it fairly early. For USUM, use 50%, since it's only
@@ -2297,9 +2124,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             unlinkStaticEncounters(staticPokemon);
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> skipIndices =
-                    Arrays.stream(romEntry.arrayEntries.get("TotemPokemonIndices")).boxed().collect(Collectors.toList());
-            skipIndices.addAll(Arrays.stream(romEntry.arrayEntries.get("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
+            List<Integer> skipIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             // Gifts, start at 3 to skip the starters
@@ -2349,16 +2175,16 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     private void unlinkStaticEncounters(List<StaticEncounter> statics) {
         List<Integer> offsetsToInsert = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
-            offsetsToInsert.add(entry.getValue());
+        for (ThreeDSLinkedEncounter le : romEntry.getLinkedEncounters()) {
+            offsetsToInsert.add(le.getLinked());
         }
         Collections.sort(offsetsToInsert);
         for (Integer offsetToInsert : offsetsToInsert) {
             statics.add(offsetToInsert, new StaticEncounter());
         }
-        for (Map.Entry<Integer, Integer> entry : romEntry.linkedStaticOffsets.entrySet()) {
-            StaticEncounter baseEncounter = statics.get(entry.getKey());
-            statics.set(entry.getValue(), baseEncounter.linkedEncounters.get(0));
+        for (ThreeDSLinkedEncounter le : romEntry.getLinkedEncounters()) {
+            StaticEncounter baseEncounter = statics.get(le.getBase());
+            statics.set(le.getLinked(), baseEncounter.linkedEncounters.get(0));
         }
     }
 
@@ -2370,7 +2196,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         }
 
         GARCArchive scriptGarc = readGARC(romEntry.getFile("Scripts"), true);
-        int[] scriptLevelOffsets = romEntry.arrayEntries.get("ZygardeScriptLevelOffsets");
+        int[] scriptLevelOffsets = romEntry.getArrayValue("ZygardeScriptLevelOffsets");
         byte[] zygardeAssemblyScriptBytes = scriptGarc.getFile(Gen7Constants.zygardeAssemblyScriptFile);
         AMX zygardeAssemblyScript = new AMX(zygardeAssemblyScriptBytes);
         for (int i = 0; i < scriptLevelOffsets.length; i++) {
@@ -2480,7 +2306,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getTMMoves() {
-        String tmDataPrefix = Gen7Constants.getTmDataPrefix(romEntry.romType);
+        String tmDataPrefix = Gen7Constants.getTmDataPrefix(romEntry.getRomType());
         int offset = find(code, tmDataPrefix);
         if (offset != 0) {
             offset += tmDataPrefix.length() / 2; // because it was a prefix
@@ -2502,7 +2328,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setTMMoves(List<Integer> moveIndexes) {
-        String tmDataPrefix = Gen7Constants.getTmDataPrefix(romEntry.romType);
+        String tmDataPrefix = Gen7Constants.getTmDataPrefix(romEntry.getRomType());
         int offset = find(code, tmDataPrefix);
         if (offset > 0) {
             offset += tmDataPrefix.length() / 2; // because it was a prefix
@@ -2511,8 +2337,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
 
             // Update TM item descriptions
-            List<String> itemDescriptions = getStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"));
-            List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
+            List<String> itemDescriptions = getStrings(false, romEntry.getIntValue("ItemDescriptionsTextOffset"));
+            List<String> moveDescriptions = getStrings(false, romEntry.getIntValue("MoveDescriptionsTextOffset"));
             // TM01 is item 328 and so on
             for (int i = 0; i < Gen7Constants.tmBlockOneCount; i++) {
                 itemDescriptions.set(i + Gen7Constants.tmBlockOneOffset, moveDescriptions.get(moveIndexes.get(i)));
@@ -2528,7 +2354,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         moveDescriptions.get(moveIndexes.get(i + Gen7Constants.tmBlockOneCount + Gen7Constants.tmBlockTwoCount)));
             }
             // Save the new item descriptions
-            setStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"), itemDescriptions);
+            setStrings(false, romEntry.getIntValue("ItemDescriptionsTextOffset"), itemDescriptions);
             // Palettes
             String palettePrefix = Gen7Constants.itemPalettesPrefix;
             int offsPals = find(code, palettePrefix);
@@ -2589,8 +2415,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public Map<Pokemon, boolean[]> getTMHMCompatibility() {
         Map<Pokemon, boolean[]> compat = new TreeMap<>();
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
+        int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
         for (int i = 1; i <= pokemonCount + formeCount; i++) {
             byte[] data;
             data = pokeGarc.files.get(i).get(0);
@@ -2618,7 +2444,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean hasMoveTutors() {
-        return romEntry.romType == Gen7Constants.Type_USUM;
+        return romEntry.getRomType() == Gen7Constants.Type_USUM;
     }
 
     @Override
@@ -2666,8 +2492,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {
         Map<Pokemon, boolean[]> compat = new TreeMap<>();
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
+        int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
         for (int i = 1; i <= pokemonCount + formeCount; i++) {
             byte[] data;
             data = pokeGarc.files.get(i).get(0);
@@ -2684,8 +2510,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData) {
         if (!hasMoveTutors()) return;
-        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
-        int formeCount = Gen7Constants.getFormeCount(romEntry.romType);
+        int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
+        int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
         for (int i = 1; i <= pokemonCount + formeCount; i++) {
             byte[] data;
             data = pokeGarc.files.get(i).get(0);
@@ -2695,21 +2521,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 data[Gen7Constants.bsMTCompatOffset + j] = getByteFromFlags(flags, j * 8 + 1);
             }
         }
-    }
-
-    @Override
-    public String getROMName() {
-        return "Pokemon " + romEntry.name;
-    }
-
-    @Override
-    public String getROMCode() {
-        return romEntry.romCode;
-    }
-
-    @Override
-    public String getSupportLevel() {
-        return "Complete";
     }
 
     @Override
@@ -2841,7 +2652,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             addEvoUpdateCondensed(easierEvolutionUpdates, evo, false);
                         }
                     }
-                    if (romEntry.romType == Gen7Constants.Type_SM) {
+                    if (romEntry.getRomType() == Gen7Constants.Type_SM) {
                         if (evo.type == EvolutionType.LEVEL_SNOWY) {
                             extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL, 35);
@@ -2979,7 +2790,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<String> getTrainerNames() {
-        List<String> tnames = getStrings(false, romEntry.getInt("TrainerNamesTextOffset"));
+        List<String> tnames = getStrings(false, romEntry.getIntValue("TrainerNamesTextOffset"));
         tnames.remove(0); // blank one
 
         return tnames;
@@ -2992,12 +2803,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setTrainerNames(List<String> trainerNames) {
-        List<String> tnames = getStrings(false, romEntry.getInt("TrainerNamesTextOffset"));
+        List<String> tnames = getStrings(false, romEntry.getIntValue("TrainerNamesTextOffset"));
         List<String> newTNames = new ArrayList<>(trainerNames);
         newTNames.add(0, tnames.get(0)); // the 0-entry, preserve it
-        setStrings(false, romEntry.getInt("TrainerNamesTextOffset"), newTNames);
+        setStrings(false, romEntry.getIntValue("TrainerNamesTextOffset"), newTNames);
         try {
-            writeStringsForAllLanguages(newTNames, romEntry.getInt("TrainerNamesTextOffset"));
+            writeStringsForAllLanguages(newTNames, romEntry.getIntValue("TrainerNamesTextOffset"));
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -3025,14 +2836,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<String> getTrainerClassNames() {
-        return getStrings(false, romEntry.getInt("TrainerClassesTextOffset"));
+        return getStrings(false, romEntry.getIntValue("TrainerClassesTextOffset"));
     }
 
     @Override
     public void setTrainerClassNames(List<String> trainerClassNames) {
-        setStrings(false, romEntry.getInt("TrainerClassesTextOffset"), trainerClassNames);
+        setStrings(false, romEntry.getIntValue("TrainerClassesTextOffset"), trainerClassNames);
         try {
-            writeStringsForAllLanguages(trainerClassNames, romEntry.getInt("TrainerClassesTextOffset"));
+            writeStringsForAllLanguages(trainerClassNames, romEntry.getIntValue("TrainerClassesTextOffset"));
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -3050,7 +2861,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getDoublesTrainerClasses() {
-        int[] doublesClasses = romEntry.arrayEntries.get("DoublesTrainerClasses");
+        int[] doublesClasses = romEntry.getArrayValue("DoublesTrainerClasses");
         List<Integer> doubles = new ArrayList<>();
         for (int tClass : doublesClasses) {
             doubles.add(tClass);
@@ -3070,7 +2881,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public int highestAbilityIndex() {
-        return Gen7Constants.getHighestAbilityIndex(romEntry.romType);
+        return Gen7Constants.getHighestAbilityIndex(romEntry.getRomType());
     }
 
     @Override
@@ -3100,7 +2911,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return Gen7Constants.getRegularShopItems(romEntry.romType);
+        return Gen7Constants.getRegularShopItems(romEntry.getRomType());
     }
 
     @Override
@@ -3175,7 +2986,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<Integer> fieldItems = this.getFieldItems();
         List<Integer> fieldTMs = new ArrayList<>();
 
-        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.getRomType());
         for (int item : fieldItems) {
             if (allowedItems.isTM(item)) {
                 fieldTMs.add(tmFromIndex(item));
@@ -3192,7 +3003,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         Iterator<Integer> iterTMs = fieldTMs.iterator();
         Map<Integer,Integer> tmMap = new HashMap<>();
 
-        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.getRomType());
         for (int i = 0; i < fiLength; i++) {
             int oldItem = fieldItems.get(i);
             if (allowedItems.isTM(oldItem)) {
@@ -3214,7 +3025,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<Integer> fieldItems = this.getFieldItems();
         List<Integer> fieldRegItems = new ArrayList<>();
 
-        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.getRomType());
         for (int item : fieldItems) {
             if (allowedItems.isAllowed(item) && !(allowedItems.isTM(item))) {
                 fieldRegItems.add(item);
@@ -3230,7 +3041,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         int fiLength = fieldItems.size();
         Iterator<Integer> iterNewItems = items.iterator();
 
-        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.romType);
+        ItemList allowedItems = Gen7Constants.getAllowedItems(romEntry.getRomType());
         for (int i = 0; i < fiLength; i++) {
             int oldItem = fieldItems.get(i);
             if (!(allowedItems.isTM(oldItem)) && allowedItems.isAllowed(oldItem)) {
@@ -3244,7 +3055,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getRequiredFieldTMs() {
-        return Gen7Constants.getRequiredFieldTMs(romEntry.romType);
+        return Gen7Constants.getRequiredFieldTMs(romEntry.getRomType());
     }
 
     public List<Integer> getFieldItems() {
@@ -3338,7 +3149,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<IngameTrade> ingameTrades = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<String> tradeStrings = getStrings(true, romEntry.getInt("IngameTradesTextOffset"));
+            List<String> tradeStrings = getStrings(true, romEntry.getIntValue("IngameTradesTextOffset"));
             byte[] tradesFile = staticGarc.files.get(4).get(0);
             int numberOfIngameTrades = tradesFile.length / 0x34;
             for (int i = 0; i < numberOfIngameTrades; i++) {
@@ -3381,8 +3192,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             List<IngameTrade> oldTrades = this.getIngameTrades();
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<String> tradeStrings = getStrings(true, romEntry.getInt("IngameTradesTextOffset"));
-            Map<Integer, List<Integer>> hardcodedTradeTextOffsets = Gen7Constants.getHardcodedTradeTextOffsets(romEntry.romType);
+            List<String> tradeStrings = getStrings(true, romEntry.getIntValue("IngameTradesTextOffset"));
+            Map<Integer, List<Integer>> hardcodedTradeTextOffsets = Gen7Constants.getHardcodedTradeTextOffsets(romEntry.getRomType());
             byte[] tradesFile = staticGarc.files.get(4).get(0);
             int numberOfIngameTrades = tradesFile.length / 0x34;
             for (int i = 0; i < numberOfIngameTrades; i++) {
@@ -3411,7 +3222,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
             }
             writeGARC(romEntry.getFile("StaticPokemon"), staticGarc);
-            setStrings(true, romEntry.getInt("IngameTradesTextOffset"), tradeStrings);
+            setStrings(true, romEntry.getIntValue("IngameTradesTextOffset"), tradeStrings);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -3466,7 +3277,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             // baby pokemon
             GARCArchive babyGarc = readGARC(romEntry.getFile("BabyPokemon"), true);
-            int pokemonCount = Gen7Constants.getPokemonCount(romEntry.romType);
+            int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
             byte[] masterFile = babyGarc.getFile(pokemonCount + 1);
             for (int i = 1; i <= pokemonCount; i++) {
                 byte[] babyFile = babyGarc.getFile(i);
@@ -3505,14 +3316,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Map<Integer, Shop> getShopItems() {
-        int[] tmShops = romEntry.arrayEntries.get("TMShops");
-        int[] regularShops = romEntry.arrayEntries.get("RegularShops");
-        int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
-        int shopCount = romEntry.getInt("ShopCount");
+        int[] tmShops = romEntry.getArrayValue("TMShops");
+        int[] regularShops = romEntry.getArrayValue("RegularShops");
+        int[] shopItemSizes = romEntry.getArrayValue("ShopItemSizes");
+        int shopCount = romEntry.getIntValue("ShopCount");
         Map<Integer, Shop> shopItemsMap = new TreeMap<>();
         try {
             byte[] shopsCRO = readFile(romEntry.getFile("ShopsAndTutors"));
-            int offset = Gen7Constants.getShopItemsOffset(romEntry.romType);
+            int offset = Gen7Constants.getShopItemsOffset(romEntry.getRomType());
             for (int i = 0; i < shopCount; i++) {
                 boolean badShop = false;
                 for (int tmShop : tmShops) {
@@ -3539,7 +3350,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     Shop shop = new Shop();
                     shop.items = items;
                     shop.name = shopNames.get(i);
-                    shop.isMainGame = Gen7Constants.getMainGameShops(romEntry.romType).contains(i);
+                    shop.isMainGame = Gen7Constants.getMainGameShops(romEntry.getRomType()).contains(i);
                     shopItemsMap.put(i, shop);
                 }
             }
@@ -3551,13 +3362,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public void setShopItems(Map<Integer, Shop> shopItems) {
-        int[] tmShops = romEntry.arrayEntries.get("TMShops");
-        int[] regularShops = romEntry.arrayEntries.get("RegularShops");
-        int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
-        int shopCount = romEntry.getInt("ShopCount");
+        int[] tmShops = romEntry.getArrayValue("TMShops");
+        int[] regularShops = romEntry.getArrayValue("RegularShops");
+        int[] shopItemSizes = romEntry.getArrayValue("ShopItemSizes");
+        int shopCount = romEntry.getIntValue("ShopCount");
         try {
             byte[] shopsCRO = readFile(romEntry.getFile("ShopsAndTutors"));
-            int offset = Gen7Constants.getShopItemsOffset(romEntry.romType);
+            int offset = Gen7Constants.getShopItemsOffset(romEntry.getRomType());
             for (int i = 0; i < shopCount; i++) {
                 boolean badShop = false;
                 for (int tmShop : tmShops) {
@@ -3645,7 +3456,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void computeCRC32sForRom() throws IOException {
         this.actualFileCRC32s = new HashMap<>();
         this.actualCodeCRC32 = FileFunctions.getCRC32(code);
-        for (String fileKey : romEntry.files.keySet()) {
+        for (String fileKey : romEntry.getFileKeys()) {
             byte[] file = readFile(romEntry.getFile(fileKey));
             long crc32 = FileFunctions.getCRC32(file);
             this.actualFileCRC32s.put(fileKey, crc32);
@@ -3655,12 +3466,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public boolean isRomValid() {
         int index = this.hasGameUpdateLoaded() ? 1 : 0;
-        if (romEntry.expectedCodeCRC32s[index] != actualCodeCRC32) {
+        if (romEntry.getExpectedCodeCRC32s()[index] != actualCodeCRC32) {
             return false;
         }
 
-        for (String fileKey : romEntry.files.keySet()) {
-            long expectedCRC32 = romEntry.files.get(fileKey).expectedCRC32s[index];
+        for (String fileKey : romEntry.getFileKeys()) {
+            long expectedCRC32 = romEntry.getFileExpectedCRC32s(fileKey)[index];
             long actualCRC32 = actualFileCRC32s.get(fileKey);
             if (expectedCRC32 != actualCRC32) {
                 return false;
@@ -3686,7 +3497,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         // for now picks icon randomly, instead of by the given Pokemon
         int pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
-        if (romEntry.romType == Gen7Constants.Type_SM) {
+        if (romEntry.getRomType() == Gen7Constants.Type_SM) {
             while (pkIndex == 1109 || pkIndex == 1117) {
                 pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size() - 1) + 1;
             }
@@ -3742,8 +3553,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        List<Integer> items = new ArrayList<>();
-        items.addAll(Gen7Constants.generalPurposeConsumableItems);
+        List<Integer> items = new ArrayList<>(Gen7Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common
         if (!consumableOnly) {
             frequencyBoostCount = 8; // bigger to account for larger item pool.
@@ -3827,5 +3637,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
         }
         return items;
+    }
+
+    @Override
+    protected Gen7RomEntry getRomEntry() {
+        return romEntry;
     }
 }

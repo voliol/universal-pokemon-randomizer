@@ -34,6 +34,9 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen2Constants {
 
+    public static final int Type_GS = 0;
+    public static final int Type_Crystal = 1;
+
     public static final int vietCrystalCheckOffset = 0x63;
 
     public static final byte vietCrystalCheckValue = (byte) 0xF5;

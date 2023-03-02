@@ -40,7 +40,6 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -135,11 +134,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     abstract protected void saveTrainers();
-
-    @Override
-    public boolean canChangeStaticPokemon() {
-        return true;
-    }
 
     @Override
     public boolean hasPhysicalSpecialSplit() {
