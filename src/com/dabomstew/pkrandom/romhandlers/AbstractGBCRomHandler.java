@@ -50,7 +50,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         if (d != null) {
             d.clear();
         } else {
-            d = new HashMap<String, Byte>();
+            d = new HashMap<>();
         }
         longestTableToken = 0;
     }
@@ -97,7 +97,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
                 if (currChar == GBConstants.stringTerminator) {
                     break;
                 } else {
-                    string.append("\\x" + String.format("%02X", currChar));
+                    string.append("\\x").append(String.format("%02X", currChar));
                 }
             }
         }

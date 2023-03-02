@@ -436,34 +436,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         switch (move.effectIndex) {
-            case Gen2Constants.noDamageSleepEffect:
-                move.statusType = StatusType.SLEEP;
-                break;
-            case Gen2Constants.damagePoisonEffect:
-            case Gen2Constants.noDamagePoisonEffect:
-            case Gen2Constants.twineedleEffect:
-                move.statusType = StatusType.POISON;
-                break;
-            case Gen2Constants.damageBurnEffect:
-            case Gen2Constants.damageBurnAndThawUserEffect:
-                move.statusType = StatusType.BURN;
-                break;
-            case Gen2Constants.damageFreezeEffect:
-                move.statusType = StatusType.FREEZE;
-                break;
-            case Gen2Constants.damageParalyzeEffect:
-            case Gen2Constants.noDamageParalyzeEffect:
-            case Gen2Constants.thunderEffect:
-                move.statusType = StatusType.PARALYZE;
-                break;
-            case Gen2Constants.toxicEffect:
-                move.statusType = StatusType.TOXIC_POISON;
-                break;
-            case Gen2Constants.noDamageConfusionEffect:
-            case Gen2Constants.damageConfusionEffect:
-            case Gen2Constants.swaggerEffect:
-                move.statusType = StatusType.CONFUSION;
-                break;
+            case Gen2Constants.noDamageSleepEffect -> move.statusType = StatusType.SLEEP;
+            case Gen2Constants.damagePoisonEffect, Gen2Constants.noDamagePoisonEffect, Gen2Constants.twineedleEffect ->
+                    move.statusType = StatusType.POISON;
+            case Gen2Constants.damageBurnEffect, Gen2Constants.damageBurnAndThawUserEffect ->
+                    move.statusType = StatusType.BURN;
+            case Gen2Constants.damageFreezeEffect -> move.statusType = StatusType.FREEZE;
+            case Gen2Constants.damageParalyzeEffect, Gen2Constants.noDamageParalyzeEffect, Gen2Constants.thunderEffect ->
+                    move.statusType = StatusType.PARALYZE;
+            case Gen2Constants.toxicEffect -> move.statusType = StatusType.TOXIC_POISON;
+            case Gen2Constants.noDamageConfusionEffect, Gen2Constants.damageConfusionEffect, Gen2Constants.swaggerEffect ->
+                    move.statusType = StatusType.CONFUSION;
         }
 
         if (move.statusMoveType == StatusMoveType.DAMAGE) {
@@ -476,43 +459,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void loadMiscMoveInfoFromEffect(Move move, double secondaryEffectChance) {
         switch (move.effectIndex) {
-            case Gen2Constants.flinchEffect:
-            case Gen2Constants.snoreEffect:
-            case Gen2Constants.twisterEffect:
-            case Gen2Constants.stompEffect:
-                move.flinchPercentChance = secondaryEffectChance;
-                break;
-
-            case Gen2Constants.damageAbsorbEffect:
-            case Gen2Constants.dreamEaterEffect:
-                move.absorbPercent = 50;
-                break;
-
-            case Gen2Constants.damageRecoilEffect:
-                move.recoilPercent = 25;
-                break;
-
-            case Gen2Constants.flailAndReversalEffect:
-            case Gen2Constants.futureSightEffect:
-                move.criticalChance = CriticalChance.NONE;
-                break;
-
-            case Gen2Constants.bindingEffect:
-            case Gen2Constants.trappingEffect:
-                move.isTrapMove = true;
-                break;
-
-            case Gen2Constants.razorWindEffect:
-            case Gen2Constants.skyAttackEffect:
-            case Gen2Constants.skullBashEffect:
-            case Gen2Constants.solarbeamEffect:
-            case Gen2Constants.semiInvulnerableEffect:
-                move.isChargeMove = true;
-                break;
-
-            case Gen2Constants.hyperBeamEffect:
-                move.isRechargeMove = true;
-                break;
+            case Gen2Constants.flinchEffect, Gen2Constants.snoreEffect, Gen2Constants.twisterEffect,
+                    Gen2Constants.stompEffect ->
+                    move.flinchPercentChance = secondaryEffectChance;
+            case Gen2Constants.damageAbsorbEffect, Gen2Constants.dreamEaterEffect -> move.absorbPercent = 50;
+            case Gen2Constants.damageRecoilEffect -> move.recoilPercent = 25;
+            case Gen2Constants.flailAndReversalEffect, Gen2Constants.futureSightEffect ->
+                    move.criticalChance = CriticalChance.NONE;
+            case Gen2Constants.bindingEffect, Gen2Constants.trappingEffect -> move.isTrapMove = true;
+            case Gen2Constants.razorWindEffect, Gen2Constants.skyAttackEffect, Gen2Constants.skullBashEffect,
+                    Gen2Constants.solarbeamEffect, Gen2Constants.semiInvulnerableEffect ->
+                    move.isChargeMove = true;
+            case Gen2Constants.hyperBeamEffect -> move.isRechargeMove = true;
         }
 
         if (Gen2Constants.increasedCritMoves.contains(move.number)) {
@@ -2115,21 +2073,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int effectivenessInternal = rom[currentOffset + 2];
             Type attacking = Gen2Constants.typeTable[attackingType];
             Type defending = Gen2Constants.typeTable[defendingType];
-            Effectiveness effectiveness = null;
-            switch (effectivenessInternal) {
-                case 20:
-                    effectiveness = Effectiveness.DOUBLE;
-                    break;
-                case 10:
-                    effectiveness = Effectiveness.NEUTRAL;
-                    break;
-                case 5:
-                    effectiveness = Effectiveness.HALF;
-                    break;
-                case 0:
-                    effectiveness = Effectiveness.ZERO;
-                    break;
-            }
+            Effectiveness effectiveness = switch (effectivenessInternal) {
+                case 20 -> Effectiveness.DOUBLE;
+                case 10 -> Effectiveness.NEUTRAL;
+                case 5 -> Effectiveness.HALF;
+                case 0 -> Effectiveness.ZERO;
+                default -> null;
+            };
             if (effectiveness != null) {
                 TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
                 typeEffectivenessTable.add(relationship);
@@ -2145,21 +2095,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (TypeRelationship relationship : typeEffectivenessTable) {
             rom[currentOffset] = Gen2Constants.typeToByte(relationship.attacker);
             rom[currentOffset + 1] = Gen2Constants.typeToByte(relationship.defender);
-            byte effectivenessInternal = 0;
-            switch (relationship.effectiveness) {
-                case DOUBLE:
-                    effectivenessInternal = 20;
-                    break;
-                case NEUTRAL:
-                    effectivenessInternal = 10;
-                    break;
-                case HALF:
-                    effectivenessInternal = 5;
-                    break;
-                case ZERO:
-                    effectivenessInternal = 0;
-                    break;
-            }
+            byte effectivenessInternal = switch (relationship.effectiveness) {
+                case DOUBLE -> 20;
+                case NEUTRAL -> 10;
+                case HALF -> 5;
+                case ZERO -> 0;
+                default -> 0;
+            };
             rom[currentOffset + 2] = effectivenessInternal;
             currentOffset += 3;
         }

@@ -49,7 +49,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected byte[] originalRom;
     private String loadedFN;
 
-    private FreedSpace freedSpace = new FreedSpace();
+    private final FreedSpace freedSpace = new FreedSpace();
 
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
