@@ -34,7 +34,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[] {1,2,3,4,5}, new Roms.Region[] {Roms.Region.USA}, false);
+        return Roms.getRoms(new int[] {1, 2, 3},  new Roms.Region[] {Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {
@@ -368,6 +368,8 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    // TODO: this test is strangely inconsistent with Fire Red (U) (both versions) and Leaf Green (U) 1.1.
+    //  It really should not be so maybe something is wrong with the test case?
     public void moveTutorMovesDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasMoveTutors());

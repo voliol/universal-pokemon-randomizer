@@ -142,7 +142,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private String[] pokeNames;
     private ItemList allowedItems, nonBadItems;
     private int pickupItemsTableOffset;
-    private long actualCRC32;
     private boolean effectivenessUpdated;
 
     // Misc.
@@ -187,56 +186,99 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void loadedRom() {
+    public void midLoadingSetUp() {
+        super.midLoadingSetUp();
+        isRomHack = false;
+        jamboMovesetHack = false;
+        if (romEntry.getRomCode().equals("BPRE") && romEntry.getVersion() == 0) {
+            basicBPRE10HackSupport();
+        }
+
+        mapLoadingDone = false;
+
+        freeAllUnusedSpace();
+        
+        // Having this in the constructor would be preferred, 
+        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
+        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
+    }
+
+    @Override
+    protected void loadGameData() {
+        super.loadGameData();
+        loadAbilityNames();
+        allowedItems = Gen3Constants.allowedItems.copy();
+        nonBadItems = Gen3Constants.getNonBadItems(romEntry.getRomType()).copy();
+    }
+
+    @Override
+    protected void initRomEntry() {
         for (Gen3RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && (rom[0xBC] & 0xFF) == re.getVersion()) {
                 romEntry = new Gen3RomEntry(re); // clone so we can modify
                 break;
             }
         }
+        addPokedexOrderToRomEntry();
+        addPointerBlocksToRomEntry();
+        addMoveTutorInfoToRomEntry();
+        addEncounterInfoToRomEntry();
+        addMapInfoToRomEntry();
+    }
 
-        tb = new String[256];
-        d = new HashMap<>();
-        isRomHack = false;
-        jamboMovesetHack = false;
-
-        // Pokemon count stuff, needs to be available first
+    private void addPokedexOrderToRomEntry() {
         List<Integer> pokedexOrderPrefixes = findMultiple(rom, Gen3Constants.pokedexOrderPointerPrefix);
         romEntry.putIntValue("PokedexOrder", readPointer(pokedexOrderPrefixes.get(1) + 16));
+    }
 
-		if (romEntry.getIntValue("HasPointerBlock1") == 1) {
-			addPointerBlock1ToRomEntry();
-		} else {
-			int baseNomOffset = find(rom, Gen3Constants.rsPokemonNamesPointerSuffix);
-			romEntry.putIntValue("PokemonNames", readPointer(baseNomOffset - 4));
-		}
-		if (romEntry.getIntValue("HasPointerBlock2") == 1) {
-			addPointerBlock2ToRomEntry();
-		}
-
-		if (romEntry.getRomType() == Gen3Constants.RomType_Em || romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-			romEntry.putIntValue("MoveTutorCompatibility",
-					romEntry.getIntValue("MoveTutorData") + romEntry.getIntValue("MoveTutorMoves") * 2);
-		}
-
-        loadTextTable(romEntry.getTableFile());
-
-        if (romEntry.getRomCode().equals("BPRE") && romEntry.getVersion() == 0) {
-            basicBPRE10HackSupport();
+    private void addPointerBlocksToRomEntry() {
+        if (romEntry.getIntValue("HasPointerBlock1") == 1) {
+            addPointerBlock1ToRomEntry();
+        } else {
+            int baseNomOffset = find(rom, Gen3Constants.rsPokemonNamesPointerSuffix);
+            romEntry.putIntValue("PokemonNames", readPointer(baseNomOffset - 4));
         }
+        if (romEntry.getIntValue("HasPointerBlock2") == 1) {
+            addPointerBlock2ToRomEntry();
+        }
+    }
 
-        loadPokemonNames();
-        loadPokedex();
-        loadPokemonStats();
-        constructPokemonList();
-        populateEvolutions();
-        loadMoves();
-        loadPokemonPalettes();
+    private void addPointerBlock1ToRomEntry() {
+        romEntry.putIntValue("PokemonFrontSprites", readPointer(Gen3Constants.pokemonFrontSpritesPointer));
+        romEntry.putIntValue("PokemonBackSprites", readPointer(Gen3Constants.pokemonBackSpritesPointer));
+        romEntry.putIntValue("PokemonNormalPalettes", readPointer(Gen3Constants.pokemonNormalPalettesPointer));
+        romEntry.putIntValue("PokemonShinyPalettes", readPointer(Gen3Constants.pokemonShinyPalettesPointer));
+        romEntry.putIntValue("PokemonIconSprites", readPointer(Gen3Constants.pokemonIconSpritesPointer));
+        romEntry.putIntValue("PokemonIconPalettes", readPointer(Gen3Constants.pokemonIconPalettesPointer));
+        romEntry.putIntValue("PokemonNames", readPointer(Gen3Constants.pokemonNamesPointer));
+        romEntry.putIntValue("MoveNames", readPointer(Gen3Constants.moveNamesPointer));
+        romEntry.putIntValue("DecorationNames", readPointer(Gen3Constants.decorationNamesPointer));
+    }
 
+    private void addPointerBlock2ToRomEntry() {
+        romEntry.putIntValue("PokemonStats", readPointer(Gen3Constants.pokemonStatsPointer));
+        romEntry.putIntValue("AbilityNames", readPointer(Gen3Constants.abilityNamesPointer));
+        romEntry.putIntValue("AbilityDescriptions", readPointer(Gen3Constants.abilityDescriptionsPointer));
+        romEntry.putIntValue("ItemData", readPointer(Gen3Constants.itemDataPointer));
+        romEntry.putIntValue("MoveData", readPointer(Gen3Constants.moveDataPointer));
+        romEntry.putIntValue("BallSpritesPointer", readPointer(Gen3Constants.ballSpritesPointer));
+        romEntry.putIntValue("BallPalettesPointer", readPointer(Gen3Constants.ballPalettesPointer));
+    }
+
+    private void addMoveTutorInfoToRomEntry() {
+        if (romEntry.getRomType() == Gen3Constants.RomType_Em || romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            romEntry.putIntValue("MoveTutorCompatibility",
+                    romEntry.getIntValue("MoveTutorData") + romEntry.getIntValue("MoveTutorMoves") * 2);
+        }
+    }
+
+    private void addEncounterInfoToRomEntry() {
         // Get wild Pokemon offset
         int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
         romEntry.putIntValue("WildPokemon", readPointer(baseWPOffset + 12));
+    }
 
+    private void addMapInfoToRomEntry() {
         // map banks
         int baseMapsOffset = findMultiple(rom, Gen3Constants.mapBanksPointerPrefix).get(0);
         romEntry.putIntValue("MapHeaders", readPointer(baseMapsOffset + 12));
@@ -247,44 +289,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 Gen3Constants.frlgMapLabelsPointerPrefix : Gen3Constants.rseMapLabelsPointerPrefix;
         int baseMLOffset = find(rom, mapLabelsPointerPrefix);
         romEntry.putIntValue("MapLabels", readPointer(baseMLOffset + 12));
-
-        mapLoadingDone = false;
-        loadAbilityNames();
-        loadItemNames();
-
-        allowedItems = Gen3Constants.allowedItems.copy();
-        nonBadItems = Gen3Constants.getNonBadItems(romEntry.getRomType()).copy();
-
-        actualCRC32 = FileFunctions.getCRC32(rom);
-
-        freeAllUnusedSpace();
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
-    
-	private void addPointerBlock1ToRomEntry() {
-		romEntry.putIntValue("PokemonFrontSprites", readPointer(Gen3Constants.pokemonFrontSpritesPointer));
-		romEntry.putIntValue("PokemonBackSprites", readPointer(Gen3Constants.pokemonBackSpritesPointer));
-		romEntry.putIntValue("PokemonNormalPalettes", readPointer(Gen3Constants.pokemonNormalPalettesPointer));
-		romEntry.putIntValue("PokemonShinyPalettes", readPointer(Gen3Constants.pokemonShinyPalettesPointer));
-		romEntry.putIntValue("PokemonIconSprites", readPointer(Gen3Constants.pokemonIconSpritesPointer));
-		romEntry.putIntValue("PokemonIconPalettes", readPointer(Gen3Constants.pokemonIconPalettesPointer));
-		romEntry.putIntValue("PokemonNames", readPointer(Gen3Constants.pokemonNamesPointer));
-		romEntry.putIntValue("MoveNames", readPointer(Gen3Constants.moveNamesPointer));
-		romEntry.putIntValue("DecorationNames", readPointer(Gen3Constants.decorationNamesPointer));
-	}
 
-	private void addPointerBlock2ToRomEntry() {
-		romEntry.putIntValue("PokemonStats", readPointer(Gen3Constants.pokemonStatsPointer));
-		romEntry.putIntValue("AbilityNames", readPointer(Gen3Constants.abilityNamesPointer));
-		romEntry.putIntValue("AbilityDescriptions", readPointer(Gen3Constants.abilityDescriptionsPointer));
-		romEntry.putIntValue("ItemData", readPointer(Gen3Constants.itemDataPointer));
-		romEntry.putIntValue("MoveData", readPointer(Gen3Constants.moveDataPointer));
-		romEntry.putIntValue("BallSpritesPointer", readPointer(Gen3Constants.ballSpritesPointer));
-		romEntry.putIntValue("BallPalettesPointer", readPointer(Gen3Constants.ballPalettesPointer));
-	}
+    @Override
+    protected void initTextTables() {
+        tb = new String[256];
+        d = new HashMap<>();
+        loadTextTable(romEntry.getTableFile());
+    }
 
     private void basicBPRE10HackSupport() {
         if (basicBPRE10HackDetection()) {
@@ -424,7 +436,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return csum != 3716707868L;
     }
 
-    private void loadPokedex() {
+    private void loadPokedexOrder() {
         int pdOffset = romEntry.getIntValue("PokedexOrder");
         int numInternalPokes = romEntry.getIntValue("PokemonCount");
         int maxPokedex = 0;
@@ -497,7 +509,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    private void loadPokemonStats() {
+    @Override
+    public void loadPokemonStats() {
+        loadPokemonNames();
+        loadPokedexOrder();
+
         pokes = new Pokemon[this.pokedexCount + 1];
         int numInternalPokes = romEntry.getIntValue("PokemonCount");
         pokesInternal = new Pokemon[numInternalPokes + 1];
@@ -531,6 +547,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 deoxys.setSpdef(readWord(offset + 10));
             }
         }
+
+        constructPokemonList();
     }
 
     @Override
@@ -567,7 +585,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         writeEvolutions();
     }
 
-    private void loadMoves() {
+    @Override
+    public void loadMoves() {
         int moveCount = romEntry.getIntValue("MoveCount");
         moves = new Move[moveCount + 1];
         int offs = romEntry.getIntValue("MoveData");
@@ -1476,12 +1495,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public List<Trainer> getTrainers() {
         if (trainers == null) {
-            loadTrainers();
+            throw new IllegalStateException("Trainers have not been loaded.");
         }
         return trainers;
     }
 
-    private void loadTrainers() {
+    @Override
+    public void loadTrainers() {
         trainers = new ArrayList<>();
         int baseOffset = romEntry.getIntValue("TrainerData");
         int amount = romEntry.getIntValue("TrainerCount");
@@ -2717,7 +2737,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 hex.charAt(3), hex.charAt(0), hex.charAt(1) });
     }
 
-    private void populateEvolutions() {
+    @Override
+    public void loadEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 pkmn.getEvolutionsFrom().clear();
@@ -3522,7 +3543,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return Gen3Constants.opShopItems;
     }
 
-    private void loadItemNames() {
+    @Override
+    public void loadItemNames() {
         int nameoffs = romEntry.getIntValue("ItemData");
         int structlen = romEntry.getIntValue("ItemEntrySize");
         int maxcount = romEntry.getIntValue("ItemCount");
@@ -4014,7 +4036,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void loadPokemonPalettes() {
+    @Override
+    public void loadPokemonPalettes() {
         int normalPaletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getIntValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
@@ -4279,9 +4302,4 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public Gen3RomEntry getRomEntry() {
         return romEntry;
     }
-
-	@Override
-	public boolean isRomValid() {
-		return romEntry.getExpectedCRC32() == actualCRC32;
-	}
 }

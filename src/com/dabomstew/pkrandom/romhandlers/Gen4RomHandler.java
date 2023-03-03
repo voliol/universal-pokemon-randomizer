@@ -172,7 +172,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
-
 		
 		// We want to guarantee that the catching tutorial in HGSS has Ethan/Lyra's new
 		// Pokemon. We also

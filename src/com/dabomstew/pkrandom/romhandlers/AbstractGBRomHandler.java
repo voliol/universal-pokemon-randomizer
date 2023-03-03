@@ -42,13 +42,18 @@ import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBRomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected byte[] rom;
     protected byte[] originalRom;
-    private String loadedFN;
+    private String loadedFileName;
+    private long actualCRC32;
 
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -56,21 +61,72 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     @Override
     public boolean loadRom(String filename) {
+        try {
+            loadRomFile(filename);
+            midLoadingSetUp();
+            loadGameData();
+            return true;
+        } catch (RandomizerIOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    protected void loadRomFile(String filename) {
         byte[] loaded = loadFile(filename);
         if (!detectRom(loaded)) {
-            return false;
+            throw new RandomizerIOException("Could not detect ROM.");
         }
         this.rom = loaded;
         this.originalRom = new byte[rom.length];
         System.arraycopy(rom, 0, originalRom, 0, rom.length);
-        loadedFN = filename;
-        loadedRom();
-        return true;
+        loadedFileName = filename;
+        this.actualCRC32 = FileFunctions.getCRC32(rom);
     }
+
+    /**
+     * Sets up various stuff which needs to be done after the ROM file has been loaded, but which is needed for loading
+     * game data like {@link Pokemon} and {@link Trainer}s. E.g. the {@link RomEntry} and text tables.
+     * Expected to be overrided.
+     */
+    protected void midLoadingSetUp() {
+        initRomEntry();
+        initTextTables();
+    }
+
+    protected abstract void initRomEntry();
+
+    protected abstract void initTextTables();
+
+    /**
+     * Loads the (randomizable) game data, i.e. stuff like the gettable lists of {@link Pokemon}, {@link Move}s,
+     * and {@link Trainer}s.
+     */
+    protected void loadGameData() {
+        loadPokemonStats();
+        loadEvolutions();
+        loadMoves();
+        loadPokemonPalettes();
+        loadItemNames();
+        loadTrainers();
+    }
+
+    // the below are public because it may be kinder to the testing environment
+    public abstract void loadPokemonStats();
+
+    public abstract void loadEvolutions();
+
+    public abstract void loadMoves();
+
+    public abstract void loadPokemonPalettes();
+
+    public abstract void loadItemNames();
+
+    public abstract void loadTrainers();
 
     @Override
     public String loadedFilename() {
-        return loadedFN;
+        return loadedFileName;
     }
 
     @Override
@@ -118,7 +174,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     @Override
     public void printRomDiagnostics(PrintStream logStream) {
-        Path p = Paths.get(loadedFN);
+        Path p = Paths.get(loadedFileName);
         logStream.println("File name: " + p.getFileName().toString());
         long crc = FileFunctions.getCRC32(originalRom);
         logStream.println("Original ROM CRC32: " + String.format("%08X", crc));
@@ -144,7 +200,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     public abstract boolean detectRom(byte[] rom);
 
-    public abstract void loadedRom();
 
     protected static byte[] loadFile(String filename) {
         try {
@@ -334,5 +389,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
 	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
+
+    @Override
+    public abstract AbstractGBRomEntry getRomEntry();
+
+    @Override
+    public boolean isRomValid() {
+        return getRomEntry().getExpectedCRC32() == actualCRC32;
+    }
 
 }

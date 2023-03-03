@@ -97,7 +97,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private String[] landmarkNames;
     private boolean isVietCrystal;
     private ItemList allowedItems, nonBadItems;
-    private long actualCRC32;
     private boolean effectivenessUpdated;
 
     @Override
@@ -111,15 +110,29 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void loadedRom() {
-        romEntry = checkRomEntry(this.rom);
-        clearTextTables();
-        readTextTable("gameboy_jpn");
-        String extraTableFile = romEntry.getExtraTableFile();
-        if (extraTableFile != null && !extraTableFile.equalsIgnoreCase("none")) {
-            readTextTable(extraTableFile);
+    public void midLoadingSetUp() {
+        super.midLoadingSetUp();
+        havePatchedFleeing = false;
+
+        loadLandmarkNames();
+        preprocessMaps();
+    }
+
+    @Override
+    protected void loadGameData() {
+        super.loadGameData();
+        allowedItems = Gen2Constants.allowedItems.copy();
+        nonBadItems = Gen2Constants.nonBadItems.copy();
+        // VietCrystal: exclude Burn Heal, Calcium, TwistedSpoon, and Elixir
+        // crashes your game if used, glitches out your inventory if carried
+        if (isVietCrystal) {
+            allowedItems.banSingles(Gen2Items.burnHeal, Gen2Items.calcium, Gen2Items.elixer, Gen2Items.twistedSpoon);
         }
-        // VietCrystal override
+    }
+
+    @Override
+    protected void initRomEntry() {
+        romEntry = checkRomEntry(this.rom);
         if (romEntry.getName().equals("Crystal (J)")
                 && rom[Gen2Constants.vietCrystalCheckOffset] == Gen2Constants.vietCrystalCheckValue) {
             readTextTable("vietcrystal");
@@ -127,21 +140,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
             isVietCrystal = false;
         }
-        havePatchedFleeing = false;
-        loadPokemonStats();
-        pokemonList = Arrays.asList(pokes);
-        loadMoves();
-        loadPokemonPalettes();
-        loadLandmarkNames();
-        preprocessMaps();
-        loadItemNames();
-        allowedItems = Gen2Constants.allowedItems.copy();
-        nonBadItems = Gen2Constants.nonBadItems.copy();
-        actualCRC32 = FileFunctions.getCRC32(rom);
-        // VietCrystal: exclude Burn Heal, Calcium, TwistedSpoon, and Elixir
-        // crashes your game if used, glitches out your inventory if carried
-        if (isVietCrystal) {
-            allowedItems.banSingles(Gen2Items.burnHeal, Gen2Items.calcium, Gen2Items.elixer, Gen2Items.twistedSpoon);
+    }
+
+    @Override
+    protected void initTextTables() {
+        clearTextTables();
+        readTextTable("gameboy_jpn");
+        String extraTableFile = romEntry.getExtraTableFile();
+        if (extraTableFile != null && !extraTableFile.equalsIgnoreCase("none")) {
+            readTextTable(extraTableFile);
         }
     }
 
@@ -163,10 +170,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
         // Not found
-        return null;
+        throw new RandomizerIOException("Could not find RomEntry.");
     }
 
-    private void loadPokemonStats() {
+    @Override
+    public void loadPokemonStats() {
         pokes = new Pokemon[Gen2Constants.pokemonCount + 1];
         // Fetch our names
         String[] pokeNames = readPokemonNames();
@@ -178,10 +186,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // Name?
             pokes[i].setName(pokeNames[i]);
         }
-
-        // Get evolutions
-        populateEvolutions();
-
+        this.pokemonList = Arrays.asList(pokes);
     }
 
     @Override
@@ -212,7 +217,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return moveNames;
     }
 
-    private void loadMoves() {
+    @Override
+    public void loadMoves() {
         moves = new Move[Gen2Constants.moveCount + 1];
         String[] moveNames = readMoveNames();
         int offs = romEntry.getIntValue("MoveDataOffset");
@@ -909,12 +915,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Trainer> getTrainers() {
         if (trainers == null) {
-            loadTrainers();
+            throw new IllegalStateException("Trainers have not been loaded.");
         }
         return trainers;
     }
 
-    private void loadTrainers() {
+    @Override
+    public void loadTrainers() {
         int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
         int trainerClassAmount = romEntry.getIntValue("TrainerClassAmount");
         int[] trainersPerClass = romEntry.getArrayValue("TrainerDataClassCounts");
@@ -1657,7 +1664,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return false;
     }
 
-    private void populateEvolutions() {
+    @Override
+    public void loadEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 pkmn.getEvolutionsFrom().clear();
@@ -2251,7 +2259,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return null; // Not implemented
     }
 
-    private void loadItemNames() {
+    @Override
+    public void loadItemNames() {
         itemNames = new String[256];
         itemNames[0] = "glitch";
         // trying to emulate pretty much what the game does here
@@ -2750,7 +2759,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return Gen2Constants.earlyRequiredHMMoves;
     }
 
-    private void loadPokemonPalettes() {
+    @Override
+    public void loadPokemonPalettes() {
         // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = romEntry.getIntValue("PokemonPalettes") + 8;
         for (Pokemon pk : getPokemonSet()) {
@@ -2860,11 +2870,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public Gen2RomEntry getRomEntry() {
         return romEntry;
-    }
-
-    @Override
-    public boolean isRomValid() {
-		return romEntry.getExpectedCRC32() == actualCRC32;
     }
 
     @Override

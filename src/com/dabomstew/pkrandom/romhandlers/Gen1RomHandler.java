@@ -135,7 +135,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private String[] mapNames;
     private SubMap[] maps;
     private boolean xAccNerfed;
-    private long actualCRC32;
     private boolean effectivenessUpdated;
 
     @Override
@@ -149,42 +148,30 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void loadedRom() {
-        romEntry = checkRomEntry(this.rom);
+    public void midLoadingSetUp() {
+        super.midLoadingSetUp();
         pokeNumToRBYTable = new int[256];
         pokeRBYToNumTable = new int[256];
         moveNumToRomTable = new int[256];
         moveRomToNumTable = new int[256];
         maps = new SubMap[256];
         xAccNerfed = false;
+        preloadMaps();
+        loadMapNames();
+    }
+
+    @Override
+    protected void initRomEntry() {
+        romEntry = checkRomEntry(this.rom);
+    }
+
+    @Override
+    protected void initTextTables() {
         clearTextTables();
         readTextTable("gameboy_jpn");
         String extraTableFile = romEntry.getExtraTableFile();
         if (extraTableFile != null && !extraTableFile.equalsIgnoreCase("none")) {
             readTextTable(extraTableFile);
-        }
-        loadPokedexOrder();
-        loadPokemonStats();
-        pokemonList = Arrays.asList(pokes);
-        loadMoves();
-        loadPokemonPalettes();
-        loadItemNames();
-        preloadMaps();
-        loadMapNames();
-        actualCRC32 = FileFunctions.getCRC32(rom);
-    }
-
-    private void loadPokedexOrder() {
-        int pkmnCount = romEntry.getIntValue("InternalPokemonCount");
-        int orderOffset = romEntry.getIntValue("PokedexOrder");
-        pokedexCount = 0;
-        for (int i = 1; i <= pkmnCount; i++) {
-            int pokedexNum = rom[orderOffset + i - 1] & 0xFF;
-            pokeRBYToNumTable[i] = pokedexNum;
-            if (pokedexNum != 0 && pokeNumToRBYTable[pokedexNum] == 0) {
-                pokeNumToRBYTable[pokedexNum] = i;
-            }
-            pokedexCount = Math.max(pokedexCount, pokedexNum);
         }
     }
 
@@ -206,7 +193,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             }
         }
         // Not found
-        return null;
+        throw new RandomizerIOException("Could not find RomEntry");
     }
 
     private String[] readMoveNames() {
@@ -220,7 +207,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return moveNames;
     }
 
-    private void loadMoves() {
+    @Override
+    public void loadMoves() {
         String[] moveNames = readMoveNames();
         int moveCount = romEntry.getIntValue("MoveCount");
         int movesOffset = romEntry.getIntValue("MoveDataOffset");
@@ -475,7 +463,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return Arrays.asList(moves);
     }
 
-    private void loadPokemonStats() {
+    private void loadPokedexOrder() {
+        int pkmnCount = romEntry.getIntValue("InternalPokemonCount");
+        int orderOffset = romEntry.getIntValue("PokedexOrder");
+        pokedexCount = 0;
+        for (int i = 1; i <= pkmnCount; i++) {
+            int pokedexNum = rom[orderOffset + i - 1] & 0xFF;
+            pokeRBYToNumTable[i] = pokedexNum;
+            if (pokedexNum != 0 && pokeNumToRBYTable[pokedexNum] == 0) {
+                pokeNumToRBYTable[pokedexNum] = i;
+            }
+            pokedexCount = Math.max(pokedexCount, pokedexNum);
+        }
+    }
+
+    @Override
+    public void loadPokemonStats() {
+        loadPokedexOrder();
+
         pokes = new Gen1Pokemon[pokedexCount + 1];
         // Fetch our names
         String[] pokeNames = readPokemonNames();
@@ -495,9 +500,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             loadBasicPokeStats((Gen1Pokemon) pokes[Species.mew], romEntry.getIntValue("MewStatsOffset"));
         }
 
-        // Evolutions
-        populateEvolutions();
-
+        this.pokemonList = Arrays.asList(pokes);
     }
 
     @Override
@@ -1031,14 +1034,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Trainer> getTrainers() { // TODO: this is the same in all of the GB romhandlers, can it be moved "up"?
+    public List<Trainer> getTrainers() {
         if (trainers == null) {
-            loadTrainers();
+            throw new IllegalStateException("Trainers have not been loaded.");
         }
         return trainers;
     }
 
-    private void loadTrainers() {
+    @Override
+    public void loadTrainers() {
         int traineroffset = romEntry.getIntValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
         int[] trainerclasslimits = romEntry.getArrayValue("TrainerDataClassCounts");
@@ -1603,7 +1607,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private void populateEvolutions() {
+    @Override
+    public void loadEvolutions() {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 pkmn.getEvolutionsFrom().clear();
@@ -2045,7 +2050,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return null; // Not implemented
     }
 
-    private void loadItemNames() {
+    @Override
+    public void loadItemNames() {
         itemNames = new String[256];
         itemNames[0] = "glitch";
         // trying to emulate pretty much what the game does here
@@ -2653,8 +2659,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
         return fsBank;
     }
-    
-    private void loadPokemonPalettes() {
+
+    @Override
+    public void loadPokemonPalettes() {
 		int palIndex = romEntry.getIntValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonSet()) {
             // they are in Pokédex order
@@ -2740,10 +2747,5 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public Gen1RomEntry getRomEntry() {
         return romEntry;
     }
-
-	@Override
-	public boolean isRomValid() {
-		return romEntry.getExpectedCRC32() == actualCRC32;
-	}
 
 }
