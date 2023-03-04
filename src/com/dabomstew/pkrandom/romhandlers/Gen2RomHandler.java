@@ -958,6 +958,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         tr.poketype = dataType;
         offset++;
         while ((rom[offset] & 0xFF) != 0xFF) {
+            //System.out.println(tr);
             TrainerPokemon tp = new TrainerPokemon();
             tp.level = rom[offset] & 0xFF;
             tp.pokemon = pokes[rom[offset + 1] & 0xFF];
@@ -1001,14 +1002,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         this.trainers = trainers;
     }
 
+    private boolean hasFreed;
+
     @Override
-    protected void saveTrainers() {
+    public void saveTrainers() {
         if (trainers == null) {
             throw new IllegalStateException("Trainers are not loaded");
         }
-
-        // TODO: some system to free space depending on RomEntry
-        freeSpaceBetween(0x3B685, 0x3BFFF);
+        if (!hasFreed) {
+            // TODO: some system to free space depending on RomEntry
+            freeSpaceBetween(0x3B685, 0x3BFFF);
+            hasFreed = true;
+        }
 
         int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
         int trainerClassAmount = romEntry.getIntValue("TrainerClassAmount");
@@ -1030,15 +1035,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
             System.out.print("\n");
 
-            // TODO: better rewriting
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
-            int oldOffset = readPointer(pointerOffset);
-            int oldLength = lengthOfTrainerClassAt(oldOffset, trainersPerClass[trainerClassNum]);
-            freeSpace(oldOffset, oldLength);
-            repointAndWriteToFreeSpaceInSameBank(pointerOffset, trainersOfClassBytes);
+            int finalTrainerClassNum = trainerClassNum;
+            new GBDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
+                    lengthOfTrainerClassAt(oldDataOffset, trainersPerClass[finalTrainerClassNum]));
         }
-
     }
 
     private int lengthOfTrainerClassAt(int offset, int numberOfTrainers) {
@@ -1050,18 +1052,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             offset += trainerLength;
         }
         return sum;
-    }
-
-    /*
-     * Returns the new offset of the data.
-     */
-    private int repointAndWriteToFreeSpaceInSameBank(int pointerOffset, byte[] data) {
-        int newOffset = findAndUnfreeSpaceInBank(data.length, bankOf(pointerOffset));
-
-        writePointer(pointerOffset, newOffset);
-        writeBytes(newOffset, data);
-
-        return newOffset;
     }
 
     private byte[] trainerToBytes(Trainer trainer) {

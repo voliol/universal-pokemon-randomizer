@@ -3,6 +3,7 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
@@ -34,7 +35,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -57,7 +58,7 @@ public class RomHandlerTest {
     private RomHandler romHandler;
 
     private void loadROM(String romName) {
-        Generation gen = Generation.GAME_TO_GENERATION.get(stripToBaseRomName(romName));
+        Generation gen = getGenerationOf(romName);
         if (gen == null) {
             throw new IllegalArgumentException("Could not find the generation of " + romName);
         }
@@ -68,6 +69,26 @@ public class RomHandlerTest {
         }
         romHandler = factory.create(new Random(), new PrintStream(System.out));
         romHandler.loadRom(fullRomName);
+    }
+
+    private Generation getGenerationOf(String romName) {
+        return Generation.GAME_TO_GENERATION.get(stripToBaseRomName(romName));
+    }
+
+    /**
+     * Used to fast check the gen number of a ROM. Really useful for assume... methods, since loading the ROM to use
+     * RomHandler.generationOfPokemon() is almost as slow as running the test cases. Increasingly relevant with
+     * newer/bigger ROMs involved.
+     */
+    private int getGenerationNumberOf(String romName) {
+        return getGenerationOf(romName).getNumber();
+    }
+
+    /**
+     * A fast check whether a ROM uses an AbstractGBRomHandler.
+     */
+    private boolean isGBGame(String romName) {
+        return getGenerationNumberOf(romName) <= 3;
     }
 
     /**
@@ -402,6 +423,20 @@ public class RomHandlerTest {
         List<Trainer> before = new ArrayList<>(trainers);
         romHandler.setTrainers(trainers);
         assertEquals(before, romHandler.getTrainers());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersDoNotChangeWithLoadAndSave(String romName) {
+        assumeTrue(isGBGame(romName));
+        loadROM(romName);
+        AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
+        List<Trainer> trainers = gbRomHandler.getTrainers();
+        List<Trainer> before = new ArrayList<>(trainers);
+        gbRomHandler.setTrainers(trainers);
+        gbRomHandler.saveTrainers();
+        gbRomHandler.loadTrainers();
+        assertEquals(before, gbRomHandler.getTrainers());
     }
 
     @ParameterizedTest

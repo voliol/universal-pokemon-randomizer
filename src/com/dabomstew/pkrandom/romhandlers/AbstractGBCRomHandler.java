@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
@@ -215,16 +216,32 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return (offset / GBConstants.bankSize);
     }
 
-//    protected int calculateOffset(int bank, int pointer) {
-//        if (pointer < GBConstants.bankSize) {
-//            return pointer;
-//        } else {
-//            return (pointer % GBConstants.bankSize) + bank * GBConstants.bankSize;
-//        }
-//    }
-
     protected String readVariableLengthString(int offset, boolean textEngineMode) {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
+    }
+
+    protected class GBDataRewriter<E> extends DataRewriter<E> {
+
+        private boolean restrictToSameBank = true;
+
+        public boolean isRestrictToSameBank() {
+            return restrictToSameBank;
+        }
+
+        public void setRestrictToSameBank(boolean restrictToSameBank) {
+            this.restrictToSameBank = restrictToSameBank;
+        }
+
+        @Override
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+            int newOffset = restrictToSameBank ? findAndUnfreeSpaceInBank(data.length, bankOf(pointerOffset))
+                    : findAndUnfreeSpace(data.length);
+
+            writePointer(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            return newOffset;
+        }
     }
 
     protected int findAndUnfreeSpaceInBank(int length, int bank) {

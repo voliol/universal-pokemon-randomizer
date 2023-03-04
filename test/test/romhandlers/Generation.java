@@ -12,13 +12,13 @@ import java.util.function.Supplier;
  */
 public class Generation {
 
-    private static final Generation GEN1 = new Generation(Gen1RomHandler.Factory::new, ".gb");
-    private static final Generation GEN2 = new Generation(Gen2RomHandler.Factory::new, ".gbc");
-    private static final Generation GEN3 = new Generation(Gen3RomHandler.Factory::new, ".gba");
-    private static final Generation GEN4 = new Generation(Gen4RomHandler.Factory::new, ".nds");
-    private static final Generation GEN5 = new Generation(Gen5RomHandler.Factory::new, ".nds");
-    private static final Generation GEN6 = new Generation(Gen6RomHandler.Factory::new, ".3ds");
-    private static final Generation GEN7 = new Generation(Gen7RomHandler.Factory::new, ".3ds");
+    private static final Generation GEN1 = new Generation(1, Gen1RomHandler.Factory::new, ".gb");
+    private static final Generation GEN2 = new Generation(2, Gen2RomHandler.Factory::new, ".gbc");
+    private static final Generation GEN3 = new Generation(3, Gen3RomHandler.Factory::new, ".gba");
+    private static final Generation GEN4 = new Generation(4, Gen4RomHandler.Factory::new, ".nds");
+    private static final Generation GEN5 = new Generation(5, Gen5RomHandler.Factory::new, ".nds");
+    private static final Generation GEN6 = new Generation(6, Gen6RomHandler.Factory::new, ".3ds");
+    private static final Generation GEN7 = new Generation(7, Gen7RomHandler.Factory::new, ".3ds");
 
     public static final Map<String, Generation> GAME_TO_GENERATION = initGenerationMap();
 
@@ -57,12 +57,18 @@ public class Generation {
         return generationMap;
     }
 
+    private final int number;
     private final Supplier<RomHandler.Factory> factorySupplier;
     private final String fileSuffix;
 
-    private Generation(Supplier<RomHandler.Factory> factorySupplier, String fileSuffix) {
+    private Generation(int number, Supplier<RomHandler.Factory> factorySupplier, String fileSuffix) {
+        this.number = number;
         this.factorySupplier = factorySupplier;
         this.fileSuffix = fileSuffix;
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     public RomHandler.Factory createFactory() {

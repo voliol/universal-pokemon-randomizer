@@ -190,7 +190,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         saveTrainers();
     }
 
-    abstract protected void saveTrainers();
+    abstract public void saveTrainers();
 
     @Override
     public boolean hasPhysicalSpecialSplit() {
@@ -306,20 +306,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             freeSpace(oldDataOffset, oldLength);
             int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
 
-            for (int spo : secondaryPointerOffsets) {
-                if (spo != pointerOffset && readPointer(spo) != oldDataOffset) {
-                    System.out.println("wanted: " + oldDataOffset);
-                    System.out.println("bad: " + spo);
-                    throw new RandomizerIOException("Invalid secondary pointer.");
-                }
-                writePointer(spo, newDataOffset);
-            }
+            rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
         }
 
         /**
          * Returns the new offset of the data.
          **/
-        private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
             int newOffset = findAndUnfreeSpace(data.length);
 
             writePointer(pointerOffset, newOffset);
@@ -328,6 +321,18 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             return newOffset;
         }
 
+        protected void rewriteSecondaryPointers(int primaryPointerOffset, int[] secondaryPointerOffsets,
+                                              int oldDataOffset, int newDataOffset) {
+            for (int spo : secondaryPointerOffsets) {
+                if (spo != primaryPointerOffset && readPointer(spo) != oldDataOffset) {
+                    System.out.println();
+                    System.out.println("bad: " + spo);
+                    throw new RandomizerIOException("Invalid secondary pointer spo=" + spo + ". Points to " +
+                            readPointer(spo) + " instead of " + oldDataOffset + ".");
+                }
+                writePointer(spo, newDataOffset);
+            }
+        }
     }
 
 	protected void freeSpace(int offset, int length) {

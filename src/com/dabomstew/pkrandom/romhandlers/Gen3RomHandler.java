@@ -1666,7 +1666,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
     @Override
-    protected void saveTrainers() {
+    public void saveTrainers() {
         if (trainers == null) {
             throw new IllegalStateException("Trainers are not loaded");
         }
