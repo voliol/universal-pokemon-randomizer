@@ -35,6 +35,7 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
@@ -285,6 +286,49 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		}
 		return true;
 	}
+
+    protected abstract int readPointer(int offset);
+
+    protected abstract void writePointer(int offset, int pointer);
+
+    protected class DataRewriter<E> {
+
+        public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
+                                Function<Integer, Integer> lengthOfOldFunction) {
+            rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
+        }
+
+        public void rewriteData(int pointerOffset, E e, int[] secondaryPointerOffsets,
+                                Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
+            byte[] newData = newDataFunction.apply(e);
+            int oldDataOffset = readPointer(pointerOffset);
+            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
+            freeSpace(oldDataOffset, oldLength);
+            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
+
+            for (int spo : secondaryPointerOffsets) {
+                if (spo != pointerOffset && readPointer(spo) != oldDataOffset) {
+                    System.out.println("wanted: " + oldDataOffset);
+                    System.out.println("bad: " + spo);
+                    throw new RandomizerIOException("Invalid secondary pointer.");
+                }
+                writePointer(spo, newDataOffset);
+            }
+        }
+
+        /**
+         * Returns the new offset of the data.
+         **/
+        private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+            int newOffset = findAndUnfreeSpace(data.length);
+
+            writePointer(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            return newOffset;
+        }
+
+    }
 
 	protected void freeSpace(int offset, int length) {
 		if (length < 1) {

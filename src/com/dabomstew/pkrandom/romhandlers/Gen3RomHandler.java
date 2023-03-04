@@ -1168,7 +1168,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    private int readPointer(int offset) {
+    @Override
+    protected int readPointer(int offset) {
         return readLong(offset) - 0x8000000;
     }
 
@@ -1177,7 +1178,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 + (((rom[offset + 3] & 0xFF)) << 24);
     }
 
-    private void writePointer(int offset, int pointer) {
+    @Override
+    protected void writePointer(int offset, int pointer) {
         writeLong(offset, pointer + 0x8000000);
     }
 
@@ -4115,45 +4117,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		byte[] newData = Arrays.copyOf(translated, translated.length + 1);
 		newData[newData.length - 1] = (byte) 0xFF;
 		return newData;
-	}
-
-	private class DataRewriter<E> {
-
-		public void rewriteData(int pointerOffset, E object, Function<E, byte[]> newDataFunction,
-				Function<Integer, Integer> lengthOfOldFunction) {
-			rewriteData(pointerOffset, object, new int[0], newDataFunction, lengthOfOldFunction);
-		}
-
-		public void rewriteData(int pointerOffset, E object, int[] secondaryPointerOffsets,
-				Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
-			byte[] newData = newDataFunction.apply(object);
-			int oldDataOffset = readPointer(pointerOffset);
-			int oldLength = lengthOfOldFunction.apply(oldDataOffset);
-			freeSpace(oldDataOffset, oldLength);
-			int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
-
-			for (int spo : secondaryPointerOffsets) {
-				if (spo != pointerOffset && readPointer(spo) != oldDataOffset) {
-					System.out.println("wanted: " + oldDataOffset);
-					System.out.println("bad: " + spo);
-					throw new RandomizerIOException("Invalid secondary pointer.");
-				}
-				writePointer(spo, newDataOffset);
-			}
-		}
-
-	}
-
-	/*
-	 * Returns the new offset of the data.
-	 */
-	private int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-		int newOffset = findAndUnfreeSpace(data.length);
-
-		writePointer(pointerOffset, newOffset);
-		writeBytes(newOffset, data);
-
-		return newOffset;
 	}
 
     @Override

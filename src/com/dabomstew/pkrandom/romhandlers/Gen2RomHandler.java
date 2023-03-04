@@ -932,8 +932,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int index = 0;
         for (int trainerClass = 0; trainerClass < trainerClassAmount; trainerClass++) {
 
-            int pointer = readWord(trainerClassTableOffset + trainerClass * 2);
-            int offset = calculateOffset(bankOf(trainerClassTableOffset), pointer);
+            int offset = readPointer(trainerClassTableOffset + trainerClass * 2);
 
             for (int trainerNum = 0; trainerNum < trainersPerClass[trainerClass]; trainerNum++) {
                 index++;
@@ -1034,8 +1033,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // TODO: better rewriting
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
-            int pointer = readWord(trainerClassTableOffset + trainerClassNum * 2);
-            int oldOffset = calculateOffset(bankOf(trainerClassTableOffset), pointer);
+            int oldOffset = readPointer(pointerOffset);
             int oldLength = lengthOfTrainerClassAt(oldOffset, trainersPerClass[trainerClassNum]);
             freeSpace(oldOffset, oldLength);
             repointAndWriteToFreeSpaceInSameBank(pointerOffset, trainersOfClassBytes);
@@ -1060,7 +1058,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private int repointAndWriteToFreeSpaceInSameBank(int pointerOffset, byte[] data) {
         int newOffset = findAndUnfreeSpaceInBank(data.length, bankOf(pointerOffset));
 
-        writeGBPointer(pointerOffset, newOffset);
+        writePointer(pointerOffset, newOffset);
         writeBytes(newOffset, data);
 
         return newOffset;
@@ -1173,25 +1171,24 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int pointersOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            int pointer = readWord(pointersOffset + (i - 1) * 2);
-            int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
+            int pointer = readPointer(pointersOffset + (i - 1) * 2);
             Pokemon pkmn = pokes[i];
             // Skip over evolution data
-            while (rom[realPointer] != 0) {
-                if (rom[realPointer] == 5) {
-                    realPointer += 4;
+            while (rom[pointer] != 0) {
+                if (rom[pointer] == 5) {
+                    pointer += 4;
                 } else {
-                    realPointer += 3;
+                    pointer += 3;
                 }
             }
             List<MoveLearnt> ourMoves = new ArrayList<>();
-            realPointer++;
-            while (rom[realPointer] != 0) {
+            pointer++;
+            while (rom[pointer] != 0) {
                 MoveLearnt learnt = new MoveLearnt();
-                learnt.level = rom[realPointer] & 0xFF;
-                learnt.move = rom[realPointer + 1] & 0xFF;
+                learnt.level = rom[pointer] & 0xFF;
+                learnt.move = rom[pointer + 1] & 0xFF;
                 ourMoves.add(learnt);
-                realPointer += 2;
+                pointer += 2;
             }
             movesets.put(pkmn.getNumber(), ourMoves);
         }
@@ -1675,44 +1672,43 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         int pointersOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            int pointer = readWord(pointersOffset + (i - 1) * 2);
-            int realPointer = calculateOffset(bankOf(pointersOffset), pointer);
+            int pointer = readPointer(pointersOffset + (i - 1) * 2);
             Pokemon pkmn = pokes[i];
-            while (rom[realPointer] != 0) {
-                int method = rom[realPointer] & 0xFF;
-                int otherPoke = rom[realPointer + 2 + (method == 5 ? 1 : 0)] & 0xFF;
+            while (rom[pointer] != 0) {
+                int method = rom[pointer] & 0xFF;
+                int otherPoke = rom[pointer + 2 + (method == 5 ? 1 : 0)] & 0xFF;
                 EvolutionType type = EvolutionType.fromIndex(2, method);
                 int extraInfo = 0;
                 if (type == EvolutionType.TRADE) {
-                    int itemNeeded = rom[realPointer + 1] & 0xFF;
+                    int itemNeeded = rom[pointer + 1] & 0xFF;
                     if (itemNeeded != 0xFF) {
                         type = EvolutionType.TRADE_ITEM;
                         extraInfo = itemNeeded;
                     }
                 } else if (type == EvolutionType.LEVEL_ATTACK_HIGHER) {
-                    int tyrogueCond = rom[realPointer + 2] & 0xFF;
+                    int tyrogueCond = rom[pointer + 2] & 0xFF;
                     if (tyrogueCond == 2) {
                         type = EvolutionType.LEVEL_DEFENSE_HIGHER;
                     } else if (tyrogueCond == 3) {
                         type = EvolutionType.LEVEL_ATK_DEF_SAME;
                     }
-                    extraInfo = rom[realPointer + 1] & 0xFF;
+                    extraInfo = rom[pointer + 1] & 0xFF;
                 } else if (type == EvolutionType.HAPPINESS) {
-                    int happCond = rom[realPointer + 1] & 0xFF;
+                    int happCond = rom[pointer + 1] & 0xFF;
                     if (happCond == 2) {
                         type = EvolutionType.HAPPINESS_DAY;
                     } else if (happCond == 3) {
                         type = EvolutionType.HAPPINESS_NIGHT;
                     }
                 } else {
-                    extraInfo = rom[realPointer + 1] & 0xFF;
+                    extraInfo = rom[pointer + 1] & 0xFF;
                 }
                 Evolution evo = new Evolution(pokes[i], pokes[otherPoke], true, type, extraInfo);
                 if (!pkmn.getEvolutionsFrom().contains(evo)) {
                     pkmn.getEvolutionsFrom().add(evo);
                     pokes[otherPoke].getEvolutionsTo().add(evo);
                 }
-                realPointer += (method == 5 ? 4 : 3);
+                pointer += (method == 5 ? 4 : 3);
             }
             // split evos don't carry stats
             if (pkmn.getEvolutionsFrom().size() > 1) {
@@ -1833,8 +1829,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         int[] pointers = new int[traineramount];
         for (int i = 0; i < traineramount; i++) {
-            int pointer = readWord(traineroffset + i * 2);
-            pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
+            pointers[i] = readPointer(traineroffset + i * 2);
         }
 
         List<String> allTrainers = new ArrayList<>();
@@ -1871,8 +1866,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
             int[] pointers = new int[traineramount];
             for (int i = 0; i < traineramount; i++) {
-                int pointer = readWord(traineroffset + i * 2);
-                pointers[i] = calculateOffset(bankOf(traineroffset), pointer);
+                pointers[i] = readPointer(traineroffset + i * 2);
             }
 
             // Build up new trainer data using old as a guideline.
@@ -2299,13 +2293,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void loadLandmarkNames() {
 
         int lmOffset = romEntry.getIntValue("LandmarkTableOffset");
-        int lmBank = bankOf(lmOffset);
         int lmCount = romEntry.getIntValue("LandmarkCount");
 
         landmarkNames = new String[lmCount];
 
         for (int i = 0; i < lmCount; i++) {
-            int lmNameOffset = calculateOffset(lmBank, readWord(lmOffset + i * 4 + 2));
+            int lmNameOffset = readPointer(lmOffset + i * 4 + 2);
             landmarkNames[i] = readVariableLengthString(lmNameOffset, false).replace("\\x1F", " ");
         }
 
@@ -2322,7 +2315,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         int[] groupOffsets = new int[mapGroupCount];
         for (int i = 0; i < mapGroupCount; i++) {
-            groupOffsets[i] = calculateOffset(mhBank, readWord(mhOffset + i * 2));
+            groupOffsets[i] = readPointer(mhOffset + i * 2);
         }
 
         // Read maps
@@ -2343,8 +2336,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         // second map header
         int smhBank = rom[offset] & 0xFF;
-        int smhPointer = readWord(offset + 3);
-        int smhOffset = calculateOffset(smhBank, smhPointer);
+        int smhOffset = readPointer(offset + 3, smhBank);
 
         // map name
         int mapLandmark = rom[offset + 5] & 0xFF;
@@ -2353,8 +2345,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // event header
         // event header is in same bank as script header
         int ehBank = rom[smhOffset + 6] & 0xFF;
-        int ehPointer = readWord(smhOffset + 9);
-        int ehOffset = calculateOffset(ehBank, ehPointer);
+        int ehOffset = readPointer(smhOffset + 9, ehBank);
 
         // skip over filler
         ehOffset += 2;
@@ -2377,8 +2368,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int spType = rom[ehOffset + sp * 5 + 2] & 0xFF;
             if (spType == 7) {
                 // get event pointer
-                int spPointer = readWord(ehOffset + sp * 5 + 3);
-                int spOffset = calculateOffset(ehBank, spPointer);
+                int spOffset = readPointer(ehOffset + sp * 5 + 3, ehBank);
                 // item is at spOffset+2 (first two bytes are the flag id)
                 itemOffs.add(spOffset + 2);
             }
@@ -2394,8 +2384,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int pColorFunction = rom[ehOffset + p * 13 + 7];
             if ((pColorFunction & 1) == 1) {
                 // get event pointer
-                int pPointer = readWord(ehOffset + p * 13 + 9);
-                int pOffset = calculateOffset(ehBank, pPointer);
+                int pOffset = readPointer(ehOffset + p * 13 + 9, ehBank);
                 // item is at the pOffset for non-hidden items
                 itemOffs.add(pOffset);
             }
@@ -2621,7 +2610,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // which, in every clean G/S/C rom supported, they are
         // specify null to either argument to copy old values
         int movesEvosStart = romEntry.getIntValue("PokemonMovesetsTableOffset");
-        int movesEvosBank = bankOf(movesEvosStart);
         byte[] pointerTable = new byte[Gen2Constants.pokemonCount * 2];
         int startOfNextBank;
         if (isVietCrystal) {
@@ -2635,7 +2623,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int offsetInData = 0;
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             // determine pointer
-            int oldDataOffset = calculateOffset(movesEvosBank, readWord(movesEvosStart + (i - 1) * 2));
+            int oldDataOffset = readPointer(movesEvosStart + (i - 1) * 2);
             int offsetStart = dataBlockOffset + offsetInData;
             boolean evoWritten = false;
             if (!writeEvos) {
@@ -2856,7 +2844,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 picBank = 0x2E;
             }
         }
-        int picOffset = calculateOffset(picBank, readWord(picPointer + 1));
+        int picOffset = readPointer(picPointer + 1, picBank);
 
         Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
         return mscSprite.getFlattenedData();

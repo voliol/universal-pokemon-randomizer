@@ -34,7 +34,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[] {1, 2, 3},  new Roms.Region[] {Roms.Region.USA}, false);
+        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -72,6 +72,7 @@ public class RomHandlerTest {
 
     /**
      * Strips the ROM name into just its base - e.g. "Crystal (S)" => "Crystal" and "Fire Red (U)(1.1)" => "Fire Red".
+     *
      * @param romName The full name of the ROM
      */
     private String stripToBaseRomName(String romName) {
@@ -199,7 +200,7 @@ public class RomHandlerTest {
 
         Settings settings = new Settings();
         settings.setLimitPokemon(true);
-        settings.setCurrentRestrictions(genRestrictionsFromBools(false, new int[] {1}));
+        settings.setCurrentRestrictions(genRestrictionsFromBools(false, new int[]{1}));
 
         romHandler.setPokemonPool(settings);
         for (Pokemon pk : romHandler.getRestrictedPokemon()) {
@@ -224,7 +225,7 @@ public class RomHandlerTest {
 
         Settings settings = new Settings();
         settings.setLimitPokemon(true);
-        settings.setCurrentRestrictions(genRestrictionsFromBools(false, new int[] {1}));
+        settings.setCurrentRestrictions(genRestrictionsFromBools(false, new int[]{1}));
 
         romHandler.setPokemonPool(settings);
         PokemonSet<Pokemon> restrictedPokemon = romHandler.getRestrictedPokemon();
@@ -254,7 +255,7 @@ public class RomHandlerTest {
 
         Settings settings = new Settings();
         settings.setLimitPokemon(true);
-        settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[] {1}));
+        settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[]{1}));
         // except for the above line's "relativesAllowed: true", identical to the "WithNoRelatives" method...
 
         romHandler.setPokemonPool(settings);
@@ -280,7 +281,7 @@ public class RomHandlerTest {
 
         Settings settings = new Settings();
         settings.setLimitPokemon(true);
-        settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[] {1}));
+        settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[]{1}));
 
         romHandler.setPokemonPool(settings);
         PokemonSet<Pokemon> restrictedPokemon = romHandler.getRestrictedPokemon();

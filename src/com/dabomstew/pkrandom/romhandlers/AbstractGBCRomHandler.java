@@ -189,22 +189,39 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     /**
      * Make a GB pointer out of the pointer, and write it to the offset.
      */
-    protected void writeGBPointer(int offset, int pointer) {
+    @Override
+    protected void writePointer(int offset, int pointer) {
         int gbPointer = makeGBPointer(pointer);
         writeWord(offset, gbPointer);
+    }
+
+    /**
+     * Reads the pointer at offset. Assumes the bank to be the one offset is in.
+     */
+    @Override
+    protected int readPointer(int offset) {
+        return readPointer(offset, bankOf(offset));
+    }
+
+    /**
+     * Reads the pointer at offset, with a manually given bank.
+     */
+    protected int readPointer(int offset, int bank) {
+        int pointer = readWord(offset);
+        return (pointer % GBConstants.bankSize) + bank * GBConstants.bankSize;
     }
 
     protected int bankOf(int offset) {
         return (offset / GBConstants.bankSize);
     }
 
-    protected int calculateOffset(int bank, int pointer) {
-        if (pointer < GBConstants.bankSize) {
-            return pointer;
-        } else {
-            return (pointer % GBConstants.bankSize) + bank * GBConstants.bankSize;
-        }
-    }
+//    protected int calculateOffset(int bank, int pointer) {
+//        if (pointer < GBConstants.bankSize) {
+//            return pointer;
+//        } else {
+//            return (pointer % GBConstants.bankSize) + bank * GBConstants.bankSize;
+//        }
+//    }
 
     protected String readVariableLengthString(int offset, boolean textEngineMode) {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
