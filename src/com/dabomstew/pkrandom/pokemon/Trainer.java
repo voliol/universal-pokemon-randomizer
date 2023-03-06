@@ -34,7 +34,7 @@ public class Trainer implements Comparable<Trainer> {
     public String tag;
     // This value has some flags about the trainer's pokemon (e.g. if they have items or custom moves)
     public int poketype;
-    public String name;
+    public String name; // TODO: make trainer name randomization use Trainer.name in all gens, really strange it doesn't
     public int trainerclass;
     public String fullDisplayName;
     public MultiBattleStatus multiBattleStatus = MultiBattleStatus.NEVER;

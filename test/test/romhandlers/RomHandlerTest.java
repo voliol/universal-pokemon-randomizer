@@ -454,4 +454,29 @@ public class RomHandlerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainerNamesAreNotNull(String romName) {
+        loadROM(romName);
+        assertNotNull(romHandler.getTrainerNames());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainerNamesAreNotEmpty(String romName) {
+        loadROM(romName);
+        assertFalse(romHandler.getTrainerNames().isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainerNamesDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        List<String> trainerNames = romHandler.getTrainerNames();
+        System.out.println(trainerNames);
+        List<String> before = new ArrayList<>(trainerNames);
+        romHandler.setTrainerNames(trainerNames);
+        assertEquals(before, romHandler.getTrainerNames());
+    }
+
 }

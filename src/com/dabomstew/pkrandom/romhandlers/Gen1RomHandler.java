@@ -657,23 +657,19 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 int sizeForOnRoutine = 5 * onValues.size() + 3;
                 int writeOnRoutineTo = romEntry.getIntValue("StarterPokedexBranchOffset");
                 int writeOffRoutineTo = writeOnRoutineTo + sizeForOnRoutine;
-                int offsetForOnRoutine = makeGBPointer(writeOnRoutineTo);
-                int offsetForOffRoutine = makeGBPointer(writeOffRoutineTo);
-                int retOnOffset = makeGBPointer(pkDexOnOffset + 5);
-                int retOffOffset = makeGBPointer(pkDexOffOffset + 4);
 
                 // Starter pokedex
                 // Branch to our new routine(s)
 
                 // Turn bytes on
                 rom[pkDexOnOffset] = GBConstants.gbZ80Jump;
-                writeWord(pkDexOnOffset + 1, offsetForOnRoutine);
+                writePointer(pkDexOnOffset + 1, writeOnRoutineTo);
                 rom[pkDexOnOffset + 3] = GBConstants.gbZ80Nop;
                 rom[pkDexOnOffset + 4] = GBConstants.gbZ80Nop;
 
                 // Turn bytes off
                 rom[pkDexOffOffset] = GBConstants.gbZ80Jump;
-                writeWord(pkDexOffOffset + 1, offsetForOffRoutine);
+                writePointer(pkDexOffOffset + 1, writeOffRoutineTo);
                 rom[pkDexOffOffset + 3] = GBConstants.gbZ80Nop;
 
                 // Put together the two scripts
@@ -696,10 +692,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 }
                 // Jump back
                 rom[turnOnOffset++] = GBConstants.gbZ80Jump;
-                writeWord(turnOnOffset, retOnOffset);
+                writePointer(turnOnOffset, pkDexOnOffset + 5);
 
                 rom[turnOffOffset++] = GBConstants.gbZ80Jump;
-                writeWord(turnOffOffset, retOffOffset);
+                writePointer(turnOffOffset, pkDexOffOffset + 4);
             }
 
         }
@@ -1135,6 +1131,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             for (int trnum = 0; trnum < limit; trnum++) {
                 Trainer tr = trainerIterator.next();
                 if (tr.trainerclass != i) {
+                    // really weird since trainers don't have names in gen 1
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
                 Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();

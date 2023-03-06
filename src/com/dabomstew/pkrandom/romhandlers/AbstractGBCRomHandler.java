@@ -188,7 +188,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     /**
-     * Make a GB pointer out of the pointer, and write it to the offset.
+     * Write a GB pointer to "offset", pointing at "pointer".
      */
     @Override
     protected void writePointer(int offset, int pointer) {

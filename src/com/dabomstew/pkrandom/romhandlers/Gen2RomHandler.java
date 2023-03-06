@@ -1573,7 +1573,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 rom[menuOffset++] = GBConstants.stringTerminator;
             }
             int pointerOffset = romEntry.getIntValue("MoveTutorMenuOffset");
-            writeWord(pointerOffset, makeGBPointer(romEntry.getIntValue("MoveTutorMenuNewSpace")));
+            int newSpaceOffset = romEntry.getIntValue("MoveTutorMenuNewSpace");
+            writeWord(pointerOffset, newSpaceOffset);
         }
     }
 
@@ -1809,121 +1810,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean canChangeTrainerText() {
         return romEntry.getIntValue("CanChangeTrainerText") > 0;
-    }
-
-    @Override
-    public List<String> getTrainerNames() {
-        int traineroffset = romEntry.getIntValue("TrainerDataTableOffset");
-        int traineramount = romEntry.getIntValue("TrainerClassAmount");
-        int[] trainerclasslimits = romEntry.getArrayValue("TrainerDataClassCounts");
-
-        int[] pointers = new int[traineramount];
-        for (int i = 0; i < traineramount; i++) {
-            pointers[i] = readPointer(traineroffset + i * 2);
-        }
-
-        List<String> allTrainers = new ArrayList<>();
-        for (int i = 0; i < traineramount; i++) {
-            int offs = pointers[i];
-            int limit = trainerclasslimits[i];
-            for (int trnum = 0; trnum < limit; trnum++) {
-                String name = readVariableLengthString(offs, false);
-                allTrainers.add(name);
-                offs += lengthOfStringAt(offs, false) + 1;
-                int dataType = rom[offs] & 0xFF;
-                offs++;
-                while ((rom[offs] & 0xFF) != 0xFF) {
-                    offs += 2;
-                    if (dataType == 2 || dataType == 3) {
-                        offs++;
-                    }
-                    if (dataType % 2 == 1) {
-                        offs += 4;
-                    }
-                }
-                offs++;
-            }
-        }
-        return allTrainers;
-    }
-
-    @Override
-    public void setTrainerNames(List<String> trainerNames) {
-        if (romEntry.getIntValue("CanChangeTrainerText") != 0) {
-            int traineroffset = romEntry.getIntValue("TrainerDataTableOffset");
-            int traineramount = romEntry.getIntValue("TrainerClassAmount");
-            int[] trainerclasslimits = romEntry.getArrayValue("TrainerDataClassCounts");
-
-            int[] pointers = new int[traineramount];
-            for (int i = 0; i < traineramount; i++) {
-                pointers[i] = readPointer(traineroffset + i * 2);
-            }
-
-            // Build up new trainer data using old as a guideline.
-            int[] offsetsInNew = new int[traineramount];
-            int oInNewCurrent = 0;
-            Iterator<String> allTrainers = trainerNames.iterator();
-            ByteArrayOutputStream newData = new ByteArrayOutputStream();
-            try {
-                for (int i = 0; i < traineramount; i++) {
-                    int offs = pointers[i];
-                    int limit = trainerclasslimits[i];
-                    offsetsInNew[i] = oInNewCurrent;
-                    for (int trnum = 0; trnum < limit; trnum++) {
-                        String newName = allTrainers.next();
-
-                        // The game uses 0xFF as a signifier for the end of the trainer data.
-                        // It ALSO uses 0xFF to encode the character "9". If a trainer name has
-                        // "9" in it, this causes strange side effects where certain trainers
-                        // effectively get skipped when parsing trainer data. Silently strip out
-                        // "9"s from trainer names to prevent this from happening.
-                        newName = newName.replace("9", "").trim();
-
-                        byte[] newNameStr = translateString(newName);
-                        newData.write(newNameStr);
-                        newData.write(GBConstants.stringTerminator);
-                        oInNewCurrent += newNameStr.length + 1;
-                        offs += lengthOfStringAt(offs, false) + 1;
-                        int dataType = rom[offs] & 0xFF;
-                        offs++;
-                        newData.write(dataType);
-                        oInNewCurrent++;
-                        while ((rom[offs] & 0xFF) != 0xFF) {
-                            newData.write(rom, offs, 2);
-                            oInNewCurrent += 2;
-                            offs += 2;
-                            if (dataType == 2 || dataType == 3) {
-                                newData.write(rom, offs, 1);
-                                oInNewCurrent++;
-                                offs++;
-                            }
-                            if (dataType % 2 == 1) {
-                                newData.write(rom, offs, 4);
-                                oInNewCurrent += 4;
-                                offs += 4;
-                            }
-                        }
-                        newData.write(0xFF);
-                        oInNewCurrent++;
-                        offs++;
-                    }
-                }
-
-                // Copy new data into ROM
-                byte[] newTrainerData = newData.toByteArray();
-                int tdBase = pointers[0];
-                System.arraycopy(newTrainerData, 0, rom, pointers[0], newTrainerData.length);
-
-                // Finally, update the pointers
-                for (int i = 1; i < traineramount; i++) {
-                    int newOffset = tdBase + offsetsInNew[i];
-                    writeWord(traineroffset + i * 2, makeGBPointer(newOffset));
-                }
-            } catch (IOException ex) {
-                // This should never happen, but abort if it does.
-            }
-        }
-
     }
 
     @Override
