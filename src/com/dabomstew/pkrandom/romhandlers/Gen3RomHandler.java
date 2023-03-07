@@ -552,7 +552,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
         // Write pokemon names & stats
         int offs = romEntry.getIntValue("PokemonNames");
         int nameLen = romEntry.getIntValue("PokemonNameLength");
@@ -952,7 +952,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
         int moveCount = romEntry.getIntValue("MoveCount");
         int offs = romEntry.getIntValue("MoveData");
         for (int i = 1; i <= moveCount; i++) {

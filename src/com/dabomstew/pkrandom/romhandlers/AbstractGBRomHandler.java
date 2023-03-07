@@ -293,6 +293,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected class DataRewriter<E> {
 
+        private boolean longAlignAdresses;
+
         public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
                                 Function<Integer, Integer> lengthOfOldFunction) {
             rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
@@ -309,11 +311,19 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
         }
 
+        public boolean isLongAlignAdresses() {
+            return longAlignAdresses;
+        }
+
+        public void setLongAlignAdresses(boolean longAlignAdresses) {
+            this.longAlignAdresses = longAlignAdresses;
+        }
+
         /**
          * Returns the new offset of the data.
          **/
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-            int newOffset = findAndUnfreeSpace(data.length);
+            int newOffset = findAndUnfreeSpace(data.length, longAlignAdresses);
 
             writePointer(pointerOffset, newOffset);
             writeBytes(newOffset, data);
@@ -373,7 +383,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("ROM full.");
+            throw new RandomizerIOException("ROM full. Can't find " + length + " free bytes anywhere.");
         }
 
         if (longAligned) {

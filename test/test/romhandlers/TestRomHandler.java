@@ -28,7 +28,7 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected void savePokemonPalettes() {
+    public void savePokemonPalettes() {
 
     }
 
@@ -567,12 +567,12 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
 
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
 
     }
 

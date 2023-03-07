@@ -90,6 +90,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private List<Pokemon> pokemonList;
     private List<Trainer> trainers;
     private Move[] moves;
+    private Map<Integer, List<MoveLearnt>> movesets;
     private boolean havePatchedFleeing;
     private String[] itemNames;
     private List<Integer> itemOffs;
@@ -190,7 +191,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
         // Write pokemon names
         int offs = romEntry.getIntValue("PokemonNamesOffset");
         int len = romEntry.getIntValue("PokemonNamesLength");
@@ -203,8 +204,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             saveBasicPokeStats(pokes[i], offs2 + (i - 1) * Gen2Constants.baseStatsEntrySize);
         }
-        // Write evolutions
-        writeEvosAndMovesLearnt(true, null);
+        // Write evolutions and movesets
+        saveEvosAndMovesLearnt();
     }
 
     private String[] readMoveNames() {
@@ -486,7 +487,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
         int offs = romEntry.getIntValue("MoveDataOffset");
         for (int i = 1; i <= 251; i++) {
             int hitratio = (int) Math.round(moves[i].hitratio * 2.55);
@@ -1182,12 +1183,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
             movesets.put(pkmn.getNumber(), ourMoves);
         }
+        setMovesLearnt(movesets); // a quick workaround
         return movesets;
     }
 
     @Override
     public void setMovesLearnt(Map<Integer, List<MoveLearnt>> movesets) {
-        writeEvosAndMovesLearnt(false, movesets);
+        this.movesets = movesets;
     }
 
     @Override
@@ -2480,112 +2482,73 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private void writeEvosAndMovesLearnt(boolean writeEvos, Map<Integer, List<MoveLearnt>> movesets) {
-        // this assumes that the evo/attack pointers & data
-        // are at the end of the bank
-        // which, in every clean G/S/C rom supported, they are
-        // specify null to either argument to copy old values
-        int movesEvosStart = romEntry.getIntValue("PokemonMovesetsTableOffset");
-        byte[] pointerTable = new byte[Gen2Constants.pokemonCount * 2];
-        int startOfNextBank;
-        if (isVietCrystal) {
-            startOfNextBank = 0x43E00; // fix for pokedex crash
-        } else {
-            startOfNextBank = ((movesEvosStart / GBConstants.bankSize) + 1) * GBConstants.bankSize;
+    private void saveEvosAndMovesLearnt() {
+        // TODO: what did the below lines do?
+//        if (isVietCrystal) {
+//            startOfNextBank = 0x43E00; // fix for pokedex crash
+//        }
+        int pointerTableOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
+
+        for (Pokemon pk : pokemonList) {
+            if (pk == null) continue;
+            int pokeNum = pk.getNumber();
+            int pointerOffset = pointerTableOffset + (pokeNum - 1) * 2;
+            new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk,
+                    pk1 -> pokemonToEvosAndMovesLearntBytes(pk1, movesets), this::lengthOfEvosAndMovesLearntAt);
+
         }
-        int dataBlockSize = startOfNextBank - (movesEvosStart + pointerTable.length);
-        int dataBlockOffset = movesEvosStart + pointerTable.length;
-        byte[] dataBlock = new byte[dataBlockSize];
-        int offsetInData = 0;
-        for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            // determine pointer
-            int oldDataOffset = readPointer(movesEvosStart + (i - 1) * 2);
-            int offsetStart = dataBlockOffset + offsetInData;
-            boolean evoWritten = false;
-            if (!writeEvos) {
-                // copy old
-                int evoOffset = oldDataOffset;
-                while (rom[evoOffset] != 0x00) {
-                    int method = rom[evoOffset] & 0xFF;
-                    int limiter = (method == 5) ? 4 : 3;
-                    for (int b = 0; b < limiter; b++) {
-                        dataBlock[offsetInData++] = rom[evoOffset++];
-                    }
-                    evoWritten = true;
-                }
-            } else {
-                for (Evolution evo : pokes[i].getEvolutionsFrom()) {
-                    // write evos
-                    dataBlock[offsetInData++] = (byte) evo.type.toIndex(2);
-                    if (evo.type == EvolutionType.LEVEL || evo.type == EvolutionType.STONE
-                            || evo.type == EvolutionType.TRADE_ITEM) {
-                        // simple types
-                        dataBlock[offsetInData++] = (byte) evo.extraInfo;
-                    } else if (evo.type == EvolutionType.TRADE) {
-                        // non-item trade
-                        dataBlock[offsetInData++] = (byte) 0xFF;
-                    } else if (evo.type == EvolutionType.HAPPINESS) {
-                        // cond 01
-                        dataBlock[offsetInData++] = 0x01;
-                    } else if (evo.type == EvolutionType.HAPPINESS_DAY) {
-                        // cond 02
-                        dataBlock[offsetInData++] = 0x02;
-                    } else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-                        // cond 03
-                        dataBlock[offsetInData++] = 0x03;
-                    } else if (evo.type == EvolutionType.LEVEL_ATTACK_HIGHER) {
-                        dataBlock[offsetInData++] = (byte) evo.extraInfo;
-                        dataBlock[offsetInData++] = 0x01;
-                    } else if (evo.type == EvolutionType.LEVEL_DEFENSE_HIGHER) {
-                        dataBlock[offsetInData++] = (byte) evo.extraInfo;
-                        dataBlock[offsetInData++] = 0x02;
-                    } else if (evo.type == EvolutionType.LEVEL_ATK_DEF_SAME) {
-                        dataBlock[offsetInData++] = (byte) evo.extraInfo;
-                        dataBlock[offsetInData++] = 0x03;
-                    }
-                    dataBlock[offsetInData++] = (byte) evo.to.getNumber();
-                    evoWritten = true;
-                }
-            }
-            // can we reuse a terminator?
-            if (!evoWritten && offsetStart != dataBlockOffset) {
-                // reuse last pokemon's move terminator for our evos
-                offsetStart -= 1;
-            } else {
-                // write a terminator
-                dataBlock[offsetInData++] = 0x00;
-            }
-            // write table entry now that we're sure of its location
-            int pointerNow = makeGBPointer(offsetStart);
-            writeWord(pointerTable, (i - 1) * 2, pointerNow);
-            // moveset
-            if (movesets == null) {
-                // copy old
-                int movesOffset = oldDataOffset;
-                // move past evos
-                while (rom[movesOffset] != 0x00) {
-                    int method = rom[movesOffset] & 0xFF;
-                    movesOffset += (method == 5) ? 4 : 3;
-                }
-                movesOffset++;
-                // copy moves
-                while (rom[movesOffset] != 0x00) {
-                    dataBlock[offsetInData++] = rom[movesOffset++];
-                    dataBlock[offsetInData++] = rom[movesOffset++];
-                }
-            } else {
-                List<MoveLearnt> moves = movesets.get(pokes[i].getNumber());
-                for (MoveLearnt ml : moves) {
-                    dataBlock[offsetInData++] = (byte) ml.level;
-                    dataBlock[offsetInData++] = (byte) ml.move;
-                }
-            }
-            // terminator
-            dataBlock[offsetInData++] = 0x00;
+    }
+
+    private int lengthOfEvosAndMovesLearntAt(int offset) {
+        int length = 0;
+        int terminatorCount = 0;
+        do {
+            if (rom[offset + length] == 0x00) terminatorCount++;
+            length++;
+        } while (terminatorCount < 2);
+        return length;
+    }
+
+    private byte[] pokemonToEvosAndMovesLearntBytes(Pokemon pk, Map<Integer, List<MoveLearnt>> movesets) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        for (Evolution evo : pk.getEvolutionsFrom()) {
+            baos.writeBytes(evolutionToBytes(evo));
         }
-        // write new data
-        System.arraycopy(pointerTable, 0, rom, movesEvosStart, pointerTable.length);
-        System.arraycopy(dataBlock, 0, rom, dataBlockOffset, dataBlock.length);
+        baos.write(0x00); // terminator
+        for (MoveLearnt ml : movesets.get(pk.getNumber())) {
+            baos.writeBytes(moveLearntToBytes(ml));
+        }
+        baos.write(0x00); // terminator
+        return baos.toByteArray();
+    }
+
+    private byte[] evolutionToBytes(Evolution evo) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write((byte) evo.type.toIndex(2));
+        baos.writeBytes(evoTypeExtraInfoToBytes(evo));
+        baos.write((byte) evo.to.getNumber());
+        return baos.toByteArray();
+    }
+
+    private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
+        return switch (evo.type) {
+            case LEVEL, STONE, TRADE_ITEM -> new byte[]{(byte) evo.extraInfo};
+            case TRADE -> new byte[]{(byte) 0xFF};
+            case HAPPINESS -> new byte[]{(byte) 0x01};
+            case HAPPINESS_DAY -> new byte[]{(byte) 0x02};
+            case HAPPINESS_NIGHT -> new byte[]{(byte) 0x03};
+            case LEVEL_ATTACK_HIGHER -> new byte[]{(byte) evo.extraInfo, (byte) 0x01};
+            case LEVEL_DEFENSE_HIGHER -> new byte[]{(byte) evo.extraInfo, (byte) 0x02};
+            case LEVEL_ATK_DEF_SAME -> new byte[]{(byte) evo.extraInfo, (byte) 0x03};
+            default -> throw new IllegalStateException("EvolutionType " + evo.type + " is not supported " +
+                    "by Gen 2 games.");
+        };
+    }
+
+    // TODO: isn't this *very* similar to the Gen III implementation? It could even be the same in *all* gens in which
+    //  case it can be moved to the MoveLearnt class.
+    private byte[] moveLearntToBytes(MoveLearnt ml) {
+        return new byte[] {(byte) ml.level, (byte) ml.move};
     }
 
     @Override

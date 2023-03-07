@@ -30,7 +30,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
@@ -224,6 +223,10 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
         private boolean restrictToSameBank = true;
 
+        public GBDataRewriter() {
+            setLongAlignAdresses(false);
+        }
+
         public boolean isRestrictToSameBank() {
             return restrictToSameBank;
         }
@@ -251,7 +254,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("Bank full.");
+            throw new RandomizerIOException("Bank full. Can't find " + length + " free bytes anywhere.");
         }
         return foundOffset;
     }

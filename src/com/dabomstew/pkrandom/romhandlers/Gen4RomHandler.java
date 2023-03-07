@@ -736,7 +736,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	protected void saveMoves() {
+	public void saveMoves() {
 		for (int i = 1; i <= Gen4Constants.moveCount; i++) {
 			byte[] data = moveNarc.files.get(i);
 			writeWord(data, 0, moves[i].effectIndex);
@@ -763,7 +763,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	protected void savePokemonStats() {
+	public void savePokemonStats() {
 		// Update the "a/an X" list too, if it exists
 		List<String> namesList = getStrings(romEntry.getIntValue("PokemonNamesTextOffset"));
 		int formeCount = Gen4Constants.getFormeCount(romEntry.getRomType());

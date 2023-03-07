@@ -7066,7 +7066,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     protected abstract List<BufferedImage> getAllPokemonImages();
 
-	protected abstract void savePokemonPalettes();
+	public abstract void savePokemonPalettes();
 
     @Override
 	public boolean saveRom(String filename, long seed, boolean saveAsDirectory) {
@@ -7089,9 +7089,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 		savePokemonPalettes();
 	}
 
-	protected abstract void saveMoves();
+	public abstract void saveMoves();
 
-	protected abstract void savePokemonStats();
+    public abstract void savePokemonStats();
 
 	protected abstract boolean saveRomFile(String filename, long seed);
 	

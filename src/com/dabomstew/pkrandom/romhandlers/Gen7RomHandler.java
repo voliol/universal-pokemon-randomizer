@@ -640,7 +640,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
         int k = Gen7Constants.bsSize;
         int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
         int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
@@ -810,7 +810,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
         int moveCount = Gen7Constants.getMoveCount(romEntry.getRomType());
         byte[][] movesData = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
         for (int i = 1; i <= moveCount; i++) {

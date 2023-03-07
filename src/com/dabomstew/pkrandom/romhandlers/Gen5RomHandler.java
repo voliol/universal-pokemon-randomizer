@@ -438,7 +438,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
         for (int i = 1; i <= Gen5Constants.moveCount; i++) {
             byte[] data = moveNarc.files.get(i);
             data[2] = Gen5Constants.moveCategoryToByte(moves[i].category);
@@ -464,7 +464,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
         List<String> nameList = getStrings(false, romEntry.getIntValue("PokemonNamesTextOffset"));
 
         int formeCount = Gen5Constants.getFormeCount(romEntry.getRomType());

@@ -577,7 +577,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
         int k = Gen6Constants.getBsSize(romEntry.getRomType());
         byte[] duplicateData = pokeGarc.files.get(Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.getRomType()) + 1).get(0);
         for (int i = 1; i <= Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.getRomType()); i++) {
@@ -763,7 +763,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
         int moveCount = Gen6Constants.getMoveCount(romEntry.getRomType());
         byte[][] miniArchive = new byte[0][0];
         if (romEntry.getRomType() == Gen6Constants.Type_ORAS) {

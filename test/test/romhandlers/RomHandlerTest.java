@@ -380,6 +380,20 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void movesLearntDoNotChangeWithLoadAndSave(String romName) {
+        assumeTrue(isGBGame(romName));
+        loadROM(romName);
+        AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
+        Map<Integer, List<MoveLearnt>> movesLearnt = romHandler.getMovesLearnt();
+        Map<Integer, List<MoveLearnt>> before = new HashMap<>(movesLearnt);
+        romHandler.setMovesLearnt(movesLearnt);
+        gbRomHandler.savePokemonStats();
+        gbRomHandler.loadPokemonStats();
+        assertEquals(before, romHandler.getMovesLearnt());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void tmMovesDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
         List<Integer> tmMoves = romHandler.getTMMoves();
