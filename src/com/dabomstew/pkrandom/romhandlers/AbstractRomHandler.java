@@ -4699,7 +4699,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Get the current trainer names data
-        List<String> currentTrainerNames = this.getTrainerNames();
+        List<String> currentTrainerNames = getTrainerNames();
         if (currentTrainerNames.size() == 0) {
             // RBY have no trainer names
             return;
@@ -6755,7 +6755,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         return placementHistory.values().stream().mapToInt(e -> e).average().orElse(0);
     }
 
-
     private PokemonSet<Pokemon> getBelowAveragePlacements() {
         // This method will return a PK if the number of times a pokemon has been
         // placed is less than average of all placed pokemon's appearances
@@ -6897,6 +6896,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public boolean forceSwapStaticMegaEvos() {
         return false;
+    }
+
+    @Override
+    public List<String> getTrainerNames() {
+        return getTrainers().stream().map(tr -> tr.name).toList();
+    }
+
+    @Override
+    public void setTrainerNames(List<String> trainerNames) {
+        for (int i = 0; i < trainerNames.size(); i++) {
+            getTrainers().get(i).name = trainerNames.get(i);
+        }
     }
 
     @Override
@@ -7057,7 +7068,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 	protected abstract void savePokemonPalettes();
 
-    
     @Override
 	public boolean saveRom(String filename, long seed, boolean saveAsDirectory) {
     	try {

@@ -193,7 +193,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             }
         }
         // Not found
-        throw new RandomizerIOException("Could not find RomEntry");
+        return null;
     }
 
     private String[] readMoveNames() {

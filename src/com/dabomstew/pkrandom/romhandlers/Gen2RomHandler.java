@@ -170,7 +170,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
         // Not found
-        throw new RandomizerIOException("Could not find RomEntry.");
+        return null;
     }
 
     @Override

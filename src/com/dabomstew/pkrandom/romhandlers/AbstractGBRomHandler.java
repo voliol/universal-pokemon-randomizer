@@ -404,18 +404,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	protected abstract byte getFreeSpaceByte();
 
     @Override
-    public List<String> getTrainerNames() {
-        return getTrainers().stream().skip(1).map(tr -> tr.name).toList();
-    }
-
-    @Override
-    public void setTrainerNames(List<String> trainerNames) {
-        for (int i = 0; i < trainerNames.size(); i++) {
-            getTrainers().get(i + 1).name = trainerNames.get(i);
-        }
-    }
-
-    @Override
 	protected List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (int i = 1; i < getPokemon().size(); i++) {
