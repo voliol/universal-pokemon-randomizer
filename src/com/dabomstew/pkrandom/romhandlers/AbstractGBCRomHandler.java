@@ -43,6 +43,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     private Map<String, Byte> d;
     private int longestTableToken;
 
+    // probably breaks if you load a second ROM with the same RomHandler...
     private BankDividedFreedSpace freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
 
     public AbstractGBCRomHandler(Random random, PrintStream logStream) {
@@ -152,8 +153,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         writeFixedLengthString(rom, str, offset, length);
     }
 
-    // pads the length with terminators, so length should be at least str's len
-    // + 1
+    // pads the length with terminators, so length should be at least str's len + 1
     protected void writeFixedLengthString(byte[] data, String str, int offset, int length) {
         byte[] translated = translateString(str);
         int len = Math.min(translated.length, length);
@@ -267,6 +267,27 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     @Override
     protected byte getFreeSpaceByte() {
         return 0;
+    }
+
+    protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
+        freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
+    }
+
+    /**
+     * Scans the ROM and frees "unused" bytes.
+     * @param end The offset for the last byte to free
+     * @param frontMargin The amount of seemingly unused bytes to NOT free, at the front/start.
+     */
+    protected void freeUnusedSpaceBefore(int end, int frontMargin) {
+        int start = end;
+        while (rom[start] == getFreeSpaceByte()) {
+            start--;
+        }
+        start++;
+        start += frontMargin;
+        if (start <= end) {
+            freeSpaceBetween(start, end);
+        }
     }
 
     protected static boolean romSig(byte[] rom, String sig) {

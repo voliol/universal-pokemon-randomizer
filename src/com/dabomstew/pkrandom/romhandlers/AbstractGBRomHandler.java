@@ -359,7 +359,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
      * Both end points included.
      */
     protected void freeSpaceBetween(int start, int end) {
-        freeSpace(start, end - start);
+        freeSpace(start, end - start + 1);
     }
 
 	protected int findAndUnfreeSpace(int length) {

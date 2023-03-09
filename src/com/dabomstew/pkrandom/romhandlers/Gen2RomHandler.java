@@ -117,6 +117,25 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         loadLandmarkNames();
         preprocessMaps();
+
+        freeUnusedSpaceAtEndOfBanks();
+    }
+
+    /**
+     * Frees the unused space at the end of some banks, so the randomizer knows to use it.<br>
+     * Assumes the same kinds of data is always found in the same banks (e.g. trainer data in Bank 0x0E).
+     */
+    private void freeUnusedSpaceAtEndOfBanks() {
+        // Bank XX ends with YY data, which decides the frontMargin.
+        // (because data either ends with a terminator, or has a set length we can know)
+        // 0E: Trainer
+        freeUnusedSpaceAtEndOfBank(0x0E, 0);
+        // 10: Evolution/MovesLearnt data
+        if (isVietCrystal) {
+            freeUnusedSpaceBefore(0x43DFF, 1);
+        } else {
+            freeUnusedSpaceAtEndOfBank(0x10, 1);
+        }
     }
 
     @Override
@@ -1003,17 +1022,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         this.trainers = trainers;
     }
 
-    private boolean hasFreed;
-
     @Override
     public void saveTrainers() {
         if (trainers == null) {
             throw new IllegalStateException("Trainers are not loaded");
-        }
-        if (!hasFreed) {
-            // TODO: some system to free space depending on RomEntry
-            freeSpaceBetween(0x3B685, 0x3BFFF);
-            hasFreed = true;
         }
 
         int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
@@ -1107,6 +1119,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // (including other gens)
         // TODO: look at the above
         tp.moves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), this.getMovesLearnt(), tp.level);
+    }
+
+    @Override
+    public boolean canAddPokemonToBossTrainers() {
+        // because there isn't enough space in the bank with trainer data; the Japanese ROMs are smaller
+        return romEntry.getNonJapanese() > 0;
+    }
+
+    @Override
+    public boolean canAddPokemonToImportantTrainers() {
+        // because there isn't enough space in the bank with trainer data; the Japanese ROMs are smaller
+        return romEntry.getNonJapanese() > 0;
     }
 
     @Override
@@ -2483,10 +2507,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void saveEvosAndMovesLearnt() {
-        // TODO: what did the below lines do?
-//        if (isVietCrystal) {
-//            startOfNextBank = 0x43E00; // fix for pokedex crash
-//        }
         int pointerTableOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
 
         for (Pokemon pk : pokemonList) {
@@ -2495,7 +2515,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int pointerOffset = pointerTableOffset + (pokeNum - 1) * 2;
             new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk,
                     pk1 -> pokemonToEvosAndMovesLearntBytes(pk1, movesets), this::lengthOfEvosAndMovesLearntAt);
-
         }
     }
 

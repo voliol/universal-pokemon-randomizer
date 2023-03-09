@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
+import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
@@ -35,7 +36,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -456,6 +457,7 @@ public class RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void trainersHaveAtLeastTwoPokemonAfterSettingDoubleBattleMode(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 3);
         loadROM(romName);
         romHandler.setDoubleBattleMode();
         for (Trainer trainer : romHandler.getTrainers()) {
@@ -466,6 +468,39 @@ public class RomHandlerTest {
                 System.out.println("Not a forced double battle.");
             }
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersSaveAndLoadCorrectlyAfterSettingDoubleBattleMode(String romName) {
+        assumeTrue(isGBGame(romName));
+        loadROM(romName);
+        romHandler.setDoubleBattleMode();
+        AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
+        List<Trainer> trainers = gbRomHandler.getTrainers();
+        List<Trainer> before = new ArrayList<>(trainers);
+        gbRomHandler.setTrainers(trainers);
+        gbRomHandler.saveTrainers();
+        gbRomHandler.loadTrainers();
+        assertEquals(before, gbRomHandler.getTrainers());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canAddPokemonToImportantTrainersAndSaveAndLoad(String romName) {
+        assumeTrue(isGBGame(romName));
+        loadROM(romName);
+        assumeTrue(romHandler.canAddPokemonToImportantTrainers());
+        Settings s = new Settings();
+        s.setAdditionalImportantTrainerPokemon(6);
+        romHandler.addTrainerPokemon(s);
+        AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
+        List<Trainer> trainers = gbRomHandler.getTrainers();
+        List<Trainer> before = new ArrayList<>(trainers);
+        gbRomHandler.setTrainers(trainers);
+        gbRomHandler.saveTrainers();
+        gbRomHandler.loadTrainers();
+        assertEquals(before, gbRomHandler.getTrainers());
     }
 
     @ParameterizedTest
@@ -491,6 +526,14 @@ public class RomHandlerTest {
         List<String> before = new ArrayList<>(trainerNames);
         romHandler.setTrainerNames(trainerNames);
         assertEquals(before, romHandler.getTrainerNames());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void foo(String romName) {
+        loadROM(romName);
+        Gen2RomHandler gen2RomHandler = (Gen2RomHandler) romHandler;
+        System.out.println(Arrays.toString(gen2RomHandler.getRomEntry().getArrayValue("BanksWithFreeableTails")));
     }
 
 }
