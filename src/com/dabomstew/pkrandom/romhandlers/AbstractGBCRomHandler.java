@@ -44,7 +44,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     private int longestTableToken;
 
     // probably breaks if you load a second ROM with the same RomHandler...
-    private BankDividedFreedSpace freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
+    private final BankDividedFreedSpace freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
 
     public AbstractGBCRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -185,7 +185,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
             return (offset % GBConstants.bankSize) + GBConstants.bankSize;
         }
     }
-
+    
     /**
      * Write a GB pointer to "offset", pointing at "pointer".
      */
@@ -270,6 +270,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
+        System.out.println("Trying to free unused space at end of bank " + bank);
         freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
     }
 

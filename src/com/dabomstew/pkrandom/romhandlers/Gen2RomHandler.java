@@ -136,6 +136,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
             freeUnusedSpaceAtEndOfBank(0x10, 1);
         }
+        if (hasMoveTutors()) {
+            freeUnusedSpaceAtEndOfBank(bankOf(romEntry.getIntValue("MoveTutorMenuOffset")), 20);
+        }
     }
 
     @Override
@@ -1249,7 +1252,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int baseOffset = (pointersOffset / 0x1000) * 0x1000;
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             int eggMovePointer = FileFunctions.read2ByteInt(rom, pointersOffset + ((i - 1) * 2));
-            int eggMoveOffset = baseOffset + (eggMovePointer % 0x1000);
+            int eggMoveOffset = baseOffset + (eggMovePointer % 0x1000); // TODO: what's up with this?! refactor
             if (eggMoves.containsKey(i)) {
                 List<Integer> moves = eggMoves.get(i);
                 for (int move : moves) {
@@ -1576,32 +1579,69 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (!romEntry.isCrystal()) {
             return;
         }
-        if (moves.size() != 3) {
-            return;
+        if (moves.size() != Gen2Constants.mtCount) {
+            throw new IllegalArgumentException("Wrong number of move tutor moves. Should be " +
+                    Gen2Constants.mtCount + ", is " + moves.size() + ".");
         }
+        int menuPointerOffset = romEntry.getIntValue("MoveTutorMenuOffset");
+        if (menuPointerOffset <= 0) {
+            throw new IllegalStateException("ROM does not support move tutor randomization.");
+        }
+
         Iterator<Integer> mvList = moves.iterator();
         for (int offset : romEntry.getArrayValue("MoveTutorMoves")) {
             writeByte(offset, mvList.next().byteValue());
         }
 
-        // Construct a new menu
-        if (romEntry.getIntValue("MoveTutorMenuOffset") > 0 && romEntry.getIntValue("MoveTutorMenuNewSpace") > 0) {
-            String[] moveNames = readMoveNames();
-            String[] names = new String[]{moveNames[moves.get(0)], moveNames[moves.get(1)], moveNames[moves.get(2)],
-                    Gen2Constants.mtMenuCancelString};
-            int menuOffset = romEntry.getIntValue("MoveTutorMenuNewSpace");
-            rom[menuOffset++] = Gen2Constants.mtMenuInitByte;
-            rom[menuOffset++] = 0x4;
-            for (int i = 0; i < 4; i++) {
-                byte[] trans = translateString(names[i]);
-                System.arraycopy(trans, 0, rom, menuOffset, trans.length);
-                menuOffset += trans.length;
-                rom[menuOffset++] = GBConstants.stringTerminator;
-            }
-            int pointerOffset = romEntry.getIntValue("MoveTutorMenuOffset");
-            int newSpaceOffset = romEntry.getIntValue("MoveTutorMenuNewSpace");
-            writeWord(pointerOffset, newSpaceOffset);
+        new GBDataRewriter<List<Integer>>().rewriteData(menuPointerOffset, moves,
+                this::moveTutorMovesToDialogueOptionBytes, this::lengthOfDialogueOptionAt);
+    }
+
+    private byte[] moveTutorMovesToDialogueOptionBytes(List<Integer> moves) {
+        String[] moveNames = readMoveNames();
+        String[] options = new String[]{moveNames[moves.get(0)], moveNames[moves.get(1)], moveNames[moves.get(2)],
+                Gen2Constants.mtDialogueCancelString};
+        return dialogueOptionToBytes(options);
+    }
+
+    private byte[] dialogueOptionToBytes(String[] options) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(Gen2Constants.dialogueOptionInitByte);
+        baos.write(options.length);
+        for (String option : options) {
+            baos.writeBytes(translateString(option));
+            baos.write(GBConstants.stringTerminator);
         }
+        System.out.println(bytesToHex(baos.toByteArray()));
+        return baos.toByteArray();
+    }
+
+    // TODO: remove
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 3];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 3] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
+            hexChars[j * 3 + 2] = ' ';
+        }
+        return new String(hexChars);
+    }
+
+    private int lengthOfDialogueOptionAt(int offset) {
+        if (rom[offset] != Gen2Constants.dialogueOptionInitByte) {
+            throw new IllegalArgumentException("There is either no dialogue option at " + offset +
+                    ", or it is in a format not supported by the randomizer.");
+        }
+        int numberOfOptions = rom[offset + 1];
+        int length = 2;
+        int terminatorCount = 0;
+        do {
+            if (rom[offset + length] == GBConstants.stringTerminator) terminatorCount++;
+            length++;
+        } while (terminatorCount < numberOfOptions);
+        return length;
     }
 
     @Override

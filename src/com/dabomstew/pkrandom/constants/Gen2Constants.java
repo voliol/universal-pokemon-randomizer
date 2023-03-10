@@ -67,9 +67,15 @@ public class Gen2Constants {
 
     public static final int tmCount = 50, hmCount = 7;
 
-    public static final String mtMenuCancelString = "CANCEL";
+    public static final int mtCount = 3;
 
-    public static final byte mtMenuInitByte = (byte) 0x80;
+    public static final String mtDialogueCancelString = "CANCEL"; // TODO: this should be RomEntry-dependent, not a constant
+
+    /**
+     * Taken from older code about the move tutor dialogue option. Assumed to work for other dialogue options as well,
+     * but this will have to be tested when implemented.
+     */
+    public static final byte dialogueOptionInitByte = (byte) 0x80;
 
     public static final int maxTrainerNameLength = 17;
 

@@ -418,6 +418,18 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void moveTutorsCanBeRandomizedAndGetAndSet(String romName) {
+        loadROM(romName);
+        assumeTrue(romHandler.hasMoveTutors());
+        romHandler.randomizeMoveTutorMoves(new Settings());
+        List<Integer> moveTutorMoves = romHandler.getMoveTutorMoves();
+        List<Integer> before = new ArrayList<>(moveTutorMoves);
+        romHandler.setMoveTutorMoves(moveTutorMoves);
+        assertEquals(before, romHandler.getMoveTutorMoves());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void trainersAreNotNull(String romName) {
         loadROM(romName);
         assertNotNull(romHandler.getTrainers());
@@ -473,7 +485,7 @@ public class RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void trainersSaveAndLoadCorrectlyAfterSettingDoubleBattleMode(String romName) {
-        assumeTrue(isGBGame(romName));
+        assumeTrue(getGenerationNumberOf(romName) == 3);
         loadROM(romName);
         romHandler.setDoubleBattleMode();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
