@@ -185,7 +185,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
             return (offset % GBConstants.bankSize) + GBConstants.bankSize;
         }
     }
-    
+
     /**
      * Write a GB pointer to "offset", pointing at "pointer".
      */

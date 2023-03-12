@@ -395,6 +395,17 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void eggMovesDoNotChangeWithGetAndSet(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) != 1);
+        loadROM(romName);
+        Map<Integer, List<Integer>> eggMoves = romHandler.getEggMoves();
+        Map<Integer, List<Integer>> before = new HashMap<>(eggMoves);
+        romHandler.setEggMoves(eggMoves);
+        assertEquals(before, romHandler.getEggMoves());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void tmMovesDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
         List<Integer> tmMoves = romHandler.getTMMoves();

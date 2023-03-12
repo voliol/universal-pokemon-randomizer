@@ -128,6 +128,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void freeUnusedSpaceAtEndOfBanks() {
         // Bank XX ends with YY data, which decides the frontMargin.
         // (because data either ends with a terminator, or has a set length we can know)
+        // 08: Egg moves
+        freeUnusedSpaceAtEndOfBank(0x08, 0);
         // 0E: Trainer
         freeUnusedSpaceAtEndOfBank(0x0E, 0);
         // 10: Evolution/MovesLearnt data
@@ -1227,11 +1229,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public Map<Integer, List<Integer>> getEggMoves() {
         Map<Integer, List<Integer>> eggMoves = new TreeMap<>();
-        int pointersOffset = romEntry.getIntValue("EggMovesTableOffset");
-        int baseOffset = (pointersOffset / 0x1000) * 0x1000;
+        int tableOffset = romEntry.getIntValue("EggMovesTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            int eggMovePointer = FileFunctions.read2ByteInt(rom, pointersOffset + ((i - 1) * 2));
-            int eggMoveOffset = baseOffset + (eggMovePointer % 0x1000);
+            int pointerOffset = tableOffset + (i - 1) * 2;
+            int eggMoveOffset = readPointer(pointerOffset);
             List<Integer> moves = new ArrayList<>();
             int val = rom[eggMoveOffset] & 0xFF;
             while (val != 0xFF) {
@@ -1248,19 +1249,33 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setEggMoves(Map<Integer, List<Integer>> eggMoves) {
-        int pointersOffset = romEntry.getIntValue("EggMovesTableOffset");
-        int baseOffset = (pointersOffset / 0x1000) * 0x1000;
+        int tableOffset = romEntry.getIntValue("EggMovesTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
-            int eggMovePointer = FileFunctions.read2ByteInt(rom, pointersOffset + ((i - 1) * 2));
-            int eggMoveOffset = baseOffset + (eggMovePointer % 0x1000); // TODO: what's up with this?! refactor
             if (eggMoves.containsKey(i)) {
-                List<Integer> moves = eggMoves.get(i);
-                for (int move : moves) {
-                    writeByte(eggMoveOffset, (byte) move);
-                    eggMoveOffset++;
-                }
+                System.out.println("\n" + getPokemon().get(i));
+                int pointerOffset = tableOffset + (i - 1) * 2;
+                new GBDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
+                        this::lengthOfEggMovesAt);
             }
         }
+    }
+
+    private byte[] eggMovesToBytes(List<Integer> eggMoves) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        eggMoves.forEach(baos::write);
+        baos.write(Gen2Constants.eggMovesTerminator);
+        return baos.toByteArray();
+    }
+
+    // TODO: merge all these terminator-searching "lengthOf" methods into one
+    private int lengthOfEggMovesAt(int offset) {
+        int length = 0;
+        int terminatorCount = 0;
+        do {
+            if (rom[offset + length] == Gen2Constants.eggMovesTerminator) terminatorCount++;
+            length++;
+        } while (terminatorCount < 1);
+        return length;
     }
 
     public static class StaticPokemon {
