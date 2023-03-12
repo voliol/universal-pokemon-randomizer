@@ -4,7 +4,6 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +35,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -549,14 +548,6 @@ public class RomHandlerTest {
         List<String> before = new ArrayList<>(trainerNames);
         romHandler.setTrainerNames(trainerNames);
         assertEquals(before, romHandler.getTrainerNames());
-    }
-
-    @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void foo(String romName) {
-        loadROM(romName);
-        Gen2RomHandler gen2RomHandler = (Gen2RomHandler) romHandler;
-        System.out.println(Arrays.toString(gen2RomHandler.getRomEntry().getArrayValue("BanksWithFreeableTails")));
     }
 
 }

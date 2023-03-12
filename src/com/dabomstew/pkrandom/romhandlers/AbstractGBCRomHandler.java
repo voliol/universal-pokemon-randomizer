@@ -43,12 +43,23 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     private Map<String, Byte> d;
     private int longestTableToken;
 
-    // probably breaks if you load a second ROM with the same RomHandler...
-    private final BankDividedFreedSpace freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
+    private BankDividedFreedSpace freedSpace;
 
     public AbstractGBCRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
     }
+
+    @Override
+    protected void midLoadingSetUp() {
+        super.midLoadingSetUp();
+        this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
+        freeUnusedSpaceAtEndOfBanks();
+    }
+
+    /**
+     * Frees the unused space at the end of some banks, so the randomizer knows to use it.
+     */
+    protected abstract void freeUnusedSpaceAtEndOfBanks();
 
     protected void clearTextTables() {
         tb = new String[256];

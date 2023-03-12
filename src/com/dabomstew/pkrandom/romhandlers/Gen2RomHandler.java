@@ -114,18 +114,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public void midLoadingSetUp() {
         super.midLoadingSetUp();
         havePatchedFleeing = false;
-
         loadLandmarkNames();
         preprocessMaps();
-
-        freeUnusedSpaceAtEndOfBanks();
     }
 
     /**
      * Frees the unused space at the end of some banks, so the randomizer knows to use it.<br>
-     * Assumes the same kinds of data is always found in the same banks (e.g. trainer data in Bank 0x0E).
+     * Assumes most kinds of data is always found in the same banks (e.g. trainer data in Bank 0x0E).
      */
-    private void freeUnusedSpaceAtEndOfBanks() {
+    @Override
+    protected void freeUnusedSpaceAtEndOfBanks() {
         // Bank XX ends with YY data, which decides the frontMargin.
         // (because data either ends with a terminator, or has a set length we can know)
         // 08: Egg moves
@@ -138,6 +136,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
             freeUnusedSpaceAtEndOfBank(0x10, 1);
         }
+        // Bank which contains events. Arbitrary high frontMargin since the event structure is not known
+        // (to the programmer).
         if (hasMoveTutors()) {
             freeUnusedSpaceAtEndOfBank(bankOf(romEntry.getIntValue("MoveTutorMenuOffset")), 20);
         }
@@ -1019,7 +1019,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getEliteFourTrainers(boolean isChallengeMode) {
-        return new ArrayList<>();
+        return new ArrayList<>(); // Not implemented
     }
 
     @Override
@@ -1212,7 +1212,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
             movesets.put(pkmn.getNumber(), ourMoves);
         }
-        setMovesLearnt(movesets); // a quick workaround
+        setMovesLearnt(movesets); // a quick workaround TODO: make this more in line with other getting/loading
         return movesets;
     }
 
@@ -1255,7 +1255,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 System.out.println("\n" + getPokemon().get(i));
                 int pointerOffset = tableOffset + (i - 1) * 2;
                 new GBDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
-                        this::lengthOfEggMovesAt);
+                        oldDataOffset -> lengthOfDataWithTerminatorAt(oldDataOffset, Gen2Constants.eggMovesTerminator));
             }
         }
     }
@@ -1265,17 +1265,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         eggMoves.forEach(baos::write);
         baos.write(Gen2Constants.eggMovesTerminator);
         return baos.toByteArray();
-    }
-
-    // TODO: merge all these terminator-searching "lengthOf" methods into one
-    private int lengthOfEggMovesAt(int offset) {
-        int length = 0;
-        int terminatorCount = 0;
-        do {
-            if (rom[offset + length] == Gen2Constants.eggMovesTerminator) terminatorCount++;
-            length++;
-        } while (terminatorCount < 1);
-        return length;
     }
 
     public static class StaticPokemon {
@@ -1627,21 +1616,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             baos.writeBytes(translateString(option));
             baos.write(GBConstants.stringTerminator);
         }
-        System.out.println(bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
-    }
-
-    // TODO: remove
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 3];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 3] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
-            hexChars[j * 3 + 2] = ' ';
-        }
-        return new String(hexChars);
     }
 
     private int lengthOfDialogueOptionAt(int offset) {
@@ -1651,11 +1626,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         int numberOfOptions = rom[offset + 1];
         int length = 2;
-        int terminatorCount = 0;
-        do {
-            if (rom[offset + length] == GBConstants.stringTerminator) terminatorCount++;
-            length++;
-        } while (terminatorCount < numberOfOptions);
+        length += lengthOfDataWithTerminatorsAt(offset + length, (byte) GBConstants.stringTerminator,
+                numberOfOptions);
         return length;
     }
 
@@ -2568,39 +2540,30 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pk == null) continue;
             int pokeNum = pk.getNumber();
             int pointerOffset = pointerTableOffset + (pokeNum - 1) * 2;
-            new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk,
-                    pk1 -> pokemonToEvosAndMovesLearntBytes(pk1, movesets), this::lengthOfEvosAndMovesLearntAt);
+            new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
+                    oldDataOffset -> lengthOfDataWithTerminatorsAt(oldDataOffset,
+                            GBConstants.evosAndMovesTerminator, 2));
         }
     }
 
-    private int lengthOfEvosAndMovesLearntAt(int offset) {
-        int length = 0;
-        int terminatorCount = 0;
-        do {
-            if (rom[offset + length] == 0x00) terminatorCount++;
-            length++;
-        } while (terminatorCount < 2);
-        return length;
-    }
-
-    private byte[] pokemonToEvosAndMovesLearntBytes(Pokemon pk, Map<Integer, List<MoveLearnt>> movesets) {
+    private byte[] pokemonToEvosAndMovesLearntBytes(Pokemon pk) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Evolution evo : pk.getEvolutionsFrom()) {
             baos.writeBytes(evolutionToBytes(evo));
         }
-        baos.write(0x00); // terminator
+        baos.write(GBConstants.evosAndMovesTerminator);
         for (MoveLearnt ml : movesets.get(pk.getNumber())) {
             baos.writeBytes(moveLearntToBytes(ml));
         }
-        baos.write(0x00); // terminator
+        baos.write(GBConstants.evosAndMovesTerminator);
         return baos.toByteArray();
     }
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write((byte) evo.type.toIndex(2));
+        baos.write(evo.type.toIndex(2));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
-        baos.write((byte) evo.to.getNumber());
+        baos.write(evo.to.getNumber());
         return baos.toByteArray();
     }
 

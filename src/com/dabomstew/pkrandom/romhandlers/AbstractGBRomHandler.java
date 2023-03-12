@@ -287,6 +287,28 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		return true;
 	}
 
+    /**
+     * Returns the length of some data, which is ended by a single-byte terminator.
+     * Counts the terminator towards the length.
+     */
+    protected int lengthOfDataWithTerminatorAt(int offset, byte terminator) {
+        return lengthOfDataWithTerminatorsAt(offset, terminator, 1);
+    }
+
+    /**
+     * Returns the length of some data using single-byte terminators.
+     * Counts the terminators towards the length.
+     */
+    protected int lengthOfDataWithTerminatorsAt(int offset, byte terminator, int terminatorAmount) {
+        int length = 0;
+        int terminatorCount = 0;
+        do {
+            if (rom[offset + length] == terminator) terminatorCount++;
+            length++;
+        } while (terminatorCount < terminatorAmount);
+        return length;
+    }
+
     protected abstract int readPointer(int offset);
 
     protected abstract void writePointer(int offset, int pointer);
