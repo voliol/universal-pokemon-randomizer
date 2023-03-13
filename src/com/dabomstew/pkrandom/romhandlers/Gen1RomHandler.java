@@ -40,7 +40,6 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -2439,17 +2438,45 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void saveEvosAndMovesLearnt() {
+        saveLevel1Moves();
+
         int pointerTableOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
 
         int pokemonCount = romEntry.getIntValue("InternalPokemonCount");
         for (int i = 1; i <= pokemonCount; i++) {
             Pokemon pk = pokes[pokeRBYToNumTable[i]];
-            //TODO: starting/level 1 moves
             int pointerOffset = pointerTableOffset + (i - 1) * 2;
             new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
                     oldDataOffset -> lengthOfDataWithTerminatorsAt(oldDataOffset,
                             GBConstants.evosAndMovesTerminator, 2));
         }
+    }
+
+    private void saveLevel1Moves() {
+        int pokeStatsOffset = romEntry.getIntValue("PokemonStatsOffset");
+        for (Pokemon pk : pokemonList) {
+            if (pk == null) continue;
+            int statsOffset;
+            if (pk.getNumber() == Species.mew && !romEntry.isYellow()) {
+                statsOffset = romEntry.getIntValue("MewStatsOffset");
+            } else {
+                statsOffset = (pk.getNumber() - 1) * Gen1Constants.baseStatsEntrySize + pokeStatsOffset;
+            }
+            List<MoveLearnt> moveset = movesets.get(pk.getNumber());
+            byte[] level1MoveBytes = movesetToLevel1MoveBytes(moveset);
+            writeBytes(statsOffset + Gen1Constants.bsLevel1MovesOffset, level1MoveBytes);
+        }
+    }
+
+    private byte[] movesetToLevel1MoveBytes(List<MoveLearnt> moveset) {
+        byte[] level1MoveBytes = new byte[4];
+        for (int i = 0; i < Math.min(4, moveset.size()); i++) {
+            MoveLearnt ml = moveset.get(i);
+            if (ml.level == 1) {
+                level1MoveBytes[i] = (byte) moveNumToRomTable[ml.move];
+            }
+        }
+        return level1MoveBytes;
     }
 
     private byte[] pokemonToEvosAndMovesLearntBytes(Pokemon pk) {
@@ -2461,14 +2488,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Evolution evo : pk.getEvolutionsFrom()) {
             baos.writeBytes(evolutionToBytes(evo));
         }
-        baos.write(0x00); // terminator
+        baos.write(GBConstants.evosAndMovesTerminator);
         List<MoveLearnt> moveset = movesets.get(pk.getNumber());
         for (int i = 0; i < moveset.size(); i++) {
             MoveLearnt ml = moveset.get(i);
             if (i <= 4 && ml.level == 1) continue;
             baos.writeBytes(moveLearntToBytes(ml));
         }
-        baos.write(0x00); // terminator
+        baos.write(GBConstants.evosAndMovesTerminator);
         System.out.println(bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
     }
