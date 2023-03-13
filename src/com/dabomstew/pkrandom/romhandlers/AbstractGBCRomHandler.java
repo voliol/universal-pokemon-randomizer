@@ -97,7 +97,6 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
             sc.close();
         } catch (FileNotFoundException ignored) {
         }
-
     }
 
     protected String readString(int offset, int maxLength, boolean textEngineMode) {

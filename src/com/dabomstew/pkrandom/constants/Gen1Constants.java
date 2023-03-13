@@ -48,6 +48,8 @@ public class Gen1Constants {
 
     public static final int trainerClassCount = 47;
 
+    public static final byte trainerDataTerminator = 0x00;
+
     public static final int champRivalOffsetFromGymLeaderMoves = 0x44;
 
     public static final int pokemonCount = 151;

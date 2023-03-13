@@ -1041,64 +1041,74 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    // TODO: nearly identical to the Gen2RomHandler implementation; combine?
     public void loadTrainers() {
-        int traineroffset = romEntry.getIntValue("TrainerDataTableOffset");
-        int traineramount = Gen1Constants.trainerClassCount;
-        int[] trainerclasslimits = romEntry.getArrayValue("TrainerDataClassCounts");
-
-        int[] pointers = new int[traineramount + 1];
-        for (int i = 1; i <= traineramount; i++) {
-            pointers[i] = readPointer(traineroffset + (i - 1) * 2);
+        int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
+        int trainerClassAmount = Gen1Constants.trainerClassCount;
+        int[] trainersPerClass = romEntry.getArrayValue("TrainerDataClassCounts");
+        if (trainersPerClass.length != trainerClassAmount) {
+            throw new RuntimeException("Conflicting count of trainer classes.");
         }
-
         List<String> tcnames = getTrainerClassesForText();
 
         trainers = new ArrayList<>();
+
         int index = 0;
-        for (int i = 1; i <= traineramount; i++) {
-            int offs = pointers[i];
-            int limit = trainerclasslimits[i];
-            String tcname = tcnames.get(i - 1);
-            for (int trnum = 0; trnum < limit; trnum++) {
+        for (int trainerClass = 0; trainerClass < trainerClassAmount; trainerClass++) {
+
+            int offset = readPointer(trainerClassTableOffset + trainerClass * 2);
+
+            for (int trainerNum = 0; trainerNum < trainersPerClass[trainerClass]; trainerNum++) {
                 index++;
-                Trainer tr = new Trainer();
-                tr.offset = offs;
+                Trainer tr = readTrainer(offset);
                 tr.index = index;
-                tr.trainerclass = i;
-                tr.fullDisplayName = tcname;
-                int dataType = rom[offs] & 0xFF;
-                if (dataType == 0xFF) {
-                    // "Special" trainer
-                    tr.poketype = 1;
-                    offs++;
-                    while (rom[offs] != 0x0) {
-                        TrainerPokemon tpk = new TrainerPokemon();
-                        tpk.level = rom[offs] & 0xFF;
-                        tpk.pokemon = pokes[pokeRBYToNumTable[rom[offs + 1] & 0xFF]];
-                        tr.pokemon.add(tpk);
-                        offs += 2;
-                    }
-                } else {
-                    tr.poketype = 0;
-                    offs++;
-                    while (rom[offs] != 0x0) {
-                        TrainerPokemon tpk = new TrainerPokemon();
-                        tpk.level = dataType;
-                        tpk.pokemon = pokes[pokeRBYToNumTable[rom[offs] & 0xFF]];
-                        tr.pokemon.add(tpk);
-                        offs++;
-                    }
-                }
-                offs++;
+                tr.trainerclass = trainerClass;
+                tr.fullDisplayName = tcnames.get(trainerClass);
                 trainers.add(tr);
+
+                offset += trainerToBytes(tr).length;
             }
         }
+
+        tagTrainers();
+    }
+
+    private void tagTrainers() {
         Gen1Constants.tagTrainersUniversal(trainers);
         if (romEntry.isYellow()) {
             Gen1Constants.tagTrainersYellow(trainers);
         } else {
             Gen1Constants.tagTrainersRB(trainers);
         }
+    }
+
+    private Trainer readTrainer(int offset) {
+        Trainer tr = new Trainer();
+        tr.offset = offset;
+        int dataType = rom[offset] & 0xFF;
+        if (dataType == 0xFF) {
+            // "Special" trainer
+            tr.poketype = 1;
+            offset++;
+            while (rom[offset] != 0x0) {
+                TrainerPokemon tp = new TrainerPokemon();
+                tp.level = rom[offset] & 0xFF;
+                tp.pokemon = pokes[pokeRBYToNumTable[rom[offset + 1] & 0xFF]];
+                tr.pokemon.add(tp);
+                offset += 2;
+            }
+        } else {
+            tr.poketype = 0;
+            offset++;
+            while (rom[offset] != 0x0) {
+                TrainerPokemon tp = new TrainerPokemon();
+                tp.level = dataType;
+                tp.pokemon = pokes[pokeRBYToNumTable[rom[offset] & 0xFF]];
+                tr.pokemon.add(tp);
+                offset++;
+            }
+        }
+        return tr;
     }
 
     @Override
@@ -1122,52 +1132,31 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             throw new IllegalStateException("Trainers are not loaded");
         }
 
-        int traineroffset = romEntry.getIntValue("TrainerDataTableOffset");
-        int traineramount = Gen1Constants.trainerClassCount;
-        int[] trainerclasslimits = romEntry.getArrayValue("TrainerDataClassCounts");
-
-        int[] pointers = new int[traineramount + 1];
-        for (int i = 1; i <= traineramount; i++) {
-            pointers[i] = readPointer(traineroffset + (i - 1) * 2);
-        }
+        int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
+        int trainerClassAmount = Gen1Constants.trainerClassCount;
+        int[] trainersPerClass = romEntry.getArrayValue("TrainerDataClassCounts");
 
         Iterator<Trainer> trainerIterator = trainers.iterator();
-        for (int i = 1; i <= traineramount; i++) {
-            int offs = pointers[i];
-            int limit = trainerclasslimits[i];
-            for (int trnum = 0; trnum < limit; trnum++) {
+        for (int trainerClassNum = 0; trainerClassNum < trainerClassAmount; trainerClassNum++) {
+            if (trainersPerClass[trainerClassNum] == 0) continue;
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            for (int trainerNum = 0; trainerNum < trainersPerClass[trainerClassNum]; trainerNum++) {
                 Trainer tr = trainerIterator.next();
-                if (tr.trainerclass != i) {
-                    // really weird since trainers don't have names in gen 1
+                if (tr.trainerclass != trainerClassNum) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
-                Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
-                // Write their pokemon based on poketype
-                if (tr.poketype == 0) {
-                    // Regular trainer
-                    int fixedLevel = tr.pokemon.get(0).level;
-                    writeByte(offs, (byte) fixedLevel);
-                    offs++;
-                    while (tPokes.hasNext()) {
-                        TrainerPokemon tpk = tPokes.next();
-                        writeByte(offs, (byte) pokeNumToRBYTable[tpk.pokemon.getNumber()]);
-                        offs++;
-                    }
-                } else {
-                    // Special trainer
-                    writeByte(offs, (byte) 0xFF);
-                    offs++;
-                    while (tPokes.hasNext()) {
-                        TrainerPokemon tpk = tPokes.next();
-                        writeBytes(offs, new byte[]{
-                                (byte) tpk.level, (byte) pokeNumToRBYTable[tpk.pokemon.getNumber()]
-                        });
-                        offs += 2;
-                    }
-                }
-                writeByte(offs, (byte) 0);
-                offs++;
+                baos.writeBytes(trainerToBytes(tr));
+                System.out.print(tr + " ");
             }
+            System.out.print("\n");
+
+            byte[] trainersOfClassBytes = baos.toByteArray();
+            int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
+            int trainersPerThisClass = trainersPerClass[trainerClassNum];
+            new GBDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
+                    lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
         }
 
         // Custom Moves AI Table
@@ -1182,7 +1171,41 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             // nop out this jump
             writeBytes(champRivalJump, new byte[] {GBConstants.gbZ80Nop, GBConstants.gbZ80Nop});
         }
+    }
 
+    private byte[] trainerToBytes(Trainer trainer) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        System.out.println("[" + trainer.fullDisplayName + " - " + trainer.offset + " => " +
+                trainer.pokemon.stream().map(tp -> tp == null ? "null" : tp).toList() + "]");
+        if (trainer.poketype == 0) {
+            // Regular trainer
+            int fixedLevel = trainer.pokemon.get(0).level;
+            baos.write(fixedLevel);
+            for (TrainerPokemon tp : trainer.pokemon) {
+                baos.write((byte) pokeNumToRBYTable[tp.pokemon.getNumber()]);
+            }
+        } else {
+            // Special trainer
+            baos.write(0xFF);
+            for (TrainerPokemon tp : trainer.pokemon) {
+                baos.write(tp.level);
+                baos.write((byte) pokeNumToRBYTable[tp.pokemon.getNumber()]);
+            }
+        }
+        baos.write(Gen1Constants.trainerDataTerminator);
+
+        return baos.toByteArray();
+    }
+
+    private int lengthOfTrainerClassAt(int offset, int numberOfTrainers) {
+        int sum = 0;
+        for (int i = 0; i < numberOfTrainers; i++) {
+            Trainer trainer = readTrainer(offset);
+            int trainerLength = trainerToBytes(trainer).length;
+            sum += trainerLength;
+            offset += trainerLength;
+        }
+        return sum;
     }
 
     @Override
@@ -1694,6 +1717,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // Not implemented
     }
 
+    // TODO: what's the difference to getTrainerClassNames()?
     private List<String> getTrainerClassesForText() {
         int[] offsets = romEntry.getArrayValue("TrainerClassNamesOffsets");
         List<String> tcNames = new ArrayList<>();

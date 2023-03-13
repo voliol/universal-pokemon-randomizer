@@ -1037,14 +1037,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int trainerClassAmount = romEntry.getIntValue("TrainerClassAmount");
         int[] trainersPerClass = romEntry.getArrayValue("TrainerDataClassCounts");
 
-        Iterator<Trainer> allTrainers = getTrainers().iterator();
+        Iterator<Trainer> trainerIterator = getTrainers().iterator();
         for (int trainerClassNum = 0; trainerClassNum < trainerClassAmount; trainerClassNum++) {
             if (trainersPerClass[trainerClassNum] == 0) continue;
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             for (int trainerNum = 0; trainerNum < trainersPerClass[trainerClassNum]; trainerNum++) {
-                Trainer tr = allTrainers.next();
+                Trainer tr = trainerIterator.next();
                 if (tr.trainerclass != trainerClassNum) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
@@ -1055,21 +1055,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
-            int finalTrainerClassNum = trainerClassNum;
+            int trainersPerThisClass = trainersPerClass[trainerClassNum];
             new GBDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
-                    lengthOfTrainerClassAt(oldDataOffset, trainersPerClass[finalTrainerClassNum]));
+                    lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
         }
-    }
-
-    private int lengthOfTrainerClassAt(int offset, int numberOfTrainers) {
-        int sum = 0;
-        for (int i = 0; i < numberOfTrainers; i++) {
-            Trainer trainer = readTrainer(offset);
-            int trainerLength = trainerToBytes(trainer).length;
-            sum += trainerLength;
-            offset += trainerLength;
-        }
-        return sum;
     }
 
     private byte[] trainerToBytes(Trainer trainer) {
@@ -1124,6 +1113,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // (including other gens)
         // TODO: look at the above
         tp.moves = RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), this.getMovesLearnt(), tp.level);
+    }
+
+    private int lengthOfTrainerClassAt(int offset, int numberOfTrainers) {
+        int sum = 0;
+        for (int i = 0; i < numberOfTrainers; i++) {
+            Trainer trainer = readTrainer(offset);
+            int trainerLength = trainerToBytes(trainer).length;
+            sum += trainerLength;
+            offset += trainerLength;
+        }
+        return sum;
     }
 
     @Override
