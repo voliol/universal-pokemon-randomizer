@@ -35,7 +35,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -626,6 +626,7 @@ public class RomHandlerTest {
         gbRomHandler.loadTrainers();
         for (Trainer tr : gbRomHandler.getTrainers()) {
             if (tr.multiBattleStatus == Trainer.MultiBattleStatus.NEVER && !tr.shouldNotGetBuffs()) {
+                System.out.println(tr);
                 assertEquals(6, tr.pokemon.size());
             }
         }

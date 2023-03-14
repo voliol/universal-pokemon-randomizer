@@ -14,6 +14,7 @@ public abstract class AbstractGBRomEntry extends RomEntry {
             putSpecialKeyMethod("CRC32", AbstractGBRomEntry::setExpectedCRC32);
             putKeySuffixMethod("Locator", this::addStringValue);
             putKeySuffixMethod("Prefix", this::addStringValue);
+            putKeySuffixMethod("String", this::addStringValue);
         }
     }
 

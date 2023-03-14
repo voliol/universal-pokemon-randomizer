@@ -828,8 +828,9 @@ public class Gen3Constants {
         // 572 + 573: Double Battle with Sailor Brenden and Battle Girl Lilith
         // 721 + 730: Double Battle with Team Magma Grunts in Team Magma Hideout
         // 848 + 850: Double Battle with Psychic Mariela and Gentleman Everett
+        // 855: Steven from the Double Battle in Mossdeep Space Center
         setMultiBattleStatus(trs, Trainer.MultiBattleStatus.ALWAYS, 25, 105, 237, 397, 404, 504, 505, 508, 514,
-                569, 572, 573, 654, 721, 730, 734, 848, 850
+                569, 572, 573, 654, 721, 730, 734, 848, 850, 855
         );
 
         // 1 + 124: Potential Double Battle with Hiker Sawyer and Beauty Melissa

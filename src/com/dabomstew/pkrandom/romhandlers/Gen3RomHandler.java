@@ -1139,7 +1139,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         while ((rom[offset + len] & 0xFF) != 0xFF) {
             len++;
         }
-        System.out.println("String at offset " + offset + " is " + len + " bytes.");
         return len - 1;
     }
 
@@ -1678,7 +1677,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (int i = 1; i < amount; i++) {
             int trOffset = baseOffset + i * entryLen;
             Trainer tr = trainerIterator.next();
-            System.out.println(i + "" + tr);
 
             // When rewriting the Pokémon data (in particular the pointer),
             // it needs to use parts of the old trainer data - thus those are overwritten
@@ -2454,6 +2452,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			if (tte.actualOffset > 0 && (tte.isMoveTutor == moveTutor)) {
 				// create the new text
 				int oldPointer = readPointer(tte.actualOffset);
+                System.out.println(tte + ", " + oldPointer);
                 if (oldPointer < 0 || oldPointer >= rom.length) {
                     throw new RuntimeException(desc + " text update failed: couldn't read a " + desc
                             + " text pointer." + nl);

@@ -1608,7 +1608,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private byte[] moveTutorMovesToDialogueOptionBytes(List<Integer> moves) {
         String[] moveNames = readMoveNames();
         String[] options = new String[]{moveNames[moves.get(0)], moveNames[moves.get(1)], moveNames[moves.get(2)],
-                Gen2Constants.mtDialogueCancelString};
+                romEntry.getStringValue("CancelString")};
         return dialogueOptionToBytes(options);
     }
 
@@ -1620,6 +1620,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             baos.writeBytes(translateString(option));
             baos.write(GBConstants.stringTerminator);
         }
+        System.out.println(RomFunctions.bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
     }
 
@@ -2586,8 +2587,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         };
     }
 
-    // TODO: isn't this *very* similar to the Gen III implementation? It could even be the same in *all* gens in which
-    //  case it can be moved to the MoveLearnt class.
     private byte[] moveLearntToBytes(MoveLearnt ml) {
         return new byte[] {(byte) ml.level, (byte) ml.move};
     }

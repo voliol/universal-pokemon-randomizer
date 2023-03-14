@@ -69,8 +69,6 @@ public class Gen2Constants {
 
     public static final int mtCount = 3;
 
-    public static final String mtDialogueCancelString = "CANCEL"; // TODO: this should be RomEntry-dependent, not a constant
-
     /**
      * Taken from older code about the move tutor dialogue option. Assumed to work for other dialogue options as well,
      * but this will have to be tested when implemented.

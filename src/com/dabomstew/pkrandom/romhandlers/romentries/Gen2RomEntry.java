@@ -65,6 +65,7 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
 
     public static final Gen2RomEntryReader<Gen2RomEntry> READER = new Gen2RomEntryReader<>();
 
+    private String cancelString;
     private final List<Gen2RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
 
     public Gen2RomEntry(String name) {
