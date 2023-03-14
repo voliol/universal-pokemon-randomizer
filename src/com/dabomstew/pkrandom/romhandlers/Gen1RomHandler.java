@@ -1148,9 +1148,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
                 baos.writeBytes(trainerToBytes(tr));
-                System.out.print(tr + " ");
             }
-            System.out.print("\n");
 
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
@@ -1175,8 +1173,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private byte[] trainerToBytes(Trainer trainer) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        System.out.println("[" + trainer.fullDisplayName + " - " + trainer.offset + " => " +
-                trainer.pokemon.stream().map(tp -> tp == null ? "null" : tp).toList() + "]");
         if (trainer.poketype == 0) {
             // Regular trainer
             int fixedLevel = trainer.pokemon.get(0).level;
@@ -1215,16 +1211,19 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean canAddPokemonToBossTrainers() {
-        return false;
+        // because there isn't enough space in the bank with trainer data; the Japanese ROMs are smaller
+        return romEntry.isNonJapanese();
     }
 
     @Override
     public boolean canAddPokemonToImportantTrainers() {
-        return false;
+        // because there isn't enough space in the bank with trainer data; the Japanese ROMs are smaller
+        return romEntry.isNonJapanese();
     }
 
     @Override
     public boolean canAddPokemonToRegularTrainers() {
+        // because there isn't enough space in the bank with trainer data
         return false;
     }
 
@@ -1323,7 +1322,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+    protected void loadMovesLearnt() {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int pointersOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
         int pokeStatsOffset = romEntry.getIntValue("PokemonStatsOffset");
@@ -1331,7 +1330,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (int i = 1; i <= pkmnCount; i++) {
             int pointer = readPointer(pointersOffset + (i - 1) * 2);
             if (pokeRBYToNumTable[i] != 0) {
-                Pokemon pkmn = pokes[pokeRBYToNumTable[i]];
+                Pokemon pk = pokes[pokeRBYToNumTable[i]];
                 int statsOffset;
                 if (pokeRBYToNumTable[i] == Species.mew && !romEntry.isYellow()) {
                     // Mewww
@@ -1366,10 +1365,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     ourMoves.add(learnt);
                     pointer += 2;
                 }
-                movesets.put(pkmn.getNumber(), ourMoves);
+                movesets.put(pk.getNumber(), ourMoves);
             }
         }
-        setMovesLearnt(movesets); // a quick workaround TODO: make this more in line with other getting/loading
+        setMovesLearnt(movesets);
+    }
+
+    @Override
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
         return movesets;
     }
 
@@ -2507,7 +2510,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (pk == null) {
             return new byte[] {0x00, 0x00};
         }
-        System.out.println(pk);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Evolution evo : pk.getEvolutionsFrom()) {
             baos.writeBytes(evolutionToBytes(evo));
@@ -2520,7 +2522,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             baos.writeBytes(moveLearntToBytes(ml));
         }
         baos.write(GBConstants.evosAndMovesTerminator);
-        System.out.println(bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
     }
 
@@ -2557,25 +2558,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private byte[] moveLearntToBytes(MoveLearnt ml) {
         return new byte[] {(byte) ml.level, (byte) moveNumToRomTable[ml.move]};
     }
-
-//                    List<MoveLearnt> ourMoves = movesets.get(pkmn.getNumber());
-//                    int statsOffset;
-//                    if (pokeNum == Species.mew && !romEntry.isYellow()) {
-//                        // Mewww
-//                        statsOffset = romEntry.getIntValue("MewStatsOffset");
-//                    } else {
-//                        statsOffset = (pokeNum - 1) * Gen1Constants.baseStatsEntrySize + pokeStatsOffset;
-//                    }
-//                    int movenum = 0;
-//                    while (movenum < 4 && ourMoves.size() > movenum && ourMoves.get(movenum).level == 1) {
-//                        rom[statsOffset + Gen1Constants.bsLevel1MovesOffset + movenum] = (byte) moveNumToRomTable[ourMoves
-//                                .get(movenum).move];
-//                        movenum++;
-//                    }
-//                    // Write out the rest of zeroes
-//                    for (int mn = movenum; mn < 4; mn++) {
-//                        rom[statsOffset + Gen1Constants.bsLevel1MovesOffset + mn] = 0;
-//                    }
 
     private int calculateFrontSpriteBank(Gen1Pokemon pk) {
         int idx = pokeNumToRBYTable[pk.getNumber()];
@@ -2654,7 +2636,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
             int palIndex = pk.getPaletteID().ordinal();
             int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
-            if (romEntry.isYellow() && romEntry.getNonJapanese() == 1) {
+            if (romEntry.isYellow() && romEntry.isNonJapanese()) {
                 // Non-japanese Yellow can use GBC palettes instead.
                 // Stored directly after regular SGB palettes.
                 palOffset += 320;

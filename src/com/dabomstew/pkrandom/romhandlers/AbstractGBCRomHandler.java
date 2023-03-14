@@ -61,6 +61,14 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
      */
     protected abstract void freeUnusedSpaceAtEndOfBanks();
 
+    @Override
+    protected void loadGameData() {
+        super.loadGameData();
+        loadMovesLearnt();
+    }
+
+    protected abstract void loadMovesLearnt();
+
     protected void clearTextTables() {
         tb = new String[256];
         if (d != null) {

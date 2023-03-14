@@ -35,6 +35,10 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
         return nonJapanese;
     }
 
+    public boolean isNonJapanese() {
+        return nonJapanese > 0;
+    }
+
     private void setNonJapanese(String unparsed) {
         this.nonJapanese = IniEntryReader.parseInt(unparsed);
     }

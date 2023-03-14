@@ -156,14 +156,14 @@ public class Gen1Constants {
 
     public static void tagTrainersUniversal(List<Trainer> trs) {
         // Gym Leaders
-        tbc(trs, 34, 0, "GYM1");
-        tbc(trs, 35, 0, "GYM2");
-        tbc(trs, 36, 0, "GYM3");
-        tbc(trs, 37, 0, "GYM4");
-        tbc(trs, 38, 0, "GYM5");
-        tbc(trs, 40, 0, "GYM6");
-        tbc(trs, 39, 0, "GYM7");
-        tbc(trs, 29, 2, "GYM8");
+        tbc(trs, 34, 0, "GYM1-LEADER");
+        tbc(trs, 35, 0, "GYM2-LEADER");
+        tbc(trs, 36, 0, "GYM3-LEADER");
+        tbc(trs, 37, 0, "GYM4-LEADER");
+        tbc(trs, 38, 0, "GYM5-LEADER");
+        tbc(trs, 40, 0, "GYM6-LEADER");
+        tbc(trs, 39, 0, "GYM7-LEADER");
+        tbc(trs, 29, 2, "GYM8-LEADER");
 
         // Other giovanni teams
         tbc(trs, 29, 0, "GIO1");
@@ -347,7 +347,8 @@ public class Gen1Constants {
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {
-            if (t.trainerclass == classNum) {
+            // adjusted to not change the above but use 0-indexing properly
+            if (t.trainerclass == classNum - 1) {
                 currnum++;
                 if (currnum == number) {
                     t.tag = tag;

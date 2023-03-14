@@ -249,22 +249,22 @@ public class Gen2Constants {
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders
-        tbc(allTrainers, 1, 0, "GYM1");
-        tbc(allTrainers, 3, 0, "GYM2");
-        tbc(allTrainers, 2, 0, "GYM3");
-        tbc(allTrainers, 4, 0, "GYM4");
-        tbc(allTrainers, 7, 0, "GYM5");
-        tbc(allTrainers, 6, 0, "GYM6");
-        tbc(allTrainers, 5, 0, "GYM7");
-        tbc(allTrainers, 8, 0, "GYM8");
-        tbc(allTrainers, 17, 0, "GYM9");
-        tbc(allTrainers, 18, 0, "GYM10");
-        tbc(allTrainers, 19, 0, "GYM11");
-        tbc(allTrainers, 21, 0, "GYM12");
-        tbc(allTrainers, 26, 0, "GYM13");
-        tbc(allTrainers, 35, 0, "GYM14");
-        tbc(allTrainers, 46, 0, "GYM15");
-        tbc(allTrainers, 64, 0, "GYM16");
+        tbc(allTrainers, 1, 0, "GYM1-LEADER");
+        tbc(allTrainers, 3, 0, "GYM2-LEADER");
+        tbc(allTrainers, 2, 0, "GYM3-LEADER");
+        tbc(allTrainers, 4, 0, "GYM4-LEADER");
+        tbc(allTrainers, 7, 0, "GYM5-LEADER");
+        tbc(allTrainers, 6, 0, "GYM6-LEADER");
+        tbc(allTrainers, 5, 0, "GYM7-LEADER");
+        tbc(allTrainers, 8, 0, "GYM8-LEADER");
+        tbc(allTrainers, 17, 0, "GYM9-LEADER");
+        tbc(allTrainers, 18, 0, "GYM10-LEADER");
+        tbc(allTrainers, 19, 0, "GYM11-LEADER");
+        tbc(allTrainers, 21, 0, "GYM12-LEADER");
+        tbc(allTrainers, 26, 0, "GYM13-LEADER");
+        tbc(allTrainers, 35, 0, "GYM14-LEADER");
+        tbc(allTrainers, 46, 0, "GYM15-LEADER");
+        tbc(allTrainers, 64, 0, "GYM16-LEADER");
 
         // Elite 4 & Red
         tbc(allTrainers, 11, 0, "ELITE1");

@@ -1129,13 +1129,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean canAddPokemonToBossTrainers() {
         // because there isn't enough space in the bank with trainer data; the Japanese ROMs are smaller
-        return romEntry.getNonJapanese() > 0;
+        return romEntry.isNonJapanese();
     }
 
     @Override
     public boolean canAddPokemonToImportantTrainers() {
         // because there isn't enough space in the bank with trainer data; the Japanese ROMs are smaller
-        return romEntry.getNonJapanese() > 0;
+        return romEntry.isNonJapanese();
     }
 
     @Override
@@ -1187,7 +1187,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
+    protected void loadMovesLearnt() {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         int pointersOffset = romEntry.getIntValue("PokemonMovesetsTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
@@ -1212,7 +1212,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
             movesets.put(pkmn.getNumber(), ourMoves);
         }
-        setMovesLearnt(movesets); // a quick workaround TODO: make this more in line with other getting/loading
+        setMovesLearnt(movesets);
+    }
+
+    @Override
+    public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
         return movesets;
     }
 
