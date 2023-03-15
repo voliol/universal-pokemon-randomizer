@@ -40,6 +40,7 @@ import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import compressors.DSCmp;
 import compressors.DSDecmp;
 
@@ -164,18 +165,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[Gen3Constants.romCodeOffset + 3] = 'T';
             rom[Gen3Constants.headerChecksumOffset] = 0x66;
         }
-        // Wild Pokemon header
-        if (find(rom, Gen3Constants.wildPokemonPointerPrefix) == -1) {
-            return false;
-        }
-        // Map Banks header
-        if (find(rom, Gen3Constants.mapBanksPointerPrefix) == -1) {
-            return false;
-        }
-        // Pokedex Order header
-        if (findMultiple(rom, Gen3Constants.pokedexOrderPointerPrefix).size() != 3) {
-            return false;
-        }
         for (Gen3RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && (rom[Gen3Constants.romVersionOffset] & 0xFF) == re.getVersion()) {
                 return true; // match
@@ -218,16 +207,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 break;
             }
         }
-        addPokedexOrderToRomEntry();
         addPointerBlocksToRomEntry();
         addMoveTutorInfoToRomEntry();
-        addEncounterInfoToRomEntry();
-        addMapInfoToRomEntry();
-    }
-
-    private void addPokedexOrderToRomEntry() {
-        List<Integer> pokedexOrderPrefixes = findMultiple(rom, Gen3Constants.pokedexOrderPointerPrefix);
-        romEntry.putIntValue("PokedexOrder", readPointer(pokedexOrderPrefixes.get(1) + 16));
     }
 
     private void addPointerBlocksToRomEntry() {
@@ -269,25 +250,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             romEntry.putIntValue("MoveTutorCompatibility",
                     romEntry.getIntValue("MoveTutorData") + romEntry.getIntValue("MoveTutorMoves") * 2);
         }
-    }
-
-    private void addEncounterInfoToRomEntry() {
-        // Get wild Pokemon offset
-        int baseWPOffset = findMultiple(rom, Gen3Constants.wildPokemonPointerPrefix).get(0);
-        romEntry.putIntValue("WildPokemon", readPointer(baseWPOffset + 12));
-    }
-
-    private void addMapInfoToRomEntry() {
-        // map banks
-        int baseMapsOffset = findMultiple(rom, Gen3Constants.mapBanksPointerPrefix).get(0);
-        romEntry.putIntValue("MapHeaders", readPointer(baseMapsOffset + 12));
-        this.determineMapBankSizes();
-
-        // map labels
-        String mapLabelsPointerPrefix = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
-                Gen3Constants.frlgMapLabelsPointerPrefix : Gen3Constants.rseMapLabelsPointerPrefix;
-        int baseMLOffset = find(rom, mapLabelsPointerPrefix);
-        romEntry.putIntValue("MapLabels", readPointer(baseMLOffset + 12));
     }
 
     @Override
@@ -2519,10 +2481,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     // For dynamic offsets later
+
+    /**
+     * Finds the offset of a hexstring which appears only once in the rom.<br>
+     * <b>WARNING:</b> this method runs very slowly, at {@code O(rom.length)}. Consider using something else,
+     * such as manual offsets in a {@link RomEntry}/.ini file.
+     */
     private int find(String hexString) {
         return find(rom, hexString);
     }
 
+    /**
+     * Finds the offset of a hexstring which appears only once in the "haystack".<br>
+     * <b>WARNING:</b> this method runs very slowly, at {@code O(haystack.length)}. Consider using something else,
+     * such as manual offsets in a {@link RomEntry}/.ini file.
+     */
     private static int find(byte[] haystack, String hexString) {
         if (hexString.length() % 2 != 0) {
             return -3; // error
@@ -2541,10 +2514,20 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    /**
+     * Finds all offsets of a hexstring in the rom.<br>
+     * <b>WARNING:</b> this method runs very slowly, at {@code O(rom.length)}. Consider using something else,
+     * such as manual offsets in a {@link RomEntry}/.ini file.
+     */
     private List<Integer> findMultiple(String hexString) {
         return findMultiple(rom, hexString);
     }
 
+    /**
+     * Finds all offsets of a hexstring in the "haystack".<br>
+     * <b>WARNING:</b> this method runs very slowly, at {@code O(haystack.length)}. Consider using something else,
+     * such as manual offsets in a {@link RomEntry}/.ini file.
+     */
     private static List<Integer> findMultiple(byte[] haystack, String hexString) {
         if (hexString.length() % 2 != 0) {
             return new ArrayList<>(); // error

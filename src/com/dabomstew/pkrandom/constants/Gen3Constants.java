@@ -49,17 +49,17 @@ public class Gen3Constants {
 
     public static final int pokemonCount = 386;
 
-    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
-
-    public static final String mapBanksPointerPrefix = "80180068890B091808687047";
-
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
 
-    public static final String frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000";
-
-    public static final String rseMapLabelsPointerPrefix = "C078288030BC01BC00470000";
-
-    public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
+    // These pointer prefixes aren't used despite being accurate to all vanilla ROMs. Using them to search was slow
+    // enough to become annoying when unit testing, compared to having the offsets they dug out in the RomEntry .ini files.
+    // They remain here in case you want to fill a new RomEntry (for a ROM hack).
+    @SuppressWarnings("unused")
+    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000",
+            mapBanksPointerPrefix = "80180068890B091808687047",
+            frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000",
+            rseMapLabelsPointerPrefix = "C078288030BC01BC00470000",
+            pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
     // pointer block 1
     public static final int pokemonFrontSpritesPointer = 0x128, pokemonBackSpritesPointer = 0x12C,
