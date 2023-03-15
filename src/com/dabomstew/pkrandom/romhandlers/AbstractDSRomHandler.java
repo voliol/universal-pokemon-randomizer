@@ -465,7 +465,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     
 	@Override
 	protected List<BufferedImage> getAllPokemonImages() {
-        ripAllOtherPokes();
+        //ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
 		String NARCPath = getNARCPath("PokemonGraphics");
