@@ -315,7 +315,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected class DataRewriter<E> {
 
-        private boolean longAlignAdresses;
+        private boolean longAlignAdresses = true;
 
         public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
                                 Function<Integer, Integer> lengthOfOldFunction) {

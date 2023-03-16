@@ -183,6 +183,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         mapLoadingDone = false;
+        determineMapBankSizes();
 
         freeAllUnusedSpace();
         

@@ -657,4 +657,20 @@ public class RomHandlerTest {
         assertEquals(before, romHandler.getTrainerNames());
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void encountersAreNotNull(String romName) {
+        loadROM(romName);
+        assertNotNull(romHandler.getEncounters(false));
+        assertNotNull(romHandler.getEncounters(true));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void encountersAreNotEmpty(String romName) {
+        loadROM(romName);
+        assertFalse(romHandler.getEncounters(false).isEmpty());
+        assertFalse(romHandler.getEncounters(true).isEmpty());
+    }
+
 }
