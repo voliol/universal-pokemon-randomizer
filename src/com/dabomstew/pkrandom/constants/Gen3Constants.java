@@ -138,11 +138,15 @@ public class Gen3Constants {
 
     public static final String rsPokedexScriptIdentifier = "326629010803";
 
+    public static final int rsNatDexScriptLength = 44;
+
     public static final String rsNatDexScriptPart1 = "31720167";
 
     public static final String rsNatDexScriptPart2 = "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
 
     public static final String frlgPokedexScriptIdentifier = "292908258101";
+
+    public static final int frlgNatDexScriptLength = 10;
 
     public static final String frlgNatDexScript = "292908258101256F0103";
 
@@ -161,6 +165,8 @@ public class Gen3Constants {
     public static final String frlgOakAideCheckPrefix = "00B5064800880028";
 
     public static final String ePokedexScriptIdentifier = "3229610825F00129E40816CD40010003";
+
+    public static final int eNatDexScriptLength = 27;
 
     public static final String eNatDexScriptPart1 = "31720167";
 

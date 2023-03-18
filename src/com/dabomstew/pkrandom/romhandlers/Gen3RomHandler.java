@@ -2540,14 +2540,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return RomFunctions.search(haystack, searchFor);
     }
 
-    // TODO: should this not convert to byte[] and then use writeBytes()?
     private void writeHexString(String hexString, int offset) {
         if (hexString.length() % 2 != 0) {
-            return; // error
+            throw new IllegalArgumentException("hexString must have an even number of characters");
         }
-        for (int i = 0; i < hexString.length() / 2; i++) {
-            rom[offset + i] = (byte) Integer.parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
-        }
+        writeBytes(offset, HexFormat.of().parseHex(hexString));
     }
 
     private void attemptObedienceEvolutionPatches() {
@@ -2623,7 +2620,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find free space for our new routine
             int writeSpace;
             try {
-                writeSpace = findAndUnfreeSpace(44); // TODO: "44" should be a constant
+                writeSpace = findAndUnfreeSpace(Gen3Constants.rsNatDexScriptLength);
             } catch (RandomizerIOException e) {
                 log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
@@ -2643,7 +2640,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find free space for our new routine
             int writeSpace;
             try {
-                writeSpace = findAndUnfreeSpace(10); // TODO: "10" should be a constant
+                writeSpace = findAndUnfreeSpace(Gen3Constants.frlgNatDexScriptLength);
             } catch (RandomizerIOException e) {
                 log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
@@ -2685,7 +2682,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 // Change the bne instruction to an unconditional branch to always use National Dex
                 writeByte(oakAideCheckOffs + 1, (byte) 0xE0);
             }
-        } else {
+        } else if (romEntry.getRomType() == Gen3Constants.RomType_Em) {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.ePokedexScriptIdentifier);
             if (pkDexOffset < 0) {
@@ -2702,7 +2699,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find free space for our new routine
             int writeSpace;
             try {
-                writeSpace = findAndUnfreeSpace(27); // TODO: "27" should be a constant
+                writeSpace = findAndUnfreeSpace(Gen3Constants.eNatDexScriptLength);
             } catch (RandomizerIOException e) {
                 log("Patch unsuccessful. " + e.getMessage() + nl);
                 return;
@@ -2711,6 +2708,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeHexString(Gen3Constants.eNatDexScriptPart1, writeSpace);
             writePointer(writeSpace + 4, textPointer);
             writeHexString(Gen3Constants.eNatDexScriptPart2, writeSpace + 8);
+        } else {
+            throw new IllegalStateException("Invalid ROM Type: " + romEntry.getRomType());
         }
         log("Patch successful!" + nl);
     }

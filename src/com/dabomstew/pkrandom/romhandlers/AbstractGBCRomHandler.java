@@ -226,6 +226,10 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
      */
     protected int readPointer(int offset, int bank) {
         int pointer = readWord(offset);
+        return calculateOffset(pointer, bank);
+    }
+
+    protected int calculateOffset(int pointer, int bank) {
         return (pointer % GBConstants.bankSize) + bank * GBConstants.bankSize;
     }
 

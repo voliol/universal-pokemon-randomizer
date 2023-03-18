@@ -2606,10 +2606,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     	
 		// assumes the backsprites are in the same bank as the frontSprites
 		int spriteBank = calculateFrontSpriteBank(pk);
-        int spriteOffset = 0;
-        // TODO: have some solution for the very rare case where the pointer was stored long-term,
-        //  instead of the offset to the pointer...
-		//int spriteOffset = calculateOffset(spriteBank, back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer());
+		int spriteOffset = calculateOffset(back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer(), spriteBank);
 
 		Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
 		sprite.decompress();
