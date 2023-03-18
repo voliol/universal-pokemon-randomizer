@@ -22,6 +22,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             putSpecialKeyMethod("CopyStaticPokemon", Gen3RomEntry::setCopyStaticPokemon);
             putSpecialKeyMethod("StaticPokemon{}", Gen3RomEntry::addStaticPokemon);
             putSpecialKeyMethod("RoamingPokemon{}", Gen3RomEntry::addRoamingPokemon);
+            putSpecialKeyMethod("StarterText[]", Gen3RomEntry::addStarterText);
             putSpecialKeyMethod("TMText[]", Gen3RomEntry::addTMText);
             putSpecialKeyMethod("MoveTutorText[]", Gen3RomEntry::addMoveTutorText);
         }
@@ -59,18 +60,16 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             return new Gen3RomHandler.StaticPokemon(speciesOffsets, levelOffsets);
         }
 
-        protected static Gen3RomHandler.TMOrMTTextEntry parseTMOrMTEntry(String s, boolean isMoveTutor) {
+        protected static Gen3EventTextEntry parseEventTextEntry(String s) {
             if (s.startsWith("[") && s.endsWith("]")) {
                 String[] parts = s.substring(1, s.length() - 1).split(",", 6);
-                Gen3RomHandler.TMOrMTTextEntry tte = new Gen3RomHandler.TMOrMTTextEntry();
-                tte.number = IniEntryReader.parseInt(parts[0]);
-                tte.mapBank = IniEntryReader.parseInt(parts[1]);
-                tte.mapNumber = IniEntryReader.parseInt(parts[2]);
-                tte.personNum = IniEntryReader.parseInt(parts[3]);
-                tte.offsetInScript = IniEntryReader.parseInt(parts[4]);
-                tte.template = parts[5];
-                tte.isMoveTutor = isMoveTutor;
-                return tte;
+                int id = IniEntryReader.parseInt(parts[0]);
+                int mapBank = IniEntryReader.parseInt(parts[1]);
+                int mapNumber = IniEntryReader.parseInt(parts[2]);
+                int personNum = IniEntryReader.parseInt(parts[3]);
+                int offsetInScript = IniEntryReader.parseInt(parts[4]);
+                String template = parts[5];
+                return new Gen3EventTextEntry(id, mapBank, mapNumber, personNum, offsetInScript, template);
             }
             return null;
         }
@@ -82,7 +81,9 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
     private boolean copyStaticPokemon;
     private final List<Gen3RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
     private final List<Gen3RomHandler.StaticPokemon> roamingPokemon = new ArrayList<>();
-    private final List<Gen3RomHandler.TMOrMTTextEntry> tmmtTexts = new ArrayList<>();
+    private final List<Gen3EventTextEntry> starterTexts = new ArrayList<>();
+    private final List<Gen3EventTextEntry> tmTexts = new ArrayList<>();
+    private final List<Gen3EventTextEntry> moveTutorTexts = new ArrayList<>();
 
     public Gen3RomEntry(String name) {
         super(name);
@@ -94,7 +95,9 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         this.copyStaticPokemon = original.copyStaticPokemon;
         staticPokemon.addAll(original.staticPokemon);
         roamingPokemon.addAll(original.roamingPokemon);
-        tmmtTexts.addAll(original.tmmtTexts);
+        starterTexts.addAll(original.starterTexts);
+        tmTexts.addAll(original.tmTexts);
+        moveTutorTexts.addAll(original.moveTutorTexts);
     }
 
     @Override
@@ -140,21 +143,36 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         roamingPokemon.add(Gen3RomEntryReader.parseStaticPokemon(s));
     }
 
-    public List<Gen3RomHandler.TMOrMTTextEntry> getTMMTTexts() {
-        return Collections.unmodifiableList(tmmtTexts);
+    public List<Gen3EventTextEntry> getStarterTexts() {
+        return starterTexts;
     }
 
-    private void addTMText(String s) {
-        Gen3RomHandler.TMOrMTTextEntry tte = Gen3RomEntryReader.parseTMOrMTEntry(s, false);
-        if (tte != null) {
-            tmmtTexts.add(tte);
+    private void addStarterText(String s) {
+        Gen3EventTextEntry ste = Gen3RomEntryReader.parseEventTextEntry(s);
+        if (ste != null) {
+            starterTexts.add(ste);
         }
     }
 
+    public List<Gen3EventTextEntry> getTMTexts() {
+        return Collections.unmodifiableList(tmTexts);
+    }
+
+    private void addTMText(String s) {
+        Gen3EventTextEntry ete = Gen3RomEntryReader.parseEventTextEntry(s);
+        if (ete != null) {
+            tmTexts.add(ete);
+        }
+    }
+
+    public List<Gen3EventTextEntry> getMoveTutorTexts() {
+        return Collections.unmodifiableList(tmTexts);
+    }
+
     private void addMoveTutorText(String s) {
-        Gen3RomHandler.TMOrMTTextEntry tte = Gen3RomEntryReader.parseTMOrMTEntry(s, true);
-        if (tte != null) {
-            tmmtTexts.add(tte);
+        Gen3EventTextEntry ete = Gen3RomEntryReader.parseEventTextEntry(s);
+        if (ete != null) {
+            moveTutorTexts.add(ete);
         }
     }
 
@@ -169,8 +187,13 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             } else {
                 putIntValue("StaticPokemonSupport", 0);
             }
+            // not used anywhere yet TODO
+            if (getIntValue("CopyStarterText") == 1) {
+                starterTexts.addAll(gen3Other.starterTexts);
+            }
             if (getIntValue("CopyTMText") == 1) {
-                tmmtTexts.addAll(gen3Other.tmmtTexts);
+                tmTexts.addAll(gen3Other.tmTexts);
+                moveTutorTexts.addAll(gen3Other.moveTutorTexts);
             }
             tableFile = gen3Other.tableFile;
         }

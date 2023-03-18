@@ -138,6 +138,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
                 && (rom[offset + len] == GBConstants.stringPrintedTextEnd || rom[offset + len] == GBConstants.stringPrintedTextPromptEnd)) {
             len++;
         }
+        len++;
         return len;
     }
 

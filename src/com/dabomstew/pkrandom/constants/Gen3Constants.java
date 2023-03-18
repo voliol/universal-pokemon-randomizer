@@ -86,7 +86,7 @@ public class Gen3Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
             bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23;
 
-    public static final int textTerminator = 0xFF, textVariable = 0xFD;
+    public static final byte textTerminator = (byte) 0xFF, textVariable = (byte) 0xFD, textPadding = (byte) 0x00;
 
     public static final byte freeSpaceByte = (byte) 0xFF;
 

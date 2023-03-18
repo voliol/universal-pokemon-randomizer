@@ -209,7 +209,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         String[] moveNames = new String[moveCount + 1];
         for (int i = 1; i <= moveCount; i++) {
             moveNames[i] = readVariableLengthString(offset, false);
-            offset += lengthOfStringAt(offset, false) + 1;
+            offset += lengthOfStringAt(offset, false);
         }
         return moveNames;
     }
@@ -1727,7 +1727,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int offset = offsets[offsets.length - 1];
         for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
             String name = readVariableLengthString(offset, false);
-            offset += lengthOfStringAt(offset, false) + 1;
+            offset += lengthOfStringAt(offset, false);
             tcNames.add(name);
         }
         return tcNames;
@@ -1750,7 +1750,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int offset = offsets[offsets.length - 1];
         for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
             String name = readVariableLengthString(offset, false);
-            offset += lengthOfStringAt(offset, false) + 1;
+            offset += lengthOfStringAt(offset, false);
             if (Gen1Constants.singularTrainers.contains(j)) {
                 trainerNames.add(name);
             }
@@ -1765,7 +1765,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             Iterator<String> trainerNamesI = trainerNames.iterator();
             int offset = offsets[offsets.length - 1];
             for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-                int oldLength = lengthOfStringAt(offset, false) + 1;
+                int oldLength = lengthOfStringAt(offset, false);
                 if (Gen1Constants.singularTrainers.contains(j)) {
                     String newName = trainerNamesI.next();
                     writeFixedLengthString(newName, offset, oldLength);
@@ -1795,7 +1795,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 int offset = offsets[i];
                 for (int j = 0; j < Gen1Constants.tclassesCounts[i]; j++) {
                     String name = readVariableLengthString(offset, false);
-                    offset += lengthOfStringAt(offset, false) + 1;
+                    offset += lengthOfStringAt(offset, false);
                     if (i == 0 || !Gen1Constants.singularTrainers.contains(j)) {
                         trainerClassNames.add(name);
                     }
@@ -1805,7 +1805,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             int offset = offsets[0];
             for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
                 String name = readVariableLengthString(offset, false);
-                offset += lengthOfStringAt(offset, false) + 1;
+                offset += lengthOfStringAt(offset, false);
                 if (!Gen1Constants.singularTrainers.contains(j)) {
                     trainerClassNames.add(name);
                 }
@@ -1823,7 +1823,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 for (int i = 0; i < offsets.length; i++) {
                     int offset = offsets[i];
                     for (int j = 0; j < Gen1Constants.tclassesCounts[i]; j++) {
-                        int oldLength = lengthOfStringAt(offset, false) + 1;
+                        int oldLength = lengthOfStringAt(offset, false);
                         if (i == 0 || !Gen1Constants.singularTrainers.contains(j)) {
                             String newName = tcNamesIter.next();
                             writeFixedLengthString(newName, offset, oldLength);
@@ -1834,7 +1834,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             } else {
                 int offset = offsets[0];
                 for (int j = 0; j < Gen1Constants.tclassesCounts[1]; j++) {
-                    int oldLength = lengthOfStringAt(offset, false) + 1;
+                    int oldLength = lengthOfStringAt(offset, false);
                     if (!Gen1Constants.singularTrainers.contains(j)) {
                         String newName = tcNamesIter.next();
                         writeFixedLengthString(newName, offset, oldLength);

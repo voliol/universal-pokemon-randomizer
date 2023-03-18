@@ -237,7 +237,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         String[] moveNames = new String[Gen2Constants.moveCount + 1];
         for (int i = 1; i <= Gen2Constants.moveCount; i++) {
             moveNames[i] = readVariableLengthString(offset, false);
-            offset += lengthOfStringAt(offset, false) + 1;
+            offset += lengthOfStringAt(offset, false);
         }
         return moveNames;
     }
@@ -978,7 +978,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         Trainer tr = new Trainer();
         tr.offset = offset;
         tr.name = readVariableLengthString(offset, false);
-        offset += lengthOfStringAt(offset, false) + 1;
+        offset += lengthOfStringAt(offset, false);
         int dataType = rom[offset] & 0xFF;
         tr.poketype = dataType;
         offset++;
@@ -1910,7 +1910,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         List<String> trainerClassNames = new ArrayList<>();
         for (int j = 0; j < amount; j++) {
             String name = readVariableLengthString(offset, false);
-            offset += lengthOfStringAt(offset, false) + 1;
+            offset += lengthOfStringAt(offset, false);
             trainerClassNames.add(name);
         }
         return trainerClassNames;
@@ -1928,7 +1928,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int offset = romEntry.getIntValue("TrainerClassNamesOffset");
             Iterator<String> trainerClassNamesI = trainerClassNames.iterator();
             for (int j = 0; j < amount; j++) {
-                int len = lengthOfStringAt(offset, false) + 1;
+                int len = lengthOfStringAt(offset, false);
                 String newName = trainerClassNamesI.next();
                 writeFixedLengthString(newName, offset, len);
                 offset += len;

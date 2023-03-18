@@ -336,13 +336,6 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void movesAreNotNull(String romName) {
-        loadROM(romName);
-        assertNotNull(romHandler.getMoves());
-    }
-
-    @ParameterizedTest
-    @MethodSource("getRomNames")
     public void movesAreNotEmpty(String romName) {
         loadROM(romName);
         System.out.println(romHandler.getMoves());
@@ -436,13 +429,6 @@ public class RomHandlerTest {
         List<Integer> before = new ArrayList<>(moveTutorMoves);
         romHandler.setMoveTutorMoves(moveTutorMoves);
         assertEquals(before, romHandler.getMoveTutorMoves());
-    }
-
-    @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void trainersAreNotNull(String romName) {
-        loadROM(romName);
-        assertNotNull(romHandler.getTrainers());
     }
 
     @ParameterizedTest
@@ -634,13 +620,6 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void trainerNamesAreNotNull(String romName) {
-        loadROM(romName);
-        assertNotNull(romHandler.getTrainerNames());
-    }
-
-    @ParameterizedTest
-    @MethodSource("getRomNames")
     public void trainerNamesAreNotEmpty(String romName) {
         loadROM(romName);
         assertFalse(romHandler.getTrainerNames().isEmpty());
@@ -659,18 +638,19 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void encountersAreNotNull(String romName) {
-        loadROM(romName);
-        assertNotNull(romHandler.getEncounters(false));
-        assertNotNull(romHandler.getEncounters(true));
-    }
-
-    @ParameterizedTest
-    @MethodSource("getRomNames")
     public void encountersAreNotEmpty(String romName) {
         loadROM(romName);
         assertFalse(romHandler.getEncounters(false).isEmpty());
         assertFalse(romHandler.getEncounters(true).isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void writesStarterText(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) == 3);
+        loadROM(romName);
+        List<Pokemon> starters = romHandler.getStarters();
+        assertThrows(RuntimeException.class, () -> romHandler.setStarters(starters), "success");
     }
 
 }
