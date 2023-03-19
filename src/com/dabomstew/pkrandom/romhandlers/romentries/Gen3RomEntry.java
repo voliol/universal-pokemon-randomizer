@@ -166,7 +166,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
     }
 
     public List<Gen3EventTextEntry> getMoveTutorTexts() {
-        return Collections.unmodifiableList(tmTexts);
+        return Collections.unmodifiableList(moveTutorTexts);
     }
 
     private void addMoveTutorText(String s) {

@@ -176,6 +176,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         mapLoadingDone = false;
         determineMapBankSizes();
+        preprocessMaps();
+        mapLoadingDone = true;
 
         freeAllUnusedSpace();
         
@@ -1216,7 +1218,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeStarterText(List<Pokemon> starters) {
-        writeEventText(romEntry.getTMTexts(), id -> {
+        writeEventText(romEntry.getStarterTexts(), id -> {
             Pokemon starter = starters.get(id);
             Type t = starter.getPrimaryType();
             if (t == Type.NORMAL && starter.getSecondaryType() != null) {
@@ -2424,7 +2426,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         for (Gen3EventTextEntry ete : eventTextEntries) {
             // TODO: what's the terminology here? "replacers", "toReplace", ".replace()"
             //  easily becomes too much on the eyes
-            System.out.println(ete);
+
             // create the new text
             Map<String, String> replacements = new HashMap<>();
             String[] replacers = idToReplacers.apply(ete.getID());
@@ -2451,58 +2453,45 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    /**
+     * Creates/prints a full event entry with template, from whatever is in the ROM
+     * @param prefix
+     * @param ete
+     * @param idToReplacers
+     * @param toReplace
+     */
+    // TODO: think about method name
+    private void printEventEntryText(String prefix, Gen3EventTextEntry ete, Function<Integer, String[]> idToReplacers,
+                                     String[] toReplace) {
+        prefix = "TMText";
+        String template = readVariableLengthString(readPointer(ete.getActualPointerOffset()));
+        template = template.replace("\\n", " ");
+        for (int i = 0; i < toReplace.length; i++) {
+            template = template.replace(idToReplacers.apply(ete.getID())[i], toReplace[i]);
+        }
+        System.out.printf("%s[]=[%d,%d,%d,%d,0x%x,%s]\n", prefix, ete.getID(), ete.getMapBank(), ete.getMapNumber(),
+                ete.getPersonNum(), ete.getOffsetInScript(), template);
+    }
+
     private void writeTMText(List<Integer> moveIndexes) {
         writeEventText(romEntry.getTMTexts(), id -> {
             int moveIndex = moveIndexes.get(id - 1);
-            return new String[]{this.moves[moveIndex].name};
+            return new String[]{moves[moveIndex].name};
         }, new String[]{"[move]"}, "TM");
     }
 
     private void writeMoveTutorText(List<Integer> moveIndexes) {
-        writeEventText(romEntry.getTMTexts(), id -> {
+        System.out.println(moveIndexes);
+        System.out.println(Arrays.stream(moves).map(m -> m == null ? "null" : m.name).toList());
+        for (int i = 0; i < moveIndexes.size(); i++) {
+            System.out.println(i + ": " + moveIndexes.get(i) + " => " + moves[moveIndexes.get(i)].name);
+        }
+
+        writeEventText(romEntry.getMoveTutorTexts(), id -> {
             int moveIndex = moveIndexes.get(id);
-            return new String[]{this.moves[moveIndex].name};
+            return new String[]{moves[moveIndex].name};
         }, new String[]{"[move]"}, "MoveTutor");
     }
-
-//    /**
-//     * Writes the (event?) text for TM or move tutor moves.
-//     * @param moveIndexes A list of move indexes
-//     * @param moveTutor false: TM / true: Move tutor
-//     */
-//    private void writeTMOrMTText(List<Integer> moveIndexes, boolean moveTutor) {
-//        String nl = System.getProperty("line.separator"); // TODO: should just "/n" do?
-//        String desc = moveTutor ? "Move Tutor" : "TM";
-//		for (TMOrMTTextEntry tte : romEntry.getTMMTTexts()) {
-//			if (tte.actualOffset > 0 && (tte.isMoveTutor == moveTutor)) {
-//				// create the new text
-//				int oldPointer = readPointer(tte.actualOffset);
-//                System.out.println(tte + ", " + oldPointer);
-//                if (oldPointer < 0 || oldPointer >= rom.length) {
-//                    throw new RuntimeException(desc + " text update failed: couldn't read a " + desc
-//                            + " text pointer." + nl);
-//                }
-//                int moveIndex = moveIndexes.get(moveTutor ? tte.id : tte.id - 1);
-//                String moveName = this.moves[moveIndex].name;
-//				// temporarily use underscores to stop the move name being split
-//				String tmpMoveName = moveName.replace(' ', '_');
-//				String unformatted = tte.template.replace("[move]", tmpMoveName);
-//				String newText = RomFunctions.formatTextWithReplacements(unformatted, null, "\\n",
-//                        "\\l", "\\p", Gen3Constants.regularTextboxCharsPerLine, ssd);
-//				// get rid of the underscores
-//				newText = newText.replace(tmpMoveName, moveName);
-//
-//				int[] secondaryPointerOffsets = searchForPointerCopies(tte.actualOffset);
-//				try {
-//					rewriteVariableLengthString(tte.actualOffset, newText, secondaryPointerOffsets);
-//				} catch (RandomizerIOException e) {
-//					log("Couldn't insert new " + desc + " text. " + e.getMessage() + nl);
-//					return;
-//				}
-//
-//			}
-//		}
-//	}
 
     @Override
     public Map<Pokemon, boolean[]> getMoveTutorCompatibility() {

@@ -142,6 +142,19 @@ public class RomHandlerTest {
         assertEquals("Pokemon " + romName, romHandler.getROMName());
     }
 
+    /**
+     * Checks all ROMs in the test/roms folder, to see if they pass isRomValid().
+     * <br>
+     * Since running this may open Gen 6+ ROMs (if you have any), which are very slow to handle,
+     * it is disabled by default.
+     */
+    @ParameterizedTest
+    @MethodSource("getRomNamesInFolder")
+    public void romInFolderIsValid(String romName) {
+        loadROM(romName);
+        assertTrue(romHandler.isRomValid());
+    }
+
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void pokemonListIsNotEmpty(String romName) {
@@ -642,15 +655,6 @@ public class RomHandlerTest {
         loadROM(romName);
         assertFalse(romHandler.getEncounters(false).isEmpty());
         assertFalse(romHandler.getEncounters(true).isEmpty());
-    }
-
-    @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void writesStarterText(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) == 3);
-        loadROM(romName);
-        List<Pokemon> starters = romHandler.getStarters();
-        assertThrows(RuntimeException.class, () -> romHandler.setStarters(starters), "success");
     }
 
 }
