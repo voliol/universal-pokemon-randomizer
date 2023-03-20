@@ -1292,21 +1292,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void writeFRLGStarterText(List<Integer> foundTexts, Pokemon pkmn, String oakText) {
-        if (foundTexts.size() > 0) {
-            int offset = foundTexts.get(0);
-            String pokeName = pkmn.getName();
-            String pokeType = pkmn.getPrimaryType() == null ? "???" : pkmn.getPrimaryType().toString();
-            if (pokeType.equals("NORMAL") && pkmn.getSecondaryType() != null) {
-                pokeType = pkmn.getSecondaryType().toString();
-            }
-            String speech = pokeName + " is your choice.\\pSo, \\v01, " + oakText + pokeType + " POKéMON " + pokeName
-                    + "?";
-            // TODO: refactor to rewriteVariableLengthString?
-            writeFixedLengthString(speech, offset, lengthOfStringAt(offset));
-        }
-    }
-
     @Override
     public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
         if (!mapLoadingDone) {
@@ -2455,7 +2440,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     // TODO: think about method name
     private void printEventEntryText(String prefix, Gen3EventTextEntry ete, Function<Integer, String[]> idToReplacers,
                                      String[] toReplace) {
-        prefix = "StarterText";
+        prefix = "MoveTutorText";
         String template = readVariableLengthString(readPointer(ete.getActualPointerOffset()));
         template = template.replace("\\n", " ");
         for (int i = 0; i < toReplace.length; i++) {
