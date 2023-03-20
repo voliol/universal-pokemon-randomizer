@@ -1218,6 +1218,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeStarterText(List<Pokemon> starters) {
+        System.out.println(starters.stream().map(Pokemon::getName).toList());
         writeEventText(romEntry.getStarterTexts(), id -> {
             Pokemon starter = starters.get(id);
             Type t = starter.getPrimaryType();
@@ -1226,17 +1227,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
             return new String[] {starter.getName(), t.toString()};
             }, new String[] {"[starter]", "[type]"}, "Starter");
-
-//        if (romEntry.getRomCode().charAt(3) != 'J' && romEntry.getRomCode().charAt(3) != 'B') {
-//            // Update PROF. Oak's descriptions for each starter
-//            // First result for each STARTERNAME is the text we need
-//            List<Integer> bulbasaurFoundTexts = RomFunctions.search(rom, translateString(pokes[Gen3Constants.frlgBaseStarter1].getName().toUpperCase()));
-//            List<Integer> charmanderFoundTexts = RomFunctions.search(rom, translateString(pokes[Gen3Constants.frlgBaseStarter2].getName().toUpperCase()));
-//            List<Integer> squirtleFoundTexts = RomFunctions.search(rom, translateString(pokes[Gen3Constants.frlgBaseStarter3].getName().toUpperCase()));
-//            writeFRLGStarterText(bulbasaurFoundTexts, starters.get(0), "you want to go with\\nthe ");
-//            writeFRLGStarterText(charmanderFoundTexts, starters.get(1), "you’re claiming the\\n");
-//            writeFRLGStarterText(squirtleFoundTexts, starters.get(2), "you’ve decided on the\\n");
-//        }
     }
 
     @Override
@@ -2427,6 +2417,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // TODO: what's the terminology here? "replacers", "toReplace", ".replace()"
             //  easily becomes too much on the eyes
 
+            printEventEntryText("foo", ete, idToReplacers, toReplace);
+
             // create the new text
             Map<String, String> replacements = new HashMap<>();
             String[] replacers = idToReplacers.apply(ete.getID());
@@ -2463,14 +2455,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     // TODO: think about method name
     private void printEventEntryText(String prefix, Gen3EventTextEntry ete, Function<Integer, String[]> idToReplacers,
                                      String[] toReplace) {
-        prefix = "TMText";
+        prefix = "StarterText";
         String template = readVariableLengthString(readPointer(ete.getActualPointerOffset()));
         template = template.replace("\\n", " ");
         for (int i = 0; i < toReplace.length; i++) {
             template = template.replace(idToReplacers.apply(ete.getID())[i], toReplace[i]);
         }
-        System.out.printf("%s[]=[%d,%d,%d,%d,0x%x,%s]\n", prefix, ete.getID(), ete.getMapBank(), ete.getMapNumber(),
-                ete.getPersonNum(), ete.getOffsetInScript(), template);
+        System.out.printf("%s[]=[%d,%d,%d,%d,%s,%s]\n", prefix, ete.getID(), ete.getMapBank(), ete.getMapNumber(),
+                ete.getPersonNum(), ete.relativePointerOffsetsToString(), template);
     }
 
     private void writeTMText(List<Integer> moveIndexes) {
@@ -2481,12 +2473,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeMoveTutorText(List<Integer> moveIndexes) {
-        System.out.println(moveIndexes);
-        System.out.println(Arrays.stream(moves).map(m -> m == null ? "null" : m.name).toList());
-        for (int i = 0; i < moveIndexes.size(); i++) {
-            System.out.println(i + ": " + moveIndexes.get(i) + " => " + moves[moveIndexes.get(i)].name);
-        }
-
         writeEventText(romEntry.getMoveTutorTexts(), id -> {
             int moveIndex = moveIndexes.get(id);
             return new String[]{moves[moveIndex].name};
@@ -3472,6 +3458,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         for (int p = 0; p < pCount; p++) {
                             int pSprite = rom[peopleOffset + p * 24 + 1];
                             int pointerOffset = peopleOffset + p * 24 + 16;
+                            if (bank == 4 && map == 3) {
+                                System.out.println("Bank: " + bank + ", Map: " + map + ", Person: " + (p + 1) + " => "
+                                        + Integer.toHexString(readPointer(pointerOffset, true)));
+                            }
                             if (pSprite == itemBall && readPointer(pointerOffset, true) != -1) {
                                 // Get script and look inside
                                 int scriptOffset = readPointer(pointerOffset);
@@ -3496,7 +3486,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 //                                        && ete.id == 7) {
 //                                    scriptOffset = readPointer(scriptOffset + 0x1F);
 //                                }
-                            ete.setActualPointerOffset(scriptOffset + ete.getOffsetInScript());
+                            int[] relPointerOffsets = ete.getRelativePointerOffsets();
+                            for (int i = 0; i < relPointerOffsets.length - 1; i++) {
+                                scriptOffset = readPointer(scriptOffset + relPointerOffsets[i]);
+                            }
+                            ete.setActualPointerOffset(scriptOffset + relPointerOffsets[relPointerOffsets.length - 1]);
 
                         }
                     }

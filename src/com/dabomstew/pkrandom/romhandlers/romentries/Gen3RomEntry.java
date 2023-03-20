@@ -67,11 +67,24 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
                 int mapBank = IniEntryReader.parseInt(parts[1]);
                 int mapNumber = IniEntryReader.parseInt(parts[2]);
                 int personNum = IniEntryReader.parseInt(parts[3]);
-                int offsetInScript = IniEntryReader.parseInt(parts[4]);
+                int[] offsetInScript = parseOffsetInScript(parts[4]);
                 String template = parts[5];
                 return new Gen3EventTextEntry(id, mapBank, mapNumber, personNum, offsetInScript, template);
             }
             return null;
+        }
+
+        protected static int[] parseOffsetInScript(String s) {
+            if (s.startsWith("[") && s.endsWith("]")) {
+                String[] parts = s.substring(1, s.length() - 1).split(";");
+                int[] offsetInScript = new int[parts.length];
+                for (int i = 0; i < parts.length; i++) {
+                    offsetInScript[i] = parseInt(parts[i]);
+                }
+                return offsetInScript;
+            } else {
+                return new int[]{parseInt(s)};
+            }
         }
     }
 
@@ -187,7 +200,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             } else {
                 putIntValue("StaticPokemonSupport", 0);
             }
-            // not used anywhere yet TODO
+            // TODO: add the other FireRed (F, G, S, I) texts, then remove them copying from FR(U)
             if (getIntValue("CopyStarterText") == 1) {
                 starterTexts.addAll(gen3Other.starterTexts);
             }

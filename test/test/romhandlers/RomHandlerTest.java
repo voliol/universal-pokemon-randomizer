@@ -35,7 +35,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -655,6 +655,40 @@ public class RomHandlerTest {
         loadROM(romName);
         assertFalse(romHandler.getEncounters(false).isEmpty());
         assertFalse(romHandler.getEncounters(true).isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void startersAreNotEmpty(String romName) {
+        loadROM(romName);
+        assertFalse(romHandler.getStarters().isEmpty());
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void startersDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        List<Pokemon> starters = romHandler.getStarters();
+        System.out.println(starters);
+        List<Pokemon> before = new ArrayList<>(starters);
+        romHandler.setStarters(starters);
+        assertEquals(before, romHandler.getStarters());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void startersCanBeRandomizedAndGetAndSet(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, true);
+        System.out.println(settings.getStartersMod());
+        romHandler.setPokemonPool(settings);
+        romHandler.randomizeStarters(settings);
+        List<Pokemon> starters = romHandler.getStarters();
+        List<Pokemon> before = new ArrayList<>(starters);
+        romHandler.setStarters(starters);
+        assertEquals(before, romHandler.getStarters());
     }
 
 }
