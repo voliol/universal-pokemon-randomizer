@@ -3344,8 +3344,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             int introPokemon = pokedexToInternal[introPk.getNumber()];
-            int frontSprites = romEntry.getIntValue("FrontSprites");
-            int palettes = romEntry.getIntValue("PokemonPalettes");
+            int frontSprites = romEntry.getIntValue("PokemonFrontSprites");
+            int palettes = romEntry.getIntValue("PokemonNormalPalettes");
 
             rom[romEntry.getIntValue("IntroCryOffset")] = (byte) introPokemon;
             rom[romEntry.getIntValue("IntroOtherOffset")] = (byte) introPokemon;
