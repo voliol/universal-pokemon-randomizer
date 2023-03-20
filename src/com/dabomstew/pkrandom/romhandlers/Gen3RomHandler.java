@@ -3458,10 +3458,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         for (int p = 0; p < pCount; p++) {
                             int pSprite = rom[peopleOffset + p * 24 + 1];
                             int pointerOffset = peopleOffset + p * 24 + 16;
-                            if (bank == 4 && map == 3) {
-                                System.out.println("Bank: " + bank + ", Map: " + map + ", Person: " + (p + 1) + " => "
-                                        + Integer.toHexString(readPointer(pointerOffset, true)));
-                            }
                             if (pSprite == itemBall && readPointer(pointerOffset, true) != -1) {
                                 // Get script and look inside
                                 int scriptOffset = readPointer(pointerOffset);
@@ -3477,15 +3473,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         }
 
                         for (Gen3EventTextEntry ete : eventTextEntriesByBankAndMap.get(bank).get(map)) {
+                            System.out.println(ete);
                             int scriptOffset = readPointer(peopleOffset + (ete.getPersonNum() - 1) * 24 + 16);
-                            // TODO: what's with these?
-//                                if (romEntry.getRomType() == Gen3Constants.RomType_FRLG && ete.isMoveTutor
-//                                        && (ete.id == 5 || (ete.id >= 8 && ete.id <= 11))) {
-//                                    scriptOffset = readPointer(scriptOffset + 1);
-//                                } else if (romEntry.getRomType() == Gen3Constants.RomType_FRLG && ete.isMoveTutor
-//                                        && ete.id == 7) {
-//                                    scriptOffset = readPointer(scriptOffset + 0x1F);
-//                                }
                             int[] relPointerOffsets = ete.getRelativePointerOffsets();
                             for (int i = 0; i < relPointerOffsets.length - 1; i++) {
                                 scriptOffset = readPointer(scriptOffset + relPointerOffsets[i]);
@@ -3515,7 +3504,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private List<List<List<Gen3EventTextEntry>>> prepareEventTextEntriesByBankAndMap(int bankCount, int[] bankMapsCount) {
-        System.out.println("bankCount: " + bankCount);
         List<List<List<Gen3EventTextEntry>>> byBankAndMap = new ArrayList<>(bankCount);
         for (int mapCount : bankMapsCount) {
             List<List<Gen3EventTextEntry>> byMap = new ArrayList<>(mapCount);
