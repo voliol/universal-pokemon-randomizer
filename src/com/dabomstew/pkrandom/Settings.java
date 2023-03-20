@@ -984,7 +984,7 @@ public class Settings {
             this.setAllowWonderGuard(false);
         }
 
-        if (!(rh instanceof Gen2RomHandler || rh instanceof Gen3RomHandler)) {
+        if (!rh.supportsStarterHeldItems()) {
             // starter held items don't exist
             this.setRandomizeStartersHeldItems(false);
             this.setBanBadRandomStarterHeldItems(false);
