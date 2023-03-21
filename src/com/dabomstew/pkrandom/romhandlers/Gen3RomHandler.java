@@ -2275,7 +2275,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 	}
 
-	private boolean writeTMItemText(List<Integer> moveIndexes) {
+	private void writeTMItemText(List<Integer> moveIndexes) {
 		// Item descriptions
 		if (romEntry.getIntValue("MoveDescriptions") > 0) {
 			// JP blocked for now - uses different item structure anyway
@@ -2297,12 +2297,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				} catch (RandomizerIOException e) {
 					String nl = System.getProperty("line.separator");
 					log("Couldn't insert new item description. " + e.getMessage() + nl);
-					return true;
+					return;
 				}
 			}
 		}
-		return false;
-	}
+    }
 
 	private int[] searchForPointerCopies(int pointerOffset) {
 		// Somewhat foolhardy, since other data around *could* coincidentally be
@@ -2396,21 +2395,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeEventText(List<Gen3EventTextEntry> eventTextEntries, Function<Integer, String[]> idToReplacers,
-                                String[] toReplace, String description) {
+                                String[] targets, String description) {
         String nl = System.getProperty("line.separator"); // TODO: should just "/n" do?
         for (Gen3EventTextEntry ete : eventTextEntries) {
-            // TODO: what's the terminology here? "replacers", "toReplace", ".replace()"
-            //  easily becomes too much on the eyes
-
-            printEventEntryText("foo", ete, idToReplacers, toReplace);
-
             // create the new text
             Map<String, String> replacements = new HashMap<>();
             String[] replacers = idToReplacers.apply(ete.getID());
-            for (int i = 0; i < toReplace.length; i++) {
+            for (int i = 0; i < targets.length; i++) {
                 // to prevent them being line-broken
                 String spaceless = replacers[i].replace(' ', '_');
-                replacements.put(toReplace[i], spaceless);
+                replacements.put(targets[i], spaceless);
             }
             String newText = RomFunctions.formatTextWithReplacements(ete.getTemplate(), replacements, "\\n",
                     "\\l", "\\p", Gen3Constants.regularTextboxCharsPerLine, ssd);
@@ -2431,22 +2425,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     /**
-     * Creates/prints a full event entry with template, from whatever is in the ROM
-     * @param prefix
-     * @param ete
-     * @param idToReplacers
-     * @param toReplace
+     * Takes a {@link Gen3EventTextEntry}, and reads the text in ROM it points to, creating a new template and
+     * thereby a new .ini file "entry". Should be run on an un-randomized ROM for the best effect.
      */
-    // TODO: think about method name
-    private void printEventEntryText(String prefix, Gen3EventTextEntry ete, Function<Integer, String[]> idToReplacers,
-                                     String[] toReplace) {
-        prefix = "MoveTutorText";
+    @SuppressWarnings("unused")
+    private String eventEntryToIniText(String prefix, Gen3EventTextEntry ete, Function<Integer, String[]> idToReplacers,
+                                       String[] targets) {
         String template = readVariableLengthString(readPointer(ete.getActualPointerOffset()));
         template = template.replace("\\n", " ");
-        for (int i = 0; i < toReplace.length; i++) {
-            template = template.replace(idToReplacers.apply(ete.getID())[i], toReplace[i]);
+        for (int i = 0; i < targets.length; i++) {
+            template = template.replace(idToReplacers.apply(ete.getID())[i], targets[i]);
         }
-        System.out.printf("%s[]=[%d,%d,%d,%d,%s,%s]\n", prefix, ete.getID(), ete.getMapBank(), ete.getMapNumber(),
+        return String.format("%s[]=[%d,%d,%d,%d,%s,%s]\n", prefix, ete.getID(), ete.getMapBank(), ete.getMapNumber(),
                 ete.getPersonNum(), ete.relativePointerOffsetsToString(), template);
     }
 
