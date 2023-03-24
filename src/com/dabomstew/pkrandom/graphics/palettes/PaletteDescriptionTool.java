@@ -441,16 +441,16 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			front = gbRomHandler.getPokemonImage(pk, false, shiny, false, false);
 			back = gbRomHandler.getPokemonImage(pk, true, shiny, false, false);
 		} else if (romHandler instanceof AbstractDSRomHandler dsRomHandler) {
-			String NARCpath = dsRomHandler.getNARCPath("PokemonGraphics");
-			NARCArchive pokeGraphicsNARC = null;
-			try {
-				pokeGraphicsNARC = dsRomHandler.readNARC(NARCpath);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			front = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, shiny, false, false);
-			back = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, true, shiny, false, false);
+//			String NARCpath = dsRomHandler.getNARCPath("PokemonGraphics"); //TODO: getNARCPath does not exist any more
+//			NARCArchive pokeGraphicsNARC = null;
+//			try {
+//				pokeGraphicsNARC = dsRomHandler.readNARC(NARCpath);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			front = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, shiny, false, false);
+//			back = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, true, shiny, false, false);
 		}
 		return GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back}});
 	}

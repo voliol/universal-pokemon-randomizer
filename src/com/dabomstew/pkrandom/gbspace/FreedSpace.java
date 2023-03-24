@@ -30,18 +30,19 @@ import java.util.LinkedList;
  **/
 public class FreedSpace {
 
-    // TODO: add bank handling for Gen I/II games. Until then, functionality of this class should not be used with them.
+    private static final String ALREADY_FREED_EXCEPTION_MESSAGE =  "Can't free a space that is already freed. " +
+            "This is a safety measure to prevent bad usage of free().";
 
-    private static class FreedChunk {
+    protected static class FreedChunk {
 
-        private int start, end;
+        public int start, end;
 
-        private FreedChunk(int offset, int end) {
+        public FreedChunk(int offset, int end) {
             this.start = offset;
             this.end = end;
         }
 
-        private int getLength() {
+        public int getLength() {
             return end - start + 1;
         }
 
@@ -52,7 +53,7 @@ public class FreedSpace {
 
     }
 
-    private final LinkedList<FreedChunk> freedChunks = new LinkedList<>();
+    protected final LinkedList<FreedChunk> freedChunks = new LinkedList<>();
 
     public void free(int start, int length) {
         if (length < 1) {
@@ -82,11 +83,10 @@ public class FreedSpace {
         }
     }
 
-    private void addFreedChunkBefore(FreedChunk toFree, int i) {
+    protected final void addFreedChunkBefore(FreedChunk toFree, int i) {
         FreedChunk neighbor = freedChunks.get(i);
         if (toFree.end >= neighbor.start) {
-            throw new RuntimeException(
-                    "Can't free a space that is already freed. This is a safety measure to prevent bad usage of freeSpace().");
+            throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
         }
 
         if (toFree.end == neighbor.start - 1) {
@@ -96,11 +96,10 @@ public class FreedSpace {
         }
     }
 
-    private boolean addFreedChunkAfterOrBetween(FreedChunk toFree, int i) {
+    protected final boolean addFreedChunkAfterOrBetween(FreedChunk toFree, int i) {
         FreedChunk leftNeighbor = freedChunks.get(i);
         if (leftNeighbor.end >= toFree.start) {
-            throw new RuntimeException(
-                    "Can't free a space that is already freed. This is a safety measure to prevent bad usage of freeSpace().");
+            throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
         }
 
         if (leftNeighbor.end == toFree.start - 1) {
@@ -110,7 +109,10 @@ public class FreedSpace {
 
             } else {
                 FreedChunk rightNeighbor = freedChunks.get(i + 1);
-                if (toFree.end == rightNeighbor.start - 1) {
+                if (toFree.end >= rightNeighbor.start) {
+                    throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
+                }
+                else if (toFree.end == rightNeighbor.start - 1) {
                     leftNeighbor.end = rightNeighbor.end;
                     freedChunks.remove(rightNeighbor);
                 } else {
@@ -129,22 +131,29 @@ public class FreedSpace {
     }
 
     public int findAndUnfree(int length) {
-//        System.out.println(getLengthSum() + " bytes in " + freedChunks.size() + " chunks." );
-//        System.out.println(this);
-//        System.out.println("Looking for " + length + " bytes.");
+        FreedChunk found = find(length);
+        if (found == null) {
+            return -1;
+        }
+        int offset = found.start;
+        unfree(found, length);
+        return offset;
+    }
 
-        for (int i = 0; i < freedChunks.size(); i++) {
-            FreedChunk fc = freedChunks.get(i);
+    protected final FreedChunk find(int length) {
+        for (FreedChunk fc : freedChunks) {
             if (fc.getLength() >= length) {
-                int foundOffset = fc.start;
-                fc.start += length;
-                if (fc.start > fc.end) {
-                    freedChunks.remove(i);
-                }
-                return foundOffset;
+                return fc;
             }
         }
-        return -1;
+        return null;
+    }
+
+    protected final void unfree(FreedChunk toUnfree, int length) {
+        toUnfree.start += length;
+        if (toUnfree.start > toUnfree.end) {
+            freedChunks.remove(toUnfree);
+        }
     }
 
     public int getLengthSum() {

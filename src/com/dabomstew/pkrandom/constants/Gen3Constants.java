@@ -49,17 +49,17 @@ public class Gen3Constants {
 
     public static final int pokemonCount = 386;
 
-    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
-
-    public static final String mapBanksPointerPrefix = "80180068890B091808687047";
-
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
 
-    public static final String frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000";
-
-    public static final String rseMapLabelsPointerPrefix = "C078288030BC01BC00470000";
-
-    public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
+    // These pointer prefixes aren't used despite being accurate to all vanilla ROMs. Using them to search was slow
+    // enough to become annoying when unit testing, compared to having the offsets they dug out in the RomEntry .ini files.
+    // They remain here in case you want to fill a new RomEntry (for a ROM hack).
+    @SuppressWarnings("unused")
+    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000",
+            mapBanksPointerPrefix = "80180068890B091808687047",
+            frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000",
+            rseMapLabelsPointerPrefix = "C078288030BC01BC00470000",
+            pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
     // pointer block 1
     public static final int pokemonFrontSpritesPointer = 0x128, pokemonBackSpritesPointer = 0x12C,
@@ -86,7 +86,7 @@ public class Gen3Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
             bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23;
 
-    public static final int textTerminator = 0xFF, textVariable = 0xFD;
+    public static final byte textTerminator = (byte) 0xFF, textVariable = (byte) 0xFD, textPadding = (byte) 0x00;
 
     public static final byte freeSpaceByte = (byte) 0xFF;
 
@@ -94,8 +94,6 @@ public class Gen3Constants {
 
     public static final int rseStarter2Offset = 2, rseStarter3Offset = 4, frlgStarter2Offset = 515,
             frlgStarter3Offset = 461, frlgStarterRepeatOffset = 5;
-
-    public static final int frlgBaseStarter1 = 1, frlgBaseStarter2 = 4, frlgBaseStarter3 = 7;
 
     public static final int frlgStarterItemsOffset = 218;
 
@@ -138,11 +136,15 @@ public class Gen3Constants {
 
     public static final String rsPokedexScriptIdentifier = "326629010803";
 
+    public static final int rsNatDexScriptLength = 44;
+
     public static final String rsNatDexScriptPart1 = "31720167";
 
     public static final String rsNatDexScriptPart2 = "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
 
     public static final String frlgPokedexScriptIdentifier = "292908258101";
+
+    public static final int frlgNatDexScriptLength = 10;
 
     public static final String frlgNatDexScript = "292908258101256F0103";
 
@@ -161,6 +163,8 @@ public class Gen3Constants {
     public static final String frlgOakAideCheckPrefix = "00B5064800880028";
 
     public static final String ePokedexScriptIdentifier = "3229610825F00129E40816CD40010003";
+
+    public static final int eNatDexScriptLength = 27;
 
     public static final String eNatDexScriptPart1 = "31720167";
 
@@ -828,8 +832,9 @@ public class Gen3Constants {
         // 572 + 573: Double Battle with Sailor Brenden and Battle Girl Lilith
         // 721 + 730: Double Battle with Team Magma Grunts in Team Magma Hideout
         // 848 + 850: Double Battle with Psychic Mariela and Gentleman Everett
+        // 855: Steven from the Double Battle in Mossdeep Space Center
         setMultiBattleStatus(trs, Trainer.MultiBattleStatus.ALWAYS, 25, 105, 237, 397, 404, 504, 505, 508, 514,
-                569, 572, 573, 654, 721, 730, 734, 848, 850
+                569, 572, 573, 654, 721, 730, 734, 848, 850, 855
         );
 
         // 1 + 124: Potential Double Battle with Hiker Sawyer and Beauty Melissa

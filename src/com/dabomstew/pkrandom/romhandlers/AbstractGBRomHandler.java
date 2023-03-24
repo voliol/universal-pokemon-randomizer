@@ -35,22 +35,26 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBRomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected byte[] rom;
     protected byte[] originalRom;
-    private String loadedFN;
-
-    private FreedSpace freedSpace = new FreedSpace();
+    private String loadedFileName;
+    private long actualCRC32;
 
     public AbstractGBRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
@@ -58,21 +62,72 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     @Override
     public boolean loadRom(String filename) {
+        try {
+            loadRomFile(filename);
+            midLoadingSetUp();
+            loadGameData();
+            return true;
+        } catch (RandomizerIOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    protected void loadRomFile(String filename) {
         byte[] loaded = loadFile(filename);
         if (!detectRom(loaded)) {
-            return false;
+            throw new RandomizerIOException("Could not detect ROM.");
         }
         this.rom = loaded;
         this.originalRom = new byte[rom.length];
         System.arraycopy(rom, 0, originalRom, 0, rom.length);
-        loadedFN = filename;
-        loadedRom();
-        return true;
+        loadedFileName = filename;
+        this.actualCRC32 = FileFunctions.getCRC32(rom);
     }
+
+    /**
+     * Sets up various stuff which needs to be done after the ROM file has been loaded, but which is needed for loading
+     * game data like {@link Pokemon} and {@link Trainer}s. E.g. the {@link RomEntry} and text tables.
+     * Expected to be overrided.
+     */
+    protected void midLoadingSetUp() {
+        initRomEntry();
+        initTextTables();
+    }
+
+    protected abstract void initRomEntry();
+
+    protected abstract void initTextTables();
+
+    /**
+     * Loads the (randomizable) game data, i.e. stuff like the gettable lists of {@link Pokemon}, {@link Move}s,
+     * and {@link Trainer}s.
+     */
+    protected void loadGameData() {
+        loadPokemonStats();
+        loadEvolutions();
+        loadMoves();
+        loadPokemonPalettes();
+        loadItemNames();
+        loadTrainers();
+    }
+
+    // the below are public because it may be kinder to the testing environment
+    public abstract void loadPokemonStats();
+
+    public abstract void loadEvolutions();
+
+    public abstract void loadMoves();
+
+    public abstract void loadPokemonPalettes();
+
+    public abstract void loadItemNames();
+
+    public abstract void loadTrainers();
 
     @Override
     public String loadedFilename() {
-        return loadedFN;
+        return loadedFileName;
     }
 
     @Override
@@ -114,22 +169,28 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     @Override
     public String getGameUpdateVersion() {
-        // do nothing, as DS games don't have external game updates
+        // do nothing, as GB games don't have external game updates
         return null;
     }
 
     @Override
     public void printRomDiagnostics(PrintStream logStream) {
-        Path p = Paths.get(loadedFN);
+        Path p = Paths.get(loadedFileName);
         logStream.println("File name: " + p.getFileName().toString());
         long crc = FileFunctions.getCRC32(originalRom);
         logStream.println("Original ROM CRC32: " + String.format("%08X", crc));
     }
 
     @Override
-    public boolean canChangeStaticPokemon() {
-        return true;
+    protected void prepareSaveRom() {
+        super.prepareSaveRom();
+        // because most other gens write the trainers to ROM each time setTrainers is used,
+        // instead of having a saveTrainers. (obviously those other gens shouldn't do that either,
+        // but code's never perfect)
+        saveTrainers();
     }
+
+    abstract public void saveTrainers();
 
     @Override
     public boolean hasPhysicalSpecialSplit() {
@@ -140,7 +201,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     public abstract boolean detectRom(byte[] rom);
 
-    public abstract void loadedRom();
 
     protected static byte[] loadFile(String filename) {
         try {
@@ -227,6 +287,86 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		return true;
 	}
 
+    /**
+     * Returns the length of some data, which is ended by a single-byte terminator.
+     * Counts the terminator towards the length.
+     */
+    protected int lengthOfDataWithTerminatorAt(int offset, byte terminator) {
+        return lengthOfDataWithTerminatorsAt(offset, terminator, 1);
+    }
+
+    /**
+     * Returns the length of some data using single-byte terminators.
+     * Counts the terminators towards the length.
+     */
+    protected int lengthOfDataWithTerminatorsAt(int offset, byte terminator, int terminatorAmount) {
+        int length = 0;
+        int terminatorCount = 0;
+        do {
+            if (rom[offset + length] == terminator) terminatorCount++;
+            length++;
+        } while (terminatorCount < terminatorAmount);
+        return length;
+    }
+
+    protected abstract int readPointer(int offset);
+
+    protected abstract void writePointer(int offset, int pointer);
+
+    protected class DataRewriter<E> {
+
+        private boolean longAlignAdresses = true;
+
+        public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
+                                Function<Integer, Integer> lengthOfOldFunction) {
+            rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
+        }
+
+        public void rewriteData(int pointerOffset, E e, int[] secondaryPointerOffsets,
+                                Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
+            byte[] newData = newDataFunction.apply(e);
+            int oldDataOffset = readPointer(pointerOffset);
+            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
+            freeSpace(oldDataOffset, oldLength);
+            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
+
+            rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
+        }
+
+        public boolean isLongAlignAdresses() {
+            return longAlignAdresses;
+        }
+
+        public void setLongAlignAdresses(boolean longAlignAdresses) {
+            this.longAlignAdresses = longAlignAdresses;
+        }
+
+        /**
+         * Returns the new offset of the data.
+         **/
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+            int newOffset = findAndUnfreeSpace(data.length, longAlignAdresses);
+
+            writePointer(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            return newOffset;
+        }
+
+        protected void rewriteSecondaryPointers(int primaryPointerOffset, int[] secondaryPointerOffsets,
+                                              int oldDataOffset, int newDataOffset) {
+            for (int spo : secondaryPointerOffsets) {
+                if (spo != primaryPointerOffset && readPointer(spo) != oldDataOffset) {
+                    System.out.println();
+                    System.out.println("bad: " + spo);
+                    throw new RandomizerIOException("Invalid secondary pointer spo=" + spo + ". Points to " +
+                            readPointer(spo) + " instead of " + oldDataOffset + ".");
+                }
+                writePointer(spo, newDataOffset);
+            }
+        }
+    }
+
 	protected void freeSpace(int offset, int length) {
 		if (length < 1) {
 			throw new IllegalArgumentException("length must be at least 1.");
@@ -234,23 +374,50 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		for (int i = 0; i < length; i++) {
 			writeByte(offset + i, getFreeSpaceByte());
 		}
-		freedSpace.free(offset, length);
+        getFreedSpace().free(offset, length);
 	}
 
-    // TODO: do something about long alignment (if something needs to be done about it)
+    /**
+     * Both end points included.
+     */
+    protected void freeSpaceBetween(int start, int end) {
+        freeSpace(start, end - start + 1);
+    }
+
 	protected int findAndUnfreeSpace(int length) {
-		int foundOffset;
-		do {
-			foundOffset = freedSpace.findAndUnfree(length);
-		} while (isRomSpaceUsed(foundOffset, length));
-
-		if (foundOffset == -1) {
-			throw new RandomizerIOException("ROM full.");
-		}
-		return foundOffset;
+        return findAndUnfreeSpace(length, true);
 	}
 
-	private boolean isRomSpaceUsed(int offset, int length) {
+    /**
+     * At least Pokémon palettes in R/S/FR/LG need to be long aligned,
+     * probably more types of data than that though. If they are not long aligned,
+     * the games soft-lock and/or crash, which isn't fun to debug.
+     * If you aren't very sure about not needing to long-align, don't use this method directly.
+     *
+     * @param length The number of bytes to find space for.
+     * @param longAligned Does the found adress need to be long-aligned?
+     */
+    protected int findAndUnfreeSpace(int length, boolean longAligned) {
+        int foundOffset;
+        length += longAligned ? GBConstants.longSize : 0;
+        do {
+            foundOffset = getFreedSpace().findAndUnfree(length);
+        } while (isRomSpaceUsed(foundOffset, length));
+
+        if (foundOffset == -1) {
+            throw new RandomizerIOException("ROM full. Can't find " + length + " free bytes anywhere.");
+        }
+
+        if (longAligned) {
+            int shift = GBConstants.longSize - (foundOffset % GBConstants.longSize);
+            shift = shift == GBConstants.longSize ? 0 : shift;
+            freeSpace(foundOffset + length - (4 - shift), 4 - shift);
+            foundOffset += shift;
+        }
+        return foundOffset;
+    }
+
+	protected boolean isRomSpaceUsed(int offset, int length) {
 		if (offset < 0)
 			return false;
 		// manual check if the space is still unused, because
@@ -263,6 +430,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		}
 		return false;
 	}
+
+    protected abstract FreedSpace getFreedSpace();
 
 	protected abstract byte getFreeSpaceByte();
 
@@ -301,5 +470,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
 	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
+
+    @Override
+    public abstract AbstractGBRomEntry getRomEntry();
+
+    @Override
+    public boolean isRomValid() {
+        return getRomEntry().getExpectedCRC32() == actualCRC32;
+    }
 
 }

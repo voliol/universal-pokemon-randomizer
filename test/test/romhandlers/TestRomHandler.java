@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
@@ -27,16 +28,8 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected void savePokemonPalettes() {
+    public void savePokemonPalettes() {
 
-    }
-
-    public PokemonSet<Pokemon> getRestrictedPokemon() {
-        return restrictedPokemon;
-    }
-
-    public PokemonSet<Pokemon> getRestrictedPokemonInclAltFormes() {
-        return restrictedPokemonInclAltFormes;
     }
 
     @Override
@@ -210,8 +203,7 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
-
+    public void setTrainers(List<Trainer> trainerData) {
     }
 
     @Override
@@ -256,11 +248,6 @@ public class TestRomHandler extends AbstractRomHandler {
 
     @Override
     public boolean setStaticPokemon(List<StaticEncounter> staticPokemon) {
-        return false;
-    }
-
-    @Override
-    public boolean canChangeStaticPokemon() {
         return false;
     }
 
@@ -580,12 +567,12 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected void saveMoves() {
+    public void saveMoves() {
 
     }
 
     @Override
-    protected void savePokemonStats() {
+    public void savePokemonStats() {
 
     }
 
@@ -597,5 +584,10 @@ public class TestRomHandler extends AbstractRomHandler {
     @Override
     protected boolean saveRomDirectory(String filename) {
         return false;
+    }
+
+    @Override
+    protected RomEntry getRomEntry() {
+        return null;
     }
 }

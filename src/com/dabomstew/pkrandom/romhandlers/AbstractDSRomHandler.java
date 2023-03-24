@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +45,7 @@ import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.romhandlers.romentries.AbstractDSRomEntry;
 
 import javax.imageio.ImageIO;
 
@@ -56,7 +58,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x20, (byte) 0x00, (byte) 0x00, (byte) 0x00,
             (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
 
-    protected String dataFolder;
     private NDSRom baseRom;
     private String loadedFN;
     private boolean arm9Extended = false;
@@ -151,11 +152,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean canChangeStaticPokemon() {
-        return false;
-    }
-
-    @Override
     public boolean hasPhysicalSpecialSplit() {
         // Default value for Gen4+.
         // Handlers can override again in case of ROM hacks etc.
@@ -176,7 +172,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             fis.skip(0x0C);
             byte[] sig = FileFunctions.readFullyIntoBuffer(fis, 4);
             fis.close();
-            return new String(sig, "US-ASCII");
+            return new String(sig, StandardCharsets.US_ASCII);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -196,7 +192,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
     protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
 
-    protected int readWord(byte[] data, int offset) {
+    public int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
     }
 
@@ -209,7 +205,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return readLong(data, offset) + offset + 4;
     }
 
-    protected void writeWord(byte[] data, int offset, int value) {
+    public void writeWord(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
@@ -412,7 +408,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	// one call in AbstractRomHandler should suffice.
 	protected void loadPokemonPalettes() {
         try {
-            String NARCpath = getNARCPath("PokemonGraphics");
+            String NARCpath = getRomEntry().getFile("PokemonGraphics");
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
             for (Pokemon pk : getPokemonSet()) {
                 int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
@@ -440,7 +436,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     @Override
     public void savePokemonPalettes() {
         try {
-            String NARCpath = getNARCPath("PokemonGraphics");
+            String NARCpath = getRomEntry().getFile("PokemonGraphics");
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 
             for (Pokemon pk : getPokemonSet()) {
@@ -468,7 +464,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
-		String NARCPath = getNARCPath("PokemonGraphics");
+		String NARCPath = getRomEntry().getFile("PokemonGraphics");
 		NARCArchive pokeGraphicsNARC;
 		try {
 			pokeGraphicsNARC = readNARC(NARCPath);
@@ -490,7 +486,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	}
 
     private void ripAllOtherPokes() {
-        String NARCPath = getNARCPath("OtherPokemonGraphics");
+        String NARCPath = getRomEntry().getFile("OtherPokemonGraphics");
         NARCArchive pokeGraphicsNARC;
         try {
             pokeGraphicsNARC = readNARC(NARCPath);
@@ -529,7 +525,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		}
 		try {
 			Pokemon pk = randomPokemon();
-			String NARCpath = getNARCPath("PokemonGraphics");
+			String NARCpath = getRomEntry().getFile("PokemonGraphics");
 			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 			boolean shiny = random.nextInt(10) == 0;
 
@@ -547,11 +543,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     public abstract BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
                                          boolean transparentBackground, boolean includePalette);
 
-    // because RomEntry is an inner class it can't be accessed here, so an abstract
-    // method is needed.
-    // a refactoring might be better, but is outside of the scope for the changes
-    // I'm making now
-    // - voliol 2022-01-13
-    public abstract String getNARCPath(String fileName);
+
+    @Override
+    protected abstract AbstractDSRomEntry getRomEntry();
 
 }

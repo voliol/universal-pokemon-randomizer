@@ -97,6 +97,10 @@ public interface RomHandler {
     
     PokemonSet<Pokemon> getPokemonSetInclFormes();
 
+    PokemonSet<Pokemon> getRestrictedPokemon();
+
+    PokemonSet<Pokemon> getRestrictedPokemonInclAltFormes();
+
     List<MegaEvolution> getMegaEvolutions();
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
@@ -252,9 +256,17 @@ public interface RomHandler {
 
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
-    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
+    void setTrainers(List<Trainer> trainerData);
+
+    boolean canAddPokemonToBossTrainers();
+
+    boolean canAddPokemonToImportantTrainers();
+
+    boolean canAddPokemonToRegularTrainers();
 
     void randomizeTrainerPokes(Settings settings);
+
+    boolean supportsTrainerHeldItems();
 
     void randomizeTrainerHeldItems(Settings settings);
 
@@ -274,7 +286,7 @@ public interface RomHandler {
 
     void addTrainerPokemon(Settings settings);
 
-    void doubleBattleMode();
+    void setDoubleBattleMode();
 
     List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
 
@@ -389,7 +401,7 @@ public interface RomHandler {
     /**
      * Get TM/HM compatibility data from this rom. The result should contain a
      * boolean array for each Pokemon indexed as such:
-     * 
+     * <br>
      * 0: blank (false) / 1 - (getTMCount()) : TM compatibility /
      * (getTMCount()+1) - (getTMCount()+getHMCount()) - HM compatibility
      * 

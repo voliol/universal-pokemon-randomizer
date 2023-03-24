@@ -244,6 +244,8 @@ public class GlobalConstants {
             Moves.spitUp, Moves.swallow, Moves.dreamEater, Moves.nightmare
     );
 
+    public static final int vanillaHappinessToEvolve = 220, easierHappinessToEvolve = 160;
+
     public static final int MIN_DAMAGING_MOVE_POWER = 50;
 
     public static final int HIGHEST_POKEMON_GEN = 9;

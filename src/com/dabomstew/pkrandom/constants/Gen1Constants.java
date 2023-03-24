@@ -34,6 +34,9 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen1Constants {
 
+    public static final int Type_RB = 0;
+    public static final int Type_Yellow = 1;
+
     public static final int baseStatsEntrySize = 0x1C;
 
 	public static final int bsHPOffset = 1, bsAttackOffset = 2, bsDefenseOffset = 3, bsSpeedOffset = 4,
@@ -45,7 +48,11 @@ public class Gen1Constants {
 
     public static final int trainerClassCount = 47;
 
+    public static final byte trainerDataTerminator = 0x00;
+
     public static final int champRivalOffsetFromGymLeaderMoves = 0x44;
+
+    public static final int pokemonCount = 151;
 
     public static final int tmCount = 50, hmCount = 5;
 
@@ -149,14 +156,14 @@ public class Gen1Constants {
 
     public static void tagTrainersUniversal(List<Trainer> trs) {
         // Gym Leaders
-        tbc(trs, 34, 0, "GYM1");
-        tbc(trs, 35, 0, "GYM2");
-        tbc(trs, 36, 0, "GYM3");
-        tbc(trs, 37, 0, "GYM4");
-        tbc(trs, 38, 0, "GYM5");
-        tbc(trs, 40, 0, "GYM6");
-        tbc(trs, 39, 0, "GYM7");
-        tbc(trs, 29, 2, "GYM8");
+        tbc(trs, 34, 0, "GYM1-LEADER");
+        tbc(trs, 35, 0, "GYM2-LEADER");
+        tbc(trs, 36, 0, "GYM3-LEADER");
+        tbc(trs, 37, 0, "GYM4-LEADER");
+        tbc(trs, 38, 0, "GYM5-LEADER");
+        tbc(trs, 40, 0, "GYM6-LEADER");
+        tbc(trs, 39, 0, "GYM7-LEADER");
+        tbc(trs, 29, 2, "GYM8-LEADER");
 
         // Other giovanni teams
         tbc(trs, 29, 0, "GIO1");
@@ -340,7 +347,8 @@ public class Gen1Constants {
     private static void tbc(List<Trainer> allTrainers, int classNum, int number, String tag) {
         int currnum = -1;
         for (Trainer t : allTrainers) {
-            if (t.trainerclass == classNum) {
+            // adjusted to not change the above but use 0-indexing properly
+            if (t.trainerclass == classNum - 1) {
                 currnum++;
                 if (currnum == number) {
                     t.tag = tag;

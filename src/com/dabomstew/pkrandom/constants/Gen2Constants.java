@@ -34,6 +34,9 @@ import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen2Constants {
 
+    public static final int Type_GS = 0;
+    public static final int Type_Crystal = 1;
+
     public static final int vietCrystalCheckOffset = 0x63;
 
     public static final byte vietCrystalCheckValue = (byte) 0xF5;
@@ -64,11 +67,17 @@ public class Gen2Constants {
 
     public static final int tmCount = 50, hmCount = 7;
 
-    public static final String mtMenuCancelString = "CANCEL";
+    public static final int mtCount = 3;
 
-    public static final byte mtMenuInitByte = (byte) 0x80;
+    /**
+     * Taken from older code about the move tutor dialogue option. Assumed to work for other dialogue options as well,
+     * but this will have to be tested when implemented.
+     */
+    public static final byte dialogueOptionInitByte = (byte) 0x80;
 
     public static final int maxTrainerNameLength = 17;
+
+    public static final byte trainerDataTerminator = (byte) 0xFF;
 
     public static final int fleeingSetTwoOffset = 0xE, fleeingSetThreeOffset = 0x17;
 
@@ -121,6 +130,9 @@ public class Gen2Constants {
 
     public static final int priorityHitEffectIndex = 0x67, protectEffectIndex = 0x6F, endureEffectIndex = 0x74,
             forceSwitchEffectIndex = 0x1C,counterEffectIndex = 0x59, mirrorCoatEffectIndex = 0x90;
+
+    // probably the terminator for all move-lists, like TM/HM compatibility
+    public static final byte eggMovesTerminator = (byte) 0xFF;
 
     public static final String friendshipValueForEvoLocator = "FEDCDA";
 
@@ -235,22 +247,22 @@ public class Gen2Constants {
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders
-        tbc(allTrainers, 1, 0, "GYM1");
-        tbc(allTrainers, 3, 0, "GYM2");
-        tbc(allTrainers, 2, 0, "GYM3");
-        tbc(allTrainers, 4, 0, "GYM4");
-        tbc(allTrainers, 7, 0, "GYM5");
-        tbc(allTrainers, 6, 0, "GYM6");
-        tbc(allTrainers, 5, 0, "GYM7");
-        tbc(allTrainers, 8, 0, "GYM8");
-        tbc(allTrainers, 17, 0, "GYM9");
-        tbc(allTrainers, 18, 0, "GYM10");
-        tbc(allTrainers, 19, 0, "GYM11");
-        tbc(allTrainers, 21, 0, "GYM12");
-        tbc(allTrainers, 26, 0, "GYM13");
-        tbc(allTrainers, 35, 0, "GYM14");
-        tbc(allTrainers, 46, 0, "GYM15");
-        tbc(allTrainers, 64, 0, "GYM16");
+        tbc(allTrainers, 1, 0, "GYM1-LEADER");
+        tbc(allTrainers, 3, 0, "GYM2-LEADER");
+        tbc(allTrainers, 2, 0, "GYM3-LEADER");
+        tbc(allTrainers, 4, 0, "GYM4-LEADER");
+        tbc(allTrainers, 7, 0, "GYM5-LEADER");
+        tbc(allTrainers, 6, 0, "GYM6-LEADER");
+        tbc(allTrainers, 5, 0, "GYM7-LEADER");
+        tbc(allTrainers, 8, 0, "GYM8-LEADER");
+        tbc(allTrainers, 17, 0, "GYM9-LEADER");
+        tbc(allTrainers, 18, 0, "GYM10-LEADER");
+        tbc(allTrainers, 19, 0, "GYM11-LEADER");
+        tbc(allTrainers, 21, 0, "GYM12-LEADER");
+        tbc(allTrainers, 26, 0, "GYM13-LEADER");
+        tbc(allTrainers, 35, 0, "GYM14-LEADER");
+        tbc(allTrainers, 46, 0, "GYM15-LEADER");
+        tbc(allTrainers, 64, 0, "GYM16-LEADER");
 
         // Elite 4 & Red
         tbc(allTrainers, 11, 0, "ELITE1");

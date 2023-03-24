@@ -36,7 +36,7 @@ public enum Type {
     NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY,
     GAS(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true), TRI(true);
 
-    public boolean isHackOnly;
+    public final boolean isHackOnly;
 
     Type() {
         this.isHackOnly = false;
@@ -54,17 +54,11 @@ public enum Type {
     public static final List<Type> GEN6PLUS = Collections.unmodifiableList(Arrays.asList(values()).subList(0, FAIRY.ordinal()+1));
 
     public static List<Type> getAllTypes(int generation) {
-        switch (generation) {
-            case 1:
-                return GEN1;
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                return GEN2THROUGH5;
-            default:
-                return GEN6PLUS;
-        }
+        return switch (generation) {
+            case 1 -> GEN1;
+            case 2, 3, 4, 5 -> GEN2THROUGH5;
+            default -> GEN6PLUS;
+        };
     }
 
     public static Type randomType(Random random) {
