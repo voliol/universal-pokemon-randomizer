@@ -1819,7 +1819,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             offset++;
 
             // Amount of required happiness for all happiness evolutions.
-            if (rom[offset] == (byte) GlobalConstants.vanillaHappinessToEvolve) { // TODO: these should be constants
+            if (rom[offset] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
                 writeByte(offset, (byte) GlobalConstants.easierHappinessToEvolve);
             }
         }
