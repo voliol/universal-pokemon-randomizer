@@ -2990,16 +2990,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int offset = find(code, Gen6Constants.friendshipValueForEvoLocator);
         if (offset > 0) {
             // Amount of required happiness for HAPPINESS evolutions.
-            if (code[offset] == (byte)220) {
-                code[offset] = (byte)160;
+            if (code[offset] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
+                code[offset] = (byte) GlobalConstants.easierHappinessToEvolve;
             }
             // Amount of required happiness for HAPPINESS_DAY evolutions.
-            if (code[offset + 12] == (byte)220) {
-                code[offset + 12] = (byte)160;
+            if (code[offset + 12] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
+                code[offset + 12] = (byte) GlobalConstants.easierHappinessToEvolve;
             }
             // Amount of required happiness for HAPPINESS_NIGHT evolutions.
-            if (code[offset + 36] == (byte)220) {
-                code[offset + 36] = (byte)160;
+            if (code[offset + 36] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
+                code[offset + 36] = (byte) GlobalConstants.easierHappinessToEvolve;
             }
         }
 

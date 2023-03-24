@@ -3987,16 +3987,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		int offset = find(arm9, Gen4Constants.friendshipValueForEvoLocator);
 		if (offset > 0) {
 			// Amount of required happiness for HAPPINESS evolutions.
-			if (arm9[offset] == (byte) 220) {
-				arm9[offset] = (byte) 160;
+			if (arm9[offset] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
+				arm9[offset] = (byte) GlobalConstants.easierHappinessToEvolve;
 			}
 			// Amount of required happiness for HAPPINESS_DAY evolutions.
-			if (arm9[offset + 22] == (byte) 220) {
-				arm9[offset + 22] = (byte) 160;
+			if (arm9[offset + 22] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
+				arm9[offset + 22] = (byte) GlobalConstants.easierHappinessToEvolve;
 			}
 			// Amount of required happiness for HAPPINESS_NIGHT evolutions.
-			if (arm9[offset + 44] == (byte) 220) {
-				arm9[offset + 44] = (byte) 160;
+			if (arm9[offset + 44] == (byte) GlobalConstants.vanillaHappinessToEvolve) {
+				arm9[offset + 44] = (byte) GlobalConstants.easierHappinessToEvolve;
 			}
 		}
 

@@ -2884,18 +2884,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int offset = find(rom, Gen3Constants.friendshipValueForEvoLocator);
         if (offset > 0) {
             // Amount of required happiness for HAPPINESS evolutions.
-            if (rom[offset] == (byte) 219) {
-                writeByte(offset, (byte) 159);
+            if (rom[offset] == (byte) (GlobalConstants.vanillaHappinessToEvolve - 1)) {
+                writeByte(offset, (byte) (GlobalConstants.easierHappinessToEvolve - 1));
             }
             // FRLG doesn't have code to handle time-based evolutions.
             if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
                 // Amount of required happiness for HAPPINESS_DAY evolutions.
-                if (rom[offset + 38] == (byte) 219) { // TODO: 219 (or 220) should be a constant
-                    writeByte(offset + 38, (byte) 159); // TODO: 159 (or 160) should be a constant
+                if (rom[offset + 38] == (byte) (GlobalConstants.vanillaHappinessToEvolve - 1)) {
+                    writeByte(offset + 38, (byte) (GlobalConstants.easierHappinessToEvolve - 1));
                 }
                 // Amount of required happiness for HAPPINESS_NIGHT evolutions.
-                if (rom[offset + 66] == (byte)219) {
-                    writeByte(offset + 66, (byte) 159);
+                if (rom[offset + 66] == (byte) (GlobalConstants.vanillaHappinessToEvolve - 1)) {
+                    writeByte(offset + 66, (byte) (GlobalConstants.easierHappinessToEvolve - 1));
                 }
             }
         }
