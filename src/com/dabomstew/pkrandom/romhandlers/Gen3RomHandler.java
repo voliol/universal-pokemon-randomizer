@@ -1218,7 +1218,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writeStarterText(List<Pokemon> starters) {
-        System.out.println(starters.stream().map(Pokemon::getName).toList());
         writeEventText(romEntry.getStarterTexts(), id -> {
             Pokemon starter = starters.get(id);
             Type t = starter.getPrimaryType();
@@ -3448,7 +3447,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         }
 
                         for (Gen3EventTextEntry ete : eventTextEntriesByBankAndMap.get(bank).get(map)) {
-                            System.out.println(ete);
                             int scriptOffset = readPointer(peopleOffset + (ete.getPersonNum() - 1) * 24 + 16);
                             int[] relPointerOffsets = ete.getRelativePointerOffsets();
                             for (int i = 0; i < relPointerOffsets.length - 1; i++) {

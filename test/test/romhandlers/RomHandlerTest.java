@@ -35,7 +35,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{3}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -648,6 +648,25 @@ public class RomHandlerTest {
         romHandler.setTrainerNames(trainerNames);
         assertEquals(before, romHandler.getTrainerNames());
     }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainerClassNamesAreNotEmpty(String romName) {
+        loadROM(romName);
+        assertFalse(romHandler.getTrainerClassNames().isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainerClassNamesDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        List<String> trainerClassNames = romHandler.getTrainerClassNames();
+        System.out.println(trainerClassNames);
+        List<String> before = new ArrayList<>(trainerClassNames);
+        romHandler.setTrainerClassNames(trainerClassNames);
+        assertEquals(before, romHandler.getTrainerClassNames());
+    }
+
 
     @ParameterizedTest
     @MethodSource("getRomNames")

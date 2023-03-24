@@ -946,6 +946,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    // This is very similar to the implementation in Gen1RomHandler. As trainers is a private field though,
+    // the two should only be reconciled during some bigger refactoring, where other private fields (e.g. pokemonList)
+    // are considered.
     public void loadTrainers() {
         int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
         int trainerClassAmount = romEntry.getIntValue("TrainerClassAmount");
@@ -1631,7 +1634,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         int numberOfOptions = rom[offset + 1];
         int length = 2;
-        length += lengthOfDataWithTerminatorsAt(offset + length, (byte) GBConstants.stringTerminator,
+        length += lengthOfDataWithTerminatorsAt(offset + length, GBConstants.stringTerminator,
                 numberOfOptions);
         return length;
     }

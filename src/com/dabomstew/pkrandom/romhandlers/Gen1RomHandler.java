@@ -1041,7 +1041,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    // TODO: nearly identical to the Gen2RomHandler implementation; combine?
+    // This is very similar to the implementation in Gen2RomHandler. As trainers is a private field though,
+    // the two should only be reconciled during some bigger refactoring, where other private fields (e.g. pokemonList)
+    // are considered.
     public void loadTrainers() {
         int trainerClassTableOffset = romEntry.getIntValue("TrainerDataTableOffset");
         int trainerClassAmount = Gen1Constants.trainerClassCount;
@@ -1720,7 +1722,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         // Not implemented
     }
 
-    // TODO: what's the difference to getTrainerClassNames()?
+    /**
+     * Similar to {@link #getTrainerClassNames()}, but has the following differences:
+     * <ul>
+     * <li>This only reads the actual trainer class name list, while {@code getTrainerClassNames()} also reads the copy
+     * "only used for trainers' defeat speeches" (according to pokered). The names in the copy are shortened in the
+     * Japanese but redundant in all (?) other versions.</li>
+     * <li>This doesn't filter out the "individual" class names of bosses (e.g. MISTY, BROCK, LANCE).</li>
+     * </ul>
+     */
     private List<String> getTrainerClassesForText() {
         int[] offsets = romEntry.getArrayValue("TrainerClassNamesOffsets");
         List<String> tcNames = new ArrayList<>();

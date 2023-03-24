@@ -191,9 +191,9 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     protected void writeVariableLengthString(byte[] data, String str, int offset, boolean alreadyTerminated) {
         byte[] translated = translateString(str);
         // TODO: should use writeBytes();
-        System.arraycopy(translated, 0, rom, offset, translated.length);
+        System.arraycopy(translated, 0, data, offset, translated.length);
         if (!alreadyTerminated) {
-            rom[offset + translated.length] = GBConstants.stringTerminator;
+            data[offset + translated.length] = GBConstants.stringTerminator;
         }
     }
 
@@ -293,7 +293,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
-        System.out.println("Trying to free unused space at end of bank " + bank);
+        //System.out.println("Trying to free unused space at end of bank " + bank);
         freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
     }
 

@@ -200,7 +200,6 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             } else {
                 putIntValue("StaticPokemonSupport", 0);
             }
-            // TODO: add the other FireRed (F, G, S, I) texts, then remove them copying from FR(U)
             if (getIntValue("CopyStarterText") == 1) {
                 starterTexts.addAll(gen3Other.starterTexts);
             }

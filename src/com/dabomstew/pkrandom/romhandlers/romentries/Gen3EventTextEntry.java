@@ -3,7 +3,8 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 /**
  * An entry for text in the Gen 3 games, referred to by some map event. The {@link #mapBank}, {@link #mapNumber},
  * and {@link #personNum} values specify which map event. {@link #relativePointerOffsets} is an array of
- * "relative offsets" to a pointer; the path to take from the start of the map event's script to the pointer to the text.
+ * "relative offsets" to a pointer each; the path to take from the start of the map event's script to the pointer to
+ * the text.
  * <br><br>
  * Finding these values may be cumbersome, but makes the entries largely copyable between different versions
  * of the same game (pair), since scripts rarely change.
@@ -12,7 +13,7 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
  * <a href=https://github.com/huderlem/porymap>Porymap</a>, and so can the scripts.
  * The scripts can then be manually decoded to bytes using
  * <a href=https://web.archive.org/web/20221119033122/http://sphericalice.com/romhacking/documents/script/>this document</a>,
- * which can be counted to get {@link #relativePointerOffsets};
+ * which can be counted to get {@link #relativePointerOffsets}.
  */
 public class Gen3EventTextEntry {
     private final int id;
