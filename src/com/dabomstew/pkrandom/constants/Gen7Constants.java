@@ -54,7 +54,7 @@ public class Gen7Constants {
 
     public static final int evolutionMethodCount = 42;
 
-    private static List<Integer> speciesWithAlolanForms = Arrays.asList(
+    private static final List<Integer> speciesWithAlolanForms = Arrays.asList(
             Species.rattata, Species.raticate, Species.raichu, Species.sandshrew, Species.sandslash, Species.vulpix,
             Species.ninetales, Species.diglett, Species.dugtrio, Species.meowth, Species.persian, Species.geodude,
             Species.graveler, Species.golem, Species.grimer, Species.muk, Species.exeggutor, Species.marowak
@@ -371,7 +371,7 @@ public class Gen7Constants {
 
     private static List<Integer> initializeGeneralPurposeItems() {
         List<Integer> list = new ArrayList<>(Gen6Constants.generalPurposeItems);
-        list.addAll(Arrays.asList(Items.protectivePads));
+        list.add(Items.protectivePads);
         return Collections.unmodifiableList(list);
     }
 
@@ -379,21 +379,21 @@ public class Gen7Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen6Constants.moveBoostingItems);
-        map.put(Moves.electricTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.grassyTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.mistyTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.psychicTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.strengthSap, Arrays.asList(Items.bigRoot));
+        map.put(Moves.electricTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.grassyTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.mistyTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.psychicTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.strengthSap, List.of(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
     public static final Map<Integer, List<Integer>> abilityBoostingItems = initializeAbilityBoostingItems();
 
     private static Map<Integer, List<Integer>> initializeAbilityBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen6Constants.abilityBoostingItems);
-        map.put(Abilities.electricSurge, Arrays.asList(Items.terrainExtender));
-        map.put(Abilities.grassySurge, Arrays.asList(Items.terrainExtender));
-        map.put(Abilities.mistySurge, Arrays.asList(Items.terrainExtender));
-        map.put(Abilities.psychicSurge, Arrays.asList(Items.terrainExtender));
+        map.put(Abilities.electricSurge, List.of(Items.terrainExtender));
+        map.put(Abilities.grassySurge, List.of(Items.terrainExtender));
+        map.put(Abilities.mistySurge, List.of(Items.terrainExtender));
+        map.put(Abilities.psychicSurge, List.of(Items.terrainExtender));
         return Collections.unmodifiableMap(map);
     }
 
@@ -689,7 +689,7 @@ public class Gen7Constants {
         return m;
     }
 
-    private static List<Integer> actuallyCosmeticFormsSM = Arrays.asList(
+    private static final List<Integer> actuallyCosmeticFormsSM = Arrays.asList(
             Species.SMFormes.cherrimCosmetic1,
             Species.SMFormes.shellosCosmetic1,
             Species.SMFormes.gastrodonCosmetic1,
@@ -723,7 +723,7 @@ public class Gen7Constants {
             Species.SMFormes.pikachuCosmetic4, Species.SMFormes.pikachuCosmetic5, Species.SMFormes.pikachuCosmetic6 // Pikachu With Funny Hats
     );
 
-    private static List<Integer> actuallyCosmeticFormsUSUM = Arrays.asList(
+    private static final List<Integer> actuallyCosmeticFormsUSUM = Arrays.asList(
             Species.USUMFormes.cherrimCosmetic1,
             Species.USUMFormes.shellosCosmetic1,
             Species.USUMFormes.gastrodonCosmetic1,
@@ -771,7 +771,7 @@ public class Gen7Constants {
         }
     }
 
-    private static List<Integer> ignoreFormsSM = Arrays.asList(
+    private static final List<Integer> ignoreFormsSM = Arrays.asList(
             Species.SMFormes.cherrimCosmetic1,
             Species.SMFormes.greninjaCosmetic1,
             Species.SMFormes.zygarde10Cosmetic1,
@@ -786,7 +786,7 @@ public class Gen7Constants {
             Species.SMFormes.mimikyuCosmetic3
     );
 
-    private static List<Integer> ignoreFormsUSUM = Arrays.asList(
+    private static final List<Integer> ignoreFormsUSUM = Arrays.asList(
             Species.USUMFormes.cherrimCosmetic1,
             Species.USUMFormes.greninjaCosmetic1,
             Species.USUMFormes.zygarde10Cosmetic1,
@@ -810,8 +810,8 @@ public class Gen7Constants {
         }
     }
 
-    private static Map<Integer,Integer> altFormesWithCosmeticFormsSM = setupAltFormesWithCosmeticForms(Type_SM);
-    private static Map<Integer,Integer> altFormesWithCosmeticFormsUSUM = setupAltFormesWithCosmeticForms(Type_USUM);
+    private static final Map<Integer,Integer> altFormesWithCosmeticFormsSM = setupAltFormesWithCosmeticForms(Type_SM);
+    private static final Map<Integer,Integer> altFormesWithCosmeticFormsUSUM = setupAltFormesWithCosmeticForms(Type_USUM);
 
     public static Map<Integer,Integer> getAltFormesWithCosmeticForms(int romType) {
         if (romType == Type_SM) {
@@ -1031,9 +1031,9 @@ public class Gen7Constants {
 
         regularShopItemsSM = new ArrayList<>();
 
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
         regularShopItemsSM.add(Items.honey);
         regularShopItemsSM.add(Items.adrenalineOrb);
 
@@ -1047,12 +1047,12 @@ public class Gen7Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
     }
 
     public static ItemList getAllowedItems(int romType) {

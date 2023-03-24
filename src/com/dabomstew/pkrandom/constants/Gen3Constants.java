@@ -249,7 +249,7 @@ public class Gen3Constants {
 
     public static final List<Integer> frlgEarlyRequiredHMMoves = Collections.singletonList(Moves.cut);
 
-    private static List<String> rsShopNames = Arrays.asList(
+    private static final List<String> rsShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -276,7 +276,7 @@ public class Gen3Constants {
             "Pokémon League Poké Mart"
     );
 
-    private static List<String> frlgShopNames = Arrays.asList(
+    private static final List<String> frlgShopNames = Arrays.asList(
             "Trainer Tower Poké Mart",
             "Two Island Market Stall (Initial)",
             "Two Island Market Stall (After Saving Lostelle)",
@@ -302,7 +302,7 @@ public class Gen3Constants {
             "Six Island Poké Mart"
     );
 
-    private static List<String> emShopNames = Arrays.asList(
+    private static final List<String> emShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -391,22 +391,22 @@ public class Gen3Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>();
-        map.put(Type.BUG, Arrays.asList(Gen3Items.silverPowder));
-        map.put(Type.DARK, Arrays.asList(Gen3Items.blackGlasses));
-        map.put(Type.DRAGON, Arrays.asList(Gen3Items.dragonFang));
-        map.put(Type.ELECTRIC, Arrays.asList(Gen3Items.magnet));
-        map.put(Type.FIGHTING, Arrays.asList(Gen3Items.blackBelt));
-        map.put(Type.FIRE, Arrays.asList(Gen3Items.charcoal));
-        map.put(Type.FLYING, Arrays.asList(Gen3Items.sharpBeak));
-        map.put(Type.GHOST, Arrays.asList(Gen3Items.spellTag));
-        map.put(Type.GRASS, Arrays.asList(Gen3Items.miracleSeed));
-        map.put(Type.GROUND, Arrays.asList(Gen3Items.softSand));
-        map.put(Type.ICE, Arrays.asList(Gen3Items.neverMeltIce));
-        map.put(Type.NORMAL, Arrays.asList(Gen3Items.silkScarf));
-        map.put(Type.POISON, Arrays.asList(Gen3Items.poisonBarb));
-        map.put(Type.PSYCHIC, Arrays.asList(Gen3Items.twistedSpoon));
-        map.put(Type.ROCK, Arrays.asList(Gen3Items.hardStone));
-        map.put(Type.STEEL, Arrays.asList(Gen3Items.metalCoat));
+        map.put(Type.BUG, List.of(Gen3Items.silverPowder));
+        map.put(Type.DARK, List.of(Gen3Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Gen3Items.dragonFang));
+        map.put(Type.ELECTRIC, List.of(Gen3Items.magnet));
+        map.put(Type.FIGHTING, List.of(Gen3Items.blackBelt));
+        map.put(Type.FIRE, List.of(Gen3Items.charcoal));
+        map.put(Type.FLYING, List.of(Gen3Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Gen3Items.spellTag));
+        map.put(Type.GRASS, List.of(Gen3Items.miracleSeed));
+        map.put(Type.GROUND, List.of(Gen3Items.softSand));
+        map.put(Type.ICE, List.of(Gen3Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Gen3Items.silkScarf));
+        map.put(Type.POISON, List.of(Gen3Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Gen3Items.twistedSpoon));
+        map.put(Type.ROCK, List.of(Gen3Items.hardStone));
+        map.put(Type.STEEL, List.of(Gen3Items.metalCoat));
         map.put(Type.WATER, Arrays.asList(Gen3Items.mysticWater, Gen3Items.seaIncense));
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
@@ -416,15 +416,15 @@ public class Gen3Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.latias, Arrays.asList(Gen3Items.soulDew));
-        map.put(Species.latios, Arrays.asList(Gen3Items.soulDew));
+        map.put(Species.latias, List.of(Gen3Items.soulDew));
+        map.put(Species.latios, List.of(Gen3Items.soulDew));
         map.put(Species.clamperl, Arrays.asList(Gen3Items.deepSeaTooth, Gen3Items.deepSeaScale));
-        map.put(Species.pikachu, Arrays.asList(Gen3Items.lightBall));
-        map.put(Species.chansey, Arrays.asList(Gen3Items.luckyPunch));
-        map.put(Species.ditto, Arrays.asList(Gen3Items.metalPowder));
-        map.put(Species.cubone, Arrays.asList(Gen3Items.thickClub));
-        map.put(Species.marowak, Arrays.asList(Gen3Items.thickClub));
-        map.put(Species.farfetchd, Arrays.asList(Gen3Items.stick));
+        map.put(Species.pikachu, List.of(Gen3Items.lightBall));
+        map.put(Species.chansey, List.of(Gen3Items.luckyPunch));
+        map.put(Species.ditto, List.of(Gen3Items.metalPowder));
+        map.put(Species.cubone, List.of(Gen3Items.thickClub));
+        map.put(Species.marowak, List.of(Gen3Items.thickClub));
+        map.put(Species.farfetchd, List.of(Gen3Items.stick));
         return Collections.unmodifiableMap(map);
     }
 
@@ -546,16 +546,16 @@ public class Gen3Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall,Gen3Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion,Gen3Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel,Gen3Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall, Gen3Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion, Gen3Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel, Gen3Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Gen3Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom,Gen3Items.bigMushroom).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl,Gen3Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom, Gen3Items.bigMushroom).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl, Gen3Items.nugget).boxed().toList());
         opShopItems.add(Gen3Items.luckyEgg);
     }
 

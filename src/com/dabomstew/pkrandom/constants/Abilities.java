@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+@SuppressWarnings("unused")
 public class Abilities {
     public static final int stench = 1;
     public static final int drizzle = 2;

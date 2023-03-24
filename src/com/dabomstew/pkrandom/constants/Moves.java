@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+@SuppressWarnings("unused")
 public class Moves {
     // https://bulbapedia.bulbagarden.net/wiki/List_of_moves
     public static final int pound = 1;
