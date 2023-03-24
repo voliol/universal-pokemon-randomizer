@@ -421,8 +421,6 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    // TODO: this test is strangely inconsistent with Fire Red (U) (both versions) and Leaf Green (U) 1.1.
-    //  It really should not be so maybe something is wrong with the test case?
     public void moveTutorMovesDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasMoveTutors());
