@@ -443,4 +443,51 @@ public class Gen2Constants {
         }
     }
 
+    public static final int japaneseGSRomSize = 0x100000, gsRomSize = 0x200000, crystalRomSize = 0x200000;
+
+    public static final int japaneseGSBankAmount = japaneseGSRomSize / GBConstants.bankSize,
+            gsBankAmount = gsRomSize / GBConstants.bankSize,
+            crystalBankAmount = crystalRomSize / GBConstants.bankSize;
+
+    public static final int defaultEndMargin = 25, eggMovesEndMargin = 0, trainerEndMargin = 0,
+            compressedImageEndMargin = 0;
+
+    public static final int[] japaneseGSEmptySpaceAtEndOfBankMargins = initJapaneseGSEmptySpaceAtEndOfBankMargins(),
+            gsEmptySpaceAtEndOfBankMargins = initGSEmptySpaceAtEndOfBankMargins(),
+            crystalEmptySpaceAtEndOfBankMargins = initCrystalEmptySpaceAtEndOfBankMargins();
+
+    private static int[] initJapaneseGSEmptySpaceAtEndOfBankMargins() {
+        return Arrays.copyOf(initGSEmptySpaceAtEndOfBankMargins(), japaneseGSBankAmount);
+    }
+
+    private static int[] initGSEmptySpaceAtEndOfBankMargins() {
+        int[] margins = new int[gsBankAmount];
+        Arrays.fill(margins, defaultEndMargin);
+        margins[0x08] = eggMovesEndMargin;
+        margins[0x0E] = trainerEndMargin;
+        margins[0x12] = compressedImageEndMargin;
+        margins[0x14] = compressedImageEndMargin;
+        margins[0x15] = compressedImageEndMargin;
+        margins[0x16] = compressedImageEndMargin;
+        margins[0x17] = compressedImageEndMargin;
+        margins[0x18] = compressedImageEndMargin;
+        margins[0x19] = compressedImageEndMargin;
+        margins[0x1A] = compressedImageEndMargin;
+        margins[0x1B] = compressedImageEndMargin;
+        margins[0x1C] = compressedImageEndMargin;
+        margins[0x1D] = compressedImageEndMargin;
+        margins[0x1E] = compressedImageEndMargin;
+        margins[0x1F] = compressedImageEndMargin;
+        margins[0x20] = compressedImageEndMargin;
+        return margins;
+    }
+
+    private static int[] initCrystalEmptySpaceAtEndOfBankMargins() {
+        int[] margins = new int[gsBankAmount];
+        Arrays.fill(margins, defaultEndMargin);
+        margins[0x08] = eggMovesEndMargin;
+        margins[0x0E] = trainerEndMargin;
+        return margins;
+    }
+
 }
