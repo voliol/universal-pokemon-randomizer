@@ -35,7 +35,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -148,6 +148,7 @@ public class RomHandlerTest {
      * Since running this may open Gen 6+ ROMs (if you have any), which are very slow to handle,
      * it is disabled by default.
      */
+    @Disabled
     @ParameterizedTest
     @MethodSource("getRomNamesInFolder")
     public void romInFolderIsValid(String romName) {

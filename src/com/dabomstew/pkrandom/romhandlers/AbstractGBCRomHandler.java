@@ -242,11 +242,11 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
     }
 
-    protected class GBDataRewriter<E> extends DataRewriter<E> {
+    protected class GBCDataRewriter<E> extends DataRewriter<E> {
 
         private boolean restrictToSameBank = true;
 
-        public GBDataRewriter() {
+        public GBCDataRewriter() {
             setLongAlignAdresses(false);
         }
 
@@ -260,10 +260,11 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
         @Override
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-            int newOffset = restrictToSameBank ? findAndUnfreeSpaceInBank(data.length, bankOf(pointerOffset))
+            int bank = bankOf(pointerReader.apply(pointerOffset));
+            int newOffset = restrictToSameBank ? findAndUnfreeSpaceInBank(data.length, bank)
                     : findAndUnfreeSpace(data.length);
 
-            writePointer(pointerOffset, newOffset);
+            pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
 
             return newOffset;
@@ -293,7 +294,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
-        //System.out.println("Trying to free unused space at end of bank " + bank);
+        System.out.println("Trying to free unused space at end of bank " + bank);
         freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
     }
 

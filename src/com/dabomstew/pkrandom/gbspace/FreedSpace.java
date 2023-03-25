@@ -150,6 +150,7 @@ public class FreedSpace {
     }
 
     protected final void unfree(FreedChunk toUnfree, int length) {
+        System.out.println("unfreeing " + length + " bytes starting from 0x" + Integer.toHexString(toUnfree.start));
         toUnfree.start += length;
         if (toUnfree.start > toUnfree.end) {
             freedChunks.remove(toUnfree);

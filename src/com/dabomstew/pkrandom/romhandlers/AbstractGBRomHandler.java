@@ -35,6 +35,7 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -315,23 +316,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected class DataRewriter<E> {
 
+        protected Function<Integer, Integer> pointerReader = AbstractGBRomHandler.this::readPointer;
+        protected BiConsumer<Integer, Integer> pointerWriter = AbstractGBRomHandler.this::writePointer;
+
         private boolean longAlignAdresses = true;
-
-        public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
-                                Function<Integer, Integer> lengthOfOldFunction) {
-            rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
-        }
-
-        public void rewriteData(int pointerOffset, E e, int[] secondaryPointerOffsets,
-                                Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
-            byte[] newData = newDataFunction.apply(e);
-            int oldDataOffset = readPointer(pointerOffset);
-            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
-            freeSpace(oldDataOffset, oldLength);
-            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
-
-            rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
-        }
 
         public boolean isLongAlignAdresses() {
             return longAlignAdresses;
@@ -341,13 +329,37 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             this.longAlignAdresses = longAlignAdresses;
         }
 
+        public void setPointerReader(Function<Integer, Integer> pointerReader) {
+            this.pointerReader = pointerReader;
+        }
+
+        public void setPointerWriter(BiConsumer<Integer, Integer> pointerWriter) {
+            this.pointerWriter = pointerWriter;
+        }
+
+        public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
+                                Function<Integer, Integer> lengthOfOldFunction) {
+            rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
+        }
+
+        public void rewriteData(int pointerOffset, E e, int[] secondaryPointerOffsets,
+                                Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
+            byte[] newData = newDataFunction.apply(e);
+            int oldDataOffset = pointerReader.apply(pointerOffset);
+            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
+            freeSpace(oldDataOffset, oldLength);
+            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
+
+            rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
+        }
+
         /**
          * Returns the new offset of the data.
          **/
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
             int newOffset = findAndUnfreeSpace(data.length, longAlignAdresses);
 
-            writePointer(pointerOffset, newOffset);
+            pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
 
             return newOffset;
@@ -362,7 +374,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
                     throw new RandomizerIOException("Invalid secondary pointer spo=" + spo + ". Points to " +
                             readPointer(spo) + " instead of " + oldDataOffset + ".");
                 }
-                writePointer(spo, newDataOffset);
+                pointerWriter.accept(spo, newDataOffset);
             }
         }
     }

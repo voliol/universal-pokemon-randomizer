@@ -13,14 +13,14 @@ public class BankDividedFreedSpace extends FreedSpace {
 
     @Override
     public void free(int start, int length) {
-        // System.out.printf("freeing %d bytes starting from 0x%x.%n", length, start);
+        System.out.printf("freeing %d bytes starting from 0x%x.%n", length, start);
         if (freedChunkWouldCrossBankBoundary(start, length)) {
             throw new RuntimeException("Can't free a space spanning over multiple banks. This is a safety measure " +
                     "to prevent bad usage of free().");
         }
         super.free(start, length);
         splitFreedChunksAtBankBoundaries();
-        // System.out.println("after:\t" + this);
+        System.out.println("after:\t" + this);
     }
 
     private boolean freedChunkWouldCrossBankBoundary(int start, int length) {
@@ -52,7 +52,7 @@ public class BankDividedFreedSpace extends FreedSpace {
     }
 
     public int findAndUnfreeInBank(int length, int bank) {
-        // System.out.println("looking for " + length + " bytes in bank " + bank);
+        System.out.println("looking for " + length + " bytes in bank " + bank);
         if (length < 1) {
             throw new IllegalArgumentException("length must be at least 1");
         }
@@ -62,7 +62,7 @@ public class BankDividedFreedSpace extends FreedSpace {
         }
         int offset = found.start;
         unfree(found, length);
-        // System.out.println("after:\t" + this);
+        System.out.println("after:\t" + this);
         return offset;
     }
 
