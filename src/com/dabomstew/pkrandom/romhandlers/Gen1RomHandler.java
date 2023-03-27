@@ -161,13 +161,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected void freeUnusedSpaceAtEndOfBanks() {
-        // 0E: The movesets/evos are towards the end of this bank, but between them and the end there is some unknown
-        //     data/code, so the frontMargin is arbitrary and large.
-        freeUnusedSpaceAtEndOfBank(0x0E, 10);
-    }
-
-    @Override
     protected void initRomEntry() {
         romEntry = checkRomEntry(this.rom);
     }
