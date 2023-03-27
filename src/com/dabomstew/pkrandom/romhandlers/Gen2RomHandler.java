@@ -118,31 +118,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         preprocessMaps();
     }
 
-    /**
-     * Frees the unused space at the end of some banks, so the randomizer knows to use it.<br>
-     * Assumes most kinds of data is always found in the same banks (e.g. trainer data in Bank 0x0E).
-     */
-    @Override
-    protected void freeUnusedSpaceAtEndOfBanks() {
-        // Bank XX ends with YY data, which decides the frontMargin.
-        // (because data either ends with a terminator, or has a set length we can know)
-        // 08: Egg moves
-        freeUnusedSpaceAtEndOfBank(0x08, 0);
-        // 0E: Trainer
-        freeUnusedSpaceAtEndOfBank(0x0E, 0);
-        // 10: Evolution/MovesLearnt data
-        if (isVietCrystal) {
-            freeUnusedSpaceBefore(0x43DFF, 1);
-        } else {
-            freeUnusedSpaceAtEndOfBank(0x10, 1);
-        }
-        // Bank which contains events. Arbitrary high frontMargin since the event structure is not known
-        // (to the programmer).
-        if (hasMoveTutors()) {
-            freeUnusedSpaceAtEndOfBank(bankOf(romEntry.getIntValue("MoveTutorMenuOffset")), 20);
-        }
-    }
-
     @Override
     protected void loadGameData() {
         super.loadGameData();
