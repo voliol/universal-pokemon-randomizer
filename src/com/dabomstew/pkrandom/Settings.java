@@ -937,7 +937,12 @@ public class Settings {
         }
 
         // starters
-        List<Pokemon> romPokemon = rh.getPokemonInclFormes();
+        List<Pokemon> romPokemon;
+        if (rh.hasStarterAltFormes()) {
+            romPokemon = rh.getPokemonInclFormes();
+        } else {
+            romPokemon = rh.getPokemon();
+        }
         List<Pokemon> romStarters = rh.getStarters();
         for (int starter = 0; starter < 3; starter++) {
             if (this.customStarters[starter] < 0 || this.customStarters[starter] >= romPokemon.size()) {
@@ -979,7 +984,7 @@ public class Settings {
             this.setAllowWonderGuard(false);
         }
 
-        if (!(rh instanceof Gen2RomHandler || rh instanceof Gen3RomHandler)) {
+        if (!rh.supportsStarterHeldItems()) {
             // starter held items don't exist
             this.setRandomizeStartersHeldItems(false);
             this.setBanBadRandomStarterHeldItems(false);

@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+@SuppressWarnings("unused")
 public class Gen2Items {
     // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_II)
     public static final int nothing = 0;

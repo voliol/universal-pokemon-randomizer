@@ -72,17 +72,18 @@ public class StaticEncounter {
             levelStringBuilder.append("-").append(maxLevel);
         }
         boolean needToDisplayLinkedLevels = false;
-        for (int i = 0; i < linkedEncounters.size(); i++) {
-            if (level != linkedEncounters.get(i).level) {
+        for (StaticEncounter linkedEncounter : linkedEncounters) {
+            if (level != linkedEncounter.level) {
                 needToDisplayLinkedLevels = true;
+                break;
             }
         }
         if (needToDisplayLinkedLevels) {
-            for (int i = 0; i < linkedEncounters.size(); i++) {
-                levelStringBuilder.append(" / ").append("Lv").append(linkedEncounters.get(i).level);
+            for (StaticEncounter linkedEncounter : linkedEncounters) {
+                levelStringBuilder.append(" / ").append("Lv").append(linkedEncounter.level);
             }
         }
-        return pkmn.fullName() + ", " + levelStringBuilder.toString();
+        return pkmn.fullName() + ", " + levelStringBuilder;
     }
 
     public boolean canMegaEvolve() {

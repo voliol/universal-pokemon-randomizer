@@ -1,47 +1,33 @@
-Universal Pokemon Randomizer ZX by Ajarmar
+Universal Pokemon Randomizer ZX - V branch
 
-With significant contributions from darkeye, cleartonic
-
+Continuously based on the UPR ZX, by Ajarmar, with significant contributions from darkeye, cleartonic
 Based on the Universal Pokemon Randomizer by Dabomstew
+Palette randomization based off work by Artemis251
 
-Palette branch 
-by voliol
+V branch maintained by voliol
 
 # Branch Info
 
-This is a branch for implementing/porting palette randomization into UPR ZX. For a longer description, see the readme of the 
-branch it came from: https://github.com/voliol/universal-pokemon-randomizer/blob/paltest/README.md
-For technical notes, see GRAPHICS_GUIDE.md.
+This is an alternate branch of the [UPR ZX](https://github.com/Ajarmar/universal-pokemon-randomizer-zx). Its goal is to be kept up with the main branch of ZX, while adding features such as palette randomization, and a bunch of refactoring for ease-of-development.
 
-As I implement the palette framework, I've taken the time to do some refactoring. This is partially a selfish endeavor to calm my own mind, 
-but also works to counteract the code bloat that adding a major feature like this naturally entails. 
-
-I hope to see it make its way into UPR ZX proper, see this issue: https://github.com/Ajarmar/universal-pokemon-randomizer-zx/issues/510
-
-
-**The rest of the readme is from the version of the UPR ZX this was branched from:**
-
-# Info
-
-This fork was originally made to make some minor tweaks and fixes, but became a bit more ambitious since 2020. There are several new features and supported games (including 3DS games) compared to the original Universal Pokemon Randomizer.
-
-Have a look at the [release page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/releases) for changelogs and downloads.
+I do not have the tools/computer to be able to handle games past Gen V. For this reason, while later generation support will be merged in from the main branch, I cannot guarantee V branch features will mesh with those generations un-buggily. And features that need generation-specific implementations simply won't make it past Gen V.  
 
 # Contributing
 
-If you want to contribute something to the codebase, we'd recommend creating an issue for it first (using the`Contribution Idea` template). This way, we can discuss whether or not it's a good fit for the randomizer before you put in the work to implement it. This is just to save you time in the event that we don't think it's something we want to accept.
+If you want to contribute something to the codebase, I recommend creating an issue for it first (using the`Contribution Idea` template). This way, we can discuss how to accomplish this, and possibly whether it's a good fit for the randomizer. My plan is to have a more laissez-faire attitute compared to the main ZX branch, so as long as it doesn't mess up the main UI/usability it should be fine. 
 
-See [the Wiki Page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Building-Universal-Pokemon-Randomizer-ZX) for setting up to build/test locally.
+[The main branch Wiki Page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Building-Universal-Pokemon-Randomizer-ZX) explains how to set up to build/test locally, with the caveat that the V branch runs of Java ...
 
 ### What is a good fit for the randomizer?
 
-In general, we try to make settings as universal as possible. This means that it preferably should work in as many games as possible, and also that it's something that many people will find useful. If the setting is very niche, it will mostly just bloat the GUI.
+In general, the UPR should have settings as universal as possible (up to Gen V). This means that an idea preferably should work in as many games as possible, and also that it's something that many people will find useful/fun. If the setting is very niche, it will mostly just bloat the GUI.
 
 If your idea is a change to an existing setting rather than a new setting, it needs to be well motivated.
 
 # Feature requests
 
-We do not take feature requests.
+I gladly take feature requests to know what the user-base wants, but be aware that I am a single person working on this, and will implement them (or not) at my own discretion and pace. 
+Features related to other ones in the V branch (like palette randomization) are more likely to get picked up, but the above still applies. If you want to guarantee your feature makes it in, the only way is to pick up Java and code it yourself. It's fun :) 
 
 # Bug reports
 

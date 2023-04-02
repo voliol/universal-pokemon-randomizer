@@ -32,13 +32,13 @@ public class Trainer implements Comparable<Trainer> {
     public int index;
     public List<TrainerPokemon> pokemon = new ArrayList<>();
     public String tag;
-    public boolean importantTrainer;
     // This value has some flags about the trainer's pokemon (e.g. if they have items or custom moves)
     public int poketype;
-    public String name;
+    public String name; // TODO: make trainer name randomization use Trainer.name in all gens, really strange it doesn't
     public int trainerclass;
     public String fullDisplayName;
     public MultiBattleStatus multiBattleStatus = MultiBattleStatus.NEVER;
+    public boolean forcedDoubleBattle; // for doubleBattleMode
     public int forceStarterPosition = -1;
     // Certain trainers (e.g., trainers in the PWT in BW2) require unique held items for all of their Pokemon to prevent a game crash.
     public boolean requiresUniqueHeldItems;
@@ -106,8 +106,8 @@ public class Trainer implements Comparable<Trainer> {
         return tag != null && (tag.startsWith("RIVAL") || tag.startsWith("FRIEND") || tag.endsWith("STRONG"));
     }
 
-    public boolean skipImportant() {
-        return ((tag != null) && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.endsWith("NOTSTRONG")));
+    public boolean shouldNotGetBuffs() {
+        return tag != null && (tag.startsWith("RIVAL1-") || tag.startsWith("FRIEND1-") || tag.endsWith("NOTSTRONG"));
     }
 
     public void setPokemonHaveItems(boolean haveItems) {

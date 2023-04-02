@@ -156,7 +156,7 @@ public class Gen4Constants {
         map.put(Type.GRASS, Arrays.asList(Items.miracleSeed, Items.meadowPlate, Items.roseIncense));
         map.put(Type.GROUND, Arrays.asList(Items.softSand, Items.earthPlate));
         map.put(Type.ICE, Arrays.asList(Items.neverMeltIce, Items.iciclePlate));
-        map.put(Type.NORMAL, Arrays.asList(Items.silkScarf));
+        map.put(Type.NORMAL, List.of(Items.silkScarf));
         map.put(Type.POISON, Arrays.asList(Items.poisonBarb, Items.toxicPlate));
         map.put(Type.PSYCHIC, Arrays.asList(Items.twistedSpoon, Items.mindPlate, Items.oddIncense));
         map.put(Type.ROCK, Arrays.asList(Items.hardStone, Items.stonePlate, Items.rockIncense));
@@ -170,56 +170,56 @@ public class Gen4Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Moves.bounce, Arrays.asList(Items.powerHerb));
-        map.put(Moves.dig, Arrays.asList(Items.powerHerb));
-        map.put(Moves.dive, Arrays.asList(Items.powerHerb));
-        map.put(Moves.fly, Arrays.asList(Items.powerHerb));
-        map.put(Moves.razorWind, Arrays.asList(Items.powerHerb));
-        map.put(Moves.skullBash, Arrays.asList(Items.powerHerb));
-        map.put(Moves.skyAttack, Arrays.asList(Items.powerHerb));
-        map.put(Moves.solarBeam, Arrays.asList(Items.powerHerb));
+        map.put(Moves.bounce, List.of(Items.powerHerb));
+        map.put(Moves.dig, List.of(Items.powerHerb));
+        map.put(Moves.dive, List.of(Items.powerHerb));
+        map.put(Moves.fly, List.of(Items.powerHerb));
+        map.put(Moves.razorWind, List.of(Items.powerHerb));
+        map.put(Moves.skullBash, List.of(Items.powerHerb));
+        map.put(Moves.skyAttack, List.of(Items.powerHerb));
+        map.put(Moves.solarBeam, List.of(Items.powerHerb));
 
         map.put(Moves.fling, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.ironBall));
 
         map.put(Moves.trick, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.fullIncense, Items.laggingTail));
         map.put(Moves.switcheroo, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.fullIncense, Items.laggingTail));
 
-        map.put(Moves.trickRoom, Arrays.asList(Items.ironBall));
+        map.put(Moves.trickRoom, List.of(Items.ironBall));
 
         map.put(Moves.facade, Arrays.asList(Items.toxicOrb, Items.flameOrb));
 
         map.put(Moves.psychoShift, Arrays.asList(Items.toxicOrb, Items.flameOrb));
 
-        map.put(Moves.lightScreen, Arrays.asList(Items.lightClay));
-        map.put(Moves.reflect, Arrays.asList(Items.lightClay));
+        map.put(Moves.lightScreen, List.of(Items.lightClay));
+        map.put(Moves.reflect, List.of(Items.lightClay));
 
-        map.put(Moves.hail, Arrays.asList(Items.icyRock));
+        map.put(Moves.hail, List.of(Items.icyRock));
 
-        map.put(Moves.sandstorm, Arrays.asList(Items.smoothRock));
+        map.put(Moves.sandstorm, List.of(Items.smoothRock));
 
-        map.put(Moves.sunnyDay, Arrays.asList(Items.heatRock));
+        map.put(Moves.sunnyDay, List.of(Items.heatRock));
 
-        map.put(Moves.rainDance, Arrays.asList(Items.dampRock));
+        map.put(Moves.rainDance, List.of(Items.dampRock));
 
-        map.put(Moves.bind, Arrays.asList(Items.gripClaw));
-        map.put(Moves.clamp, Arrays.asList(Items.gripClaw));
-        map.put(Moves.fireSpin, Arrays.asList(Items.gripClaw));
-        map.put(Moves.magmaStorm, Arrays.asList(Items.gripClaw));
-        map.put(Moves.outrage, Arrays.asList(Items.gripClaw));
-        map.put(Moves.sandTomb, Arrays.asList(Items.gripClaw));
-        map.put(Moves.uproar, Arrays.asList(Items.gripClaw));
-        map.put(Moves.whirlpool, Arrays.asList(Items.gripClaw));
-        map.put(Moves.wrap, Arrays.asList(Items.gripClaw));
+        map.put(Moves.bind, List.of(Items.gripClaw));
+        map.put(Moves.clamp, List.of(Items.gripClaw));
+        map.put(Moves.fireSpin, List.of(Items.gripClaw));
+        map.put(Moves.magmaStorm, List.of(Items.gripClaw));
+        map.put(Moves.outrage, List.of(Items.gripClaw));
+        map.put(Moves.sandTomb, List.of(Items.gripClaw));
+        map.put(Moves.uproar, List.of(Items.gripClaw));
+        map.put(Moves.whirlpool, List.of(Items.gripClaw));
+        map.put(Moves.wrap, List.of(Items.gripClaw));
 
-        map.put(Moves.absorb, Arrays.asList(Items.bigRoot));
-        map.put(Moves.aquaRing, Arrays.asList(Items.bigRoot));
-        map.put(Moves.drainPunch, Arrays.asList(Items.bigRoot));
-        map.put(Moves.dreamEater, Arrays.asList(Items.bigRoot));
-        map.put(Moves.gigaDrain, Arrays.asList(Items.bigRoot));
-        map.put(Moves.ingrain, Arrays.asList(Items.bigRoot));
-        map.put(Moves.leechLife, Arrays.asList(Items.bigRoot));
-        map.put(Moves.leechSeed, Arrays.asList(Items.bigRoot));
-        map.put(Moves.megaDrain, Arrays.asList(Items.bigRoot));
+        map.put(Moves.absorb, List.of(Items.bigRoot));
+        map.put(Moves.aquaRing, List.of(Items.bigRoot));
+        map.put(Moves.drainPunch, List.of(Items.bigRoot));
+        map.put(Moves.dreamEater, List.of(Items.bigRoot));
+        map.put(Moves.gigaDrain, List.of(Items.bigRoot));
+        map.put(Moves.ingrain, List.of(Items.bigRoot));
+        map.put(Moves.leechLife, List.of(Items.bigRoot));
+        map.put(Moves.leechSeed, List.of(Items.bigRoot));
+        map.put(Moves.megaDrain, List.of(Items.bigRoot));
 
         return Collections.unmodifiableMap(map);
     }
@@ -251,17 +251,17 @@ public class Gen4Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.dialga, Arrays.asList(Items.adamantOrb));
-        map.put(Species.palkia, Arrays.asList(Items.lustrousOrb));
-        map.put(Species.latias, Arrays.asList(Items.soulDew));
-        map.put(Species.latios, Arrays.asList(Items.soulDew));
+        map.put(Species.dialga, List.of(Items.adamantOrb));
+        map.put(Species.palkia, List.of(Items.lustrousOrb));
+        map.put(Species.latias, List.of(Items.soulDew));
+        map.put(Species.latios, List.of(Items.soulDew));
         map.put(Species.clamperl, Arrays.asList(Items.deepSeaTooth, Items.deepSeaScale));
-        map.put(Species.pikachu, Arrays.asList(Items.lightBall));
-        map.put(Species.chansey, Arrays.asList(Items.luckyPunch));
+        map.put(Species.pikachu, List.of(Items.lightBall));
+        map.put(Species.chansey, List.of(Items.luckyPunch));
         map.put(Species.ditto, Arrays.asList(Items.metalPowder, Items.quickPowder));
-        map.put(Species.cubone, Arrays.asList(Items.thickClub));
-        map.put(Species.marowak, Arrays.asList(Items.thickClub));
-        map.put(Species.farfetchd, Arrays.asList(Items.leek));
+        map.put(Species.cubone, List.of(Items.thickClub));
+        map.put(Species.marowak, List.of(Items.thickClub));
+        map.put(Species.farfetchd, List.of(Items.leek));
         return Collections.unmodifiableMap(map);
     }
 
@@ -297,7 +297,7 @@ public class Gen4Constants {
 
     public static final int itemScriptVariable = 0x8008;
 
-    private static List<String> dpShopNames = Arrays.asList(
+    private static final List<String> dpShopNames = Arrays.asList(
             "Sunyshore Secondary",
             "Jubilife Secondary",
             "Floaroma Secondary",
@@ -329,7 +329,7 @@ public class Gen4Constants {
             "Progressive Shops"
     );
 
-    private static List<String> ptShopNames = Arrays.asList(
+    private static final List<String> ptShopNames = Arrays.asList(
             "Jubilife Secondary",
             "Sunyshore Secondary",
             "Floaroma Secondary",
@@ -362,7 +362,7 @@ public class Gen4Constants {
             "Progressive Shops"
     );
 
-    private static List<String> hgssShopNames = Arrays.asList(
+    private static final List<String> hgssShopNames = Arrays.asList(
             "Cherrygrove Secondary",
             "Cerulean Secondary",
             "Ecruteak Secondary",
@@ -524,7 +524,7 @@ public class Gen4Constants {
             862
     );
 
-    public static final int convertOverworldSpriteToSpecies(int overworldSpriteID) {
+    public static int convertOverworldSpriteToSpecies(int overworldSpriteID) {
         int speciesID = overworldSpriteID - 296;
 
         // Venusaur
@@ -906,15 +906,15 @@ public class Gen4Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
         opShopItems.add(Items.rareBone);
         opShopItems.add(Items.luckyEgg);
     }

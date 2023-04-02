@@ -49,17 +49,17 @@ public class Gen3Constants {
 
     public static final int pokemonCount = 386;
 
-    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
-
-    public static final String mapBanksPointerPrefix = "80180068890B091808687047";
-
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
 
-    public static final String frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000";
-
-    public static final String rseMapLabelsPointerPrefix = "C078288030BC01BC00470000";
-
-    public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
+    // These pointer prefixes aren't used despite being accurate to all vanilla ROMs. Using them to search was slow
+    // enough to become annoying when unit testing, compared to having the offsets they dug out in the RomEntry .ini files.
+    // They remain here in case you want to fill a new RomEntry (for a ROM hack).
+    @SuppressWarnings("unused")
+    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000",
+            mapBanksPointerPrefix = "80180068890B091808687047",
+            frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000",
+            rseMapLabelsPointerPrefix = "C078288030BC01BC00470000",
+            pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
     // pointer block 1
     public static final int pokemonFrontSpritesPointer = 0x128, pokemonBackSpritesPointer = 0x12C,
@@ -86,14 +86,14 @@ public class Gen3Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
             bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23;
 
-    public static final int textTerminator = 0xFF, textVariable = 0xFD;
+    public static final byte textTerminator = (byte) 0xFF, textVariable = (byte) 0xFD, textPadding = (byte) 0x00;
 
     public static final byte freeSpaceByte = (byte) 0xFF;
 
+    public static final int unusedSpaceChunkLength = 0x100, unusedSpaceFrontMargin = 0x10;
+
     public static final int rseStarter2Offset = 2, rseStarter3Offset = 4, frlgStarter2Offset = 515,
             frlgStarter3Offset = 461, frlgStarterRepeatOffset = 5;
-
-    public static final int frlgBaseStarter1 = 1, frlgBaseStarter2 = 4, frlgBaseStarter3 = 7;
 
     public static final int frlgStarterItemsOffset = 218;
 
@@ -105,6 +105,9 @@ public class Gen3Constants {
     public static final Type[] typeTable = constructTypeTable();
 
     public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
+
+    public static final byte[] vanillaMovesLearntTerminator = new byte[] {(byte) 0xFF, (byte) 0xFF},
+            jamboMovesLearntTerminator = new byte[] {0x00, 0x00, (byte) 0xFF};
 
     public static final int tmCount = 50, hmCount = 8;
 
@@ -133,11 +136,15 @@ public class Gen3Constants {
 
     public static final String rsPokedexScriptIdentifier = "326629010803";
 
+    public static final int rsNatDexScriptLength = 44;
+
     public static final String rsNatDexScriptPart1 = "31720167";
 
     public static final String rsNatDexScriptPart2 = "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
 
     public static final String frlgPokedexScriptIdentifier = "292908258101";
+
+    public static final int frlgNatDexScriptLength = 10;
 
     public static final String frlgNatDexScript = "292908258101256F0103";
 
@@ -156,6 +163,8 @@ public class Gen3Constants {
     public static final String frlgOakAideCheckPrefix = "00B5064800880028";
 
     public static final String ePokedexScriptIdentifier = "3229610825F00129E40816CD40010003";
+
+    public static final int eNatDexScriptLength = 27;
 
     public static final String eNatDexScriptPart1 = "31720167";
 
@@ -240,7 +249,7 @@ public class Gen3Constants {
 
     public static final List<Integer> frlgEarlyRequiredHMMoves = Collections.singletonList(Moves.cut);
 
-    private static List<String> rsShopNames = Arrays.asList(
+    private static final List<String> rsShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -267,7 +276,7 @@ public class Gen3Constants {
             "Pokémon League Poké Mart"
     );
 
-    private static List<String> frlgShopNames = Arrays.asList(
+    private static final List<String> frlgShopNames = Arrays.asList(
             "Trainer Tower Poké Mart",
             "Two Island Market Stall (Initial)",
             "Two Island Market Stall (After Saving Lostelle)",
@@ -293,7 +302,7 @@ public class Gen3Constants {
             "Six Island Poké Mart"
     );
 
-    private static List<String> emShopNames = Arrays.asList(
+    private static final List<String> emShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -382,22 +391,22 @@ public class Gen3Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>();
-        map.put(Type.BUG, Arrays.asList(Gen3Items.silverPowder));
-        map.put(Type.DARK, Arrays.asList(Gen3Items.blackGlasses));
-        map.put(Type.DRAGON, Arrays.asList(Gen3Items.dragonFang));
-        map.put(Type.ELECTRIC, Arrays.asList(Gen3Items.magnet));
-        map.put(Type.FIGHTING, Arrays.asList(Gen3Items.blackBelt));
-        map.put(Type.FIRE, Arrays.asList(Gen3Items.charcoal));
-        map.put(Type.FLYING, Arrays.asList(Gen3Items.sharpBeak));
-        map.put(Type.GHOST, Arrays.asList(Gen3Items.spellTag));
-        map.put(Type.GRASS, Arrays.asList(Gen3Items.miracleSeed));
-        map.put(Type.GROUND, Arrays.asList(Gen3Items.softSand));
-        map.put(Type.ICE, Arrays.asList(Gen3Items.neverMeltIce));
-        map.put(Type.NORMAL, Arrays.asList(Gen3Items.silkScarf));
-        map.put(Type.POISON, Arrays.asList(Gen3Items.poisonBarb));
-        map.put(Type.PSYCHIC, Arrays.asList(Gen3Items.twistedSpoon));
-        map.put(Type.ROCK, Arrays.asList(Gen3Items.hardStone));
-        map.put(Type.STEEL, Arrays.asList(Gen3Items.metalCoat));
+        map.put(Type.BUG, List.of(Gen3Items.silverPowder));
+        map.put(Type.DARK, List.of(Gen3Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Gen3Items.dragonFang));
+        map.put(Type.ELECTRIC, List.of(Gen3Items.magnet));
+        map.put(Type.FIGHTING, List.of(Gen3Items.blackBelt));
+        map.put(Type.FIRE, List.of(Gen3Items.charcoal));
+        map.put(Type.FLYING, List.of(Gen3Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Gen3Items.spellTag));
+        map.put(Type.GRASS, List.of(Gen3Items.miracleSeed));
+        map.put(Type.GROUND, List.of(Gen3Items.softSand));
+        map.put(Type.ICE, List.of(Gen3Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Gen3Items.silkScarf));
+        map.put(Type.POISON, List.of(Gen3Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Gen3Items.twistedSpoon));
+        map.put(Type.ROCK, List.of(Gen3Items.hardStone));
+        map.put(Type.STEEL, List.of(Gen3Items.metalCoat));
         map.put(Type.WATER, Arrays.asList(Gen3Items.mysticWater, Gen3Items.seaIncense));
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
@@ -407,15 +416,15 @@ public class Gen3Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.latias, Arrays.asList(Gen3Items.soulDew));
-        map.put(Species.latios, Arrays.asList(Gen3Items.soulDew));
+        map.put(Species.latias, List.of(Gen3Items.soulDew));
+        map.put(Species.latios, List.of(Gen3Items.soulDew));
         map.put(Species.clamperl, Arrays.asList(Gen3Items.deepSeaTooth, Gen3Items.deepSeaScale));
-        map.put(Species.pikachu, Arrays.asList(Gen3Items.lightBall));
-        map.put(Species.chansey, Arrays.asList(Gen3Items.luckyPunch));
-        map.put(Species.ditto, Arrays.asList(Gen3Items.metalPowder));
-        map.put(Species.cubone, Arrays.asList(Gen3Items.thickClub));
-        map.put(Species.marowak, Arrays.asList(Gen3Items.thickClub));
-        map.put(Species.farfetchd, Arrays.asList(Gen3Items.stick));
+        map.put(Species.pikachu, List.of(Gen3Items.lightBall));
+        map.put(Species.chansey, List.of(Gen3Items.luckyPunch));
+        map.put(Species.ditto, List.of(Gen3Items.metalPowder));
+        map.put(Species.cubone, List.of(Gen3Items.thickClub));
+        map.put(Species.marowak, List.of(Gen3Items.thickClub));
+        map.put(Species.farfetchd, List.of(Gen3Items.stick));
         return Collections.unmodifiableMap(map);
     }
 
@@ -537,16 +546,16 @@ public class Gen3Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall,Gen3Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion,Gen3Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel,Gen3Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall, Gen3Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion, Gen3Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel, Gen3Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Gen3Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom,Gen3Items.bigMushroom).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl,Gen3Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom, Gen3Items.bigMushroom).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl, Gen3Items.nugget).boxed().toList());
         opShopItems.add(Gen3Items.luckyEgg);
     }
 
@@ -823,8 +832,9 @@ public class Gen3Constants {
         // 572 + 573: Double Battle with Sailor Brenden and Battle Girl Lilith
         // 721 + 730: Double Battle with Team Magma Grunts in Team Magma Hideout
         // 848 + 850: Double Battle with Psychic Mariela and Gentleman Everett
+        // 855: Steven from the Double Battle in Mossdeep Space Center
         setMultiBattleStatus(trs, Trainer.MultiBattleStatus.ALWAYS, 25, 105, 237, 397, 404, 504, 505, 508, 514,
-                569, 572, 573, 654, 721, 730, 734, 848, 850
+                569, 572, 573, 654, 721, 730, 734, 848, 850, 855
         );
 
         // 1 + 124: Potential Double Battle with Hiker Sawyer and Beauty Melissa

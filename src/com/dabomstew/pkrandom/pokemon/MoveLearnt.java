@@ -24,6 +24,8 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.Objects;
+
 public class MoveLearnt {
 
     public int move;
@@ -33,4 +35,16 @@ public class MoveLearnt {
         return "move " + move + " at level " + level;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof MoveLearnt other) {
+            return other.move == move && other.level == level;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(move, level);
+    }
 }

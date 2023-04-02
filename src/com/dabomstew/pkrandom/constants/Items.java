@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+@SuppressWarnings("unused")
 public class Items {
     // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_IV)
     // https://bulbapedia.bulbagarden.net/wiki/List_of_items_by_index_number_(Generation_V)

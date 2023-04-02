@@ -101,12 +101,18 @@ public class RomFunctions {
         return new String(string);
     }
 
+    @Deprecated
     public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset) {
+        System.out.print("RomFunctions.freeSpaceFinder() is deprecated, " +
+                "use AbstractGBRomHandler.findAndUnfreeSpace() instead.");
         // by default align to 4 bytes to make sure things don't break
         return freeSpaceFinder(rom, freeSpace, amount, offset, true);
     }
 
+    @Deprecated
     public static int freeSpaceFinder(byte[] rom, byte freeSpace, int amount, int offset, boolean longAligned) {
+        System.out.print("RomFunctions.freeSpaceFinder() is deprecated, " +
+                "use AbstractGBRomHandler.findAndUnfreeSpace() instead.");
         if (!longAligned) {
             // Find 2 more than necessary and return 2 into it,
             // to preserve stuff like FF terminators for strings
@@ -176,7 +182,7 @@ public class RomFunctions {
         return results;
     }
 
-    private static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
+    public static int searchForFirst(byte[] haystack, int beginOffset, byte[] needle) {
         int currentMatchStart = beginOffset;
         int currentCharacterPosition = 0;
 
@@ -405,6 +411,22 @@ public class RomFunctions {
             return encodedText.length();
         }
 
+    }
+
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    /**
+     * A debugging tool
+     */
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 3];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 3] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
+            hexChars[j * 3 + 2] = ' ';
+        }
+        return new String(hexChars);
     }
 
 }

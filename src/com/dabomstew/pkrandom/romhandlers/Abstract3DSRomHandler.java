@@ -25,13 +25,11 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.NCCH;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -39,6 +37,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -262,7 +261,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			fis.skip(ncchStartingOffset + 0x150);
 			byte[] productCode = FileFunctions.readFullyIntoBuffer(fis, 0x10);
 			fis.close();
-			return new String(productCode, "UTF-8").trim();
+			return new String(productCode, StandardCharsets.UTF_8).trim();
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
