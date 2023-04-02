@@ -33,6 +33,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,6 +84,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	/**
 	 * 1.0
 	 */
+	@Serial
 	private static final long serialVersionUID = 7741836888133659367L;
 
 	private static final Random RND = new Random();
