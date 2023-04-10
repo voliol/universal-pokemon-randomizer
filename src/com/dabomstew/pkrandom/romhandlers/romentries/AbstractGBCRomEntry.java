@@ -2,9 +2,7 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.romhandlers.AbstractGBCRomHandler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * An abstract {@link RomEntry} to be used by GBC (Gen 1 and 2) games. Corresponds to {@link AbstractGBCRomHandler}.
@@ -19,6 +17,7 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
             putSpecialKeyMethod("ExtraTableFile", AbstractGBCRomEntry::setExtraTableFile);
             putSpecialKeyMethod("CRCInHeader", AbstractGBCRomEntry::setCRCInHeader);
             putSpecialKeyMethod("TMText[]", AbstractGBCRomEntry::addTMText);
+            putKeyPrefixMethod("BankEndFreeSpaceMargin<", AbstractGBCRomEntry::addBankEndFreeSpaceMargin);
         }
     }
 
@@ -26,6 +25,7 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
     private String extraTableFile;
     private int crcInHeader = -1;
     private final List<GBCTMTextEntry> tmTexts = new ArrayList<>();
+    private final Map<Integer, Integer> bankEndFreeSpaceMargins = new HashMap<>();
 
     public AbstractGBCRomEntry(String name) {
         super(name);
@@ -74,6 +74,17 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
         return Collections.unmodifiableList(tmTexts);
     }
 
+    public Map<Integer, Integer> getBankEndFreeSpaceMargins() {
+        return Collections.unmodifiableMap(bankEndFreeSpaceMargins);
+    }
+
+    private void addBankEndFreeSpaceMargin(String[] valuePair) {
+        String keyString = valuePair[0].split("<")[1].split(">")[0];
+        int key = IniEntryReader.parseInt(keyString);
+        int value = IniEntryReader.parseInt(valuePair[1]);
+        bankEndFreeSpaceMargins.put(key, value);
+    }
+
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
@@ -82,6 +93,7 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
             if (getIntValue("CopyTMText") == 1) {
                 tmTexts.addAll(gbcOther.tmTexts);
             }
+            bankEndFreeSpaceMargins.putAll(gbcOther.bankEndFreeSpaceMargins);
         }
     }
 

@@ -196,7 +196,7 @@ public class Gen5Constants {
             Species.Gen5Formes.kyuremB
     );
 
-    public static final List<Integer> emptyPlaythroughTrainers = Arrays.asList(new Integer[] { });
+    public static final List<Integer> emptyPlaythroughTrainers = List.of();
     
     public static final List<Integer> bw1MainPlaythroughTrainers = Arrays.asList(
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -456,7 +456,7 @@ public class Gen5Constants {
         map.put(Moves.whirlpool, Arrays.asList(Items.gripClaw, Items.bindingBand));
         map.put(Moves.wrap, Arrays.asList(Items.gripClaw, Items.bindingBand));
 
-        map.put(Moves.hornLeech, Arrays.asList(Items.bigRoot));
+        map.put(Moves.hornLeech, List.of(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
 
@@ -868,9 +868,9 @@ public class Gen5Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
@@ -879,13 +879,13 @@ public class Gen5Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
     }
 
     public static ItemList getNonBadItems(int romType) {

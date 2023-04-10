@@ -1,14 +1,31 @@
 package com.dabomstew.pkrandom.gbspace;
 
+/**
+ * A {@link FreedSpace} with bank functionality.<br>
+ * Assumes there is data which must be in certain banks, and data which can be placed anywhere. It would be a problem
+ * if space freed for bank-specific data could be used up by bank-unspecific data, so there is a simple "reservation"
+ * system.<br>
+ * {@link #findAndUnfree(int)} can only find freed space in banks that are NOT reserved.<br>
+ * {@link #findAndUnfreeInBank(int, int)} on the other hand lets you specify a bank, assuming you only use it for
+ * bank-specific data.
+ *
+ */
 public class BankDividedFreedSpace extends FreedSpace {
 
     private final int bankSize;
+    private final int numberOfBanks;
+    private final boolean[] reservedBanks;
 
-    public BankDividedFreedSpace(int bankSize) {
+    public BankDividedFreedSpace(int bankSize, int numberOfBanks, int[] reservedBanks) {
         if (bankSize <= 0) {
             throw new IllegalArgumentException("bankSize must be positive.");
         }
         this.bankSize = bankSize;
+        this.numberOfBanks = numberOfBanks;
+        this.reservedBanks = new boolean[numberOfBanks];
+        for (int i : reservedBanks) {
+            this.reservedBanks[i] = true;
+        }
     }
 
     @Override
@@ -49,6 +66,26 @@ public class BankDividedFreedSpace extends FreedSpace {
 
     private int freedChunkStartBank(FreedChunk fc) {
         return fc.start / bankSize;
+    }
+
+    /**
+     * Only finds/unfrees in banks that are NOT reserved.
+     */
+    @Override
+    public int findAndUnfree(int length) {
+        for (int i = 0; i < numberOfBanks; i++) {
+            if (!isBankReserved(i)) {
+                int offset = findAndUnfreeInBank(length, i);
+                if (offset != -1) {
+                    return offset;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private boolean isBankReserved(int bank) {
+        return reservedBanks[bank];
     }
 
     public int findAndUnfreeInBank(int length, int bank) {

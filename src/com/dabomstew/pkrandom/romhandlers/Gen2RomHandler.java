@@ -121,39 +121,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         preprocessMaps();
     }
 
-    /**
-     * Frees the unused space at the end of some banks, so the randomizer knows to use it.<br>
-     * Assumes most kinds of data is always found in the same banks (e.g. trainer data in Bank 0x0E).
-     * See layout.link from
-     * <a href=https://github.com/pret/pokegold/blob/d36f220b902ea210a3de86e1b7c0c7f938943121/layout.link>pokegold</a> and
-     * <a href=https://github.com/pret/pokecrystal/blob/c75d121c78324077bd058c179c94c596c6457f77/layout.link>pokecrystal</a>.
-     */
-    @Override
-    protected void freeUnusedSpaceAtEndOfBanks() {
-        // Bank XX ends with YY data, which decides the frontMargin.
-        // (because data either ends with a terminator, or has a set length we can know)
-        // 08: Egg moves
-        freeUnusedSpaceAtEndOfBank(0x08, 0);
-        // 0E: Trainer
-        freeUnusedSpaceAtEndOfBank(0x0E, 0);
-        // 10: Evolution/MovesLearnt data
-        if (isVietCrystal) {
-            freeUnusedSpaceBefore(0x43DFF, 1);
-        } else {
-            freeUnusedSpaceAtEndOfBank(0x10, 1);
-        }
-        int[] banksEndingWithImages = romEntry.isCrystal() ? Gen2Constants.crystalBanksEndingWithImages :
-                Gen2Constants.gsBanksEndingWithImages;
-        for (int bank : banksEndingWithImages) {
-            freeUnusedSpaceAtEndOfBank(bank, 0);
-        }
-        // Bank which contains events. Arbitrary high frontMargin since the event structure is not known
-        // (to the programmer).
-        if (hasMoveTutors()) {
-            freeUnusedSpaceAtEndOfBank(bankOf(romEntry.getIntValue("MoveTutorMenuOffset")), 20);
-        }
-    }
-
     @Override
     protected void loadGameData() {
         super.loadGameData();
