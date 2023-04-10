@@ -52,7 +52,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     @Override
     protected void midLoadingSetUp() {
         super.midLoadingSetUp();
-        this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
+        this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize, rom.length / GBConstants.bankSize,
+                getRomEntry().getArrayValue("ReservedBanks"));
         freeUnusedSpaceAtEndOfBanks();
     }
 
