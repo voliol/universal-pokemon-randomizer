@@ -2717,6 +2717,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                                          boolean includePalette) {
         // TODO: call stuff here "image..." instead of "pic..." to be in line with other gens
         if (!back && !shiny) {
+            System.out.println(pk);
             String filename = "baytwo.png";
             int picWidth = pk.getPicDimensions() & 0x0F;
             if (picWidth == 5) {

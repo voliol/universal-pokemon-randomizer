@@ -299,7 +299,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
-        System.out.println("Trying to free unused space at end of bank " + bank);
+        System.out.println("Trying to free unused space at end of bank 0x" + Integer.toHexString(bank));
         freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
     }
 
@@ -310,7 +310,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
      */
     protected void freeUnusedSpaceBefore(int end, int frontMargin) {
         int start = end;
-        while (rom[start] == getFreeSpaceByte()) {
+        int minStart = bankOf(end)*GBConstants.bankSize;
+        while (rom[start] == getFreeSpaceByte() && start >= minStart) {
             start--;
         }
         start++;

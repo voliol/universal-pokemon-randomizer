@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.gbspace;
 
+import java.util.ListIterator;
+
 /**
  * A {@link FreedSpace} with bank functionality.<br>
  * Assumes there is data which must be in certain banks, and data which can be placed anywhere. It would be a problem
@@ -49,8 +51,9 @@ public class BankDividedFreedSpace extends FreedSpace {
     private void splitFreedChunksAtBankBoundaries() {
         int bank = 0;
 
-        for (int i = 0; i < freedChunks.size(); i++) {
-            FreedChunk fs = freedChunks.get(i);
+        ListIterator<FreedChunk> iterator = freedChunks.listIterator();
+        while (iterator.hasNext()) {
+            FreedChunk fs = iterator.next();
             while (freedChunkStartBank(fs) > bank) {
                 bank++;
             }
@@ -59,7 +62,7 @@ public class BankDividedFreedSpace extends FreedSpace {
             if (fs.end >= startOfNextBank) {
                 FreedChunk splitOff = new FreedChunk(startOfNextBank, fs.end);
                 fs.end = startOfNextBank - 1;
-                freedChunks.add(splitOff);
+                iterator.add(splitOff);
             }
         }
     }
@@ -89,7 +92,7 @@ public class BankDividedFreedSpace extends FreedSpace {
     }
 
     public int findAndUnfreeInBank(int length, int bank) {
-        System.out.println("looking for " + length + " bytes in bank " + bank);
+        // System.out.println("looking for " + length + " bytes in bank " + bank);
         if (length < 1) {
             throw new IllegalArgumentException("length must be at least 1");
         }
