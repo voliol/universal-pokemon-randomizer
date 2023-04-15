@@ -359,7 +359,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 	}
 
 	@Override
-	protected List<BufferedImage> getAllPokemonImages() {
+	public List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 
 		String GARCPath = getGARCPath("PokemonGraphics");
@@ -380,7 +380,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 	@Override
 	public final BufferedImage getMascotImage() {
 		try {
-			dumpAllPokemonSprites();
+			dumpAllPokemonImages();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

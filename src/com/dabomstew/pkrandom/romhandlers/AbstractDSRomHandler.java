@@ -460,7 +460,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
     
 	@Override
-	protected List<BufferedImage> getAllPokemonImages() {
+	public List<BufferedImage> getAllPokemonImages() {
         ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
@@ -519,7 +519,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     @Override
 	public final BufferedImage getMascotImage() {
 		try {
-			dumpAllPokemonSprites();
+			dumpAllPokemonImages();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

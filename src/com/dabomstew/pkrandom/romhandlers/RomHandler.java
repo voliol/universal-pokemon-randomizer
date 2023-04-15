@@ -681,4 +681,8 @@ public interface RomHandler {
 
     PaletteHandler getPaletteHandler();
 
+    void dumpAllPokemonImages();
+
+    List<BufferedImage> getAllPokemonImages();
+
 }

@@ -4,9 +4,11 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
+import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -707,6 +709,12 @@ public class RomHandlerTest {
         List<Pokemon> before = new ArrayList<>(starters);
         romHandler.setStarters(starters);
         assertEquals(before, romHandler.getStarters());
+    }
+
+    @Test
+    public void getAllPokemonImagesOnGoldU() {
+        loadROM("Gold (U)");
+        romHandler.getAllPokemonImages();
     }
 
 }

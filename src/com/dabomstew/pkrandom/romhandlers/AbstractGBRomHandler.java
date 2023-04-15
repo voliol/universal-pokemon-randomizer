@@ -448,7 +448,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	protected abstract byte getFreeSpaceByte();
 
     @Override
-	protected List<BufferedImage> getAllPokemonImages() {
+	public List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (int i = 1; i < getPokemon().size(); i++) {
 			Pokemon pk = getPokemon().get(i);
@@ -468,7 +468,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	@Override
 	public final BufferedImage getMascotImage() {
 		try {
-			dumpAllPokemonSprites();
+			dumpAllPokemonImages();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

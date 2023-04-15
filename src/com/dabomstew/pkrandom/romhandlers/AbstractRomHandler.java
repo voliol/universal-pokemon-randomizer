@@ -7044,14 +7044,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         getPaletteHandler().randomizePokemonPalettes(getPokemonSet(), typeSanity, evolutionSanity, shinyFromNormal);
     }
 
+    @Override
     public abstract PaletteHandler getPaletteHandler();
 
+    @Override
     // just for testing
-    protected final void dumpAllPokemonSprites() {
+    public final void dumpAllPokemonImages() {
         List<BufferedImage> bims = getAllPokemonImages();
 
         for (int i = 0; i < bims.size(); i++) {
-            String fileAdress = "Pokemon_sprite_dump/gen" + generationOfPokemon() + "/"
+            String fileAdress = "Pokemon_image_dump/gen" + generationOfPokemon() + "/"
                     + String.format("%03d_d.png", i + 1);
             File outputfile = new File(fileAdress);
             try {
@@ -7063,7 +7065,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
 
-    protected abstract List<BufferedImage> getAllPokemonImages();
+    @Override
+    public abstract List<BufferedImage> getAllPokemonImages();
 
 	public abstract void savePokemonPalettes();
 
