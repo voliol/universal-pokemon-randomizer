@@ -39,7 +39,7 @@ public class BankDividedFreedSpace extends FreedSpace {
         }
         super.free(start, length);
         splitFreedChunksAtBankBoundaries();
-        System.out.println("after:\t" + this);
+        //System.out.println("after:\t" + this);
     }
 
     private boolean freedChunkWouldCrossBankBoundary(int start, int length) {
@@ -102,7 +102,7 @@ public class BankDividedFreedSpace extends FreedSpace {
         }
         int offset = found.start;
         unfree(found, length);
-        System.out.println("after:\t" + this);
+        //System.out.println("after:\t" + this);
         return offset;
     }
 

@@ -40,6 +40,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
 
@@ -2647,11 +2648,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     // experimenting method TODO: remove when done experimenting
-    private void rewritePoke(int species, String filename) throws IOException {
+    private void rewritePoke(int species, String filename, boolean back) throws IOException {
         Pokemon pk = pokemonList.get(species);
         int picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
+        if (back) {
+            picPointer += 3;
+        }
         BufferedImage bim = ImageIO.read(new File(filename));
-        System.out.println(Integer.toHexString(picPointer));
         rewritePokemonOrTrainerImage(picPointer, bim);
     }
 
@@ -2672,7 +2675,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private int lengthOfCompressedDataAt(int offset) {
         byte[] decompressed = Gen2Decmp.decompress(rom, offset);
         byte[] recompressed = Gen2Cmp.compress(decompressed);
-        return recompressed.length;
+        // TODO: Figure out why this -1 seems to work. Does Gen2Cmp.compress() give one byte too many??
+        return recompressed.length - 1;
     }
 
     private int readPokemonOrTrainerImagePointer(int pointerOffset) {
@@ -2716,21 +2720,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
         // TODO: call stuff here "image..." instead of "pic..." to be in line with other gens
-        if (!back && !shiny) {
-            System.out.println(pk);
-            String filename = "baytwo.png";
-            int picWidth = pk.getPicDimensions() & 0x0F;
-            if (picWidth == 5) {
-                filename = "baytwo_small.png";
-            } else if (picWidth == 6) {
-                filename = "baytwo.png";
-            } else if (picWidth == 7) {
-                filename = "baytwo_big.png";
-            } else {
-                System.out.println(pk.getName() + " invalid width: " + picWidth);
-            }
+
+        if (!shiny) {
+            currentPokemon = pk;
+            // a stupid hack, just to not have to think of how to carry the back boolean through several steps
+            currentPokemon.setSecondaryType(back ? Type.GHOST : Type.NORMAL);
+            System.out.println(" = " + pk.getName() + " = ");
+            String filename = String.format("test_images/%03d" + (back ? "_b" : "_f") + ".png", pk.getNumber());
             try {
-                rewritePoke(pk.getNumber(), filename);
+                rewritePoke(pk.getNumber(), filename, back);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

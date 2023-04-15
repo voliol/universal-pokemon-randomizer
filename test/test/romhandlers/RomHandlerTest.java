@@ -712,9 +712,9 @@ public class RomHandlerTest {
     }
 
     @Test
-    public void getAllPokemonImagesOnGoldU() {
+    public void dumpAllPokemonImagesOnGoldU() {
         loadROM("Gold (U)");
-        romHandler.getAllPokemonImages();
+        romHandler.dumpAllPokemonImages();
     }
 
 }
