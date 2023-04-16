@@ -116,10 +116,38 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void midLoadingSetUp() {
+        checkEmptyBanks();
         super.midLoadingSetUp();
         havePatchedFleeing = false;
         loadLandmarkNames();
         preprocessMaps();
+    }
+
+    private void checkEmptyBanks() {
+        System.out.print("EmptyBanks=[");
+        List<Integer> emptyBanks = new ArrayList<>();
+        for (int bank = 0; bank < rom.length / GBConstants.bankSize; bank++) {
+            if (isBankEmpty(bank)) {
+                emptyBanks.add(bank);
+            }
+        }
+        for (int i = 0; i < emptyBanks.size(); i++) {
+            System.out.printf("0x%2x", emptyBanks.get(i));
+            if (i != emptyBanks.size() - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.print("]\n");
+    }
+
+    private boolean isBankEmpty(int bank) {
+        byte unusedByte = this.getFreeSpaceByte();
+        for (int i = 0; i < GBConstants.bankSize; i++) {
+            if (rom[bank*GBConstants.bankSize + i] != unusedByte) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

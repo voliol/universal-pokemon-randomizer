@@ -17,6 +17,7 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
             putSpecialKeyMethod("ExtraTableFile", AbstractGBCRomEntry::setExtraTableFile);
             putSpecialKeyMethod("CRCInHeader", AbstractGBCRomEntry::setCRCInHeader);
             putSpecialKeyMethod("TMText[]", AbstractGBCRomEntry::addTMText);
+            putSpecialKeyMethod("EmptyBanks", AbstractGBCRomEntry::addFreeSpaceMarginOfEmptyBanks);
             putKeyPrefixMethod("BankEndFreeSpaceMargin<", AbstractGBCRomEntry::addBankEndFreeSpaceMargin);
         }
     }
@@ -76,6 +77,14 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
 
     public Map<Integer, Integer> getBankEndFreeSpaceMargins() {
         return Collections.unmodifiableMap(bankEndFreeSpaceMargins);
+    }
+
+    private void addFreeSpaceMarginOfEmptyBanks(String s) {
+        int[] freeBanks = IniEntryReader.parseArray(s);
+        putArrayValue("FreeBanks", freeBanks);
+        for (int bank : freeBanks) {
+            bankEndFreeSpaceMargins.put(bank, 0);
+        }
     }
 
     private void addBankEndFreeSpaceMargin(String[] valuePair) {

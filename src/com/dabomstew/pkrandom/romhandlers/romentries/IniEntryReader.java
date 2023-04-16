@@ -22,6 +22,20 @@ import static com.dabomstew.pkrandom.FileFunctions.openConfig;
  */
 public abstract class IniEntryReader<T extends IniEntry> {
 
+    public static int[] parseArray(String s) {
+        String[] unparsed = s.substring(1, s.length() - 1).split(",");
+        if (unparsed.length == 1 && unparsed[0].trim().isEmpty()) {
+            return new int[0];
+        } else {
+            int[] value = new int[unparsed.length];
+            int i = 0;
+            for (String part : unparsed) {
+                value[i++] = parseInt(part);
+            }
+            return value;
+        }
+    }
+
     public static int parseInt(String s) {
         int radix = 10;
         s = s.trim().toLowerCase();
@@ -210,17 +224,12 @@ public abstract class IniEntryReader<T extends IniEntry> {
     }
 
     protected void addArrayValue(String[] valuePair) {
-        String[] unparsed = valuePair[1].substring(1, valuePair[1].length() - 1).split(",");
-        if (unparsed.length == 1 && unparsed[0].trim().isEmpty()) {
-            current.putArrayValue(valuePair[0], new int[0]);
-        } else {
-            int[] value = new int[unparsed.length];
-            int i = 0;
-            for (String s : unparsed) {
-                value[i++] = parseInt(s);
-            }
-            current.putArrayValue(valuePair[0], value);
-        }
+        addArrayValue(current, valuePair);
+    }
+
+    protected void addArrayValue(T entry, String[] valuePair) {
+        int[] value = parseArray(valuePair[1]);
+        entry.putArrayValue(valuePair[0], value);
     }
 
     protected void addIntValue(String[] valuePair) {
