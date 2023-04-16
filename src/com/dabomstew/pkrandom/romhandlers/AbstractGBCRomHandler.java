@@ -57,6 +57,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize, rom.length / GBConstants.bankSize,
                 getRomEntry().getArrayValue("ReservedBanks"));
         freeUnusedSpaceAtEndOfBanks();
+        freeUnusedBanks();
     }
 
     /**
@@ -66,6 +67,33 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         for (Map.Entry<Integer, Integer> margin : getRomEntry().getBankEndFreeSpaceMargins().entrySet()) {
             freeUnusedSpaceAtEndOfBank(margin.getKey(), margin.getValue());
         }
+    }
+
+    protected void freeUnusedBanks() {
+        for (int bank : getRomEntry().getArrayValue("UnusedBanks")) {
+            if (isBankEmpty(bank)) {
+                freeSpaceBetween(bank*GBConstants.bankSize, (bank+1)*GBConstants.bankSize - 1);
+            } else {
+                // TODO: what is a good way to log this?
+                System.out.printf("""
+                        Bank 0x%2x was expected to be empty, but is not.
+                        This is a sign of a modified ROM which is not supported by the randomizer.
+                        The randomizer will handle it as well as it can, but be aware of the risk of
+                        the output being corrupted, or otherwise non-functional.
+                        """, bank);
+                freeUnusedSpaceAtEndOfBank(bank, 0x100); // arbitrary large amount
+            }
+        }
+    }
+
+    protected boolean isBankEmpty(int bank) {
+        byte unusedByte = this.getFreeSpaceByte();
+        for (int i = 0; i < GBConstants.bankSize; i++) {
+            if (rom[bank*GBConstants.bankSize + i] != unusedByte) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
