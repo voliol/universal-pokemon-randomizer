@@ -32,7 +32,8 @@ import java.util.ListIterator;
 public class FreedSpace {
 
     private static final String ALREADY_FREED_EXCEPTION_MESSAGE =  "Can't free a space that is already freed. " +
-            "This is a safety measure to prevent bad usage of free().";
+            "This is a safety measure to prevent bad usage of free()." +
+            "\n%s overlaps with existing freed chunk %s";
 
     protected static class FreedChunk {
 
@@ -78,7 +79,7 @@ public class FreedSpace {
                 freedChunkAdded = true;
 
             } else if (neighbor.end >= toFree.start) {
-                throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
+                throw new RuntimeException(String.format(ALREADY_FREED_EXCEPTION_MESSAGE, toFree, neighbor));
             }
         }
 
@@ -90,7 +91,7 @@ public class FreedSpace {
     protected final void addChunkBeforeOrMergeWithRightNeighbor(FreedChunk toFree, FreedChunk rightNeighbor,
                                                                 ListIterator<FreedChunk> iterator) {
         if (toFree.end >= rightNeighbor.start) {
-            throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
+            throw new RuntimeException(String.format(ALREADY_FREED_EXCEPTION_MESSAGE, toFree, rightNeighbor));
         }
 
         if (toFree.end == rightNeighbor.start - 1) {
@@ -107,7 +108,7 @@ public class FreedSpace {
             FreedChunk rightNeighbor = iterator.next();
 
             if (toFree.end >= rightNeighbor.start) {
-                throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
+                throw new RuntimeException(String.format(ALREADY_FREED_EXCEPTION_MESSAGE, toFree, rightNeighbor));
             } else if (toFree.end == rightNeighbor.start - 1) {
                 leftNeighbor.end = rightNeighbor.end;
                 iterator.remove();
