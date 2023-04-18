@@ -63,6 +63,7 @@ public class BankDividedFreedSpace extends FreedSpace {
                 FreedChunk splitOff = new FreedChunk(startOfNextBank, fs.end);
                 fs.end = startOfNextBank - 1;
                 iterator.add(splitOff);
+                iterator.previous();
             }
         }
     }
