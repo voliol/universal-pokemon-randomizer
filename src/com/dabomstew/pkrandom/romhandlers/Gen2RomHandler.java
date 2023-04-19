@@ -2647,6 +2647,26 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeBytes(offset, palette.toBytes());
     }
 
+    private void rewritePokemonImage(Pokemon pk, boolean back, BufferedImage bim) {
+        rewritePokemonOrTrainerImage(getPokemonImagePointerOffset(pk, back), bim);
+    }
+
+    private int getPokemonImagePointerOffset(Pokemon pk, boolean back) {
+        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
+        // There is no zero-entry.
+        int pointerOffset;
+        if (pk.getNumber() == Species.unown) {
+            int unownLetter = new Random().nextInt(Gen2Constants.unownFormeCount);
+            pointerOffset = romEntry.getIntValue("UnownImages") + unownLetter * 6;
+        } else {
+            pointerOffset = romEntry.getIntValue("PokemonImages") + (pk.getNumber() - 1) * 6;
+        }
+        if (back) {
+            pointerOffset += 3;
+        }
+        return pointerOffset;
+    }
+
     private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
         byte[] uncompressed = new GBCImage(bim).getData();
         int width = bim.getWidth() / 8;
@@ -2735,22 +2755,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         return bim;
-    }
-
-    private int getPokemonImagePointerOffset(Pokemon pk, boolean back) {
-        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
-        // There is no zero-entry.
-        int pointerOffset;
-        if (pk.getNumber() == Species.unown) {
-            int unownLetter = new Random().nextInt(Gen2Constants.unownFormeCount);
-            pointerOffset = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
-        } else {
-            pointerOffset = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
-        }
-        if (back) {
-            pointerOffset += 3;
-        }
-        return pointerOffset;
     }
 
     private byte[] readPokemonImageData(int pointerOffset, int imageWidth, int imageHeight) {

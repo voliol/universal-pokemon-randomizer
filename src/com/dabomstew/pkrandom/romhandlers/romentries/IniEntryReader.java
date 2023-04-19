@@ -103,6 +103,18 @@ public abstract class IniEntryReader<T extends IniEntry> {
         specialKeyMethods.put(key, method);
     }
 
+    protected void putArrayAlias(String oldKey, String newKey) {
+        putSpecialKeyMethod(oldKey, (entry, value) -> addArrayValue(entry, newKey, value));
+    }
+
+    protected void putIntAlias(String oldKey, String newKey) {
+        putSpecialKeyMethod(oldKey, (entry, value) -> addIntValue(entry, newKey, value));
+    }
+
+    protected void putStringAlias(String oldKey, String newKey) {
+        putSpecialKeyMethod(oldKey, (entry, value) -> addStringValue(entry, newKey, value));
+    }
+
     public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
         Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
         this.fileName = fileName;
@@ -155,6 +167,12 @@ public abstract class IniEntryReader<T extends IniEntry> {
             return;
         }
 
+        BiConsumer<T, String> specialKeyMethod = specialKeyMethods.get(valuePair[0]);
+        if (specialKeyMethod != null) {
+            specialKeyMethod.accept(current, valuePair[1]);
+            return;
+        }
+
         BiConsumer<T, String[]> keyPrefixMethod = checkForKeyPrefixMethod(valuePair);
         if (keyPrefixMethod != null) {
             keyPrefixMethod.accept(current, valuePair);
@@ -164,12 +182,6 @@ public abstract class IniEntryReader<T extends IniEntry> {
         BiConsumer<T, String[]> keySuffixMethod = checkForKeySuffixMethod(valuePair);
         if (keySuffixMethod != null) {
             keySuffixMethod.accept(current, valuePair);
-            return;
-        }
-
-        BiConsumer<T, String> specialKeyMethod = specialKeyMethods.get(valuePair[0]);
-        if (specialKeyMethod != null) {
-            specialKeyMethod.accept(current, valuePair[1]);
             return;
         }
 
@@ -224,29 +236,41 @@ public abstract class IniEntryReader<T extends IniEntry> {
     }
 
     protected void addArrayValue(String[] valuePair) {
-        addArrayValue(current, valuePair);
+        addArrayValue(current, valuePair[0], valuePair[1]);
     }
 
     protected void addArrayValue(T entry, String[] valuePair) {
-        int[] value = parseArray(valuePair[1]);
-        entry.putArrayValue(valuePair[0], value);
+        addArrayValue(entry, valuePair[0], valuePair[1]);
+    }
+
+    protected void addArrayValue(T entry, String key, String valueString) {
+        int[] value = parseArray(valueString);
+        entry.putArrayValue(key, value);
     }
 
     protected void addIntValue(String[] valuePair) {
-        addIntValue(current, valuePair);
+        addIntValue(current, valuePair[0], valuePair[1]);
     }
 
     protected void addIntValue(T entry, String[] valuePair) {
-        int value = parseInt(valuePair[1]);
-        entry.putIntValue(valuePair[0], value);
+        addIntValue(entry, valuePair[0], valuePair[1]);
+    }
+
+    protected void addIntValue(T entry, String key, String valueString) {
+        int value = parseInt(valueString);
+        entry.putIntValue(key, value);
     }
 
     protected void addStringValue(String[] valuePair) {
-        addStringValue(current, valuePair);
+        addStringValue(current, valuePair[0], valuePair[1]);
     }
 
     protected void addStringValue(T entry, String[] valuePair) {
-        entry.putStringValue(valuePair[0], valuePair[1]);
+        addStringValue(entry, valuePair[0], valuePair[1]);
+    }
+
+    protected void addStringValue(T entry, String key, String value) {
+        entry.putStringValue(key, value);
     }
 
     private void copyFrom(T entry, String value) {
