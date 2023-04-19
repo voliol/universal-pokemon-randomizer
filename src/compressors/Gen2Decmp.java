@@ -1,8 +1,8 @@
 package compressors;
 
 /**
- * Pokemon Gen 2 image decompressor Source:
- * https://github.com/pret/pokemon-reverse-engineering-tools/blob/master/pokemontools/lz.py 
+ * Pokemon Gen 2 image decompressor
+ * (<a href="https://github.com/pret/pokemon-reverse-engineering-tools/blob/master/pokemontools/lz.py">Source</a>)
  * (and gfx.py for flatten())<br>
  * Ported to Java by Dabomstew
  *
@@ -17,11 +17,16 @@ public class Gen2Decmp {
         return gen2Decmp.getData();
     }
 
+    public static int lengthOfCompressed(byte[] data, int offset) {
+        Gen2Decmp gen2Decmp = new Gen2Decmp(data, offset);
+        return gen2Decmp.getCompressedLength();
+    }
+
     public byte[] data;
+    private final int startAddress;
     private int address;
     private byte[] output;
     private int out_idx;
-    private int cmd;
     private int len;
     private int offset;
 
@@ -39,12 +44,17 @@ public class Gen2Decmp {
 
     private Gen2Decmp(byte[] data, int offset) {
         this.data = data;
+        this.startAddress = offset;
         this.address = offset;
         decompress();
     }
 
     private byte[] getData() {
         return output;
+    }
+
+    private int getCompressedLength() {
+        return address - startAddress;
     }
 
     private void decompress() {
@@ -55,7 +65,7 @@ public class Gen2Decmp {
                 break;
             }
 
-            cmd = (this.peek() & 0xE0) >> 5;
+            int cmd = (this.peek() & 0xE0) >> 5;
             if (cmd == 7) {
                 // LONG command
                 cmd = (this.peek() & 0x1C) >> 2;
@@ -70,41 +80,35 @@ public class Gen2Decmp {
             }
 
             switch (cmd) {
-            case 0:
-                // Literal
-                System.arraycopy(data, address, output, out_idx, len);
-                out_idx += len;
-                address += len;
-                break;
-            case 1:
-                // Iterate
-                byte repe = (byte) next();
-                for (int i = 0; i < len; i++) {
-                    output[out_idx++] = repe;
+                case 0 -> {
+                    // Literal
+                    System.arraycopy(data, address, output, out_idx, len);
+                    out_idx += len;
+                    address += len;
                 }
-                break;
-            case 2:
-                // Alternate
-                byte[] alts = { (byte) next(), (byte) next() };
-                for (int i = 0; i < len; i++) {
-                    output[out_idx++] = alts[i & 1];
+                case 1 -> {
+                    // Iterate
+                    byte repe = (byte) next();
+                    for (int i = 0; i < len; i++) {
+                        output[out_idx++] = repe;
+                    }
                 }
-                break;
-            case 3:
-                // Zero-fill
-                // Easy, since Java arrays are initialized to 0.
-                out_idx += len;
-                break;
-            case 4:
-                // Default repeat
-                repeat();
-                break;
-            case 5:
-                repeat(1, bit_flipped);
-                break;
-            case 6:
-                repeat(-1, null);
-                break;
+                case 2 -> {
+                    // Alternate
+                    byte[] alts = {(byte) next(), (byte) next()};
+                    for (int i = 0; i < len; i++) {
+                        output[out_idx++] = alts[i & 1];
+                    }
+                }
+                case 3 ->
+                    // Zero-fill
+                    // Easy, since Java arrays are initialized to 0.
+                        out_idx += len;
+                case 4 ->
+                    // Default repeat
+                        repeat();
+                case 5 -> repeat(1, bit_flipped);
+                case 6 -> repeat(-1, null);
             }
         }
 

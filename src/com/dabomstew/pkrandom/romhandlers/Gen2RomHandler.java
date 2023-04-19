@@ -2673,10 +2673,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private int lengthOfCompressedDataAt(int offset) {
-        byte[] decompressed = Gen2Decmp.decompress(rom, offset);
-        byte[] recompressed = Gen2Cmp.compress(decompressed);
-        // TODO: Figure out why this -1 seems to work. Does Gen2Cmp.compress() give one byte too many??
-        return recompressed.length - 1;
+        return Gen2Decmp.lengthOfCompressed(rom, offset);
     }
 
     private int readPokemonOrTrainerImagePointer(int pointerOffset) {
