@@ -529,7 +529,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pkmn.setRareHeldItem(rom[offset + Gen2Constants.bsRareHeldItemOffset] & 0xFF);
         pkmn.setDarkGrassHeldItem(-1);
         pkmn.setGrowthCurve(ExpCurve.fromByte(rom[offset + Gen2Constants.bsGrowthCurveOffset]));
-        pkmn.setPicDimensions(rom[offset + Gen2Constants.bsPicDimensionsOffset] & 0xFF);
+        pkmn.setImageDimensions(rom[offset + Gen2Constants.bsImageDimensionsOffset] & 0xFF);
 
     }
 
@@ -2647,17 +2647,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeBytes(offset, palette.toBytes());
     }
 
-    // experimenting method TODO: remove when done experimenting
-    private void rewritePoke(int species, String filename, boolean back) throws IOException {
-        Pokemon pk = pokemonList.get(species);
-        int picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
-        if (back) {
-            picPointer += 3;
-        }
-        BufferedImage bim = ImageIO.read(new File(filename));
-        rewritePokemonOrTrainerImage(picPointer, bim);
-    }
-
     private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
         byte[] uncompressed = new GBCImage(bim).getData();
         int width = bim.getWidth() / 8;
@@ -2716,53 +2705,25 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
-        // TODO: call stuff here "image..." instead of "pic..." to be in line with other gens
 
-        if (!shiny) {
-            currentPokemon = pk;
-            // a stupid hack, just to not have to think of how to carry the back boolean through several steps
-            currentPokemon.setSecondaryType(back ? Type.GHOST : Type.NORMAL);
-            System.out.println(" = " + pk.getName() + " = ");
-            String filename = String.format("test_images/%03d" + (back ? "_b" : "_f") + ".png", pk.getNumber());
-            try {
-                rewritePoke(pk.getNumber(), filename, back);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
+        int pointerOffset = getPokemonImagePointerOffset(pk, back);
 
-        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
-        // There is no zero-entry.
-        int picPointer;
-        if (pk.getNumber() == Species.unown) {
-            int unownLetter = new Random().nextInt(Gen2Constants.unownFormeCount);
-            picPointer = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
-        } else {
-            picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
-        }
-        if (back) {
-            picPointer += 3;
-        }
-
-        int picWidth = back ? 6 : pk.getPicDimensions() & 0x0F;
-        int picHeight = back ? 6 : (pk.getPicDimensions() >> 4) & 0x0F;
+        int width = back ? 6 : pk.getImageDimensions() & 0x0F;
+        int height = back ? 6 : (pk.getImageDimensions() >> 4) & 0x0F;
 
         byte[] data;
         try {
-            data = readPokemonImageData(picPointer, picWidth, picHeight);
+            data = readPokemonImageData(pointerOffset, width, height);
         } catch (Exception e) {
             return null;
         }
-        int w = picWidth * 8;
-        int h = picHeight * 8;
 
         // White and black are always in the palettes at positions 0 and 3, 
         // so only the middle colors are stored and need to be read.
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
 
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
+        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
 
         if (transparentBackground) {
             bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
@@ -2774,6 +2735,22 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         return bim;
+    }
+
+    private int getPokemonImagePointerOffset(Pokemon pk, boolean back) {
+        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
+        // There is no zero-entry.
+        int pointerOffset;
+        if (pk.getNumber() == Species.unown) {
+            int unownLetter = new Random().nextInt(Gen2Constants.unownFormeCount);
+            pointerOffset = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
+        } else {
+            pointerOffset = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
+        }
+        if (back) {
+            pointerOffset += 3;
+        }
+        return pointerOffset;
     }
 
     private byte[] readPokemonImageData(int pointerOffset, int imageWidth, int imageHeight) {

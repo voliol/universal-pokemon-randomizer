@@ -35,8 +35,6 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.BankDividedFreedSpace;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
 
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
@@ -277,19 +275,6 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
     }
 
-    // TODO: remove
-    protected Pokemon currentPokemon = null;
-    protected TreeMap<Integer, List<String>> repointedTo = new TreeMap<>();
-
-    // TODO: remove
-    private void recordCurrentPokemonAsBeingRepointedToBank(int bank) {
-        if (!repointedTo.containsKey(bank)){
-            repointedTo.put(bank, new ArrayList<>());
-        }
-        repointedTo.get(bank).add(currentPokemon.getName() +
-                (currentPokemon.getSecondaryType() == Type.GHOST ? "-back" : "-front"));
-    }
-
     protected class GBCDataRewriter<E> extends DataRewriter<E> {
 
         private boolean restrictToSameBank = true;
@@ -314,8 +299,6 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
             pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
-
-            recordCurrentPokemonAsBeingRepointedToBank(bankOf(newOffset));
 
             return newOffset;
         }
