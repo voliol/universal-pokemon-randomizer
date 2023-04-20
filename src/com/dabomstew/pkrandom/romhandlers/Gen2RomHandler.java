@@ -2783,20 +2783,34 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
     }
 
+    private void findImageForRomEntry(String fileName, String romEntryName, boolean transpose) {
+        try {
+            BufferedImage orig = ImageIO.read(new File(fileName));
+            if (transpose) {
+                orig = GFXFunctions.transposeTiles(orig);
+            }
+            byte[] data = new GBCImage(orig).getData();
+
+            System.out.println(RomFunctions.bytesToHex(data));
+            System.out.println("found at:");
+            List<Integer> foundAt = RomFunctions.search(rom, data);
+            System.out.println(foundAt);
+            if (!foundAt.isEmpty()) {
+                System.out.println(romEntryName + "=0x" + Integer.toHexString(foundAt.get(0)));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
 
-        if (pk.getNumber() == 1) {
-            try {
-                BufferedImage bim = ImageIO.read(new File("baytwo_big.png"));
-                for (int i = 0; i < 66; i++) {
-                    rewriteTrainerImage(i, bim);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            dumpAllTrainerImages();
+        if (pk.getNumber() == 1 && !back && !shiny) {
+            findImageForRomEntry("chris_card_orig.png", "ChrisTrainerCardImage", false);
+            findImageForRomEntry("chris_card_crystal.png", "ChrisTrainerCardImage", true);
+            findImageForRomEntry("kris_card.png", "KrisTrainerCardImage", true);
         }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);

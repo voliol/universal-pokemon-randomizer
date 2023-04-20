@@ -136,6 +136,9 @@ public class Gen2Constants {
 
     public static final String friendshipValueForEvoLocator = "FEDCDA";
 
+    // directly after chris's respective images
+    public static final int krisTrainerCardImageOffset = 16 * 5 * 7, krisFrontImageOffset = 16 * 7 * 7;
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;
