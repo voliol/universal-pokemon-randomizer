@@ -2810,7 +2810,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (pk.getNumber() == 1 && !back && !shiny) {
             findImageForRomEntry("chris_card_orig.png", "ChrisTrainerCardImage", false);
             findImageForRomEntry("chris_card_crystal.png", "ChrisTrainerCardImage", true);
-            findImageForRomEntry("kris_card.png", "KrisTrainerCardImage", true);
+            findImageForRomEntry("chris.png", "ChrisFrontImage", true);
         }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);

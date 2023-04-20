@@ -171,6 +171,7 @@ public class GFXFunctions {
 		return drawTiledZOrderImage(data, palette, offset, width, height, 8, 8, bpp);
 	}
 
+	// TODO: this long implementation should be redundant with transposeTiles() + drawTiledImage()
 	private static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
 			int tileWidth, int tileHeight, int bpp) {
 		if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
@@ -211,6 +212,12 @@ public class GFXFunctions {
 		return bim;
 	}
 
+	/**
+	 * Takes a {@link BufferedImage} which can be divided into 8x8 pixel tiles, and returns it "transposed",
+	 * as if it were a matrix with the tiles as cells. Can be used to mirror
+	 * <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a> since it turns columns of tiles into
+	 * rows of tiles.
+	 */
 	public static BufferedImage transposeTiles(BufferedImage bim) {
 		BufferedImage transposed = new BufferedImage(bim.getHeight(), bim.getWidth(), BufferedImage.TYPE_BYTE_INDEXED,
 				(IndexColorModel) bim.getColorModel());
