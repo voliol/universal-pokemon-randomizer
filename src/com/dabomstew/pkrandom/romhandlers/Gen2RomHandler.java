@@ -2667,6 +2667,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return pointerOffset;
     }
 
+    private void rewriteTrainerImage(int trainerClass, BufferedImage bim) {
+        if (trainerClass < 0) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't be negative");
+        }
+        int lastTrainerClass = romEntry.getIntValue("TrainerClassAmount") - 1;
+        if (trainerClass > lastTrainerClass) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
+        }
+        int pointerOffset = romEntry.getIntValue("TrainerImages") + trainerClass * 3;
+        rewritePokemonOrTrainerImage(pointerOffset, bim);
+    }
+
     private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
         byte[] uncompressed = new GBCImage(bim).getData();
         int width = bim.getWidth() / 8;
@@ -2722,9 +2734,70 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writePointer(offset + 1, pointer);
     }
 
+    // TODO: temp, remove
+    private void dumpAllTrainerImages() {
+        List<BufferedImage> bims = getAllTrainerImages();
+
+        for (int i = 0; i < bims.size(); i++) {
+            String fileAdress = "trainer_image_dump/"
+                    + String.format("%03d_d.png", i + 1);
+            File outputfile = new File(fileAdress);
+            try {
+                BufferedImage bim = bims.get(i) == null ? new BufferedImage(1,1,1) : bims.get(i);
+                ImageIO.write(bim, "png", outputfile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // TODO: temp, remove
+    private List<BufferedImage> getAllTrainerImages() {
+        final int trainerBound = 100;
+        List<BufferedImage> bims = new ArrayList<>();
+        for (int i = 0; i < trainerBound; i++) {
+            System.out.println("Trainer class " + i);
+            bims.add(getTrainerImage(i));
+        }
+        return bims;
+    }
+
+    // TODO: temp, remove
+    private BufferedImage getTrainerImage(int trainerClass) {
+        int pointerOffset = romEntry.getIntValue("TrainerImages") + (trainerClass * 3);
+        System.out.println(pointerOffset);
+
+        int width = 7;
+        int height = 7;
+
+        byte[] data;
+        try {
+            data = readPokemonOrTrainerImageData(pointerOffset, width, height);
+        } catch (Exception e) {
+            //e.printStackTrace();
+            return null;
+        }
+
+        int[] convPalette = new int[]{0xFFFFFFFF, 0xFFC0C0C0, 0xFF808080, 0xFF000000};
+
+        return GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
+    }
+
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
+
+        if (pk.getNumber() == 1) {
+            try {
+                BufferedImage bim = ImageIO.read(new File("baytwo_big.png"));
+                for (int i = 0; i < 66; i++) {
+                    rewriteTrainerImage(i, bim);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            dumpAllTrainerImages();
+        }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
 
@@ -2733,7 +2806,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         byte[] data;
         try {
-            data = readPokemonImageData(pointerOffset, width, height);
+            data = readPokemonOrTrainerImageData(pointerOffset, width, height);
         } catch (Exception e) {
             return null;
         }
@@ -2757,7 +2830,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return bim;
     }
 
-    private byte[] readPokemonImageData(int pointerOffset, int imageWidth, int imageHeight) {
+    private byte[] readPokemonOrTrainerImageData(int pointerOffset, int imageWidth, int imageHeight) {
         int imageOffset = readPokemonOrTrainerImagePointer(pointerOffset);
         byte[] data = Gen2Decmp.decompress(rom, imageOffset);
         byte[] transposed = GFXFunctions.gen2CutAndTranspose(data, imageWidth, imageHeight);
