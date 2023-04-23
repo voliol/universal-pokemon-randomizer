@@ -2624,6 +2624,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
+    private Palette readTrainerPalette(int trainerClass) {
+        if (trainerClass < 0) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't be negative");
+        }
+        int lastTrainerClass = romEntry.getIntValue("TrainerClassAmount") - 1;
+        if (trainerClass > lastTrainerClass) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
+        }
+        int offset = romEntry.getIntValue("TrainerPalettes") + trainerClass * 4;
+        return read2ColorPalette(offset);
+    }
+
     private Palette read2ColorPalette(int offset) {
         byte[] paletteBytes = new byte[]{rom[offset], rom[offset + 1], rom[offset + 2], rom[offset + 3]};
         return new Palette(paletteBytes);
@@ -2641,6 +2653,21 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int shinyPaletteOffset = palOffset + num * 8 + 4;
             writePalette(shinyPaletteOffset, pk.getShinyPalette());
         }
+    }
+
+    private void writeTrainerPalette(int trainerClass, Palette palette) {
+        if (trainerClass < 0) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't be negative");
+        }
+        int lastTrainerClass = romEntry.getIntValue("TrainerClassAmount") - 1;
+        if (trainerClass > lastTrainerClass) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
+        }
+        if (palette.size() != 2) {
+            throw new IllegalArgumentException("Invalid Palette, must have exactly 2 colors.");
+        }
+        int offset = romEntry.getIntValue("TrainerPalettes") + trainerClass * 4;
+        writePalette(offset, palette);
     }
 
     private void writePalette(int offset, Palette palette) {
@@ -2753,7 +2780,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     // TODO: temp, remove
     private List<BufferedImage> getAllTrainerImages() {
-        final int trainerBound = 100;
+        final int trainerBound = romEntry.getIntValue("TrainerClassAmount");
         List<BufferedImage> bims = new ArrayList<>();
         for (int i = 0; i < trainerBound; i++) {
             System.out.println("Trainer class " + i);
@@ -2778,7 +2805,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             return null;
         }
 
-        int[] convPalette = new int[]{0xFFFFFFFF, 0xFFC0C0C0, 0xFF808080, 0xFF000000};
+        Palette palette = readTrainerPalette(trainerClass);
+
+        int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
 
         return GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
     }
@@ -2834,6 +2863,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                                          boolean includePalette) {
 
         if (pk.getNumber() == 1 && !back && !shiny) {
+            dumpAllTrainerImages();
+
             findImageForRomEntry("chris_card_orig.png", "ChrisTrainerCardImage", false);
             findImageForRomEntry("chris_card_crystal.png", "ChrisTrainerCardImage", true);
             findImageForRomEntry("chris.png", "ChrisFrontImage", true);
