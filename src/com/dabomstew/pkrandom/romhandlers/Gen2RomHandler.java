@@ -2803,6 +2803,32 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
+    private static final String chrisBack = "EC492301070302070507060F08431F10433F20013E217D09010107071F1F213F3E3FCF8807030304040808101023201B40407D7C83FFC03FD83FE67FD1AFA05FD02FA05FC03F807F30CF708F87AD140C0F101F203F017F427F417F02FF85FF8AFF85FF8B28FF040FFFF0FF7F437F3FE0303F1F3F0F1F0F0FE7F71F0F3F431F260B1C17062B035500AA00F5C03EF01FEC0BF715EA0AF505FA42FD20FF28FF1CFF1EFF63069F7F0080FCFE7F22FF848330FF04F8FFC6FF3E44FEFF11FEFFFEFBFFF8FFF0FFC0FF00BF009F008F01220305078786E76677A3951207FF03FECEB47C44BEAF595CA838D018F03CE3A4007A0DC030380E06BEC1EFF0F7F8FFF8FB4AFCFF0AFDFEFFFF7FF8F7F87F605C454000010080610880C101C202E404F078A300881F8080C84CD353F121F931FE6FB89F101F0F4F0B2F08283030FCEC3F437F87F818AD007146C04043C0E00FF070F0F03878F8F87CEC64C04040C000228000002240010040AD00881B607088888004E4E4FC34A81864FC9C9C0C0C949C64640A0A3232FCFC63FF";
+
+    private void chrisBackStuff() {
+//        int chrisOffset = find(rom, chrisBack);
+//        System.out.println("ChrisBackImage=0x" + Integer.toHexString(chrisOffset));
+
+        int offset = romEntry.getIntValue("ChrisBackImage");
+        System.out.println("0x" + Integer.toHexString(offset));
+        byte[] data = new byte[lengthOfCompressedDataAt(offset)];
+        System.arraycopy(rom, offset, data, 0, data.length);
+        System.out.println(RomFunctions.bytesToHexNoSeparator(data));
+
+        if (offset != 0) {
+            byte[] decompressed = Gen2Decmp.decompress(rom, offset);
+            decompressed = GFXFunctions.gen2CutAndTranspose(decompressed, 6, 6);
+            decompressed = GFXFunctions.gen2Flatten(decompressed);
+            int[] convPalette = new int[]{0xFFFFFFFF, 0xFFC0C0C0, 0xFF808080, 0xFF000000};
+            BufferedImage bim = GFXFunctions.drawTiledImage(decompressed, convPalette, 6 * 8, 6 * 8, 8);
+            try {
+                ImageIO.write(bim, "png", new File(romEntry.getName() + "_chris_back.png"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
@@ -2811,6 +2837,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             findImageForRomEntry("chris_card_orig.png", "ChrisTrainerCardImage", false);
             findImageForRomEntry("chris_card_crystal.png", "ChrisTrainerCardImage", true);
             findImageForRomEntry("chris.png", "ChrisFrontImage", true);
+            findImageForRomEntry("kris_back.png", "KrisBackImage", true);
+            chrisBackStuff();
         }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
