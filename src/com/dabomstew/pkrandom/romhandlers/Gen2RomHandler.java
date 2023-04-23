@@ -2791,10 +2791,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
             byte[] data = new GBCImage(orig).getData();
 
-            System.out.println(RomFunctions.bytesToHex(data));
-            System.out.println("found at:");
+//            System.out.println(RomFunctions.bytesToHex(data));
+//            System.out.println("found at:");
             List<Integer> foundAt = RomFunctions.search(rom, data);
-            System.out.println(foundAt);
+//            System.out.println(foundAt);
             if (!foundAt.isEmpty()) {
                 System.out.println(romEntryName + "=0x" + Integer.toHexString(foundAt.get(0)));
             }
@@ -2839,6 +2839,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             findImageForRomEntry("chris.png", "ChrisFrontImage", true);
             findImageForRomEntry("kris_back.png", "KrisBackImage", true);
             chrisBackStuff();
+            findImageForRomEntry("chris_walk.png", "ChrisWalkSprite", false);
+            findImageForRomEntry("chris_bike.png", "ChrisBikeSprite", false);
+            findImageForRomEntry("chris_fish2.png", "ChrisFishSprite", false);
+            findImageForRomEntry("kris_walk.png", "KrisWalkSprite", false);
+            findImageForRomEntry("kris_bike.png", "KrisBikeSprite", false);
+            findImageForRomEntry("kris_fish2.png", "KrisFishSprite", false);
+            // TODO: add the offsets found to the ini files
         }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
