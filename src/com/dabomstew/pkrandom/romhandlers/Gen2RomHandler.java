@@ -2837,46 +2837,54 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void chrisBackStuff() {
 //        int chrisOffset = find(rom, chrisBack);
 //        System.out.println("ChrisBackImage=0x" + Integer.toHexString(chrisOffset));
-
-        int offset = romEntry.getIntValue("ChrisBackImage");
-        System.out.println("0x" + Integer.toHexString(offset));
-        byte[] data = new byte[lengthOfCompressedDataAt(offset)];
-        System.arraycopy(rom, offset, data, 0, data.length);
-        System.out.println(RomFunctions.bytesToHexNoSeparator(data));
-
-        if (offset != 0) {
-            byte[] decompressed = Gen2Decmp.decompress(rom, offset);
-            decompressed = GFXFunctions.gen2CutAndTranspose(decompressed, 6, 6);
-            decompressed = GFXFunctions.gen2Flatten(decompressed);
-            int[] convPalette = new int[]{0xFFFFFFFF, 0xFFC0C0C0, 0xFF808080, 0xFF000000};
-            BufferedImage bim = GFXFunctions.drawTiledImage(decompressed, convPalette, 6 * 8, 6 * 8, 8);
-            try {
-                ImageIO.write(bim, "png", new File(romEntry.getName() + "_chris_back.png"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//
+//        int offset = romEntry.getIntValue("ChrisBackImage");
+//        System.out.println("0x" + Integer.toHexString(offset));
+//        byte[] data = new byte[lengthOfCompressedDataAt(offset)];
+//        System.arraycopy(rom, offset, data, 0, data.length);
+//        System.out.println(RomFunctions.bytesToHexNoSeparator(data));
+//
+//        if (offset != 0) {
+//            byte[] decompressed = Gen2Decmp.decompress(rom, offset);
+//            decompressed = GFXFunctions.gen2CutAndTranspose(decompressed, 6, 6);
+//            decompressed = GFXFunctions.gen2Flatten(decompressed);
+//            int[] convPalette = new int[]{0xFFFFFFFF, 0xFFC0C0C0, 0xFF808080, 0xFF000000};
+//            BufferedImage bim = GFXFunctions.drawTiledImage(decompressed, convPalette, 6 * 8, 6 * 8, 8);
+//            try {
+//                ImageIO.write(bim, "png", new File(romEntry.getName() + "_chris_back.png"));
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
     }
+
+    private void writeChrisSprites(BufferedImage walk, BufferedImage bike, BufferedImage fish) {
+        int walkOffset = romEntry.getIntValue("ChrisWalkSprite");
+        writeImage(walkOffset, walk);
+        int bikeOffset = romEntry.getIntValue("ChrisBikeSprite");
+        writeImage(bikeOffset, bike);
+        int fishOffset = romEntry.getIntValue("ChrisFishSprite");
+        writeImage(fishOffset, fish);
+    }
+
+    private void writeImage(int offset, BufferedImage bim) {
+        writeBytes(offset, new GBCImage(bim).getData());
+    }
+
 
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
 
         if (pk.getNumber() == 1 && !back && !shiny) {
-            dumpAllTrainerImages();
-
-            findImageForRomEntry("chris_card_orig.png", "ChrisTrainerCardImage", false);
-            findImageForRomEntry("chris_card_crystal.png", "ChrisTrainerCardImage", true);
-            findImageForRomEntry("chris.png", "ChrisFrontImage", true);
-            findImageForRomEntry("kris_back.png", "KrisBackImage", true);
-            chrisBackStuff();
-            findImageForRomEntry("chris_walk.png", "ChrisWalkSprite", false);
-            findImageForRomEntry("chris_bike.png", "ChrisBikeSprite", false);
-            findImageForRomEntry("chris_fish2.png", "ChrisFishSprite", false);
-            findImageForRomEntry("kris_walk.png", "KrisWalkSprite", false);
-            findImageForRomEntry("kris_bike.png", "KrisBikeSprite", false);
-            findImageForRomEntry("kris_fish2.png", "KrisFishSprite", false);
-            // TODO: add the offsets found to the ini files
+            try {
+                BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
+                BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
+                BufferedImage fish = ImageIO.read(new File("kris_fish.png"));
+                writeChrisSprites(walk, bike, fish);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
