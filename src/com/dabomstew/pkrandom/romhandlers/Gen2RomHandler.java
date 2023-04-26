@@ -2865,7 +2865,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
         new GBCDataRewriter<BufferedImage>().rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                bim2 -> new GBCImage(bim2).getData(), this::lengthOfCompressedDataAt);
+                bim2 -> Gen2Cmp.compress(new GBCImage(bim2).getData()), this::lengthOfCompressedDataAt);
     }
 
     private void writeChrisSprites(BufferedImage walk, BufferedImage bike, BufferedImage fish) {
