@@ -2721,6 +2721,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private int lengthOfCompressedDataAt(int offset) {
+        System.out.println("0x" + Integer.toHexString(offset));
         return Gen2Decmp.lengthOfCompressed(rom, offset);
     }
 
@@ -2858,6 +2859,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 //        }
     }
 
+    private void rewriteChrisBackImage(BufferedImage bim) {
+        // TODO: figure out how to deal with the space in bank 0f running out.
+        int[] pointerOffsets = romEntry.getArrayValue("ChrisBackImagePointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        new GBCDataRewriter<BufferedImage>().rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+                bim2 -> new GBCImage(bim2).getData(), this::lengthOfCompressedDataAt);
+    }
+
     private void writeChrisSprites(BufferedImage walk, BufferedImage bike, BufferedImage fish) {
         int walkOffset = romEntry.getIntValue("ChrisWalkSprite");
         writeImage(walkOffset, walk);
@@ -2882,6 +2892,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
                 BufferedImage fish = ImageIO.read(new File("kris_fish.png"));
                 writeChrisSprites(walk, bike, fish);
+                BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
+                rewriteChrisBackImage(backImage);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

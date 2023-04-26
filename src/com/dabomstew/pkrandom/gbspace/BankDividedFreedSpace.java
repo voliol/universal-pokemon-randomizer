@@ -32,7 +32,7 @@ public class BankDividedFreedSpace extends FreedSpace {
 
     @Override
     public void free(int start, int length) {
-        // System.out.printf("freeing %d bytes starting from 0x%x.%n", length, start);
+        System.out.printf("freeing %d bytes starting from 0x%x.%n", length, start);
         if (freedChunkWouldCrossBankBoundary(start, length)) {
             throw new RuntimeException("Can't free a space spanning over multiple banks. This is a safety measure " +
                     "to prevent bad usage of free().");
