@@ -277,25 +277,39 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     protected class GBCDataRewriter<E> extends DataRewriter<E> {
 
-        private boolean restrictToSameBank = true;
-
         public GBCDataRewriter() {
+            super();
             setLongAlignAdresses(false);
         }
+    }
 
-        public boolean isRestrictToSameBank() {
-            return restrictToSameBank;
-        }
-
-        public void setRestrictToSameBank(boolean restrictToSameBank) {
-            this.restrictToSameBank = restrictToSameBank;
-        }
+    protected class SameBankDataRewriter<E> extends GBCDataRewriter<E> {
 
         @Override
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
             int bank = bankOf(pointerReader.apply(pointerOffset));
-            int newOffset = restrictToSameBank ? findAndUnfreeSpaceInBank(data.length, bank)
-                    : findAndUnfreeSpace(data.length, isLongAlignAdresses());
+            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
+
+            pointerWriter.accept(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            return newOffset;
+        }
+    }
+
+    protected class SpecificBankDataRewriter<E> extends GBCDataRewriter<E> {
+
+        private final int bank;
+
+        public SpecificBankDataRewriter(int bank) {
+            super();
+            this.bank = bank;
+            setPointerReader(pointerOffset -> readPointer(pointerOffset, bank));
+        }
+
+        @Override
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
 
             pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
@@ -311,7 +325,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("Bank full. Can't find " + length + " free bytes anywhere.");
+            throw new RandomizerIOException("Bank 0x" + Integer.toHexString(bank) + " full. Can't find " + length +
+                    " free bytes anywhere.");
         }
         return foundOffset;
     }

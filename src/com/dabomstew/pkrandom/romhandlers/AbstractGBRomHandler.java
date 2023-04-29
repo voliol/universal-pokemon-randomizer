@@ -368,11 +368,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         protected void rewriteSecondaryPointers(int primaryPointerOffset, int[] secondaryPointerOffsets,
                                               int oldDataOffset, int newDataOffset) {
             for (int spo : secondaryPointerOffsets) {
-                if (spo != primaryPointerOffset && readPointer(spo) != oldDataOffset) {
+                int offset = pointerReader.apply(spo);
+                if (spo != primaryPointerOffset && offset != oldDataOffset) {
                     System.out.println();
                     System.out.println("bad: " + spo);
-                    throw new RandomizerIOException("Invalid secondary pointer spo=" + spo + ". Points to " +
-                            readPointer(spo) + " instead of " + oldDataOffset + ".");
+                    throw new RandomizerIOException("Invalid secondary pointer spo=0x" + Integer.toHexString(spo) +
+                            ". Points to 0x" + Integer.toHexString(offset) + " instead of 0x" +
+                            Integer.toHexString(oldDataOffset) + ".");
                 }
                 pointerWriter.accept(spo, newDataOffset);
             }

@@ -1038,8 +1038,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
             int trainersPerThisClass = trainersPerClass[trainerClassNum];
-            new GBCDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
-                    lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
+            new SameBankDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b,
+                    oldDataOffset -> lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
         }
     }
 
@@ -1240,7 +1240,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (eggMoves.containsKey(i)) {
                 System.out.println("\n" + getPokemon().get(i));
                 int pointerOffset = tableOffset + (i - 1) * 2;
-                new GBCDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
+                new SameBankDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
                         oldDataOffset -> lengthOfDataWithTerminatorAt(oldDataOffset, Gen2Constants.eggMovesTerminator));
             }
         }
@@ -1583,7 +1583,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             writeByte(offset, mvList.next().byteValue());
         }
 
-        new GBCDataRewriter<List<Integer>>().rewriteData(menuPointerOffset, moves,
+        new SameBankDataRewriter<List<Integer>>().rewriteData(menuPointerOffset, moves,
                 this::moveTutorMovesToDialogueOptionBytes, this::lengthOfDialogueOptionAt);
     }
 
@@ -2527,7 +2527,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pk == null) continue;
             int pokeNum = pk.getNumber();
             int pointerOffset = pointerTableOffset + (pokeNum - 1) * 2;
-            new GBCDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
+            new SameBankDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
                     oldDataOffset -> lengthOfDataWithTerminatorsAt(oldDataOffset,
                             GBConstants.evosAndMovesTerminator, 2));
         }
@@ -2714,14 +2714,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         uncompressed = GFXFunctions.gen2CutAndTranspose(uncompressed, width, height);
 
         GBCDataRewriter<byte[]> dataRewriter = new GBCDataRewriter<>();
-        dataRewriter.setRestrictToSameBank(false);
         dataRewriter.setPointerReader(this::readPokemonOrTrainerImagePointer);
         dataRewriter.setPointerWriter(this::writePokemonOrTrainerImagePointer);
         dataRewriter.rewriteData(pointerOffset, uncompressed, Gen2Cmp::compress, this::lengthOfCompressedDataAt);
     }
 
     private int lengthOfCompressedDataAt(int offset) {
-        System.out.println("0x" + Integer.toHexString(offset));
+        System.out.println("Trying to read length of compressed data at 0x" + Integer.toHexString(offset));
         return Gen2Decmp.lengthOfCompressed(rom, offset);
     }
 
@@ -2864,7 +2863,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int[] pointerOffsets = romEntry.getArrayValue("ChrisBackImagePointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
-        new GBCDataRewriter<BufferedImage>().rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+        DataRewriter<BufferedImage> dataRewriter = new SpecificBankDataRewriter<>(0xa);
+        dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
                 bim2 -> Gen2Cmp.compress(new GBCImage(bim2).getData()), this::lengthOfCompressedDataAt);
     }
 
