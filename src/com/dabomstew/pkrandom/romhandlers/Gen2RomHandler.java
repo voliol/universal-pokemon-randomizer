@@ -2833,12 +2833,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private static final String chrisBack = "EC492301070302070507060F08431F10433F20013E217D09010107071F1F213F3E3FCF8807030304040808101023201B40407D7C83FFC03FD83FE67FD1AFA05FD02FA05FC03F807F30CF708F87AD140C0F101F203F017F427F417F02FF85FF8AFF85FF8B28FF040FFFF0FF7F437F3FE0303F1F3F0F1F0F0FE7F71F0F3F431F260B1C17062B035500AA00F5C03EF01FEC0BF715EA0AF505FA42FD20FF28FF1CFF1EFF63069F7F0080FCFE7F22FF848330FF04F8FFC6FF3E44FEFF11FEFFFEFBFFF8FFF0FFC0FF00BF009F008F01220305078786E76677A3951207FF03FECEB47C44BEAF595CA838D018F03CE3A4007A0DC030380E06BEC1EFF0F7F8FFF8FB4AFCFF0AFDFEFFFF7FF8F7F87F605C454000010080610880C101C202E404F078A300881F8080C84CD353F121F931FE6FB89F101F0F4F0B2F08283030FCEC3F437F87F818AD007146C04043C0E00FF070F0F03878F8F87CEC64C04040C000228000002240010040AD00881B607088888004E4E4FC34A81864FC9C9C0C0C949C64640A0A3232FCFC63FF";
+    private static final String dudeBack = "6202010307220F231F253F347FC497C59F011F0F430F070207030748030207060704070E0F0F0D231F83C72A3F013C3E3DFF22FE47FEFF858208FCFBFCBFF8FF90EF9044FF801100FF00FE00FC00FA00FD00FAC03FFCC3FFFC22FF02FDFFFA868301FEFF6114C0E0F0F8AEFED7FFEFFFFDFDDCFEEEFEF3F3F1F9F8A3003322E00320602020254043C0000380C0C00043E0000AF000F101FA02FC1CE020A0222023100A0808040687077E1FE5FF1E22FF007E22FF025FFFAF8483690180804380C0024040002A20000022408991000084EB0080C2A67513808040C0A0E050F0B0F058F8A8F8D4FCACFCD4FCEC3923014303020963629392F392FB8C7F44437F40433F20461F1104100F080F0CEC3702C0C0004420A007B0308848E848E04443F42413BC44B858E8688084C404F434E444E8C8F848F030FF";
 
-    private void chrisBackStuff() {
-//        int chrisOffset = find(rom, chrisBack);
-//        System.out.println("ChrisBackImage=0x" + Integer.toHexString(chrisOffset));
-//
-//        int offset = romEntry.getIntValue("ChrisBackImage");
+    private void dudeBackStuff() {
+        int dudeOffset = find(rom, dudeBack);
+        System.out.println("DudeBackImage=0x" + Integer.toHexString(dudeOffset));
+
+//        int offset = romEntry.getIntValue("DudeBackImage");
 //        System.out.println("0x" + Integer.toHexString(offset));
 //        byte[] data = new byte[lengthOfCompressedDataAt(offset)];
 //        System.arraycopy(rom, offset, data, 0, data.length);
@@ -2858,14 +2859,55 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 //        }
     }
 
-    private void rewriteChrisBackImage(BufferedImage bim) {
-        // TODO: figure out how to deal with the space in bank 0f running out.
+    public void rewriteChrisBackImage(BufferedImage bim) {
         int[] pointerOffsets = romEntry.getArrayValue("ChrisBackImagePointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
-        DataRewriter<BufferedImage> dataRewriter = new SpecificBankDataRewriter<>(0xa);
-        dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                bim2 -> Gen2Cmp.compress(new GBCImage(bim2).getData()), this::lengthOfCompressedDataAt);
+        int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
+        DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+
+        if (romEntry.isCrystal()) {
+            dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+                    bim1 -> Gen2Cmp.compress(new GBCImage(GFXFunctions.transposeTiles(bim)).getData()),
+                    this::lengthOfCompressedDataAt);
+        } else {
+            // much more in GS since it has to make sure the catching tutorial dude's backpic ends up in the same bank
+            dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+                    this::chrisPlusDudeBackImagesToBytes, this::lengthOfChrisAndDudeBackImagesAt);
+            repointDudeBackImage(primaryPointerOffset, bankOffsets[0]);
+        }
+    }
+
+    private byte[] chrisPlusDudeBackImagesToBytes(BufferedImage chrisBack) {
+        byte[] chrisBackData = new GBCImage(GFXFunctions.transposeTiles(chrisBack)).getData();
+        chrisBackData = Gen2Cmp.compress(chrisBackData);
+
+        int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"));
+        int dudeBackLength = Gen2Decmp.lengthOfCompressed(rom, dudeBackOffset);
+        byte[] dudeBackData = Arrays.copyOfRange(rom, dudeBackOffset, dudeBackOffset + dudeBackLength);
+
+        byte[] bothData = new byte[chrisBackData.length + dudeBackData.length];
+        System.arraycopy(chrisBackData, 0, bothData, 0, chrisBackData.length);
+        System.arraycopy(dudeBackData, 0, bothData, chrisBackData.length, dudeBackData.length);
+        return bothData;
+    }
+
+    /**
+     * The length in bytes of Chris' compressed back image, followed by the catching tutorial dude's.<br>
+     * Assumes they actually follow another in ROM, with no gaps.
+     */
+    private int lengthOfChrisAndDudeBackImagesAt(int offset) {
+        int length = lengthOfCompressedDataAt(offset);
+        length += lengthOfCompressedDataAt(offset + length);
+        return length;
+    }
+
+    private void repointDudeBackImage(int chrisBackPointerOffset, int bankOffset) {
+        int bank = rom[bankOffset];
+        int newOffset = readPointer(chrisBackPointerOffset, bank);
+        int newDudeOffset = newOffset + lengthOfCompressedDataAt(newOffset);
+        int dudeBackPointerOffset = romEntry.getIntValue("DudeBackImagePointer");
+        writePointer(dudeBackPointerOffset, newDudeOffset);
     }
 
     private void writeChrisSprites(BufferedImage walk, BufferedImage bike, BufferedImage fish) {
@@ -2887,10 +2929,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                                          boolean includePalette) {
 
         if (pk.getNumber() == 1 && !back && !shiny) {
+            dudeBackStuff();
             try {
                 BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
                 BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
-                BufferedImage fish = ImageIO.read(new File("kris_fish.png"));
+                BufferedImage fish = ImageIO.read(new File("kris_fish2.png"));
                 writeChrisSprites(walk, bike, fish);
                 BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
                 rewriteChrisBackImage(backImage);

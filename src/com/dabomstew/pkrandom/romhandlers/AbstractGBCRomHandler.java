@@ -297,22 +297,33 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         }
     }
 
-    protected class SpecificBankDataRewriter<E> extends GBCDataRewriter<E> {
+    protected class IndirectBankDataRewriter<E> extends GBCDataRewriter<E> {
 
-        private final int bank;
+        private final int[] bankOffsets;
+        private int bank;
 
-        public SpecificBankDataRewriter(int bank) {
+        public IndirectBankDataRewriter(int[] bankOffsets) {
             super();
-            this.bank = bank;
+            this.bankOffsets = bankOffsets;
+            this.bank = rom[bankOffsets[0]] & 0xFF;
+            System.out.println("Bank before: " + Integer.toHexString(bank));
             setPointerReader(pointerOffset -> readPointer(pointerOffset, bank));
         }
 
         @Override
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
+            //TODO: deal with/ignore error in case same bank is full
+//            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
+//            if (newOffset == -1) {
+                int newOffset = findAndUnfreeSpace(data.length);
+//            }
 
             pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
+
+            for (int bankOffset : bankOffsets) {
+                writeByte(bankOffset, (byte) bankOf(newOffset));
+            }
 
             return newOffset;
         }
@@ -342,7 +353,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
-        System.out.println("Trying to free unused space at end of bank 0x" + Integer.toHexString(bank));
+//        System.out.println("Trying to free unused space at end of bank 0x" + Integer.toHexString(bank));
         freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
     }
 
