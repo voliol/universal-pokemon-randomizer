@@ -56,10 +56,13 @@ public class GBCImage {
 	}
 
 	private final BufferedImage image;
-	
-	private byte[] bitplane1;
-	private byte[] bitplane2;
 	private byte[] data;
+
+	private boolean bitplanesPrepared;
+	private BufferedImage bitplane1Image;
+	private BufferedImage bitplane2Image;
+	private byte[] bitplane1Data;
+	private byte[] bitplane2Data;
 
 	public GBCImage(BufferedImage bim) {
 		this.image = fixed2bppIndexing(bim);
@@ -69,6 +72,11 @@ public class GBCImage {
 		}
 	}
 
+
+	public BufferedImage getImage() { //TODO: should GBCimage extend BufferedImage instead?
+		return image;
+	}
+
 	public int getWidthInTiles() {
 		return image.getWidth() / 8;
 	}
@@ -76,11 +84,52 @@ public class GBCImage {
 	public int getHeightInTiles() {
 		return image.getHeight() / 8;
 	}
-	
+
+	public byte[] getData() {
+		if (data == null) {
+			prepareBitplanes();
+			data = new byte[bitplane1Data.length * 2];
+			for (int i = 0; i < bitplane1Data.length; i++) {
+				data[i * 2] = bitplane1Data[i];
+				data[i * 2 + 1] = bitplane2Data[i];
+			}
+		}
+		return this.data;
+	}
+
+	public byte[] getFlattenedData() {
+		return null;
+		// TODO: what does this even mean?
+	}
+
+	public byte[] getBitplane1Data() {
+		prepareBitplanes();
+		return bitplane1Data;
+	}
+
+	public byte[] getBitplane2Data() {
+		prepareBitplanes();
+		return bitplane2Data;
+	}
+
+	public BufferedImage getBitplane1Image() {
+		prepareBitplanes();
+		return bitplane1Image;
+	}
+
+	public BufferedImage getBitplane2Image() {
+		prepareBitplanes();
+		return bitplane2Image;
+	}
+
 	private void prepareBitplanes() {
-		BufferedImage bitplane1Image = new BufferedImage(image.getWidth(), image.getHeight(),
+		if (bitplanesPrepared) {
+			return;
+		}
+
+		bitplane1Image = new BufferedImage(image.getWidth(), image.getHeight(),
 				BufferedImage.TYPE_BYTE_BINARY);
-		BufferedImage bitplane2Image = new BufferedImage(image.getWidth(), image.getHeight(),
+		bitplane2Image = new BufferedImage(image.getWidth(), image.getHeight(),
 				BufferedImage.TYPE_BYTE_BINARY);
 		for (int x = 0; x < image.getWidth(); x++) {
 			for (int y = 0; y < image.getHeight(); y++) {
@@ -93,43 +142,10 @@ public class GBCImage {
 				}
 			}
 		}
-	
-		this.bitplane1 = GFXFunctions.readTiledImageData(bitplane1Image, 1);
-		this.bitplane2 = GFXFunctions.readTiledImageData(bitplane2Image, 1);
+		bitplane1Data = GFXFunctions.readTiledImageData(bitplane1Image, 1);
+		bitplane2Data = GFXFunctions.readTiledImageData(bitplane2Image, 1);
+
+		bitplanesPrepared = true;
 	}
 
-	public byte[] getData() {
-		if (data == null) {
-			prepareBitplanes();
-			data = new byte[bitplane1.length * 2];
-			for (int i = 0; i < bitplane1.length; i++) {
-				data[i * 2] = bitplane1[i];
-				data[i * 2 + 1] = bitplane2[i];
-			}
-		}
-		return this.data;
-	}
-
-	public byte[] getBitplane1() {
-		if (bitplane1 == null) {
-			prepareBitplanes();
-		}
-		return bitplane1;
-	}
-
-	public byte[] getBitplane2() {
-		if (bitplane2 == null) {
-			prepareBitplanes();
-		}
-		return bitplane2;
-	}
-
-	public byte[] getFlattenedData() {
-		return null;
-		// TODO: what does this even mean?
-	}
-
-	public Image getImage() { //TODO: should GBCimage extend BufferedImage instead?
-		return image;
-	}
 }
