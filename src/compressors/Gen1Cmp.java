@@ -23,66 +23,13 @@ public class Gen1Cmp {
 			"articuno", "beedrill", "bellsprout", "blastoise", "bulbasaur", "butterfree", "caterpie", "chansey",
 			"charizard", "charmander", "charmeleon", "clefable", "clefairy", "cloyster", "cubone", "diglett", "ditto",
 			"dodrio", "doduo", "dragonair", "dragonite", "dratini", "drowzee", "dugtrio" };
-	private static final String BLASTOISE_ADRESS = "bin/com/dabomstew/pkrandom/graphics/resources";
-	private static final String BLASTOISE_FILE_NAME = "pokeImageFRLG_9f";
-
-	private static final byte[] MANUAL_RED_DATA = { (byte) 0x07, (byte) 0x07, (byte) 0x08, (byte) 0x0F, (byte) 0x10,
-			(byte) 0x1F, (byte) 0x10, (byte) 0x1F, (byte) 0x3B, (byte) 0x3C, (byte) 0x3F, (byte) 0x37, (byte) 0x7F,
-			(byte) 0x50, (byte) 0x7F, (byte) 0x42, (byte) 0xE0, (byte) 0xE0, (byte) 0x10, (byte) 0xF0, (byte) 0x08,
-			(byte) 0xF8, (byte) 0x08, (byte) 0xF8, (byte) 0xDC, (byte) 0x3C, (byte) 0xFC, (byte) 0xEC, (byte) 0xFE,
-			(byte) 0x0A, (byte) 0xFE, (byte) 0x42, (byte) 0x3F, (byte) 0x32, (byte) 0x3E, (byte) 0x39, (byte) 0x7F,
-			(byte) 0x4F, (byte) 0x7F, (byte) 0x4F, (byte) 0x39, (byte) 0x3F, (byte) 0x16, (byte) 0x1F, (byte) 0x11,
-			(byte) 0x1F, (byte) 0x0E, (byte) 0x0E, (byte) 0xFC, (byte) 0x4C, (byte) 0x7C, (byte) 0x9C, (byte) 0xFE,
-			(byte) 0xF2, (byte) 0xFE, (byte) 0xF2, (byte) 0x9C, (byte) 0xFC, (byte) 0x68, (byte) 0xF8, (byte) 0x88,
-			(byte) 0xF8, (byte) 0x70, (byte) 0x70, (byte) 0x07, (byte) 0x07, (byte) 0x08, (byte) 0x0F, (byte) 0x10,
-			(byte) 0x1F, (byte) 0x10, (byte) 0x1F, (byte) 0x30, (byte) 0x3F, (byte) 0x38, (byte) 0x3F, (byte) 0x7F,
-			(byte) 0x5F, (byte) 0x7F, (byte) 0x4F, (byte) 0xE0, (byte) 0xE0, (byte) 0x10, (byte) 0xF0, (byte) 0x08,
-			(byte) 0xF8, (byte) 0x08, (byte) 0xF8, (byte) 0x0C, (byte) 0xFC, (byte) 0x1C, (byte) 0xFC, (byte) 0xFE,
-			(byte) 0xFA, (byte) 0xFE, (byte) 0xF2, (byte) 0x3F, (byte) 0x33, (byte) 0x3C, (byte) 0x3F, (byte) 0x7B,
-			(byte) 0x5F, (byte) 0x79, (byte) 0x5E, (byte) 0x3C, (byte) 0x3F, (byte) 0x17, (byte) 0x1F, (byte) 0x11,
-			(byte) 0x1F, (byte) 0x0E, (byte) 0x0E, (byte) 0xFC, (byte) 0xCC, (byte) 0x3C, (byte) 0xFC, (byte) 0xDE,
-			(byte) 0xFA, (byte) 0x9E, (byte) 0x7A, (byte) 0x3C, (byte) 0xFC, (byte) 0xE8, (byte) 0xF8, (byte) 0x88,
-			(byte) 0xF8, (byte) 0x70, (byte) 0x70, (byte) 0x07, (byte) 0x07, (byte) 0x08, (byte) 0x0F, (byte) 0x10,
-			(byte) 0x1F, (byte) 0x38, (byte) 0x37, (byte) 0x7C, (byte) 0x43, (byte) 0x31, (byte) 0x3F, (byte) 0x1F,
-			(byte) 0x14, (byte) 0x1F, (byte) 0x14, (byte) 0xE0, (byte) 0xE0, (byte) 0x10, (byte) 0xF0, (byte) 0x08,
-			(byte) 0xF8, (byte) 0x08, (byte) 0xF8, (byte) 0x1C, (byte) 0xFC, (byte) 0xFC, (byte) 0xFC, (byte) 0xFC,
-			(byte) 0xFC, (byte) 0xF8, (byte) 0x98, (byte) 0x1F, (byte) 0x10, (byte) 0x0B, (byte) 0x0C, (byte) 0x07,
-			(byte) 0x07, (byte) 0x03, (byte) 0x03, (byte) 0x03, (byte) 0x03, (byte) 0x04, (byte) 0x07, (byte) 0x04,
-			(byte) 0x07, (byte) 0x03, (byte) 0x03, (byte) 0xF0, (byte) 0x10, (byte) 0xE8, (byte) 0x78, (byte) 0xC8,
-			(byte) 0xF8, (byte) 0xE8, (byte) 0x38, (byte) 0xE8, (byte) 0x38, (byte) 0xF0, (byte) 0xF0, (byte) 0x20,
-			(byte) 0xE0, (byte) 0xC0, (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) 0x07, (byte) 0x07, (byte) 0x08,
-			(byte) 0x0F, (byte) 0x10, (byte) 0x1F, (byte) 0x10, (byte) 0x1F, (byte) 0x3B, (byte) 0x3C, (byte) 0x3F,
-			(byte) 0x3F, (byte) 0x7F, (byte) 0x50, (byte) 0x00, (byte) 0x00, (byte) 0xE0, (byte) 0xE0, (byte) 0x10,
-			(byte) 0xF0, (byte) 0x08, (byte) 0xF8, (byte) 0x08, (byte) 0xF8, (byte) 0xDC, (byte) 0x3C, (byte) 0xFC,
-			(byte) 0xFC, (byte) 0xFE, (byte) 0x0A, (byte) 0x7F, (byte) 0x42, (byte) 0x7F, (byte) 0x72, (byte) 0x7E,
-			(byte) 0x59, (byte) 0x3F, (byte) 0x3F, (byte) 0x1B, (byte) 0x1F, (byte) 0x0E, (byte) 0x0F, (byte) 0x09,
-			(byte) 0x0F, (byte) 0x07, (byte) 0x07, (byte) 0xFE, (byte) 0x42, (byte) 0xFC, (byte) 0x4C, (byte) 0x74,
-			(byte) 0x9C, (byte) 0xFC, (byte) 0xF4, (byte) 0xFC, (byte) 0xCC, (byte) 0x78, (byte) 0xC8, (byte) 0xB0,
-			(byte) 0xB0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x07, (byte) 0x07, (byte) 0x08,
-			(byte) 0x0F, (byte) 0x10, (byte) 0x1F, (byte) 0x10, (byte) 0x1F, (byte) 0x30, (byte) 0x3F, (byte) 0x38,
-			(byte) 0x3F, (byte) 0x7F, (byte) 0x5F, (byte) 0x00, (byte) 0x00, (byte) 0xE0, (byte) 0xE0, (byte) 0x10,
-			(byte) 0xF0, (byte) 0x08, (byte) 0xF8, (byte) 0x08, (byte) 0xF8, (byte) 0x0C, (byte) 0xFC, (byte) 0x1C,
-			(byte) 0xFC, (byte) 0xFE, (byte) 0xFA, (byte) 0x7F, (byte) 0x4F, (byte) 0x7F, (byte) 0x73, (byte) 0x7C,
-			(byte) 0x5F, (byte) 0x3B, (byte) 0x3F, (byte) 0x19, (byte) 0x1E, (byte) 0x0C, (byte) 0x0F, (byte) 0x0B,
-			(byte) 0x0F, (byte) 0x07, (byte) 0x07, (byte) 0xFE, (byte) 0xF2, (byte) 0xFC, (byte) 0xCC, (byte) 0x3C,
-			(byte) 0xFC, (byte) 0xDE, (byte) 0xF2, (byte) 0x9E, (byte) 0x72, (byte) 0x3C, (byte) 0xFC, (byte) 0xC0,
-			(byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x07, (byte) 0x07, (byte) 0x08,
-			(byte) 0x0F, (byte) 0x10, (byte) 0x1F, (byte) 0x38, (byte) 0x37, (byte) 0x7C, (byte) 0x43, (byte) 0x31,
-			(byte) 0x3F, (byte) 0x1F, (byte) 0x14, (byte) 0x00, (byte) 0x00, (byte) 0xE0, (byte) 0xE0, (byte) 0x10,
-			(byte) 0xF0, (byte) 0x08, (byte) 0xF8, (byte) 0x08, (byte) 0xF8, (byte) 0x1C, (byte) 0xFC, (byte) 0xFC,
-			(byte) 0xFC, (byte) 0xFC, (byte) 0xFC, (byte) 0x1F, (byte) 0x14, (byte) 0x1F, (byte) 0x10, (byte) 0x0B,
-			(byte) 0x0C, (byte) 0x07, (byte) 0x07, (byte) 0x1F, (byte) 0x1F, (byte) 0x24, (byte) 0x3F, (byte) 0x13,
-			(byte) 0x1F, (byte) 0x0E, (byte) 0x0E, (byte) 0xF8, (byte) 0x98, (byte) 0xF0, (byte) 0x10, (byte) 0xE8,
-			(byte) 0x78, (byte) 0xE8, (byte) 0xF8, (byte) 0xF8, (byte) 0x98, (byte) 0xF4, (byte) 0x9C, (byte) 0xE4,
-			(byte) 0xFC, (byte) 0x18, (byte) 0x18 };
 
 	private static int[][] tested = new int[3][2];
 	private static int[][] succeeded = new int[3][2];
 	private static int[][] failed = new int[3][2];
+	private static int[][] erred = new int[3][2];
 
 	public static void main(String[] args) {
-		
-		testBlastoise();
 
 		System.out.println("starting test of gen 1 compression");
 		for (String name : TEST_FILE_NAMES) {
@@ -91,27 +38,8 @@ public class Gen1Cmp {
 		System.out.println("Tested: " + Arrays.deepToString(tested));
 		System.out.println("Succed: " + Arrays.deepToString(succeeded));
 		System.out.println("Failed: " + Arrays.deepToString(failed));
+		System.out.println("Errord: " + Arrays.deepToString(erred));
 
-	}
-	
-	private static void testBlastoise() {
-		BufferedImage blast = null;
-		try {
-			blast = ImageIO.read(new File(BLASTOISE_ADRESS + "/" + BLASTOISE_FILE_NAME + ".png"));
-		} catch (IOException e) {
-		}
-		byte[] blastData = GFXFunctions.readTiledImageData(blast);
-		int[] blastPalette = new int[16];
-		for (int i = 0; i < 16; i++) {
-			blastPalette[i] = 0xFF000000;
-			blastPalette[i] += 0x101010 * i + 0x080808;
-		}
-		BufferedImage blastimage = GFXFunctions.drawTiledImage(blastData, blastPalette, 64, 64, 4);
-		try {
-			ImageIO.write(blastimage, "png", new File("blastoise.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private static void testImage(String name) {
@@ -122,12 +50,12 @@ public class Gen1Cmp {
 			BufferedImage bim = null;
 			try {
 				bim = ImageIO.read(new File(IN_ADRESS + "/" + name + ".png"));
-			} catch (IOException e) {
+			} catch (IOException ignored) {
 			}
 
-			//byte[] compressed = compressed(bim);
-			byte[] compressed = null;
-			tested[bestMode - 1][bestOrder]++;
+			Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
+			byte[] compressed = compressor.compressInner();
+			tested[compressor.bestMode - 1][compressor.bestOrder]++;
 
 			byte[] rom = Arrays.copyOf(compressed, 0x100000);
 			Gen1Decmp sprite = new Gen1Decmp(rom, 0);
@@ -145,35 +73,49 @@ public class Gen1Cmp {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			succeeded[mode][order]++;
+
+			if (data.equals(new GBCImage(bim).getData())) {
+				succeeded[mode][order]++;
+			} else {
+				failed[mode][order]++;
+			}
 		} catch (Exception e) {
-			failed[mode][order]++;
+			erred[mode][order]++;
 			e.printStackTrace();
 		}
 	}
 
-	private int widthInTiles;
-	private int heightInTiles;
-	private byte[] bitplane1, bitplane2;
+	private final byte[] bitplane1;
+	private final byte[] bitplane2;
+	private final int widthInTiles;
+	private final int heightInTiles;
 
-	private static int bestMode, bestOrder;
-	
-	public static byte[] compress(BufferedImage bim) {
-		return compress(new GBCImage(bim));
-	}
-	
+	private int bestMode = -1, bestOrder = -1;
+
 	public static byte[] compress(GBCImage image) {
-		return compress(image.getData(), image.getWidthInTiles(), image.getHeightInTiles());
+		return new Gen1Cmp(image).compressInner();
 	}
 
-	public static byte[] compress(byte[] data, int widthInTiles, int heightInTiles) {
-		byte[] shortest = null;
-		
-		Gen1Cmp a = new Gen1Cmp();
+	public static byte[] compress(byte[] bitplane1, byte[] bitplane2, int widthInTiles, int heightInTiles) {
+		return new Gen1Cmp(bitplane1, bitplane2, widthInTiles, heightInTiles).compressInner();
+	}
 
+	private Gen1Cmp(GBCImage image) {
+		this(image.getBitplane1(), image.getBitplane2(), image.getWidthInTiles(), image.getHeightInTiles());
+	}
+
+	private Gen1Cmp(byte[] bitplane1, byte[] bitplane2, int widthInTiles, int heightInTiles) {
+		this.bitplane1 = bitplane1;
+		this.bitplane2 = bitplane2;
+		this.widthInTiles = widthInTiles;
+		this.heightInTiles = heightInTiles;
+	}
+
+	private byte[] compressInner() {
+		byte[] shortest = null;
 		for (int mode = 1; mode <= 3; mode++) {
 			for (int order = 0; order < 2; order++) {
-				byte[] compressed2 = a.compressUsingModeAndOrder(mode, order);
+				byte[] compressed2 = compressUsingModeAndOrder(mode, order);
 				if (shortest == null || compressed2.length < shortest.length) {
 					shortest = compressed2;
 					bestMode = mode;
@@ -181,7 +123,6 @@ public class Gen1Cmp {
 				}
 			}
 		}
-
 		return shortest;
 	}
 
@@ -189,6 +130,7 @@ public class Gen1Cmp {
 		BitWriteStream bws = new BitWriteStream();
 		writeImageDimensions(bws);
 		bws.writeBit(order);
+		System.out.println(bws);
 		compressAndWriteBitplane(order == 1 ? bitplane2 : bitplane1, bws);
 		writeMode(mode, bws);
 		compressAndWriteBitplane(order == 1 ? bitplane1 : bitplane2, bws);
@@ -249,7 +191,7 @@ public class Gen1Cmp {
 		return needed - 1;
 	}
 
-	private int[] bitPlaneToPairs(byte[] bitplane) {
+	private int[] bitPlaneToPairs(byte[] bitplane) { // TODO: does this work?
 		int[] pairs = new int[bitplane.length * 4];
 		int i = 0;
 		for (int tileX = 0; tileX < widthInTiles; tileX++) {
@@ -319,9 +261,9 @@ public class Gen1Cmp {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < bytes.size(); i++) {
+			for (Byte b : bytes) {
 				for (int j = 7; j >= 0; j--) {
-					sb.append((bytes.get(i) >> j) & 1);
+					sb.append((b >> j) & 1);
 				}
 			}
 			return sb.toString();

@@ -110,9 +110,23 @@ public class GBCImage {
 		return this.data;
 	}
 
+	public byte[] getBitplane1() {
+		if (bitplane1 == null) {
+			prepareBitplanes();
+		}
+		return bitplane1;
+	}
+
+	public byte[] getBitplane2() {
+		if (bitplane2 == null) {
+			prepareBitplanes();
+		}
+		return bitplane2;
+	}
+
 	public byte[] getFlattenedData() {
 		return null;
-		// TODO
+		// TODO: what does this even mean?
 	}
 
 	public Image getImage() { //TODO: should GBCimage extend BufferedImage instead?
