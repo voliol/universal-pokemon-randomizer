@@ -29,6 +29,10 @@ public class Gen1Cmp {
 
     public static void main(String[] args) {
 
+        testDeltaEncode();
+        System.out.println("");
+        testXor();
+
         System.out.println("starting test of gen 1 compression");
         for (String name : TEST_FILE_NAMES) {
             testImage(name);
@@ -41,8 +45,6 @@ public class Gen1Cmp {
     }
 
     private static void testImage(String name) {
-        int mode = 0;
-        int order = 0;
         try {
             System.out.println(name);
             BufferedImage bim = null;
@@ -53,34 +55,45 @@ public class Gen1Cmp {
 
             writeBitplaneImages(bim, name);
 
-            Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
-            byte[] compressed = compressor.compressInner();
-            tested[compressor.bestMode - 1][compressor.bestOrder]++;
+            for (int mode = 1; mode <= 3; mode++) {
+                for (int order = 0; order <= 1; order++) {
+                    try {
 
-            byte[] rom = Arrays.copyOf(compressed, 0x100000);
-            Gen1Decmp sprite = new Gen1Decmp(rom, 0);
-            sprite.decompress();
-            sprite.transpose();
-            byte[] data = sprite.getData();
+                        Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
+                        byte[] compressed = compressor.compressUsingModeAndOrder(mode, order);
+                        tested[mode][order]++;
 
-            System.out.println("w: " + sprite.getWidth() + ", h: " + sprite.getHeight());
+                        byte[] rom = Arrays.copyOf(compressed, 0x100000);
+                        Gen1Decmp sprite = new Gen1Decmp(rom, 0);
+                        sprite.decompress();
+                        sprite.transpose();
+                        byte[] data = sprite.getData();
 
-            int[] convPalette = new int[]{0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000};
-            BufferedImage bim2 = GFXFunctions.drawTiledImage(data, convPalette, sprite.getWidth(), sprite.getHeight(),
-                    2);
-            try {
-                ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_overandout.png"));
-            } catch (IOException e) {
-                e.printStackTrace();
+                        System.out.println("w: " + sprite.getWidth() + ", h: " + sprite.getHeight());
+
+                        int[] convPalette = new int[]{0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000};
+                        BufferedImage bim2 = GFXFunctions.drawTiledImage(data, convPalette, sprite.getWidth(), sprite.getHeight(),
+                                2);
+                        try {
+                            ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (Arrays.equals(data, new GBCImage(bim).getData())) {
+                            succeeded[mode - 1][order]++;
+                        } else {
+                            failed[mode - 1][order]++;
+                        }
+
+                    } catch (Exception e) {
+                        erred[mode - 1][order]++;
+                        e.printStackTrace();
+                    }
+                }
             }
-
-            if (Arrays.equals(data, new GBCImage(bim).getData())) {
-                succeeded[mode][order]++;
-            } else {
-                failed[mode][order]++;
-            }
-        } catch (Exception e) {
-            erred[mode][order]++;
+        } catch (
+                Exception e) {
             e.printStackTrace();
         }
     }
@@ -99,8 +112,6 @@ public class Gen1Cmp {
     private final byte[] bitplane2;
     private final int widthInTiles;
     private final int heightInTiles;
-
-    private int bestMode = -1, bestOrder = -1;
 
     public static byte[] compress(GBCImage image) {
         return new Gen1Cmp(image).compressInner();
@@ -128,8 +139,6 @@ public class Gen1Cmp {
                 byte[] compressed2 = compressUsingModeAndOrder(mode, order);
                 if (shortest == null || compressed2.length < shortest.length) {
                     shortest = compressed2;
-                    bestMode = mode;
-                    bestOrder = order;
                 }
             }
         }
@@ -140,10 +149,26 @@ public class Gen1Cmp {
         BitWriteStream bws = new BitWriteStream();
         writeImageDimensions(bws);
         bws.writeBit(order);
-        System.out.println(bws);
-        compressAndWriteBitplane(order == 1 ? bitplane2 : bitplane1, bws);
+
+        byte[] bp1;
+        byte[] bp2;
+
+//        bp1 = deltaEncode(bitplane1);
+//        if (mode == 1) {
+//            bp2 = deltaEncode(bitplane2);
+//        } else if (mode == 2) {
+//            bp2 = xor(bitplane1, bitplane2);
+//        } else { // mode == 3
+//            bp2 = xor(bitplane1, bitplane2);
+//            bp2 = deltaEncode(bp2);
+//        }
+
+        bp1 = deltaEncode(bitplane1);
+        bp2 = deltaEncode(bitplane2);
+
+        compressAndWriteBitplane(order == 1 ? bp2 : bp1, bws);
         writeMode(mode, bws);
-        compressAndWriteBitplane(order == 1 ? bitplane1 : bitplane2, bws);
+        compressAndWriteBitplane(order == 1 ? bp1 : bp2, bws);
         return bws.toByteArray();
     }
 
@@ -153,6 +178,7 @@ public class Gen1Cmp {
         int packetType = bitPairs[0] == 0 ? 0 : 1;
         bws.writeBit(packetType); // 0 for RLE, 1 for data
 
+        System.out.println(bws);
         int i = 0;
         while (i < bitPairs.length) {
             if (packetType == 0) {
@@ -160,16 +186,9 @@ public class Gen1Cmp {
             } else {
                 i = writeDataPacket(bitPairs, i, bws);
             }
+            System.out.println(bws);
             packetType ^= 1;
         }
-    }
-
-    private int writeDataPacket(int[] bitPairs, int i, BitWriteStream bws) {
-        do {
-            bws.writeBitPair(bitPairs[i]);
-            i++;
-        } while (i < bitPairs.length - 1 && bitPairs[i] != 0b00);
-        return i;
     }
 
     private int writeRLEPacket(int[] bitPairs, int i, BitWriteStream bws) {
@@ -179,26 +198,43 @@ public class Gen1Cmp {
             i++;
         }
 
-        int bitCount = bitsNeeded(length);
+        int bitCount = getBitCount(length);
 
-        for (int j = 0; j < bitCount; j++) {
-            bws.writeBit(1);
-        }
-        bws.writeBit(0);
+        writeBitCount(bws, bitCount);
+        writeValue(bws, length, bitCount);
 
-        for (int j = bitCount; j >= 0; j--) {
-            bws.writeBit((length >> j) & 1);
-        }
         return i;
     }
 
-    private static int bitsNeeded(int i) {
-        int needed = 0;
-        while ((i & 1) == 1) {
-            needed++;
-            i >>= 1;
+    private int getBitCount(int length) {
+        int bitCount = 1;
+        while (length > ((1 << bitCount) - 2)) {
+            bitCount++;
         }
-        return needed - 1;
+        bitCount--; // ignore leading '1'
+        return bitCount;
+    }
+
+    private void writeBitCount(BitWriteStream bws, int bitCount) {
+        for (int j = 0; j < bitCount - 1; j++) {
+            bws.writeBit(1);
+        }
+        bws.writeBit(0);
+    }
+
+    private void writeValue(BitWriteStream bws, int length, int bitCount) {
+        for (int j = bitCount; j > 0; j--) {
+            bws.writeBit(((length + 1) >> (j - 1)) & 1);
+        }
+    }
+
+    private int writeDataPacket(int[] bitPairs, int i, BitWriteStream bws) {
+        do {
+            bws.writeBitPair(bitPairs[i]);
+            i++;
+        } while (i < bitPairs.length - 1 && bitPairs[i] != 0b00);
+        bws.writeBitPair(0);
+        return i;
     }
 
     /**
@@ -213,7 +249,7 @@ public class Gen1Cmp {
                 for (int y = 0; y < heightInTiles * 8; y++) {
 
                     byte fromByte = bitplane[tileX * heightInTiles * 8 + y];
-                    pairs[i] = 0b11 & (fromByte >> (3 - pairX));
+                    pairs[i] = 0b11 & (fromByte >> ((3 - pairX) * 2));
                     i++;
 
                 }
@@ -237,19 +273,66 @@ public class Gen1Cmp {
         }
     }
 
+    private static byte[] deltaEncode(byte[] bytes) {
+        BitReadStream brs = new BitReadStream(bytes);
+        BitWriteStream bws = new BitWriteStream();
+        int last = 0;
+        while (brs.hasNext()) {
+            int current = brs.readBit();
+            bws.writeBit(current ^ last);
+            last = current;
+        }
+
+        return bws.toByteArray();
+    }
+
+    private static byte[] xor(byte[] a, byte[] b) {
+        byte[] xored = new byte[a.length];
+        for (int i = 0; i < a.length; i++) {
+            xored[i] = (byte) (a[i] ^ b[i]);
+        }
+        return xored;
+    }
+
+    private static void testDeltaEncode() {
+        int[] bitPairs = new int[] {2, 0, 0, 0, 3, 3, 3, 3, 0, 0, 2, 2, 0, 1, 2, 0, 0, 0, 3, 0};
+        BitWriteStream bws = new BitWriteStream();
+        for (int pair : bitPairs) {
+            bws.writeBitPair(pair);
+        }
+        System.out.println(bws);
+        byte[] encoded = deltaEncode(bws.toByteArray());
+        BitWriteStream bws2 = new BitWriteStream();
+        for (byte b : encoded) {
+            bws2.writeByte(b);
+        }
+        System.out.println(bws2);
+    }
+
+    private static void testXor() {
+        int[] bitPairs1 = new int[] {2, 0, 0, 0, 3, 3, 3, 3, 0, 0, 2, 2, 0, 1, 2, 0, 0, 0, 3, 0};
+        int[] bitPairs2 = new int[] {0, 0, 0, 2, 0, 0, 0, 2, 2, 0, 1, 2, 0, 0, 0, 3, 0, 2, 0, 0};
+        BitWriteStream bws1 = new BitWriteStream();
+        bws1.writeBitPairs(bitPairs1);
+        System.out.println(bws1);
+        BitWriteStream bws2 = new BitWriteStream();
+        bws2.writeBitPairs(bitPairs2);
+        System.out.println(bws2);
+
+        byte[] xored = xor(bws1.toByteArray(), bws2.toByteArray());
+        BitWriteStream bws3 = new BitWriteStream();
+        bws3.writeBytes(xored);
+        System.out.println(bws3);
+    }
+
     private static class BitWriteStream {
 
         List<Byte> bytes = new ArrayList<>();
         int currentBit = 0;
         byte currentByte = 0;
 
-        public void writeByte(byte b) {
-            bytes.add(b);
-            currentBit = 7;
-        }
-
         public void writeBit(int bit) {
-            if (currentBit == 7) {
+            if (currentBit == 8 || bytes.isEmpty()) {
                 currentBit = 0;
                 currentByte = 0;
                 bytes.add(currentByte);
@@ -259,9 +342,27 @@ public class Gen1Cmp {
             currentBit++;
         }
 
-        public void writeBitPair(int bitpair) {
-            writeBit((bitpair >> 1) & 1);
-            writeBit(bitpair & 1);
+        public void writeBitPair(int bitPair) {
+            writeBit((bitPair >> 1) & 1);
+            writeBit(bitPair & 1);
+        }
+
+        public void writeBitPairs(int[] bitPairs) {
+            for (int bitPair : bitPairs) {
+                writeBitPair(bitPair);
+            }
+        }
+
+        public void writeByte(byte b) {
+            for (int i = 7; i >= 0; i--) {
+                writeBit((b >> i) & 1);
+            }
+        }
+
+        public void writeBytes(byte[] bytes){
+            for (byte b : bytes) {
+                writeByte(b);
+            }
         }
 
         public byte[] toByteArray() {
@@ -275,14 +376,45 @@ public class Gen1Cmp {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            for (Byte b : bytes) {
+            for (int i = 0; i < bytes.size() - 1; i++) {
                 for (int j = 7; j >= 0; j--) {
+                    byte b = bytes.get(i);
                     sb.append((b >> j) & 1);
                 }
             }
+            for (int j = 7; j > 7 - currentBit; j--) {
+                sb.append((currentByte >> j) & 1);
+            }
+
             return sb.toString();
         }
 
+    }
+
+    private static class BitReadStream {
+
+        final byte[] bytes;
+        int currentBit = 0;
+        int currentByte = 0;
+
+        public BitReadStream(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        public int readBit() {
+            byte b = bytes[currentByte];
+            int bit = b >> (7 - currentBit) & 1;
+            currentBit++;
+            if (currentBit == 8) {
+                currentBit = 0;
+                currentByte++;
+            }
+            return bit;
+        }
+
+        public boolean hasNext() {
+            return currentByte < bytes.length;
+        }
     }
 
 }
