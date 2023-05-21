@@ -17,7 +17,7 @@ public class Gen1Cmp {
 
     private static final String IN_ADRESS = "compresstest/in";
     private static final String OUT_ADRESS = "compresstest/out";
-    private static final String[] TEST_FILE_NAMES = new String[]{"test", "abra", "aerodactyl", "alakazam", "arcanine",
+    private static final String[] TEST_FILE_NAMES = new String[]{"test", "testbig", "testblack", "testrect", "testamogus", "testab", "abra", "aerodactyl", "alakazam", "arcanine",
             "articuno", "beedrill", "bellsprout", "blastoise", "bulbasaur", "butterfree", "caterpie", "chansey",
             "charizard", "charmander", "charmeleon", "clefable", "clefairy", "cloyster", "cubone", "diglett", "ditto",
             "dodrio", "doduo", "dragonair", "dragonite", "dratini", "drowzee", "dugtrio"};
@@ -28,10 +28,6 @@ public class Gen1Cmp {
     private static final int[][] erred = new int[3][2];
 
     public static void main(String[] args) {
-
-        testDeltaEncode();
-        System.out.println("");
-        testXor();
 
         System.out.println("starting test of gen 1 compression");
         for (String name : TEST_FILE_NAMES) {
@@ -61,7 +57,7 @@ public class Gen1Cmp {
 
                         Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
                         byte[] compressed = compressor.compressUsingModeAndOrder(mode, order);
-                        tested[mode][order]++;
+                        tested[mode - 1][order]++;
 
                         byte[] rom = Arrays.copyOf(compressed, 0x100000);
                         Gen1Decmp sprite = new Gen1Decmp(rom, 0);
@@ -113,6 +109,9 @@ public class Gen1Cmp {
     private final int widthInTiles;
     private final int heightInTiles;
 
+    private byte[] bp1;
+    private byte[] bp2;
+
     public static byte[] compress(GBCImage image) {
         return new Gen1Cmp(image).compressInner();
     }
@@ -135,7 +134,7 @@ public class Gen1Cmp {
     private byte[] compressInner() {
         byte[] shortest = null;
         for (int mode = 1; mode <= 3; mode++) {
-            for (int order = 0; order < 2; order++) {
+            for (int order = 0; order <= 1; order++) {
                 byte[] compressed2 = compressUsingModeAndOrder(mode, order);
                 if (shortest == null || compressed2.length < shortest.length) {
                     shortest = compressed2;
@@ -146,30 +145,32 @@ public class Gen1Cmp {
     }
 
     private byte[] compressUsingModeAndOrder(int mode, int order) {
+
+        prepareBitplanes(mode, order);
+
         BitWriteStream bws = new BitWriteStream();
+
         writeImageDimensions(bws);
         bws.writeBit(order);
-
-        byte[] bp1;
-        byte[] bp2;
-
-//        bp1 = deltaEncode(bitplane1);
-//        if (mode == 1) {
-//            bp2 = deltaEncode(bitplane2);
-//        } else if (mode == 2) {
-//            bp2 = xor(bitplane1, bitplane2);
-//        } else { // mode == 3
-//            bp2 = xor(bitplane1, bitplane2);
-//            bp2 = deltaEncode(bp2);
-//        }
-
-        bp1 = deltaEncode(bitplane1);
-        bp2 = deltaEncode(bitplane2);
-
-        compressAndWriteBitplane(order == 1 ? bp2 : bp1, bws);
+        compressAndWriteBitplane(bp1, bws);
         writeMode(mode, bws);
-        compressAndWriteBitplane(order == 1 ? bp1 : bp2, bws);
+        compressAndWriteBitplane(bp2, bws);
+
         return bws.toByteArray();
+    }
+
+    private void prepareBitplanes(int mode, int order) {
+        bp1 = Arrays.copyOf(order == 0 ? bitplane1 : bitplane2, bitplane1.length);
+        bp2 = Arrays.copyOf(order == 0 ? bitplane2 : bitplane1, bitplane1.length);
+
+        if (mode != 0) {
+            bp2 = xor(bp1, bp2);
+        }
+
+        bp1 = deltaEncode(bp1);
+        if (mode != 2) {
+            bp2 = deltaEncode(bp2);
+        }
     }
 
     private void compressAndWriteBitplane(byte[] bitplane, BitWriteStream bws) {
@@ -178,7 +179,7 @@ public class Gen1Cmp {
         int packetType = bitPairs[0] == 0 ? 0 : 1;
         bws.writeBit(packetType); // 0 for RLE, 1 for data
 
-        System.out.println(bws);
+       // System.out.println(bws);
         int i = 0;
         while (i < bitPairs.length) {
             if (packetType == 0) {
@@ -186,7 +187,7 @@ public class Gen1Cmp {
             } else {
                 i = writeDataPacket(bitPairs, i, bws);
             }
-            System.out.println(bws);
+          //  System.out.println(bws);
             packetType ^= 1;
         }
     }
@@ -233,7 +234,9 @@ public class Gen1Cmp {
             bws.writeBitPair(bitPairs[i]);
             i++;
         } while (i < bitPairs.length - 1 && bitPairs[i] != 0b00);
-        bws.writeBitPair(0);
+        if (i != bitPairs.length - 1) {
+            bws.writeBitPair(0);
+        }
         return i;
     }
 
@@ -249,7 +252,7 @@ public class Gen1Cmp {
                 for (int y = 0; y < heightInTiles * 8; y++) {
 
                     byte fromByte = bitplane[tileX * heightInTiles * 8 + y];
-                    pairs[i] = 0b11 & (fromByte >> ((3 - pairX) * 2));
+                    pairs[i] = 0b11 & (fromByte >>> ((3 - pairX) * 2)); // TODO: fix this occasionally losing bits
                     i++;
 
                 }
@@ -273,8 +276,29 @@ public class Gen1Cmp {
         }
     }
 
-    private static byte[] deltaEncode(byte[] bytes) {
-        BitReadStream brs = new BitReadStream(bytes);
+    // "[Bitplanes] are delta [en]coded in horizontal lines spanning from the right side to the left
+    // side of the [bitplane], going from top to bottom. Each row is [en]coded separately - the state of the
+    // system is reset to 0 at the start of each row." -- https://youtu.be/aF1Yw_wu2cM?t=1519
+    private byte[] deltaEncode(byte[] bitplane) {
+        byte[] encoded = new byte[bitplane.length];
+        for (int row = 0; row < heightInTiles * 8; row++) {
+
+            byte[] rowBytes = new byte[bitplane.length / (heightInTiles * 8)];
+            for (int x = 0; x < widthInTiles; x++) {
+                rowBytes[x] = bitplane[x * heightInTiles + row];
+            }
+
+            rowBytes = deltaEncodeRow(rowBytes);
+
+            for (int x = 0; x < widthInTiles; x++) {
+                encoded[x * heightInTiles + row] = rowBytes[x];
+            }
+        }
+        return encoded;
+    }
+
+    private byte[] deltaEncodeRow(byte[] row) {
+        BitReadStream brs = new BitReadStream(row);
         BitWriteStream bws = new BitWriteStream();
         int last = 0;
         while (brs.hasNext()) {
@@ -282,47 +306,15 @@ public class Gen1Cmp {
             bws.writeBit(current ^ last);
             last = current;
         }
-
         return bws.toByteArray();
     }
 
-    private static byte[] xor(byte[] a, byte[] b) {
+    private byte[] xor(byte[] a, byte[] b) {
         byte[] xored = new byte[a.length];
         for (int i = 0; i < a.length; i++) {
             xored[i] = (byte) (a[i] ^ b[i]);
         }
         return xored;
-    }
-
-    private static void testDeltaEncode() {
-        int[] bitPairs = new int[] {2, 0, 0, 0, 3, 3, 3, 3, 0, 0, 2, 2, 0, 1, 2, 0, 0, 0, 3, 0};
-        BitWriteStream bws = new BitWriteStream();
-        for (int pair : bitPairs) {
-            bws.writeBitPair(pair);
-        }
-        System.out.println(bws);
-        byte[] encoded = deltaEncode(bws.toByteArray());
-        BitWriteStream bws2 = new BitWriteStream();
-        for (byte b : encoded) {
-            bws2.writeByte(b);
-        }
-        System.out.println(bws2);
-    }
-
-    private static void testXor() {
-        int[] bitPairs1 = new int[] {2, 0, 0, 0, 3, 3, 3, 3, 0, 0, 2, 2, 0, 1, 2, 0, 0, 0, 3, 0};
-        int[] bitPairs2 = new int[] {0, 0, 0, 2, 0, 0, 0, 2, 2, 0, 1, 2, 0, 0, 0, 3, 0, 2, 0, 0};
-        BitWriteStream bws1 = new BitWriteStream();
-        bws1.writeBitPairs(bitPairs1);
-        System.out.println(bws1);
-        BitWriteStream bws2 = new BitWriteStream();
-        bws2.writeBitPairs(bitPairs2);
-        System.out.println(bws2);
-
-        byte[] xored = xor(bws1.toByteArray(), bws2.toByteArray());
-        BitWriteStream bws3 = new BitWriteStream();
-        bws3.writeBytes(xored);
-        System.out.println(bws3);
     }
 
     private static class BitWriteStream {
@@ -347,21 +339,9 @@ public class Gen1Cmp {
             writeBit(bitPair & 1);
         }
 
-        public void writeBitPairs(int[] bitPairs) {
-            for (int bitPair : bitPairs) {
-                writeBitPair(bitPair);
-            }
-        }
-
         public void writeByte(byte b) {
             for (int i = 7; i >= 0; i--) {
                 writeBit((b >> i) & 1);
-            }
-        }
-
-        public void writeBytes(byte[] bytes){
-            for (byte b : bytes) {
-                writeByte(b);
             }
         }
 
