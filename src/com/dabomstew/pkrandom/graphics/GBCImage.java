@@ -102,16 +102,6 @@ public class GBCImage {
 		// TODO: what does this even mean?
 	}
 
-	public byte[] getBitplane1Data() {
-		prepareBitplanes();
-		return bitplane1Data;
-	}
-
-	public byte[] getBitplane2Data() {
-		prepareBitplanes();
-		return bitplane2Data;
-	}
-
 	public BufferedImage getBitplane1Image() {
 		prepareBitplanes();
 		return bitplane1Image;

@@ -2,133 +2,36 @@ package compressors;
 
 // based on pret/pokered/blob/master/tools/pkmncompress.c
 
-import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.GBCImage;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Gen1Cmp {
 
-    private static final String IN_ADRESS = "compresstest/in";
-    private static final String OUT_ADRESS = "compresstest/out";
-    private static final String[] TEST_FILE_NAMES = new String[]{"test", "testbig", "testblack", "testrect", "testamogus", "testab", "abra", "aerodactyl", "alakazam", "arcanine",
-            "articuno", "beedrill", "bellsprout", "blastoise", "bulbasaur", "butterfree", "caterpie", "chansey",
-            "charizard", "charmander", "charmeleon", "clefable", "clefairy", "cloyster", "cubone", "diglett", "ditto",
-            "dodrio", "doduo", "dragonair", "dragonite", "dratini", "drowzee", "dugtrio"};
+    private static final int MAX_DIMENSION = 15;
+    private static final int BLACK = 0xFF000000;
 
-    private static final int[][] tested = new int[3][2];
-    private static final int[][] succeeded = new int[3][2];
-    private static final int[][] failed = new int[3][2];
-    private static final int[][] erred = new int[3][2];
+    private final GBCImage image;
 
-    public static void main(String[] args) {
-
-        System.out.println("starting test of gen 1 compression");
-        for (String name : TEST_FILE_NAMES) {
-            testImage(name);
-        }
-        System.out.println("Tested: " + Arrays.deepToString(tested));
-        System.out.println("Succed: " + Arrays.deepToString(succeeded));
-        System.out.println("Failed: " + Arrays.deepToString(failed));
-        System.out.println("Errord: " + Arrays.deepToString(erred));
-
-    }
-
-    private static void testImage(String name) {
-        try {
-            System.out.println(name);
-            BufferedImage bim = null;
-            try {
-                bim = ImageIO.read(new File(IN_ADRESS + "/" + name + ".png"));
-            } catch (IOException ignored) {
-            }
-
-            writeBitplaneImages(bim, name);
-
-            for (int mode = 1; mode <= 3; mode++) {
-                for (int order = 0; order <= 1; order++) {
-                    try {
-
-                        Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
-                        byte[] compressed = compressor.compressUsingModeAndOrder(mode, order);
-                        tested[mode - 1][order]++;
-
-                        byte[] rom = Arrays.copyOf(compressed, 0x100000);
-                        Gen1Decmp sprite = new Gen1Decmp(rom, 0);
-                        sprite.decompress();
-                        sprite.transpose();
-                        byte[] data = sprite.getData();
-
-                        System.out.println("w: " + sprite.getWidth() + ", h: " + sprite.getHeight());
-
-                        int[] convPalette = new int[]{0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000};
-                        BufferedImage bim2 = GFXFunctions.drawTiledImage(data, convPalette, sprite.getWidth(), sprite.getHeight(),
-                                2);
-                        try {
-                            ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        if (Arrays.equals(data, new GBCImage(bim).getData())) {
-                            succeeded[mode - 1][order]++;
-                        } else {
-                            failed[mode - 1][order]++;
-                        }
-
-                    } catch (Exception e) {
-                        erred[mode - 1][order]++;
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (
-                Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void writeBitplaneImages(BufferedImage bim, String name) {
-        GBCImage image = new GBCImage(bim);
-        try {
-            ImageIO.write(image.getBitplane1Image(), "png", new File(OUT_ADRESS + "/" + name + "_bp1.png"));
-            ImageIO.write(image.getBitplane2Image(), "png", new File(OUT_ADRESS + "/" + name + "_bp2.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private final byte[] bitplane1;
-    private final byte[] bitplane2;
-    private final int widthInTiles;
-    private final int heightInTiles;
-
-    private byte[] bp1;
-    private byte[] bp2;
+    private final int width;
+    private final int height;
+    private int[][] bp1;
+    private int[][] bp2;
 
     public static byte[] compress(GBCImage image) {
         return new Gen1Cmp(image).compressInner();
     }
 
-    public static byte[] compress(byte[] bitplane1, byte[] bitplane2, int widthInTiles, int heightInTiles) {
-        return new Gen1Cmp(bitplane1, bitplane2, widthInTiles, heightInTiles).compressInner();
-    }
-
-    private Gen1Cmp(GBCImage image) {
-        this(image.getBitplane1Data(), image.getBitplane2Data(), image.getWidthInTiles(), image.getHeightInTiles());
-    }
-
-    private Gen1Cmp(byte[] bitplane1, byte[] bitplane2, int widthInTiles, int heightInTiles) {
-        this.bitplane1 = bitplane1;
-        this.bitplane2 = bitplane2;
-        this.widthInTiles = widthInTiles;
-        this.heightInTiles = heightInTiles;
+    public Gen1Cmp(GBCImage image) {
+        this.image = image;
+        this.width = image.getImage().getWidth();
+        this.height = image.getImage().getHeight();
+        if (image.getWidthInTiles() > MAX_DIMENSION || image.getHeightInTiles() > MAX_DIMENSION) {
+            throw new IllegalArgumentException("Image dimensions (in tiles) of " + image.getWidthInTiles() + "x" + image.getHeightInTiles() +
+                    " exceeds " + MAX_DIMENSION + "x" + MAX_DIMENSION + ".");
+        }
     }
 
     private byte[] compressInner() {
@@ -144,7 +47,7 @@ public class Gen1Cmp {
         return shortest;
     }
 
-    private byte[] compressUsingModeAndOrder(int mode, int order) {
+    public byte[] compressUsingModeAndOrder(int mode, int order) {
 
         prepareBitplanes(mode, order);
 
@@ -160,8 +63,26 @@ public class Gen1Cmp {
     }
 
     private void prepareBitplanes(int mode, int order) {
-        bp1 = Arrays.copyOf(order == 0 ? bitplane1 : bitplane2, bitplane1.length);
-        bp2 = Arrays.copyOf(order == 0 ? bitplane2 : bitplane1, bitplane1.length);
+        initBitplanes(order);
+        xorAndDeltaEncodeBitplanes(mode);
+    }
+
+    private void initBitplanes(int order) {
+        bp1 = bitplaneFromImage(order == 0 ? image.getBitplane1Image() : image.getBitplane2Image());
+        bp2 = bitplaneFromImage(order == 0 ? image.getBitplane2Image() : image.getBitplane1Image());
+    }
+
+    private int[][] bitplaneFromImage(BufferedImage image) {
+        int[][] bitplane = new int[image.getWidth()][image.getWidth()];
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                bitplane[x][y] = image.getRGB(x, y) == BLACK ? 1 : 0;
+            }
+        }
+        return bitplane;
+    }
+
+    private void xorAndDeltaEncodeBitplanes(int mode) {
 
         if (mode != 0) {
             bp2 = xor(bp1, bp2);
@@ -173,13 +94,40 @@ public class Gen1Cmp {
         }
     }
 
-    private void compressAndWriteBitplane(byte[] bitplane, BitWriteStream bws) {
+    private int[][] xor(int[][] a, int[][] b) {
+        int[][] xored = new int[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                xored[x][y] = a[x][y] ^ b[x][y];
+            }
+        }
+        return xored;
+    }
+
+    // "[Bitplanes] are delta [en]coded in horizontal lines spanning from the right side to the left
+    // side of the [bitplane], going from top to bottom. Each row is [en]coded separately - the state of the
+    // system is reset to 0 at the start of each row." -- https://youtu.be/aF1Yw_wu2cM?t=1519
+    private int[][] deltaEncode(int[][] bitplane) {
+        int[][] encoded = new int[width][height];
+        for (int y = 0; y < height; y++) {
+            int prev = 0;
+            for (int x = 0; x < width; x++) {
+                int current = bitplane[x][y];
+                encoded[x][y] = current ^ prev;
+                prev = current;
+            }
+        }
+
+        return encoded;
+    }
+
+    private void compressAndWriteBitplane(int[][] bitplane, BitWriteStream bws) {
         int[] bitPairs = bitPlaneToPairs(bitplane);
 
         int packetType = bitPairs[0] == 0 ? 0 : 1;
         bws.writeBit(packetType); // 0 for RLE, 1 for data
 
-       // System.out.println(bws);
+        // System.out.println(bws);
         int i = 0;
         while (i < bitPairs.length) {
             if (packetType == 0) {
@@ -187,7 +135,7 @@ public class Gen1Cmp {
             } else {
                 i = writeDataPacket(bitPairs, i, bws);
             }
-          //  System.out.println(bws);
+            //  System.out.println(bws);
             packetType ^= 1;
         }
     }
@@ -240,30 +188,21 @@ public class Gen1Cmp {
         return i;
     }
 
-    /**
-     * Converts a bitplane to pairs of bits. The bitplane represents an image with 8x8 tiles, top-to-bottom,
-     * left-to-right. Essentially, 8-bit wide columns. The pairs of bits are similar, essentially 2-bit wide columns.
-     */
-    private int[] bitPlaneToPairs(byte[] bitplane) {
-        int[] pairs = new int[bitplane.length * 4];
+    private int[] bitPlaneToPairs(int[][] bitplane) {
+        int[] pairs = new int[width * height / 2];
         int i = 0;
-        for (int tileX = 0; tileX < widthInTiles; tileX++) {
-            for (int pairX = 0; pairX < 4; pairX++) {
-                for (int y = 0; y < heightInTiles * 8; y++) {
-
-                    byte fromByte = bitplane[tileX * heightInTiles * 8 + y];
-                    pairs[i] = 0b11 & (fromByte >>> ((3 - pairX) * 2)); // TODO: fix this occasionally losing bits
+        for (int x = 0; x < width; x += 2) {
+            for (int y = 0; y < height; y++) {
+                    pairs[i] = bitplane[x][y] << 1 + bitplane[x+1][y];
                     i++;
-
                 }
-            }
         }
         return pairs;
     }
 
     private void writeImageDimensions(BitWriteStream bws) {
-        int high = (widthInTiles & 0b1111) << 4;
-        int low = heightInTiles & 0b1111;
+        int high = (width / 8) << 4;
+        int low = height / 8;
         bws.writeByte((byte) (high + low));
     }
 
@@ -274,47 +213,6 @@ public class Gen1Cmp {
             bws.writeBit(1);
             bws.writeBit(mode & 1);
         }
-    }
-
-    // "[Bitplanes] are delta [en]coded in horizontal lines spanning from the right side to the left
-    // side of the [bitplane], going from top to bottom. Each row is [en]coded separately - the state of the
-    // system is reset to 0 at the start of each row." -- https://youtu.be/aF1Yw_wu2cM?t=1519
-    private byte[] deltaEncode(byte[] bitplane) {
-        byte[] encoded = new byte[bitplane.length];
-        for (int row = 0; row < heightInTiles * 8; row++) {
-
-            byte[] rowBytes = new byte[bitplane.length / (heightInTiles * 8)];
-            for (int x = 0; x < widthInTiles; x++) {
-                rowBytes[x] = bitplane[x * heightInTiles + row];
-            }
-
-            rowBytes = deltaEncodeRow(rowBytes);
-
-            for (int x = 0; x < widthInTiles; x++) {
-                encoded[x * heightInTiles + row] = rowBytes[x];
-            }
-        }
-        return encoded;
-    }
-
-    private byte[] deltaEncodeRow(byte[] row) {
-        BitReadStream brs = new BitReadStream(row);
-        BitWriteStream bws = new BitWriteStream();
-        int last = 0;
-        while (brs.hasNext()) {
-            int current = brs.readBit();
-            bws.writeBit(current ^ last);
-            last = current;
-        }
-        return bws.toByteArray();
-    }
-
-    private byte[] xor(byte[] a, byte[] b) {
-        byte[] xored = new byte[a.length];
-        for (int i = 0; i < a.length; i++) {
-            xored[i] = (byte) (a[i] ^ b[i]);
-        }
-        return xored;
     }
 
     private static class BitWriteStream {
