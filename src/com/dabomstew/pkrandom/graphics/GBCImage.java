@@ -10,10 +10,10 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 
 /**
- * A 2bpp image used by a Gen 1 or Gen 2 game. 
+ * A 2bpp image used by a Gen 1 or Gen 2 game.
  */
 public class GBCImage {
-	
+
 	// TODO: see if this limitation exists in Gen 2 as well (probably)
 	private static final int MAX_WIDTH_IN_TILES = 15;
 	private static final int MAX_WIDTH_IN_PIXELS = MAX_WIDTH_IN_TILES * 8;
@@ -22,7 +22,7 @@ public class GBCImage {
 	 * Returns a copy of the input {@link BufferedImage} with "fixed" 2bpp color
 	 * indexing. I.e. the returned BufferedImage uses an {@link IndexColorModel}
 	 * with four colors, sorted from lightest/white to darkest/black.
-	 * 
+	 *
 	 * @param bim The original BufferedImage.
 	 */
 	private static BufferedImage fixed2bppIndexing(BufferedImage bim) {
@@ -80,7 +80,7 @@ public class GBCImage {
 	public int getWidthInTiles() {
 		return image.getWidth() / 8;
 	}
-	
+
 	public int getHeightInTiles() {
 		return image.getHeight() / 8;
 	}
@@ -121,14 +121,21 @@ public class GBCImage {
 				BufferedImage.TYPE_BYTE_BINARY);
 		bitplane2Image = new BufferedImage(image.getWidth(), image.getHeight(),
 				BufferedImage.TYPE_BYTE_BINARY);
+		Graphics2D g1 = bitplane1Image.createGraphics();
+		g1.setColor(java.awt.Color.WHITE);
+        g1.fillRect(0, 0, image.getWidth(), image.getHeight());
+        Graphics2D g2 = bitplane2Image.createGraphics();
+        g2.setColor(java.awt.Color.WHITE);
+        g2.fillRect(0, 0, image.getWidth(), image.getHeight());
+
 		for (int x = 0; x < image.getWidth(); x++) {
 			for (int y = 0; y < image.getHeight(); y++) {
 				int sample = image.getData().getSample(x, y, 0);
 				if (sample % 2 == 1) {
-					bitplane1Image.setRGB(x, y, 0xffffffff);
+					bitplane1Image.setRGB(x, y, 0xff000000);
 				}
 				if (sample >= 2) {
-					bitplane2Image.setRGB(x, y, 0xffffffff);
+					bitplane2Image.setRGB(x, y, 0xff000000);
 				}
 			}
 		}

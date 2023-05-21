@@ -84,7 +84,7 @@ public class Gen1Cmp {
 
     private void xorAndDeltaEncodeBitplanes(int mode) {
 
-        if (mode != 0) {
+        if (mode != 1) {
             bp2 = xor(bp1, bp2);
         }
 
@@ -127,7 +127,7 @@ public class Gen1Cmp {
         int packetType = bitPairs[0] == 0 ? 0 : 1;
         bws.writeBit(packetType); // 0 for RLE, 1 for data
 
-        // System.out.println(bws);
+        System.out.println(bws);
         int i = 0;
         while (i < bitPairs.length) {
             if (packetType == 0) {
@@ -135,7 +135,7 @@ public class Gen1Cmp {
             } else {
                 i = writeDataPacket(bitPairs, i, bws);
             }
-            //  System.out.println(bws);
+            System.out.println(bws);
             packetType ^= 1;
         }
     }
@@ -193,9 +193,9 @@ public class Gen1Cmp {
         int i = 0;
         for (int x = 0; x < width; x += 2) {
             for (int y = 0; y < height; y++) {
-                    pairs[i] = bitplane[x][y] << 1 + bitplane[x+1][y];
-                    i++;
-                }
+                pairs[i] = (bitplane[x][y] << 1) + bitplane[x + 1][y];
+                i++;
+            }
         }
         return pairs;
     }
