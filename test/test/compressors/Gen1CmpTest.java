@@ -61,7 +61,7 @@ public class Gen1CmpTest {
 
                     int[] convPalette = new int[]{0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000};
                     BufferedImage bim2 = GFXFunctions.drawTiledImage(data, convPalette, sprite.getWidth(), sprite.getHeight(),
-                            4);
+                            8);
                     try {
                         ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
                     } catch (IOException e) {

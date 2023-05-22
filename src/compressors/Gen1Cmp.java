@@ -1,13 +1,20 @@
 package compressors;
 
-// based on pret/pokered/blob/master/tools/pkmncompress.c
-
 import com.dabomstew.pkrandom.graphics.GBCImage;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Pokémon Gen 1 compressor. Since it is only used for image compression in the games,
+ * it only takes {@link GBCImage}s as input.
+ * <br><br>
+ * This implementation was largely ported by
+ * <a href=https://rgmechex.com/tech/gen1decompress.html>Frieze/RGME's JavaScript implementation</a>.
+ * The algorithm is explained in <a href=https://youtu.be/aF1Yw_wu2cM>this video</a>,
+ * though from a decompression perspective.
+ */
 public class Gen1Cmp {
 
     private static final int MAX_DIMENSION = 15;
