@@ -55,20 +55,20 @@ public class Gen1CmpTest {
                     Gen1Decmp sprite = new Gen1Decmp(rom, 0);
                     sprite.decompress();
                     sprite.transpose();
-                    byte[] data = sprite.getData();
+                    byte[] data = sprite.getFlattenedData();
 
                     System.out.println("w: " + sprite.getWidth() + ", h: " + sprite.getHeight());
 
                     int[] convPalette = new int[]{0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000};
                     BufferedImage bim2 = GFXFunctions.drawTiledImage(data, convPalette, sprite.getWidth(), sprite.getHeight(),
-                            2);
+                            4);
                     try {
                         ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    if (equals(bim, bim2)) {
+                    if (new GBCImage(bim).equals(new GBCImage(bim2))) {
                         succeeded[mode][order] = 1;
                     } else {
                         failed[mode][order] = 1;

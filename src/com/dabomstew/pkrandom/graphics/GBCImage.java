@@ -1,13 +1,15 @@
 package com.dabomstew.pkrandom.graphics;
 
+import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.graphics.palettes.Color;
 
 /**
  * A 2bpp image used by a Gen 1 or Gen 2 game.
@@ -143,6 +145,20 @@ public class GBCImage {
 		bitplane2Data = GFXFunctions.readTiledImageData(bitplane2Image, 1);
 
 		bitplanesPrepared = true;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof GBCImage otherImage) {
+			return Arrays.equals(getRasterData(image), getRasterData(otherImage.image));
+		}
+		return false;
+	}
+
+	private int[] getRasterData(BufferedImage bim) {
+		Raster raster = bim.getRaster();
+		return raster.getPixels(0, 0, raster.getWidth(), raster.getHeight(),
+				new int[raster.getWidth() * raster.getHeight()]);
 	}
 
 }
