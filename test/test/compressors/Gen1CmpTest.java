@@ -19,7 +19,7 @@ public class Gen1CmpTest {
 
     private static final String IN_ADRESS = "compresstest/in";
     private static final String OUT_ADRESS = "compresstest/out";
-    private static final String[] TEST_FILE_NAMES = new String[]{"testamogus", "test", "testbig", "testwhite", "testrect", "testab", "abra", "aerodactyl", "alakazam", "arcanine",
+    private static final String[] TEST_FILE_NAMES = new String[]{"testab", "testamogus", "test", "testbig", "testwhite", "testrect", "abra", "aerodactyl", "alakazam", "arcanine",
             "articuno", "beedrill", "bellsprout", "blastoise", "bulbasaur", "butterfree", "caterpie", "chansey",
             "charizard", "charmander", "charmeleon", "clefable", "clefairy", "cloyster", "cubone", "diglett", "ditto",
             "dodrio", "doduo", "dragonair", "dragonite", "dratini", "drowzee", "dugtrio"};
@@ -44,12 +44,12 @@ public class Gen1CmpTest {
         int[][] failed = new int[3][2];
         int[][] erred = new int[3][2];
 
-        for (int mode = 1; mode <= 3; mode++) {
+        for (int mode = 0; mode <= 2; mode++) {
             for (int order = 0; order <= 1; order++) {
                 try {
 
                     Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
-                    byte[] compressed = compressor.compressUsingModeAndOrder(mode, order);
+                    byte[] compressed = compressor.compressUsingModeAndOrder(mode, order == 1);
 
                     byte[] rom = Arrays.copyOf(compressed, 0x100000);
                     Gen1Decmp sprite = new Gen1Decmp(rom, 0);
@@ -69,13 +69,13 @@ public class Gen1CmpTest {
                     }
 
                     if (equals(bim, bim2)) {
-                        succeeded[mode - 1][order] = 1;
+                        succeeded[mode][order] = 1;
                     } else {
-                        failed[mode - 1][order] = 1;
+                        failed[mode][order] = 1;
                     }
 
                 } catch (Exception e) {
-                    erred[mode - 1][order] = 1;
+                    erred[mode][order] = 1;
                     e.printStackTrace();
                 }
             }

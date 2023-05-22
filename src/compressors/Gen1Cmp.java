@@ -36,25 +36,28 @@ public class Gen1Cmp {
 
     private byte[] compressInner() {
         byte[] shortest = null;
-        for (int mode = 1; mode <= 3; mode++) {
+        for (int mode = 0; mode <= 2; mode++) {
             for (int order = 0; order <= 1; order++) {
-                byte[] compressed2 = compressUsingModeAndOrder(mode, order);
-                if (shortest == null || compressed2.length < shortest.length) {
-                    shortest = compressed2;
+                byte[] compressed = compressUsingModeAndOrder(mode, order == 1);
+                if (shortest == null || compressed.length < shortest.length) {
+                    shortest = compressed;
                 }
             }
         }
         return shortest;
     }
 
-    public byte[] compressUsingModeAndOrder(int mode, int order) {
+    public byte[] compressUsingModeAndOrder(int mode, boolean order) {
+        if (mode < 0 || mode > 2) {
+            throw new IllegalArgumentException("Invalid mode: " + mode + ". Must be 0, 1, or 2.");
+        }
 
         prepareBitplanes(mode, order);
 
         BitWriteStream bws = new BitWriteStream();
 
         writeImageDimensions(bws);
-        bws.writeBit(order);
+        bws.writeBit(order ? 1 : 0);
         compressAndWriteBitplane(bp1, bws);
         writeMode(mode, bws);
         compressAndWriteBitplane(bp2, bws);
@@ -69,14 +72,14 @@ public class Gen1Cmp {
         return bws.toByteArray();
     }
 
-    private void prepareBitplanes(int mode, int order) {
+    private void prepareBitplanes(int mode, boolean order) {
         initBitplanes(order);
         xorAndDeltaEncodeBitplanes(mode);
     }
 
-    private void initBitplanes(int order) {
-        bp1 = bitplaneFromImage(order == 0 ? image.getBitplane1Image() : image.getBitplane2Image());
-        bp2 = bitplaneFromImage(order == 0 ? image.getBitplane2Image() : image.getBitplane1Image());
+    private void initBitplanes(boolean order) {
+        bp1 = bitplaneFromImage(order ? image.getBitplane2Image() : image.getBitplane1Image());
+        bp2 = bitplaneFromImage(order ? image.getBitplane1Image() : image.getBitplane2Image());
     }
 
     private int[][] bitplaneFromImage(BufferedImage image) {
@@ -91,12 +94,12 @@ public class Gen1Cmp {
 
     private void xorAndDeltaEncodeBitplanes(int mode) {
 
-        if (mode != 1) {
+        if (mode != 0) {
             bp2 = xor(bp1, bp2);
         }
 
         bp1 = deltaEncode(bp1);
-        if (mode != 2) {
+        if (mode != 1) {
             bp2 = deltaEncode(bp2);
         }
     }
@@ -212,11 +215,11 @@ public class Gen1Cmp {
     }
 
     private void writeMode(int mode, BitWriteStream bws) {
-        if (mode == 1) {
+        if (mode == 0) {
             bws.writeBit(0);
         } else {
             bws.writeBit(1);
-            bws.writeBit(mode & 1);
+            bws.writeBit(~mode & 1);
         }
     }
 
