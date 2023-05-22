@@ -59,6 +59,13 @@ public class Gen1Cmp {
         writeMode(mode, bws);
         compressAndWriteBitplane(bp2, bws);
 
+        byte[] compressed = bws.toByteArray();
+        BitReadStream brs = new BitReadStream(compressed);
+        BitWriteStream bws2 = new BitWriteStream();
+        while (brs.hasNext()) {
+            bws2.writeBit(brs.readBit());
+        }
+        System.out.println("Result: " + bws2 + " | " + compressed.length + " bytes");
         return bws.toByteArray();
     }
 
@@ -127,7 +134,6 @@ public class Gen1Cmp {
         int packetType = bitPairs[0] == 0 ? 0 : 1;
         bws.writeBit(packetType); // 0 for RLE, 1 for data
 
-        System.out.println(bws);
         int i = 0;
         while (i < bitPairs.length) {
             if (packetType == 0) {
@@ -135,7 +141,6 @@ public class Gen1Cmp {
             } else {
                 i = writeDataPacket(bitPairs, i, bws);
             }
-            System.out.println(bws);
             packetType ^= 1;
         }
     }
@@ -181,8 +186,8 @@ public class Gen1Cmp {
         do {
             bws.writeBitPair(bitPairs[i]);
             i++;
-        } while (i < bitPairs.length - 1 && bitPairs[i] != 0b00);
-        if (i != bitPairs.length - 1) {
+        } while (i < bitPairs.length && bitPairs[i] != 0b00);
+        if (i != bitPairs.length) {
             bws.writeBitPair(0);
         }
         return i;
