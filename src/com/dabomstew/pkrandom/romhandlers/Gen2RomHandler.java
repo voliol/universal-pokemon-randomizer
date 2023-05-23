@@ -2707,7 +2707,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
-        byte[] uncompressed = new GBCImage(bim).getData();
+        byte[] uncompressed = new GBCImage(bim).toBytes();
         int width = bim.getWidth() / 8;
         int height = bim.getHeight() / 8;
         // TODO: figure out what cutAndTranspose does, and why it works here
@@ -2818,7 +2818,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (transpose) {
                 orig = GFXFunctions.transposeTiles(orig);
             }
-            byte[] data = new GBCImage(orig).getData();
+            byte[] data = new GBCImage(orig).toBytes();
 
 //            System.out.println(RomFunctions.bytesToHex(data));
 //            System.out.println("found at:");
@@ -2868,7 +2868,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         if (romEntry.isCrystal()) {
             dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                    bim1 -> Gen2Cmp.compress(new GBCImage(GFXFunctions.transposeTiles(bim)).getData()),
+                    bim1 -> Gen2Cmp.compress(new GBCImage(GFXFunctions.transposeTiles(bim)).toBytes()),
                     this::lengthOfCompressedDataAt);
         } else {
             // much more in GS since it has to make sure the catching tutorial dude's backpic ends up in the same bank
@@ -2879,7 +2879,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private byte[] chrisPlusDudeBackImagesToBytes(BufferedImage chrisBack) {
-        byte[] chrisBackData = new GBCImage(GFXFunctions.transposeTiles(chrisBack)).getData();
+        byte[] chrisBackData = new GBCImage(GFXFunctions.transposeTiles(chrisBack)).toBytes();
         chrisBackData = Gen2Cmp.compress(chrisBackData);
 
         int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"));
@@ -2920,7 +2920,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void writeImage(int offset, BufferedImage bim) {
-        writeBytes(offset, new GBCImage(bim).getData());
+        writeBytes(offset, new GBCImage(bim).toBytes());
     }
 
 

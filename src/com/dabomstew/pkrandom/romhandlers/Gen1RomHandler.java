@@ -2570,7 +2570,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     protected void writeImage(int offset, GBCImage image) {
-        writeBytes(offset, image.getData());
+        writeBytes(offset, image.toBytes());
     }
 
     private int calculateFrontSpriteBank(Gen1Pokemon pk) {

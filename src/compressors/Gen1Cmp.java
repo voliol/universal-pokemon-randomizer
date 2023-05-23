@@ -33,8 +33,8 @@ public class Gen1Cmp {
 
     public Gen1Cmp(GBCImage image) {
         this.image = image;
-        this.width = image.getImage().getWidth();
-        this.height = image.getImage().getHeight();
+        this.width = image.getWidth();
+        this.height = image.getHeight();
         if (image.getWidthInTiles() > MAX_DIMENSION || image.getHeightInTiles() > MAX_DIMENSION) {
             throw new IllegalArgumentException("Image dimensions (in tiles) of " + image.getWidthInTiles() + "x" + image.getHeightInTiles() +
                     " exceeds " + MAX_DIMENSION + "x" + MAX_DIMENSION + ".");

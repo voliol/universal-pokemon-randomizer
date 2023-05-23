@@ -21,6 +21,7 @@ package com.dabomstew.pkrandom.graphics.palettes;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,10 @@ import java.util.regex.Pattern;
  */
 public class Color implements Cloneable {
 
-	private static final Color DEFAULT_COLOR = new Color(255, 255, 255);
+	public static final Color WHITE = new Color(255, 255, 255);
+	public static final Color BLACK = new Color(0, 0, 0);
+
+	private static final Color DEFAULT_COLOR = WHITE;
 
 	private static final String HEX_REGEX = "[0-9abcdefABCDEF]{6}";
 
@@ -99,7 +103,7 @@ public class Color implements Cloneable {
 	}
 
 	public static int conv3DSColorWordToARGB(int word) {
-		int alpha = (int) ((word & 0x1) * 0xFF);
+		int alpha = (word & 0x1) * 0xFF;
 		int blue = (int) (((word & 0x3E) >> 1) * 8.25);
 		int green = (int) (((word & 0x7C0) >> 6) * 8.25);
 		int red = (int) (((word & 0xF800) >> 11) * 8.25);
@@ -157,6 +161,19 @@ public class Color implements Cloneable {
 		return "(" + r + ", " + g + ", " + b + ")";
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof Color otherColor) {
+			return r == otherColor.r && g == otherColor.g && b == otherColor.b;
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(r, g, b);
+	}
+
 	public byte[] toBytes() {
 		int red = Math.floorDiv(r, 8);
 		int green = Math.floorDiv(g, 8);
@@ -200,37 +217,26 @@ public class Color implements Cloneable {
 	}
 
 	public int getComp(int i) {
-		switch (i) {
-		case 0:
-			return r;
-		case 1:
-			return g;
-		case 2:
-			return b;
-		default:
-			throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
-		}
+		return switch (i) {
+			case 0 -> r;
+			case 1 -> g;
+			case 2 -> b;
+			default -> throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
+		};
 	}
 
 	public void setComp(int i, int value) {
 		switch (i) {
-		case 0:
-			r = value;
-			break;
-		case 1:
-			g = value;
-			break;
-		case 2:
-			b = value;
-			break;
-		default:
-			throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
+			case 0 -> r = value;
+			case 1 -> g = value;
+			case 2 -> b = value;
+			default -> throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
 		}
 	}
 
 	@FunctionalInterface
-	public static interface ColorChange {
-		public int change(Color orig, int i);
+	public interface ColorChange {
+		int change(Color orig, int i);
 	}
 
 	public void setComps(ColorChange cc) {

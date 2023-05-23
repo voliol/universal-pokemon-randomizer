@@ -2,6 +2,7 @@ package com.dabomstew.pkrandom.graphics;
 
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,151 +15,158 @@ import java.util.List;
 /**
  * A 2bpp image used by a Gen 1 or Gen 2 game.
  */
-public class GBCImage {
+public class GBCImage extends BufferedImage {
 
-	// TODO: see if this limitation exists in Gen 2 as well (probably)
-	private static final int MAX_WIDTH_IN_TILES = 15;
-	private static final int MAX_WIDTH_IN_PIXELS = MAX_WIDTH_IN_TILES * 8;
+    private static final int TILE_SIZE = 8;
+    private static final int BPP = 2;
+    private static final int PALETTE_SIZE = 4;
 
-	/**
-	 * Returns a copy of the input {@link BufferedImage} with "fixed" 2bpp color
-	 * indexing. I.e. the returned BufferedImage uses an {@link IndexColorModel}
-	 * with four colors, sorted from lightest/white to darkest/black.
-	 *
-	 * @param bim The original BufferedImage.
-	 */
-	private static BufferedImage fixed2bppIndexing(BufferedImage bim) {
-		final int bpp = 2;
+    private static final Palette DEFAULT_PALETTE = new Palette(new Color[]{
+            Color.WHITE, new Color(0xFFAAAAAA), new Color(0xFF666666), Color.BLACK});
 
-		List<Integer> colors = new ArrayList<>();
-		for (int x = 0; x < bim.getWidth(); x++) {
-			for (int y = 0; y < bim.getHeight(); y++) {
-				int color = bim.getRGB(x, y);
-				if (!colors.contains(color)) {
-					colors.add(color);
-				}
-			}
-		}
-		colors.sort((c1, c2) -> Double.compare(new com.dabomstew.pkrandom.graphics.palettes.Color(c2).toHSV()[2], new Color(c1).toHSV()[2]));
+    /**
+     * "Fixes" a palette, filling it out to have 4 colors if there are less,
+     * and reordering them from brightest to darkest. True white (=FFFFFF) is always put at the start of the palette,
+     * and true black (=000000) is always put at the end.
+     */
+    private static Palette fixPalette(Palette palette) {
+        if (palette.size() > 4) {
+            throw new IllegalArgumentException("palette.size()=" + palette.size() + " exceeds max palette size "
+                    + PALETTE_SIZE + ".");
+        }
+        List<Integer> colors = new ArrayList<>(Arrays.stream(palette.toARGB()).boxed().toList());
+        colors.sort((c1, c2) -> compareColors(new Color(c1), new Color(c2)));
+        Palette fixed = DEFAULT_PALETTE.clone();
+        for (int i = 0; i < colors.size(); i++) {
+            Color color = new Color(colors.get(i));
+            if (!color.equals(Color.WHITE) && !color.equals(Color.BLACK)) {
+                fixed.setColor(i, color);
+            }
+        }
 
-		BufferedImage fixed = new BufferedImage(bim.getWidth(), bim.getHeight(), BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(toArray(colors), bpp));
-		Graphics2D g = fixed.createGraphics();
-		g.drawImage(bim, 0, 0, null);
+        return fixed;
+    }
 
-		return fixed;
-	}
+    private static int compareColors(Color a, Color b) {
+        double[] aHSV = a.toHSV();
+        double[] bHSV = b.toHSV();
+        int compare = Double.compare(bHSV[2], aHSV[2]);
+        if (compare == 0) {
+            compare = Double.compare(aHSV[1], bHSV[1]);
+            if (compare == 0) {
+                compare = Double.compare(aHSV[0], bHSV[0]);
+            }
+        }
+        return compare;
+    }
 
-	private static int[] toArray(List<Integer> colors) {
-		int[] palette = new int[colors.size()];
-		for (int i = 0; i < colors.size(); i++) {
-			palette[i] = colors.get(i);
-		}
-		return palette;
-	}
+    private byte[] data;
 
-	private final BufferedImage image;
-	private byte[] data;
+    private boolean bitplanesPrepared;
+    private BufferedImage bitplane1Image;
+    private BufferedImage bitplane2Image;
+    private byte[] bitplane1Data;
+    private byte[] bitplane2Data;
 
-	private boolean bitplanesPrepared;
-	private BufferedImage bitplane1Image;
-	private BufferedImage bitplane2Image;
-	private byte[] bitplane1Data;
-	private byte[] bitplane2Data;
+    /**
+     * Creates a GBCImage copy of the input {@link BufferedImage}.
+     * This allows both the GBCImage methods, but also "fixes" its 2bpp color
+     * indexing. I.e. the GBCImage uses an {@link IndexColorModel}
+     * with four colors, sorted from lightest/white to darkest/black.
+     *
+     * @param bim The original BufferedImage.
+     */
+    public GBCImage(BufferedImage bim) {
+        this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
+                Palette.readImagePaletteFromPixels(bim));
+        if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
+            throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
+                    bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
+        }
+        Graphics2D g = createGraphics();
+        g.drawImage(bim, 0, 0, null);
+    }
 
-	public GBCImage(BufferedImage bim) {
-		this.image = fixed2bppIndexing(bim);
-		if (getWidthInTiles() > MAX_WIDTH_IN_TILES || getHeightInTiles() > MAX_WIDTH_IN_TILES) { // allows non-square images
-			throw new IllegalArgumentException("Width or height of image exceeds " + MAX_WIDTH_IN_TILES + " tiles ("
-					+ MAX_WIDTH_IN_PIXELS + " pixels).");
-		}
-	}
+    public GBCImage(int widthInTiles, int heightInTiles, Palette palette) {
+        super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
+                GFXFunctions.indexColorModelFromPalette(fixPalette(palette), BPP));
+    }
 
+    public int getWidthInTiles() {
+        return getWidth() / 8;
+    }
 
-	public BufferedImage getImage() { //TODO: should GBCimage extend BufferedImage instead?
-		return image;
-	}
+    public int getHeightInTiles() {
+        return getHeight() / 8;
+    }
 
-	public int getWidthInTiles() {
-		return image.getWidth() / 8;
-	}
+    public byte[] toBytes() {
+        if (data == null) {
+            prepareBitplanes();
+            data = new byte[bitplane1Data.length * 2];
+            for (int i = 0; i < bitplane1Data.length; i++) {
+                data[i * 2] = bitplane1Data[i];
+                data[i * 2 + 1] = bitplane2Data[i];
+            }
+        }
+        return this.data;
+    }
 
-	public int getHeightInTiles() {
-		return image.getHeight() / 8;
-	}
+    public BufferedImage getBitplane1Image() {
+        prepareBitplanes();
+        return bitplane1Image;
+    }
 
-	public byte[] getData() {
-		if (data == null) {
-			prepareBitplanes();
-			data = new byte[bitplane1Data.length * 2];
-			for (int i = 0; i < bitplane1Data.length; i++) {
-				data[i * 2] = bitplane1Data[i];
-				data[i * 2 + 1] = bitplane2Data[i];
-			}
-		}
-		return this.data;
-	}
+    public BufferedImage getBitplane2Image() {
+        prepareBitplanes();
+        return bitplane2Image;
+    }
 
-	public byte[] getFlattenedData() {
-		return null;
-		// TODO: what does this even mean?
-	}
+    private void prepareBitplanes() {
+        if (bitplanesPrepared) {
+            return;
+        }
 
-	public BufferedImage getBitplane1Image() {
-		prepareBitplanes();
-		return bitplane1Image;
-	}
-
-	public BufferedImage getBitplane2Image() {
-		prepareBitplanes();
-		return bitplane2Image;
-	}
-
-	private void prepareBitplanes() {
-		if (bitplanesPrepared) {
-			return;
-		}
-
-		bitplane1Image = new BufferedImage(image.getWidth(), image.getHeight(),
-				BufferedImage.TYPE_BYTE_BINARY);
-		bitplane2Image = new BufferedImage(image.getWidth(), image.getHeight(),
-				BufferedImage.TYPE_BYTE_BINARY);
-		Graphics2D g1 = bitplane1Image.createGraphics();
-		g1.setColor(java.awt.Color.WHITE);
-        g1.fillRect(0, 0, image.getWidth(), image.getHeight());
+        bitplane1Image = new BufferedImage(getWidth(), getHeight(),
+                BufferedImage.TYPE_BYTE_BINARY);
+        bitplane2Image = new BufferedImage(getWidth(), getHeight(),
+                BufferedImage.TYPE_BYTE_BINARY);
+        Graphics2D g1 = bitplane1Image.createGraphics();
+        g1.setColor(java.awt.Color.WHITE);
+        g1.fillRect(0, 0, getWidth(), getHeight());
         Graphics2D g2 = bitplane2Image.createGraphics();
         g2.setColor(java.awt.Color.WHITE);
-        g2.fillRect(0, 0, image.getWidth(), image.getHeight());
+        g2.fillRect(0, 0, getWidth(), getHeight());
 
-		for (int x = 0; x < image.getWidth(); x++) {
-			for (int y = 0; y < image.getHeight(); y++) {
-				int sample = image.getData().getSample(x, y, 0);
-				if (sample % 2 == 1) {
-					bitplane1Image.setRGB(x, y, 0xff000000);
-				}
-				if (sample >= 2) {
-					bitplane2Image.setRGB(x, y, 0xff000000);
-				}
-			}
-		}
-		bitplane1Data = GFXFunctions.readTiledImageData(bitplane1Image, 1);
-		bitplane2Data = GFXFunctions.readTiledImageData(bitplane2Image, 1);
+        for (int x = 0; x < getWidth(); x++) {
+            for (int y = 0; y < getHeight(); y++) {
+                int sample = getData().getSample(x, y, 0);
+                if (sample % 2 == 1) {
+                    bitplane1Image.setRGB(x, y, 0xff000000);
+                }
+                if (sample >= 2) {
+                    bitplane2Image.setRGB(x, y, 0xff000000);
+                }
+            }
+        }
+        bitplane1Data = GFXFunctions.readTiledImageData(bitplane1Image, 1);
+        bitplane2Data = GFXFunctions.readTiledImageData(bitplane2Image, 1);
 
-		bitplanesPrepared = true;
-	}
+        bitplanesPrepared = true;
+    }
 
-	@Override
-	public boolean equals(Object other) {
-		if (other instanceof GBCImage otherImage) {
-			return Arrays.equals(getRasterData(image), getRasterData(otherImage.image));
-		}
-		return false;
-	}
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof GBCImage otherImage) {
+            return Arrays.equals(getRasterData(), otherImage.getRasterData());
+        }
+        return false;
+    }
 
-	private int[] getRasterData(BufferedImage bim) {
-		Raster raster = bim.getRaster();
-		return raster.getPixels(0, 0, raster.getWidth(), raster.getHeight(),
-				new int[raster.getWidth() * raster.getHeight()]);
-	}
+    private int[] getRasterData() {
+        Raster raster = getRaster();
+        return raster.getPixels(0, 0, raster.getWidth(), raster.getHeight(),
+                new int[raster.getWidth() * raster.getHeight()]);
+    }
 
 }
