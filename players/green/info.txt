@@ -1,5 +1,0 @@
-[NAME:Green]
-[DESCRIPTION:Based on beta images of a would-be playable character or rival of the Generation I games.]
-[FROM:Pokémon - Custom]
-[CREATOR:Madame Frog]
-[CATEGORY:POKEMON]
