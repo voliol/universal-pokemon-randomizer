@@ -8,4 +8,5 @@
 -- gbc sprites from firered++ --
 
 the overworld sprites are by "BettyNewbie",
+gb_back by voliol
 the rest by Luna 
