@@ -550,8 +550,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         pkmn.setCatchRate(rom[offset + Gen1Constants.bsCatchRateOffset] & 0xFF);
         pkmn.setExpYield(rom[offset + Gen1Constants.bsExpYieldOffset] & 0xFF);
         pkmn.setGrowthCurve(ExpCurve.fromByte(rom[offset + Gen1Constants.bsGrowthCurveOffset]));
-        pkmn.setFrontSpritePointer(readWord(offset + Gen1Constants.bsFrontSpriteOffset));
-        pkmn.setBackSpritePointer(readWord(offset + Gen1Constants.bsBackSpriteOffset));
+        pkmn.setFrontImageDimensions(rom[offset + Gen1Constants.bsFrontImageDimensionsOffset] & 0xFF);
+        pkmn.setFrontImagePointer(readWord(offset + Gen1Constants.bsFrontImagePointerOffset));
+        pkmn.setBackImagePointer(readWord(offset + Gen1Constants.bsBackImagePointerOffset));
         
         pkmn.setGuaranteedHeldItem(-1);
         pkmn.setCommonHeldItem(-1);
@@ -2584,9 +2585,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             fsBank = 0x9;
         } else if (idx < 0x4A) {
             fsBank = 0xA;
-        } else if (idx < 0x74 || idx == 0x74 && pk.getFrontSpritePointer() > 0x7000) {
+        } else if (idx < 0x74 || idx == 0x74 && pk.getFrontImagePointer() > 0x7000) {
             fsBank = 0xB;
-        } else if (idx < 0x99 || idx == 0x99 && pk.getFrontSpritePointer() > 0x7000) {
+        } else if (idx < 0x99 || idx == 0x99 && pk.getFrontImagePointer() > 0x7000) {
             fsBank = 0xC;
         } else {
             fsBank = 0xD;
@@ -2621,6 +2622,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new Palette(paletteBytes);
     }
 
+
 	@Override
 	public BufferedImage getPokemonImage(Pokemon uncheckedPk, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette) {
@@ -2630,20 +2632,38 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		if (shiny) {
 			return null;
 		}
-    	
-		// assumes the backsprites are in the same bank as the frontSprites
-		int spriteBank = calculateFrontSpriteBank(pk);
-		int spriteOffset = calculateOffset(back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer(), spriteBank);
 
-		Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
-		sprite.decompress();
-		sprite.transpose();
-		int w = sprite.getWidth();
-		int h = sprite.getHeight();
+        int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
+        int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
 
-		byte[] data = sprite.getFlattenedData();
+        int bank = calculateFrontSpriteBank(pk);
+        int imageOffset = calculateOffset(back ? pk.getBackImagePointer() : pk.getFrontImagePointer(), bank);
+        byte[] data = readPokemonImageData(imageOffset);
 
-        // Palette?
+        int[] convPalette = getVisiblePokemonPalette(pk);
+
+        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
+        
+        if (transparentBackground) {
+            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
+        }
+        if (includePalette) {
+            for (int j = 0; j < convPalette.length; j++) {
+                bim.setRGB(j, 0, convPalette[j]);
+            }
+        }
+        
+        return bim;
+    }
+
+    private byte[] readPokemonImageData(int imageOffset) {
+        Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
+        image.decompress();
+        image.transpose();
+        return image.getFlattenedData();
+    }
+
+    private int[] getVisiblePokemonPalette(Gen1Pokemon pk) {
         int[] convPalette;
         if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
             int palIndex = pk.getPaletteID().ordinal();
@@ -2658,22 +2678,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         } else {
             convPalette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
         }
-
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
-        
-        if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
-        }
-        if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
-            }
-        }
-        
-        return bim;
+        return convPalette;
     }
 
-	@Override
+    @Override
 	public PaletteHandler getPaletteHandler() {
 	    return paletteHandler;
 	}

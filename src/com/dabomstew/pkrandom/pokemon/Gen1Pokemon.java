@@ -38,8 +38,8 @@ public class Gen1Pokemon extends Pokemon {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4);
     }
 
-    private int frontSpritePointer;
-    private int backSpritePointer;
+    private int frontImagePointer;
+    private int backImagePointer;
 	
 	private PaletteID paletteID;
 
@@ -151,22 +151,20 @@ public class Gen1Pokemon extends Pokemon {
                 + ", speed=" + getSpeed() + "]";
     }
 
-    @Override
-    public int getFrontSpritePointer() {
-        return frontSpritePointer;
+    public int getFrontImagePointer() {
+        return frontImagePointer;
     }
 
-    @Override
-    public void setFrontSpritePointer(int frontSpritePointer) {
-        this.frontSpritePointer = frontSpritePointer;
+    public void setFrontImagePointer(int frontImagePointer) {
+        this.frontImagePointer = frontImagePointer;
     }
 
-    public int getBackSpritePointer() {
-        return backSpritePointer;
+    public int getBackImagePointer() {
+        return backImagePointer;
     }
 
-    public void setBackSpritePointer(int backSpritePointer) {
-        this.backSpritePointer = backSpritePointer;
+    public void setBackImagePointer(int backImagePointer) {
+        this.backImagePointer = backImagePointer;
     }
 
     public PaletteID getPaletteID() {

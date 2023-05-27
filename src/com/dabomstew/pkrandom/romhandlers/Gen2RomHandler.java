@@ -529,7 +529,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pkmn.setRareHeldItem(rom[offset + Gen2Constants.bsRareHeldItemOffset] & 0xFF);
         pkmn.setDarkGrassHeldItem(-1);
         pkmn.setGrowthCurve(ExpCurve.fromByte(rom[offset + Gen2Constants.bsGrowthCurveOffset]));
-        pkmn.setImageDimensions(rom[offset + Gen2Constants.bsImageDimensionsOffset] & 0xFF);
+        pkmn.setFrontImageDimensions(rom[offset + Gen2Constants.bsFrontImageDimensionsOffset] & 0xFF);
 
     }
 
@@ -2927,7 +2927,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
-
+        // TODO remove
         if (pk.getNumber() == 1 && !back && !shiny) {
             dudeBackStuff();
             try {
@@ -2944,8 +2944,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
 
-        int width = back ? 6 : pk.getImageDimensions() & 0x0F;
-        int height = back ? 6 : (pk.getImageDimensions() >> 4) & 0x0F;
+        int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
+        int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
 
         byte[] data;
         try {

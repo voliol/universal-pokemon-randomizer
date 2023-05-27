@@ -74,8 +74,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private int genderRatio;
 
-    private int frontSpritePointer;
-    private int imageDimensions;
+    private int frontImageDimensions;
 
     private int callRate;
 
@@ -564,20 +563,12 @@ public class Pokemon implements Comparable<Pokemon> {
         this.genderRatio = genderRatio;
     }
 
-    public int getFrontSpritePointer() {
-        return frontSpritePointer;
+    public int getFrontImageDimensions() {
+        return frontImageDimensions;
     }
 
-    public void setFrontSpritePointer(int frontSpritePointer) {
-        this.frontSpritePointer = frontSpritePointer;
-    }
-
-    public int getImageDimensions() {
-        return imageDimensions;
-    }
-
-    public void setImageDimensions(int imageDimensions) {
-        this.imageDimensions = imageDimensions;
+    public void setFrontImageDimensions(int frontImageDimensions) {
+        this.frontImageDimensions = frontImageDimensions;
     }
 
     public int getCallRate() {
