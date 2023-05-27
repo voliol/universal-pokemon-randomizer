@@ -3,3 +3,9 @@
 [FROM:Pokémon]
 [CREATOR:Gamefreak]
 [CATEGORY:POKEMON]
+
+
+-- gbc sprites from firered++ --
+
+the overworld sprites are by "BettyNewbie",
+the rest by Luna 
