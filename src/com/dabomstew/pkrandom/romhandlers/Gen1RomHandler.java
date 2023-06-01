@@ -49,7 +49,9 @@ import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteID;
 import com.dabomstew.pkrandom.pokemon.*;
+import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
+import compressors.Gen2Cmp;
 
 import javax.imageio.ImageIO;
 
@@ -2557,10 +2559,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private void changeTrainerSprites(String name) {
         BufferedImage walk = null;
         BufferedImage bike = null;
+        BufferedImage front = null;
         try {
             walk = ImageIO.read(new File( "players/" + name + "/gb_walk.png"));
             File bikeFile = new File( "players/" + name + "/gb_bike.png");
-            bike = !bikeFile.exists() ? walk : ImageIO.read(bikeFile);
+            bike = bikeFile.exists() ? ImageIO.read(bikeFile) : walk;
+            File frontFile = new File("players/" + name + "/gb_front.png");
+            front = frontFile.exists() ? ImageIO.read(frontFile) : null;
         } catch (IOException ignored) {
         }
 
@@ -2568,6 +2573,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         writeImage(walkOffset, new GBCImage(walk));
         int bikeOffset = romEntry.getIntValue("PlayerBikeSpriteOffset");
         writeImage(bikeOffset, new GBCImage(bike));
+        if (front != null) {
+            System.out.println("changing player front image");
+            rewritePlayerFrontImage(front);
+        }
     }
 
     protected void writeImage(int offset, GBCImage image) {
@@ -2607,7 +2616,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
 	@Override
 	public void savePokemonPalettes() {
-        	changeTrainerSprites("mario"); // TODO: connect to the gui
 		int palIndex = romEntry.getIntValue("MonPaletteIndicesOffset");
 		for (Pokemon pk : getPokemonSet()) {
             // they are in Pokédex order
@@ -2622,6 +2630,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new Palette(paletteBytes);
     }
 
+    public void rewritePlayerFrontImage(BufferedImage bim) {
+        int[] pointerOffsets = romEntry.getArrayValue("PlayerFrontImagePointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        int[] bankOffsets = romEntry.getArrayValue("PlayerFrontImageBankOffsets");
+        DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+
+        System.out.println(bim + " " + bim.getWidth() + " " + bim.getHeight());
+
+        dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+                bim1 -> Gen1Cmp.compress(new GBCImage(bim1)), this::lengthOfCompressedDataAt);
+    }
+
+    private int lengthOfCompressedDataAt(int offset) {
+        Gen1Decmp decmp = new Gen1Decmp(rom, offset);
+        decmp.decompress();
+        return decmp.getCompressedLength();
+    }
 
 	@Override
 	public BufferedImage getPokemonImage(Pokemon uncheckedPk, boolean back, boolean shiny,
@@ -2632,6 +2658,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		if (shiny) {
 			return null;
 		}
+
+        if (pk.getNumber() == 1 && !back) {
+            changeTrainerSprites("blackmage"); // TODO: connect to the gui
+        }
 
         int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
         int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;

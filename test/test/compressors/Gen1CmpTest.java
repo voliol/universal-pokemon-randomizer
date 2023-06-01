@@ -23,7 +23,7 @@ public class Gen1CmpTest {
             "testblack", "testgrays", "testrect", "abra", "aerodactyl", "alakazam", "arcanine",
             "articuno", "beedrill", "bellsprout", "blastoise", "bulbasaur", "butterfree", "caterpie", "chansey",
             "charizard", "charmander", "charmeleon", "clefable", "clefairy", "cloyster", "cubone", "diglett", "ditto",
-            "dodrio", "doduo", "dragonair", "dragonite", "dratini", "drowzee", "dugtrio"};
+            "dodrio", "doduo", "dragonair", "dragonite", "dratini", "drowzee", "dugtrio", "blackmage"};
 
     public static String[] getImageNames() {
         return TEST_FILE_NAMES;

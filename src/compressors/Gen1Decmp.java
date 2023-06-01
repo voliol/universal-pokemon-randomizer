@@ -38,6 +38,7 @@ public class Gen1Decmp {
 
     private static final int tilesize = 8;
 
+    private final int baseOffset;
     private final BitStream bs;
     private final boolean mirror, planar;
     private byte[] data;
@@ -48,6 +49,7 @@ public class Gen1Decmp {
     }
 
     private Gen1Decmp(byte[] input, int baseOffset, boolean mirror, boolean planar) {
+        this.baseOffset = baseOffset;
         this.bs = new BitStream(input, baseOffset);
         this.mirror = mirror;
         this.planar = planar;
@@ -138,6 +140,13 @@ public class Gen1Decmp {
 
     public int getHeight() {
         return this.sizey * tilesize;
+    }
+
+    public int getCompressedLength() {
+        if (bs == null) {
+            throw new IllegalStateException("Must decompress before getting compressed length.");
+        }
+        return bs.offset - baseOffset + 1; // TODO: check this works perfectly
     }
 
     private void fillram(byte[][] rams, int rOffset) {
