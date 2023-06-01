@@ -2560,12 +2560,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         BufferedImage walk = null;
         BufferedImage bike = null;
         BufferedImage front = null;
+        BufferedImage back = null;
         try {
             walk = ImageIO.read(new File( "players/" + name + "/gb_walk.png"));
             File bikeFile = new File( "players/" + name + "/gb_bike.png");
             bike = bikeFile.exists() ? ImageIO.read(bikeFile) : walk;
             File frontFile = new File("players/" + name + "/gb_front.png");
             front = frontFile.exists() ? ImageIO.read(frontFile) : null;
+            File backFile = new File("players/" + name + "/gb_back.png");
+            back = backFile.exists() ? ImageIO.read(backFile) : null;
         } catch (IOException ignored) {
         }
 
@@ -2576,6 +2579,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (front != null) {
             System.out.println("changing player front image");
             rewritePlayerFrontImage(front);
+        }
+        if (back != null) {
+            System.out.println("changing player back image");
+            rewritePlayerBackImage(back);
         }
     }
 
@@ -2637,7 +2644,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int[] bankOffsets = romEntry.getArrayValue("PlayerFrontImageBankOffsets");
         DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
-        System.out.println(bim + " " + bim.getWidth() + " " + bim.getHeight());
+        dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+                bim1 -> Gen1Cmp.compress(new GBCImage(bim1)), this::lengthOfCompressedDataAt);
+    }
+
+    // TODO: ensure the old man back image is in the same bank
+    public void rewritePlayerBackImage(BufferedImage bim) {
+        int[] pointerOffsets = romEntry.getArrayValue("PlayerBackImagePointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
         dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
                 bim1 -> Gen1Cmp.compress(new GBCImage(bim1)), this::lengthOfCompressedDataAt);
