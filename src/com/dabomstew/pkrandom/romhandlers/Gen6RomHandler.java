@@ -3980,6 +3980,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
         g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
 
+        finalImage = GFXFunctions.pseudoTransparent(finalImage, palette.getColor(0).toARGB());
+
         // Phew, all done.
         return finalImage;
 	}
