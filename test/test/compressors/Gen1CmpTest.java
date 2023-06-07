@@ -1,6 +1,5 @@
 package test.compressors;
 
-import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.GBCImage;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
@@ -33,9 +32,9 @@ public class Gen1CmpTest {
     @MethodSource("getImageNames")
     public void testImage(String name) {
         System.out.println(name);
-        BufferedImage bim = null;
+        GBCImage bim = null;
         try {
-            bim = ImageIO.read(new File(IN_ADRESS + "/" + name + ".png"));
+            bim = new GBCImage(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")));
         } catch (IOException ignored) {
         }
 
@@ -49,20 +48,15 @@ public class Gen1CmpTest {
             for (int order = 0; order <= 1; order++) {
                 try {
 
-                    Gen1Cmp compressor = new Gen1Cmp(new GBCImage(bim));
+                    Gen1Cmp compressor = new Gen1Cmp(bim);
                     byte[] compressed = compressor.compressUsingModeAndOrder(mode, order == 1);
 
                     byte[] rom = Arrays.copyOf(compressed, 0x100000);
                     Gen1Decmp sprite = new Gen1Decmp(rom, 0);
                     sprite.decompress();
                     sprite.transpose();
-                    byte[] data = sprite.getFlattenedData();
-
-                    System.out.println("w: " + sprite.getWidth() + ", h: " + sprite.getHeight());
-
-                    int[] convPalette = new int[]{0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000};
-                    BufferedImage bim2 = GFXFunctions.drawTiledImage(data, convPalette, sprite.getWidth(), sprite.getHeight(),
-                            8);
+                    GBCImage bim2 = new GBCImage(sprite.getWidth() / 8, sprite.getHeight() / 8,
+                            GBCImage.DEFAULT_PALETTE, sprite.getData());
                     try {
                         ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
                     } catch (IOException e) {

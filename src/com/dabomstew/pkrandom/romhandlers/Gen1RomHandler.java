@@ -2676,27 +2676,26 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 			return null;
 		}
 
-        if (pk.getNumber() == 1 && !back) {
-            changeTrainerSprites("blackmage"); // TODO: connect to the gui
-        }
+//        if (pk.getNumber() == 1 && !back) {
+//            changeTrainerSprites("blackmage"); // TODO: connect to the gui
+//        }
 
-        int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
-        int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
+        int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
+        int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
 
         int bank = calculateFrontSpriteBank(pk);
         int imageOffset = calculateOffset(back ? pk.getBackImagePointer() : pk.getFrontImagePointer(), bank);
         byte[] data = readPokemonImageData(imageOffset);
+        Palette palette = getVisiblePokemonPalette(pk);
 
-        int[] convPalette = getVisiblePokemonPalette(pk);
+        BufferedImage bim = new GBCImage(width, height, palette, data);
 
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
-        
         if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
+            bim = GFXFunctions.pseudoTransparent(bim, palette.getColor(0).toARGB());
         }
         if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
+            for (int j = 0; j < palette.size(); j++) {
+                bim.setRGB(j, 0, palette.getColor(j).toARGB());
             }
         }
         
@@ -2707,11 +2706,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
         image.decompress();
         image.transpose();
-        return image.getFlattenedData();
+        return image.getData();
     }
 
-    private int[] getVisiblePokemonPalette(Gen1Pokemon pk) {
-        int[] convPalette;
+    private Palette getVisiblePokemonPalette(Gen1Pokemon pk) {
+        Palette palette;
         if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
             int palIndex = pk.getPaletteID().ordinal();
             int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
@@ -2720,12 +2719,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 // Stored directly after regular SGB palettes.
                 palOffset += 320;
             }
-            Palette palette = read4ColorPalette(palOffset);
-            convPalette = palette.toARGB();
+            palette = read4ColorPalette(palOffset);
         } else {
-            convPalette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
+            palette = GBCImage.DEFAULT_PALETTE;
         }
-        return convPalette;
+        return palette;
     }
 
     @Override

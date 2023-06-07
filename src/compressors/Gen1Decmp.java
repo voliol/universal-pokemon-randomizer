@@ -130,10 +130,6 @@ public class Gen1Decmp {
         return data;
     }
 
-    public byte[] getFlattenedData() {
-        return flatten(data);
-    }
-
     public int getWidth() {
         return this.sizex;
     }
@@ -326,20 +322,6 @@ public class Gen1Decmp {
 
             return retval;
         }
-    }
-
-    private static byte[] flatten(byte[] planar) {
-        byte[] strips = new byte[planar.length * 4];
-        for (int j = 0; j < planar.length / 2; j++) {
-            int bottom = planar[j * 2] & 0xFF;
-            int top = planar[j * 2 + 1] & 0xFF;
-            byte[] strip = new byte[8];
-            for (int i = 7; i >= 0; i--) {
-                strip[7 - i] = (byte) (((bottom >>> i) & 1) + ((top * 2 >>> i) & 2));
-            }
-            System.arraycopy(strip, 0, strips, j * 8, 8);
-        }
-        return strips;
     }
 
 }

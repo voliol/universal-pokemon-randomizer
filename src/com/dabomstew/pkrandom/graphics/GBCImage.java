@@ -21,7 +21,7 @@ public class GBCImage extends BufferedImage {
     private static final int BPP = 2;
     private static final int PALETTE_SIZE = 4;
 
-    private static final Palette DEFAULT_PALETTE = new Palette(new Color[]{
+    public static final Palette DEFAULT_PALETTE = new Palette(new Color[]{
             Color.WHITE, new Color(0xFFAAAAAA), new Color(0xFF666666), Color.BLACK});
 
     /**
@@ -90,6 +90,25 @@ public class GBCImage extends BufferedImage {
     public GBCImage(int widthInTiles, int heightInTiles, Palette palette) {
         super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
                 GFXFunctions.indexColorModelFromPalette(fixPalette(palette), BPP));
+    }
+
+    public GBCImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data) {
+        this(widthInTiles, heightInTiles, palette);
+
+        for (int tile = 0; tile < data.length / TILE_SIZE / 2; tile++) {
+            int tileX = tile % widthInTiles;
+            int tileY = tile / widthInTiles;
+            for (int yT = 0; yT < 8; yT++) {
+                int strip0 = data[(tile * 8 + yT) * 2];
+                int strip1 = data[(tile * 8 + yT) * 2 + 1];
+                for (int xT = 0; xT < 8; xT++) {
+                    int bit0 = (strip0 >>> (7 - xT)) & 1;
+                    int bit1 = (strip1 >>> (7 - xT)) & 1;
+                    int colorIndex = (bit1 << 1) + bit0;
+                    setRGB(tileX * 8 + xT, tileY * 8 + yT, palette.getColor(colorIndex).toARGB());
+                }
+            }
+        }
     }
 
     public int getWidthInTiles() {

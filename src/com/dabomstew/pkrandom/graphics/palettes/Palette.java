@@ -64,7 +64,6 @@ public class Palette implements Cloneable {
         }
     }
 
-
     /**
      * Reads the palette of an image with indexed colors, returning a Palette object
      * with a size determined by the image.
@@ -184,7 +183,7 @@ public class Palette implements Cloneable {
         this(bytesToARGBValues(bytes));
     }
 
-    public Color getColor(int i) {
+    public Color getColor(int i) { // TODO: just "get" should be enough
         return colors[i];
     }
 

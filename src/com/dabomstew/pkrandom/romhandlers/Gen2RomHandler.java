@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -2928,19 +2929,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
         // TODO remove
-        if (pk.getNumber() == 1 && !back && !shiny) {
-            dudeBackStuff();
-            try {
-                BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
-                BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
-                BufferedImage fish = ImageIO.read(new File("kris_fish2.png"));
-                writeChrisSprites(walk, bike, fish);
-                BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
-                rewriteChrisBackImage(backImage);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        if (pk.getNumber() == 1 && !back && !shiny) {
+//            dudeBackStuff();
+//            try {
+//                BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
+//                BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
+//                BufferedImage fish = ImageIO.read(new File("kris_fish2.png"));
+//                writeChrisSprites(walk, bike, fish);
+//                BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
+//                rewriteChrisBackImage(backImage);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
 
@@ -2957,16 +2958,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // White and black are always in the palettes at positions 0 and 3, 
         // so only the middle colors are stored and need to be read.
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
+        palette = new Palette(new Color[] {Color.WHITE, palette.getColor(0), palette.getColor(1), Color.BLACK});
 
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
+        BufferedImage bim = new GBCImage(width, height, palette, data);
 
         if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
+            bim = GFXFunctions.pseudoTransparent(bim, palette.getColor(0).toARGB());
         }
         if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
+            for (int j = 0; j < palette.size(); j++) {
+                bim.setRGB(j, 0, palette.getColor(j).toARGB());
             }
         }
 
@@ -2976,8 +2977,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private byte[] readPokemonOrTrainerImageData(int pointerOffset, int imageWidth, int imageHeight) {
         int imageOffset = readPokemonOrTrainerImagePointer(pointerOffset);
         byte[] data = Gen2Decmp.decompress(rom, imageOffset);
-        byte[] transposed = GFXFunctions.gen2CutAndTranspose(data, imageWidth, imageHeight);
-        return GFXFunctions.gen2Flatten(transposed);
+        return GFXFunctions.gen2CutAndTranspose(data, imageWidth, imageHeight);
     }
 
     @Override
