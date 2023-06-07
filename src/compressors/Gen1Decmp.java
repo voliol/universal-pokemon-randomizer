@@ -107,25 +107,6 @@ public class Gen1Decmp {
 
     }
 
-    public void transpose() {
-        if (data == null) {
-            return;
-        }
-        int tiles = data.length / 16;
-        int width = sizex / tilesize;
-        int height = sizey;
-
-        byte[] newData = new byte[data.length];
-        for (int tile = 0; tile < tiles; tile++) {
-            int oldTileX = tile % width;
-            int oldTileY = tile / width;
-            int newTileNum = oldTileX * height + oldTileY;
-            System.arraycopy(data, tile * 16, newData, newTileNum * 16, 16);
-        }
-        data = newData;
-
-    }
-
     public byte[] getData() {
         return data;
     }

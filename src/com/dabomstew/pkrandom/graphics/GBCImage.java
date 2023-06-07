@@ -96,8 +96,8 @@ public class GBCImage extends BufferedImage {
         this(widthInTiles, heightInTiles, palette);
 
         for (int tile = 0; tile < data.length / TILE_SIZE / 2; tile++) {
-            int tileX = tile % widthInTiles;
-            int tileY = tile / widthInTiles;
+            int tileX = tile / widthInTiles;
+            int tileY = tile % widthInTiles;
             for (int yT = 0; yT < 8; yT++) {
                 int strip0 = data[(tile * 8 + yT) * 2];
                 int strip1 = data[(tile * 8 + yT) * 2 + 1];

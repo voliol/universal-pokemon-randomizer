@@ -54,7 +54,6 @@ public class Gen1CmpTest {
                     byte[] rom = Arrays.copyOf(compressed, 0x100000);
                     Gen1Decmp sprite = new Gen1Decmp(rom, 0);
                     sprite.decompress();
-                    sprite.transpose();
                     GBCImage bim2 = new GBCImage(sprite.getWidth() / 8, sprite.getHeight() / 8,
                             GBCImage.DEFAULT_PALETTE, sprite.getData());
                     try {

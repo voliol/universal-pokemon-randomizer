@@ -2705,7 +2705,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private byte[] readPokemonImageData(int imageOffset) {
         Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
         image.decompress();
-        image.transpose();
         return image.getData();
     }
 
