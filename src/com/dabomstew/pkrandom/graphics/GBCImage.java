@@ -13,7 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A 2bpp image used by a Gen 1 or Gen 2 game.
+ * A 2bpp image used by a Gen 1 or Gen 2 game. The GBCImage itself is a {@link BufferedImage} with an
+ * {@link IndexColorModel} of 4 colors, but can be converted from/to a byte array format used by the games.
+ * <a href=https://www.huderlem.com/demos/gameboy2bpp.html>That format is explained here</a>.
  */
 public class GBCImage extends BufferedImage {
 
@@ -60,6 +62,7 @@ public class GBCImage extends BufferedImage {
         return compare;
     }
 
+    private int[] colors;
     private byte[] data;
 
     private boolean bitplanesPrepared;
@@ -90,25 +93,39 @@ public class GBCImage extends BufferedImage {
     public GBCImage(int widthInTiles, int heightInTiles, Palette palette) {
         super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
                 GFXFunctions.indexColorModelFromPalette(fixPalette(palette), BPP));
+        initColors();
+    }
+
+    private void initColors() {
+        this.colors = new int[4];
+        IndexColorModel colorModel = (IndexColorModel) getColorModel();
+        colorModel.getRGBs(colors);
     }
 
     public GBCImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data) {
         this(widthInTiles, heightInTiles, palette);
+        drawTileData(data);
+    }
 
+    private void drawTileData(byte[] data) {
         for (int tile = 0; tile < data.length / TILE_SIZE / 2; tile++) {
-            int tileX = tile / widthInTiles;
-            int tileY = tile % widthInTiles;
+            int tileX = tile / getWidthInTiles();
+            int tileY = tile % getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {
-                int strip0 = data[(tile * 8 + yT) * 2];
-                int strip1 = data[(tile * 8 + yT) * 2 + 1];
+                int lowByte = data[(tile * 8 + yT) * 2];
+                int highByte = data[(tile * 8 + yT) * 2 + 1];
                 for (int xT = 0; xT < 8; xT++) {
-                    int bit0 = (strip0 >>> (7 - xT)) & 1;
-                    int bit1 = (strip1 >>> (7 - xT)) & 1;
-                    int colorIndex = (bit1 << 1) + bit0;
-                    setRGB(tileX * 8 + xT, tileY * 8 + yT, palette.getColor(colorIndex).toARGB());
+                    int low = (lowByte >>> (7 - xT)) & 1;
+                    int high = (highByte >>> (7 - xT)) & 1;
+                    int colorIndex = (high << 1) + low;
+                    setColor(tileX * 8 + xT, tileY * 8 + yT, colorIndex);
                 }
             }
         }
+    }
+
+    public void setColor(int x, int y, int colorIndex) {
+        setRGB(x, y, colors[colorIndex]);
     }
 
     public int getWidthInTiles() {
