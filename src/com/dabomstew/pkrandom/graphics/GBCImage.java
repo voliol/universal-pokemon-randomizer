@@ -62,7 +62,8 @@ public class GBCImage extends BufferedImage {
         return compare;
     }
 
-    private int[] colors;
+    private final boolean columnMode;
+    private final int[] colors;
 
     private boolean bitplanesPrepared;
     private BufferedImage bitplane1Image;
@@ -73,12 +74,28 @@ public class GBCImage extends BufferedImage {
      * This allows both the GBCImage methods, but also "fixes" its 2bpp color
      * indexing. I.e. the GBCImage uses an {@link IndexColorModel}
      * with four colors, sorted from lightest/white to darkest/black.
+     * <br><br>
+     * Assumes the tiles to be row-by-row, see {@link #GBCImage(BufferedImage, boolean)}.
      *
      * @param bim The original BufferedImage.
      */
     public GBCImage(BufferedImage bim) {
+        this(bim, false);
+    }
+
+    /**
+     * Creates a GBCImage copy of the input {@link BufferedImage}.
+     * This allows both the GBCImage methods, but also "fixes" its 2bpp color
+     * indexing. I.e. the GBCImage uses an {@link IndexColorModel}
+     * with four colors, sorted from lightest/white to darkest/black.
+     *
+     * @param bim        The original BufferedImage.
+     * @param columnMode If true, the output data from {@link #toBytes()} will be column-by-column, instead of row-by-row. Mirrors
+     *                   <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a>.
+     */
+    public GBCImage(BufferedImage bim, boolean columnMode) {
         this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
-                fixPalette(Palette.readImagePaletteFromPixels(bim)));
+                fixPalette(Palette.readImagePaletteFromPixels(bim)), columnMode);
         if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
             throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
                     bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
@@ -87,27 +104,38 @@ public class GBCImage extends BufferedImage {
         g.drawImage(bim, 0, 0, null);
     }
 
-    public GBCImage(int widthInTiles, int heightInTiles, Palette palette) {
+    private GBCImage(int widthInTiles, int heightInTiles, Palette palette, boolean columnMode) {
         super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
                 GFXFunctions.indexColorModelFromPalette(palette, BPP));
-        initColors();
+        this.columnMode = columnMode;
+        this.colors = initColors();
     }
 
-    private void initColors() {
-        this.colors = new int[4];
+    private int[] initColors() {
+        int[] colors = new int[4];
         IndexColorModel colorModel = (IndexColorModel) getColorModel();
         colorModel.getRGBs(colors);
+        return colors;
     }
 
     public GBCImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data) {
-        this(widthInTiles, heightInTiles, palette);
+        this(widthInTiles, heightInTiles, palette, data, false);
+    }
+
+    /**
+     * @param columnMode If true, the data will be column-by-column, instead of row-by-row. This affects the data reading,
+     *                   as well as the output from {@link #toBytes()}.
+     *                   Mirrors <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a>.
+     */
+    public GBCImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data, boolean columnMode) {
+        this(widthInTiles, heightInTiles, palette, columnMode);
         drawTileData(data);
     }
 
     private void drawTileData(byte[] data) {
         for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
-            int tileX = tile / getWidthInTiles();
-            int tileY = tile % getWidthInTiles();
+            int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
+            int tileY = columnMode ? tile % getWidthInTiles() : tile / getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {
                 int lowByte = data[(tile * 8 + yT) * 2];
                 int highByte = data[(tile * 8 + yT) * 2 + 1];
@@ -137,15 +165,15 @@ public class GBCImage extends BufferedImage {
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
 
         for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
-            int tileX = tile / getWidthInTiles();
-            int tileY = tile % getWidthInTiles();
+            int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
+            int tileY = columnMode ? tile % getWidthInTiles() : tile / getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {
                 int lowByte = 0;
                 int highByte = 0;
                 for (int xT = 0; xT < 8; xT++) {
                     int sample = getData().getSample(tileX * 8 + xT, tileY * 8 + yT, 0);
                     lowByte |= (sample & 1) << (7 - xT);
-                    highByte |= (sample & 2) << (6 - xT);
+                    highByte |= ((sample >>> 1) & 1) << (7 - xT);
                 }
                 data[(tile * 8 + yT) * 2] = (byte) lowByte;
                 data[(tile * 8 + yT) * 2 + 1] = (byte) highByte;

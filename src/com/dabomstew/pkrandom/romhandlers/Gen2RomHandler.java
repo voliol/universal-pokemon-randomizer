@@ -2708,7 +2708,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
-        byte[] uncompressed = new GBCImage(bim).toBytes();
+        byte[] uncompressed = new GBCImage(bim, true).toBytes();
 
         GBCDataRewriter<byte[]> dataRewriter = new GBCDataRewriter<>();
         dataRewriter.setPointerReader(this::readPokemonOrTrainerImagePointer);
@@ -2812,10 +2812,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void findImageForRomEntry(String fileName, String romEntryName, boolean transpose) {
         try {
             BufferedImage orig = ImageIO.read(new File(fileName));
-            if (transpose) {
-                orig = GFXFunctions.transposeTiles(orig);
-            }
-            byte[] data = new GBCImage(orig).toBytes();
+            byte[] data = new GBCImage(orig, transpose).toBytes();
 
 //            System.out.println(RomFunctions.bytesToHex(data));
 //            System.out.println("found at:");
@@ -2865,7 +2862,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         if (romEntry.isCrystal()) {
             dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                    bim1 -> Gen2Cmp.compress(new GBCImage(GFXFunctions.transposeTiles(bim)).toBytes()),
+                    bim1 -> Gen2Cmp.compress(new GBCImage(bim, true).toBytes()),
                     this::lengthOfCompressedDataAt);
         } else {
             // much more in GS since it has to make sure the catching tutorial dude's backpic ends up in the same bank
@@ -2876,7 +2873,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private byte[] chrisPlusDudeBackImagesToBytes(BufferedImage chrisBack) {
-        byte[] chrisBackData = new GBCImage(GFXFunctions.transposeTiles(chrisBack)).toBytes();
+        byte[] chrisBackData = new GBCImage(chrisBack, true).toBytes();
         chrisBackData = Gen2Cmp.compress(chrisBackData);
 
         int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"));
@@ -2920,7 +2917,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeBytes(offset, new GBCImage(bim).toBytes());
     }
 
-
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
@@ -2956,7 +2952,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         palette = new Palette(new Color[] {Color.WHITE, palette.getColor(0), palette.getColor(1), Color.BLACK});
 
-        BufferedImage bim = new GBCImage(width, height, palette, data);
+        BufferedImage bim = new GBCImage(width, height, palette, data, true);
 
         if (transparentBackground) {
             bim = GFXFunctions.pseudoTransparent(bim, palette.getColor(0).toARGB());

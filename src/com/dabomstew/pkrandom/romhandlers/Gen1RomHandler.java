@@ -2645,7 +2645,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
         dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                bim1 -> Gen1Cmp.compress(new GBCImage(bim1)), this::lengthOfCompressedDataAt);
+                bim1 -> Gen1Cmp.compress(new GBCImage(bim1, true)), this::lengthOfCompressedDataAt);
     }
 
     // TODO: ensure the old man back image is in the same bank
@@ -2657,7 +2657,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
         dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                bim1 -> Gen1Cmp.compress(new GBCImage(bim1)), this::lengthOfCompressedDataAt);
+                bim1 -> Gen1Cmp.compress(new GBCImage(bim1, true)), this::lengthOfCompressedDataAt);
     }
 
     private int lengthOfCompressedDataAt(int offset) {
@@ -2676,9 +2676,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 			return null;
 		}
 
-//        if (pk.getNumber() == 1 && !back) {
-//            changeTrainerSprites("blackmage"); // TODO: connect to the gui
-//        }
+        if (pk.getNumber() == 1 && !back) {
+            changeTrainerSprites("blackmage"); // TODO: connect to the gui
+        }
 
         int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
         int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
@@ -2688,7 +2688,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         byte[] data = readPokemonImageData(imageOffset);
         Palette palette = getVisiblePokemonPalette(pk);
 
-        BufferedImage bim = new GBCImage(width, height, palette, data);
+        BufferedImage bim = new GBCImage(width, height, palette, data, true);
 
         if (transparentBackground) {
             bim = GFXFunctions.pseudoTransparent(bim, palette.getColor(0).toARGB());

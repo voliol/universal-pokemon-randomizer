@@ -34,7 +34,7 @@ public class Gen1CmpTest {
         System.out.println(name);
         GBCImage bim = null;
         try {
-            bim = new GBCImage(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")));
+            bim = new GBCImage(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")), true);
         } catch (IOException ignored) {
         }
 
@@ -55,14 +55,14 @@ public class Gen1CmpTest {
                     Gen1Decmp sprite = new Gen1Decmp(rom, 0);
                     sprite.decompress();
                     GBCImage bim2 = new GBCImage(sprite.getWidth() / 8, sprite.getHeight() / 8,
-                            GBCImage.DEFAULT_PALETTE, sprite.getData());
+                            GBCImage.DEFAULT_PALETTE, sprite.getData(), true);
                     try {
                         ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    if (new GBCImage(bim).equals(new GBCImage(bim2))) {
+                    if (bim.equals(bim2)) {
                         succeeded[mode][order] = 1;
                     } else {
                         failed[mode][order] = 1;

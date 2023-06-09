@@ -213,29 +213,6 @@ public class GFXFunctions {
 	}
 
 	/**
-	 * Takes a {@link BufferedImage} which can be divided into 8x8 pixel tiles, and returns it "transposed",
-	 * as if it were a matrix with the tiles as cells. Can be used to mirror
-	 * <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a> since it turns columns of tiles into
-	 * rows of tiles.
-	 */
-	public static BufferedImage transposeTiles(BufferedImage bim) {
-		BufferedImage transposed = new BufferedImage(bim.getHeight(), bim.getWidth(), BufferedImage.TYPE_BYTE_INDEXED,
-				(IndexColorModel) bim.getColorModel());
-		for (int tileX = 0; tileX < bim.getWidth() / DEFAULT_TILE_WIDTH; tileX++) {
-			for (int tileY = 0; tileY < bim.getHeight() / DEFAULT_TILE_HEIGHT; tileY++) {
-
-				for (int xT = 0; xT < DEFAULT_TILE_WIDTH; xT++) {
-					for (int yT = 0; yT < DEFAULT_TILE_HEIGHT; yT++) {
-						int pixel = bim.getRGB(tileX * DEFAULT_TILE_WIDTH + xT, tileY * DEFAULT_TILE_HEIGHT + yT);
-						transposed.setRGB(tileY * DEFAULT_TILE_WIDTH + xT, tileX * DEFAULT_TILE_HEIGHT + yT, pixel);
-					}
-				}
-			}
-		}
-		return transposed;
-	}
-
-	/**
 	 * Reads the data from an image read from a 4bpp .png file, returning it in the
 	 * format used by Gen III-V games.
 	 * <p>
