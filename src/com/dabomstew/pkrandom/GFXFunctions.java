@@ -235,23 +235,6 @@ public class GFXFunctions {
 		return transposed;
 	}
 
-	// TODO: refactor away
-	public static byte[] gen2CutAndTranspose(byte[] data, int width, int height) {
-		if (data == null) {
-			throw new NullPointerException();
-		}
-		int tiles = width * height;
-
-		byte[] newData = new byte[width * height * 16];
-		for (int tile = 0; tile < tiles; tile++) {
-			int oldTileX = tile % width;
-			int oldTileY = tile / width;
-			int newTileNum = oldTileX * height + oldTileY;
-			System.arraycopy(data, tile * 16, newData, newTileNum * 16, 16);
-		}
-		return newData;
-	}
-
 	/**
 	 * Reads the data from an image read from a 4bpp .png file, returning it in the
 	 * format used by Gen III-V games.

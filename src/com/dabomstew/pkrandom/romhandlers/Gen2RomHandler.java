@@ -2709,11 +2709,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
         byte[] uncompressed = new GBCImage(bim).toBytes();
-        // TODO: figure out why cutAndTranspose is needed here?
-        //  Can't GBCImage.toBytes() already return it in the right format? Or does that break sprites?
-        int width = bim.getWidth() / 8;
-        int height = bim.getHeight() / 8;
-        uncompressed = GFXFunctions.gen2CutAndTranspose(uncompressed, width, height);
 
         GBCDataRewriter<byte[]> dataRewriter = new GBCDataRewriter<>();
         dataRewriter.setPointerReader(this::readPokemonOrTrainerImagePointer);

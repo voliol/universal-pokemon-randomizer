@@ -63,13 +63,10 @@ public class GBCImage extends BufferedImage {
     }
 
     private int[] colors;
-    private byte[] data;
 
     private boolean bitplanesPrepared;
     private BufferedImage bitplane1Image;
     private BufferedImage bitplane2Image;
-    private byte[] bitplane1Data;
-    private byte[] bitplane2Data;
 
     /**
      * Creates a GBCImage copy of the input {@link BufferedImage}.
@@ -81,7 +78,7 @@ public class GBCImage extends BufferedImage {
      */
     public GBCImage(BufferedImage bim) {
         this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
-                Palette.readImagePaletteFromPixels(bim));
+                fixPalette(Palette.readImagePaletteFromPixels(bim)));
         if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
             throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
                     bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
@@ -92,7 +89,7 @@ public class GBCImage extends BufferedImage {
 
     public GBCImage(int widthInTiles, int heightInTiles, Palette palette) {
         super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
-                GFXFunctions.indexColorModelFromPalette(fixPalette(palette), BPP));
+                GFXFunctions.indexColorModelFromPalette(palette, BPP));
         initColors();
     }
 
@@ -108,7 +105,7 @@ public class GBCImage extends BufferedImage {
     }
 
     private void drawTileData(byte[] data) {
-        for (int tile = 0; tile < data.length / TILE_SIZE / 2; tile++) {
+        for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
             int tileX = tile / getWidthInTiles();
             int tileY = tile % getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {
@@ -137,15 +134,25 @@ public class GBCImage extends BufferedImage {
     }
 
     public byte[] toBytes() {
-        if (data == null) {
-            prepareBitplanes();
-            data = new byte[bitplane1Data.length * 2];
-            for (int i = 0; i < bitplane1Data.length; i++) {
-                data[i * 2] = bitplane1Data[i];
-                data[i * 2 + 1] = bitplane2Data[i];
+        byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
+
+        for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
+            int tileX = tile / getWidthInTiles();
+            int tileY = tile % getWidthInTiles();
+            for (int yT = 0; yT < 8; yT++) {
+                int lowByte = 0;
+                int highByte = 0;
+                for (int xT = 0; xT < 8; xT++) {
+                    int sample = getData().getSample(tileX * 8 + xT, tileY * 8 + yT, 0);
+                    lowByte |= (sample & 1) << (7 - xT);
+                    highByte |= (sample & 2) << (6 - xT);
+                }
+                data[(tile * 8 + yT) * 2] = (byte) lowByte;
+                data[(tile * 8 + yT) * 2 + 1] = (byte) highByte;
             }
         }
-        return this.data;
+
+        return data;
     }
 
     public BufferedImage getBitplane1Image() {
@@ -185,8 +192,6 @@ public class GBCImage extends BufferedImage {
                 }
             }
         }
-        bitplane1Data = GFXFunctions.readTiledImageData(bitplane1Image, 1);
-        bitplane2Data = GFXFunctions.readTiledImageData(bitplane2Image, 1);
 
         bitplanesPrepared = true;
     }
