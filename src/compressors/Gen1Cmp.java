@@ -75,7 +75,6 @@ public class Gen1Cmp {
         while (brs.hasNext()) {
             bws2.writeBit(brs.readBit());
         }
-        System.out.println("Result: " + bws2 + " | " + compressed.length + " bytes");
         return bws.toByteArray();
     }
 
