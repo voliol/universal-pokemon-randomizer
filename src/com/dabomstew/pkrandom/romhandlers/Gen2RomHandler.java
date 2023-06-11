@@ -2921,19 +2921,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
         // TODO remove
-//        if (pk.getNumber() == 1 && !back && !shiny) {
-//            dudeBackStuff();
-//            try {
-//                BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
-//                BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
-//                BufferedImage fish = ImageIO.read(new File("kris_fish2.png"));
-//                writeChrisSprites(walk, bike, fish);
-//                BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
-//                rewriteChrisBackImage(backImage);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
+        if (pk.getNumber() == 1 && !back && !shiny) {
+            dudeBackStuff();
+            try {
+                BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
+                BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
+                BufferedImage fish = ImageIO.read(new File("kris_fish2.png"));
+                writeChrisSprites(walk, bike, fish);
+                BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
+                rewriteChrisBackImage(backImage);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
 

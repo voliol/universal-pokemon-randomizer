@@ -51,7 +51,6 @@ import com.dabomstew.pkrandom.graphics.palettes.PaletteID;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
-import compressors.Gen2Cmp;
 
 import javax.imageio.ImageIO;
 
@@ -2559,12 +2558,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private void changeTrainerSprites(String name) {
         BufferedImage walk = null;
         BufferedImage bike = null;
+        BufferedImage fish = null;
         BufferedImage front = null;
         BufferedImage back = null;
         try {
             walk = ImageIO.read(new File( "players/" + name + "/gb_walk.png"));
             File bikeFile = new File( "players/" + name + "/gb_bike.png");
             bike = bikeFile.exists() ? ImageIO.read(bikeFile) : walk;
+            File fishFile = new File( "players/" + name + "/gb_fish.png");
+            fish = fishFile.exists() ? ImageIO.read(fishFile) : null;
             File frontFile = new File("players/" + name + "/gb_front.png");
             front = frontFile.exists() ? ImageIO.read(frontFile) : null;
             File backFile = new File("players/" + name + "/gb_back.png");
@@ -2576,6 +2578,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         writeImage(walkOffset, new GBCImage(walk));
         int bikeOffset = romEntry.getIntValue("PlayerBikeSpriteOffset");
         writeImage(bikeOffset, new GBCImage(bike));
+        if (fish != null) {
+            int fishOffset = romEntry.getIntValue("PlayerFishSpriteOffset");
+            writeImage(fishOffset, new GBCImage(fish));
+        }
         if (front != null) {
             System.out.println("changing player front image");
             rewritePlayerFrontImage(front);
@@ -2677,7 +2683,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		}
 
         if (pk.getNumber() == 1 && !back) {
-            changeTrainerSprites("blackmage"); // TODO: connect to the gui
+            changeTrainerSprites("leaf"); // TODO: connect to the gui
         }
 
         int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
