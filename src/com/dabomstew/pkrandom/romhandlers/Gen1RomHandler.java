@@ -2555,6 +2555,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new byte[] {(byte) ml.level, (byte) moveNumToRomTable[ml.move]};
     }
 
+    @Override
+    public boolean hasCustomPlayerCharacterSpritesSupport() {
+        return romEntry.getName().equals("Red (U)") || romEntry.getName().equals("Blue (U)");
+    }
+
     private void changeTrainerSprites(String name) {
         BufferedImage walk = null;
         BufferedImage bike = null;

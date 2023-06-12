@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -115,9 +117,13 @@ public abstract class IniEntryReader<T extends IniEntry> {
         putSpecialKeyMethod(oldKey, (entry, value) -> addStringValue(entry, newKey, value));
     }
 
-    public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
-        Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+    protected void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new FileInputStream(fileName), StandardCharsets.UTF_8);
+        setFileName(fileName);
         return readEntriesFromScanner(scanner);
     }
 

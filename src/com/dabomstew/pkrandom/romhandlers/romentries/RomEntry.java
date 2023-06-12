@@ -2,8 +2,14 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+
+import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
 /**
  * A description of a specific rom, or version of a rom. The {@code RomEntry} differentiates the rom from
@@ -29,6 +35,13 @@ public abstract class RomEntry extends IniEntry {
             putSpecialKeyMethod("Version", RomEntry::setVersion);
             putSpecialKeyMethod("Type", RomEntry::setRomType);
             putKeySuffixMethod("Tweak", RomEntry::putTweakFile);
+        }
+
+        @Override
+        public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
+            Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+            setFileName(fileName);
+            return readEntriesFromScanner(scanner);
         }
 
         @Override

@@ -1,5 +1,0 @@
-[NAME:Blue]
-[DESCRIPTION:The rival from the Generation I games.]
-[FROM:Pokémon - Generation I]
-[CREATOR:Gamefreak]
-[CATEGORY:POKEMON]

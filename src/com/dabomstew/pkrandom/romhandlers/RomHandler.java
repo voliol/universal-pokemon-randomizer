@@ -676,6 +676,8 @@ public interface RomHandler {
     // ========
     // Graphics
     // ========
+
+    boolean hasCustomPlayerCharacterSpritesSupport();
     
     void randomizePokemonPalettes(Settings settings);
 

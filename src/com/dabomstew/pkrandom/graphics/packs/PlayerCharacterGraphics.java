@@ -2,7 +2,7 @@ package com.dabomstew.pkrandom.graphics.packs;
 
 import java.awt.image.BufferedImage;
 
-public abstract class PlayerCharacterGraphics extends GraphicsPack {
+public abstract class PlayerCharacterGraphics extends OldGraphicsPack {
 
 	private static final String PLAYERS_DIR_PATH = "players";
 

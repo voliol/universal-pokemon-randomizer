@@ -32,8 +32,7 @@ import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
-import com.dabomstew.pkrandom.graphics.packs.PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.*;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -311,7 +310,7 @@ public class NewRandomizerGUI {
     private JRadioButton pcsUnchangedRadioButton;
     private JRadioButton pcsCustomRadioButton;
     private JRadioButton pcsRandomRadioButton;
-    private JComboBox pcsCustomComboBox;
+    private JComboBox<GraphicsPack> pcsCustomComboBox;
     private JLabel pcsNotExistLabel;
     private GraphicsPackInfo pcsCustomInfo;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
@@ -2586,7 +2585,7 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler) && ppalSupport);
             ppalShinyFromNormalCheckBox.setEnabled(false);
 
-            boolean pcsSupport = romHandler.generationOfPokemon() < 6; // TODO: responsibility of the RomHandler?
+            boolean pcsSupport = romHandler.hasCustomPlayerCharacterSpritesSupport();
             pcsNotExistLabel.setVisible(!pcsSupport);
             pcsUnchangedRadioButton.setVisible(pcsSupport);
             pcsUnchangedRadioButton.setEnabled(pcsSupport);
@@ -2598,30 +2597,15 @@ public class NewRandomizerGUI {
             pcsCustomComboBox.setVisible(pcsSupport);
             pcsCustomComboBox.setEnabled(false);
             if (pcsSupport) {
-                System.out.println("filling combobox...");
-                DefaultComboBoxModel<PlayerCharacterGraphics> comboBoxModel = new DefaultComboBoxModel<>();
-                pcsCustomComboBox.setModel(comboBoxModel);
-                File players = new File("players");
-                for (File file : players.listFiles()) {
-                    if (file.isDirectory()) {
-                        try {
-                            comboBoxModel.addElement(new Gen3PlayerCharacterGraphics(file.getName(), "May"));
-                        } catch (Exception e) {
-                            System.out.println("could not load " + file);
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                System.out.println(comboBoxModel);
+                fillPCSComboBox();
             }
             pcsCustomInfo.setVisible(pcsSupport);
             pcsCustomInfo.setEnabled(false);
             // TODO: move this somewhere more reasonable
             pcsCustomComboBox.addItemListener(e -> {
-                PlayerCharacterGraphics pcs = (PlayerCharacterGraphics) e.getItem();
+                GraphicsPack pcs = (GraphicsPack) e.getItem();
                 pcsCustomInfo.setGraphicsPack(pcs);
             });
-
 
             int mtsAvailable = romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
@@ -2675,6 +2659,26 @@ public class NewRandomizerGUI {
             attemptToLogException(e, "GUI.processFailed","GUI.processFailedNoLog", null, null);
             romHandler = null;
             initialState();
+        }
+    }
+
+    private void fillPCSComboBox() {
+        System.out.println("filling combobox...");
+        DefaultComboBoxModel<GraphicsPack> comboBoxModel = new DefaultComboBoxModel<>();
+        pcsCustomComboBox.setModel(comboBoxModel);
+        File players = new File("players");
+        File[] playerDirectories = players.listFiles(File::isDirectory);
+        if (playerDirectories != null) {
+            for (File playerDir : playerDirectories) {
+                try {
+                    String path = playerDir.getCanonicalPath();
+                    List<GraphicsPackEntry> entries = GraphicsPackEntry.readAllFromFolder(path);
+                    entries.forEach(entry -> comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry))); // TODO: generalize
+                } catch (IOException ignored) {
+                    System.out.println("Could not read " + playerDir);
+                    ignored.printStackTrace();
+                }
+            }
         }
     }
 

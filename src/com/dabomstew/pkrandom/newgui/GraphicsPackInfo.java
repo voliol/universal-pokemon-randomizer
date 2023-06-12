@@ -1,14 +1,14 @@
 package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.graphics.packs.OldGraphicsPack;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.nio.Buffer;
 
 public class GraphicsPackInfo {
-    private static final BufferedImage EMPTY_IMAGE = new BufferedImage(1, 1, 1);
+
     private static final String EMPTY_TEXT = "---";
 
     private JPanel ImagesPanel;
@@ -29,7 +29,7 @@ public class GraphicsPackInfo {
         setGraphicsPack(null);
     }
 
-    public void setGraphicsPack(GraphicsPack graphicsPack) { // TODO: generalize to not only player character sprites
+    public void setGraphicsPack(GraphicsPack graphicsPack) {
         if (graphicsPack == null) {
             setNullGraphicsPack();
         } else {
@@ -46,8 +46,7 @@ public class GraphicsPackInfo {
         for (Component c : ImagesPanel.getComponents()) {
             ImagesPanel.remove(c);
         }
-        BufferedImage[] sampleImages = graphicsPack.getSampleImages();
-        for (BufferedImage sampleImage : sampleImages) {
+        for (BufferedImage sampleImage : graphicsPack.getSampleImages()) {
             if (sampleImage != null) {
                 JLabel imageLabel = new JLabel(new ImageIcon(sampleImage));
                 ImagesPanel.add(imageLabel);

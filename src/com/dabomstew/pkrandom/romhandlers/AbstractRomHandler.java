@@ -7032,6 +7032,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean hasCustomPlayerCharacterSpritesSupport() {
+        return false;
+    }
+
+    @Override
     public void randomizePokemonPalettes(Settings settings) {
         // I personally don't think it should be the responsibility of the RomHandlers to
         // communicate with the Settings - isn't that the role of the Randomizer class?
