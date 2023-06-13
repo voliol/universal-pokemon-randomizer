@@ -45,7 +45,7 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBCImage back = new GBCImage(base, true);
-        if (front.getWidthInTiles() != BACK_IMAGE_DIMENSIONS || front.getWidthInTiles() != BACK_IMAGE_DIMENSIONS) {
+        if (back.getWidthInTiles() != BACK_IMAGE_DIMENSIONS || back.getWidthInTiles() != BACK_IMAGE_DIMENSIONS) {
             System.out.println("Invalid back image dimensions");
             return null;
         }
@@ -53,7 +53,7 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
     }
 
     private GBCImage initWalk() {
-        BufferedImage base = readImage("WalkImage");
+        BufferedImage base = readImage("WalkSprite");
         if (base == null) {
             return null;
         }
@@ -66,7 +66,7 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
     }
 
     private GBCImage initBike() {
-        BufferedImage base = readImage("BikeImage");
+        BufferedImage base = readImage("BikeSprite");
         if (base == null) {
             return null;
         }

@@ -1,6 +1,0 @@
-[NAME:Snorlax]
-[DESCRIPTION:The Pokémon known for blocking roads.]
-[FROM:Pokémon - Generation I]
-[CREATOR:Gamefreak]
-[ADAPTER:Voliol]
-[CATEGORY:POKEMON]

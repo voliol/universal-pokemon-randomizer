@@ -1914,6 +1914,8 @@ public class NewRandomizerGUI {
         settings.setPokemonPalettesFollowEvolutions(ppalFollowEvolutionsCheckBox.isSelected());
         settings.setPokemonPalettesShinyFromNormal(ppalShinyFromNormalCheckBox.isSelected());
 
+        settings.setCustomPlayerGraphics((GraphicsPack) cpgCustomComboBox.getSelectedItem());
+
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
 
@@ -2228,6 +2230,7 @@ public class NewRandomizerGUI {
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
                         cpgRandomRadioButton, cpgCustomRadioButton, cpgUnchangedRadioButton)
                 .forEach(this::setInitialButtonState);
+        // TODO: initial state for the cpg combobox/info window
 
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
 				miscFastestTextCheckBox, miscRunningShoesIndoorsCheckBox, miscRandomizePCPotionCheckBox,
@@ -2596,16 +2599,18 @@ public class NewRandomizerGUI {
             cpgRandomRadioButton.setEnabled(cpgSupport);
             cpgCustomComboBox.setVisible(cpgSupport);
             cpgCustomComboBox.setEnabled(false);
-            if (cpgSupport) {
-                fillCustomPlayerGraphicsComboBox();
-            }
-            cpgCustomInfo.setVisible(cpgSupport);
-            cpgCustomInfo.setEnabled(false);
-            // TODO: move this somewhere more reasonable
+
+            // TODO: move this adding of listener somewhere more reasonable
             cpgCustomComboBox.addItemListener(e -> {
                 GraphicsPack cpg = (GraphicsPack) e.getItem();
                 cpgCustomInfo.setGraphicsPack(cpg);
             });
+
+            if (cpgSupport) {
+                fillCustomPlayerGraphicsComboBox();
+            }
+            cpgCustomInfo.setVisible(cpgSupport);
+            cpgCustomInfo.setEnabled(false); // TODO: gray over when not enabled
 
             // Misc. Tweaks
             int mtsAvailable = romHandler.miscTweaksAvailable();
@@ -2677,7 +2682,6 @@ public class NewRandomizerGUI {
                     entries.forEach(entry -> comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry))); // TODO: generalize
                 } catch (IOException ignored) {
                     System.out.println("Could not read " + playerDir);
-                    ignored.printStackTrace();
                 }
             }
         }
