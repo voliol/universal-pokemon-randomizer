@@ -37,6 +37,7 @@ import java.io.IOException;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -7032,8 +7033,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public boolean hasCustomPlayerCharacterSpritesSupport() {
+    public boolean hasCustomPlayerGraphicsSupport() {
         return false;
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack playerGraphics) {
+        throw new UnsupportedOperationException("Custom player graphics not supported for this game.");
     }
 
     @Override

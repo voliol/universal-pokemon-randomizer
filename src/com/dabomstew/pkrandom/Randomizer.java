@@ -670,6 +670,8 @@ public class Randomizer {
         	romHandler.randomizePokemonPalettes(settings);
         }
 
+        romHandler.setCustomPlayerGraphics(settings.getCustomPlayerGraphics());
+
         // Intro Pokemon...
         romHandler.randomizeIntroPokemon();
 

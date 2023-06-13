@@ -40,6 +40,8 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.graphics.packs.Gen1PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -2556,44 +2558,33 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean hasCustomPlayerCharacterSpritesSupport() {
+    public boolean hasCustomPlayerGraphicsSupport() {
         return romEntry.getName().equals("Red (U)") || romEntry.getName().equals("Blue (U)");
     }
 
-    private void changeTrainerSprites(String name) {
-        BufferedImage walk = null;
-        BufferedImage bike = null;
-        BufferedImage fish = null;
-        BufferedImage front = null;
-        BufferedImage back = null;
-        try {
-            walk = ImageIO.read(new File( "players/" + name + "/gb_walk.png"));
-            File bikeFile = new File( "players/" + name + "/gb_bike.png");
-            bike = bikeFile.exists() ? ImageIO.read(bikeFile) : walk;
-            File fishFile = new File( "players/" + name + "/gb_fish.png");
-            fish = fishFile.exists() ? ImageIO.read(fishFile) : null;
-            File frontFile = new File("players/" + name + "/gb_front.png");
-            front = frontFile.exists() ? ImageIO.read(frontFile) : null;
-            File backFile = new File("players/" + name + "/gb_back.png");
-            back = backFile.exists() ? ImageIO.read(backFile) : null;
-        } catch (IOException ignored) {
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack unchecked) {
+        if (!(unchecked instanceof Gen1PlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
         }
 
-        int walkOffset = romEntry.getIntValue("PlayerWalkSpriteOffset");
-        writeImage(walkOffset, new GBCImage(walk));
-        int bikeOffset = romEntry.getIntValue("PlayerBikeSpriteOffset");
-        writeImage(bikeOffset, new GBCImage(bike));
-        if (fish != null) {
+        if (playerGraphics.hasFrontImage()) {
+            rewritePlayerFrontImage(playerGraphics.getFrontImage());
+        }
+        if (playerGraphics.hasBackImage()) {
+            rewritePlayerBackImage(playerGraphics.getBackImage());
+        }
+        if (playerGraphics.hasWalkSprite()) {
+            int walkOffset = romEntry.getIntValue("PlayerWalkSpriteOffset");
+            writeImage(walkOffset, playerGraphics.getWalkSprite());
+        }
+        if (playerGraphics.hasBikeSprite()) {
+            int bikeOffset = romEntry.getIntValue("PlayerBikeSpriteOffset");
+            writeImage(bikeOffset, playerGraphics.getBikeSprite());
+        }
+        if (playerGraphics.hasFishSprite()) {
             int fishOffset = romEntry.getIntValue("PlayerFishSpriteOffset");
-            writeImage(fishOffset, new GBCImage(fish));
-        }
-        if (front != null) {
-            System.out.println("changing player front image");
-            rewritePlayerFrontImage(front);
-        }
-        if (back != null) {
-            System.out.println("changing player back image");
-            rewritePlayerBackImage(back);
+            writeImage(fishOffset, playerGraphics.getFishSprite());
         }
     }
 
@@ -2648,27 +2639,27 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new Palette(paletteBytes);
     }
 
-    public void rewritePlayerFrontImage(BufferedImage bim) {
+    public void rewritePlayerFrontImage(GBCImage frontImage) {
         int[] pointerOffsets = romEntry.getArrayValue("PlayerFrontImagePointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
         int[] bankOffsets = romEntry.getArrayValue("PlayerFrontImageBankOffsets");
-        DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+        DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
-        dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                bim1 -> Gen1Cmp.compress(new GBCImage(bim1, true)), this::lengthOfCompressedDataAt);
+        dataRewriter.rewriteData(primaryPointerOffset, frontImage, secondaryPointerOffsets,
+                Gen1Cmp::compress, this::lengthOfCompressedDataAt);
     }
 
     // TODO: ensure the old man back image is in the same bank
-    public void rewritePlayerBackImage(BufferedImage bim) {
+    public void rewritePlayerBackImage(GBCImage backImage) {
         int[] pointerOffsets = romEntry.getArrayValue("PlayerBackImagePointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
         int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
-        DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+        DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
-        dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                bim1 -> Gen1Cmp.compress(new GBCImage(bim1, true)), this::lengthOfCompressedDataAt);
+        dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
+                Gen1Cmp::compress, this::lengthOfCompressedDataAt);
     }
 
     private int lengthOfCompressedDataAt(int offset) {
@@ -2686,10 +2677,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		if (shiny) {
 			return null;
 		}
-
-        if (pk.getNumber() == 1 && !back) {
-            changeTrainerSprites("leaf"); // TODO: connect to the gui
-        }
 
         int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
         int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;

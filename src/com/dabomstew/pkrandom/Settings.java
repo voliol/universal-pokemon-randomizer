@@ -36,6 +36,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -325,6 +326,8 @@ public class Settings {
     private boolean pokemonPalettesFollowTypes;
     private boolean pokemonPalettesFollowEvolutions;
     private boolean pokemonPalettesShinyFromNormal;
+
+    private GraphicsPack customPlayerGraphics; // TODO: save/load from the settings file
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
@@ -2363,6 +2366,14 @@ public class Settings {
 	public void setPokemonPalettesShinyFromNormal(boolean pokemonPalettesShinyFromNormal) {
 		this.pokemonPalettesShinyFromNormal = pokemonPalettesShinyFromNormal;
 	}
+
+    public GraphicsPack getCustomPlayerGraphics() {
+        return customPlayerGraphics;
+    }
+
+    public void setCustomPlayerGraphics(GraphicsPack customPlayerGraphics) {
+        this.customPlayerGraphics = customPlayerGraphics;
+    }
 
 	private static int makeByteSelected(boolean... bools) {
         if (bools.length > 8) {

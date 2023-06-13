@@ -307,12 +307,12 @@ public class NewRandomizerGUI {
     private JPanel graphicsPanel;
     private JLabel ppalNotExistLabel;
     private JLabel ppalPartiallyImplementedLabel;
-    private JRadioButton pcsUnchangedRadioButton;
-    private JRadioButton pcsCustomRadioButton;
-    private JRadioButton pcsRandomRadioButton;
-    private JComboBox<GraphicsPack> pcsCustomComboBox;
-    private JLabel pcsNotExistLabel;
-    private GraphicsPackInfo pcsCustomInfo;
+    private JRadioButton cpgUnchangedRadioButton;
+    private JRadioButton cpgCustomRadioButton;
+    private JRadioButton cpgRandomRadioButton;
+    private JComboBox<GraphicsPack> cpgCustomComboBox;
+    private JLabel cpgNotExistLabel;
+    private GraphicsPackInfo cpgCustomInfo;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox miscDisableLowHPMusicCheckBox;
 
@@ -582,9 +582,9 @@ public class NewRandomizerGUI {
         ptIsDualTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
         ppalUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
-        pcsUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
-        pcsCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
-        pcsRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -662,7 +662,7 @@ public class NewRandomizerGUI {
         mtNoneAvailableLabel.setVisible(false);
         ppalNotExistLabel.setVisible(false);
         ppalPartiallyImplementedLabel.setVisible(false);
-        pcsNotExistLabel.setVisible(false);
+        cpgNotExistLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);
         liveTweaksPanel.setVisible(false);
         websiteLinkLabel.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
@@ -2226,7 +2226,7 @@ public class NewRandomizerGUI {
 
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
-                pcsRandomRadioButton, pcsCustomRadioButton, pcsUnchangedRadioButton)
+                        cpgRandomRadioButton, cpgCustomRadioButton, cpgUnchangedRadioButton)
                 .forEach(this::setInitialButtonState);
 
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
@@ -2585,28 +2585,29 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler) && ppalSupport);
             ppalShinyFromNormalCheckBox.setEnabled(false);
 
-            boolean pcsSupport = romHandler.hasCustomPlayerCharacterSpritesSupport();
-            pcsNotExistLabel.setVisible(!pcsSupport);
-            pcsUnchangedRadioButton.setVisible(pcsSupport);
-            pcsUnchangedRadioButton.setEnabled(pcsSupport);
-            pcsUnchangedRadioButton.setSelected(ppalSupport);
-            pcsCustomRadioButton.setVisible(pcsSupport);
-            pcsCustomRadioButton.setEnabled(pcsSupport);
-            pcsRandomRadioButton.setVisible(pcsSupport);
-            pcsRandomRadioButton.setEnabled(pcsSupport);
-            pcsCustomComboBox.setVisible(pcsSupport);
-            pcsCustomComboBox.setEnabled(false);
-            if (pcsSupport) {
-                fillPCSComboBox();
+            boolean cpgSupport = romHandler.hasCustomPlayerGraphicsSupport();
+            cpgNotExistLabel.setVisible(!cpgSupport);
+            cpgUnchangedRadioButton.setVisible(cpgSupport);
+            cpgUnchangedRadioButton.setEnabled(cpgSupport);
+            cpgUnchangedRadioButton.setSelected(ppalSupport);
+            cpgCustomRadioButton.setVisible(cpgSupport);
+            cpgCustomRadioButton.setEnabled(cpgSupport);
+            cpgRandomRadioButton.setVisible(cpgSupport);
+            cpgRandomRadioButton.setEnabled(cpgSupport);
+            cpgCustomComboBox.setVisible(cpgSupport);
+            cpgCustomComboBox.setEnabled(false);
+            if (cpgSupport) {
+                fillCustomPlayerGraphicsComboBox();
             }
-            pcsCustomInfo.setVisible(pcsSupport);
-            pcsCustomInfo.setEnabled(false);
+            cpgCustomInfo.setVisible(cpgSupport);
+            cpgCustomInfo.setEnabled(false);
             // TODO: move this somewhere more reasonable
-            pcsCustomComboBox.addItemListener(e -> {
-                GraphicsPack pcs = (GraphicsPack) e.getItem();
-                pcsCustomInfo.setGraphicsPack(pcs);
+            cpgCustomComboBox.addItemListener(e -> {
+                GraphicsPack cpg = (GraphicsPack) e.getItem();
+                cpgCustomInfo.setGraphicsPack(cpg);
             });
 
+            // Misc. Tweaks
             int mtsAvailable = romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
             List<JCheckBox> usableCheckBoxes = new ArrayList<>();
@@ -2662,10 +2663,10 @@ public class NewRandomizerGUI {
         }
     }
 
-    private void fillPCSComboBox() {
+    private void fillCustomPlayerGraphicsComboBox() {
         System.out.println("filling combobox...");
         DefaultComboBoxModel<GraphicsPack> comboBoxModel = new DefaultComboBoxModel<>();
-        pcsCustomComboBox.setModel(comboBoxModel);
+        cpgCustomComboBox.setModel(comboBoxModel);
         File players = new File("players");
         File[] playerDirectories = players.listFiles(File::isDirectory);
         if (playerDirectories != null) {
@@ -3351,8 +3352,8 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setSelected(false);
         }
 
-        pcsCustomComboBox.setEnabled(pcsCustomRadioButton.isSelected() &&
-                pcsCustomRadioButton.isVisible() && pcsCustomRadioButton.isEnabled());
+        cpgCustomComboBox.setEnabled(cpgCustomRadioButton.isSelected() &&
+                cpgCustomRadioButton.isVisible() && cpgCustomRadioButton.isEnabled());
     }
 
     private void initTweaksPanel() {

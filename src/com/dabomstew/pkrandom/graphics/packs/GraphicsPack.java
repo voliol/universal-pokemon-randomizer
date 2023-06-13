@@ -38,6 +38,10 @@ public abstract class GraphicsPack {
 
     public abstract List<BufferedImage> getSampleImages();
 
+    protected GraphicsPackEntry getEntry() {
+        return entry;
+    }
+
     protected BufferedImage readImage(String key) {
         File imageFile = new File(entry.getPath() + "/" + entry.getStringValue(key));
         if (imageFile.canRead()) {
