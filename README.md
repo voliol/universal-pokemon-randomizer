@@ -1,8 +1,8 @@
 Universal Pokemon Randomizer ZX - V branch/images
 
-Continuously based on the UPR ZX, by Ajarmar, with significant contributions from darkeye, cleartonic
-Based on the Universal Pokemon Randomizer by Dabomstew
-Palette randomization based off work by Artemis251
+Continuously based on the UPR ZX, by Ajarmar, with significant contributions from darkeye, cleartonic.
+Based on the Universal Pokemon Randomizer by Dabomstew.
+Palette randomization based off work by Artemis251.
 
 V branch/images maintained by voliol
 
@@ -14,14 +14,13 @@ This is an experimental branch for various image-related operations, such as cha
 
 # Branch Info
 
-
 I do not have the tools/computer to be able to handle games past Gen V. For this reason, while later generation support will be merged in from the main branch, I cannot guarantee V branch features will mesh with those generations un-buggily. And features that need generation-specific implementations simply won't make it past Gen V.  
 
 # Contributing
 
 If you want to contribute something to the codebase, I recommend creating an issue for it first (using the`Contribution Idea` template). This way, we can discuss how to accomplish this, and possibly whether it's a good fit for the randomizer. My plan is to have a more laissez-faire attitute compared to the main ZX branch, so as long as it doesn't mess up the main UI/usability it should be fine. 
 
-[The main branch Wiki Page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Building-Universal-Pokemon-Randomizer-ZX) explains how to set up to build/test locally, with the caveat that the V branch runs of Java ...
+[The main branch Wiki Page](https://github.com/Ajarmar/universal-pokemon-randomizer-zx/wiki/Building-Universal-Pokemon-Randomizer-ZX) explains how to set up to build/test locally, with the caveat that the V branch runs of Java 18.
 
 ### What is a good fit for the randomizer?
 
