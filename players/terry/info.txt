@@ -1,6 +1,0 @@
-[NAME:Terry]
-[DESCRIPTION:The playable character from his game.]
-[FROM:Dragon Quest Monsters]
-[CREATOR:Enix]
-[ADAPTER:Voliol]
-[CATEGORY:GAMES]

@@ -1,5 +1,0 @@
-[NAME:Kris]
-[DESCRIPTION:One of the vanilla player characters in Pokémon Crystal.]
-[FROM:Pokémon]
-[CREATOR:Gamefreak]
-[CATEGORY:POKEMON]
