@@ -1,8 +1,10 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.GBCImage;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.List;
 
 public class Gen1PlayerCharacterGraphics extends GraphicsPack {
@@ -19,6 +21,7 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
 
     public Gen1PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
+        System.out.println("Initializing " + getName() + "...");
         this.front = initFront();
         this.back = initBack();
         this.walk = initWalk();
@@ -101,7 +104,7 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBCImage fish = new GBCImage(base);
-        if (fish.getWidthInTiles() * fish.getHeightInTiles() != (OVERWORLD_SPRITE_TILE_AMOUNT) / 4 ) {
+        if (fish.getWidthInTiles() * fish.getHeightInTiles() != (OVERWORLD_SPRITE_TILE_AMOUNT) / 4) {
             System.out.println("Invalid fish sprite dimensions");
             return null;
         }
@@ -109,13 +112,27 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
     }
 
     private GBCImage initFishFromSeparate() {
-        // TODO
-        return null;
+        // assumes front, back, side uses the same palette
+        BufferedImage front = readImage("FishFrontSprite");
+        BufferedImage back = readImage("FishBackSprite");
+        BufferedImage side = readImage("FishSideSprite");
+        BufferedImage stitched = GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back, side}});
+        GBCImage fish = new GBCImage(stitched);
+        if (fish.getWidthInTiles() * fish.getHeightInTiles() != (OVERWORLD_SPRITE_TILE_AMOUNT) / 4) {
+            System.out.println("Invalid fish sprite dimensions");
+            return null;
+        }
+        return fish;
     }
 
     private GBCImage initFishFromWalkSprite() {
-        // TODO
-        return null;
+        System.out.println("initFishFromWalkSprite");
+        GBCImage walk = getWalkSprite();
+        GBCImage front = walk.getSubimageFromTileRange(2, 4);
+        GBCImage back = walk.getSubimageFromTileRange(6, 8);
+        GBCImage side = walk.getSubimageFromTileRange(10, 12);
+        BufferedImage stitched = GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back, side}});
+        return new GBCImage(stitched);
     }
 
     public boolean hasFrontImage() {
@@ -158,8 +175,21 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
         return fish;
     }
 
+    private BufferedImage getFishSpriteForSample() {
+        GBCImage walk = getWalkSprite();
+        GBCImage fish = getFishSprite();
+        GBCImage walkFront = walk.getSubimageFromTileRange(0, 2);
+        GBCImage walkBack = walk.getSubimageFromTileRange(4, 6);
+        GBCImage walkSide = walk.getSubimageFromTileRange(8, 10);
+        GBCImage fishFront = fish.getSubimageFromTileRange(0, 2);
+        GBCImage fishBack = fish.getSubimageFromTileRange(2, 4);
+        GBCImage fishSide = fish.getSubimageFromTileRange(4, 6);
+        return GFXFunctions.stitchToGrid(new BufferedImage[][]{
+                {walkFront, fishFront, walkBack, fishBack, walkSide, fishSide}});
+    }
+
     @Override
     public List<BufferedImage> getSampleImages() {
-        return List.of(getFrontImage());
+        return Arrays.asList(getFrontImage(), getBackImage(), getWalkSprite(), getBikeSprite(), getFishSpriteForSample());
     }
 }

@@ -104,7 +104,7 @@ public class GBCImage extends BufferedImage {
         g.drawImage(bim, 0, 0, null);
     }
 
-    private GBCImage(int widthInTiles, int heightInTiles, Palette palette, boolean columnMode) {
+    public GBCImage(int widthInTiles, int heightInTiles, Palette palette, boolean columnMode) {
         super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
                 GFXFunctions.indexColorModelFromPalette(palette, BPP));
         this.columnMode = columnMode;
@@ -222,6 +222,29 @@ public class GBCImage extends BufferedImage {
         }
 
         bitplanesPrepared = true;
+    }
+
+    public Palette getPalette() {
+        return new Palette(colors);
+    }
+
+    /**
+     * Returns a subimage consisting of only the tiles within a given range.
+     *
+     * @param from the initial index of the range, inclusive
+     * @param to   the final index of the range, exclusive
+     */
+    public GBCImage getSubimageFromTileRange(int from, int to) {
+        GBCImage subimage = new GBCImage(to - from, 1, getPalette(), false);
+        Graphics2D g = subimage.createGraphics();
+        for (int tile = from; tile < to; tile++) {
+            int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
+            int tileY = columnMode ? tile % getWidthInTiles() : tile / getWidthInTiles();
+            g.drawImage(this, (tile - from) * TILE_SIZE, 0, (tile - from + 1) * TILE_SIZE, TILE_SIZE,
+                    tileX * TILE_SIZE, tileY * TILE_SIZE, (tileX + 1) * TILE_SIZE,
+                    (tileY + 1) * TILE_SIZE, null);
+        }
+        return subimage;
     }
 
     @Override

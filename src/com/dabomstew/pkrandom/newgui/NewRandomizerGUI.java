@@ -2680,7 +2680,7 @@ public class NewRandomizerGUI {
                     String path = playerDir.getCanonicalPath();
                     List<GraphicsPackEntry> entries = GraphicsPackEntry.readAllFromFolder(path);
                     entries.forEach(entry -> comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry))); // TODO: generalize
-                } catch (IOException ignored) {
+                } catch (Exception ignored) {
                     System.out.println("Could not read " + playerDir);
                 }
             }
