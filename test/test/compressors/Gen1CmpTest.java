@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Gen1CmpTest {
@@ -92,6 +93,23 @@ public class Gen1CmpTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getImageNames")
+    public void getCompressedLengthWorks(String name) {
+        byte[] rom = new byte[1000];
+        int offset = 23;
+        GBCImage image = null;
+        try {
+            image = new GBCImage(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")), true);
+        } catch (IOException ignored) {
+        }
+        byte[] compressed = Gen1Cmp.compress(image);
+        System.arraycopy(compressed, 0, rom, offset, compressed.length);
+        Gen1Decmp decmp = new Gen1Decmp(rom, offset);
+        decmp.decompress();
+        assertEquals(compressed.length, decmp.getCompressedLength());
     }
 
 }

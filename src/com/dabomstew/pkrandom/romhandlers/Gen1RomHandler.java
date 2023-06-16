@@ -54,8 +54,6 @@ import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
 
-import javax.imageio.ImageIO;
-
 public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -169,6 +167,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     protected void initRomEntry() {
         romEntry = checkRomEntry(this.rom);
+
+        int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
+        if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OldManBackImagePointer") == 0) {
+            romEntry.putIntValue("OldManBackImagePointer",
+                    playerBackImagePointers[0] + Gen1Constants.oldManBackImagePointerOffset);
+        }
     }
 
     @Override
@@ -2683,7 +2687,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         int bank = calculateFrontSpriteBank(pk);
         int imageOffset = calculateOffset(back ? pk.getBackImagePointer() : pk.getFrontImagePointer(), bank);
-        byte[] data = readPokemonImageData(imageOffset);
+        byte[] data = readImageData(imageOffset);
         Palette palette = getVisiblePokemonPalette(pk);
 
         BufferedImage bim = new GBCImage(width, height, palette, data, true);
@@ -2700,7 +2704,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return bim;
     }
 
-    private byte[] readPokemonImageData(int imageOffset) {
+    private byte[] readImageData(int imageOffset) {
         Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
         image.decompress();
         return image.getData();

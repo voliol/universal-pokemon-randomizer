@@ -102,6 +102,8 @@ public class Gen1Constants {
 
     public static final String guaranteedCatchPrefix = "CF7EFE01";
 
+    public static final int oldManBackImagePointerOffset = 5;
+
     public static final Type[] typeTable = constructTypeTable();
 
     private static Type[] constructTypeTable() {

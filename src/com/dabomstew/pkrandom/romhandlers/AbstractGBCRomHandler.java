@@ -312,7 +312,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
         @Override
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-            //TODO: deal with/ignore error in case same bank is full
+            // TODO: deal with/ignore error in case same bank is full
 //            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
 //            if (newOffset == -1) {
                 int newOffset = findAndUnfreeSpace(data.length);
