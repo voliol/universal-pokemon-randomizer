@@ -25,6 +25,8 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.graphics.packs.Gen1PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -2758,74 +2760,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writePointer(offset + 1, pointer);
     }
 
-    // TODO: temp, remove
-    private void dumpAllTrainerImages() {
-        List<BufferedImage> bims = getAllTrainerImages();
-
-        for (int i = 0; i < bims.size(); i++) {
-            String fileAdress = "trainer_image_dump/"
-                    + String.format("%03d_d.png", i + 1);
-            File outputfile = new File(fileAdress);
-            try {
-                BufferedImage bim = bims.get(i) == null ? new BufferedImage(1,1,1) : bims.get(i);
-                ImageIO.write(bim, "png", outputfile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    // TODO: temp, remove
-    private List<BufferedImage> getAllTrainerImages() {
-        final int trainerBound = romEntry.getIntValue("TrainerClassAmount");
-        List<BufferedImage> bims = new ArrayList<>();
-        for (int i = 0; i < trainerBound; i++) {
-            System.out.println("Trainer class " + i);
-            bims.add(getTrainerImage(i));
-        }
-        return bims;
-    }
-
-    // TODO: temp, remove
-    private BufferedImage getTrainerImage(int trainerClass) {
-        int pointerOffset = romEntry.getIntValue("TrainerImages") + (trainerClass * 3);
-        System.out.println(pointerOffset);
-
-        int width = 7;
-        int height = 7;
-
-        byte[] data;
-        try {
-            data = readPokemonOrTrainerImageData(pointerOffset, width, height);
-        } catch (Exception e) {
-            //e.printStackTrace();
-            return null;
-        }
-
-        Palette palette = readTrainerPalette(trainerClass);
-
-        int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
-
-        return GFXFunctions.drawTiledImage(data, convPalette, width * 8, height * 8, 8);
-    }
-
-    private void findImageForRomEntry(String fileName, String romEntryName, boolean transpose) {
-        try {
-            BufferedImage orig = ImageIO.read(new File(fileName));
-            byte[] data = new GBCImage(orig, transpose).toBytes();
-
-//            System.out.println(RomFunctions.bytesToHex(data));
-//            System.out.println("found at:");
-            List<Integer> foundAt = RomFunctions.search(rom, data);
-//            System.out.println(foundAt);
-            if (!foundAt.isEmpty()) {
-                System.out.println(romEntryName + "=0x" + Integer.toHexString(foundAt.get(0)));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private static final String chrisBack = "EC492301070302070507060F08431F10433F20013E217D09010107071F1F213F3E3FCF8807030304040808101023201B40407D7C83FFC03FD83FE67FD1AFA05FD02FA05FC03F807F30CF708F87AD140C0F101F203F017F427F417F02FF85FF8AFF85FF8B28FF040FFFF0FF7F437F3FE0303F1F3F0F1F0F0FE7F71F0F3F431F260B1C17062B035500AA00F5C03EF01FEC0BF715EA0AF505FA42FD20FF28FF1CFF1EFF63069F7F0080FCFE7F22FF848330FF04F8FFC6FF3E44FEFF11FEFFFEFBFFF8FFF0FFC0FF00BF009F008F01220305078786E76677A3951207FF03FECEB47C44BEAF595CA838D018F03CE3A4007A0DC030380E06BEC1EFF0F7F8FFF8FB4AFCFF0AFDFEFFFF7FF8F7F87F605C454000010080610880C101C202E404F078A300881F8080C84CD353F121F931FE6FB89F101F0F4F0B2F08283030FCEC3F437F87F818AD007146C04043C0E00FF070F0F03878F8F87CEC64C04040C000228000002240010040AD00881B607088888004E4E4FC34A81864FC9C9C0C0C949C64640A0A3232FCFC63FF";
     private static final String dudeBack = "6202010307220F231F253F347FC497C59F011F0F430F070207030748030207060704070E0F0F0D231F83C72A3F013C3E3DFF22FE47FEFF858208FCFBFCBFF8FF90EF9044FF801100FF00FE00FC00FA00FD00FAC03FFCC3FFFC22FF02FDFFFA868301FEFF6114C0E0F0F8AEFED7FFEFFFFDFDDCFEEEFEF3F3F1F9F8A3003322E00320602020254043C0000380C0C00043E0000AF000F101FA02FC1CE020A0222023100A0808040687077E1FE5FF1E22FF007E22FF025FFFAF8483690180804380C0024040002A20000022408991000084EB0080C2A67513808040C0A0E050F0B0F058F8A8F8D4FCACFCD4FCEC3923014303020963629392F392FB8C7F44437F40433F20461F1104100F080F0CEC3702C0C0004420A007B0308848E848E04443F42413BC44B858E8688084C404F434E444E8C8F848F030FF";
 
@@ -2904,15 +2838,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writePointer(dudeBackPointerOffset, newDudeOffset);
     }
 
-    private void writeChrisSprites(BufferedImage walk, BufferedImage bike, BufferedImage fish) {
-        int walkOffset = romEntry.getIntValue("ChrisWalkSprite");
-        writeImage(walkOffset, walk);
-        int bikeOffset = romEntry.getIntValue("ChrisBikeSprite");
-        writeImage(bikeOffset, bike);
-        int fishOffset = romEntry.getIntValue("ChrisFishSprite");
-        writeImage(fishOffset, fish);
-    }
-
     private void writeImage(int offset, BufferedImage bim) {
         writeBytes(offset, new GBCImage(bim).toBytes());
     }
@@ -2920,20 +2845,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
                                          boolean includePalette) {
-        // TODO remove
-        if (pk.getNumber() == 1 && !back && !shiny) {
-            dudeBackStuff();
-            try {
-                BufferedImage walk = ImageIO.read(new File("kris_walk.png"));
-                BufferedImage bike = ImageIO.read(new File("kris_bike.png"));
-                BufferedImage fish = ImageIO.read(new File("kris_fish2.png"));
-                writeChrisSprites(walk, bike, fish);
-                BufferedImage backImage = ImageIO.read(new File("kris_back.png"));
-                rewriteChrisBackImage(backImage);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         int pointerOffset = getPokemonImagePointerOffset(pk, back);
 

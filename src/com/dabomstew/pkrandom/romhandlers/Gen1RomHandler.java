@@ -2682,6 +2682,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 			return null;
 		}
 
+        if (pk.getNumber() == 1 && !back) {
+
+        }
+
         int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
         int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
 

@@ -25,17 +25,20 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.BankDividedFreedSpace;
+import com.dabomstew.pkrandom.graphics.GBCImage;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
+
+import javax.imageio.ImageIO;
 
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
@@ -364,7 +367,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
      */
     protected void freeUnusedSpaceBefore(int end, int frontMargin) {
         int start = end;
-        int minStart = bankOf(end)*GBConstants.bankSize;
+        int minStart = bankOf(end) * GBConstants.bankSize;
         while (rom[start] == getFreeSpaceByte() && start >= minStart) {
             start--;
         }
@@ -372,6 +375,23 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         start += frontMargin;
         if (start <= end) {
             freeSpaceBetween(start, end);
+        }
+    }
+
+    // for filling the RomEntries
+    public void findImageForRomEntry(String fileName, String romEntryName, boolean columnMode) {
+        try {
+            BufferedImage orig = ImageIO.read(new File(fileName));
+            byte[] data = new GBCImage(orig, columnMode).toBytes();
+//            System.out.println(RomFunctions.bytesToHex(data));
+//            System.out.println("found at:");
+            List<Integer> foundAt = RomFunctions.search(rom, data);
+//            System.out.println(foundAt);
+            if (!foundAt.isEmpty()) {
+                System.out.println(romEntryName + "=0x" + Integer.toHexString(foundAt.get(0)));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
