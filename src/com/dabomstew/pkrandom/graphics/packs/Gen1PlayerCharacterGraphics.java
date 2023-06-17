@@ -21,7 +21,6 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
 
     public Gen1PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
-        System.out.println("Initializing " + getName() + "...");
         this.front = initFront();
         this.back = initBack();
         this.walk = initWalk();

@@ -2669,7 +2669,6 @@ public class NewRandomizerGUI {
     }
 
     private void fillCustomPlayerGraphicsComboBox() {
-        System.out.println("filling combobox...");
         DefaultComboBoxModel<GraphicsPack> comboBoxModel = new DefaultComboBoxModel<>();
         cpgCustomComboBox.setModel(comboBoxModel);
         File players = new File("players");

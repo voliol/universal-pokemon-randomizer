@@ -54,6 +54,8 @@ import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
 
+import javax.imageio.ImageIO;
+
 public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -2592,10 +2594,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    protected void writeImage(int offset, GBCImage image) {
-        writeBytes(offset, image.toBytes());
-    }
-
     private int calculateFrontSpriteBank(Gen1Pokemon pk) {
         int idx = pokeNumToRBYTable[pk.getNumber()];
         int fsBank;
@@ -2654,8 +2652,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 Gen1Cmp::compress, this::lengthOfCompressedDataAt);
     }
 
-    // TODO: ensure the old man back image is in the same bank
-    public void rewritePlayerBackImage(GBCImage backImage) {
+    private void rewritePlayerBackImage(GBCImage backImage) {
         int[] pointerOffsets = romEntry.getArrayValue("PlayerBackImagePointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
@@ -2663,7 +2660,46 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
         dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
-                Gen1Cmp::compress, this::lengthOfCompressedDataAt);
+                this::playerPlusOldManBackImagesToBytes, this::lengthOfPlayerAndOldManBackImagesAt);
+        repointOldManBackImage(primaryPointerOffset);
+    }
+
+    private byte[] playerPlusOldManBackImagesToBytes(GBCImage playerBack) {
+        byte[] playerBackData = Gen1Cmp.compress(playerBack);
+        byte[] oldManBackData = readCompressedOldManBackData();
+
+        byte[] bothData = new byte[playerBackData.length + oldManBackData.length];
+        System.arraycopy(playerBackData, 0, bothData, 0, playerBackData.length);
+        System.arraycopy(oldManBackData, 0, bothData, playerBackData.length, oldManBackData.length);
+        return bothData;
+    }
+
+    private byte[] readCompressedOldManBackData() {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+        int oldManBackOffset = readPointer(romEntry.getIntValue("OldManBackImagePointer"), bank);
+        int oldManBackLength = lengthOfCompressedDataAt(oldManBackOffset);
+        return Arrays.copyOfRange(rom, oldManBackOffset, oldManBackOffset + oldManBackLength);
+    }
+
+    /**
+     * The length in bytes of the player's compressed back image, followed by the catching tutorial old man's.<br>
+     * Assumes they actually follow another in ROM, with no gaps.
+     */
+    private int lengthOfPlayerAndOldManBackImagesAt(int offset) {
+        int length = lengthOfCompressedDataAt(offset);
+        length += lengthOfCompressedDataAt(offset + length);
+        return length;
+    }
+
+    private void repointOldManBackImage(int playerBackPointerOffset) {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+
+        int newOffset = readPointer(playerBackPointerOffset, bank);
+        int newOldManOffset = newOffset + lengthOfCompressedDataAt(newOffset);
+        int oldManBackPointerOffset = romEntry.getIntValue("OldManBackImagePointer");
+        writePointer(oldManBackPointerOffset, newOldManOffset);
     }
 
     private int lengthOfCompressedDataAt(int offset) {
@@ -2681,10 +2717,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		if (shiny) {
 			return null;
 		}
-
-        if (pk.getNumber() == 1 && !back) {
-
-        }
 
         int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
         int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;

@@ -278,6 +278,10 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
     }
 
+    protected void writeImage(int offset, GBCImage image) {
+        writeBytes(offset, image.toBytes());
+    }
+
     protected class GBCDataRewriter<E> extends DataRewriter<E> {
 
         public GBCDataRewriter() {
