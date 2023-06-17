@@ -17,7 +17,7 @@ as well as the older GFXFunctions class, and compressor/decompressor classes.
 
 The graphics package classes have basic JavaDocs, the others do not.
 
-Images can be read to some extent in all generations, but written only in Gen III. 
+Images can be read to some extent in all generations, and written in I-III. 
 
 Palettes can be read and written in generations I-V.
 
@@ -30,13 +30,13 @@ work on background tiles as well, making "sprite" a misnomer.
 Images are used by the Randomizer GUI when a ROM is loaded, to display a "mascot" Pokémon, 
 and there are methods for dumping all Pokémon images for bugtesting purposes.
 
-Gen I uses Gen1Decmp to decompress "sprites". Whether background tiles can be decompressed as well is unclear.
-This is only used for the mascot image, and image dumps. There are no corresponding methods to compress, 
-so they could be written.
+Gen I uses Gen1Decmp to decompress images, and Gen1Cmp to compress them. 
+Only some images are compressed: the large ones for Pokémon and trainers.
 
-Gen II uses Gen2Decmp to decompress "sprites". Whether background tiles can be decompressed as well is unclear.
-This is only used for the mascot image, and image dumps. There are no corresponding methods to compress, 
-so they could be written.
+Gen II uses Gen2Decmp to decompress images, and Gen2Cmp to compress them. 
+Only some images are compressed: the large ones for Pokémon and trainers.
+
+Gen I and II uses the GBCImage class to represent their images.
 
 Gen III uses DSDecmp to decompress images. (when needed, e.g. Pokémon icons are uncompressed in the ROM)
 As there is a DScmp class, these can be compressed and written to ROM. No methods exist specifically for this,
