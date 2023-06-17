@@ -390,6 +390,7 @@ public class NewRandomizerGUI {
 
             try {
 
+                // TODO: think of how to make this work with the V branch
                 URL url = new URL(SysConstants.API_URL_ZX);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
