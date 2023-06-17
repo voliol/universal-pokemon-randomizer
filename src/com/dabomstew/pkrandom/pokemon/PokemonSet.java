@@ -117,8 +117,8 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		});
 	}
 
-	// TODO: according to the RomFunctions method this replaces, this should also
-	// filter out formes
+	// TODO: according to the RomFunctions method this replaced, this should also
+	//  filter out formes
 	public PokemonSet<T> filterMiddleEvolutions(boolean includeSplitEvos) {
 		return filter(pk -> {
 			if (pk.getEvolutionsTo().size() == 1 && pk.getEvolutionsFrom().size() > 0) {
@@ -129,8 +129,8 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		});
 	}
 
-	// TODO: according to the RomFunctions method this replaces, this should also
-	// filter out formes
+	// TODO: according to the RomFunctions method this replaced, this should also
+	//  filter out formes
 	public PokemonSet<T> filterFinalEvolutions(boolean includeSplitEvos) {
 		return filter(pk -> {
 			if (pk.getEvolutionsTo().size() == 1 && pk.getEvolutionsFrom().size() == 0) {

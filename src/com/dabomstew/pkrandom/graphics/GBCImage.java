@@ -42,7 +42,7 @@ public class GBCImage extends BufferedImage {
         for (int i = 0; i < colors.size(); i++) {
             Color color = new Color(colors.get(i));
             if (!color.equals(Color.WHITE) && !color.equals(Color.BLACK)) {
-                fixed.setColor(i, color);
+                fixed.set(i, color);
             }
         }
 

@@ -68,5 +68,9 @@ public class GraphicsPackInfo {
 
     public void setEnabled(boolean enabled) {
         form.setEnabled(enabled);
+        Color foreground = enabled ? SystemColor.textText : SystemColor.textInactiveText;
+        for (Component comp : InfoPanel.getComponents()) {
+            comp.setForeground(foreground);
+        }
     }
 }

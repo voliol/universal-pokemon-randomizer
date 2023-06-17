@@ -123,7 +123,7 @@ public class Gen1Decmp {
         if (bs == null) {
             throw new IllegalStateException("Must decompress before getting compressed length.");
         }
-        return bs.offset - baseOffset + 1; // TODO: check this works perfectly
+        return bs.offset - baseOffset + 1;
     }
 
     private void fillram(byte[][] rams, int rOffset) {

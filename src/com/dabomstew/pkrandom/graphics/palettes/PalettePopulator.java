@@ -114,7 +114,7 @@ public class PalettePopulator {
 	}
 
 	private Color getSiblingColor(Palette palette, Color baseColor) {
-		Color sharedColor = palette.getColor(description.getSharedSlot()).clone();
+		Color sharedColor = palette.get(description.getSharedSlot()).clone();
 
 		if (sharedColor.getComp(0) <= 3 && sharedColor.getComp(1) <= 3 && sharedColor.getComp(2) <= 3) {
 			sharedColor.setComps((orig, i) -> (int) (baseColor.getComp(i) * 0.15));
@@ -127,7 +127,7 @@ public class PalettePopulator {
 	private void fillWithShades(Color[] shades) {
 		for (int i = 0; i < shades.length; i++) {
 			if (shades[i] != null) {
-				palette.setColor(i, shades[i]);
+				palette.set(i, shades[i]);
 			}
 		}
 	}
@@ -365,12 +365,12 @@ public class PalettePopulator {
 	}
 
 	public void populateAverageColor(Palette palette, PalettePartDescription description) {
-		Color averageTo = palette.getColor(description.getAverageToSlot());
+		Color averageTo = palette.get(description.getAverageToSlot());
 		int[] averageFromSlots = description.getAverageFromSlots();
 		averageTo.setComps((orig, i) -> {
 			int sum = 0;
 			for (int slot : averageFromSlots) {
-				sum += palette.getColor(slot).getComp(i);
+				sum += palette.get(slot).getComp(i);
 			}
 			return sum / averageFromSlots.length;
 		});

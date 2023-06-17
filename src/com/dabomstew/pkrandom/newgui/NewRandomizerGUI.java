@@ -310,7 +310,7 @@ public class NewRandomizerGUI {
     private JRadioButton cpgUnchangedRadioButton;
     private JRadioButton cpgCustomRadioButton;
     private JRadioButton cpgRandomRadioButton;
-    private JComboBox<GraphicsPack> cpgCustomComboBox;
+    private JComboBox<GraphicsPack> cpgComboBox;
     private JLabel cpgNotExistLabel;
     private GraphicsPackInfo cpgCustomInfo;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
@@ -585,6 +585,10 @@ public class NewRandomizerGUI {
         cpgUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         cpgCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         cpgRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgComboBox.addItemListener(e -> {
+            GraphicsPack cpg = (GraphicsPack) e.getItem();
+            cpgCustomInfo.setGraphicsPack(cpg);
+        });
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -1914,7 +1918,7 @@ public class NewRandomizerGUI {
         settings.setPokemonPalettesFollowEvolutions(ppalFollowEvolutionsCheckBox.isSelected());
         settings.setPokemonPalettesShinyFromNormal(ppalShinyFromNormalCheckBox.isSelected());
 
-        settings.setCustomPlayerGraphics((GraphicsPack) cpgCustomComboBox.getSelectedItem());
+        settings.setCustomPlayerGraphics((GraphicsPack) cpgComboBox.getSelectedItem());
 
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
@@ -2597,20 +2601,13 @@ public class NewRandomizerGUI {
             cpgCustomRadioButton.setEnabled(cpgSupport);
             cpgRandomRadioButton.setVisible(cpgSupport);
             cpgRandomRadioButton.setEnabled(cpgSupport);
-            cpgCustomComboBox.setVisible(cpgSupport);
-            cpgCustomComboBox.setEnabled(false);
-
-            // TODO: move this adding of listener somewhere more reasonable
-            cpgCustomComboBox.addItemListener(e -> {
-                GraphicsPack cpg = (GraphicsPack) e.getItem();
-                cpgCustomInfo.setGraphicsPack(cpg);
-            });
-
+            cpgComboBox.setVisible(cpgSupport);
+            cpgComboBox.setEnabled(false);
             if (cpgSupport) {
                 fillCustomPlayerGraphicsComboBox();
             }
             cpgCustomInfo.setVisible(cpgSupport);
-            cpgCustomInfo.setEnabled(false); // TODO: gray over when not enabled
+            cpgCustomInfo.setEnabled(false);
 
             // Misc. Tweaks
             int mtsAvailable = romHandler.miscTweaksAvailable();
@@ -2670,15 +2667,15 @@ public class NewRandomizerGUI {
 
     private void fillCustomPlayerGraphicsComboBox() {
         DefaultComboBoxModel<GraphicsPack> comboBoxModel = new DefaultComboBoxModel<>();
-        cpgCustomComboBox.setModel(comboBoxModel);
-        File players = new File("players");
+        cpgComboBox.setModel(comboBoxModel);
+        File players = new File(SysConstants.customPCGDirectory);
         File[] playerDirectories = players.listFiles(File::isDirectory);
         if (playerDirectories != null) {
             for (File playerDir : playerDirectories) {
                 try {
                     String path = playerDir.getCanonicalPath();
                     List<GraphicsPackEntry> entries = GraphicsPackEntry.readAllFromFolder(path);
-                    entries.forEach(entry -> comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry))); // TODO: generalize
+                    entries.forEach(entry -> comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry))); // TODO: generalize for other games/generations
                 } catch (Exception ignored) {
                     System.out.println("Could not read " + playerDir);
                 }
@@ -3355,8 +3352,13 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setSelected(false);
         }
 
-        cpgCustomComboBox.setEnabled(cpgCustomRadioButton.isSelected() &&
-                cpgCustomRadioButton.isVisible() && cpgCustomRadioButton.isEnabled());
+        if (cpgCustomRadioButton.isSelected() && cpgCustomRadioButton.isVisible() && cpgCustomRadioButton.isEnabled()) {
+            cpgComboBox.setEnabled(true);
+            cpgCustomInfo.setEnabled(true);
+        } else {
+            cpgComboBox.setEnabled(false);
+            cpgCustomInfo.setEnabled(false);
+        }
     }
 
     private void initTweaksPanel() {

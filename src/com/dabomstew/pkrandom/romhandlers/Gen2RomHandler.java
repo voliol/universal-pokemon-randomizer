@@ -25,8 +25,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.graphics.packs.Gen1PlayerCharacterGraphics;
-import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -39,7 +37,6 @@ import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen2Cmp;
 import compressors.Gen2Decmp;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -2861,16 +2858,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // White and black are always in the palettes at positions 0 and 3, 
         // so only the middle colors are stored and need to be read.
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        palette = new Palette(new Color[] {Color.WHITE, palette.getColor(0), palette.getColor(1), Color.BLACK});
+        palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
 
         BufferedImage bim = new GBCImage(width, height, palette, data, true);
 
         if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, palette.getColor(0).toARGB());
+            bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
         }
         if (includePalette) {
             for (int j = 0; j < palette.size(); j++) {
-                bim.setRGB(j, 0, palette.getColor(j).toARGB());
+                bim.setRGB(j, 0, palette.get(j).toARGB());
             }
         }
 

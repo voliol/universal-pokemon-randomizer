@@ -307,7 +307,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     protected class IndirectBankDataRewriter<E> extends GBCDataRewriter<E> {
 
         private final int[] bankOffsets;
-        private int bank;
+        private final int bank;
 
         public IndirectBankDataRewriter(int[] bankOffsets) {
             super();
@@ -319,11 +319,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
         @Override
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-            // TODO: deal with/ignore error in case same bank is full
-//            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
-//            if (newOffset == -1) {
-                int newOffset = findAndUnfreeSpace(data.length);
-//            }
+
+            int newOffset = findAndUnfreeSpace(data.length);
 
             pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);

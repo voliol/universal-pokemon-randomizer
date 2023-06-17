@@ -22,7 +22,6 @@ package com.dabomstew.pkrandom.graphics.palettes;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -92,7 +91,7 @@ public class Palette implements Cloneable {
         Palette palette = new Palette(size);
         for (int i = 0; i < (Math.min(palette.size(), imagePaletteSize(bim))); i++) {
             int argb = bim.getColorModel().getRGB(i);
-            palette.setColor(i, new Color(argb));
+            palette.set(i, new Color(argb));
         }
 
         return palette;
@@ -183,11 +182,20 @@ public class Palette implements Cloneable {
         this(bytesToARGBValues(bytes));
     }
 
-    public Color getColor(int i) { // TODO: just "get" should be enough
+    /**
+     * Gets the {@link Color} at index i.
+     * @param i index of the color
+     */
+    public Color get(int i) {
         return colors[i];
     }
 
-    public void setColor(int i, Color c) {
+    /**
+     * Sets the {@link Color} at index i.
+     * @param i index to set
+     * @param c new Color
+     */
+    public void set(int i, Color c) {
         colors[i] = c;
     }
 
@@ -222,7 +230,7 @@ public class Palette implements Cloneable {
     public Palette clone() {
         Palette palette = new Palette(colors.length);
         for (int i = 0; i < colors.length; i++) {
-            palette.setColor(i, colors[i].clone());
+            palette.set(i, colors[i].clone());
         }
         return palette;
     }

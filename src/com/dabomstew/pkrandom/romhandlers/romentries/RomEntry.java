@@ -57,7 +57,7 @@ public abstract class RomEntry extends IniEntry {
     protected String romCode;
     protected int version;
     protected int romType;
-    protected Map<String, String> tweakFiles = new HashMap<>(); // TODO: is this a good name?
+    protected Map<String, String> tweakFiles = new HashMap<>(); // is this a good name?
 
     public RomEntry(String name) {
         super(name);

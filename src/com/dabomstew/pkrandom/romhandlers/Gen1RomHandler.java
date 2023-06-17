@@ -54,8 +54,6 @@ import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
 
-import javax.imageio.ImageIO;
-
 public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -2565,6 +2563,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
+        // TODO: add offsets to the ROM entries of all other versions, so they can support it too
         return romEntry.getName().equals("Red (U)") || romEntry.getName().equals("Blue (U)");
     }
 
@@ -2729,11 +2728,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         BufferedImage bim = new GBCImage(width, height, palette, data, true);
 
         if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, palette.getColor(0).toARGB());
+            bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
         }
         if (includePalette) {
             for (int j = 0; j < palette.size(); j++) {
-                bim.setRGB(j, 0, palette.getColor(j).toARGB());
+                bim.setRGB(j, 0, palette.get(j).toARGB());
             }
         }
         
