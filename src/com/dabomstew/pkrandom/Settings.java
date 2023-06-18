@@ -327,7 +327,12 @@ public class Settings {
     private boolean pokemonPalettesFollowEvolutions;
     private boolean pokemonPalettesShinyFromNormal;
 
+    public enum PlayerCharacterMod {
+        PC1, PC2
+    }
+
     private GraphicsPack customPlayerGraphics; // TODO: save/load from the settings file
+    private PlayerCharacterMod customPlayerGraphicsCharacterMod;
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
@@ -2373,6 +2378,18 @@ public class Settings {
 
     public void setCustomPlayerGraphics(GraphicsPack customPlayerGraphics) {
         this.customPlayerGraphics = customPlayerGraphics;
+    }
+
+    public PlayerCharacterMod getCustomPlayerGraphicsCharacterMod() {
+        return customPlayerGraphicsCharacterMod;
+    }
+
+    public void setCustomPlayerGraphicsCharacterMod(boolean... bools) {
+        setCustomPlayerGraphicsCharacterMod(getEnum(PlayerCharacterMod.class, bools));
+    }
+
+    public void setCustomPlayerGraphicsCharacterMod(PlayerCharacterMod playerCharacterMod) {
+        this.customPlayerGraphicsCharacterMod = playerCharacterMod;
     }
 
 	private static int makeByteSelected(boolean... bools) {

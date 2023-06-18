@@ -2573,7 +2573,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setCustomPlayerGraphics(GraphicsPack unchecked) {
+    public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (toReplace != Settings.PlayerCharacterMod.PC1) {
+            throw new IllegalArgumentException("Invalid toReplace. Only one player character in Gen 1.");
+        }
         if (!(unchecked instanceof GBCPlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }

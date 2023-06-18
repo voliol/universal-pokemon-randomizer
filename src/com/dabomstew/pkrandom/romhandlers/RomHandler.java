@@ -682,7 +682,7 @@ public interface RomHandler {
 
     boolean hasCustomPlayerGraphicsSupport();
 
-    void setCustomPlayerGraphics(GraphicsPack playerGraphics);
+    void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace);
     
     void randomizePokemonPalettes(Settings settings);
 

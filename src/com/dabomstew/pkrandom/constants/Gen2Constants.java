@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -135,6 +136,16 @@ public class Gen2Constants {
     public static final byte eggMovesTerminator = (byte) 0xFF;
 
     public static final String friendshipValueForEvoLocator = "FEDCDA";
+
+    public static String getName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Chris";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "Kris";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. Gen 2 only has two playable characters, Chris and Kris.");
+        }
+    }
 
     // directly after chris's respective images
     public static final int krisTrainerCardImageOffset = 16 * 5 * 7, krisFrontImageOffset = 16 * 7 * 7;

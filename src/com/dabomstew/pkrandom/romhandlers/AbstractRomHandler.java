@@ -7038,16 +7038,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public boolean hasCustomPlayerGraphicsSupport() {
-        return false;
-    }
-
-    @Override
-    public void setCustomPlayerGraphics(GraphicsPack playerGraphics) {
-        throw new UnsupportedOperationException("Custom player graphics not supported for this game.");
-    }
-
-    @Override
     public void randomizePokemonPalettes(Settings settings) {
         // I personally don't think it should be the responsibility of the RomHandlers to
         // communicate with the Settings - isn't that the role of the Randomizer class?
@@ -7062,6 +7052,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public abstract PaletteHandler getPaletteHandler();
+
+
+    @Override
+    public boolean hasCustomPlayerGraphicsSupport() {
+        return false;
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace) {
+        throw new UnsupportedOperationException("Custom player graphics not supported for this game.");
+    }
 
     @Override
     // just for testing

@@ -2797,18 +2797,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setCustomPlayerGraphics(GraphicsPack unchecked) {
+    public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
         if (!(unchecked instanceof Gen2PlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
 
         if (playerGraphics.hasFrontImage()) {
-            rewritePlayerFrontImage(playerGraphics.getFrontImage(), playerGraphics.getToReplace());
-            rewritePlayerTrainerCardImage(playerGraphics.getTrainerCardImage(), playerGraphics.getToReplace());
+            rewritePlayerFrontImage(playerGraphics.getFrontImage(), toReplace);
+            rewritePlayerTrainerCardImage(playerGraphics.getTrainerCardImage(), toReplace);
         }
 
         if (playerGraphics.hasBackImage()) {
-            if (playerGraphics.getToReplace() == Gen2PlayerCharacterGraphics.ToReplace.CHRIS) {
+            if (toReplace == Settings.PlayerCharacterMod.PC1) {
                 rewriteChrisBackImage(playerGraphics.getBackImage());
             } else {
                 rewriteKrisBackImage(playerGraphics.getBackImage());
@@ -2816,24 +2816,24 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         if (playerGraphics.hasWalkSprite()) {
-            int walkOffset = romEntry.getIntValue(playerGraphics.getToReplaceName() + "WalkSprite");
+            int walkOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "WalkSprite");
             writeImage(walkOffset, playerGraphics.getWalkSprite());
         }
         if (playerGraphics.hasBikeSprite()) {
-            int bikeOffset = romEntry.getIntValue(playerGraphics.getToReplaceName() + "BikeSprite");
+            int bikeOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "BikeSprite");
             writeImage(bikeOffset, playerGraphics.getBikeSprite());
         }
         if (playerGraphics.hasFishSprite()) {
-            int fishOffset = romEntry.getIntValue(playerGraphics.getToReplaceName() + "FishSprite");
+            int fishOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "FishSprite");
             writeImage(fishOffset, playerGraphics.getFishSprite());
         }
     }
 
-    private void rewritePlayerFrontImage(GBCImage frontImage, Gen2PlayerCharacterGraphics.ToReplace toReplace) {
+    private void rewritePlayerFrontImage(GBCImage frontImage, Settings.PlayerCharacterMod toReplace) {
         // TODO
     }
 
-    private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Gen2PlayerCharacterGraphics.ToReplace toReplace) {
+    private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Settings.PlayerCharacterMod toReplace) {
         // TODO
     }
 
