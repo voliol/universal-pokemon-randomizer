@@ -630,6 +630,8 @@ public interface RomHandler {
 
     boolean isYellow();
 
+    boolean hasMultiplePlayerCharacters();
+
     String getROMName();
 
     String getROMCode();

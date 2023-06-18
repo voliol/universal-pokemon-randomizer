@@ -70,6 +70,7 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
     public boolean isYellow() {
         return romType == Gen1Constants.Type_Yellow;
     }
+
     @Override
     protected void setRomType(String s) {
         if (s.equalsIgnoreCase("RB")) {

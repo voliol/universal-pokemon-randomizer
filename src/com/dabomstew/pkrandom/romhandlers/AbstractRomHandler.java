@@ -6960,6 +6960,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean hasMultiplePlayerCharacters() {
+        return true;
+    }
+
+    @Override
     public void writeCheckValueToROM(int value) {
         // do nothing
     }

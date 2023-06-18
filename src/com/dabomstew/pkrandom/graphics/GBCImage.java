@@ -247,6 +247,21 @@ public class GBCImage extends BufferedImage {
         return subimage;
     }
 
+    /**
+     * Returns a subimage defined by a rectangular region - in tiles. Similar to
+     * {@link BufferedImage#getSubimage(int, int, int, int)}.<br>
+     * The columnmode of the subimage is the same as the source image.
+     *
+     * @param x the X coordinate of the upper-left corner tile of the specified rectangular region
+     * @param y the Y coordinate of the upper-left corner tile of the specified rectangular region
+     * @param w the width in tiles
+     * @param h the height in tiles
+     */
+    public GBCImage getSubimageFromTileRect(int x, int y, int w, int h) {
+        BufferedImage subimage = getSubimage(x * TILE_SIZE, y * TILE_SIZE, w * TILE_SIZE, h * TILE_SIZE);
+        return new GBCImage(subimage, columnMode);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other instanceof GBCImage otherImage) {

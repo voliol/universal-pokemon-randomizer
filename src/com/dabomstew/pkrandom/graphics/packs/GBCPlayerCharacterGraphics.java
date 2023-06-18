@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
-public class Gen1PlayerCharacterGraphics extends GraphicsPack {
+public class GBCPlayerCharacterGraphics extends GraphicsPack {
 
     private static final int FRONT_IMAGE_DIMENSIONS = 7;
     private static final int BACK_IMAGE_DIMENSIONS = 4;
@@ -19,7 +19,7 @@ public class Gen1PlayerCharacterGraphics extends GraphicsPack {
     private final GBCImage bike;
     private final GBCImage fish;
 
-    public Gen1PlayerCharacterGraphics(GraphicsPackEntry entry) {
+    public GBCPlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
         this.front = initFront();
         this.back = initBack();

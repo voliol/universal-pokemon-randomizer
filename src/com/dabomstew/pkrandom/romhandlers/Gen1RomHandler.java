@@ -40,7 +40,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.graphics.packs.Gen1PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GBCPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -1241,6 +1241,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean isYellow() {
         return romEntry.isYellow();
+    }
+
+    @Override
+    public boolean hasMultiplePlayerCharacters() {
+        return false;
     }
 
     @Override
@@ -2569,7 +2574,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setCustomPlayerGraphics(GraphicsPack unchecked) {
-        if (!(unchecked instanceof Gen1PlayerCharacterGraphics playerGraphics)) {
+        if (!(unchecked instanceof GBCPlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
 
@@ -2580,15 +2585,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             rewritePlayerBackImage(playerGraphics.getBackImage());
         }
         if (playerGraphics.hasWalkSprite()) {
-            int walkOffset = romEntry.getIntValue("PlayerWalkSpriteOffset");
+            int walkOffset = romEntry.getIntValue("PlayerWalkSprite");
             writeImage(walkOffset, playerGraphics.getWalkSprite());
         }
         if (playerGraphics.hasBikeSprite()) {
-            int bikeOffset = romEntry.getIntValue("PlayerBikeSpriteOffset");
+            int bikeOffset = romEntry.getIntValue("PlayerBikeSprite");
             writeImage(bikeOffset, playerGraphics.getBikeSprite());
         }
         if (playerGraphics.hasFishSprite()) {
-            int fishOffset = romEntry.getIntValue("PlayerFishSpriteOffset");
+            int fishOffset = romEntry.getIntValue("PlayerFishSprite");
             writeImage(fishOffset, playerGraphics.getFishSprite());
         }
     }

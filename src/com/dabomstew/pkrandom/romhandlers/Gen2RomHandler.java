@@ -25,6 +25,8 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
@@ -605,6 +607,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public int starterCount() {
         return 3;
+    }
+
+    @Override
+    public boolean hasMultiplePlayerCharacters() {
+        return romEntry.isCrystal();
     }
 
     @Override
@@ -2784,37 +2791,92 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 //        }
     }
 
-    public void rewriteChrisBackImage(BufferedImage bim) {
+    @Override
+    public boolean hasCustomPlayerGraphicsSupport() {
+        return true;
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack unchecked) {
+        if (!(unchecked instanceof Gen2PlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+
+        if (playerGraphics.hasFrontImage()) {
+            rewritePlayerFrontImage(playerGraphics.getFrontImage(), playerGraphics.getToReplace());
+            rewritePlayerTrainerCardImage(playerGraphics.getTrainerCardImage(), playerGraphics.getToReplace());
+        }
+
+        if (playerGraphics.hasBackImage()) {
+            if (playerGraphics.getToReplace() == Gen2PlayerCharacterGraphics.ToReplace.CHRIS) {
+                rewriteChrisBackImage(playerGraphics.getBackImage());
+            } else {
+                rewriteKrisBackImage(playerGraphics.getBackImage());
+            }
+        }
+
+        if (playerGraphics.hasWalkSprite()) {
+            int walkOffset = romEntry.getIntValue(playerGraphics.getToReplaceName() + "WalkSprite");
+            writeImage(walkOffset, playerGraphics.getWalkSprite());
+        }
+        if (playerGraphics.hasBikeSprite()) {
+            int bikeOffset = romEntry.getIntValue(playerGraphics.getToReplaceName() + "BikeSprite");
+            writeImage(bikeOffset, playerGraphics.getBikeSprite());
+        }
+        if (playerGraphics.hasFishSprite()) {
+            int fishOffset = romEntry.getIntValue(playerGraphics.getToReplaceName() + "FishSprite");
+            writeImage(fishOffset, playerGraphics.getFishSprite());
+        }
+    }
+
+    private void rewritePlayerFrontImage(GBCImage frontImage, Gen2PlayerCharacterGraphics.ToReplace toReplace) {
+        // TODO
+    }
+
+    private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Gen2PlayerCharacterGraphics.ToReplace toReplace) {
+        // TODO
+    }
+
+    public void rewriteKrisBackImage(GBCImage krisBack) {
+        // not compressed
+        int krisBackOffset = romEntry.getIntValue("KrisBackImage");
+        writeImage(krisBackOffset, krisBack);
+    }
+
+    public void rewriteChrisBackImage(GBCImage chrisBack) {
         int[] pointerOffsets = romEntry.getArrayValue("ChrisBackImagePointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
         int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
-        DataRewriter<BufferedImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+        DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
         if (romEntry.isCrystal()) {
-            dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
-                    bim1 -> Gen2Cmp.compress(new GBCImage(bim, true).toBytes()),
-                    this::lengthOfCompressedDataAt);
+            dataRewriter.rewriteData(primaryPointerOffset, chrisBack, secondaryPointerOffsets,
+                    image -> Gen2Cmp.compress(image.toBytes()), this::lengthOfCompressedDataAt);
         } else {
             // much more in GS since it has to make sure the catching tutorial dude's backpic ends up in the same bank
-            dataRewriter.rewriteData(primaryPointerOffset, bim, secondaryPointerOffsets,
+            dataRewriter.rewriteData(primaryPointerOffset, chrisBack, secondaryPointerOffsets,
                     this::chrisPlusDudeBackImagesToBytes, this::lengthOfChrisAndDudeBackImagesAt);
-            repointDudeBackImage(primaryPointerOffset, bankOffsets[0]);
+            repointDudeBackImage(primaryPointerOffset);
         }
     }
 
-    private byte[] chrisPlusDudeBackImagesToBytes(BufferedImage chrisBack) {
-        byte[] chrisBackData = new GBCImage(chrisBack, true).toBytes();
-        chrisBackData = Gen2Cmp.compress(chrisBackData);
-
-        int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"));
-        int dudeBackLength = Gen2Decmp.lengthOfCompressed(rom, dudeBackOffset);
-        byte[] dudeBackData = Arrays.copyOfRange(rom, dudeBackOffset, dudeBackOffset + dudeBackLength);
+    private byte[] chrisPlusDudeBackImagesToBytes(GBCImage chrisBack) {
+        byte[] chrisBackData = Gen2Cmp.compress(chrisBack.toBytes());
+        byte[] dudeBackData = readDudeCompressedBackData();
 
         byte[] bothData = new byte[chrisBackData.length + dudeBackData.length];
         System.arraycopy(chrisBackData, 0, bothData, 0, chrisBackData.length);
         System.arraycopy(dudeBackData, 0, bothData, chrisBackData.length, dudeBackData.length);
         return bothData;
+    }
+
+    private byte[] readDudeCompressedBackData() {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+        int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"), bank);
+        int dudeBackLength = Gen2Decmp.lengthOfCompressed(rom, dudeBackOffset);
+        return Arrays.copyOfRange(rom, dudeBackOffset, dudeBackOffset + dudeBackLength);
     }
 
     /**
@@ -2827,16 +2889,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return length;
     }
 
-    private void repointDudeBackImage(int chrisBackPointerOffset, int bankOffset) {
-        int bank = rom[bankOffset];
+    private void repointDudeBackImage(int chrisBackPointerOffset) {
+        int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+
         int newOffset = readPointer(chrisBackPointerOffset, bank);
         int newDudeOffset = newOffset + lengthOfCompressedDataAt(newOffset);
         int dudeBackPointerOffset = romEntry.getIntValue("DudeBackImagePointer");
         writePointer(dudeBackPointerOffset, newDudeOffset);
-    }
-
-    private void writeImage(int offset, BufferedImage bim) {
-        writeBytes(offset, new GBCImage(bim).toBytes());
     }
 
     @Override

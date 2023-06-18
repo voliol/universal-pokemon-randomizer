@@ -307,14 +307,19 @@ public class NewRandomizerGUI {
     private JPanel graphicsPanel;
     private JLabel ppalNotExistLabel;
     private JLabel ppalPartiallyImplementedLabel;
+    private JLabel cpgNotExistLabel;
     private JRadioButton cpgUnchangedRadioButton;
     private JRadioButton cpgCustomRadioButton;
-    private JRadioButton cpgRandomRadioButton;
     private JComboBox<GraphicsPack> cpgComboBox;
-    private JLabel cpgNotExistLabel;
+    private JButton cpgRandomButton;
     private GraphicsPackInfo cpgCustomInfo;
+    private JLabel cpgReplaceLabel;
+    private JRadioButton cpgReplaceRadioButton1;
+    private JRadioButton cpgReplaceRadioButton2;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox miscDisableLowHPMusicCheckBox;
+
+    private static final Random RND = new Random();
 
     private static JFrame frame;
 
@@ -585,11 +590,11 @@ public class NewRandomizerGUI {
         ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         cpgUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         cpgCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
-        cpgRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         cpgComboBox.addItemListener(e -> {
             GraphicsPack cpg = (GraphicsPack) e.getItem();
             cpgCustomInfo.setGraphicsPack(cpg);
         });
+        cpgRandomButton.addActionListener(e -> cpgComboBox.setSelectedIndex(RND.nextInt(cpgComboBox.getItemCount())));
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -2233,7 +2238,7 @@ public class NewRandomizerGUI {
 
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
-                        cpgRandomRadioButton, cpgCustomRadioButton, cpgUnchangedRadioButton)
+                        cpgUnchangedRadioButton, cpgCustomRadioButton, cpgRandomButton)
                 .forEach(this::setInitialButtonState);
         // TODO: initial state for the cpg combobox/info window
 
@@ -2600,15 +2605,22 @@ public class NewRandomizerGUI {
             cpgUnchangedRadioButton.setSelected(ppalSupport);
             cpgCustomRadioButton.setVisible(cpgSupport);
             cpgCustomRadioButton.setEnabled(cpgSupport);
-            cpgRandomRadioButton.setVisible(cpgSupport);
-            cpgRandomRadioButton.setEnabled(cpgSupport);
             cpgComboBox.setVisible(cpgSupport);
             cpgComboBox.setEnabled(false);
             if (cpgSupport) {
                 fillCustomPlayerGraphicsComboBox();
             }
+            cpgRandomButton.setVisible(cpgSupport);
+            cpgRandomButton.setEnabled(false);
             cpgCustomInfo.setVisible(cpgSupport);
             cpgCustomInfo.setEnabled(false);
+            boolean cpgReplaceChoiceSupport = cpgSupport && romHandler.hasMultiplePlayerCharacters();
+            cpgReplaceLabel.setVisible(cpgReplaceChoiceSupport);
+            cpgReplaceLabel.setEnabled(false);
+            cpgReplaceRadioButton1.setVisible(cpgReplaceChoiceSupport);
+            cpgReplaceRadioButton1.setEnabled(false);
+            cpgReplaceRadioButton2.setVisible(cpgReplaceChoiceSupport);
+            cpgReplaceRadioButton2.setEnabled(false);
 
             // Misc. Tweaks
             int mtsAvailable = romHandler.miscTweaksAvailable();
@@ -2676,7 +2688,7 @@ public class NewRandomizerGUI {
                 try {
                     String path = playerDir.getCanonicalPath();
                     List<GraphicsPackEntry> entries = GraphicsPackEntry.readAllFromFolder(path);
-                    entries.forEach(entry -> comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry))); // TODO: generalize for other games/generations
+                    entries.forEach(entry -> comboBoxModel.addElement(new GBCPlayerCharacterGraphics(entry))); // TODO: generalize for other games/generations
                 } catch (Exception ignored) {
                     System.out.println("Could not read " + playerDir);
                 }
@@ -3355,10 +3367,18 @@ public class NewRandomizerGUI {
 
         if (cpgCustomRadioButton.isSelected() && cpgCustomRadioButton.isVisible() && cpgCustomRadioButton.isEnabled()) {
             cpgComboBox.setEnabled(true);
+            cpgRandomButton.setEnabled(true);
             cpgCustomInfo.setEnabled(true);
+            cpgReplaceLabel.setEnabled(true);
+            cpgReplaceRadioButton1.setEnabled(true);
+            cpgReplaceRadioButton2.setEnabled(true);
         } else {
             cpgComboBox.setEnabled(false);
+            cpgRandomButton.setEnabled(false);
             cpgCustomInfo.setEnabled(false);
+            cpgReplaceLabel.setEnabled(false);
+            cpgReplaceRadioButton1.setEnabled(false);
+            cpgReplaceRadioButton2.setEnabled(false);
         }
     }
 

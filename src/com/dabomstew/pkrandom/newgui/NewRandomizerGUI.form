@@ -3406,7 +3406,7 @@
                     </constraints>
                     <properties>
                       <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUIppalFollowEvolutionsCheckBox.text"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalFollowEvolutionsCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.ppalFollowEvolutionsCheckBox.toolTipText"/>
                     </properties>
                   </component>
@@ -3479,7 +3479,7 @@
                 <properties>
                   <enabled value="true"/>
                 </properties>
-                <border type="none" title-resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" title-key="GUI.pcsPanel.title">
+                <border type="none" title-resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" title-key="GUI.cpgPanel.title">
                   <font style="1"/>
                 </border>
                 <children>
@@ -3491,12 +3491,12 @@
                     <properties>
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.fiUnchangedRadioButton.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pcsUnchangedRadioButton.toolTipText"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgUnchangedRadioButton.toolTipText"/>
                     </properties>
                   </component>
                   <hspacer id="5010d">
                     <constraints>
-                      <grid row="3" column="3" row-span="3" col-span="7" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="6" row-span="5" col-span="7" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.1" weighty="0.0"/>
                     </constraints>
                   </hspacer>
@@ -3514,7 +3514,76 @@
                   </vspacer>
                   <vspacer id="65044">
                     <constraints>
-                      <grid row="2" column="1" row-span="1" col-span="9" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="1" row-span="1" col-span="12" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </vspacer>
+                  <vspacer id="ec8b7">
+                    <constraints>
+                      <grid row="8" column="2" row-span="1" col-span="5" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </vspacer>
+                  <component id="ff261" class="javax.swing.JComboBox" binding="cpgComboBox">
+                    <constraints>
+                      <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                    </properties>
+                  </component>
+                  <component id="b827b" class="javax.swing.JLabel" binding="cpgNotExistLabel">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="12" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgNotExistLabel"/>
+                    </properties>
+                  </component>
+                  <nested-form id="dd4" form-file="com/dabomstew/pkrandom/newgui/GraphicsPackInfo.form" binding="cpgCustomInfo">
+                    <constraints>
+                      <grid row="5" column="2" row-span="3" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </nested-form>
+                  <component id="76521" class="javax.swing.JLabel" binding="cpgReplaceLabel">
+                    <constraints>
+                      <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgReplaceLabel"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgReplaceLabel.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="1a7a1" class="javax.swing.JRadioButton" binding="cpgReplaceRadioButton1">
+                    <constraints>
+                      <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgReplaceRadioButton1.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgReplaceRadioButton1.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="74ff2" class="javax.swing.JRadioButton" binding="cpgReplaceRadioButton2">
+                    <constraints>
+                      <grid row="6" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgReplaceRadioButton2.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgReplaceRadioButton2.toolTipText"/>
+                    </properties>
+                  </component>
+                  <vspacer id="bbd">
+                    <constraints>
+                      <grid row="7" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -3525,49 +3594,20 @@
                     </constraints>
                     <properties>
                       <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pcsCustomRadioButton.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pcsCustomRadioButton.toolTipText"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgCustomRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgCustomRadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="95847" class="javax.swing.JRadioButton" binding="cpgRandomRadioButton">
+                  <component id="bc8da" class="javax.swing.JButton" binding="cpgRandomButton">
                     <constraints>
-                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.fiRandomRadioButton.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pcsRandomRadioButton.toolTipText"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.cpgRandomButton.text"/>
                     </properties>
                   </component>
-                  <vspacer id="ec8b7">
-                    <constraints>
-                      <grid row="7" column="2" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                  </vspacer>
-                  <component id="ff261" class="javax.swing.JComboBox" binding="cpgComboBox">
-                    <constraints>
-                      <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties/>
-                  </component>
-                  <component id="b827b" class="javax.swing.JLabel" binding="cpgNotExistLabel">
-                    <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="9" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.pcsNotExistLabel"/>
-                    </properties>
-                  </component>
-                  <nested-form id="dd4" form-file="com/dabomstew/pkrandom/newgui/GraphicsPackInfo.form" binding="cpgCustomInfo">
-                    <constraints>
-                      <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                  </nested-form>
                 </children>
               </grid>
             </children>
@@ -4171,10 +4211,15 @@
       <member id="4ac3a"/>
       <member id="17f6d"/>
     </group>
-    <group name="playerCharSpritesButtonGroup">
+    <group name="cpgButtonGroup">
       <member id="a712d"/>
       <member id="77b87"/>
       <member id="95847"/>
+    </group>
+    <group name="cpgReplaceButtonGroup">
+      <member id="74ff2"/>
+      <member id="74ff2"/>
+      <member id="1a7a1"/>
     </group>
   </buttonGroups>
   <inspectionSuppressions>
