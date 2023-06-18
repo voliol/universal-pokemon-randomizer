@@ -161,12 +161,12 @@ public class GBCImage extends BufferedImage {
         return getHeight() / 8;
     }
 
-    public byte[] toBytes() {
+    public byte[] toBytes() { 
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
 
         for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
-            int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
-            int tileY = columnMode ? tile % getWidthInTiles() : tile / getWidthInTiles();
+            int tileX = columnMode ? tile / getHeightInTiles() : tile % getWidthInTiles();
+            int tileY = columnMode ? tile % getHeightInTiles() : tile / getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {
                 int lowByte = 0;
                 int highByte = 0;
