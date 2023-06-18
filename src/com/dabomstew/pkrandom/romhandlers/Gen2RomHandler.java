@@ -146,6 +146,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
             isVietCrystal = false;
         }
+        if (romEntry.isCrystal()) {
+            int chrisFrontImage = romEntry.getIntValue("ChrisFrontImage");
+            if (chrisFrontImage != 0) {
+                romEntry.putIntValue("KrisFrontImage", chrisFrontImage + Gen2Constants.krisFrontImageOffset);
+            }
+            int chrisTrainerCardImage = romEntry.getIntValue("ChrisTrainerCardImage");
+            if (chrisTrainerCardImage != 0) {
+                romEntry.putIntValue("KrisTrainerCardImage", chrisTrainerCardImage +
+                        Gen2Constants.krisTrainerCardImageOffset);
+            }
+        }
     }
 
     @Override
@@ -2681,10 +2692,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeBytes(offset, palette.toBytes());
     }
 
-    private void rewritePokemonImage(Pokemon pk, boolean back, BufferedImage bim) {
-        rewritePokemonOrTrainerImage(getPokemonImagePointerOffset(pk, back), bim);
-    }
-
     private int getPokemonImagePointerOffset(Pokemon pk, boolean back) {
         // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
         // There is no zero-entry.
@@ -2701,7 +2708,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return pointerOffset;
     }
 
-    private void rewriteTrainerImage(int trainerClass, BufferedImage bim) {
+    private void rewriteTrainerImage(int trainerClass, GBCImage image) {
         if (trainerClass < 0) {
             throw new IllegalArgumentException("Invalid trainerClass; can't be negative");
         }
@@ -2710,11 +2717,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
         }
         int pointerOffset = romEntry.getIntValue("TrainerImages") + trainerClass * 3;
-        rewritePokemonOrTrainerImage(pointerOffset, bim);
+        rewritePokemonOrTrainerImage(pointerOffset, image);
     }
 
-    private void rewritePokemonOrTrainerImage(int pointerOffset, BufferedImage bim) {
-        byte[] uncompressed = new GBCImage(bim, true).toBytes();
+    private void rewritePokemonOrTrainerImage(int pointerOffset, GBCImage image) {
+        byte[] uncompressed = image.toBytes();
 
         GBCDataRewriter<byte[]> dataRewriter = new GBCDataRewriter<>();
         dataRewriter.setPointerReader(this::readPokemonOrTrainerImagePointer);
@@ -2830,11 +2837,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void rewritePlayerFrontImage(GBCImage frontImage, Settings.PlayerCharacterMod toReplace) {
-        // TODO
+        if (romEntry.isCrystal()) {
+            int frontOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "FrontImage");
+            writeImage(frontOffset, frontImage);
+        } else {
+            rewriteTrainerImage(Gen2Constants.chrisTrainerClass, frontImage);
+        }
     }
 
     private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Settings.PlayerCharacterMod toReplace) {
-        // TODO
+        int trainerCardOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "TrainerCardImage");
+        writeImage(trainerCardOffset, trainerCardImage);
     }
 
     public void rewriteKrisBackImage(GBCImage krisBack) {

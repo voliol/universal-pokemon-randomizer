@@ -1925,6 +1925,7 @@ public class NewRandomizerGUI {
         settings.setPokemonPalettesShinyFromNormal(ppalShinyFromNormalCheckBox.isSelected());
 
         settings.setCustomPlayerGraphics((GraphicsPack) cpgComboBox.getSelectedItem());
+        settings.setCustomPlayerGraphicsCharacterMod(cpgReplaceRadioButton1.isSelected(), cpgReplaceRadioButton2.isSelected());
 
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
@@ -2619,6 +2620,7 @@ public class NewRandomizerGUI {
             cpgReplaceLabel.setEnabled(false);
             cpgReplaceRadioButton1.setVisible(cpgReplaceChoiceSupport);
             cpgReplaceRadioButton1.setEnabled(false);
+            cpgReplaceRadioButton1.setSelected(cpgReplaceChoiceSupport);
             cpgReplaceRadioButton2.setVisible(cpgReplaceChoiceSupport);
             cpgReplaceRadioButton2.setEnabled(false);
 
