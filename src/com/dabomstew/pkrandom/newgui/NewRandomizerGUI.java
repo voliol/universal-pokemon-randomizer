@@ -2690,9 +2690,16 @@ public class NewRandomizerGUI {
                 try {
                     String path = playerDir.getCanonicalPath();
                     List<GraphicsPackEntry> entries = GraphicsPackEntry.readAllFromFolder(path);
-                    entries.forEach(entry -> comboBoxModel.addElement(new GBCPlayerCharacterGraphics(entry))); // TODO: generalize for other games/generations
+                    entries.forEach(entry -> {
+                        if (entry.getStringValue("RomType").equalsIgnoreCase("Gen1") && romHandler.generationOfPokemon() == 1) {
+                            comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry));
+                        } else if (entry.getStringValue("RomType").equalsIgnoreCase("Gen2") && romHandler.generationOfPokemon() == 2) {
+                            comboBoxModel.addElement(new Gen2PlayerCharacterGraphics(entry));
+                        }
+                    });
                 } catch (Exception ignored) {
                     System.out.println("Could not read " + playerDir);
+                    ignored.printStackTrace();
                 }
             }
         }

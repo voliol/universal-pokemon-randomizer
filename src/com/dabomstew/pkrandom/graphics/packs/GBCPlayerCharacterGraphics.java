@@ -7,10 +7,9 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
-public class GBCPlayerCharacterGraphics extends GraphicsPack {
+public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
 
     private static final int FRONT_IMAGE_DIMENSIONS = 7;
-    private static final int BACK_IMAGE_DIMENSIONS = 4;
     private static final int OVERWORLD_SPRITE_TILE_AMOUNT = 4 * 3 * 2; // 4 tiles shown at once, 3 directions, 2 frames
 
     private final GBCImage front;
@@ -47,12 +46,14 @@ public class GBCPlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBCImage back = new GBCImage(base, true);
-        if (back.getWidthInTiles() != BACK_IMAGE_DIMENSIONS || back.getWidthInTiles() != BACK_IMAGE_DIMENSIONS) {
+        if (back.getWidthInTiles() != getBackImageDimensions() || back.getWidthInTiles() != getBackImageDimensions()) {
             System.out.println("Invalid back image dimensions");
             return null;
         }
         return back;
     }
+
+    protected abstract int getBackImageDimensions();
 
     private GBCImage initWalk() {
         BufferedImage base = readImage("WalkSprite");

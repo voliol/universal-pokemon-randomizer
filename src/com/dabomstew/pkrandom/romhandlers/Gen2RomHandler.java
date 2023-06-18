@@ -2950,7 +2950,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private byte[] readPokemonOrTrainerImageData(int pointerOffset, int imageWidth, int imageHeight) {
         int imageOffset = readPokemonOrTrainerImagePointer(pointerOffset);
         byte[] data = Gen2Decmp.decompress(rom, imageOffset);
-        System.out.println("The decompressed gen 2 image data is " + data.length + " bytes before cutting");
         return Arrays.copyOf(data, imageWidth * imageHeight * 16);
     }
 
