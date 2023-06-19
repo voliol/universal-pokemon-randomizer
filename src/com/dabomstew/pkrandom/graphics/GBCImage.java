@@ -161,7 +161,7 @@ public class GBCImage extends BufferedImage {
         return getHeight() / 8;
     }
 
-    public byte[] toBytes() { 
+    public byte[] toBytes() {
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
 
         for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {

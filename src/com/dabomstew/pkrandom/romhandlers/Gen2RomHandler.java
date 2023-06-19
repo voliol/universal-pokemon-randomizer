@@ -1049,9 +1049,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
                 baos.writeBytes(trainerToBytes(tr));
-                System.out.print(tr + " ");
             }
-            System.out.print("\n");
 
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
@@ -1620,7 +1618,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             baos.writeBytes(translateString(option));
             baos.write(GBConstants.stringTerminator);
         }
-        System.out.println(RomFunctions.bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
     }
 
@@ -2730,7 +2727,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private int lengthOfCompressedDataAt(int offset) {
-        System.out.println("Trying to read length of compressed data at 0x" + Integer.toHexString(offset));
         return Gen2Decmp.lengthOfCompressed(rom, offset);
     }
 
@@ -2800,7 +2796,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        return true;
+        // TODO: the rest of the games need their ROM entries filled with chris back image stuff
+        return List.of("Gold (U)", "Silver (U)", "Crystal (U)", "Crystal (U 1.1)").contains(romEntry.getName());
     }
 
     @Override
@@ -2885,7 +2882,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private byte[] readDudeCompressedBackData() {
-        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
         int bank = rom[bankOffsets[0]];
         int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"), bank);
         int dudeBackLength = Gen2Decmp.lengthOfCompressed(rom, dudeBackOffset);
