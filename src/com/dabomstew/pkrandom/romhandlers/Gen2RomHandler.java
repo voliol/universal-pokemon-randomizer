@@ -146,6 +146,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
             isVietCrystal = false;
         }
+
         if (romEntry.isCrystal()) {
             int chrisFrontImage = romEntry.getIntValue("ChrisFrontImage");
             if (chrisFrontImage != 0) {
@@ -156,20 +157,27 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 romEntry.putIntValue("KrisTrainerCardImage", chrisTrainerCardImage +
                         Gen2Constants.krisTrainerCardImageOffset);
             }
-        } else {
-            int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");
-            if (chrisBackPointers.length == 2) {
-                if (romEntry.getArrayValue("ChrisBackImageBankOffsets").length == 0) {
-                    int[] bankOffsets = new int[] {chrisBackPointers[0] + Gen2Constants.chrisBackBankOffset1,
-                            chrisBackPointers[1] + Gen2Constants.chrisBackBankOffset2};
-                    romEntry.putArrayValue("ChrisBackImageBankOffsets", bankOffsets);
-                }
-                if (romEntry.getIntValue("DudeBackImagePointer") == 0) {
-                    int dudeBackPointer = chrisBackPointers[0] + Gen2Constants.dudeBackPointerOffset;
-                    romEntry.putIntValue("DudeBackImagePointer", dudeBackPointer);
-                }
+        }
+
+        int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");
+        if (chrisBackPointers.length == 2) {
+            if (romEntry.getArrayValue("ChrisBackImageBankOffsets").length == 0) {
+                int offset1 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal1 :
+                        Gen2Constants.chrisBackBankOffsetGS1;
+                int offset2 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal2 :
+                        Gen2Constants.chrisBackBankOffsetGS2;
+                int[] bankOffsets = new int[] {chrisBackPointers[0] + offset1, chrisBackPointers[1] + offset2};
+                System.out.println("ChrisBackImageBankOffsets=[0x" + Integer.toHexString(bankOffsets[0]) +
+                        ", 0x" + Integer.toHexString(bankOffsets[1]) + "]");
+                romEntry.putArrayValue("ChrisBackImageBankOffsets", bankOffsets);
+            }
+
+            if (romEntry.isCrystal() && romEntry.getIntValue("DudeBackImagePointer") == 0) {
+                int dudeBackPointer = chrisBackPointers[0] + Gen2Constants.dudeBackPointerOffset;
+                romEntry.putIntValue("DudeBackImagePointer", dudeBackPointer);
             }
         }
+
     }
 
     @Override
@@ -2809,10 +2817,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: the rest of the games need their ROM entries filled with chris back image stuff
-        //  and the Japanese GS do not work for unknown reason. Does their dudeback not come immediately after chris?
-        return (!romEntry.isCrystal() && romEntry.isNonJapanese())
-                || List.of("Crystal (U)", "Crystal (U 1.1)").contains(romEntry.getName());
+        // TODO: the Japanese GS do not work for unknown reason. Does their dudeback not come immediately after chris?
+        //  Japanese Crystal ALSO does not work, though seemingly for some other reason
+        return romEntry.isNonJapanese();
     }
 
     @Override
