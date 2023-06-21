@@ -150,6 +150,9 @@ public class Gen2Constants {
     // directly after chris's respective images
     public static final int krisTrainerCardImageOffset = 16 * 5 * 7, krisFrontImageOffset = 16 * 7 * 7;
 
+    public static final int chrisBackBankOffset1 = 16, dudeBackPointerOffset = 10, // battle script
+                            chrisBackBankOffset2 = 6; // hall of fame script
+
     public static final int chrisTrainerClass = 11;
 
     private static Type[] constructTypeTable() {

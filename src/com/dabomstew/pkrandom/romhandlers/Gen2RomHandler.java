@@ -156,6 +156,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 romEntry.putIntValue("KrisTrainerCardImage", chrisTrainerCardImage +
                         Gen2Constants.krisTrainerCardImageOffset);
             }
+        } else {
+            int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");
+            if (chrisBackPointers.length == 2) {
+                if (romEntry.getArrayValue("ChrisBackImageBankOffsets").length == 0) {
+                    int[] bankOffsets = new int[] {chrisBackPointers[0] + Gen2Constants.chrisBackBankOffset1,
+                            chrisBackPointers[1] + Gen2Constants.chrisBackBankOffset2};
+                    romEntry.putArrayValue("ChrisBackImageBankOffsets", bankOffsets);
+                }
+                if (romEntry.getIntValue("DudeBackImagePointer") == 0) {
+                    int dudeBackPointer = chrisBackPointers[0] + Gen2Constants.dudeBackPointerOffset;
+                    romEntry.putIntValue("DudeBackImagePointer", dudeBackPointer);
+                }
+            }
         }
     }
 
@@ -2797,7 +2810,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
         // TODO: the rest of the games need their ROM entries filled with chris back image stuff
-        return List.of("Gold (U)", "Silver (U)", "Crystal (U)", "Crystal (U 1.1)").contains(romEntry.getName());
+        //  and the Japanese GS do not work for unknown reason. Does their dudeback not come immediately after chris?
+        return (!romEntry.isCrystal() && romEntry.isNonJapanese())
+                || List.of("Crystal (U)", "Crystal (U 1.1)").contains(romEntry.getName());
     }
 
     @Override
