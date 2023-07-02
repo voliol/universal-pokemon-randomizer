@@ -2,6 +2,10 @@ package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.graphics.packs.Gen1PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPackEntry;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -11,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -35,8 +40,10 @@ public class RomHandlerTest {
     private static final String TEST_ROMS_PATH = "test/roms";
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
+    private static final String TEST_CPG_PATH = "test/players";
+
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -721,6 +728,38 @@ public class RomHandlerTest {
     public void dumpAllPokemonImagesInSpecificGame() {
         loadROM("Gold (U)");
         romHandler.dumpAllPokemonImages();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canSetCustomPlayerGraphicsWithoutThrowing(String romName) {
+        loadROM(romName);
+        GraphicsPack cpg = getCustomPlayerGraphics();
+        romHandler.setCustomPlayerGraphics(cpg, Settings.PlayerCharacterMod.PC1);
+        if (romHandler.hasMultiplePlayerCharacters()) {
+            romHandler.setCustomPlayerGraphics(cpg, Settings.PlayerCharacterMod.PC2);
+        }
+        assertTrue(true);
+    }
+
+    private static final List<GraphicsPackEntry> cpgEntries = initCPGEntries();
+
+    private static List<GraphicsPackEntry> initCPGEntries() {
+        try {
+            return GraphicsPackEntry.readAllFromFolder(TEST_CPG_PATH);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private GraphicsPack getCustomPlayerGraphics() {
+        GraphicsPack cpg;
+        switch (romHandler.generationOfPokemon()) {
+            case 1 -> cpg = new Gen1PlayerCharacterGraphics(cpgEntries.get(0));
+            case 2 -> cpg = new Gen2PlayerCharacterGraphics(cpgEntries.get(1));
+            default -> cpg = null;
+        }
+        return cpg;
     }
 
     // TODO: figure out a clever way to test reading/writing all images
