@@ -172,7 +172,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 romEntry.putArrayValue("ChrisBackImageBankOffsets", bankOffsets);
             }
 
-            if (romEntry.isCrystal() && romEntry.getIntValue("DudeBackImagePointer") == 0) {
+            if (!romEntry.isCrystal() && romEntry.getIntValue("DudeBackImagePointer") == 0) {
                 int dudeBackPointer = chrisBackPointers[0] + Gen2Constants.dudeBackPointerOffset;
                 romEntry.putIntValue("DudeBackImagePointer", dudeBackPointer);
             }
