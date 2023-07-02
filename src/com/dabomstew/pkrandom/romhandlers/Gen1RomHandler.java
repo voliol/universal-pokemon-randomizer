@@ -2710,6 +2710,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private int lengthOfCompressedDataAt(int offset) {
+        if (offset == 0) {
+            throw new IllegalArgumentException("Invalid offset. Compressed data cannot be at offset 0.");
+        }
         Gen1Decmp decmp = new Gen1Decmp(rom, offset);
         decmp.decompress();
         return decmp.getCompressedLength();
