@@ -63,8 +63,16 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
     private final Map<Integer, Type> extraTypeLookup = new HashMap<>();
     private final Map<Type, Integer> extraTypeReverse = new HashMap<>();
 
-    public Gen1RomEntry(String name) {
+    private Gen1RomEntry(String name) {
         super(name);
+    }
+
+    public Gen1RomEntry(Gen1RomEntry original) {
+        super(original);
+        staticPokemon.addAll(original.staticPokemon);
+        ghostMarowakOffsets = original.ghostMarowakOffsets;
+        extraTypeLookup.putAll(original.extraTypeLookup);
+        extraTypeReverse.putAll(original.extraTypeReverse);
     }
 
     public boolean isYellow() {

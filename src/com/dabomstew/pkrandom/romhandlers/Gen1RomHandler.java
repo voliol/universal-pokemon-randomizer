@@ -219,13 +219,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Gen1RomEntry re : roms) {
             if (romSig(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap
                     && re.getCRCInHeader() == crcInHeader) {
-                return re;
+                return new Gen1RomEntry(re);
             }
         }
         // Now check for non-specific-CRC entries
         for (Gen1RomEntry re : roms) {
             if (romSig(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap && re.getCRCInHeader() == -1) {
-                return re;
+                return new Gen1RomEntry(re);
             }
         }
         // Not found
@@ -2610,9 +2610,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (playerGraphics.hasFrontImage()) {
             rewritePlayerFrontImage(playerGraphics.getFrontImage());
         }
-        if (playerGraphics.hasBackImage()) {
-            rewritePlayerBackImage(playerGraphics.getBackImage());
-        }
+//        if (playerGraphics.hasBackImage()) {
+//            rewritePlayerBackImage(playerGraphics.getBackImage());
+//        }
         if (playerGraphics.hasWalkSprite()) {
             int walkOffset = romEntry.getIntValue("PlayerWalkSprite");
             writeImage(walkOffset, playerGraphics.getWalkSprite());

@@ -198,13 +198,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Gen2RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap
                     && re.getCRCInHeader() == crcInHeader) {
-                return re;
+                return new Gen2RomEntry(re);
             }
         }
         // Now check for non-specific-CRC entries
         for (Gen2RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap && re.getCRCInHeader() == -1) {
-                return re;
+                return new Gen2RomEntry(re);
             }
         }
         // Not found

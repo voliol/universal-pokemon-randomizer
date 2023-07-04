@@ -70,8 +70,13 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
 
     private final List<Gen2RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
 
-    public Gen2RomEntry(String name) {
+    private Gen2RomEntry(String name) {
         super(name);
+    }
+
+    public Gen2RomEntry(Gen2RomEntry original) {
+        super(original);
+        this.staticPokemon.addAll(original.staticPokemon);
     }
 
     public boolean isCrystal() {
