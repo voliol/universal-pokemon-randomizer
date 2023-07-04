@@ -168,6 +168,32 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     protected void initRomEntry() {
         romEntry = checkRomEntry(this.rom);
 
+        addPlayerFrontImagePointersToRomEntry();
+        addOldManBackImagePointerToRomEntry();
+    }
+
+    private void addPlayerFrontImagePointersToRomEntry() {
+        int[] oldPointers = romEntry.getArrayValue("PlayerFrontImagePointers");
+        int[] oldBankOffsets = romEntry.getArrayValue("PlayerFrontImageBankOffsets");
+        if (oldPointers.length != 5 || oldBankOffsets.length != 1) {
+            return;
+        }
+
+        int[] newPointers = new int[6];
+        System.arraycopy(oldPointers, 0, newPointers, 0, 5);
+        newPointers[5] = oldPointers[1] + Gen1Constants.playerFrontOffset5;
+        romEntry.putArrayValue("PlayerFrontImagePointers", newPointers);
+
+        int[] newBankOffsets = new int[] { oldBankOffsets[0],
+                newPointers[1] + Gen1Constants.playerFrontBankOffset1,
+                newPointers[2] + Gen1Constants.playerFrontBankOffset2,
+                newPointers[3] + Gen1Constants.playerFrontBankOffset3,
+                newPointers[4] + Gen1Constants.playerFrontBankOffset4,
+                newPointers[5] + Gen1Constants.playerFrontBankOffset5};
+        romEntry.putArrayValue("PlayerFrontImageBankOffsets", newBankOffsets);
+    }
+
+    private void addOldManBackImagePointerToRomEntry() {
         int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
         if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OldManBackImagePointer") == 0) {
             romEntry.putIntValue("OldManBackImagePointer",

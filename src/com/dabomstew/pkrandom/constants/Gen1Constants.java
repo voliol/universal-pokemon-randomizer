@@ -102,6 +102,11 @@ public class Gen1Constants {
 
     public static final String guaranteedCatchPrefix = "CF7EFE01";
 
+    public static final int playerFrontOffset5 = 54; // "5" because it is used to put a value at index 5 of PlayerFrontImagePointers
+
+    public static final int playerFrontBankOffset1 = 4, playerFrontBankOffset2 = 3, playerFrontBankOffset3 = 4,
+            playerFrontBankOffset4 = 3, playerFrontBankOffset5 = 4;
+
     public static final int oldManBackImagePointerOffset = 5;
 
     public static final Type[] typeTable = constructTypeTable();

@@ -162,11 +162,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");
         if (chrisBackPointers.length == 2) {
             if (romEntry.getArrayValue("ChrisBackImageBankOffsets").length == 0) {
+                int offset0 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal0 :
+                        Gen2Constants.chrisBackBankOffsetGS0;
                 int offset1 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal1 :
                         Gen2Constants.chrisBackBankOffsetGS1;
-                int offset2 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal2 :
-                        Gen2Constants.chrisBackBankOffsetGS2;
-                int[] bankOffsets = new int[] {chrisBackPointers[0] + offset1, chrisBackPointers[1] + offset2};
+                int[] bankOffsets = new int[] {chrisBackPointers[0] + offset0, chrisBackPointers[1] + offset1};
                 System.out.println("ChrisBackImageBankOffsets=[0x" + Integer.toHexString(bankOffsets[0]) +
                         ", 0x" + Integer.toHexString(bankOffsets[1]) + "]");
                 romEntry.putArrayValue("ChrisBackImageBankOffsets", bankOffsets);

@@ -166,6 +166,13 @@ public class RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void romIsValid(String romName) {
+        loadROM(romName);
+        assertTrue(romHandler.isRomValid());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void pokemonListIsNotEmpty(String romName) {
         loadROM(romName);
         assertFalse(romHandler.getPokemon().isEmpty());
@@ -717,16 +724,11 @@ public class RomHandlerTest {
         assertEquals(before, romHandler.getStarters());
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void dumpAllPokemonImages(String romName) {
         loadROM(romName);
-        romHandler.dumpAllPokemonImages();
-    }
-
-    @Test
-    public void dumpAllPokemonImagesInSpecificGame() {
-        loadROM("Gold (U)");
         romHandler.dumpAllPokemonImages();
     }
 
