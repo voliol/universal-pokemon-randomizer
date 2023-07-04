@@ -313,6 +313,14 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
             super();
             this.bankOffsets = bankOffsets;
             this.bank = rom[bankOffsets[0]] & 0xFF;
+            for (int i = 1; i < bankOffsets.length; i++) {
+                if ((rom[bankOffsets[i]] & 0xFF) != bank) {
+                    throw new IllegalArgumentException("Invalid bankOffset=0x" + Integer.toHexString(bankOffsets[i]) +
+                            ". Value is 0x" + Integer.toHexString(rom[bankOffsets[i]] & 0xFF) + ", instead of 0x" +
+                            Integer.toHexString(bank) + ".");
+                }
+            }
+
             System.out.println("Bank before: " + Integer.toHexString(bank));
             setPointerReader(pointerOffset -> readPointer(pointerOffset, bank));
         }

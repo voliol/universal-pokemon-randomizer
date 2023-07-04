@@ -169,6 +169,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         romEntry = checkRomEntry(this.rom);
 
         addPlayerFrontImagePointersToRomEntry();
+        addPlayerBackImageBankOffsetsToRomEntry();
         addOldManBackImagePointerToRomEntry();
     }
 
@@ -181,7 +182,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         int[] newPointers = new int[6];
         System.arraycopy(oldPointers, 0, newPointers, 0, 5);
-        newPointers[5] = oldPointers[1] + Gen1Constants.playerFrontOffset5;
+        newPointers[5] = oldPointers[1] + Gen1Constants.playerFrontImageOffset5;
         romEntry.putArrayValue("PlayerFrontImagePointers", newPointers);
 
         int[] newBankOffsets = new int[] { oldBankOffsets[0],
@@ -193,11 +194,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         romEntry.putArrayValue("PlayerFrontImageBankOffsets", newBankOffsets);
     }
 
+    private void addPlayerBackImageBankOffsetsToRomEntry() {
+        int[] pointers = romEntry.getArrayValue("PlayerBackImagePointers");
+        if (pointers.length != 2) {
+            return;
+        }
+        int[] bankOffsets = new int[] {pointers[0] + Gen1Constants.playerBackImageOffset0,
+                pointers[1] + Gen1Constants.playerBackImageOffset1};
+        romEntry.putArrayValue("PlayerBackImageBankOffsets", bankOffsets);
+    }
+
     private void addOldManBackImagePointerToRomEntry() {
         int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
         if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OldManBackImagePointer") == 0) {
             romEntry.putIntValue("OldManBackImagePointer",
-                    playerBackImagePointers[0] + Gen1Constants.oldManBackImagePointerOffset);
+                    playerBackImagePointers[0] + Gen1Constants.oldManBackImageOffset);
         }
     }
 
@@ -2610,9 +2621,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (playerGraphics.hasFrontImage()) {
             rewritePlayerFrontImage(playerGraphics.getFrontImage());
         }
-//        if (playerGraphics.hasBackImage()) {
-//            rewritePlayerBackImage(playerGraphics.getBackImage());
-//        }
+        if (playerGraphics.hasBackImage()) {
+            rewritePlayerBackImage(playerGraphics.getBackImage());
+        }
         if (playerGraphics.hasWalkSprite()) {
             int walkOffset = romEntry.getIntValue("PlayerWalkSprite");
             writeImage(walkOffset, playerGraphics.getWalkSprite());
