@@ -199,12 +199,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (pointers.length != 2) {
             return;
         }
-        int[] bankOffsets = new int[] {pointers[0] + Gen1Constants.playerBackImageOffset0,
+        int backOffset0 = romEntry.isYellow() ? Gen1Constants.playerBackImageOffsetYellow0 :
+                Gen1Constants.playerBackImageOffsetRGB0;
+        int[] bankOffsets = new int[] {pointers[0] + backOffset0,
                 pointers[1] + Gen1Constants.playerBackImageOffset1};
         romEntry.putArrayValue("PlayerBackImageBankOffsets", bankOffsets);
     }
 
     private void addOldManBackImagePointerToRomEntry() {
+        // TODO: do something about the old man in Yellow, and the oak back image
         int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
         if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OldManBackImagePointer") == 0) {
             romEntry.putIntValue("OldManBackImagePointer",

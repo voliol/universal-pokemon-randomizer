@@ -107,7 +107,7 @@ public class Gen1Constants {
     public static final int playerFrontBankOffset1 = 4, playerFrontBankOffset2 = 3, playerFrontBankOffset3 = 4,
             playerFrontBankOffset4 = 3, playerFrontBankOffset5 = 4;
 
-    public static final int playerBackImageOffset0 = 8, playerBackImageOffset1 = 3;
+    public static final int playerBackImageOffsetRGB0 = 8, playerBackImageOffset1 = 3, playerBackImageOffsetYellow0 = 3;
 
     public static final int oldManBackImageOffset = 5;
 
