@@ -670,8 +670,10 @@ public class Randomizer {
         	romHandler.randomizePokemonPalettes(settings);
         }
 
-        romHandler.setCustomPlayerGraphics(settings.getCustomPlayerGraphics(),
-                settings.getCustomPlayerGraphicsCharacterMod());
+        if (settings.getCustomPlayerGraphicsMod() == Settings.CustomPlayerGraphicsMod.RANDOM) {
+            romHandler.setCustomPlayerGraphics(settings.getCustomPlayerGraphics(),
+                    settings.getCustomPlayerGraphicsCharacterMod());
+        }
 
         // Intro Pokemon...
         romHandler.randomizeIntroPokemon();
