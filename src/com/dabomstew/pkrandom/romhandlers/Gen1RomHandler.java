@@ -171,6 +171,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         addPlayerFrontImagePointersToRomEntry();
         addPlayerBackImageBankOffsetsToRomEntry();
         addOldManBackImagePointerToRomEntry();
+        if (romEntry.isYellow()) {
+            addOakBackImagePointerToRomEntry();
+        }
     }
 
     private void addPlayerFrontImagePointersToRomEntry() {
@@ -185,7 +188,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         newPointers[5] = oldPointers[1] + Gen1Constants.playerFrontImageOffset5;
         romEntry.putArrayValue("PlayerFrontImagePointers", newPointers);
 
-        int[] newBankOffsets = new int[] { oldBankOffsets[0],
+        int[] newBankOffsets = new int[]{oldBankOffsets[0],
                 newPointers[1] + Gen1Constants.playerFrontBankOffset1,
                 newPointers[2] + Gen1Constants.playerFrontBankOffset2,
                 newPointers[3] + Gen1Constants.playerFrontBankOffset3,
@@ -201,17 +204,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
         int backOffset0 = romEntry.isYellow() ? Gen1Constants.playerBackImageOffsetYellow0 :
                 Gen1Constants.playerBackImageOffsetRGB0;
-        int[] bankOffsets = new int[] {pointers[0] + backOffset0,
+        int[] bankOffsets = new int[]{pointers[0] + backOffset0,
                 pointers[1] + Gen1Constants.playerBackImageOffset1};
         romEntry.putArrayValue("PlayerBackImageBankOffsets", bankOffsets);
     }
 
     private void addOldManBackImagePointerToRomEntry() {
-        // TODO: do something about the old man in Yellow, and the oak back image
         int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
         if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OldManBackImagePointer") == 0) {
-            romEntry.putIntValue("OldManBackImagePointer",
-                    playerBackImagePointers[0] + Gen1Constants.oldManBackImageOffset);
+            int oldManOffset = romEntry.isYellow() ? Gen1Constants.oldManBackImageOffsetYellow :
+                    Gen1Constants.oldManBackImageOffsetRGB;
+            romEntry.putIntValue("OldManBackImagePointer", playerBackImagePointers[0] + oldManOffset);
+        }
+    }
+
+    private void addOakBackImagePointerToRomEntry() {
+        int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
+        if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OakBackImagePointer") == 0) {
+            romEntry.putIntValue("OakBackImagePointer", playerBackImagePointers[0] + Gen1Constants.oakBackImageOffset);
         }
     }
 
@@ -2608,8 +2618,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: add offsets to the ROM entries of all other versions, so they can support it too
-        return romEntry.getName().equals("Red (U)") || romEntry.getName().equals("Blue (U)");
+        // TODO: do the prof. oak stuff for yellow, the JP games probably can't get support due to extreme space issues
+        return romEntry.isNonJapanese();
     }
 
     @Override
@@ -2706,9 +2716,25 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
         DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
 
-        dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
-                this::playerPlusOldManBackImagesToBytes, this::lengthOfPlayerAndOldManBackImagesAt);
+        if (romEntry.isYellow()) {
+            dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
+                    this::playerPlusOtherBackImagesToBytes, this::lengthOfPlayerAndOtherBackImagesAt);
+            repointOakBackImage(primaryPointerOffset);
+        } else {
+            dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
+                    this::playerPlusOldManBackImagesToBytes, this::lengthOfPlayerAndOldManBackImagesAt);
+        }
         repointOldManBackImage(primaryPointerOffset);
+    }
+
+    private byte[] playerPlusOtherBackImagesToBytes(GBCImage playerBack) {
+        byte[] playerPlusOldManBackData = playerPlusOldManBackImagesToBytes(playerBack);
+        byte[] oakBackData = readCompressedOakBackData();
+
+        byte[] allData = new byte[playerPlusOldManBackData.length + oakBackData.length];
+        System.arraycopy(playerPlusOldManBackData, 0, allData, 0, playerPlusOldManBackData.length);
+        System.arraycopy(oakBackData, 0, allData, playerPlusOldManBackData.length, oakBackData.length);
+        return allData;
     }
 
     private byte[] playerPlusOldManBackImagesToBytes(GBCImage playerBack) {
@@ -2729,6 +2755,25 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return Arrays.copyOfRange(rom, oldManBackOffset, oldManBackOffset + oldManBackLength);
     }
 
+    private byte[] readCompressedOakBackData() {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+        int oakBackOffset = readPointer(romEntry.getIntValue("OakBackImagePointer"), bank);
+        int oakBackLength = lengthOfCompressedDataAt(oakBackOffset);
+        return Arrays.copyOfRange(rom, oakBackOffset, oakBackOffset + oakBackLength);
+    }
+
+    /**
+     * The length in bytes of the player's compressed back image, followed by the catching tutorial old man's,
+     * and then prof. Oak's shown when catching the starter.<br>
+     * Assumes they actually follow another in ROM, with no gaps.
+     */
+    private int lengthOfPlayerAndOtherBackImagesAt(int offset) {
+        int length = lengthOfPlayerAndOldManBackImagesAt(offset);
+        length += lengthOfCompressedDataAt(offset + length);
+        return length;
+    }
+
     /**
      * The length in bytes of the player's compressed back image, followed by the catching tutorial old man's.<br>
      * Assumes they actually follow another in ROM, with no gaps.
@@ -2737,6 +2782,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int length = lengthOfCompressedDataAt(offset);
         length += lengthOfCompressedDataAt(offset + length);
         return length;
+    }
+
+    private void repointOakBackImage(int playerBackPointerOffset) {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+
+        int newOffset = readPointer(playerBackPointerOffset, bank);
+        int newOldManOffset = newOffset + lengthOfCompressedDataAt(newOffset);
+        int newOakOffset = newOldManOffset + lengthOfCompressedDataAt(newOldManOffset);
+        int oakBackPointerOffset = romEntry.getIntValue("OakBackImagePointer");
+        writePointer(oakBackPointerOffset, newOakOffset);
     }
 
     private void repointOldManBackImage(int playerBackPointerOffset) {

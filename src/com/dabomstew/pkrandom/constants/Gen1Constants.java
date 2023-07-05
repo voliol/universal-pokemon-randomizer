@@ -109,7 +109,7 @@ public class Gen1Constants {
 
     public static final int playerBackImageOffsetRGB0 = 8, playerBackImageOffset1 = 3, playerBackImageOffsetYellow0 = 3;
 
-    public static final int oldManBackImageOffset = 5;
+    public static final int oldManBackImageOffsetRGB = 5, oldManBackImageOffsetYellow = -14, oakBackImageOffset = -7;
 
     public static final Type[] typeTable = constructTypeTable();
 
