@@ -2820,9 +2820,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: the Japanese GS do not work for unknown reason. Does their dudeback not come immediately after chris?
-        //  Japanese Crystal ALSO does not work, though seemingly for some other reason
-        return romEntry.isNonJapanese();
+        return true;
     }
 
     @Override

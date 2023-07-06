@@ -2618,7 +2618,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: do the prof. oak stuff for yellow, the JP games probably can't get support due to extreme space issues
+        // The JP games probably can't get support due to extreme space issues.
+        // They would need a more powerful space handling system (than DataRewriter) or even ROM expansion.
         return romEntry.isNonJapanese();
     }
 
