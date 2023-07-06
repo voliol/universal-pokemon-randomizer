@@ -2240,9 +2240,13 @@ public class NewRandomizerGUI {
 
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
-                        cpgUnchangedRadioButton, cpgCustomRadioButton, cpgRandomButton)
+                        cpgUnchangedRadioButton, cpgCustomRadioButton, cpgRandomButton,
+                        cpgReplaceRadioButton1, cpgReplaceRadioButton2)
                 .forEach(this::setInitialButtonState);
-        // TODO: initial state for the cpg combobox/info window
+        cpgComboBox.setVisible(true);
+        cpgComboBox.setEnabled(false);
+        cpgCustomInfo.setVisible(true);
+        cpgCustomInfo.setEnabled(false);
 
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
 				miscFastestTextCheckBox, miscRunningShoesIndoorsCheckBox, miscRandomizePCPotionCheckBox,
