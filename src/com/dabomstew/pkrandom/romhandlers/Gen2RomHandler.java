@@ -2867,7 +2867,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Settings.PlayerCharacterMod toReplace) {
         int trainerCardOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "TrainerCardImage");
-        writeImage(trainerCardOffset, trainerCardImage);
+        // the trainer card image has different column modes in GS / Crystal, for whatever reason
+        writeImage(trainerCardOffset, new GBCImage(trainerCardImage, romEntry.isCrystal()));
     }
 
     public void rewriteKrisBackImage(GBCImage krisBack) {
