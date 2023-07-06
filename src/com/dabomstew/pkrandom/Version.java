@@ -29,8 +29,8 @@ import java.util.Map;
 
 public class Version {
     // TODO: come up with some clever way of dealing with versions, and the V branch.
-    public static final int VERSION = 323; // Increment by 1 for new version. Updated for 4.6.0 + V0.9.1.
-    public static final String VERSION_STRING = "4.6.0 + V0.9.1";
+    public static final int VERSION = 324; // Increment by 1 for new version. Updated for 4.6.0 + V0.9.1.
+    public static final String VERSION_STRING = "4.6.0 + V0.9.2";
 
     public static final Map<Integer,String> oldVersions = setupVersionsMap();
 
@@ -64,6 +64,7 @@ public class Version {
         map.put(320, "4.5.1");
         map.put(321, "4.6.0");
         map.put(322, "4.6.0 + V0.9.0");
+        map.put(323, "4.6.0 + V0.9.1");
 
         // Latest version - when version is updated, add the old version as an explicit put
         map.put(VERSION, VERSION_STRING);
