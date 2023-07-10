@@ -3,6 +3,8 @@ package com.dabomstew.pkrandom.graphics.packs;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
+import com.dabomstew.pkrandom.graphics.GBAImage;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 // TODO: non-abstract classes for RSE and FRLG
 public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
@@ -21,6 +23,8 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
     private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT * 3 * 3;
     private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT * 3 * 4;
 
+    private final static int PALETTE_SIZE = 16;
+
     private final GBAImage front;
     private final GBAImage back;
     private final GBAImage walk;
@@ -29,6 +33,10 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
     private final GBAImage fish;
     private final GBAImage sit;
     private final GBAImage mapIcon;
+
+    private final Palette normalSpritePalette;
+    private final Palette reflectionSpritePalette;
+    private final Palette mapIconPalette;
 
     public Gen3PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
@@ -40,6 +48,9 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         this.fish = initFish();
         this.sit = initSit();
         this.mapIcon = initMapIcon();
+        this.normalSpritePalette = initNormalSpritePalette();
+        this.reflectionSpritePalette = initReflectionSpritePalette();
+        this.mapIconPalette = initMapIconPalette();
     }
 
     private GBAImage initFront() {
@@ -88,7 +99,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
     private GBAImage initRun() {
         BufferedImage base = readImage("RunSprite");
         if (base == null) {
-            return null;
+            return null; // TODO: use the walk sprite if it exists, and this doesn't
         }
         GBAImage run = new GBAImage(base);
         if (run.getWidthInTiles() * run.getHeightInTiles() != RUN_SPRITE_TILE_AMOUNT) {
@@ -150,6 +161,30 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         return mapIcon;
+    }
+
+    private Palette initNormalSpritePalette() {
+        Palette palette = readPalette("SpritePalette");
+        if (palette == null && hasWalkSprite()) {
+            palette = walk.getPalette();
+        }
+        return palette;
+    }
+
+    private Palette initReflectionSpritePalette() {
+        Palette palette = readPalette("SpriteReflectionPalette");
+        if (palette == null) {
+            palette = normalSpritePalette; // TODO: auto-soften the palette
+        }
+        return palette;
+    }
+
+    private Palette initMapIconPalette() {
+        Palette palette = readPalette("MapIconPalette");
+        if (palette == null && hasMapIcon()) {
+            palette = mapIcon.getPalette();
+        }
+        return palette;
     }
 
     public boolean hasFrontImage() {
@@ -216,9 +251,34 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         return mapIcon;
     }
 
+    public Palette getNormalSpritePalette() {
+        return normalSpritePalette;
+    }
+
+    public Palette getReflectionSpritePalette() {
+        return reflectionSpritePalette;
+    }
+
+    public Palette getMapIconPalette() {
+        return mapIconPalette;
+    }
+
     @Override
     public List<BufferedImage> getSampleImages() {
         return Arrays.asList(getFrontImage(), getBackImage(), getWalkSprite(), getBikeSprite());
+    }
+
+    @Override
+    protected Palette readPalette(String key) {
+        Palette palette = super.readPalette(key);
+        if (palette == null) {
+            return null;
+        }
+        if (palette.size() != PALETTE_SIZE) {
+            System.out.println("Invalid palette size");
+            return null;
+        }
+        return palette;
     }
 
 }
