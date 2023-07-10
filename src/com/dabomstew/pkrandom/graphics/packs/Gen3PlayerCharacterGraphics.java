@@ -1,178 +1,224 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.graphics.palettes.Palette;
-
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.List;
 
-// TODO: does it even make sense to have a unified class for all of Gen3? Probably not?
-public class Gen3PlayerCharacterGraphics extends PlayerCharacterGraphics {
+// TODO: non-abstract classes for RSE and FRLG
+public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
 
-	// TODO: are these correct/indicative?
-	private static final int SMALL_SPRITE_WIDTH = 16;
-	private static final int SMALL_SPRITE_HEIGHT = 16;
-	private static final int MEDIUM_SPRITE_WIDTH = 16;
-	private static final int MEDIUM_SPRITE_HEIGHT = 32;
+    private final static int FRONT_IMAGE_DIMENSIONS = 8;
+    private final static int MAP_ICON_DIMENSIONS = 1;
 
-	private final String playerToReplaceName;
+    protected final static int MEDIUM_SPRITE_WIDTH = 2;
+    protected final static int MEDIUM_SPRITE_HEIGHT = 4;
+    protected final static int BIG_SPRITE_WIDTH = 4;
+    protected final static int BIG_SPRITE_HEIGHT = 4;
 
-	private BufferedImage runImage = null;
-	private BufferedImage acroBikeImage = null;
-	// TODO: standardize names, should either be "run, surf" or "running, surfing"
-	// TODO: should "surfing" rather be "sitting"?
-	private BufferedImage surfingImage = null;
-	private BufferedImage fieldMoveImage = null;
-	private BufferedImage fishingImage = null;
-	private BufferedImage wateringImage = null;
-	private BufferedImage decoratingImage = null;
+    // amount of tiles shown at once * 3 directions * n frames/direction
+    private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_WIDTH * MEDIUM_SPRITE_HEIGHT * 3 * 3;
+    private final static int RUN_SPRITE_TILE_AMOUNT = WALK_SPRITE_TILE_AMOUNT;
+    private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT * 3 * 3;
+    private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT * 3 * 4;
 
-	private BufferedImage underwaterImage = null;
+    private final GBAImage front;
+    private final GBAImage back;
+    private final GBAImage walk;
+    private final GBAImage run;
+    private final GBAImage bike; // acro bike
+    private final GBAImage fish;
+    private final GBAImage sit;
+    private final GBAImage mapIcon;
 
-	private Palette overworldReflectionPalette = null;
+    public Gen3PlayerCharacterGraphics(GraphicsPackEntry entry) {
+        super(entry);
+        this.front = initFront();
+        this.back = initBack();
+        this.walk = initWalk();
+        this.run = initRun();
+        this.bike = initBike();
+        this.fish = initFish();
+        this.sit = initSit();
+        this.mapIcon = initMapIcon();
+    }
 
-	private final BufferedImage mapIconImage;
+    private GBAImage initFront() {
+        BufferedImage base = readImage("FrontImage");
+        if (base == null) {
+            return null;
+        }
+        GBAImage front = new GBAImage(base, true);
+        if (front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS || front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS) {
+            System.out.println("Invalid front image dimensions");
+            return null;
+        }
+        return front;
+    }
 
-	public Gen3PlayerCharacterGraphics(String name, String playerToReplaceName) {
-		super(name);
-		this.playerToReplaceName = playerToReplaceName;
+    private GBAImage initBack() {
+        BufferedImage base = readImage("BackImage");
+        if (base == null) {
+            return null;
+        }
+        GBAImage back = new GBAImage(base, true);
+        if (back.getWidthInTiles() != getBackImageWidth() || back.getWidthInTiles() != getBackImageHeight()) {
+            System.out.println("Invalid back image dimensions");
+            return null;
+        }
+        return back;
+    }
 
-		// TODO: size check these images
-		// TODO: auto-reindex the palettes if needed
+    protected abstract int getBackImageWidth();
 
-		setFrontImage(loadImage("front_pic.png"));
-		setBackImage(loadImage("back_pic.png"));
+    protected abstract int getBackImageHeight();
 
-		loadWalkAndRunImages();
-		loadBikeImages();
+    private GBAImage initWalk() {
+        BufferedImage base = readImage("WalkSprite");
+        if (base == null) {
+            return null;
+        }
+        GBAImage walk = new GBAImage(base);
+        if (walk.getWidthInTiles() * walk.getHeightInTiles() != WALK_SPRITE_TILE_AMOUNT) {
+            System.out.println("Invalid walk sprite dimensions");
+            return null;
+        }
+        return walk;
+    }
 
-		this.surfingImage = loadImage("surfing.png");
-		this.fieldMoveImage = loadImage("field_move.png");
-		this.fishingImage = loadImage("fishing.png");
-		this.wateringImage = loadImage("watering.png");
-		this.decoratingImage = loadImage("decorating.png", MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
+    private GBAImage initRun() {
+        BufferedImage base = readImage("RunSprite");
+        if (base == null) {
+            return null;
+        }
+        GBAImage run = new GBAImage(base);
+        if (run.getWidthInTiles() * run.getHeightInTiles() != RUN_SPRITE_TILE_AMOUNT) {
+            System.out.println("Invalid run sprite dimensions");
+            return null;
+        }
+        return run;
+    }
 
-		this.overworldReflectionPalette = loadPalette("reflection.pal");
+    private GBAImage initBike() {
+        BufferedImage base = readImage("BikeSprite");
+        if (base == null) {
+            return null;
+        }
+        GBAImage bike = new GBAImage(base);
+        if (bike.getWidthInTiles() * bike.getHeightInTiles() != BIKE_SPRITE_TILE_AMOUNT) {
+            System.out.println("Invalid bike sprite dimensions");
+            return null;
+        }
+        return bike;
+    }
 
-		this.underwaterImage = loadImage("underwater.png");
+    private GBAImage initFish() {
+        BufferedImage base = readImage("FishSprite");
+        if (base == null) {
+            return null;
+        }
+        GBAImage fish = new GBAImage(base);
+        if (fish.getWidthInTiles() * fish.getHeightInTiles() != FISH_SPRITE_TILE_AMOUNT) {
+            System.out.println("Invalid fish sprite dimensions");
+            return null;
+        }
+        return fish;
+    }
 
-		this.mapIconImage = loadImage("icon.png", SMALL_SPRITE_WIDTH, SMALL_SPRITE_HEIGHT);
-	}
+    private GBAImage initSit() {
+        BufferedImage base = readImage("BackImage");
+        if (base == null) {
+            return null;
+        }
+        GBAImage sit = new GBAImage(base);
+        if (sit.getWidthInTiles() * sit.getHeightInTiles() != getSitTileAmount()) {
+            System.out.println("Invalid sit sprite dimensions");
+            return null;
+        }
+        return sit;
+    }
 
-	private void loadWalkAndRunImages() {
-		// TODO: support vertically laid out sources
-		// TODO: support whatever pokefirered has, with combined surfing/running
-		BufferedImage normal = loadImage("normal.png");
-		BufferedImage walk, run;
-		if (normal != null) {
-			walk = normal.getSubimage(0, 0, 144, 32); // pokeruby style
-			run = normal.getSubimage(144, 0, 144, 32);
-		} else {
-			walk = loadImage("walking.png"); // pokeemerald style
-			run = loadImage("running.png");
-		}
-		setWalkImage(walk);
-		this.runImage = run;
-	}
+    protected abstract int getSitTileAmount();
 
-	private void loadBikeImages() {
-		BufferedImage mach = loadImage("mach_bike.png"); // pokeruby/pokeemerald style
-		if (mach == null) {
-			mach = loadImage("bike.png"); // pokefirered style
-		}
-		setBikeImage(mach);
-		this.acroBikeImage = loadImage("acro_bike.png");
-	}
+    private GBAImage initMapIcon() {
+        BufferedImage base = readImage("MapIcon");
+        if (base == null) {
+            return null;
+        }
+        GBAImage mapIcon = new GBAImage(base, true);
+        if (back.getWidthInTiles() != MAP_ICON_DIMENSIONS || back.getWidthInTiles() != MAP_ICON_DIMENSIONS) {
+            System.out.println("Invalid map icon dimensions");
+            return null;
+        }
+        return mapIcon;
+    }
 
-	public String getPlayerToReplaceName() {
-		return playerToReplaceName;
-	}
+    public boolean hasFrontImage() {
+        return front != null;
+    }
 
-	public BufferedImage getRunImage() {
-		return runImage;
-	}
+    public GBAImage getFrontImage() {
+        return front;
+    }
 
-	/**
-	 * Alias for getBikeImage().
-	 */
-	public BufferedImage getMachBikeImage() {
-		return getBikeImage();
-	}
+    public boolean hasBackImage() {
+        return back != null;
+    }
 
-	public BufferedImage getAcroBikeImage() {
-		return acroBikeImage;
-	}
+    public GBAImage getBackImage() {
+        return back;
+    }
 
-	public BufferedImage getFieldMoveImage() {
-		return fieldMoveImage;
-	}
+    public boolean hasWalkSprite() {
+        return walk != null;
+    }
 
-	public BufferedImage getFishingImage() {
-		return fishingImage;
-	}
+    public GBAImage getWalkSprite() {
+        return walk;
+    }
 
-	public BufferedImage getWateringImage() {
-		return wateringImage;
-	}
+    public boolean hasRunSprite() {
+        return run != null;
+    }
 
-	public BufferedImage getDecoratingImage() {
-		return decoratingImage;
-	}
+    public GBAImage getRunSprite() {
+        return run;
+    }
 
-	public Palette getOverworldNormalPalette() {
-		BufferedImage walk = getWalkImage();
-		return Palette.readImagePalette(walk);
-	}
+    public boolean hasBikeSprite() {
+        return bike != null;
+    }
 
-	public Palette getOverworldReflectionPalette() {
-		// TODO: auto-soften reflection if not pre-set
-		return overworldReflectionPalette != null ? overworldReflectionPalette : getOverworldNormalPalette();
-	}
+    public GBAImage getBikeSprite() {
+        return bike;
+    }
 
-	public BufferedImage getMapIconImage() {
-		return mapIconImage;
-	}
+    public boolean hasFishSprite() {
+        return fish != null;
+    }
 
-	public Palette getMapIconPalette() {
-		BufferedImage walk = getMapIconImage();
-		return Palette.readImagePalette(walk);
-	}
+    public GBAImage getFishSprite() {
+        return fish;
+    }
 
-	@Override
-	public BufferedImage[] getSampleImages() {
-		return new BufferedImage[] { getFrontImage(), getWalkImage() };
-	}
+    public boolean hasSitSprite() {
+        return sit != null;
+    }
 
-	/**
-	 * Gets the frames of the player surfing/sitting, as an array of
-	 * {@link BufferedImage}s. The array may contain duplicate and/or null values.
-	 * The order is:<br>
-	 * [down_0, up_0, side_0, down_1, up_1, side_1, down_2, up_2, side_2, down_jump,
-	 * up_jump, side_jump]
-	 */
-	public BufferedImage[] getSurfingImages() {
-		BufferedImage[] frames;
-		BufferedImage[] split = GFXFunctions.splitImage(surfingImage, 32, 32);
-		if (split.length == 12) { // all frames in the order given above
-			frames = split;
-		} else if (split.length == 6) { // [down_012, down_jump, up_012, up_jump, side_012, side_jump]
-			frames = new BufferedImage[] { 
-					split[0], split[2], split[4], split[0], split[2], split[4], 
-					split[0], split[2], split[4], split[1], split[3], split[5] };
-		} else {
-			frames = null;
-		}
-		return frames;
-	}
+    public GBAImage getSitSprite() {
+        return sit;
+    }
 
-	/**
-	 * Gets the frames of the player underwater, as an array of
-	 * {@link BufferedImage}s. The array may contain duplicate and/or null values.
-	 * The order is:<br>
-	 * [down_0, up_0, side_0, down_1, up_1, side_1, down_2, up_2, side_2]
-	 */
-	public BufferedImage[] getUnderwaterImages() {
-		// TODO
-		return null;
-	}
+    public boolean hasMapIcon() {
+        return mapIcon != null;
+    }
+
+    public GBAImage getMapIcon() {
+        return mapIcon;
+    }
+
+    @Override
+    public List<BufferedImage> getSampleImages() {
+        return Arrays.asList(getFrontImage(), getBackImage(), getWalkSprite(), getBikeSprite());
+    }
 
 }
