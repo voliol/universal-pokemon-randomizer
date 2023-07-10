@@ -2700,6 +2700,12 @@ public class NewRandomizerGUI {
                             comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry));
                         } else if (entry.getStringValue("RomType").equalsIgnoreCase("Gen2") && romHandler.generationOfPokemon() == 2) {
                             comboBoxModel.addElement(new Gen2PlayerCharacterGraphics(entry));
+                        } else if (romHandler.generationOfPokemon() == 3) {
+                            if (entry.getStringValue("RomType").equalsIgnoreCase("RSE")) {
+                                comboBoxModel.addElement(new RSEPlayerCharacterGraphics(entry));
+                            } else if (entry.getStringValue("RomType").equalsIgnoreCase("FRLG")) {
+                                comboBoxModel.addElement(new FRLGPlayerCharacterGraphics(entry));
+                            }
                         }
                     });
                 } catch (Exception ignored) {

@@ -28,7 +28,9 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
+import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
@@ -4042,6 +4044,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
             rewriteCompressedPalette(shinyPalPointerOffset, pk.getShinyPalette());
         }
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (!(unchecked instanceof Gen3PlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+        // TODO
     }
 
     /**
