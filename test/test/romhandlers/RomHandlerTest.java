@@ -11,7 +11,6 @@ import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -43,7 +42,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2, 3, 4, 5, 6, 7}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -518,6 +517,17 @@ public class RomHandlerTest {
         gbRomHandler.saveTrainers();
         gbRomHandler.loadTrainers();
         assertEquals(before, gbRomHandler.getTrainers());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void trainersHaveCustomMovesAfterPickingTrainerMovesets(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 3);
+        loadROM(romName);
+        romHandler.pickTrainerMovesets(new Settings());
+        for (Trainer t : romHandler.getTrainers()) {
+            assertTrue(t.pokemonHaveCustomMoves());
+        }
     }
 
     @ParameterizedTest

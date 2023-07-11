@@ -317,7 +317,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			originalPalettes.put(pk, pk.getNormalPalette());
 		}
 		paletteDescriptions
-				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY, false).toArray(new PaletteDescription[0]));
+				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY).toArray(new PaletteDescription[0]));
 		paletteDescriptions.setSelectedIndex(0);
 
 	}

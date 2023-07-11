@@ -58,6 +58,12 @@ import com.dabomstew.pkrandom.pokemon.PokemonSet;
 public class Gen3to5PaletteHandler extends PaletteHandler {
 
 	/**
+	 * A setting to use when testing the palette description files.
+	 * If false, the corresponding source file is read instead of the compiled resource.
+	 */
+	private final static boolean COMPILED = true;
+
+	/**
 	 * An identifier for the related resource files. ROMs that share a
 	 * paletteFilesID also share all resources. If they shouldn't, different ROMs
 	 * must be assigned separate IDs.
@@ -109,7 +115,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
 		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
-		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes", true);
+		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");
 		populatePokemonPalettes(paletteDescriptions);
 
 	}
@@ -160,14 +166,12 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 	 * 
 	 * @param fileKey         The key to this particular kind of file, e.g.
 	 *                        "pokePalettes".
-	 * @param useWhenCompiled If false, the corresponding source file is read
-	 *                        instead of the compiled resource.
 	 */
-	public List<PaletteDescription> getPaletteDescriptions(String fileKey, boolean useWhenCompiled) {
+	public List<PaletteDescription> getPaletteDescriptions(String fileKey) {
 		List<PaletteDescription> paletteDescriptions = new ArrayList<>();
 
 		Reader reader;
-		if (useWhenCompiled) {
+		if (COMPILED) {
 			InputStream infi = getClass().getResourceAsStream(getResourceAdress(fileKey));
 			reader = new InputStreamReader(infi);
 		} else {
@@ -187,7 +191,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		} catch (java.io.IOException ioe) {
 			// using RandomizerIOException because it is unchecked
 			throw new RandomizerIOException("Could not read palette description file "
-					+ (useWhenCompiled ? getResourceAdress(fileKey) : getSourceFileAdress(fileKey)) + ".");
+					+ (COMPILED ? getResourceAdress(fileKey) : getSourceFileAdress(fileKey)) + ".");
 		}
 
 		System.out.println(paletteDescriptions);
