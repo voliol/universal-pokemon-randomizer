@@ -1,5 +1,0 @@
-[NAME:Brendan (Ruby/Sapphire)]
-[DESCRIPTION:One of the vanilla player characters in Pokémon Ruby/Sapphire.]
-[FROM:Pokémon]
-[CREATOR:Gamefreak]
-[CATEGORY:POKEMON]

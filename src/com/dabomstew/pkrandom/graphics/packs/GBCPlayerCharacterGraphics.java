@@ -33,7 +33,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBCImage front = new GBCImage(base, true);
-        if (front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS || front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS) {
+        if (front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS || front.getHeightInTiles() != FRONT_IMAGE_DIMENSIONS) {
             System.out.println("Invalid front image dimensions");
             return null;
         }
@@ -46,7 +46,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBCImage back = new GBCImage(base, true);
-        if (back.getWidthInTiles() != getBackImageDimensions() || back.getWidthInTiles() != getBackImageDimensions()) {
+        if (back.getWidthInTiles() != getBackImageDimensions() || back.getHeightInTiles() != getBackImageDimensions()) {
             System.out.println("Invalid back image dimensions");
             return null;
         }

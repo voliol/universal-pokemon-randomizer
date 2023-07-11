@@ -4047,6 +4047,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public boolean hasCustomPlayerGraphicsSupport() {
+        return true; // TODO: make reality
+    }
+
+    @Override
     public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
         if (!(unchecked instanceof Gen3PlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");

@@ -45,7 +45,7 @@ public class GBAImage extends BufferedImage {
     }
 
     private int[] initColors() {
-        int[] colors = new int[4];
+        int[] colors = new int[16];
         IndexColorModel colorModel = (IndexColorModel) getColorModel();
         colorModel.getRGBs(colors);
         return colors;

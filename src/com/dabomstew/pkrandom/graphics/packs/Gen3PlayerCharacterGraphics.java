@@ -3,25 +3,29 @@ package com.dabomstew.pkrandom.graphics.packs;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
+
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.GBAImage;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
-// TODO: non-abstract classes for RSE and FRLG
 public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
 
     private final static int FRONT_IMAGE_DIMENSIONS = 8;
-    private final static int MAP_ICON_DIMENSIONS = 1;
+    private final static int MAP_ICON_DIMENSIONS = 2;
 
     protected final static int MEDIUM_SPRITE_WIDTH = 2;
     protected final static int MEDIUM_SPRITE_HEIGHT = 4;
+    protected final static int MEDIUM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_WIDTH * MEDIUM_SPRITE_HEIGHT;
     protected final static int BIG_SPRITE_WIDTH = 4;
     protected final static int BIG_SPRITE_HEIGHT = 4;
+    protected static final int BIG_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT;
 
     // amount of tiles shown at once * 3 directions * n frames/direction
-    private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_WIDTH * MEDIUM_SPRITE_HEIGHT * 3 * 3;
+    private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * 3 * 3;
     private final static int RUN_SPRITE_TILE_AMOUNT = WALK_SPRITE_TILE_AMOUNT;
-    private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT * 3 * 3;
-    private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT * 3 * 4;
+    private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3 * 3;
+    private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3 * 4;
+    private final static int SIT_JUMP_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3;
 
     private final static int PALETTE_SIZE = 16;
 
@@ -29,28 +33,28 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
     private final GBAImage back;
     private final GBAImage walk;
     private final GBAImage run;
-    private final GBAImage bike; // acro bike
+    private final GBAImage bike; // mach bike
     private final GBAImage fish;
     private final GBAImage sit;
+    private final GBAImage sitJump;
     private final GBAImage mapIcon;
 
     private final Palette normalSpritePalette;
     private final Palette reflectionSpritePalette;
-    private final Palette mapIconPalette;
 
     public Gen3PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
         this.front = initFront();
         this.back = initBack();
-        this.walk = initWalk();
+        this.walk = initSprite("WalkSprite", WALK_SPRITE_TILE_AMOUNT);
         this.run = initRun();
-        this.bike = initBike();
-        this.fish = initFish();
-        this.sit = initSit();
+        this.bike = initSprite("BikeSprite", BIKE_SPRITE_TILE_AMOUNT);
+        this.fish = initSprite("FishSprite", FISH_SPRITE_TILE_AMOUNT);
+        this.sit = initSprite("SitSprite", getSitTileAmount());
+        this.sitJump = initSprite("SitJumpSprite", SIT_JUMP_SPRITE_TILE_AMOUNT);
         this.mapIcon = initMapIcon();
         this.normalSpritePalette = initNormalSpritePalette();
         this.reflectionSpritePalette = initReflectionSpritePalette();
-        this.mapIconPalette = initMapIconPalette();
     }
 
     private GBAImage initFront() {
@@ -72,7 +76,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBAImage back = new GBAImage(base, true);
-        if (back.getWidthInTiles() != getBackImageWidth() || back.getWidthInTiles() != getBackImageHeight()) {
+        if (back.getWidthInTiles() != getBackImageWidth() || back.getHeightInTiles() != getBackImageHeight()) {
             System.out.println("Invalid back image dimensions");
             return null;
         }
@@ -83,69 +87,13 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
 
     protected abstract int getBackImageHeight();
 
-    private GBAImage initWalk() {
-        BufferedImage base = readImage("WalkSprite");
-        if (base == null) {
-            return null;
-        }
-        GBAImage walk = new GBAImage(base);
-        if (walk.getWidthInTiles() * walk.getHeightInTiles() != WALK_SPRITE_TILE_AMOUNT) {
-            System.out.println("Invalid walk sprite dimensions");
-            return null;
-        }
-        return walk;
-    }
 
     private GBAImage initRun() {
-        BufferedImage base = readImage("RunSprite");
-        if (base == null) {
-            return null; // TODO: use the walk sprite if it exists, and this doesn't
-        }
-        GBAImage run = new GBAImage(base);
-        if (run.getWidthInTiles() * run.getHeightInTiles() != RUN_SPRITE_TILE_AMOUNT) {
-            System.out.println("Invalid run sprite dimensions");
-            return null;
+        GBAImage run = initSprite("RunSprite", RUN_SPRITE_TILE_AMOUNT);
+        if (run == null) {
+            run = walk;
         }
         return run;
-    }
-
-    private GBAImage initBike() {
-        BufferedImage base = readImage("BikeSprite");
-        if (base == null) {
-            return null;
-        }
-        GBAImage bike = new GBAImage(base);
-        if (bike.getWidthInTiles() * bike.getHeightInTiles() != BIKE_SPRITE_TILE_AMOUNT) {
-            System.out.println("Invalid bike sprite dimensions");
-            return null;
-        }
-        return bike;
-    }
-
-    private GBAImage initFish() {
-        BufferedImage base = readImage("FishSprite");
-        if (base == null) {
-            return null;
-        }
-        GBAImage fish = new GBAImage(base);
-        if (fish.getWidthInTiles() * fish.getHeightInTiles() != FISH_SPRITE_TILE_AMOUNT) {
-            System.out.println("Invalid fish sprite dimensions");
-            return null;
-        }
-        return fish;
-    }
-
-    private GBAImage initSit() {
-        BufferedImage base = readImage("BackImage");
-        if (base == null) {
-            return null;
-        }
-        GBAImage sit = new GBAImage(base);
-        if (sit.getWidthInTiles() * sit.getHeightInTiles() != getSitTileAmount()) {
-            System.out.println("Invalid sit sprite dimensions");
-            return null;
-        }
-        return sit;
     }
 
     protected abstract int getSitTileAmount();
@@ -156,7 +104,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBAImage mapIcon = new GBAImage(base, true);
-        if (back.getWidthInTiles() != MAP_ICON_DIMENSIONS || back.getWidthInTiles() != MAP_ICON_DIMENSIONS) {
+        if (mapIcon.getWidthInTiles() != MAP_ICON_DIMENSIONS || mapIcon.getWidthInTiles() != MAP_ICON_DIMENSIONS) {
             System.out.println("Invalid map icon dimensions");
             return null;
         }
@@ -179,12 +127,17 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         return palette;
     }
 
-    private Palette initMapIconPalette() {
-        Palette palette = readPalette("MapIconPalette");
-        if (palette == null && hasMapIcon()) {
-            palette = mapIcon.getPalette();
+    protected GBAImage initSprite(String key, int tileAmount) {
+        BufferedImage base = readImage(key);
+        if (base == null) {
+            return null;
         }
-        return palette;
+        GBAImage sprite = new GBAImage(base);
+        if (sprite.getWidthInTiles() * sprite.getHeightInTiles() != tileAmount) {
+            System.out.println("Invalid " + key + " dimensions");
+            return null;
+        }
+        return sprite;
     }
 
     public boolean hasFrontImage() {
@@ -243,6 +196,14 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         return sit;
     }
 
+    public boolean hasSitJumpSprite() {
+        return sitJump != null;
+    }
+
+    public GBAImage getSitJumpSprite() {
+        return sitJump;
+    }
+
     public boolean hasMapIcon() {
         return mapIcon != null;
     }
@@ -259,13 +220,17 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         return reflectionSpritePalette;
     }
 
-    public Palette getMapIconPalette() {
-        return mapIconPalette;
+    private BufferedImage getBackImageSpriteForSample() {
+        return back == null ? null : back.getSubimageFromTileRect(0, 0, getBackImageWidth(), getBackImageWidth());
+    }
+
+    private BufferedImage getWalkSpriteForSample() {
+        return walk == null ? null : walk.getSubimageFromTileRect(0, 0, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
     }
 
     @Override
     public List<BufferedImage> getSampleImages() {
-        return Arrays.asList(getFrontImage(), getBackImage(), getWalkSprite(), getBikeSprite());
+        return Arrays.asList(getFrontImage(), getBackImageSpriteForSample(), getWalkSpriteForSample());
     }
 
     @Override
