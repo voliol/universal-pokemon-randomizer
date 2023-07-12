@@ -1,7 +1,6 @@
 package com.dabomstew.pkrandom.graphics;
 
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.awt.*;
@@ -28,7 +27,7 @@ public class GBAImage extends BufferedImage {
 
     public GBAImage(BufferedImage bim, boolean columnMode) {
         this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
-                Palette.readImagePaletteFromPixels(bim), columnMode); // TODO: is readImagePaletteFromPixels() appropriate?
+                Palette.readImagePalette(bim, 16), columnMode); // TODO: is readImagePaletteFromPixels() appropriate?
         if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
             throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
                     bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
@@ -66,8 +65,21 @@ public class GBAImage extends BufferedImage {
     }
 
     private void drawTileData(byte[] data) {
-        for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
-            // TODO; move from GFXFunctions
+        int dataNumTiles = data.length / TILE_SIZE / BPP;
+        int imageNumTiles = getWidthInTiles() * getHeightInTiles();
+        int next = 0;
+        for (int tile = 0; tile < Math.min(dataNumTiles, imageNumTiles); tile++) {
+            int tileX = columnMode ? tile / getHeightInTiles() : tile % getWidthInTiles();
+            int tileY = columnMode ? tile % getHeightInTiles() : tile / getWidthInTiles();
+            for (int yT = 0; yT < TILE_SIZE; yT++) {
+                for (int xT = 0; xT < TILE_SIZE; xT += 2) {
+                    int pixel1 = data[next] & 0xF;
+                    int pixel2 = (data[next] >>> BPP) & 0xF;
+                    setColor(tileX * TILE_SIZE + xT, tileY * TILE_SIZE + yT, pixel1);
+                    setColor(tileX * TILE_SIZE + xT + 1, tileY * TILE_SIZE + yT, pixel2);
+                    next++;
+                }
+            }
         }
     }
 
@@ -84,9 +96,23 @@ public class GBAImage extends BufferedImage {
     }
 
     public byte[] toBytes() {
-        byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
+        byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP]; // TODO: probably broken in some way
+        int numTiles = getWidthInTiles() * getHeightInTiles();
 
-        // TODO; move from GFXFunctions
+        int next = 0;
+        for (int tile = 0; tile < numTiles; tile++) {
+            int tileX = columnMode ? tile / getHeightInTiles() : tile % getWidthInTiles();
+            int tileY = columnMode ? tile % getHeightInTiles() : tile / getWidthInTiles();
+
+            for (int yT = 0; yT < TILE_SIZE; yT++) {
+                for (int xT = 0; xT < TILE_SIZE; xT += 2) {
+                    int pixel1 = getData().getSample(tileX * TILE_SIZE + xT, tileY * TILE_SIZE + yT, 0);
+                    int pixel2 = getData().getSample(tileX * TILE_SIZE + xT + 1, tileY * TILE_SIZE + yT, 0);
+                    data[next] = (byte) ((pixel2 << 4) + pixel1);
+                    next++;
+                }
+            }
+        }
 
         return data;
     }

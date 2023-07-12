@@ -133,7 +133,9 @@ public class GBCImage extends BufferedImage {
     }
 
     private void drawTileData(byte[] data) {
-        for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
+        int dataNumTiles = data.length / TILE_SIZE / BPP;
+        int imageNumTiles = getWidthInTiles() * getHeightInTiles();
+        for (int tile = 0; tile < Math.min(dataNumTiles, imageNumTiles); tile++) {
             int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
             int tileY = columnMode ? tile % getWidthInTiles() : tile / getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {
@@ -163,8 +165,9 @@ public class GBCImage extends BufferedImage {
 
     public byte[] toBytes() {
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
+        int numTiles = getWidthInTiles() * getHeightInTiles();
 
-        for (int tile = 0; tile < data.length / TILE_SIZE / BPP; tile++) {
+        for (int tile = 0; tile < numTiles; tile++) {
             int tileX = columnMode ? tile / getHeightInTiles() : tile % getWidthInTiles();
             int tileY = columnMode ? tile % getHeightInTiles() : tile / getWidthInTiles();
             for (int yT = 0; yT < 8; yT++) {

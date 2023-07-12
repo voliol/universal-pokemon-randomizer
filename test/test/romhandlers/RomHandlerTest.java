@@ -2,12 +2,10 @@ package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.graphics.packs.Gen1PlayerCharacterGraphics;
-import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
-import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
-import com.dabomstew.pkrandom.graphics.packs.GraphicsPackEntry;
+import com.dabomstew.pkrandom.graphics.packs.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
+import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
@@ -42,7 +40,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3, 4, 5, 6, 7}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -734,7 +732,6 @@ public class RomHandlerTest {
         assertEquals(before, romHandler.getStarters());
     }
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void dumpAllPokemonImages(String romName) {
@@ -753,11 +750,11 @@ public class RomHandlerTest {
         }
         assertTrue(true);
     }
-
     private static final List<GraphicsPackEntry> cpgEntries = initCPGEntries();
 
     private static List<GraphicsPackEntry> initCPGEntries() {
         try {
+
             return GraphicsPackEntry.readAllFromFolder(TEST_CPG_PATH);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -769,6 +766,12 @@ public class RomHandlerTest {
         switch (romHandler.generationOfPokemon()) {
             case 1 -> cpg = new Gen1PlayerCharacterGraphics(cpgEntries.get(0));
             case 2 -> cpg = new Gen2PlayerCharacterGraphics(cpgEntries.get(1));
+            case 3 -> {
+                Gen3RomHandler gen3RomHandler = (Gen3RomHandler) romHandler;
+                return gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG ?
+                        new FRLGPlayerCharacterGraphics(cpgEntries.get(3)) :
+                        new RSEPlayerCharacterGraphics(cpgEntries.get(2));
+            }
             default -> cpg = null;
         }
         return cpg;

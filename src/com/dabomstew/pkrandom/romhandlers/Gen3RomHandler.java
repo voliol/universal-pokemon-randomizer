@@ -28,6 +28,7 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
+import com.dabomstew.pkrandom.graphics.GBAImage;
 import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
@@ -4048,7 +4049,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        return true; // TODO: make reality
+        // TODO: make reality, and then support frlg as well
+        // TODO: rom entries seem to be missing for most versions
+        return romEntry.getRomType() != Gen3Constants.RomType_FRLG;
     }
 
     @Override
@@ -4056,7 +4059,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (!(unchecked instanceof Gen3PlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
-        // TODO
+        if (playerGraphics.hasFrontImage()) {
+            writeTrainerImage(toReplace.ordinal(), playerGraphics.getFrontImage());
+        }
+        if (playerGraphics.hasBackImage()) {
+            writeTrainerBackImage(toReplace.ordinal(), playerGraphics.getBackImage());
+        }
     }
 
     /**
@@ -4077,7 +4085,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         writeBytes(imageOffset, imageData);
     }
 
-    private void writeTrainerImage(int trainerNumber, BufferedImage image) {
+    private void writeTrainerImage(int trainerNumber, GBAImage image) {
         int imageTableOffset = romEntry.getIntValue("TrainerImages");
         int paletteTableOffset = romEntry.getIntValue("TrainerPalettes");
 
@@ -4087,7 +4095,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         rewriteCompressedPalette(palettePointerOffset, Palette.readImagePalette(image));
     }
 
-    private void writeTrainerBackImage(int trainerNumber, BufferedImage image) {
+    private void writeTrainerBackImage(int trainerNumber, GBAImage image) {
         int imageTableOffset = romEntry.getIntValue("TrainerBackImages");
         int imagePointerOffset = imageTableOffset + trainerNumber * 8;
         rewriteCompressedImage(imagePointerOffset, image);
@@ -4097,8 +4105,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         rewriteCompressedData(pointerOffset, palette.toBytes());
     }
 
-    private void rewriteCompressedImage(int pointerOffset, BufferedImage image) {
-        rewriteCompressedData(pointerOffset, GFXFunctions.readTiledImageData(image));
+    private void rewriteCompressedImage(int pointerOffset, GBAImage image) {
+        rewriteCompressedData(pointerOffset, image.toBytes());
     }
 
     /*
@@ -4198,34 +4206,37 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
             boolean includePalette) {
 
-        int num = pokedexToInternal[pk.getNumber()];
-        int sprites = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");
+        // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
 
-        int spriteOffset = readPointer(sprites + num * 8);
-        byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+        int num = pokedexToInternal[pk.getNumber()];
+        int tableOffset = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");
+
+        int imageOffset = readPointer(tableOffset + num * 8);
+        byte[] data = DSDecmp.Decompress(rom, imageOffset);
         // Uses the 0-index missingno sprite if the data failed to read, for debugging
         // purposes
-        if (trueSprite == null) {
-            spriteOffset = readPointer(sprites);
-            trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+        if (data == null) {
+            imageOffset = readPointer(tableOffset);
+            data = DSDecmp.Decompress(rom, imageOffset);
         }
 
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+        // Castform has a 64-color palette, 16 colors for each form.
+        if (pk.getNumber() == Species.castform) {
+            palette = new Palette(Arrays.copyOf(palette.toARGB(), 16));
+        }
+
+        // TODO: make this work
         int[] convPalette = palette.toARGB();
         if (transparentBackground) {
             convPalette[0] = 0;
         }
-        // Castform has a 64-color palette, 16 colors for each form.
-        if (pk.getNumber() == Species.castform) {
-        	convPalette = Arrays.copyOfRange(convPalette, 0, 16);
-        }
 
         // Make image, 4bpp
-        BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
-
+        GBAImage bim = new GBAImage(8, 8, palette, data);
         if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
+            for (int i = 0; i < palette.size(); i++) {
+                bim.setColor(i, 0, i);
             }
         }
 
