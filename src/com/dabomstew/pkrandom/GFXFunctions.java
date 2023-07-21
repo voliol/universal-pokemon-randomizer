@@ -233,10 +233,6 @@ public class GFXFunctions {
 			throw new IllegalArgumentException("Invalid input.");
 		}
 
-		if (bim.getRaster().getSampleModel().getSampleSize(0) != bpp) {
-			throw new IllegalArgumentException("Invalid input; image and bpp do not correspond.");
-		}
-
 		if (bim.getWidth() % tileWidth != 0 || bim.getHeight() % tileHeight != 0) {
 			throw new IllegalArgumentException(
 					"Invalid input; image must be dividable into " + tileWidth + "x" + tileHeight + " pixel tiles.");
