@@ -4092,7 +4092,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int imagePointerOffset = imageTableOffset + trainerNumber * 8;
         rewriteCompressedImage(imagePointerOffset, image);
         int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
-        rewriteCompressedPalette(palettePointerOffset, Palette.readImagePalette(image));
+        rewriteCompressedPalette(palettePointerOffset, image.getPalette());
     }
 
     private void writeTrainerBackImage(int trainerNumber, GBAImage image) {

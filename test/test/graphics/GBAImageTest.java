@@ -9,10 +9,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GBAImageTest {
 
@@ -53,7 +51,7 @@ public class GBAImageTest {
     @Test
     void toBytesMirrorsGFXFunction() {
         GBAImage a = new GBAImage(bim1);
-        assertTrue(Arrays.equals(GFXFunctions.readTiledImageData(a), a.toBytes()));
+        assertArrayEquals(GFXFunctions.readTiledImageData(a), a.toBytes());
     }
 
     @Test
@@ -66,6 +64,13 @@ public class GBAImageTest {
     @Test
     void toBytesPlusFromBytesCreatesEqualImageWithColumnModeTrue() {
         GBAImage a = new GBAImage(bim1, true);
+        GBAImage b = new GBAImage(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes(), true);
+        assertEquals(a, b);
+    }
+
+    @Test
+    void toBytesPlusFromBytesCreatesEqualImageWithNonIndexedBim() {
+        GBAImage a = new GBAImage(bim2, true);
         GBAImage b = new GBAImage(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes(), true);
         assertEquals(a, b);
     }

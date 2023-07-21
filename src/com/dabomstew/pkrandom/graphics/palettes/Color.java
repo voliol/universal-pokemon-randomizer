@@ -151,8 +151,16 @@ public class Color implements Cloneable {
 		this.b = color.b;
 	}
 
+	public Color(Color original) {
+		this.r = original.r;
+		this.g = original.g;
+		this.b = original.b;
+	}
+
 	@Override
+	@Deprecated
 	public Color clone() {
+		System.out.println("Color.clone() is deprecated. Use copy constructor instead.");
 		return new Color(r, g, b);
 	}
 

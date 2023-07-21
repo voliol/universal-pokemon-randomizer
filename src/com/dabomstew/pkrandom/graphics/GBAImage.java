@@ -27,7 +27,7 @@ public class GBAImage extends BufferedImage {
 
     public GBAImage(BufferedImage bim, boolean columnMode) {
         this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
-                Palette.readImagePalette(bim, 16), columnMode); // TODO: is readImagePaletteFromPixels() appropriate?
+                Palette.readImagePalette(bim, 16), columnMode);
         if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
             throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
                     bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
@@ -96,7 +96,7 @@ public class GBAImage extends BufferedImage {
     }
 
     public byte[] toBytes() {
-        byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP]; // TODO: probably broken in some way
+        byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
         int numTiles = getWidthInTiles() * getHeightInTiles();
 
         int next = 0;

@@ -22,6 +22,7 @@ package com.dabomstew.pkrandom.graphics.palettes;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -64,32 +65,39 @@ public class Palette implements Cloneable {
     }
 
     /**
-     * Reads the palette of an image with indexed colors, returning a Palette object
-     * with a size determined by the image.
-     *
-     * @param bim An image with indexed colors.
-     */
-    public static Palette readImagePalette(BufferedImage bim) {
-        return readImagePalette(bim, imagePaletteSize(bim));
-    }
-
-    /**
-     * Reads the palette of an image with indexed colors, returning a Palette object
+     * Reads the palette of an image, returning a {@link Palette} object
      * of set size.
      *
-     * @param bim  An image with indexed colors.
+     * @param bim An image with either indexed colors or not.
      * @param size The number of colors in the palette. Truncates the factual
      *             palette of the image if it is less than its length, or fills it
      *             out with the default Color if it is more.
      */
     public static Palette readImagePalette(BufferedImage bim, int size) {
+        Palette palette;
+        if (bim.getColorModel() instanceof IndexColorModel) {
+            palette = readImagePaletteFromIndexedColorModel(bim);
+        } else {
+            palette = readImagePaletteFromPixels(bim);
+        }
+        palette = new Palette(palette, size);
+
+        return palette;
+    }
+
+    /**
+     * Reads the palette of an image with indexed colors.
+     *
+     * @param bim  An image with indexed colors.
+     */
+    public static Palette readImagePaletteFromIndexedColorModel(BufferedImage bim) {
         if (bim.getRaster().getNumBands() != 1) {
             throw new IllegalArgumentException(
                     "Invalid input; image must have indexed colors (e.g. come from a .bmp file).");
         }
 
-        Palette palette = new Palette(size);
-        for (int i = 0; i < (Math.min(palette.size(), imagePaletteSize(bim))); i++) {
+        Palette palette = new Palette(imagePaletteSize(bim));
+        for (int i = 0; i < palette.size(); i++) {
             int argb = bim.getColorModel().getRGB(i);
             palette.set(i, new Color(argb));
         }
@@ -182,6 +190,20 @@ public class Palette implements Cloneable {
         this(bytesToARGBValues(bytes));
     }
 
+    public Palette(Palette original) {
+        this(original, original.size());
+    }
+
+    public Palette(Palette original, int size) {
+        this.colors = new Color[size];
+        for (int i = 0; i < Math.min(size, original.size()); i++) {
+            this.colors[i] = new Color(original.get(i));
+        }
+        for (int i = Math.min(size, original.size()); i < size; i++) {
+            this.colors[i] = new Color();
+        }
+    }
+
     /**
      * Gets the {@link Color} at index i.
      * @param i index of the color
@@ -227,7 +249,9 @@ public class Palette implements Cloneable {
     }
 
     @Override
+    @Deprecated
     public Palette clone() {
+        System.out.println("Palette.clone() is deprecated. Use copy constructor instead");
         Palette palette = new Palette(colors.length);
         for (int i = 0; i < colors.length; i++) {
             palette.set(i, colors[i].clone());
