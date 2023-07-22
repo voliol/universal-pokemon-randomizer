@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Gen1CmpTest {
 
-    private static final String IN_ADRESS = "compresstest/in";
-    private static final String OUT_ADRESS = "compresstest/out";
+    private static final String IN_ADRESS = "test/test_images/compresstest/in";
+    private static final String OUT_ADRESS = "test/test_images/compresstest/out";
     private static final String[] TEST_FILE_NAMES = new String[]{"testab", "testamogus", "test", "testbig", "testwhite",
             "testblack", "testgrays", "testrect", "abra", "aerodactyl", "alakazam", "arcanine",
             "articuno", "beedrill", "bellsprout", "blastoise", "bulbasaur", "butterfree", "caterpie", "chansey",
