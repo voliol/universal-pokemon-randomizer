@@ -183,6 +183,10 @@ public class Gen3Constants {
 
     public static final int emMeteorFallsStevenIndex = 804;
 
+    public static final int emBrendanFrontImageIndex = 71;
+
+    public static final int rsTrainerFrontPalettesOffset = 0x298, rsTrainerBackPalettesOffset = 0x18;
+
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
     private static Map<Integer,List<Integer>> setupAbilityVariations() {

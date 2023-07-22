@@ -29,7 +29,6 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.graphics.GBAImage;
-import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
@@ -207,6 +206,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         addPointerBlocksToRomEntry();
         addMoveTutorInfoToRomEntry();
+        addTrainerGraphicsInfoToRomEntry();
     }
 
     private void addPointerBlocksToRomEntry() {
@@ -247,6 +247,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (romEntry.getRomType() == Gen3Constants.RomType_Em || romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             romEntry.putIntValue("MoveTutorCompatibility",
                     romEntry.getIntValue("MoveTutorData") + romEntry.getIntValue("MoveTutorMoves") * 2);
+        }
+    }
+
+    private void addTrainerGraphicsInfoToRomEntry() {
+        // TODO: for emerald and frlg too (might be identical)
+        if (romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
+                romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
+            if (romEntry.getIntValue("TrainerFrontImages") != 0) {
+                int value = romEntry.getIntValue("TrainerFrontImages") + Gen3Constants.rsTrainerFrontPalettesOffset;
+                romEntry.putIntValue("TrainerFrontPalettes", value);
+            }
+            if (romEntry.getIntValue("TrainerBackImages") != 0) {
+                int value = romEntry.getIntValue("TrainerBackImages") + Gen3Constants.rsTrainerBackPalettesOffset;
+                romEntry.putIntValue("TrainerBackPalettes", value);
+            }
         }
     }
 
@@ -4034,6 +4049,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
+        // TODO: special case for Unown
         int normalPaletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getIntValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
@@ -4049,15 +4065,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: make reality, and then support frlg as well
+        // TODO: make reality, and then support emerald and frlg as well
         // TODO: rom entries seem to be missing for most versions
-        return romEntry.getRomType() != Gen3Constants.RomType_FRLG;
+        return romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
+                romEntry.getRomType() == Gen3Constants.RomType_Sapp;
     }
 
     @Override
     public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
         if (!(unchecked instanceof Gen3PlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+        if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
+            separateFrontAndBackPlayerPalettes();
         }
         if (playerGraphics.hasFrontImage()) {
             writeTrainerImage(toReplace.ordinal(), playerGraphics.getFrontImage());
@@ -4085,20 +4105,41 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         writeBytes(imageOffset, imageData);
     }
 
+    private void separateFrontAndBackPlayerPalettes() {
+        int frontTableOffset = romEntry.getIntValue("TrainerFrontPalettes");
+
+        for (int i = 0; i <= 1; i++) {
+            int trainerImageNum = romEntry.getRomType() ==
+                    Gen3Constants.RomType_Em ? i + Gen3Constants.emBrendanFrontImageIndex : i;
+            int frontPointerOffset = frontTableOffset + trainerImageNum * 8;
+            Palette palette = readPalette(readPointer(frontPointerOffset));
+            byte[] paletteBytes = DSCmp.compressLZ10(palette.toBytes());
+            int newOffset = findAndUnfreeSpace(paletteBytes.length);
+            writeBytes(newOffset, paletteBytes);
+            writePointer(frontPointerOffset, newOffset);
+        }
+    }
+
     private void writeTrainerImage(int trainerNumber, GBAImage image) {
-        int imageTableOffset = romEntry.getIntValue("TrainerImages");
-        int paletteTableOffset = romEntry.getIntValue("TrainerPalettes");
+        int imageTableOffset = romEntry.getIntValue("TrainerFrontImages");
+        int paletteTableOffset = romEntry.getIntValue("TrainerFrontPalettes");
 
         int imagePointerOffset = imageTableOffset + trainerNumber * 8;
         rewriteCompressedImage(imagePointerOffset, image);
+
         int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
         rewriteCompressedPalette(palettePointerOffset, image.getPalette());
     }
 
     private void writeTrainerBackImage(int trainerNumber, GBAImage image) {
         int imageTableOffset = romEntry.getIntValue("TrainerBackImages");
+        int paletteTableOffset = romEntry.getIntValue("TrainerBackPalettes");
+
         int imagePointerOffset = imageTableOffset + trainerNumber * 8;
         rewriteCompressedImage(imagePointerOffset, image);
+
+        int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
+        rewriteCompressedPalette(palettePointerOffset, image.getPalette());
     }
 
     private void rewriteCompressedPalette(int pointerOffset, Palette palette) {
