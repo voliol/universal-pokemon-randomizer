@@ -4085,24 +4085,25 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (playerGraphics.hasBackImage()) {
             writeTrainerBackImage(toReplace.ordinal(), playerGraphics.getBackImage());
         }
-    }
-
-    /**
-     * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
-     * The given image must be as large as the one it is overwriting.
-     */
-    private void writeOverworldImage(int imageNumber, BufferedImage image) {
-        int imageTableOffset = romEntry.getIntValue("OverworldSpriteImages");
-
-        int imagePointerOffset = imageTableOffset + imageNumber * 8;
-        int imageOffset = readPointer(imagePointerOffset);
-        int imageLength = readWord(imagePointerOffset + 4);
-
-        byte[] imageData = GFXFunctions.readTiledImageData(image);
-        if (imageData.length != imageLength) {
-            throw new IllegalArgumentException("Wrong image size.");
+        if (playerGraphics.hasWalkSprite()) {
+            rewritePlayerWalkSprite(playerGraphics.getWalkSprite(), toReplace);
+            rewritePlayerRunSprite(playerGraphics.getRunSprite(), toReplace);
         }
-        writeBytes(imageOffset, imageData);
+        if (playerGraphics.hasBikeSprite()) {
+            rewritePlayerBikeSprite(playerGraphics.getBikeSprite(), toReplace);
+        }
+        if (playerGraphics.hasFishSprite()) {
+            rewritePlayerFishSprite(playerGraphics.getFishSprite(), toReplace);
+        }
+        if (playerGraphics.hasSitSprite()) {
+            rewritePlayerSitSprite(playerGraphics.getSitSprite(), toReplace);
+        }
+        if (playerGraphics.hasSitJumpSprite()) {
+            rewritePlayerSitJumpSprite(playerGraphics.getSitJumpSprite(), toReplace);
+        }
+        if (playerGraphics.hasMapIcon()) {
+            rewritePlayerMapIcon(playerGraphics.getMapIcon(), toReplace);
+        }
     }
 
     private void separateFrontAndBackPlayerPalettes() {
@@ -4140,6 +4141,55 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
         rewriteCompressedPalette(palettePointerOffset, image.getPalette());
+    }
+
+    private void rewritePlayerWalkSprite(GBAImage walkSprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO
+    }
+
+    private void rewritePlayerRunSprite(GBAImage runSprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO
+    }
+
+    private void rewritePlayerBikeSprite(GBAImage bikeSprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO
+    }
+
+    private void rewritePlayerFishSprite(GBAImage fishSprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO
+    }
+
+    private void rewritePlayerSitSprite(GBAImage sitSprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO
+    }
+
+    private void rewritePlayerSitJumpSprite(GBAImage sitJumpSprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO
+    }
+
+    /**
+     * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
+     * The given image must be as large as the one it is overwriting.
+     */
+    private void writeOverworldImage(int imageNumber, GBAImage image) {
+        int imageTableOffset = romEntry.getIntValue("OverworldSpriteImages");
+
+        int imagePointerOffset = imageTableOffset + imageNumber * 8;
+        int imageOffset = readPointer(imagePointerOffset);
+        int imageLength = readWord(imagePointerOffset + 4);
+
+        byte[] imageData = image.toBytes();
+        if (imageData.length != imageLength) {
+            throw new IllegalArgumentException("Wrong image size.");
+        }
+        writeBytes(imageOffset, imageData);
+    }
+
+    private void rewritePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
+        int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
+        int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
+        writeBytes(imageOffset, mapIcon.toBytes());
+        writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
     }
 
     private void rewriteCompressedPalette(int pointerOffset, Palette palette) {

@@ -164,10 +164,6 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         return walk;
     }
 
-    public boolean hasRunSprite() {
-        return run != null;
-    }
-
     public GBAImage getRunSprite() {
         return run;
     }

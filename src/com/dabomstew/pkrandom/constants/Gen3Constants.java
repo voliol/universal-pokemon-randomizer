@@ -183,6 +183,16 @@ public class Gen3Constants {
 
     public static final int emMeteorFallsStevenIndex = 804;
 
+    public static String rseGetName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Brendan";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "May";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. RSE only has two playable characters, Brendan and May.");
+        }
+    }
+
     public static final int emBrendanFrontImageIndex = 71;
 
     public static final int rsTrainerFrontPalettesOffset = 0x298, rsTrainerBackPalettesOffset = 0x18;
