@@ -9,11 +9,17 @@ public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
     private static final int SIT_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3;
 
-    private static final int ACRO_BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 27;
-    private static final int UNDERWATER_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 4;
-    private static final int WATERING_CAN_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 6;
-    private static final int DECORATE_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT;
-    private static final int FIELD_MOVE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 5;
+    public static final int ACRO_BIKE_SPRITE_FRAME_NUM = 27;
+    public static final int UNDERWATER_SPRITE_FRAME_NUM = 4;
+    public static final int WATERING_CAN_SPRITE_FRAME_NUM = 6;
+    public static final int DECORATE_SPRITE_FRAME_NUM = 1;
+    public static final int FIELD_MOVE_SPRITE_FRAME_NUM = 5;
+
+    private static final int ACRO_BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * ACRO_BIKE_SPRITE_FRAME_NUM;
+    private static final int UNDERWATER_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * UNDERWATER_SPRITE_FRAME_NUM;
+    private static final int WATERING_CAN_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * WATERING_CAN_SPRITE_FRAME_NUM;
+    private static final int DECORATE_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * DECORATE_SPRITE_FRAME_NUM;
+    private static final int FIELD_MOVE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * FIELD_MOVE_SPRITE_FRAME_NUM;
 
     private final GBAImage acroBike;
     private final GBAImage underwater;
