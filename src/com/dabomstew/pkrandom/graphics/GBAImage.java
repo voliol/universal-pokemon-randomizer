@@ -155,6 +155,33 @@ public class GBAImage extends BufferedImage {
         return new GBAImage(subimage, columnMode);
     }
 
+    /**
+     * Returns a subimage defined as a "frame", a rectangular region
+     * given by its index and dimensions. Throws an {@link IllegalArgumentException}
+     * if the dimensions of the BufferedImage are not divisible by the frame dimensions.
+     * <br><br>
+     * This method allows for easier handling of "sheets" of images, since the
+     * return is the same regardless whether the frames are laid out horizontally,
+     * vertically, or even in a 2D grid. Frames are read row-for-row, left-to-right,
+     * top to bottom. I.e.: <br>
+     * -----<br>
+     * |0|1|<br>
+     * |2|3|<br>
+     * -----<br>
+     *
+     * @param i the index of the frame
+     * @param w the width of a frame in tiles
+     * @param h the height of a frame in tiles
+     */
+    public GBAImage getFrameSubimage(int i, int w, int h) {
+        if (getWidthInTiles() % w != 0 || getHeightInTiles() % h != 0) {
+            throw new IllegalArgumentException("Image cannot be split into frames that are " + w + "x" + h + " tiles.");
+        }
+        int x = (i * w) % getWidthInTiles();
+        int y = ((i * w) / getWidthInTiles()) * h;
+        return getSubimageFromTileRect(x, y, w, h);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other instanceof GBAImage otherImage) {

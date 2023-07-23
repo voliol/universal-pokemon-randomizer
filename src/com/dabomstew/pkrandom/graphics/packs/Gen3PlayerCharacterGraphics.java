@@ -4,28 +4,34 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
-import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.GBAImage;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
-public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
+public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO: these class names are too long
 
     private final static int FRONT_IMAGE_DIMENSIONS = 8;
     private final static int MAP_ICON_DIMENSIONS = 2;
 
-    protected final static int MEDIUM_SPRITE_WIDTH = 2;
-    protected final static int MEDIUM_SPRITE_HEIGHT = 4;
-    protected final static int MEDIUM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_WIDTH * MEDIUM_SPRITE_HEIGHT;
-    protected final static int BIG_SPRITE_WIDTH = 4;
-    protected final static int BIG_SPRITE_HEIGHT = 4;
-    protected static final int BIG_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT;
+    public final static int MEDIUM_SPRITE_WIDTH = 2;
+    public final static int MEDIUM_SPRITE_HEIGHT = 4;
+    public final static int MEDIUM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_WIDTH * MEDIUM_SPRITE_HEIGHT;
+    public final static int BIG_SPRITE_WIDTH = 4;
+    public final static int BIG_SPRITE_HEIGHT = 4;
+    public static final int BIG_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT;
+
+    public final static int WALK_SPRITE_FRAME_NUM = 3 * 3;
+    public final static int RUN_SPRITE_FRAME_NUM = WALK_SPRITE_FRAME_NUM;
+    public final static int BIKE_SPRITE_FRAME_NUM = 3 * 3;
+    public final static int FISH_SPRITE_FRAME_NUM = 3 * 4;
+    public final static int SIT_SPRITE_FRAME_NUM = 3;
+    public final static int SIT_JUMP_FRAME_NUM = 3;
 
     // amount of tiles shown at once * 3 directions * n frames/direction
-    private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * 3 * 3;
-    private final static int RUN_SPRITE_TILE_AMOUNT = WALK_SPRITE_TILE_AMOUNT;
-    private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3 * 3;
-    private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3 * 4;
-    private final static int SIT_JUMP_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3;
+    private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * WALK_SPRITE_FRAME_NUM;
+    private final static int RUN_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * RUN_SPRITE_FRAME_NUM;
+    private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * BIKE_SPRITE_FRAME_NUM;
+    private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * FISH_SPRITE_FRAME_NUM;
+    private final static int SIT_JUMP_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * SIT_JUMP_FRAME_NUM;
 
     private final static int PALETTE_SIZE = 16;
 
@@ -217,11 +223,11 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
     }
 
     private BufferedImage getBackImageSpriteForSample() {
-        return back == null ? null : back.getSubimageFromTileRect(0, 0, getBackImageWidth(), getBackImageWidth());
+        return back == null ? null : back.getFrameSubimage(0, getBackImageWidth(), getBackImageWidth());
     }
 
     private BufferedImage getWalkSpriteForSample() {
-        return walk == null ? null : walk.getSubimageFromTileRect(0, 0, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
+        return walk == null ? null : walk.getFrameSubimage(0, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
     }
 
     @Override

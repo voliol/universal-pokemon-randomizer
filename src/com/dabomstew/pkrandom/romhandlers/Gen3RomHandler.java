@@ -4144,11 +4144,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void rewritePlayerWalkSprite(GBAImage walkSprite, Settings.PlayerCharacterMod toReplace) {
-        // TODO
+        for (int i = 0; i < Gen3PlayerCharacterGraphics.WALK_SPRITE_FRAME_NUM; i++) {
+            GBAImage frame = walkSprite.getFrameSubimage(i, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH,
+                    Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT);
+            int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "WalkImage") + i;
+            writeOverworldImage(imageNum, frame);
+        }
     }
 
     private void rewritePlayerRunSprite(GBAImage runSprite, Settings.PlayerCharacterMod toReplace) {
-        // TODO
+        for (int i = 0; i < Gen3PlayerCharacterGraphics.WALK_SPRITE_FRAME_NUM; i++) {
+            GBAImage frame = runSprite.getFrameSubimage(i, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH,
+                    Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT);
+            int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "RunImage") + i;
+            writeOverworldImage(imageNum, frame);
+        }
     }
 
     private void rewritePlayerBikeSprite(GBAImage bikeSprite, Settings.PlayerCharacterMod toReplace) {
@@ -4171,10 +4181,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
      * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
      * The given image must be as large as the one it is overwriting.
      */
-    private void writeOverworldImage(int imageNumber, GBAImage image) {
+    private void writeOverworldImage(int imageNum, GBAImage image) {
         int imageTableOffset = romEntry.getIntValue("OverworldSpriteImages");
 
-        int imagePointerOffset = imageTableOffset + imageNumber * 8;
+        int imagePointerOffset = imageTableOffset + imageNum * 8;
         int imageOffset = readPointer(imagePointerOffset);
         int imageLength = readWord(imagePointerOffset + 4);
 
