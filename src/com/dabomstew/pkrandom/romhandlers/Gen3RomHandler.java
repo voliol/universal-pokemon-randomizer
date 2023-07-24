@@ -4087,24 +4087,30 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (playerGraphics.hasBackImage()) {
             writeTrainerBackImage(toReplace.ordinal(), playerGraphics.getBackImage());
         }
+        if (playerGraphics.hasSpritePalettes()) {
+            int normalIndex = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "NormalPalette");
+            writeOverworldPalette(normalIndex, playerGraphics.getNormalSpritePalette());
+            int reflectionIndex = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "ReflectionPalette");
+            writeOverworldPalette(reflectionIndex, playerGraphics.getReflectionSpritePalette());
+        }
         if (playerGraphics.hasWalkSprite()) {
-            rewritePlayerWalkSprite(playerGraphics.getWalkSprite(), toReplace);
-            rewritePlayerRunSprite(playerGraphics.getRunSprite(), toReplace);
+            writePlayerWalkSprite(playerGraphics.getWalkSprite(), toReplace);
+            writePlayerRunSprite(playerGraphics.getRunSprite(), toReplace);
         }
         if (playerGraphics.hasBikeSprite()) {
-            rewritePlayerBikeSprite(playerGraphics.getBikeSprite(), toReplace);
+            writePlayerBikeSprite(playerGraphics.getBikeSprite(), toReplace);
         }
         if (playerGraphics.hasFishSprite()) {
-            rewritePlayerFishSprite(playerGraphics.getFishSprite(), toReplace);
+            writePlayerFishSprite(playerGraphics.getFishSprite(), toReplace);
         }
         if (playerGraphics.hasSitSprite()) {
-            rewritePlayerSitSprite(playerGraphics.getSitSprite(), toReplace);
+            writePlayerSitSprite(playerGraphics.getSitSprite(), toReplace);
         }
         if (playerGraphics.hasSitJumpSprite()) {
-            rewritePlayerSitJumpSprite(playerGraphics.getSitJumpSprite(), toReplace);
+            writePlayerSitJumpSprite(playerGraphics.getSitJumpSprite(), toReplace);
         }
         if (playerGraphics.hasMapIcon()) {
-            rewritePlayerMapIcon(playerGraphics.getMapIcon(), toReplace);
+            writePlayerMapIcon(playerGraphics.getMapIcon(), toReplace);
         }
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             setFRLGCustomPlayerGraphics(playerGraphics, toReplace);
@@ -4113,34 +4119,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void rewritePlayerSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace,
-                                     int frameAmount, int frameWidth, int frameHeight,
-                                     String key) {
-        for (int i = 0; i < frameAmount; i++) {
-            GBAImage frame = sprite.getFrameSubimage(i, frameWidth, frameHeight);
-            int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + key) + i;
-            writeOverworldImage(imageNum, frame);
-        }
-    }
-
     private void setRSECustomPlayerGraphics(Gen3PlayerCharacterGraphics unchecked, Settings.PlayerCharacterMod toReplace) {
         if (!(unchecked instanceof RSEPlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
         if (playerGraphics.hasAcroBikeSprite()) {
-            rewritePlayerAcroBikeSprite(playerGraphics.getAcroBikeSprite(), toReplace);
+            writePlayerAcroBikeSprite(playerGraphics.getAcroBikeSprite(), toReplace);
         }
         if (playerGraphics.hasUnderwaterSprite()) {
-            rewritePlayerUnderwaterSprite(playerGraphics.getUnderwaterSprite(), toReplace);
+            writePlayerUnderwaterSprite(playerGraphics.getUnderwaterSprite(), toReplace);
+            int underwaterIndex = romEntry.getIntValue("UnderwaterPalette");
+            writeOverworldPalette(underwaterIndex, playerGraphics.getUnderwaterPalette());
         }
         if (playerGraphics.hasWateringCanSprite()) {
-            rewritePlayerWateringCanSprite(playerGraphics.getWateringCanSprite(), toReplace);
+            writePlayerWateringCanSprite(playerGraphics.getWateringCanSprite(), toReplace);
         }
         if (playerGraphics.hasDecorateSprite()) {
-            rewritePlayerDecorateSprite(playerGraphics.getDecorateSprite(), toReplace);
+            writePlayerDecorateSprite(playerGraphics.getDecorateSprite(), toReplace);
         }
         if (playerGraphics.hasFieldMoveSprite()) {
-            rewritePlayerFieldMoveSprite(playerGraphics.getFieldMoveSprite(), toReplace);
+            writePlayerFieldMoveSprite(playerGraphics.getFieldMoveSprite(), toReplace);
         }
     }
 
@@ -4166,6 +4164,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    private void writePlayerSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace,
+                                   int frameAmount, int frameWidth, int frameHeight,
+                                   String key) {
+        for (int i = 0; i < frameAmount; i++) {
+            GBAImage frame = sprite.getFrameSubimage(i, frameWidth, frameHeight);
+            int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + key) + i;
+            writeOverworldImage(imageNum, frame);
+        }
+    }
+
     private void writeTrainerImage(int trainerNumber, GBAImage image) {
         int imageTableOffset = romEntry.getIntValue("TrainerFrontImages");
         int paletteTableOffset = romEntry.getIntValue("TrainerFrontPalettes");
@@ -4188,78 +4196,77 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         rewriteCompressedPalette(palettePointerOffset, image.getPalette());
     }
 
-    private void rewritePlayerWalkSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.WALK_SPRITE_FRAME_NUM,
+    private void writePlayerWalkSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.WALK_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT,
                 "WalkImage");
     }
 
-    private void rewritePlayerRunSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.RUN_SPRITE_FRAME_NUM,
+    private void writePlayerRunSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.RUN_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT,
                 "RunImage");
     }
 
-    private void rewritePlayerBikeSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.BIKE_SPRITE_FRAME_NUM,
+    private void writePlayerBikeSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.BIKE_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
                 "BikeImage");
     }
 
-    private void rewritePlayerFishSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.FISH_SPRITE_FRAME_NUM,
+    private void writePlayerFishSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, Gen3PlayerCharacterGraphics.FISH_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
                 "FishImage");
     }
 
-    private void rewritePlayerSitSprite(GBAImage sitSprite, Settings.PlayerCharacterMod toReplace) {
+    private void writePlayerSitSprite(GBAImage sitSprite, Settings.PlayerCharacterMod toReplace) {
         // TODO
     }
 
-    private void rewritePlayerSitJumpSprite(GBAImage sitJumpSprite, Settings.PlayerCharacterMod toReplace) {
+    private void writePlayerSitJumpSprite(GBAImage sitJumpSprite, Settings.PlayerCharacterMod toReplace) {
         // TODO
     }
 
 
-    private void rewritePlayerAcroBikeSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.ACRO_BIKE_SPRITE_FRAME_NUM,
+    private void writePlayerAcroBikeSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.ACRO_BIKE_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
                 "AcroBikeImage");
     }
 
-    private void rewritePlayerUnderwaterSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.UNDERWATER_SPRITE_FRAME_NUM,
+    private void writePlayerUnderwaterSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.UNDERWATER_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
                 "UnderwaterImage"); // TODO: fix
     }
 
-    private void rewritePlayerWateringCanSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.WATERING_CAN_SPRITE_FRAME_NUM,
+    private void writePlayerWateringCanSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.WATERING_CAN_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
                 "WateringCanImage");
     }
 
-    private void rewritePlayerDecorateSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.DECORATE_SPRITE_FRAME_NUM,
+    private void writePlayerDecorateSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.DECORATE_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT,
                 "DecorateImage");
     }
 
-    private void rewritePlayerFieldMoveSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        rewritePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.FIELD_MOVE_SPRITE_FRAME_NUM,
+    private void writePlayerFieldMoveSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.FIELD_MOVE_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
                 "FieldMoveImage");
     }
-
 
     /**
      * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
      * The given image must be as large as the one it is overwriting.
      */
-    private void writeOverworldImage(int imageNum, GBAImage image) {
+    private void writeOverworldImage(int index, GBAImage image) {
         int imageTableOffset = romEntry.getIntValue("OverworldSpriteImages");
 
-        int imagePointerOffset = imageTableOffset + imageNum * 8;
+        int imagePointerOffset = imageTableOffset + index * 8;
         int imageOffset = readPointer(imagePointerOffset);
         int imageLength = readWord(imagePointerOffset + 4);
 
@@ -4270,7 +4277,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         writeBytes(imageOffset, imageData);
     }
 
-    private void rewritePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
+    private void writeOverworldPalette(int index, Palette palette) {
+        if (palette.size() != 16) {
+            throw new IllegalArgumentException("Palette must have exactly 16 colors");
+        }
+        int paletteTableOffset = romEntry.getIntValue("OverworldPalettes");
+        int paletteOffset = readPointer(paletteTableOffset + index * 8);
+        writeBytes(paletteOffset, palette.toBytes());
+    }
+
+    private void writePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
         int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
         int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
         writeBytes(imageOffset, mapIcon.toBytes());

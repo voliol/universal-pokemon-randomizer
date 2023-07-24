@@ -33,7 +33,7 @@ public class GBAImage extends BufferedImage {
                     bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
         }
         Graphics2D g = createGraphics();
-        g.drawImage(bim, 0, 0, null);
+        g.drawImage(bim, 0, 0, null); // TODO: this breaks palette tricks, fix
     }
 
     public GBAImage(int widthInTiles, int heightInTiles, Palette palette, boolean columnMode) {

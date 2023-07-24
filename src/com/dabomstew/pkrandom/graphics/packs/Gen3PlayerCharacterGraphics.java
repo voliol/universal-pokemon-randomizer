@@ -118,7 +118,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     }
 
     private Palette initNormalSpritePalette() {
-        Palette palette = readPalette("SpritePalette");
+        Palette palette = readPalette("SpriteNormalPalette");
         if (palette == null && hasWalkSprite()) {
             palette = walk.getPalette();
         }
@@ -212,6 +212,13 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
     public GBAImage getMapIcon() {
         return mapIcon;
+    }
+
+    /**
+     * If there is a normal sprite palette, there is also one for reflections.
+     */
+    public boolean hasSpritePalettes() {
+        return normalSpritePalette != null;
     }
 
     public Palette getNormalSpritePalette() {

@@ -1,5 +1,0 @@
-[NAME:Frisk]
-[DESCRIPTION:The playable character from Undertale.]
-[FROM:Undertale]
-[CREATOR:Voliol]
-[CATEGORY:GAMES]

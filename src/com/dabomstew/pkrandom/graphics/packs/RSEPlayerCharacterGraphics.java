@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
 import com.dabomstew.pkrandom.graphics.GBAImage;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
@@ -65,6 +66,10 @@ public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
     public GBAImage getUnderwaterSprite() {
         return underwater;
+    }
+
+    public Palette getUnderwaterPalette() {
+        return underwater.getPalette();
     }
 
     public boolean hasWateringCanSprite() {
