@@ -11,7 +11,7 @@ public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
     private static final int SIT_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * 3;
 
     public static final int ACRO_BIKE_SPRITE_FRAME_NUM = 27;
-    public static final int UNDERWATER_SPRITE_FRAME_NUM = 4;
+    public static final int UNDERWATER_SPRITE_FRAME_NUM = 3; // ignore the unused 4th frame
     public static final int WATERING_CAN_SPRITE_FRAME_NUM = 6;
     public static final int DECORATE_SPRITE_FRAME_NUM = 1;
     public static final int FIELD_MOVE_SPRITE_FRAME_NUM = 5;

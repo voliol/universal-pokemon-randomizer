@@ -24,14 +24,14 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     public final static int BIKE_SPRITE_FRAME_NUM = 3 * 3;
     public final static int FISH_SPRITE_FRAME_NUM = 3 * 4;
     public final static int SIT_SPRITE_FRAME_NUM = 3;
-    public final static int SIT_JUMP_FRAME_NUM = 3;
+    public final static int SIT_JUMP_SPRITE_FRAME_NUM = 3;
 
     // amount of tiles shown at once * 3 directions * n frames/direction
     private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * WALK_SPRITE_FRAME_NUM;
     private final static int RUN_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * RUN_SPRITE_FRAME_NUM;
     private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * BIKE_SPRITE_FRAME_NUM;
     private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * FISH_SPRITE_FRAME_NUM;
-    private final static int SIT_JUMP_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * SIT_JUMP_FRAME_NUM;
+    private final static int SIT_JUMP_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * SIT_JUMP_SPRITE_FRAME_NUM;
 
     private final static int PALETTE_SIZE = 16;
 

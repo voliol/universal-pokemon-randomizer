@@ -4220,14 +4220,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 "FishImage");
     }
 
-    private void writePlayerSitSprite(GBAImage sitSprite, Settings.PlayerCharacterMod toReplace) {
-        // TODO
+    private void writePlayerSitSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.SIT_SPRITE_FRAME_NUM,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
+                "SitImage");
     }
 
-    private void writePlayerSitJumpSprite(GBAImage sitJumpSprite, Settings.PlayerCharacterMod toReplace) {
-        // TODO
+    private void writePlayerSitJumpSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.SIT_JUMP_SPRITE_FRAME_NUM,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
+                "SitJumpImage");
     }
-
 
     private void writePlayerAcroBikeSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
         writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.ACRO_BIKE_SPRITE_FRAME_NUM,
@@ -4238,7 +4241,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void writePlayerUnderwaterSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
         writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.UNDERWATER_SPRITE_FRAME_NUM,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
-                "UnderwaterImage"); // TODO: fix
+                "UnderwaterImage");
     }
 
     private void writePlayerWateringCanSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
