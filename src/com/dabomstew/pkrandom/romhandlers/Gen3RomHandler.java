@@ -253,16 +253,60 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void addTrainerGraphicsInfoToRomEntry() {
-        // TODO: for emerald and frlg too (might be identical)
+        // TODO: for emerald and frlg too (might be identical at parts)
+        addTrainerFrontPalettesToRomEntry();
+        addTrainerBackPalettesToRomEntry();
+        addMapIconInfoToRomEntry();
+    }
+
+    private void addTrainerFrontPalettesToRomEntry() {
+        if (romEntry.getIntValue("TrainerFrontImages") != 0
+                && romEntry.getIntValue("TrainerFrontPalettes") == 0) {
+            int offset;
+            switch (romEntry.getRomType()) {
+                case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+                        offset = Gen3Constants.rsTrainerFrontPalettesOffset;
+                case Gen3Constants.RomType_Em ->
+                    offset = Gen3Constants.emTrainerFrontPalettesOffset;
+                case Gen3Constants.RomType_FRLG ->
+                    offset = Gen3Constants.frlgTrainerFrontPalettesOffset;
+                default ->
+                    throw new RuntimeException("Invalid romType");
+            }
+            int value = romEntry.getIntValue("TrainerFrontImages") + offset;
+            romEntry.putIntValue("TrainerFrontPalettes", value);
+        }
+    }
+
+    private void addTrainerBackPalettesToRomEntry() {
+        if (romEntry.getIntValue("TrainerBackImages") != 0
+                && romEntry.getIntValue("TrainerBackPalettes") == 0) {
+            int offset;
+            switch (romEntry.getRomType()) {
+                case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+                        offset = Gen3Constants.rsTrainerBackPalettesOffset;
+                case Gen3Constants.RomType_Em ->
+                        offset = Gen3Constants.emTrainerBackPalettesOffset;
+                case Gen3Constants.RomType_FRLG ->
+                        offset = Gen3Constants.frlgTrainerBackPalettesOffset;
+                default ->
+                        throw new RuntimeException("Invalid romType");
+            }
+            int value = romEntry.getIntValue("TrainerBackImages") + offset;
+            romEntry.putIntValue("TrainerBackPalettes", value);
+        }
+    }
+
+    private void addMapIconInfoToRomEntry() {
         if (romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
                 romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
-            if (romEntry.getIntValue("TrainerFrontImages") != 0) {
-                int value = romEntry.getIntValue("TrainerFrontImages") + Gen3Constants.rsTrainerFrontPalettesOffset;
-                romEntry.putIntValue("TrainerFrontPalettes", value);
-            }
-            if (romEntry.getIntValue("TrainerBackImages") != 0) {
-                int value = romEntry.getIntValue("TrainerBackImages") + Gen3Constants.rsTrainerBackPalettesOffset;
-                romEntry.putIntValue("TrainerBackPalettes", value);
+            if (romEntry.getIntValue("BrendanMapIconImage") != 0) {
+                int brendanPal = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.brendanMapIconPaletteOffset;
+                romEntry.putIntValue("BrendanMapIconPalette", brendanPal);
+                int mayImage = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.mayMapIconImageOffset;
+                romEntry.putIntValue("MayMapIconImage", mayImage);
+                int mayPal = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.mayMapIconPaletteOffset;
+                romEntry.putIntValue("MayMapIconPalette", mayPal);
             }
         }
     }
@@ -4190,7 +4234,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int paletteTableOffset = romEntry.getIntValue("TrainerBackPalettes");
 
         int imagePointerOffset = imageTableOffset + trainerNumber * 8;
-        rewriteCompressedImage(imagePointerOffset, image);
+        if (romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
+                romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
+            rewriteCompressedImage(imagePointerOffset, image);
+        } else {
+            writeBytes(readPointer(imagePointerOffset), image.toBytes());
+        }
 
         int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
         rewriteCompressedPalette(palettePointerOffset, image.getPalette());

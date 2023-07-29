@@ -195,7 +195,13 @@ public class Gen3Constants {
 
     public static final int emBrendanFrontImageIndex = 71;
 
-    public static final int rsTrainerFrontPalettesOffset = 0x298, rsTrainerBackPalettesOffset = 0x18;
+    public static final int rsTrainerFrontPalettesOffset = 0x298, emTrainerFrontPalettesOffset = 0x2E8,
+            frlgTrainerFrontPalettesOffset = 0x4A0,
+            rsTrainerBackPalettesOffset = 0x18, emTrainerBackPalettesOffset = 0x40,
+            frlgTrainerBackPalettesOffset = 0x30;
+
+    public static final int brendanMapIconPaletteOffset = -32, mayMapIconImageOffset = 160,
+            mayMapIconPaletteOffset = 128;
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
