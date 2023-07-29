@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 /**
  * An image for GBA games with 16-color palettes. For now just a copy of GBCImage with that difference.
- * // TODO: class structure
+ * // TODO: class structure; concile with GBCImage
  */
 public class GBAImage extends BufferedImage {
 
