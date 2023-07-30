@@ -298,8 +298,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void addMapIconInfoToRomEntry() {
-        if (romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
-                romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
+        if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
             if (romEntry.getIntValue("BrendanMapIconImage") != 0) {
                 int brendanPal = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.brendanMapIconPaletteOffset;
                 romEntry.putIntValue("BrendanMapIconPalette", brendanPal);
@@ -4111,10 +4110,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: make reality, and then support emerald and frlg as well
+        // TODO: make reality, and then support frlg as well
         // TODO: rom entries seem to be missing for most versions
-        return romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
-                romEntry.getRomType() == Gen3Constants.RomType_Sapp;
+        return romEntry.getRomType() != Gen3Constants.RomType_FRLG;
     }
 
     @Override
@@ -4126,7 +4124,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             separateFrontAndBackPlayerPalettes();
         }
         if (playerGraphics.hasFrontImage()) {
-            writeTrainerImage(toReplace.ordinal(), playerGraphics.getFrontImage());
+            int trainerNum = romEntry.getRomType() == Gen3Constants.RomType_Em ?
+                    toReplace.ordinal() + Gen3Constants.emBrendanFrontImageIndex : toReplace.ordinal();
+            writeTrainerImage(trainerNum, playerGraphics.getFrontImage());
         }
         if (playerGraphics.hasBackImage()) {
             writeTrainerBackImage(toReplace.ordinal(), playerGraphics.getBackImage());
@@ -4294,9 +4294,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePlayerWateringCanSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.WATERING_CAN_SPRITE_FRAME_NUM,
-                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
-                "WateringCanImage");
+        int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "WateringCanImage");
+        writeOverworldImage(imageNum, sprite.getFrameSubimage(0,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
+        writeOverworldImage(imageNum + 1, sprite.getFrameSubimage(2,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
+        writeOverworldImage(imageNum + 2, sprite.getFrameSubimage(4,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
+        writeOverworldImage(imageNum + 3, sprite.getFrameSubimage(1,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
+        writeOverworldImage(imageNum + 5, sprite.getFrameSubimage(3,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
+        writeOverworldImage(imageNum + 7, sprite.getFrameSubimage(5,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
     }
 
     private void writePlayerDecorateSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
@@ -4324,7 +4334,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         byte[] imageData = image.toBytes();
         if (imageData.length != imageLength) {
-            throw new IllegalArgumentException("Wrong image size.");
+            throw new IllegalArgumentException("Wrong image size. Expected " + imageLength + " bytes, was "
+                    + imageData.length + ".");
         }
         writeBytes(imageOffset, imageData);
     }
@@ -4339,6 +4350,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
+
+        List<Integer> locs = RomFunctions.search(rom, mapIcon.toBytes());
+        System.out.println("foo");
+        for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
+        System.out.println("bar");
+
         int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
         int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
         writeBytes(imageOffset, mapIcon.toBytes());

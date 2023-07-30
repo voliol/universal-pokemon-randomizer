@@ -254,9 +254,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	}
 
 	protected final void writeBytes(int offset, byte[] values) {
-		for (int i = 0; i < values.length; i++) {
-			writeByte(offset + i, values[i]);
-		}
+        if (offset == 0) {
+            throw new IllegalArgumentException("Not allowed to write at offset 0 of the ROM.");
+        }
+        writeBytes(rom, offset, values);
 	}
 
 	protected final void writeBytes(byte[] data, int offset, byte[] values) {

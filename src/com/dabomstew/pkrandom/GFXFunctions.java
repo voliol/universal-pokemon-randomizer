@@ -222,13 +222,12 @@ public class GFXFunctions {
 	// TODO: it makes sense for this to be handled by its own class(es).
 	@Deprecated
 	public static byte[] readTiledImageData(BufferedImage bim) {
-		System.out.print("GFXFunctions.readTiledImageData() is deprecated. Use GBAImage.toBytes() instead.");
 		return readTiledImageData(bim, DEFAULT_BPP);
 	}
 
 	@Deprecated
 	public static byte[] readTiledImageData(BufferedImage bim, int bpp) {
-		System.out.print("GFXFunctions.readTiledImageData() is deprecated. Use GBAImage.toBytes() instead.");
+		System.out.println("GFXFunctions.readTiledImageData() is deprecated. Use GBAImage.toBytes() instead.");
 
 		int tileWidth = DEFAULT_TILE_WIDTH;
 		int tileHeight = DEFAULT_TILE_HEIGHT;
