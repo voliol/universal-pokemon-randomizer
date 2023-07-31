@@ -11,17 +11,21 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
     public static final int ITEM_SPRITE_FRAME_NUM = 9;
     public static final int ITEM_BIKE_SPRITE_FRAME_NUM = 6;
+    public static final int BIRD_SPRITE_FRAME_NUM = 2;
 
     private static final int ITEM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * ITEM_SPRITE_FRAME_NUM;
     private static final int ITEM_BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * ITEM_BIKE_SPRITE_FRAME_NUM;
+    private static final int BIRD_SPRITE_TILE_AMOUNT = HUGE_SPRITE_TILE_AMOUNT * BIRD_SPRITE_FRAME_NUM;
 
     private final GBAImage item;
     private final GBAImage itemBike;
+    private final GBAImage bird;
 
     public FRLGPlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
         this.item = initSprite("ItemSprite", ITEM_SPRITE_TILE_AMOUNT);
         this.itemBike = initSprite("ItemBikeSprite", ITEM_BIKE_SPRITE_TILE_AMOUNT);
+        this.bird = initSprite("BirdSprite", BIRD_SPRITE_TILE_AMOUNT);
     }
 
     @Override
@@ -54,4 +58,13 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
     public GBAImage getItemBikeSprite() {
         return itemBike;
     }
+
+    public boolean hasBirdSprite() {
+        return bird != null;
+    }
+
+    public GBAImage getBirdSprite() {
+        return bird;
+    }
+
 }

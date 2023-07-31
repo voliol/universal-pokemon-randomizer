@@ -98,6 +98,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected abstract void initRomEntry();
 
+    protected void addRelativeOffsetToRomEntry(String newKey, String baseKey, int offset) {
+        int baseOffset = getRomEntry().getIntValue(baseKey);
+        if (baseOffset != 0 && getRomEntry().getIntValue(newKey) == 0) {
+            getRomEntry().putIntValue(newKey, baseOffset + offset);
+        }
+    }
+
     protected abstract void initTextTables();
 
     /**

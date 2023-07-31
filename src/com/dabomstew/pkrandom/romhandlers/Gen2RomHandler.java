@@ -148,15 +148,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         if (romEntry.isCrystal()) {
-            int chrisFrontImage = romEntry.getIntValue("ChrisFrontImage");
-            if (chrisFrontImage != 0) {
-                romEntry.putIntValue("KrisFrontImage", chrisFrontImage + Gen2Constants.krisFrontImageOffset);
-            }
-            int chrisTrainerCardImage = romEntry.getIntValue("ChrisTrainerCardImage");
-            if (chrisTrainerCardImage != 0) {
-                romEntry.putIntValue("KrisTrainerCardImage", chrisTrainerCardImage +
-                        Gen2Constants.krisTrainerCardImageOffset);
-            }
+            addRelativeOffsetToRomEntry("KrisFrontImage", "ChrisFrontImage",
+                    Gen2Constants.krisFrontImageOffset);
+            addRelativeOffsetToRomEntry("KrisTrainerCardImage", "ChrisTrainerCardImage",
+                    Gen2Constants.krisTrainerCardImageOffset);
         }
 
         int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");

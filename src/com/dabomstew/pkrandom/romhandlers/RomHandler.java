@@ -636,6 +636,8 @@ public interface RomHandler {
 
     String getROMCode();
 
+    int getROMType();
+
     String getSupportLevel();
 
     String getDefaultExtension();

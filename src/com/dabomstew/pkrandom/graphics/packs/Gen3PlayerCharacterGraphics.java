@@ -18,6 +18,9 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     public final static int BIG_SPRITE_WIDTH = 4;
     public final static int BIG_SPRITE_HEIGHT = 4;
     public static final int BIG_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT;
+    public final static int HUGE_SPRITE_WIDTH = 8;
+    public final static int HUGE_SPRITE_HEIGHT = 8;
+    public static final int HUGE_SPRITE_TILE_AMOUNT = HUGE_SPRITE_WIDTH * HUGE_SPRITE_HEIGHT;
 
     public final static int WALK_SPRITE_FRAME_NUM = 3 * 3;
     public final static int RUN_SPRITE_FRAME_NUM = WALK_SPRITE_FRAME_NUM;

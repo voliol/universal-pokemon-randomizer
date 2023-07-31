@@ -253,87 +253,61 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void addTrainerGraphicsInfoToRomEntry() {
-        // TODO: for emerald and frlg too (might be identical at parts)
         addTrainerFrontPalettesToRomEntry();
         addTrainerBackPalettesToRomEntry();
         addMapIconInfoToRomEntry();
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            addRelativeOffsetToRomEntry("LeafBirdImage", "RedBirdImage",
+                    Gen3Constants.leafBirdImageOffset);
+        }
     }
 
     private void addTrainerFrontPalettesToRomEntry() {
-        if (romEntry.getIntValue("TrainerFrontImages") != 0
-                && romEntry.getIntValue("TrainerFrontPalettes") == 0) {
-            int offset;
-            switch (romEntry.getRomType()) {
-                case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
-                        offset = Gen3Constants.rsTrainerFrontPalettesOffset;
-                case Gen3Constants.RomType_Em ->
+        int offset;
+        switch (romEntry.getRomType()) {
+            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+                    offset = Gen3Constants.rsTrainerFrontPalettesOffset;
+            case Gen3Constants.RomType_Em ->
                     offset = Gen3Constants.emTrainerFrontPalettesOffset;
-                case Gen3Constants.RomType_FRLG ->
+            case Gen3Constants.RomType_FRLG ->
                     offset = Gen3Constants.frlgTrainerFrontPalettesOffset;
-                default ->
+            default ->
                     throw new RuntimeException("Invalid romType");
-            }
-            int value = romEntry.getIntValue("TrainerFrontImages") + offset;
-            romEntry.putIntValue("TrainerFrontPalettes", value);
         }
+        addRelativeOffsetToRomEntry("TrainerFrontPalettes", "TrainerFrontImages", offset);
     }
 
     private void addTrainerBackPalettesToRomEntry() {
-        if (romEntry.getIntValue("TrainerBackImages") != 0
-                && romEntry.getIntValue("TrainerBackPalettes") == 0) {
-            int offset;
-            switch (romEntry.getRomType()) {
-                case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
-                        offset = Gen3Constants.rsTrainerBackPalettesOffset;
-                case Gen3Constants.RomType_Em ->
-                        offset = Gen3Constants.emTrainerBackPalettesOffset;
-                case Gen3Constants.RomType_FRLG ->
-                        offset = Gen3Constants.frlgTrainerBackPalettesOffset;
-                default ->
-                        throw new RuntimeException("Invalid romType");
-            }
-            int value = romEntry.getIntValue("TrainerBackImages") + offset;
-            romEntry.putIntValue("TrainerBackPalettes", value);
+        int offset;
+        switch (romEntry.getRomType()) {
+            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+                    offset = Gen3Constants.rsTrainerBackPalettesOffset;
+            case Gen3Constants.RomType_Em ->
+                    offset = Gen3Constants.emTrainerBackPalettesOffset;
+            case Gen3Constants.RomType_FRLG ->
+                    offset = Gen3Constants.frlgTrainerBackPalettesOffset;
+            default ->
+                    throw new RuntimeException("Invalid romType");
         }
+        addRelativeOffsetToRomEntry("TrainerBackPalettes", "TrainerBackImages", offset);
+
     }
 
     private void addMapIconInfoToRomEntry() {
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-            if (romEntry.getIntValue("RedMapIconImagePointer") != 0) {
-                if (romEntry.getIntValue("RedMapIconPalettePointer") == 0) {
-                    int redPal = romEntry.getIntValue("RedMapIconImagePointer")
-                            + Gen3Constants.redMapIconPalettePointerOffset;
-                    romEntry.putIntValue("RedMapIconPalettePointer", redPal);
-                }
-                if (romEntry.getIntValue("LeafMapIconImagePointer") == 0) {
-                    int leafImage = romEntry.getIntValue("RedMapIconImagePointer")
-                            + Gen3Constants.leafMapIconImagePointerOffset;
-                    romEntry.putIntValue("LeafMapIconImagePointer", leafImage);
-                }
-                if (romEntry.getIntValue("LeafMapIconPalettePointer") == 0) {
-                    int leafPal = romEntry.getIntValue("RedMapIconImagePointer")
-                            + Gen3Constants.leafMapIconPalettePointerOffset;
-                    romEntry.putIntValue("LeafMapIconPalettePointer", leafPal);
-                }
-            }
+            addRelativeOffsetToRomEntry("RedMapIconPalettePointer", "RedMapIconImagePointer",
+                    Gen3Constants.redMapIconPalettePointerOffset);
+            addRelativeOffsetToRomEntry("LeafMapIconImagePointer", "RedMapIconImagePointer",
+                    Gen3Constants.leafMapIconImagePointerOffset);
+            addRelativeOffsetToRomEntry("LeafMapIconPalettePointer", "RedMapIconImagePointer",
+                    Gen3Constants.leafMapIconPalettePointerOffset);
         } else {
-            if (romEntry.getIntValue("BrendanMapIconImage") != 0) {
-                if (romEntry.getIntValue("BrendanMapIconPalette") == 0) {
-                    int brendanPal = romEntry.getIntValue("BrendanMapIconImage")
-                            + Gen3Constants.brendanMapIconPaletteOffset;
-                    romEntry.putIntValue("BrendanMapIconPalette", brendanPal);
-                }
-                if (romEntry.getIntValue("MayMapIconImage") == 0) {
-                    int mayImage = romEntry.getIntValue("BrendanMapIconImage")
-                            + Gen3Constants.mayMapIconImageOffset;
-                    romEntry.putIntValue("MayMapIconImage", mayImage);
-                }
-                if (romEntry.getIntValue("MayMapIconPalette") == 0) {
-                    int mayPal = romEntry.getIntValue("BrendanMapIconImage")
-                            + Gen3Constants.mayMapIconPaletteOffset;
-                    romEntry.putIntValue("MayMapIconPalette", mayPal);
-                }
-            }
+            addRelativeOffsetToRomEntry("BrendanMapIconPalette", "BrendanMapIconImage",
+                    Gen3Constants.brendanMapIconPaletteOffset);
+            addRelativeOffsetToRomEntry("MayMapIconImage", "BrendanMapIconImage",
+                    Gen3Constants.mayMapIconImageOffset);
+            addRelativeOffsetToRomEntry("MayMapIconPalette", "BrendanMapIconImage",
+                    Gen3Constants.mayMapIconPaletteOffset);
         }
     }
 
@@ -4226,6 +4200,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (playerGraphics.hasItemBikeSprite()) {
             writePlayerItemBikeSprite(playerGraphics.getItemBikeSprite(), toReplace);
         }
+        if (playerGraphics.hasBirdSprite()) {
+            writePlayerBirdSprite(playerGraphics.getBirdSprite(), toReplace);
+        }
     }
 
     private void separateFrontAndBackPlayerPalettes() {
@@ -4376,6 +4353,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 "ItemBikeImage");
     }
 
+    private void writePlayerBirdSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        // TODO: remove these lines when all rom entries are filled
+        List<Integer> locs = RomFunctions.search(rom, sprite.toBytes());
+        System.out.println("foo");
+        System.out.println(RomFunctions.bytesToHex(sprite.toBytes()));
+        for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
+        System.out.println("bird");
+
+        int offset = romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace) + "BirdImage");
+        writeBytes(offset, sprite.toBytes());
+    }
+
     /**
      * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
      * The given image must be as large as the one it is overwriting.
@@ -4405,14 +4394,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
-        // TODO: remove these lines when all rom entries are filled
-        List<Integer> locs = RomFunctions.search(rom, mapIcon.toBytes());
-        System.out.println("foo");
-        System.out.println(RomFunctions.bytesToHex(mapIcon.toBytes()));
-        for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
-        System.out.println("bar");
+
 
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            // TODO: remove these lines when all rom entries are filled
+            List<Integer> locs = RomFunctions.search(rom, DSCmp.compressLZ10(mapIcon.toBytes()));
+            System.out.println("foo");
+            for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
+            System.out.println("bar");
+
             int imagePointerOffset = romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace)
                     + "MapIconImagePointer");
             rewriteCompressedImage(imagePointerOffset, mapIcon);
@@ -4420,6 +4410,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     + "MapIconPalettePointer"));
             writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
         } else {
+            // TODO: remove these lines when all rom entries are filled
+            List<Integer> locs = RomFunctions.search(rom, mapIcon.toBytes());
+            System.out.println("foo");
+            for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
+            System.out.println("bar");
+
             int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
             int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
             writeBytes(imageOffset, mapIcon.toBytes());

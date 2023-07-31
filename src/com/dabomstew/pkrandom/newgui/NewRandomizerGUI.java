@@ -27,6 +27,7 @@ package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.cli.CliRandomizer;
+import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
@@ -2701,9 +2702,13 @@ public class NewRandomizerGUI {
                         } else if (entry.getStringValue("RomType").equalsIgnoreCase("Gen2") && romHandler.generationOfPokemon() == 2) {
                             comboBoxModel.addElement(new Gen2PlayerCharacterGraphics(entry));
                         } else if (romHandler.generationOfPokemon() == 3) {
-                            if (entry.getStringValue("RomType").equalsIgnoreCase("RSE")) {
+                            if ((romHandler.getROMType() == Gen3Constants.RomType_Ruby ||
+                                    romHandler.getROMType() == Gen3Constants.RomType_Sapp ||
+                                    romHandler.getROMType() == Gen3Constants.RomType_Em) &&
+                                    entry.getStringValue("RomType").equalsIgnoreCase("RSE")) {
                                 comboBoxModel.addElement(new RSEPlayerCharacterGraphics(entry));
-                            } else if (entry.getStringValue("RomType").equalsIgnoreCase("FRLG")) {
+                            } else if (romHandler.getROMType() == Gen3Constants.RomType_FRLG &&
+                                    entry.getStringValue("RomType").equalsIgnoreCase("FRLG")) {
                                 comboBoxModel.addElement(new FRLGPlayerCharacterGraphics(entry));
                             }
                         }
