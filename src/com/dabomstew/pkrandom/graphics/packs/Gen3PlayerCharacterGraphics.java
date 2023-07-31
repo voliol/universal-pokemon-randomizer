@@ -24,14 +24,12 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     public final static int BIKE_SPRITE_FRAME_NUM = 3 * 3;
     public final static int FISH_SPRITE_FRAME_NUM = 3 * 4;
     public final static int SIT_SPRITE_FRAME_NUM = 3;
-    public final static int SIT_JUMP_SPRITE_FRAME_NUM = 3;
 
     // amount of tiles shown at once * 3 directions * n frames/direction
     private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * WALK_SPRITE_FRAME_NUM;
     private final static int RUN_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * RUN_SPRITE_FRAME_NUM;
     private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * BIKE_SPRITE_FRAME_NUM;
     private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * FISH_SPRITE_FRAME_NUM;
-    private final static int SIT_JUMP_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * SIT_JUMP_SPRITE_FRAME_NUM;
 
     private final static int PALETTE_SIZE = 16;
 
@@ -42,7 +40,6 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     private final GBAImage bike; // mach bike
     private final GBAImage fish;
     private final GBAImage sit;
-    private final GBAImage sitJump;
     private final GBAImage mapIcon;
 
     private final Palette normalSpritePalette;
@@ -57,7 +54,6 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
         this.bike = initSprite("BikeSprite", BIKE_SPRITE_TILE_AMOUNT);
         this.fish = initSprite("FishSprite", FISH_SPRITE_TILE_AMOUNT);
         this.sit = initSprite("SitSprite", getSitTileAmount());
-        this.sitJump = initSprite("SitJumpSprite", SIT_JUMP_SPRITE_TILE_AMOUNT);
         this.mapIcon = initMapIcon();
         this.normalSpritePalette = initNormalSpritePalette();
         this.reflectionSpritePalette = initReflectionSpritePalette();
@@ -196,14 +192,6 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
     public GBAImage getSitSprite() {
         return sit;
-    }
-
-    public boolean hasSitJumpSprite() {
-        return sitJump != null;
-    }
-
-    public GBAImage getSitJumpSprite() {
-        return sitJump;
     }
 
     public boolean hasMapIcon() {

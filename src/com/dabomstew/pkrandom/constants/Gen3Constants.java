@@ -193,15 +193,26 @@ public class Gen3Constants {
         }
     }
 
-    public static final int emBrendanFrontImageIndex = 71;
+    public static String frlgGetName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Red";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "Leaf";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. FRLG only has two playable characters, Red and Leaf.");
+        }
+    }
+
+    public static final int emBrendanFrontImageIndex = 71, frlgRedFrontImageIndex = 135;
 
     public static final int rsTrainerFrontPalettesOffset = 0x298, emTrainerFrontPalettesOffset = 0x2E8,
             frlgTrainerFrontPalettesOffset = 0x4A0,
             rsTrainerBackPalettesOffset = 0x18, emTrainerBackPalettesOffset = 0x40,
             frlgTrainerBackPalettesOffset = 0x30;
 
-    public static final int brendanMapIconPaletteOffset = -32, mayMapIconImageOffset = 160,
-            mayMapIconPaletteOffset = 128;
+    public static final int brendanMapIconPaletteOffset = -0x20, mayMapIconImageOffset = 0xA0,
+            mayMapIconPaletteOffset = 0x80, redMapIconPalettePointerOffset = 0xC4,
+            leafMapIconImagePointerOffset = -0x30, leafMapIconPalettePointerOffset = 0xE0;
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 

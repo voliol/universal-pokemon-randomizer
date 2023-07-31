@@ -298,14 +298,41 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void addMapIconInfoToRomEntry() {
-        if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            if (romEntry.getIntValue("RedMapIconImagePointer") != 0) {
+                if (romEntry.getIntValue("RedMapIconPalettePointer") == 0) {
+                    int redPal = romEntry.getIntValue("RedMapIconImagePointer")
+                            + Gen3Constants.redMapIconPalettePointerOffset;
+                    romEntry.putIntValue("RedMapIconPalettePointer", redPal);
+                }
+                if (romEntry.getIntValue("LeafMapIconImagePointer") == 0) {
+                    int leafImage = romEntry.getIntValue("RedMapIconImagePointer")
+                            + Gen3Constants.leafMapIconImagePointerOffset;
+                    romEntry.putIntValue("LeafMapIconImagePointer", leafImage);
+                }
+                if (romEntry.getIntValue("LeafMapIconPalettePointer") == 0) {
+                    int leafPal = romEntry.getIntValue("RedMapIconImagePointer")
+                            + Gen3Constants.leafMapIconPalettePointerOffset;
+                    romEntry.putIntValue("LeafMapIconPalettePointer", leafPal);
+                }
+            }
+        } else {
             if (romEntry.getIntValue("BrendanMapIconImage") != 0) {
-                int brendanPal = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.brendanMapIconPaletteOffset;
-                romEntry.putIntValue("BrendanMapIconPalette", brendanPal);
-                int mayImage = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.mayMapIconImageOffset;
-                romEntry.putIntValue("MayMapIconImage", mayImage);
-                int mayPal = romEntry.getIntValue("BrendanMapIconImage") + Gen3Constants.mayMapIconPaletteOffset;
-                romEntry.putIntValue("MayMapIconPalette", mayPal);
+                if (romEntry.getIntValue("BrendanMapIconPalette") == 0) {
+                    int brendanPal = romEntry.getIntValue("BrendanMapIconImage")
+                            + Gen3Constants.brendanMapIconPaletteOffset;
+                    romEntry.putIntValue("BrendanMapIconPalette", brendanPal);
+                }
+                if (romEntry.getIntValue("MayMapIconImage") == 0) {
+                    int mayImage = romEntry.getIntValue("BrendanMapIconImage")
+                            + Gen3Constants.mayMapIconImageOffset;
+                    romEntry.putIntValue("MayMapIconImage", mayImage);
+                }
+                if (romEntry.getIntValue("MayMapIconPalette") == 0) {
+                    int mayPal = romEntry.getIntValue("BrendanMapIconImage")
+                            + Gen3Constants.mayMapIconPaletteOffset;
+                    romEntry.putIntValue("MayMapIconPalette", mayPal);
+                }
             }
         }
     }
@@ -4110,9 +4137,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public boolean hasCustomPlayerGraphicsSupport() {
-        // TODO: make reality, and then support frlg as well
-        // TODO: rom entries seem to be missing for most versions
-        return romEntry.getRomType() != Gen3Constants.RomType_FRLG;
+        // TODO: make reality; full frlg support, and support for non-english versions
+        return true;
     }
 
     @Override
@@ -4124,8 +4150,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             separateFrontAndBackPlayerPalettes();
         }
         if (playerGraphics.hasFrontImage()) {
-            int trainerNum = romEntry.getRomType() == Gen3Constants.RomType_Em ?
-                    toReplace.ordinal() + Gen3Constants.emBrendanFrontImageIndex : toReplace.ordinal();
+            int trainerNum = toReplace.ordinal();
+            if (romEntry.getRomType() == Gen3Constants.RomType_Em) {
+                trainerNum += Gen3Constants.emBrendanFrontImageIndex;
+            } else if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+                trainerNum += Gen3Constants.frlgRedFrontImageIndex;
+            }
             writeTrainerImage(trainerNum, playerGraphics.getFrontImage());
         }
         if (playerGraphics.hasBackImage()) {
@@ -4150,9 +4180,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (playerGraphics.hasSitSprite()) {
             writePlayerSitSprite(playerGraphics.getSitSprite(), toReplace);
         }
-        if (playerGraphics.hasSitJumpSprite()) {
-            writePlayerSitJumpSprite(playerGraphics.getSitJumpSprite(), toReplace);
-        }
         if (playerGraphics.hasMapIcon()) {
             writePlayerMapIcon(playerGraphics.getMapIcon(), toReplace);
         }
@@ -4166,6 +4193,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void setRSECustomPlayerGraphics(Gen3PlayerCharacterGraphics unchecked, Settings.PlayerCharacterMod toReplace) {
         if (!(unchecked instanceof RSEPlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+        if (playerGraphics.hasSitJumpSprite()) {
+            writePlayerSitJumpSprite(playerGraphics.getSitJumpSprite(), toReplace);
         }
         if (playerGraphics.hasAcroBikeSprite()) {
             writePlayerAcroBikeSprite(playerGraphics.getAcroBikeSprite(), toReplace);
@@ -4190,7 +4220,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (!(unchecked instanceof FRLGPlayerCharacterGraphics playerGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
-        // TODO
+        if (playerGraphics.hasItemSprite()) {
+            writePlayerItemSprite(playerGraphics.getItemSprite(), toReplace);
+        }
+        if (playerGraphics.hasItemBikeSprite()) {
+            writePlayerItemBikeSprite(playerGraphics.getItemBikeSprite(), toReplace);
+        }
     }
 
     private void separateFrontAndBackPlayerPalettes() {
@@ -4213,7 +4248,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                    String key) {
         for (int i = 0; i < frameAmount; i++) {
             GBAImage frame = sprite.getFrameSubimage(i, frameWidth, frameHeight);
-            int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + key) + i;
+            String name = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                    Gen3Constants.frlgGetName(toReplace) : Gen3Constants.rseGetName(toReplace);
+            int imageNum = romEntry.getIntValue(name + key) + i;
             writeOverworldImage(imageNum, frame);
         }
     }
@@ -4270,9 +4307,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePlayerSitSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.SIT_SPRITE_FRAME_NUM,
-                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
-                "SitImage");
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            writePlayerSprite(sprite, toReplace, FRLGPlayerCharacterGraphics.SIT_SPRITE_FRAME_NUM,
+                    Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT,
+                    "SitImage");
+        } else {
+            writePlayerSprite(sprite, toReplace, RSEPlayerCharacterGraphics.SIT_SPRITE_FRAME_NUM,
+                    Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
+                    "SitImage");
+        }
     }
 
     private void writePlayerSitJumpSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
@@ -4321,6 +4364,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 "FieldMoveImage");
     }
 
+    private void writePlayerItemSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, FRLGPlayerCharacterGraphics.ITEM_SPRITE_FRAME_NUM,
+                Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.MEDIUM_SPRITE_HEIGHT,
+                "ItemImage");
+    }
+
+    private void writePlayerItemBikeSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        writePlayerSprite(sprite, toReplace, FRLGPlayerCharacterGraphics.ITEM_BIKE_SPRITE_FRAME_NUM,
+                Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT,
+                "ItemBikeImage");
+    }
+
     /**
      * Overwrites an entry in the overworld image table, with a given {@link BufferedImage}.
      * The given image must be as large as the one it is overwriting.
@@ -4350,16 +4405,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
-
+        // TODO: remove these lines when all rom entries are filled
         List<Integer> locs = RomFunctions.search(rom, mapIcon.toBytes());
         System.out.println("foo");
+        System.out.println(RomFunctions.bytesToHex(mapIcon.toBytes()));
         for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
         System.out.println("bar");
 
-        int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
-        int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
-        writeBytes(imageOffset, mapIcon.toBytes());
-        writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            int imagePointerOffset = romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace)
+                    + "MapIconImagePointer");
+            rewriteCompressedImage(imagePointerOffset, mapIcon);
+            int paletteOffset = readPointer(romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace)
+                    + "MapIconPalettePointer"));
+            writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
+        } else {
+            int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
+            int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
+            writeBytes(imageOffset, mapIcon.toBytes());
+            writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
+        }
     }
 
     private void rewriteCompressedPalette(int pointerOffset, Palette palette) {

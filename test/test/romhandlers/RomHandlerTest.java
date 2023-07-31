@@ -754,7 +754,6 @@ public class RomHandlerTest {
 
     private static List<GraphicsPackEntry> initCPGEntries() {
         try {
-
             return GraphicsPackEntry.readAllFromFolder(TEST_CPG_PATH);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
