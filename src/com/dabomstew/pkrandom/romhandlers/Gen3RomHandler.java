@@ -4136,9 +4136,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeTrainerBackImage(toReplace.ordinal(), playerGraphics.getBackImage());
         }
         if (playerGraphics.hasSpritePalettes()) {
-            int normalIndex = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "NormalPalette");
+            String name = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                    Gen3Constants.frlgGetName(toReplace) : Gen3Constants.rseGetName(toReplace);
+            int normalIndex = romEntry.getIntValue(name + "NormalPalette");
             writeOverworldPalette(normalIndex, playerGraphics.getNormalSpritePalette());
-            int reflectionIndex = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "ReflectionPalette");
+            int reflectionIndex = romEntry.getIntValue(name + "ReflectionPalette");
             writeOverworldPalette(reflectionIndex, playerGraphics.getReflectionSpritePalette());
         }
         if (playerGraphics.hasWalkSprite()) {
