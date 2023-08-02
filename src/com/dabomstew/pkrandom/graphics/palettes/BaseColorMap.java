@@ -50,7 +50,7 @@ public class BaseColorMap {
 			add(key);
 		}
 		// unsure if this is where to put copy protection
-		return baseColors.get(key).clone();
+		return new Color(baseColors.get(key));
 	}
 
 	public LightDarkMode getLightDarkMode(TypeColor key) {

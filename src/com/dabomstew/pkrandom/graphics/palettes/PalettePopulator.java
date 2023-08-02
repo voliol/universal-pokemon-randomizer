@@ -93,7 +93,7 @@ public class PalettePopulator {
 
 		this.description = description;
 
-		this.baseColor = baseColor.clone();
+		this.baseColor = new Color(baseColor);
 
 		this.lightDarkMode = description.correctLightDarkMode(lightDarkMode);
 
@@ -114,7 +114,7 @@ public class PalettePopulator {
 	}
 
 	private Color getSiblingColor(Palette palette, Color baseColor) {
-		Color sharedColor = palette.get(description.getSharedSlot()).clone();
+		Color sharedColor = new Color(palette.get(description.getSharedSlot()));
 
 		if (sharedColor.getComp(0) <= 3 && sharedColor.getComp(1) <= 3 && sharedColor.getComp(2) <= 3) {
 			sharedColor.setComps((orig, i) -> (int) (baseColor.getComp(i) * 0.15));

@@ -103,7 +103,7 @@ public class Gen2PaletteHandler extends PaletteHandler {
 		}
 
 		private void setNormalPaletteFromPrevo(Pokemon evFrom, Pokemon evTo) {
-			Palette palette = evFrom.getNormalPalette().clone();
+			Palette palette = new Palette(evFrom.getNormalPalette());
 
 			if (typeSanity) {
 				if (evTo.getPrimaryType() != evFrom.getPrimaryType()) {

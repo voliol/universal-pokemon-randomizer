@@ -400,7 +400,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private void randomizePalette(Pokemon pk, String paletteDescriptionBody) {
-		pk.setNormalPalette(originalPalettes.get(pk).clone());
+		pk.setNormalPalette(new Palette(originalPalettes.get(pk)));
 		Palette palette = pk.getNormalPalette();
 		PalettePopulator pp = new PalettePopulator(RND);
 		TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, false, RND);
@@ -423,7 +423,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			unchangedNote = descNoteField.getText();
 
 			Pokemon pk = getCurrentPokemon();
-			pk.setNormalPalette(originalPalettes.get(pk).clone());
+			pk.setNormalPalette(new Palette(originalPalettes.get(pk)));
 			originalImage.setImage(getPokemonImage(pk, false));
 			shinyImage.setImage(getPokemonImage(pk, true));
 			newRandomizedExample();
