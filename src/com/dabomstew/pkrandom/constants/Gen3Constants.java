@@ -209,8 +209,8 @@ public class Gen3Constants {
             frlgTrainerFrontPalettesOffset = 0x4A0,
             rsTrainerBackPalettesOffset = 0x18, emTrainerBackPalettesOffset = 0x40,
             frlgTrainerBackPalettesOffset = 0x30;
-
-    public static final int leafBirdImageOffset = 0x1000;
+    
+    public static final int redBirdImageOffset = 0x800, leafBirdImageOffset = 0x1800;
 
     public static final int brendanMapIconPaletteOffset = -0x20, mayMapIconImageOffset = 0xA0,
             mayMapIconPaletteOffset = 0x80, redMapIconPalettePointerOffset = 0xC4,

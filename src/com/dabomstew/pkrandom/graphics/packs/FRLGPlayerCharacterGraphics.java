@@ -11,7 +11,7 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
     public static final int ITEM_SPRITE_FRAME_NUM = 9;
     public static final int ITEM_BIKE_SPRITE_FRAME_NUM = 6;
-    public static final int BIRD_SPRITE_FRAME_NUM = 2;
+    public static final int BIRD_SPRITE_FRAME_NUM = 3;
 
     private static final int ITEM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * ITEM_SPRITE_FRAME_NUM;
     private static final int ITEM_BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * ITEM_BIKE_SPRITE_FRAME_NUM;

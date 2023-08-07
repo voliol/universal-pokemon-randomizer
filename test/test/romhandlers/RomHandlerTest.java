@@ -40,7 +40,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {

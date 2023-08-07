@@ -258,7 +258,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         addTrainerBackPalettesToRomEntry();
         addMapIconInfoToRomEntry();
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-            addRelativeOffsetToRomEntry("LeafBirdImage", "RedBirdImage",
+            addRelativeOffsetToRomEntry("RedBirdImage", "BirdImage",
+                    Gen3Constants.redBirdImageOffset);
+            addRelativeOffsetToRomEntry("LeafBirdImage", "BirdImage",
                     Gen3Constants.leafBirdImageOffset);
         }
     }
@@ -4122,7 +4124,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
 
-        findFRLGOffsets();
+        findPlayerGraphicsOffsets();
 
         if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
             separateFrontAndBackPlayerPalettes();
@@ -4177,8 +4179,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private boolean hasFoundFRLGOffsets;
 
+    private void findPlayerGraphicsOffsets() {
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            findFRLGPlayerGraphicsOffsets();
+        } else {
+            // TODO
+        }
+    }
+
     // TODO: remove when no longer relevant
-    private void findFRLGOffsets() {
+    private void findFRLGPlayerGraphicsOffsets() {
         if (!hasFoundFRLGOffsets) {
             int loc = find(unownbytes);
             loc += 0x400;
@@ -4191,7 +4201,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
             GBAImage walk = null;
             try {
-                walk = new GBAImage(ImageIO.read(new File("walk.png"))).getFrameSubimage(0, 2, 4);
+                walk = new GBAImage(ImageIO.read(new File("walk.png"))).getSubimageFromFrame(0, 2, 4);
             } catch (IOException ignored) {
             }
             loc = RomFunctions.search(rom, walk.toBytes()).get(0);
@@ -4199,12 +4209,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             for (int ploc : pointerLocs) System.out.println("OverworldSpriteImages=0x" + Integer.toHexString(ploc));
 
             List<Integer> locs = findMultiple(overworldpalettebytes);
-            for (int loc2 : locs) System.out.println("0x" + Integer.toHexString(loc2));
             loc = find(overworldpalettebytes);
             pointerLocs = searchForPointers(loc);
             for (int ploc : pointerLocs) {
                 System.out.println("OverworldPalettes=0x" + Integer.toHexString(ploc));
             }
+
+            GBAImage bird = null;
+            try {
+                bird = new GBAImage(ImageIO.read(new File("bird.png"))).getSubimageFromFrame(0, 8, 8);
+            } catch (IOException ignored) {
+            }
+            loc = RomFunctions.search(rom, bird.toBytes()).get(0);
+            System.out.println("BirdImage=0x" + Integer.toHexString(loc));
 
             loc = findMultiple(iconpalettebytes).get(1);
             pointerLocs = searchForPointers(loc);
@@ -4286,7 +4303,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                                    int frameAmount, int frameWidth, int frameHeight,
                                    String key) {
         for (int i = 0; i < frameAmount; i++) {
-            GBAImage frame = sprite.getFrameSubimage(i, frameWidth, frameHeight);
+            GBAImage frame = sprite.getSubimageFromFrame(i, frameWidth, frameHeight);
             String name = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
                     Gen3Constants.frlgGetName(toReplace) : Gen3Constants.rseGetName(toReplace);
             int imageNum = romEntry.getIntValue(name + key) + i;
@@ -4377,17 +4394,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void writePlayerWateringCanSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
         int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "WateringCanImage");
-        writeOverworldImage(imageNum, sprite.getFrameSubimage(0,
+        writeOverworldImage(imageNum, sprite.getSubimageFromFrame(0,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
-        writeOverworldImage(imageNum + 1, sprite.getFrameSubimage(2,
+        writeOverworldImage(imageNum + 1, sprite.getSubimageFromFrame(2,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
-        writeOverworldImage(imageNum + 2, sprite.getFrameSubimage(4,
+        writeOverworldImage(imageNum + 2, sprite.getSubimageFromFrame(4,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
-        writeOverworldImage(imageNum + 3, sprite.getFrameSubimage(1,
+        writeOverworldImage(imageNum + 3, sprite.getSubimageFromFrame(1,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
-        writeOverworldImage(imageNum + 5, sprite.getFrameSubimage(3,
+        writeOverworldImage(imageNum + 5, sprite.getSubimageFromFrame(3,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
-        writeOverworldImage(imageNum + 7, sprite.getFrameSubimage(5,
+        writeOverworldImage(imageNum + 7, sprite.getSubimageFromFrame(5,
                 Gen3PlayerCharacterGraphics.BIG_SPRITE_WIDTH, Gen3PlayerCharacterGraphics.BIG_SPRITE_HEIGHT));
     }
 
@@ -4416,15 +4433,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void writePlayerBirdSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
-        // TODO: remove these lines when all rom entries are filled
-        List<Integer> locs = RomFunctions.search(rom, sprite.toBytes());
-        System.out.println("foo");
-        System.out.println(RomFunctions.bytesToHex(sprite.toBytes()));
-        for (Integer loc : locs) System.out.println("0x" + Integer.toHexString(loc));
-        System.out.println("bird");
+        int playerlessOffset = romEntry.getIntValue("BirdImage");
+        writeBytes(playerlessOffset, sprite.getSubimageFromFrame(0, Gen3PlayerCharacterGraphics.HUGE_SPRITE_WIDTH,
+                Gen3PlayerCharacterGraphics.HUGE_SPRITE_WIDTH).toBytes());
 
-        int offset = romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace) + "BirdImage");
-        writeBytes(offset, sprite.toBytes());
+        int withPlayerOffset = romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace) + "BirdImage");
+        byte[] frame1Data = sprite.getSubimageFromFrame(1, Gen3PlayerCharacterGraphics.HUGE_SPRITE_WIDTH,
+                Gen3PlayerCharacterGraphics.HUGE_SPRITE_WIDTH).toBytes();
+        writeBytes(withPlayerOffset, frame1Data);
+        byte[] frame2Data = sprite.getSubimageFromFrame(2, Gen3PlayerCharacterGraphics.HUGE_SPRITE_WIDTH,
+                Gen3PlayerCharacterGraphics.HUGE_SPRITE_WIDTH).toBytes();
+        writeBytes(withPlayerOffset + frame1Data.length, frame2Data);
     }
 
     /**

@@ -221,11 +221,11 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     }
 
     private BufferedImage getBackImageSpriteForSample() {
-        return back == null ? null : back.getFrameSubimage(0, getBackImageWidth(), getBackImageWidth());
+        return back == null ? null : back.getSubimageFromFrame(0, getBackImageWidth(), getBackImageWidth());
     }
 
     private BufferedImage getWalkSpriteForSample() {
-        return walk == null ? null : walk.getFrameSubimage(0, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
+        return walk == null ? null : walk.getSubimageFromFrame(0, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
     }
 
     @Override

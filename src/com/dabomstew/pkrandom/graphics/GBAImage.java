@@ -186,7 +186,7 @@ public class GBAImage extends BufferedImage {
      * @param w the width of a frame in tiles
      * @param h the height of a frame in tiles
      */
-    public GBAImage getFrameSubimage(int i, int w, int h) {
+    public GBAImage getSubimageFromFrame(int i, int w, int h) {
         if (getWidthInTiles() % w != 0 || getHeightInTiles() % h != 0) {
             throw new IllegalArgumentException("Image cannot be split into frames that are " + w + "x" + h + " tiles.");
         }
