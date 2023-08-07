@@ -73,7 +73,7 @@ public class BaseColorMap {
 			int randMax = (int) (TWEAK_RAND_MAX_COEFF * color.getComp(i) + TWEAK_RAND_MAX_ADDEND);
 			int change = random.nextInt(randMax - randMin) + random.nextInt(randMax);
 			int value = color.getComp(i) + (int) (color.getComp(i) * change * 0.01 * Math.pow(-1, random.nextInt(2)));
-			value = value > 255 ? 255 : value;
+			value = Math.min(value, 255);
 			tweakedColor.setComp(i, value);
 		}
 		return tweakedColor;

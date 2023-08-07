@@ -40,7 +40,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{3}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2, 3}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -743,6 +743,7 @@ public class RomHandlerTest {
     @MethodSource("getRomNames")
     public void canSetCustomPlayerGraphicsWithoutThrowing(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasCustomPlayerGraphicsSupport());
         GraphicsPack cpg = getCustomPlayerGraphics();
         romHandler.setCustomPlayerGraphics(cpg, Settings.PlayerCharacterMod.PC1);
         if (romHandler.hasMultiplePlayerCharacters()) {
