@@ -14,25 +14,16 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
     public final static int MEDIUM_SPRITE_WIDTH = 2;
     public final static int MEDIUM_SPRITE_HEIGHT = 4;
-    public final static int MEDIUM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_WIDTH * MEDIUM_SPRITE_HEIGHT;
     public final static int BIG_SPRITE_WIDTH = 4;
     public final static int BIG_SPRITE_HEIGHT = 4;
-    public static final int BIG_SPRITE_TILE_AMOUNT = BIG_SPRITE_WIDTH * BIG_SPRITE_HEIGHT;
     public final static int HUGE_SPRITE_WIDTH = 8;
     public final static int HUGE_SPRITE_HEIGHT = 8;
-    public static final int HUGE_SPRITE_TILE_AMOUNT = HUGE_SPRITE_WIDTH * HUGE_SPRITE_HEIGHT;
 
     public final static int WALK_SPRITE_FRAME_NUM = 3 * 3;
     public final static int RUN_SPRITE_FRAME_NUM = WALK_SPRITE_FRAME_NUM;
     public final static int BIKE_SPRITE_FRAME_NUM = 3 * 3;
     public final static int FISH_SPRITE_FRAME_NUM = 3 * 4;
     public final static int SIT_SPRITE_FRAME_NUM = 3;
-
-    // amount of tiles shown at once * 3 directions * n frames/direction
-    private final static int WALK_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * WALK_SPRITE_FRAME_NUM;
-    private final static int RUN_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * RUN_SPRITE_FRAME_NUM;
-    private final static int BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * BIKE_SPRITE_FRAME_NUM;
-    private final static int FISH_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * FISH_SPRITE_FRAME_NUM;
 
     private final static int PALETTE_SIZE = 16;
 
@@ -52,11 +43,11 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
         super(entry);
         this.front = initFront();
         this.back = initBack();
-        this.walk = initSprite("WalkSprite", WALK_SPRITE_TILE_AMOUNT);
+        this.walk = initSprite("WalkSprite", WALK_SPRITE_FRAME_NUM, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
         this.run = initRun();
-        this.bike = initSprite("BikeSprite", BIKE_SPRITE_TILE_AMOUNT);
-        this.fish = initSprite("FishSprite", FISH_SPRITE_TILE_AMOUNT);
-        this.sit = initSprite("SitSprite", getSitTileAmount());
+        this.bike = initSprite("BikeSprite", BIKE_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
+        this.fish = initSprite("FishSprite", FISH_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
+        this.sit = initSprite("SitSprite", SIT_SPRITE_FRAME_NUM, getSitFrameWidth(), getSitFrameHeight());
         this.mapIcon = initMapIcon();
         this.normalSpritePalette = initNormalSpritePalette();
         this.reflectionSpritePalette = initReflectionSpritePalette();
@@ -94,14 +85,16 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
 
     private GBAImage initRun() {
-        GBAImage run = initSprite("RunSprite", RUN_SPRITE_TILE_AMOUNT);
+        GBAImage run = initSprite("RunSprite", RUN_SPRITE_FRAME_NUM, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
         if (run == null) {
             run = walk;
         }
         return run;
     }
 
-    protected abstract int getSitTileAmount();
+    protected abstract int getSitFrameWidth();
+
+    protected abstract int getSitFrameHeight();
 
     private GBAImage initMapIcon() {
         BufferedImage base = readImage("MapIcon");
@@ -130,6 +123,14 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
             palette = normalSpritePalette; // TODO: auto-soften the palette
         }
         return palette;
+    }
+
+    protected GBAImage initSprite(String key, int frameAmount, int frameWidth, int frameHeight) {
+        GBAImage image = initSprite(key,frameAmount * frameHeight * frameWidth);
+        if (image != null) {
+            image.setFrameDimensions(frameWidth, frameHeight);
+        }
+        return image;
     }
 
     protected GBAImage initSprite(String key, int tileAmount) {

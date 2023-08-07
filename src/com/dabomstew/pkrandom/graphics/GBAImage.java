@@ -22,6 +22,10 @@ public class GBAImage extends BufferedImage {
     private final boolean columnMode;
     private final int[] colors;
 
+    private int frameWidth;
+    private int frameHeight;
+    private int frameAmount;
+
     public GBAImage(BufferedImage bim) {
         this(bim, false);
     }
@@ -108,6 +112,32 @@ public class GBAImage extends BufferedImage {
         return getHeight() / 8;
     }
 
+    public void setFrameDimensions(int frameWidth, int frameHeight) {
+        if (frameWidth <= 0 || frameHeight <= 0) {
+            throw new IllegalArgumentException("Invalid dimensions " + frameWidth + "x" + frameHeight + ". " +
+                    "Both dimensions must be >= 1.");
+        }
+        if (getWidthInTiles() % frameWidth != 0 || getHeightInTiles() % frameHeight != 0) {
+            throw new IllegalArgumentException("Image cannot be split into frames that are " + frameWidth + "x" +
+                    frameHeight + " tiles.");
+        }
+        this.frameWidth = frameWidth;
+        this.frameHeight = frameHeight;
+        this.frameAmount = (getWidthInTiles() * getHeightInTiles()) / (frameWidth * frameHeight);
+    }
+
+    public int getFrameWidth() {
+        return frameWidth;
+    }
+
+    public int getFrameHeight() {
+        return frameHeight;
+    }
+
+    public int getFrameAmount() {
+        return frameAmount;
+    }
+
     public byte[] toBytes() {
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
         int numTiles = getWidthInTiles() * getHeightInTiles();
@@ -166,6 +196,20 @@ public class GBAImage extends BufferedImage {
     public GBAImage getSubimageFromTileRect(int x, int y, int w, int h) {
         BufferedImage subimage = getSubimage(x * TILE_SIZE, y * TILE_SIZE, w * TILE_SIZE, h * TILE_SIZE);
         return new GBAImage(subimage, columnMode);
+    }
+
+    /**
+     * A version of {@link #getSubimageFromFrame(int, int, int)} where the
+     * dimensions have already been set by {@link #setFrameDimensions(int, int)}. <br>
+     * Throws an {@link IllegalStateException} if the dimensions are not set.
+     *
+     * @param i the index of the frame
+     */
+    public GBAImage getSubimageFromFrame(int i) {
+        if (frameWidth == 0 || frameHeight == 0) {
+            throw new IllegalStateException("Must set the dimensions first, or use getSubimageFromFrame(i, w, h).");
+        }
+        return getSubimageFromFrame(i, frameWidth, frameHeight);
     }
 
     /**

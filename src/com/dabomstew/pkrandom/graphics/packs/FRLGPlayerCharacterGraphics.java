@@ -7,25 +7,25 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
     private static final int BACK_IMAGE_WIDTH = 8;
     private static final int BACK_IMAGE_HEIGHT = 8 * 5;
 
-    private static final int SIT_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * 3;
+    private static final int SIT_FRAME_WIDTH = MEDIUM_SPRITE_WIDTH;
+    private static final int SIT_FRAME_HEIGHT = MEDIUM_SPRITE_HEIGHT;
 
     public static final int ITEM_SPRITE_FRAME_NUM = 9;
     public static final int ITEM_BIKE_SPRITE_FRAME_NUM = 6;
+    public static final int SURF_BLOB_SPRITE_FRAME_NUM = 6;
     public static final int BIRD_SPRITE_FRAME_NUM = 3;
-
-    private static final int ITEM_SPRITE_TILE_AMOUNT = MEDIUM_SPRITE_TILE_AMOUNT * ITEM_SPRITE_FRAME_NUM;
-    private static final int ITEM_BIKE_SPRITE_TILE_AMOUNT = BIG_SPRITE_TILE_AMOUNT * ITEM_BIKE_SPRITE_FRAME_NUM;
-    private static final int BIRD_SPRITE_TILE_AMOUNT = HUGE_SPRITE_TILE_AMOUNT * BIRD_SPRITE_FRAME_NUM;
 
     private final GBAImage item;
     private final GBAImage itemBike;
+    private final GBAImage surfBlob;
     private final GBAImage bird;
 
     public FRLGPlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
-        this.item = initSprite("ItemSprite", ITEM_SPRITE_TILE_AMOUNT);
-        this.itemBike = initSprite("ItemBikeSprite", ITEM_BIKE_SPRITE_TILE_AMOUNT);
-        this.bird = initSprite("BirdSprite", BIRD_SPRITE_TILE_AMOUNT);
+        this.item = initSprite("ItemSprite", ITEM_SPRITE_FRAME_NUM, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
+        this.itemBike = initSprite("ItemBikeSprite", ITEM_BIKE_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
+        this.surfBlob = initSprite("SurfBlobSprite", SURF_BLOB_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
+        this.bird = initSprite("BirdSprite", BIRD_SPRITE_FRAME_NUM, HUGE_SPRITE_WIDTH, HUGE_SPRITE_HEIGHT);
     }
 
     @Override
@@ -39,8 +39,13 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
     }
 
     @Override
-    protected int getSitTileAmount() {
-        return SIT_TILE_AMOUNT;
+    protected int getSitFrameWidth() {
+        return SIT_FRAME_WIDTH;
+    }
+
+    @Override
+    protected int getSitFrameHeight() {
+        return SIT_FRAME_HEIGHT;
     }
 
     public boolean hasItemSprite() {
@@ -57,6 +62,14 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
     public GBAImage getItemBikeSprite() {
         return itemBike;
+    }
+
+    public boolean hasSurfBlobSprite() {
+        return surfBlob != null;
+    } // TODO: generalise to RSE (?)
+
+    public GBAImage getSurfBlobSprite() {
+        return surfBlob;
     }
 
     public boolean hasBirdSprite() {
