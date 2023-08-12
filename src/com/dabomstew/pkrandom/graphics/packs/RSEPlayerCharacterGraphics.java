@@ -10,13 +10,15 @@ public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
     private static final int SIT_FRAME_WIDTH = BIG_SPRITE_WIDTH;
     private static final int SIT_FRAME_HEIGHT = BIG_SPRITE_HEIGHT;
+    private static final int SURF_BLOB_SPRITE_FRAME_NUM = 3;
+    private static final int BIRD_SPRITE_FRAME_NUM = 1;
 
-    public final static int SIT_JUMP_SPRITE_FRAME_NUM = 3;
-    public static final int ACRO_BIKE_SPRITE_FRAME_NUM = 27;
-    public static final int UNDERWATER_SPRITE_FRAME_NUM = 3; // ignore the unused 4th frame
-    public static final int WATERING_CAN_SPRITE_FRAME_NUM = 6;
-    public static final int DECORATE_SPRITE_FRAME_NUM = 1;
-    public static final int FIELD_MOVE_SPRITE_FRAME_NUM = 5;
+    private final static int SIT_JUMP_SPRITE_FRAME_NUM = 3;
+    private static final int ACRO_BIKE_SPRITE_FRAME_NUM = 27;
+    private static final int UNDERWATER_SPRITE_FRAME_NUM = 3; // ignore the unused 4th frame
+    private static final int WATERING_CAN_SPRITE_FRAME_NUM = 6;
+    private static final int DECORATE_SPRITE_FRAME_NUM = 1;
+    private static final int FIELD_MOVE_SPRITE_FRAME_NUM = 5;
 
     private final GBAImage sitJump;
     private final GBAImage acroBike;
@@ -53,6 +55,26 @@ public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
     @Override
     protected int getSitFrameHeight() {
         return SIT_FRAME_HEIGHT;
+    }
+
+    @Override
+    protected int getSurfBlobFrameNum() {
+        return SURF_BLOB_SPRITE_FRAME_NUM;
+    }
+
+    @Override
+    protected int getBirdFrameNum() {
+        return BIRD_SPRITE_FRAME_NUM;
+    }
+
+    @Override
+    protected int getBirdFrameWidth() {
+        return BIG_SPRITE_WIDTH;
+    }
+
+    @Override
+    protected int getBirdFrameHeight() {
+        return BIG_SPRITE_HEIGHT;
     }
 
     public boolean hasSitJumpSprite() {

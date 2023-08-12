@@ -1,11 +1,11 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
+import com.dabomstew.pkrandom.graphics.GBAImage;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
-
-import com.dabomstew.pkrandom.graphics.GBAImage;
-import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO: these class names are too long
 
@@ -34,6 +34,8 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     private final GBAImage bike; // mach bike
     private final GBAImage fish;
     private final GBAImage sit;
+    private final GBAImage surfBlob;
+    private final GBAImage bird;
     private final GBAImage mapIcon;
 
     private final Palette normalSpritePalette;
@@ -48,6 +50,8 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
         this.bike = initSprite("BikeSprite", BIKE_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
         this.fish = initSprite("FishSprite", FISH_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
         this.sit = initSprite("SitSprite", SIT_SPRITE_FRAME_NUM, getSitFrameWidth(), getSitFrameHeight());
+        this.surfBlob = initSprite("SurfBlobSprite", getSurfBlobFrameNum(), BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
+        this.bird = initSprite("BirdSprite", getBirdFrameNum(), getBirdFrameWidth(), getBirdFrameHeight());
         this.mapIcon = initMapIcon();
         this.normalSpritePalette = initNormalSpritePalette();
         this.reflectionSpritePalette = initReflectionSpritePalette();
@@ -96,6 +100,14 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
     protected abstract int getSitFrameHeight();
 
+    protected abstract int getSurfBlobFrameNum();
+
+    protected abstract int getBirdFrameNum();
+
+    protected abstract int getBirdFrameWidth();
+
+    protected abstract int getBirdFrameHeight();
+
     private GBAImage initMapIcon() {
         BufferedImage base = readImage("MapIcon");
         if (base == null) {
@@ -126,7 +138,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     }
 
     protected GBAImage initSprite(String key, int frameAmount, int frameWidth, int frameHeight) {
-        GBAImage image = initSprite(key,frameAmount * frameHeight * frameWidth);
+        GBAImage image = initSprite(key, frameAmount * frameHeight * frameWidth);
         if (image != null) {
             image.setFrameDimensions(frameWidth, frameHeight);
         }
@@ -197,6 +209,23 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
     public GBAImage getSitSprite() {
         return sit;
     }
+
+    public boolean hasSurfBlobSprite() {
+        return surfBlob != null;
+    } // TODO: generalise to RSE (?)
+
+    public GBAImage getSurfBlobSprite() {
+        return surfBlob;
+    }
+
+    public boolean hasBirdSprite() {
+        return bird != null;
+    }
+
+    public GBAImage getBirdSprite() {
+        return bird;
+    }
+
 
     public boolean hasMapIcon() {
         return mapIcon != null;
