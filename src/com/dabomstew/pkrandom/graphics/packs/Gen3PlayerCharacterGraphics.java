@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO: these class names are too long
+public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
 
     private final static int FRONT_IMAGE_DIMENSIONS = 8;
     private final static int MAP_ICON_DIMENSIONS = 2;
@@ -89,12 +89,28 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
 
     private GBAImage initRun() {
+        String mode = getEntry().getStringValue("RunSpriteMode");
+
         GBAImage run = initSprite("RunSprite", RUN_SPRITE_FRAME_NUM, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
         if (run == null) {
             run = walk;
+            mode = "RSE";
         }
+
+        if (mode.equalsIgnoreCase("rse")) {
+            run = handleRSERunMode(run);
+        } else if (mode.equalsIgnoreCase("frlg")) {
+            run = handleFRLGRunMode(run);
+        } else {
+            System.out.println("Invalid run sprite mode");
+        }
+
         return run;
     }
+
+    protected abstract GBAImage handleRSERunMode(GBAImage run);
+
+    protected abstract GBAImage handleFRLGRunMode(GBAImage run);
 
     protected abstract int getSitFrameWidth();
 
@@ -212,7 +228,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack { // TODO
 
     public boolean hasSurfBlobSprite() {
         return surfBlob != null;
-    } // TODO: generalise to RSE (?)
+    }
 
     public GBAImage getSurfBlobSprite() {
         return surfBlob;

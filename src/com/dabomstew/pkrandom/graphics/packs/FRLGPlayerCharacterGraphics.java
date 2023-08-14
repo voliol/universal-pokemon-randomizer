@@ -1,6 +1,9 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
+import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.GBAImage;
+
+import java.awt.image.BufferedImage;
 
 public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
 
@@ -32,6 +35,26 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
     @Override
     protected int getBackImageHeight() {
         return BACK_IMAGE_HEIGHT;
+    }
+
+    @Override
+    protected GBAImage handleRSERunMode(GBAImage run) {
+        if (run == null) {
+            return null;
+        }
+        // this probably doesn't respect "palette tricks" since it comes down to a Graphics2D.draw call...
+        run = new GBAImage(GFXFunctions.stitchToGrid(new BufferedImage[][]{{
+                run.getSubimageFromFrame(0), run.getSubimageFromFrame(3), run.getSubimageFromFrame(4),
+                run.getSubimageFromFrame(1), run.getSubimageFromFrame(5), run.getSubimageFromFrame(6),
+                run.getSubimageFromFrame(2), run.getSubimageFromFrame(7), run.getSubimageFromFrame(8)
+        }}));
+        run.setFrameDimensions(MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
+        return run;
+    }
+
+    @Override
+    protected GBAImage handleFRLGRunMode(GBAImage run) {
+        return run;
     }
 
     @Override
