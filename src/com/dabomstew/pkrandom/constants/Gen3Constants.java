@@ -63,7 +63,7 @@ public class Gen3Constants {
             pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
     // pointer block 1
-    public static final int pokemonFrontSpritesPointer = 0x128, pokemonBackSpritesPointer = 0x12C,
+    public static final int pokemonFrontImagesPointer = 0x128, pokemonBackImagesPointer = 0x12C,
     		pokemonNormalPalettesPointer = 0x130, pokemonShinyPalettesPointer = 0x134,
     		pokemonIconSpritesPointer = 0x138, pokemonIconPalettesPointer = 0x13C,
     		pokemonNamesPointer = 0x144, moveNamesPointer = 0x148, decorationNamesPointer = 0x14C;

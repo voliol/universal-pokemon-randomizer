@@ -225,8 +225,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void addPointerBlock1ToRomEntry() {
-        romEntry.putIntValue("PokemonFrontSprites", readPointer(Gen3Constants.pokemonFrontSpritesPointer));
-        romEntry.putIntValue("PokemonBackSprites", readPointer(Gen3Constants.pokemonBackSpritesPointer));
+        romEntry.putIntValue("PokemonFrontImages", readPointer(Gen3Constants.pokemonFrontImagesPointer));
+        romEntry.putIntValue("PokemonBackImages", readPointer(Gen3Constants.pokemonBackImagesPointer));
         romEntry.putIntValue("PokemonNormalPalettes", readPointer(Gen3Constants.pokemonNormalPalettesPointer));
         romEntry.putIntValue("PokemonShinyPalettes", readPointer(Gen3Constants.pokemonShinyPalettesPointer));
         romEntry.putIntValue("PokemonIconSprites", readPointer(Gen3Constants.pokemonIconSpritesPointer));
@@ -3311,6 +3311,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void randomizeIntroPokemon() {
+        int imageTableOffset = romEntry.getIntValue("PokemonFrontImages");
+        int paletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
+        int cryOffset = romEntry.getIntValue("IntroCryOffset");
+        int imageOffset = romEntry.getIntValue("IntroImageOffset");
+        int paletteOffset = romEntry.getIntValue("IntroPaletteOffset");
+        int otherOffset = romEntry.getIntValue("IntroOtherOffset");
+
         // FRLG
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             // intro sprites : first 255 only due to size
@@ -3319,57 +3326,50 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             int introPokemon = pokedexToInternal[introPk.getNumber()];
-            int frontSprites = romEntry.getIntValue("PokemonFrontSprites");
-            int palettes = romEntry.getIntValue("PokemonNormalPalettes");
 
-            writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) introPokemon);
-            writeByte(romEntry.getIntValue("IntroOtherOffset"), (byte) introPokemon);
+            writeByte(cryOffset, (byte) introPokemon);
+            writeByte(otherOffset, (byte) introPokemon);
 
-            int spriteBase = romEntry.getIntValue("IntroSpriteOffset");
-            writePointer(spriteBase, frontSprites + introPokemon * 8);
-            writePointer(spriteBase + 4, palettes + introPokemon * 8);
+            writePointer(imageOffset, imageTableOffset + introPokemon * 8);
+            writePointer(imageOffset + 4, paletteTableOffset + introPokemon * 8);
         } else if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
             // intro sprites : any pokemon in the range 0-510 except bulbasaur
             int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
             while (introPokemon == 1 || introPokemon > 510) {
                 introPokemon = pokedexToInternal[randomPokemon().getNumber()];
             }
-            int frontSprites = romEntry.getIntValue("PokemonFrontSprites");
-            int palettes = romEntry.getIntValue("PokemonNormalPalettes");
-            int cryCommand = romEntry.getIntValue("IntroCryOffset");
-            int otherCommand = romEntry.getIntValue("IntroOtherOffset");
 
             if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
-                rom[cryCommand] = (byte) 0xFF;
-                rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
+                rom[cryOffset] = (byte) 0xFF;
+                rom[cryOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
 
-                rom[cryCommand + 2] = (byte) (introPokemon - 0xFF);
-                rom[cryCommand + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR0;
+                rom[cryOffset + 2] = (byte) (introPokemon - 0xFF);
+                rom[cryOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR0;
 
-                rom[otherCommand] = (byte) 0xFF;
-                rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
+                rom[otherOffset] = (byte) 0xFF;
+                rom[otherOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
 
-                rom[otherCommand + 2] = (byte) (introPokemon - 0xFF);
-                rom[otherCommand + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR4;
+                rom[otherOffset + 2] = (byte) (introPokemon - 0xFF);
+                rom[otherOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR4;
             } else {
-                rom[cryCommand] = (byte) introPokemon;
-                rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
+                rom[cryOffset] = (byte) introPokemon;
+                rom[cryOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
 
-                writeWord(cryCommand + 2, Gen3Constants.gbaNopOpcode);
+                writeWord(cryOffset + 2, Gen3Constants.gbaNopOpcode);
 
-                rom[otherCommand] = (byte) introPokemon;
-                rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
+                rom[otherOffset] = (byte) introPokemon;
+                rom[otherOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
 
-                writeWord(otherCommand + 2, Gen3Constants.gbaNopOpcode);
+                writeWord(otherOffset + 2, Gen3Constants.gbaNopOpcode);
             }
 
-            writePointer(romEntry.getIntValue("IntroSpriteOffset"), frontSprites + introPokemon * 8);
-            writePointer(romEntry.getIntValue("IntroPaletteOffset"), palettes + introPokemon * 8);
+            writePointer(imageOffset, imageTableOffset + introPokemon * 8);
+            writePointer(paletteOffset, paletteTableOffset + introPokemon * 8);
         } else {
             // Emerald, intro sprite: any Pokemon.
             int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
-            writeWord(romEntry.getIntValue("IntroSpriteOffset"), introPokemon);
-            writeWord(romEntry.getIntValue("IntroCryOffset"), introPokemon);
+            writeWord(imageOffset, introPokemon);
+            writeWord(cryOffset, introPokemon);
         }
 
     }
@@ -4666,7 +4666,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
 
         int num = pokedexToInternal[pk.getNumber()];
-        int tableOffset = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");
+        int tableOffset = back ? romEntry.getIntValue("PokemonBackImages") : romEntry.getIntValue("PokemonFrontImages");
 
         int imageOffset = readPointer(tableOffset + num * 8);
         byte[] data = DSDecmp.Decompress(rom, imageOffset);
