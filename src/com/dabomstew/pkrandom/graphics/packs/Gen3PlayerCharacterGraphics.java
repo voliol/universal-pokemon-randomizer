@@ -43,8 +43,8 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
 
     public Gen3PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
-        this.front = initFront();
-        this.back = initBack();
+        this.front = initImage("FrontImage", FRONT_IMAGE_DIMENSIONS, FRONT_IMAGE_DIMENSIONS);
+        this.back = initImage("BackImage", getBackImageWidth(), getBackImageHeight());
         this.walk = initSprite("WalkSprite", WALK_SPRITE_FRAME_NUM, MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
         this.run = initRun();
         this.bike = initSprite("BikeSprite", BIKE_SPRITE_FRAME_NUM, BIG_SPRITE_WIDTH, BIG_SPRITE_HEIGHT);
@@ -55,32 +55,6 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         this.mapIcon = initMapIcon();
         this.normalSpritePalette = initNormalSpritePalette();
         this.reflectionSpritePalette = initReflectionSpritePalette();
-    }
-
-    private GBAImage initFront() {
-        BufferedImage base = readImage("FrontImage");
-        if (base == null) {
-            return null;
-        }
-        GBAImage front = new GBAImage(base);
-        if (front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS || front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS) {
-            System.out.println("Invalid front image dimensions");
-            return null;
-        }
-        return front;
-    }
-
-    private GBAImage initBack() {
-        BufferedImage base = readImage("BackImage");
-        if (base == null) {
-            return null;
-        }
-        GBAImage back = new GBAImage(base);
-        if (back.getWidthInTiles() != getBackImageWidth() || back.getHeightInTiles() != getBackImageHeight()) {
-            System.out.println("Invalid back image dimensions");
-            return null;
-        }
-        return back;
     }
 
     protected abstract int getBackImageWidth();
@@ -151,6 +125,19 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
             palette = normalSpritePalette; // TODO: auto-soften the palette
         }
         return palette;
+    }
+
+    protected GBAImage initImage(String key, int width, int height) {
+        BufferedImage base = readImage(key);
+        if (base == null) {
+            return null;
+        }
+        GBAImage image = new GBAImage(base);
+        if (image.getWidthInTiles() != width || image.getWidthInTiles() != height) {
+            System.out.println("Invalid " + key + " dimensions");
+            return null;
+        }
+        return image;
     }
 
     protected GBAImage initSprite(String key, int frameAmount, int frameWidth, int frameHeight) {

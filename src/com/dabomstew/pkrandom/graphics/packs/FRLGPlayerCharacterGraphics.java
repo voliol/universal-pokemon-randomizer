@@ -103,4 +103,6 @@ public class FRLGPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
         return itemBike;
     }
 
+    // TODO: the oak speech image and its 32-color palette
+
 }

@@ -219,7 +219,6 @@ public class GFXFunctions {
 	 * Allows for writing image files to Gen III-V games, by using the data as an
 	 * argument for the appropriate writing method.
 	 */
-	// TODO: it makes sense for this to be handled by its own class(es).
 	@Deprecated
 	public static byte[] readTiledImageData(BufferedImage bim) {
 		return readTiledImageData(bim, DEFAULT_BPP);
