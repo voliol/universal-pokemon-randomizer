@@ -50,6 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
@@ -4092,17 +4093,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void savePokemonPalettes() {
-        // TODO: special case for Unown
         int normalPaletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
         int shinyPaletteTableOffset = romEntry.getIntValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
             int pokeNumber = pokedexToInternal[pk.getNumber()];
-
             int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
-            rewriteCompressedPalette(normalPalPointerOffset, pk.getNormalPalette());
-
             int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
-            rewriteCompressedPalette(shinyPalPointerOffset, pk.getShinyPalette());
+
+            if (pk.getNumber() == Species.unown) {
+                int[] altFormeNormalPointerOffsets = IntStream.range(0, Gen3Constants.unownFormeCount - 1)
+                        .map(i -> normalPaletteTableOffset + (Gen3Constants.unownBIndex + i) * 8)
+                        .toArray();
+                int[] altFormeShinyPointerOffsets = IntStream.range(0, Gen3Constants.unownFormeCount - 1)
+                        .map(i -> shinyPaletteTableOffset + (Gen3Constants.unownBIndex + i) * 8)
+                        .toArray();
+                rewriteCompressedData(normalPalPointerOffset, pk.getNormalPalette().toBytes(),
+                        altFormeNormalPointerOffsets);
+                rewriteCompressedData(shinyPalPointerOffset, pk.getShinyPalette().toBytes(),
+                        altFormeShinyPointerOffsets);
+
+            } else {
+                rewriteCompressedPalette(normalPalPointerOffset, pk.getNormalPalette());
+                rewriteCompressedPalette(shinyPalPointerOffset, pk.getShinyPalette());
+            }
         }
     }
 

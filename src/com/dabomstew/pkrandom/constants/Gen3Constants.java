@@ -50,6 +50,8 @@ public class Gen3Constants {
 
     public static final int pokemonCount = 386;
 
+    public static final int unownFormeCount = 28, unownBIndex = 413;
+
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
 
     // These pointer prefixes aren't used despite being accurate to all vanilla ROMs. Using them to search was slow
