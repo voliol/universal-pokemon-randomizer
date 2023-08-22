@@ -133,8 +133,9 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
             return null;
         }
         GBAImage image = new GBAImage(base);
-        if (image.getWidthInTiles() != width || image.getWidthInTiles() != height) {
-            System.out.println("Invalid " + key + " dimensions");
+        if (image.getWidthInTiles() != width || image.getHeightInTiles() != height) {
+            System.out.println("Invalid " + key + " dimensions. Expected " + width + "x" + height + ", was " +
+                    image.getWidthInTiles() + "x" + image.getHeightInTiles());
             return null;
         }
         return image;
