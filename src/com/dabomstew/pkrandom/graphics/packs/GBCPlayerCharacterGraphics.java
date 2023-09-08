@@ -32,7 +32,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBCImage front = new GBCImage(base, true);
+        GBCImage front = new GBCImage.Builder(base).columnMode(true).build();
         if (front.getWidthInTiles() != FRONT_IMAGE_DIMENSIONS || front.getHeightInTiles() != FRONT_IMAGE_DIMENSIONS) {
             System.out.println("Invalid front image dimensions");
             return null;
@@ -45,7 +45,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBCImage back = new GBCImage(base, true);
+        GBCImage back = new GBCImage.Builder(base).columnMode(true).build();
         if (back.getWidthInTiles() != getBackImageDimensions() || back.getHeightInTiles() != getBackImageDimensions()) {
             System.out.println("Invalid back image dimensions");
             return null;
@@ -60,7 +60,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBCImage walk = new GBCImage(base);
+        GBCImage walk = new GBCImage.Builder(base).build();
         if (walk.getWidthInTiles() * walk.getHeightInTiles() != OVERWORLD_SPRITE_TILE_AMOUNT) {
             System.out.println("Invalid walk sprite dimensions");
             return null;
@@ -73,7 +73,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBCImage bike = new GBCImage(base);
+        GBCImage bike = new GBCImage.Builder(base).build();
         if (bike.getWidthInTiles() * bike.getHeightInTiles() != OVERWORLD_SPRITE_TILE_AMOUNT) {
             System.out.println("Invalid bike sprite dimensions");
             return null;
@@ -103,7 +103,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBCImage fish = new GBCImage(base);
+        GBCImage fish = new GBCImage.Builder(base).build();
         if (fish.getWidthInTiles() * fish.getHeightInTiles() != (OVERWORLD_SPRITE_TILE_AMOUNT) / 4) {
             System.out.println("Invalid fish sprite dimensions");
             return null;
@@ -117,7 +117,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         BufferedImage back = readImage("FishBackSprite");
         BufferedImage side = readImage("FishSideSprite");
         BufferedImage stitched = GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back, side}});
-        GBCImage fish = new GBCImage(stitched);
+        GBCImage fish = new GBCImage.Builder(stitched).build();
         if (fish.getWidthInTiles() * fish.getHeightInTiles() != (OVERWORLD_SPRITE_TILE_AMOUNT) / 4) {
             System.out.println("Invalid fish sprite dimensions");
             return null;
@@ -132,7 +132,7 @@ public abstract class GBCPlayerCharacterGraphics extends GraphicsPack {
         GBCImage back = walk.getSubimageFromTileRange(6, 8);
         GBCImage side = walk.getSubimageFromTileRange(10, 12);
         BufferedImage stitched = GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back, side}});
-        return new GBCImage(stitched);
+        return new GBCImage.Builder(stitched).build();
     }
 
     public boolean hasFrontImage() {

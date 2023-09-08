@@ -103,7 +103,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBAImage mapIcon = new GBAImage(base);
+        GBAImage mapIcon = new GBAImage.Builder(base).build();
         if (mapIcon.getWidthInTiles() != MAP_ICON_DIMENSIONS || mapIcon.getWidthInTiles() != MAP_ICON_DIMENSIONS) {
             System.out.println("Invalid map icon dimensions");
             return null;
@@ -132,7 +132,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBAImage image = new GBAImage(base);
+        GBAImage image = new GBAImage.Builder(base).build();
         if (image.getWidthInTiles() != width || image.getHeightInTiles() != height) {
             System.out.println("Invalid " + key + " dimensions. Expected " + width + "x" + height + ", was " +
                     image.getWidthInTiles() + "x" + image.getHeightInTiles());
@@ -154,7 +154,7 @@ public abstract class Gen3PlayerCharacterGraphics extends GraphicsPack {
         if (base == null) {
             return null;
         }
-        GBAImage sprite = new GBAImage(base);
+        GBAImage sprite = new GBAImage.Builder(base).build();
         if (sprite.getWidthInTiles() * sprite.getHeightInTiles() != tileAmount) {
             System.out.println("Invalid " + key + " dimensions");
             return null;

@@ -39,7 +39,7 @@ public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
         if (base == null) {
             return null;
         }
-        GBCImage trainerCard = new GBCImage(base, true);
+        GBCImage trainerCard = new GBCImage.Builder(base).columnMode(true).build();
         if (trainerCard.getWidthInTiles() != TRAINER_CARD_IMAGE_WIDTH ||
                 trainerCard.getHeightInTiles() != TRAINER_CARD_IMAGE_HEIGHT) {
             System.out.println("Invalid trainer card image dimensions");

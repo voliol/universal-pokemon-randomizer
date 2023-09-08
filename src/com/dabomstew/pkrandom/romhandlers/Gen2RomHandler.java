@@ -2836,7 +2836,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Settings.PlayerCharacterMod toReplace) {
         int trainerCardOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "TrainerCardImage");
         // the trainer card image has different column modes in GS / Crystal, for whatever reason
-        writeImage(trainerCardOffset, new GBCImage(trainerCardImage, romEntry.isCrystal()));
+        writeImage(trainerCardOffset, new GBCImage.Builder(trainerCardImage).columnMode(romEntry.isCrystal()).build());
     }
 
     public void rewriteKrisBackImage(GBCImage krisBack) {
@@ -2922,7 +2922,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
         palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
 
-        BufferedImage bim = new GBCImage(width, height, palette, data, true);
+        BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
 
         if (transparentBackground) {
             bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());

@@ -391,7 +391,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     public void findImageForRomEntry(String fileName, String romEntryName, boolean columnMode) {
         try {
             BufferedImage orig = ImageIO.read(new File(fileName));
-            byte[] data = new GBCImage(orig, columnMode).toBytes();
+            byte[] data = new GBCImage.Builder(orig).columnMode(columnMode)
+                    .build().toBytes();
 //            System.out.println(RomFunctions.bytesToHex(data));
 //            System.out.println("found at:");
             List<Integer> foundAt = RomFunctions.search(rom, data);

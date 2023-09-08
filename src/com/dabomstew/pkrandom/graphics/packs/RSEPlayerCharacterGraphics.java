@@ -61,12 +61,12 @@ public class RSEPlayerCharacterGraphics extends Gen3PlayerCharacterGraphics {
             return null;
         }
         // this probably doesn't respect "palette tricks" since it comes down to a Graphics2D.draw call...
-        run = new GBAImage(GFXFunctions.stitchToGrid(new BufferedImage[][]{{
+        run = new GBAImage.Builder(GFXFunctions.stitchToGrid(new BufferedImage[][]{{
                 run.getSubimageFromFrame(0), run.getSubimageFromFrame(3), run.getSubimageFromFrame(6),
                 run.getSubimageFromFrame(1), run.getSubimageFromFrame(2),
                 run.getSubimageFromFrame(4), run.getSubimageFromFrame(5),
                 run.getSubimageFromFrame(7), run.getSubimageFromFrame(8)
-        }}));
+        }})).build();
         run.setFrameDimensions(MEDIUM_SPRITE_WIDTH, MEDIUM_SPRITE_HEIGHT);
         return run;
     }

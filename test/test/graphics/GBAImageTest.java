@@ -27,51 +27,55 @@ public class GBAImageTest {
 
     @Test
     void canInitFromBimWithIndexedColors() {
-        new GBAImage(bim1);
+        new GBAImage.Builder(bim1).build();
     }
 
     @Test
     void canInitFromBimWithNonIndexedColors() {
-        new GBAImage(bim2);
+        new GBAImage.Builder(bim2).build();
     }
 
     @Test
     void paletteHas16Colors() {
-        GBAImage a = new GBAImage(bim1);
+        GBAImage a = new GBAImage.Builder(bim1).build();
         assertEquals(16, a.getPalette().size());
-        GBAImage b = new GBAImage(bim2);
+        GBAImage b = new GBAImage.Builder(bim2).build();
         assertEquals(16, b.getPalette().size());
     }
 
     @Test
     void imagesFromSameBimAreEqual() {
-        assertEquals(new GBAImage(bim1), new GBAImage(bim1));
+        assertEquals(new GBAImage.Builder(bim1).build(), new GBAImage.Builder(bim1).build());
     }
 
     @Test
     void toBytesMirrorsGFXFunction() {
-        GBAImage a = new GBAImage(bim1);
+        GBAImage a = new GBAImage.Builder(bim1).build();
         assertArrayEquals(GFXFunctions.readTiledImageData(a), a.toBytes());
     }
 
     @Test
     void toBytesPlusFromBytesCreatesEqualImage() {
-        GBAImage a = new GBAImage(bim1);
-        GBAImage b = new GBAImage(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes());
+        GBAImage a = new GBAImage.Builder(bim1).build();
+        GBAImage b = new GBAImage.Builder(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes())
+                .build();
         assertEquals(a, b);
     }
 
     @Test
     void toBytesPlusFromBytesCreatesEqualImageWithColumnModeTrue() {
-        GBAImage a = new GBAImage(bim1, true);
-        GBAImage b = new GBAImage(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes(), true);
+        GBAImage a = new GBAImage.Builder(bim1)
+                .columnMode(true).build();
+        GBAImage b = new GBAImage.Builder(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes())
+                .columnMode(true).build();
         assertEquals(a, b);
     }
 
     @Test
     void toBytesPlusFromBytesCreatesEqualImageWithNonIndexedBim() {
-        GBAImage a = new GBAImage(bim2, true);
-        GBAImage b = new GBAImage(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes(), true);
+        GBAImage a = new GBAImage.Builder(bim2).columnMode(true).build();
+        GBAImage b = new GBAImage.Builder(a.getWidthInTiles(), a.getHeightInTiles(), a.getPalette(), a.toBytes())
+                .columnMode(true).build();
         assertEquals(a, b);
     }
 }

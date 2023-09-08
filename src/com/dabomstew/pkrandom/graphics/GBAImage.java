@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom.graphics;
 
-import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.awt.*;
@@ -8,80 +7,57 @@ import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
 
 /**
- * An image for GBA games with 16-color palettes. For now just a copy of GBCImage with that difference.
- * // TODO: class structure; concile with GBCImage
+ * An image for GBA games with 16-color palettes. The GBAImage itself is a {@link BufferedImage} with an
+ * {@link IndexColorModel} of 16 colors, but can be converted from/to a byte array format used by the games.
  */
-public class GBAImage extends BufferedImage {
+public class GBAImage extends TiledImage {
 
-    private static final int TILE_SIZE = 8;
     private static final int BPP = 4;
 
-    private final boolean columnMode;
-    private final int[] colors;
+    public static class Builder extends TiledImage.Builder<GBAImage> {
 
-    private int frameWidth;
-    private int frameHeight;
-    private int frameAmount;
-
-    public GBAImage(BufferedImage bim) {
-        this(bim, false);
-    }
-
-    public GBAImage(BufferedImage bim, boolean columnMode) {
-        this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
-                Palette.readImagePalette(bim, 16), columnMode);
-        if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
-            throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
-                    bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
+        public Builder(int width, int height, Palette palette) {
+            super(width, height, palette);
         }
-        if (bim.getColorModel() instanceof IndexColorModel indexColorModel
-                && indexColorModel.isCompatibleRaster(getData())) {
-            Raster from = bim.getData();
-            WritableRaster to = getRaster();
-            for (int x = 0; x < getWidth(); x++) {
-                for (int y = 0; y < getHeight(); y++) {
-                    int s = from.getSample(x, y, 0);
-                    to.setSample(x, y, 0, s);
-                }
-            }
-        } else {
-            Graphics2D g = createGraphics();
-            g.drawImage(bim, 0, 0, null);
+
+        public Builder(int width, int height, Palette palette, byte[] data) {
+            super(width, height, palette, data);
+        }
+
+        public Builder(BufferedImage bim) {
+            super(bim);
+        }
+
+        public Builder(File file) throws IOException {
+            super(file);
+        }
+
+        @Override
+        protected Palette preparePalette(BufferedImage bim) {
+            return Palette.readImagePalette(bim, 16);
+        }
+
+        @Override
+        protected int getBPP() {
+            return BPP;
+        }
+
+        @Override
+        protected GBAImage init(int width, int height, IndexColorModel colorModel, boolean columnMode) {
+            return new GBAImage(width, height, colorModel, columnMode);
         }
     }
 
-    public GBAImage(int widthInTiles, int heightInTiles, Palette palette, boolean columnMode) {
-        super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
-                GFXFunctions.indexColorModelFromPalette(palette, BPP));
-        this.columnMode = columnMode;
-        this.colors = initColors();
+    protected GBAImage(int width, int height, IndexColorModel colorModel, boolean columnMode) {
+        super(width, height, colorModel, columnMode);
     }
 
-    private int[] initColors() {
-        int[] colors = new int[16];
-        IndexColorModel colorModel = (IndexColorModel) getColorModel();
-        colorModel.getRGBs(colors);
-        return colors;
-    }
-
-    public GBAImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data) {
-        this(widthInTiles, heightInTiles, palette, data, false);
-    }
-
-    /**
-     * @param columnMode If true, the data will be column-by-column, instead of row-by-row. This affects the data reading,
-     *                   as well as the output from {@link #toBytes()}.
-     *                   Mirrors <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a>.
-     */
-    public GBAImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data, boolean columnMode) {
-        this(widthInTiles, heightInTiles, palette, columnMode);
-        drawTileData(data);
-    }
-
-    private void drawTileData(byte[] data) {
+    @Override
+    protected void drawTileData(byte[] data) {
         int dataNumTiles = data.length / TILE_SIZE / BPP;
         int imageNumTiles = getWidthInTiles() * getHeightInTiles();
         int next = 0;
@@ -100,44 +76,25 @@ public class GBAImage extends BufferedImage {
         }
     }
 
-    public void setColor(int x, int y, int colorIndex) {
-        getRaster().setSample(x, y, 0, colorIndex);
-    }
-
-    public int getWidthInTiles() {
-        return getWidth() / 8;
-    }
-
-    public int getHeightInTiles() {
-        return getHeight() / 8;
-    }
-
-    public void setFrameDimensions(int frameWidth, int frameHeight) {
-        if (frameWidth <= 0 || frameHeight <= 0) {
-            throw new IllegalArgumentException("Invalid dimensions " + frameWidth + "x" + frameHeight + ". " +
-                    "Both dimensions must be >= 1.");
+    @Override
+    protected void drawImage(BufferedImage bim) {
+        if (bim.getColorModel() instanceof IndexColorModel indexColorModel
+                && indexColorModel.isCompatibleRaster(getData())) {
+            Raster from = bim.getData();
+            WritableRaster to = getRaster();
+            for (int x = 0; x < getWidth(); x++) {
+                for (int y = 0; y < getHeight(); y++) {
+                    int s = from.getSample(x, y, 0);
+                    to.setSample(x, y, 0, s);
+                }
+            }
+        } else {
+            Graphics2D g = createGraphics();
+            g.drawImage(bim, 0, 0, null);
         }
-        if (getWidthInTiles() % frameWidth != 0 || getHeightInTiles() % frameHeight != 0) {
-            throw new IllegalArgumentException("Image cannot be split into frames that are " + frameWidth + "x" +
-                    frameHeight + " tiles.");
-        }
-        this.frameWidth = frameWidth;
-        this.frameHeight = frameHeight;
-        this.frameAmount = (getWidthInTiles() * getHeightInTiles()) / (frameWidth * frameHeight);
     }
 
-    public int getFrameWidth() {
-        return frameWidth;
-    }
-
-    public int getFrameHeight() {
-        return frameHeight;
-    }
-
-    public int getFrameAmount() {
-        return frameAmount;
-    }
-
+    @Override
     public byte[] toBytes() {
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
         int numTiles = getWidthInTiles() * getHeightInTiles();
@@ -160,18 +117,10 @@ public class GBAImage extends BufferedImage {
         return data;
     }
 
-    public Palette getPalette() {
-        return new Palette(colors);
-    }
-
-    /**
-     * Returns a subimage consisting of only the tiles within a given range.
-     *
-     * @param from the initial index of the range, inclusive
-     * @param to   the final index of the range, exclusive
-     */
+    @Override
     public GBAImage getSubimageFromTileRange(int from, int to) {
-        GBAImage subimage = new GBAImage(to - from, 1, getPalette(), false);
+        // TODO: make this use raster drawing instead
+        GBAImage subimage = new Builder(to - from, 1, getPalette()).build();
         Graphics2D g = subimage.createGraphics();
         for (int tile = from; tile < to; tile++) {
             int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
@@ -183,28 +132,13 @@ public class GBAImage extends BufferedImage {
         return subimage;
     }
 
-    /**
-     * Returns a subimage defined by a rectangular region - in tiles. Similar to
-     * {@link BufferedImage#getSubimage(int, int, int, int)}.<br>
-     * The columnmode of the subimage is the same as the source image.
-     *
-     * @param x the X coordinate of the upper-left corner tile of the specified rectangular region
-     * @param y the Y coordinate of the upper-left corner tile of the specified rectangular region
-     * @param w the width in tiles
-     * @param h the height in tiles
-     */
+    @Override
     public GBAImage getSubimageFromTileRect(int x, int y, int w, int h) {
         BufferedImage subimage = getSubimage(x * TILE_SIZE, y * TILE_SIZE, w * TILE_SIZE, h * TILE_SIZE);
-        return new GBAImage(subimage, columnMode);
+        return new Builder(subimage).columnMode(columnMode).build();
     }
 
-    /**
-     * A version of {@link #getSubimageFromFrame(int, int, int)} where the
-     * dimensions have already been set by {@link #setFrameDimensions(int, int)}. <br>
-     * Throws an {@link IllegalStateException} if the dimensions are not set.
-     *
-     * @param i the index of the frame
-     */
+    @Override
     public GBAImage getSubimageFromFrame(int i) {
         if (frameWidth == 0 || frameHeight == 0) {
             throw new IllegalStateException("Must set the dimensions first, or use getSubimageFromFrame(i, w, h).");
@@ -212,24 +146,7 @@ public class GBAImage extends BufferedImage {
         return getSubimageFromFrame(i, frameWidth, frameHeight);
     }
 
-    /**
-     * Returns a subimage defined as a "frame", a rectangular region
-     * given by its index and dimensions. Throws an {@link IllegalArgumentException}
-     * if the dimensions of the BufferedImage are not divisible by the frame dimensions.
-     * <br><br>
-     * This method allows for easier handling of "sheets" of images, since the
-     * return is the same regardless whether the frames are laid out horizontally,
-     * vertically, or even in a 2D grid. Frames are read row-for-row, left-to-right,
-     * top to bottom. I.e.: <br>
-     * -----<br>
-     * |0|1|<br>
-     * |2|3|<br>
-     * -----<br>
-     *
-     * @param i the index of the frame
-     * @param w the width of a frame in tiles
-     * @param h the height of a frame in tiles
-     */
+    @Override
     public GBAImage getSubimageFromFrame(int i, int w, int h) {
         if (getWidthInTiles() % w != 0 || getHeightInTiles() % h != 0) {
             throw new IllegalArgumentException("Image cannot be split into frames that are " + w + "x" + h + " tiles.");
@@ -237,20 +154,6 @@ public class GBAImage extends BufferedImage {
         int x = (i * w) % getWidthInTiles();
         int y = ((i * w) / getWidthInTiles()) * h;
         return getSubimageFromTileRect(x, y, w, h);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof GBAImage otherImage) {
-            return Arrays.equals(getRasterData(), otherImage.getRasterData());
-        }
-        return false;
-    }
-
-    private int[] getRasterData() {
-        Raster raster = getRaster();
-        return raster.getPixels(0, 0, raster.getWidth(), raster.getHeight(),
-                new int[raster.getWidth() * raster.getHeight()]);
     }
 
 }

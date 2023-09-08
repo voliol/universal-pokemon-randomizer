@@ -35,7 +35,7 @@ public class Gen1CmpTest {
         System.out.println(name);
         GBCImage bim = null;
         try {
-            bim = new GBCImage(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")), true);
+            bim = new GBCImage.Builder(new File(IN_ADRESS + "/" + name + ".png")).columnMode(true).build();
         } catch (IOException ignored) {
         }
 
@@ -55,8 +55,8 @@ public class Gen1CmpTest {
                     byte[] rom = Arrays.copyOf(compressed, 0x100000);
                     Gen1Decmp sprite = new Gen1Decmp(rom, 0);
                     sprite.decompress();
-                    GBCImage bim2 = new GBCImage(sprite.getWidth() / 8, sprite.getHeight() / 8,
-                            GBCImage.DEFAULT_PALETTE, sprite.getData(), true);
+                    GBCImage bim2 = new GBCImage.Builder(sprite.getWidth() / 8, sprite.getHeight() / 8,
+                            GBCImage.DEFAULT_PALETTE, sprite.getData()).columnMode(true).build();
                     try {
                         ImageIO.write(bim2, "png", new File(OUT_ADRESS + "/" + name + "_m" + mode + "o" + order + ".png"));
                     } catch (IOException e) {
@@ -86,7 +86,7 @@ public class Gen1CmpTest {
     }
 
     private static void writeBitplaneImages(BufferedImage bim, String name) {
-        GBCImage image = new GBCImage(bim);
+        GBCImage image = new GBCImage.Builder(bim).build();
         try {
             ImageIO.write(image.getBitplane1Image(), "png", new File(OUT_ADRESS + "/" + name + "_bp1.png"));
             ImageIO.write(image.getBitplane2Image(), "png", new File(OUT_ADRESS + "/" + name + "_bp2.png"));
@@ -102,7 +102,8 @@ public class Gen1CmpTest {
         int offset = 23;
         GBCImage image = null;
         try {
-            image = new GBCImage(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")), true);
+            image = new GBCImage.Builder(ImageIO.read(new File(IN_ADRESS + "/" + name + ".png")))
+                    .columnMode(true).build();
         } catch (IOException ignored) {
         }
         byte[] compressed = Gen1Cmp.compress(image);

@@ -4487,7 +4487,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         // Make image, 4bpp
-        GBAImage bim = new GBAImage(8, 8, palette, data);
+        GBAImage bim = new GBAImage.Builder(8, 8, palette, data).build();
         if (includePalette) {
             for (int i = 0; i < palette.size(); i++) {
                 bim.setColor(i, 0, i);

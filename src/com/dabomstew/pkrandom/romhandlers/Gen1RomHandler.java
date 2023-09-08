@@ -2833,7 +2833,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         byte[] data = readImageData(imageOffset);
         Palette palette = getVisiblePokemonPalette(pk);
 
-        BufferedImage bim = new GBCImage(width, height, palette, data, true);
+        BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
 
         if (transparentBackground) {
             bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());

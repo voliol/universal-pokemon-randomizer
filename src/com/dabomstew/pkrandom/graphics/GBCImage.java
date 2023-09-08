@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom.graphics;
 
-import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
@@ -8,6 +7,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
  * {@link IndexColorModel} of 4 colors, but can be converted from/to a byte array format used by the games.
  * <a href=https://www.huderlem.com/demos/gameboy2bpp.html>That format is explained here</a>.
  */
-public class GBCImage extends BufferedImage {
+public class GBCImage extends TiledImage {
 
     private static final int TILE_SIZE = 8;
     private static final int BPP = 2;
@@ -26,113 +27,91 @@ public class GBCImage extends BufferedImage {
     public static final Palette DEFAULT_PALETTE = new Palette(new Color[]{
             Color.WHITE, new Color(0xFFAAAAAA), new Color(0xFF666666), Color.BLACK});
 
-    /**
-     * "Fixes" a palette, filling it out to have 4 colors if there are less,
-     * and reordering them from brightest to darkest. True white (=FFFFFF) is always put at the start of the palette,
-     * and true black (=000000) is always put at the end.
-     */
-    private static Palette fixPalette(Palette palette) {
-        if (palette.size() > 4) {
-            throw new IllegalArgumentException("palette.size()=" + palette.size() + " exceeds max palette size "
-                    + PALETTE_SIZE + ".");
+    public static class Builder extends TiledImage.Builder<GBCImage> {
+
+        public Builder(int width, int height, Palette palette) {
+            super(width, height, palette);
         }
-        List<Integer> colors = new ArrayList<>(Arrays.stream(palette.toARGB()).boxed().toList());
-        colors.sort((c1, c2) -> compareColors(new Color(c1), new Color(c2)));
-        Palette fixed = new Palette(DEFAULT_PALETTE);
-        for (int i = 0; i < colors.size(); i++) {
-            Color color = new Color(colors.get(i));
-            if (!color.equals(Color.WHITE) && !color.equals(Color.BLACK)) {
-                fixed.set(i, color);
+
+        public Builder(int width, int height, Palette palette, byte[] data) {
+            super(width, height, palette, data);
+        }
+
+        public Builder(BufferedImage bim) {
+            super(bim);
+        }
+
+        public Builder(File file) throws IOException {
+            super(file);
+        }
+
+        /**
+         * Fills out the palette from the image out to have 4 colors if there are less,
+         * and reorders them from brightest to darkest. True white (=FFFFFF) is always put at the start of the palette,
+         * and true black (=000000) is always put at the end.
+         */
+        @Override
+        protected Palette preparePalette(BufferedImage bim) {
+            Palette palette = Palette.readImagePaletteFromPixels(bim);
+            if (palette.size() > 4) {
+                throw new IllegalArgumentException("palette.size()=" + palette.size() + " exceeds max palette size "
+                        + PALETTE_SIZE + ".");
             }
+            List<Integer> colors = new ArrayList<>(Arrays.stream(palette.toARGB()).boxed().toList());
+            colors.sort((c1, c2) -> compareColors(new Color(c1), new Color(c2)));
+            Palette fixed = new Palette(DEFAULT_PALETTE);
+            for (int i = 0; i < colors.size(); i++) {
+                Color color = new Color(colors.get(i));
+                if (!color.equals(Color.WHITE) && !color.equals(Color.BLACK)) {
+                    fixed.set(i, color);
+                }
+            }
+
+            return fixed;
         }
 
-        return fixed;
-    }
-
-    private static int compareColors(Color a, Color b) {
-        double[] aHSV = a.toHSV();
-        double[] bHSV = b.toHSV();
-        int compare = Double.compare(bHSV[2], aHSV[2]);
-        if (compare == 0) {
-            compare = Double.compare(aHSV[1], bHSV[1]);
+        private static int compareColors(Color a, Color b) {
+            double[] aHSV = a.toHSV();
+            double[] bHSV = b.toHSV();
+            int compare = Double.compare(bHSV[2], aHSV[2]);
             if (compare == 0) {
-                compare = Double.compare(aHSV[0], bHSV[0]);
+                compare = Double.compare(aHSV[1], bHSV[1]);
+                if (compare == 0) {
+                    compare = Double.compare(aHSV[0], bHSV[0]);
+                }
             }
+            return compare;
         }
-        return compare;
+
+        @Override
+        protected int getBPP() {
+            return BPP;
+        }
+
+        @Override
+        protected GBCImage init(int width, int height, IndexColorModel colorModel, boolean columnMode) {
+            return new GBCImage(width, height, colorModel, columnMode);
+        }
     }
 
-    private final boolean columnMode;
-    private final int[] colors;
+    protected GBCImage(int width, int height, IndexColorModel colorModel, boolean columnMode) {
+        super(width, height, colorModel, columnMode);
+    }
 
     private boolean bitplanesPrepared;
     private BufferedImage bitplane1Image;
     private BufferedImage bitplane2Image;
 
-    /**
-     * Creates a GBCImage copy of the input {@link BufferedImage}.
-     * This allows both the GBCImage methods, but also "fixes" its 2bpp color
-     * indexing. I.e. the GBCImage uses an {@link IndexColorModel}
-     * with four colors, sorted from lightest/white to darkest/black.
-     * <br><br>
-     * Assumes the tiles to be row-by-row, see {@link #GBCImage(BufferedImage, boolean)}.
-     *
-     * @param bim The original BufferedImage.
-     */
-    public GBCImage(BufferedImage bim) {
-        this(bim, false);
-    }
-
-    /**
-     * Creates a GBCImage copy of the input {@link BufferedImage}.
-     * This allows both the GBCImage methods, but also "fixes" its 2bpp color
-     * indexing. I.e. the GBCImage uses an {@link IndexColorModel}
-     * with four colors, sorted from lightest/white to darkest/black.
-     *
-     * @param bim        The original BufferedImage.
-     * @param columnMode If true, the output data from {@link #toBytes()} will be column-by-column, instead of row-by-row. Mirrors
-     *                   <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a>.
-     */
-    public GBCImage(BufferedImage bim, boolean columnMode) {
-        this(bim.getWidth() / TILE_SIZE, bim.getHeight() / TILE_SIZE,
-                fixPalette(Palette.readImagePaletteFromPixels(bim)), columnMode);
-        if (bim.getWidth() % TILE_SIZE != 0 || bim.getHeight() % TILE_SIZE != 0) {
-            throw new IllegalArgumentException(bim + " has invalid dimensions " + bim.getWidth() + "x" +
-                    bim.getHeight() + " pixels. Must be multiples of " + TILE_SIZE);
-        }
-        Graphics2D g = createGraphics();
-        g.drawImage(bim, 0, 0, null);
-    }
-
-    public GBCImage(int widthInTiles, int heightInTiles, Palette palette, boolean columnMode) {
-        super(widthInTiles * TILE_SIZE, heightInTiles * TILE_SIZE, BufferedImage.TYPE_BYTE_INDEXED,
-                GFXFunctions.indexColorModelFromPalette(palette, BPP));
-        this.columnMode = columnMode;
-        this.colors = initColors();
-    }
-
-    private int[] initColors() {
+    @Override // TODO: very temp until these methods are rewritten so the base case isn't 16 colors
+    protected int[] initColors() {
         int[] colors = new int[4];
         IndexColorModel colorModel = (IndexColorModel) getColorModel();
         colorModel.getRGBs(colors);
         return colors;
     }
 
-    public GBCImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data) {
-        this(widthInTiles, heightInTiles, palette, data, false);
-    }
-
-    /**
-     * @param columnMode If true, the data will be column-by-column, instead of row-by-row. This affects the data reading,
-     *                   as well as the output from {@link #toBytes()}.
-     *                   Mirrors <a href=https://rgbds.gbdev.io/docs/v0.6.1/rgbgfx.1/#Z>"rgbgfx -Z"</a>.
-     */
-    public GBCImage(int widthInTiles, int heightInTiles, Palette palette, byte[] data, boolean columnMode) {
-        this(widthInTiles, heightInTiles, palette, columnMode);
-        drawTileData(data);
-    }
-
-    private void drawTileData(byte[] data) {
+    @Override
+    protected void drawTileData(byte[] data) {
         int dataNumTiles = data.length / TILE_SIZE / BPP;
         int imageNumTiles = getWidthInTiles() * getHeightInTiles();
         for (int tile = 0; tile < Math.min(dataNumTiles, imageNumTiles); tile++) {
@@ -151,18 +130,13 @@ public class GBCImage extends BufferedImage {
         }
     }
 
-    public void setColor(int x, int y, int colorIndex) {
-        setRGB(x, y, colors[colorIndex]);
+    @Override
+    protected void drawImage(BufferedImage bim) {
+        Graphics2D g = createGraphics();
+        g.drawImage(bim, 0, 0, null);
     }
 
-    public int getWidthInTiles() {
-        return getWidth() / 8;
-    }
-
-    public int getHeightInTiles() {
-        return getHeight() / 8;
-    }
-
+    @Override
     public byte[] toBytes() {
         byte[] data = new byte[getWidthInTiles() * getHeightInTiles() * TILE_SIZE * BPP];
         int numTiles = getWidthInTiles() * getHeightInTiles();
@@ -231,14 +205,9 @@ public class GBCImage extends BufferedImage {
         return new Palette(colors);
     }
 
-    /**
-     * Returns a subimage consisting of only the tiles within a given range.
-     *
-     * @param from the initial index of the range, inclusive
-     * @param to   the final index of the range, exclusive
-     */
+    @Override
     public GBCImage getSubimageFromTileRange(int from, int to) {
-        GBCImage subimage = new GBCImage(to - from, 1, getPalette(), false);
+        GBCImage subimage = new GBCImage.Builder(to - from, 1, getPalette()).build();
         Graphics2D g = subimage.createGraphics();
         for (int tile = from; tile < to; tile++) {
             int tileX = columnMode ? tile / getWidthInTiles() : tile % getWidthInTiles();
@@ -250,19 +219,28 @@ public class GBCImage extends BufferedImage {
         return subimage;
     }
 
-    /**
-     * Returns a subimage defined by a rectangular region - in tiles. Similar to
-     * {@link BufferedImage#getSubimage(int, int, int, int)}.<br>
-     * The columnmode of the subimage is the same as the source image.
-     *
-     * @param x the X coordinate of the upper-left corner tile of the specified rectangular region
-     * @param y the Y coordinate of the upper-left corner tile of the specified rectangular region
-     * @param w the width in tiles
-     * @param h the height in tiles
-     */
+    @Override
     public GBCImage getSubimageFromTileRect(int x, int y, int w, int h) {
         BufferedImage subimage = getSubimage(x * TILE_SIZE, y * TILE_SIZE, w * TILE_SIZE, h * TILE_SIZE);
-        return new GBCImage(subimage, columnMode);
+        return new GBCImage.Builder(subimage).columnMode(columnMode).build();
+    }
+
+    @Override
+    public TiledImage getSubimageFromFrame(int i) {
+        if (frameWidth == 0 || frameHeight == 0) {
+            throw new IllegalStateException("Must set the dimensions first, or use getSubimageFromFrame(i, w, h).");
+        }
+        return getSubimageFromFrame(i, frameWidth, frameHeight);
+    }
+
+    @Override
+    public TiledImage getSubimageFromFrame(int i, int w, int h) {
+        if (getWidthInTiles() % w != 0 || getHeightInTiles() % h != 0) {
+            throw new IllegalArgumentException("Image cannot be split into frames that are " + w + "x" + h + " tiles.");
+        }
+        int x = (i * w) % getWidthInTiles();
+        int y = ((i * w) / getWidthInTiles()) * h;
+        return getSubimageFromTileRect(x, y, w, h);
     }
 
     @Override
