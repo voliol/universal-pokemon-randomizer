@@ -1,7 +1,7 @@
 package test.graphics;
 
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.graphics.GBAImage;
+import com.dabomstew.pkrandom.graphics.images.GBAImage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

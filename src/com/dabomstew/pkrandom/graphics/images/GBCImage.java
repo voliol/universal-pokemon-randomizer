@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.graphics;
+package com.dabomstew.pkrandom.graphics.images;
 
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;

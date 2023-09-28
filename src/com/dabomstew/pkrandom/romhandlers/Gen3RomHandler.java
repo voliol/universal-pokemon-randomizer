@@ -28,7 +28,7 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
-import com.dabomstew.pkrandom.graphics.GBAImage;
+import com.dabomstew.pkrandom.graphics.images.GBAImage;
 import com.dabomstew.pkrandom.graphics.packs.FRLGPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
@@ -43,7 +43,6 @@ import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import compressors.DSCmp;
 import compressors.DSDecmp;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;

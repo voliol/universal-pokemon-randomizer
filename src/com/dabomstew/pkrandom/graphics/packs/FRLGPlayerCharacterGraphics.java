@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.graphics.GBAImage;
+import com.dabomstew.pkrandom.graphics.images.GBAImage;
 
 import java.awt.image.BufferedImage;
 
