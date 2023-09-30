@@ -741,25 +741,25 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         try {
             NARCArchive encounterNARC = readNARC(romEntry.getFile("WildPokemon"));
-            List<EncounterArea> encounters = new ArrayList<>();
+            List<EncounterArea> encounterAreas = new ArrayList<>();
             int idx = -1;
             for (byte[] entry : encounterNARC.files) {
                 idx++;
                 if (entry.length > Gen5Constants.perSeasonEncounterDataLength && useTimeOfDay) {
                     for (int i = 0; i < 4; i++) {
-                        processEncounterEntry(encounters, entry, i * Gen5Constants.perSeasonEncounterDataLength, idx);
+                        processEncounterEntry(encounterAreas, entry, i * Gen5Constants.perSeasonEncounterDataLength, idx);
                     }
                 } else {
-                    processEncounterEntry(encounters, entry, 0, idx);
+                    processEncounterEntry(encounterAreas, entry, 0, idx);
                 }
             }
-            return encounters;
+            return encounterAreas;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
-    private void processEncounterEntry(List<EncounterArea> encounters, byte[] entry, int startOffset, int idx) {
+    private void processEncounterEntry(List<EncounterArea> encounterAreas, byte[] entry, int startOffset, int idx) {
 
         if (!wildMapNames.containsKey(idx)) {
             wildMapNames.put(idx, "? Unknown ?");
@@ -772,13 +772,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         for (int i = 0; i < 7; i++) {
             int rate = entry[startOffset + i] & 0xFF;
             if (rate != 0) {
-                List<Encounter> encs = readEncounters(entry, startOffset + offset, amounts[i]);
-                EncounterArea area = new EncounterArea();
+                List<Encounter> encounters = readEncounters(entry, startOffset + offset, amounts[i]);
+                EncounterArea area = new EncounterArea(encounters);
                 area.setRate(rate);
-                area.encounters = encs;
                 area.setOffset(idx);
                 area.setDisplayName(mapName + " " + Gen5Constants.encounterTypeNames[i]);
-                encounters.add(area);
+                encounterAreas.add(area);
             }
             offset += amounts[i] * 4;
         }
@@ -786,41 +785,41 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private List<Encounter> readEncounters(byte[] data, int offset, int number) {
-        List<Encounter> encs = new ArrayList<>();
+        List<Encounter> encounters = new ArrayList<>();
         for (int i = 0; i < number; i++) {
-            Encounter enc1 = new Encounter();
+            Encounter enc = new Encounter();
             int species = readWord(data, offset + i * 4) & 0x7FF;
             int forme = readWord(data, offset + i * 4) >> 11;
             Pokemon baseForme = pokes[species];
             if (forme <= baseForme.getCosmeticForms() || forme == 30 || forme == 31) {
-                enc1.setPokemon(pokes[species]);
+                enc.setPokemon(pokes[species]);
             } else {
                 int speciesWithForme = Gen5Constants.getAbsolutePokeNumByBaseForme(species,forme);
                 if (speciesWithForme == 0) {
-                    enc1.setPokemon(pokes[species]); // Failsafe
+                    enc.setPokemon(pokes[species]); // Failsafe
                 } else {
-                    enc1.setPokemon(pokes[speciesWithForme]);
+                    enc.setPokemon(pokes[speciesWithForme]);
                 }
             }
-            enc1.setFormeNumber(forme);
-            enc1.setLevel(data[offset + 2 + i * 4] & 0xFF);
-            enc1.setMaxLevel(data[offset + 3 + i * 4] & 0xFF);
-            encs.add(enc1);
+            enc.setFormeNumber(forme);
+            enc.setLevel(data[offset + 2 + i * 4] & 0xFF);
+            enc.setMaxLevel(data[offset + 3 + i * 4] & 0xFF);
+            encounters.add(enc);
         }
-        return encs;
+        return encounters;
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encountersList) {
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounterAreas) {
         try {
             NARCArchive encounterNARC = readNARC(romEntry.getFile("WildPokemon"));
-            Iterator<EncounterArea> encounters = encountersList.iterator();
+            Iterator<EncounterArea> areaIterator = encounterAreas.iterator();
             for (byte[] entry : encounterNARC.files) {
-                writeEncounterEntry(encounters, entry, 0);
+                writeEncounterEntry(areaIterator, entry, 0);
                 if (entry.length > 232) {
                     if (useTimeOfDay) {
                         for (int i = 1; i < 4; i++) {
-                            writeEncounterEntry(encounters, entry, i * 232);
+                            writeEncounterEntry(areaIterator, entry, i * 232);
                         }
                     } else {
                         // copy for other 3 seasons
@@ -1028,16 +1027,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void writeEncounterEntry(Iterator<EncounterArea> encounters, byte[] entry, int startOffset) {
+    private void writeEncounterEntry(Iterator<EncounterArea> areaIterator, byte[] entry, int startOffset) {
         int[] amounts = Gen5Constants.encountersOfEachType;
 
         int offset = 8;
         for (int i = 0; i < 7; i++) {
             int rate = entry[startOffset + i] & 0xFF;
             if (rate != 0) {
-                EncounterArea area = encounters.next();
+                Iterator<Encounter> encounterIterator = areaIterator.next().iterator();
                 for (int j = 0; j < amounts[i]; j++) {
-                    Encounter enc = area.encounters.get(j);
+                    Encounter enc = encounterIterator.next();
                     int speciesAndFormeData = (enc.getFormeNumber() << 11) + enc.getPokemon().getBaseNumber();
                     writeWord(entry, startOffset + offset + j * 4, speciesAndFormeData);
                     entry[startOffset + offset + j * 4 + 2] = (byte) enc.getLevel();
