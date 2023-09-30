@@ -24,10 +24,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class EncounterArea extends ArrayList<Encounter> {
 
@@ -35,6 +32,13 @@ public class EncounterArea extends ArrayList<Encounter> {
     private Set<Pokemon> bannedPokemon = new HashSet<>();
     private String displayName;
     private int offset;
+
+    public EncounterArea() {
+    }
+
+    public EncounterArea(Collection<? extends Encounter> collection) {
+        super(collection);
+    }
 
     public int getRate() {
         return rate;

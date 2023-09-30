@@ -1256,7 +1256,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		String encountersFile = romEntry.getFile("WildPokemon");
 
 		NARCArchive encounterData = readNARC(encountersFile);
-		List<EncounterArea> encounters = new ArrayList<>();
+		List<EncounterArea> encounterAreas = new ArrayList<>();
 		// Credit for
 		// https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-sinnoh.py
 		// for the structure for this.
@@ -1271,12 +1271,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (grassRate != 0) {
 				// up to 4
 				List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
-				EncounterArea grass = new EncounterArea();
-				grass.setDisplayName(mapName + " Grass/Cave");
-				grass.encounters = grassEncounters;
-				grass.setRate(grassRate);
-				grass.setOffset(c);
-				encounters.add(grass);
+				EncounterArea grassArea = new EncounterArea();
+				grassArea.setDisplayName(mapName + " Grass/Cave");
+				grassArea.addAll(grassEncounters);
+				grassArea.setRate(grassRate);
+				grassArea.setOffset(c);
+				encounterAreas.add(grassArea);
 
 				// Time of day replacements?
 				if (useTimeOfDay) {
@@ -1294,10 +1294,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// (if useTimeOfDay is off, just override them later)
 
 				// Other conditional replacements (swarm, radar, GBA)
-				EncounterArea conds = new EncounterArea();
-				conds.setDisplayName(mapName + " Swarm/Radar/GBA");
-				conds.setRate(grassRate);
-				conds.setOffset(c);
+				EncounterArea condsArea = new EncounterArea();
+				condsArea.setDisplayName(mapName + " Swarm/Radar/GBA");
+				condsArea.setRate(grassRate);
+				condsArea.setOffset(c);
 				for (int i = 0; i < 20; i++) {
 					if (i >= 2 && i <= 5) {
 						// Time of day slot, handled already
@@ -1310,11 +1310,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						Encounter enc = new Encounter();
 						enc.setLevel(grassEncounters.get(Gen4Constants.dpptAlternateSlots[i]).getLevel());
 						enc.setPokemon(pk);
-						conds.encounters.add(enc);
+						condsArea.add(enc);
 					}
 				}
-				if (conds.encounters.size() > 0) {
-					encounters.add(conds);
+				if (condsArea.size() > 0) {
+					encounterAreas.add(condsArea);
 				}
 			}
 
@@ -1323,17 +1323,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			for (int i = 0; i < 5; i++) {
 				int rate = readLong(b, offset);
 				offset += 4;
-				List<Encounter> encountersHere = readSeaEncountersDPPt(b, offset, 5);
+				List<Encounter> seaEncounters = readSeaEncountersDPPt(b, offset, 5);
 				offset += 40;
 				if (rate == 0 || i == 1) {
 					continue;
 				}
-				EncounterArea other = new EncounterArea();
-				other.setDisplayName(mapName + " " + Gen4Constants.dpptWaterSlotSetNames[i]);
-				other.setOffset(c);
-				other.encounters = encountersHere;
-				other.setRate(rate);
-				encounters.add(other);
+				EncounterArea seaArea = new EncounterArea();
+				seaArea.setDisplayName(mapName + " " + Gen4Constants.dpptWaterSlotSetNames[i]);
+				seaArea.setOffset(c);
+				seaArea.addAll(seaEncounters);
+				seaArea.setRate(rate);
+				encounterAreas.add(seaArea);
 			}
 		}
 
@@ -1344,24 +1344,24 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		// Feebas tiles
 		byte[] feebasData = extraEncounterData.files.get(0);
-		EncounterArea feebasEncounters = readExtraEncountersDPPt(feebasData, 0, 1);
+		EncounterArea feebas = readExtraEncounterAreaDPPt(feebasData, 0, 1);
 		byte[] encounterOverlay = readOverlay(romEntry.getIntValue("EncounterOvlNumber"));
 		int offset = find(encounterOverlay, Gen4Constants.feebasLevelPrefixDPPt);
 		if (offset > 0) {
 			offset += Gen4Constants.feebasLevelPrefixDPPt.length() / 2; // because it was a prefix
-			for (Encounter enc : feebasEncounters.encounters) {
+			for (Encounter enc : feebas) {
 				enc.setMaxLevel(encounterOverlay[offset]);
 				enc.setLevel(encounterOverlay[offset + 4]);
 			}
 		}
-		feebasEncounters.setDisplayName("Mt. Coronet Feebas Tiles");
-		encounters.add(feebasEncounters);
+		feebas.setDisplayName("Mt. Coronet Feebas Tiles");
+		encounterAreas.add(feebas);
 
 		// Honey trees
 		int[] honeyTreeOffsets = romEntry.getArrayValue("HoneyTreeOffsets");
 		for (int i = 0; i < honeyTreeOffsets.length; i++) {
 			byte[] honeyTreeData = extraEncounterData.files.get(honeyTreeOffsets[i]);
-			EncounterArea honeyTreeEncounters = readExtraEncountersDPPt(honeyTreeData, 0, 6);
+			EncounterArea honeyTreeArea = readExtraEncounterAreaDPPt(honeyTreeData, 0, 6);
 			offset = find(encounterOverlay, Gen4Constants.honeyTreeLevelPrefixDPPt);
 			if (offset > 0) {
 				offset += Gen4Constants.honeyTreeLevelPrefixDPPt.length() / 2; // because it was a prefix
@@ -1376,18 +1376,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				} else {
 					level = encounterOverlay[offset + 46];
 				}
-				for (Encounter enc : honeyTreeEncounters.encounters) {
+				for (Encounter enc : honeyTreeArea) {
 					enc.setMaxLevel(encounterOverlay[offset + 102]);
 					enc.setLevel(level);
 				}
 			}
-			honeyTreeEncounters.setDisplayName("Honey Tree Group " + (i + 1));
-			encounters.add(honeyTreeEncounters);
+			honeyTreeArea.setDisplayName("Honey Tree Group " + (i + 1));
+			encounterAreas.add(honeyTreeArea);
 		}
 
 		// Trophy Garden rotating Pokemon (Mr. Backlot)
 		byte[] trophyGardenData = extraEncounterData.files.get(8);
-		EncounterArea trophyGardenEncounters = readExtraEncountersDPPt(trophyGardenData, 0, 16);
+		EncounterArea trophyGardenArea = readExtraEncounterAreaDPPt(trophyGardenData, 0, 16);
 
 		// Trophy Garden rotating Pokemon get their levels from the regular Trophy
 		// Garden grass encounters,
@@ -1395,23 +1395,23 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// area and set the level
 		// and maxLevel for the rotating encounters appropriately.
 		int trophyGardenGrassEncounterIndex = Gen4Constants.getTrophyGardenGrassEncounterIndex(romEntry.getRomType());
-		EncounterArea trophyGardenGrassEncounterSet = encounters.get(trophyGardenGrassEncounterIndex);
-		int level1 = trophyGardenGrassEncounterSet.encounters.get(6).getLevel();
-		int level2 = trophyGardenGrassEncounterSet.encounters.get(7).getLevel();
-		for (Encounter enc : trophyGardenEncounters.encounters) {
+		EncounterArea trophyGardenGrassEncounterSet = encounterAreas.get(trophyGardenGrassEncounterIndex);
+		int level1 = trophyGardenGrassEncounterSet.get(6).getLevel();
+		int level2 = trophyGardenGrassEncounterSet.get(7).getLevel();
+		for (Encounter enc : trophyGardenArea) {
 			enc.setLevel(Math.min(level1, level2));
 			if (level1 != level2) {
 				enc.setMaxLevel(Math.max(level1, level2));
 			}
 		}
-		trophyGardenEncounters.setDisplayName("Trophy Garden Rotating Pokemon (via Mr. Backlot)");
-		encounters.add(trophyGardenEncounters);
+		trophyGardenArea.setDisplayName("Trophy Garden Rotating Pokemon (via Mr. Backlot)");
+		encounterAreas.add(trophyGardenArea);
 
 		// Great Marsh rotating Pokemon
 		int[] greatMarshOffsets = new int[] { 9, 10 };
 		for (int i = 0; i < greatMarshOffsets.length; i++) {
 			byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
-			EncounterArea greatMarshEncounters = readExtraEncountersDPPt(greatMarshData, 0, 32);
+			EncounterArea greatMarchRotatingArea = readExtraEncounterAreaDPPt(greatMarshData, 0, 32);
 
 			// Great Marsh rotating Pokemon get their levels from the regular Great Marsh
 			// grass encounters,
@@ -1422,15 +1422,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			int maxLevel = 0;
 			List<Integer> marshGrassEncounterIndices = Gen4Constants.getMarshGrassEncounterIndices(romEntry.getRomType());
 			for (Integer marshGrassEncounterIndex : marshGrassEncounterIndices) {
-				EncounterArea marshGrassEncounterSet = encounters.get(marshGrassEncounterIndex);
-				int currentLevel = marshGrassEncounterSet.encounters.get(6).getLevel();
+				EncounterArea marshGrassArea = encounterAreas.get(marshGrassEncounterIndex);
+				int currentLevel = marshGrassArea.get(6).getLevel();
 				if (currentLevel < level) {
 					level = currentLevel;
 				}
 				if (currentLevel > maxLevel) {
 					maxLevel = currentLevel;
 				}
-				currentLevel = marshGrassEncounterSet.encounters.get(7).getLevel();
+				currentLevel = marshGrassArea.get(7).getLevel();
 				if (currentLevel < level) {
 					level = currentLevel;
 				}
@@ -1438,15 +1438,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					maxLevel = currentLevel;
 				}
 			}
-			for (Encounter enc : greatMarshEncounters.encounters) {
+			for (Encounter enc : greatMarchRotatingArea) {
 				enc.setLevel(level);
 				enc.setMaxLevel(maxLevel);
 			}
 			String pokedexStatus = i == 0 ? "(Post-National Dex)" : "(Pre-National Dex)";
-			greatMarshEncounters.setDisplayName("Great Marsh Rotating Pokemon " + pokedexStatus);
-			encounters.add(greatMarshEncounters);
+			greatMarchRotatingArea.setDisplayName("Great Marsh Rotating Pokemon " + pokedexStatus);
+			encounterAreas.add(greatMarchRotatingArea);
 		}
-		return encounters;
+		return encounterAreas;
 	}
 
 	private List<Encounter> readEncountersDPPt(byte[] data, int offset, int amount) {
@@ -1476,23 +1476,23 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return encounters;
 	}
 
-	private EncounterArea readExtraEncountersDPPt(byte[] data, int offset, int amount) {
-		EncounterArea es = new EncounterArea();
-		es.setRate(1);
+	private EncounterArea readExtraEncounterAreaDPPt(byte[] data, int offset, int amount) {
+		EncounterArea area = new EncounterArea();
+		area.setRate(1);
 		for (int i = 0; i < amount; i++) {
 			int pokemon = readLong(data, offset + i * 4);
 			Encounter e = new Encounter();
 			e.setLevel(1);
 			e.setPokemon(pokes[pokemon]);
-			es.encounters.add(e);
+			area.add(e);
 		}
-		return es;
+		return area;
 	}
 
 	private List<EncounterArea> getEncountersHGSS(boolean useTimeOfDay) throws IOException {
 		String encountersFile = romEntry.getFile("WildPokemon");
 		NARCArchive encounterData = readNARC(encountersFile);
-		List<EncounterArea> encounters = new ArrayList<>();
+		List<EncounterArea> encounterAreas = new ArrayList<>();
 		// Credit for
 		// https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-johto.py
 		// for the structure for this.
@@ -1527,61 +1527,57 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (rates[0] != 0) {
 				if (!useTimeOfDay) {
 					// Just write "day" encounters
-					List<Encounter> grassEncounters = stitchEncsToLevels(grassPokes[1], grassLevels);
-					EncounterArea grass = new EncounterArea();
-					grass.encounters = grassEncounters;
-					grass.setRate(rates[0]);
-					grass.setDisplayName(mapName + " Grass/Cave");
-					encounters.add(grass);
+					EncounterArea grassArea = new EncounterArea(stitchEncsToLevels(grassPokes[1], grassLevels));
+					grassArea.setRate(rates[0]);
+					grassArea.setDisplayName(mapName + " Grass/Cave");
+					encounterAreas.add(grassArea);
 				} else {
 					for (int i = 0; i < 3; i++) {
-						EncounterArea grass = new EncounterArea();
-						grass.encounters = stitchEncsToLevels(grassPokes[i], grassLevels);
-						grass.setRate(rates[0]);
-						grass.setDisplayName(mapName + " " + Gen4Constants.hgssTimeOfDayNames[i] + " Grass/Cave");
-						encounters.add(grass);
+						EncounterArea grassArea = new EncounterArea(stitchEncsToLevels(grassPokes[i], grassLevels));
+						grassArea.setRate(rates[0]);
+						grassArea.setDisplayName(mapName + " " + Gen4Constants.hgssTimeOfDayNames[i] + " Grass/Cave");
+						encounterAreas.add(grassArea);
 					}
 				}
 			}
 
 			// Hoenn/Sinnoh Radio
-			EncounterArea radio = readOptionalEncountersHGSS(b, 92, 4);
-			radio.setDisplayName(mapName + " Hoenn/Sinnoh Radio");
-			if (radio.encounters.size() > 0) {
-				encounters.add(radio);
+			EncounterArea radioArea = readOptionalEncounterAreaHGSS(b, 92, 4);
+			radioArea.setDisplayName(mapName + " Hoenn/Sinnoh Radio");
+			if (radioArea.size() > 0) {
+				encounterAreas.add(radioArea);
 			}
 
 			// Up to 100 now... 2*2*2 for radio pokemon
 			// Time to handle Surfing, Rock Smash, Rods
 			int offset = 100;
 			for (int i = 1; i < 6; i++) {
-				List<Encounter> encountersHere = readSeaEncountersHGSS(b, offset, amounts[i]);
+				List<Encounter> seaEncounters = readSeaEncountersHGSS(b, offset, amounts[i]);
 				offset += 4 * amounts[i];
 				if (rates[i] != 0) {
 					// Valid area.
-					EncounterArea other = new EncounterArea();
-					other.encounters = encountersHere;
-					other.setDisplayName(mapName + " " + Gen4Constants.hgssNonGrassSetNames[i]);
-					other.setRate(rates[i]);
-					encounters.add(other);
+					EncounterArea seaArea = new EncounterArea(seaEncounters);
+					seaArea.setDisplayName(mapName + " " + Gen4Constants.hgssNonGrassSetNames[i]);
+					seaArea.setRate(rates[i]);
+					encounterAreas.add(seaArea);
 				}
 			}
 
 			// Swarms
-			EncounterArea swarms = readOptionalEncountersHGSS(b, offset, 2);
-			swarms.setDisplayName(mapName + " Swarms");
-			if (swarms.encounters.size() > 0) {
-				encounters.add(swarms);
+			EncounterArea swarmArea = readOptionalEncounterAreaHGSS(b, offset, 2);
+			swarmArea.setDisplayName(mapName + " Swarms");
+			if (swarmArea.size() > 0) {
+				encounterAreas.add(swarmArea);
 			}
-			EncounterArea nightFishingReplacement = readOptionalEncountersHGSS(b, offset + 4, 1);
-			nightFishingReplacement.setDisplayName(mapName + " Night Fishing Replacement");
-			if (nightFishingReplacement.encounters.size() > 0) {
-				encounters.add(nightFishingReplacement);
+			EncounterArea nightFishingReplacementArea = readOptionalEncounterAreaHGSS(b, offset + 4, 1);
+			nightFishingReplacementArea.setDisplayName(mapName + " Night Fishing Replacement");
+			if (nightFishingReplacementArea.size() > 0) {
+				encounterAreas.add(nightFishingReplacementArea);
 			}
-			EncounterArea fishingSwarms = readOptionalEncountersHGSS(b, offset + 6, 1);
-			fishingSwarms.setDisplayName(mapName + " Fishing Swarm");
-			if (fishingSwarms.encounters.size() > 0) {
-				encounters.add(fishingSwarms);
+			EncounterArea fishingSwarmsArea = readOptionalEncounterAreaHGSS(b, offset + 6, 1);
+			fishingSwarmsArea.setDisplayName(mapName + " Fishing Swarm");
+			if (fishingSwarmsArea.size() > 0) {
+				encounterAreas.add(fishingSwarmsArea);
 			}
 		}
 
@@ -1602,56 +1598,56 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 
 			String mapName = headbuttMapNames.get(c);
-			EncounterArea headbuttEncounters = readHeadbuttEncountersHGSS(b, 4, 18);
-			headbuttEncounters.setDisplayName(mapName + " Headbutt");
+			EncounterArea headbuttArea = readHeadbuttEncounterAreaHGSS(b, 4, 18);
+			headbuttArea.setDisplayName(mapName + " Headbutt");
 
 			// Map 24 is an unused version of Route 16, but it still has valid headbutt
 			// encounter data.
 			// Avoid adding it to the list of encounters to prevent confusion.
-			if (headbuttEncounters.encounters.size() > 0 && c != 24) {
-				encounters.add(headbuttEncounters);
+			if (headbuttArea.size() > 0 && c != 24) {
+				encounterAreas.add(headbuttArea);
 			}
 		}
 
 		// Bug Catching Contest Encounters
 		String bccEncountersFile = romEntry.getFile("BCCWilds");
 		byte[] bccEncountersData = readFile(bccEncountersFile);
-		EncounterArea bccEncountersPreNationalDex = readBCCEncountersHGSS(bccEncountersData, 0, 10);
-		bccEncountersPreNationalDex.setDisplayName("Bug Catching Contest (Pre-National Dex)");
-		if (bccEncountersPreNationalDex.encounters.size() > 0) {
-			encounters.add(bccEncountersPreNationalDex);
+		EncounterArea bccPreNationalDexArea = readBCCEncounterAreaHGSS(bccEncountersData, 0, 10);
+		bccPreNationalDexArea.setDisplayName("Bug Catching Contest (Pre-National Dex)");
+		if (bccPreNationalDexArea.size() > 0) {
+			encounterAreas.add(bccPreNationalDexArea);
 		}
-		EncounterArea bccEncountersPostNationalDexTues = readBCCEncountersHGSS(bccEncountersData, 80, 10);
-		bccEncountersPostNationalDexTues.setDisplayName("Bug Catching Contest (Post-National Dex, Tuesdays)");
-		if (bccEncountersPostNationalDexTues.encounters.size() > 0) {
-			encounters.add(bccEncountersPostNationalDexTues);
+		EncounterArea bccPostNationalDexTuesArea = readBCCEncounterAreaHGSS(bccEncountersData, 80, 10);
+		bccPostNationalDexTuesArea.setDisplayName("Bug Catching Contest (Post-National Dex, Tuesdays)");
+		if (bccPostNationalDexTuesArea.size() > 0) {
+			encounterAreas.add(bccPostNationalDexTuesArea);
 		}
-		EncounterArea bccEncountersPostNationalDexThurs = readBCCEncountersHGSS(bccEncountersData, 160, 10);
-		bccEncountersPostNationalDexThurs.setDisplayName("Bug Catching Contest (Post-National Dex, Thursdays)");
-		if (bccEncountersPostNationalDexThurs.encounters.size() > 0) {
-			encounters.add(bccEncountersPostNationalDexThurs);
+		EncounterArea bccPostNationalDexThursArea = readBCCEncounterAreaHGSS(bccEncountersData, 160, 10);
+		bccPostNationalDexThursArea.setDisplayName("Bug Catching Contest (Post-National Dex, Thursdays)");
+		if (bccPostNationalDexThursArea.size() > 0) {
+			encounterAreas.add(bccPostNationalDexThursArea);
 		}
-		EncounterArea bccEncountersPostNationalDexSat = readBCCEncountersHGSS(bccEncountersData, 240, 10);
-		bccEncountersPostNationalDexSat.setDisplayName("Bug Catching Contest (Post-National Dex, Saturdays)");
-		if (bccEncountersPostNationalDexSat.encounters.size() > 0) {
-			encounters.add(bccEncountersPostNationalDexSat);
+		EncounterArea bccPostNationalDexSatArea = readBCCEncounterAreaHGSS(bccEncountersData, 240, 10);
+		bccPostNationalDexSatArea.setDisplayName("Bug Catching Contest (Post-National Dex, Saturdays)");
+		if (bccPostNationalDexSatArea.size() > 0) {
+			encounterAreas.add(bccPostNationalDexSatArea);
 		}
-		return encounters;
+		return encounterAreas;
 	}
 
-	private EncounterArea readOptionalEncountersHGSS(byte[] data, int offset, int amount) {
-		EncounterArea es = new EncounterArea();
-		es.setRate(1);
+	private EncounterArea readOptionalEncounterAreaHGSS(byte[] data, int offset, int amount) {
+		EncounterArea area = new EncounterArea();
+		area.setRate(1);
 		for (int i = 0; i < amount; i++) {
 			int pokemon = readWord(data, offset + i * 2);
 			if (pokemon != 0) {
-				Encounter e = new Encounter();
-				e.setLevel(1);
-				e.setPokemon(pokes[pokemon]);
-				es.encounters.add(e);
+				Encounter enc = new Encounter();
+				enc.setLevel(1);
+				enc.setPokemon(pokes[pokemon]);
+				area.add(enc);
 			}
 		}
-		return es;
+		return area;
 	}
 
 	private Pokemon[] readPokemonHGSS(byte[] data, int offset, int amount) {
@@ -1676,9 +1672,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return encounters;
 	}
 
-	private EncounterArea readHeadbuttEncountersHGSS(byte[] data, int offset, int amount) {
-		EncounterArea es = new EncounterArea();
-		es.setRate(1);
+	private EncounterArea readHeadbuttEncounterAreaHGSS(byte[] data, int offset, int amount) {
+		EncounterArea area = new EncounterArea();
+		area.setRate(1);
 		for (int i = 0; i < amount; i++) {
 			int pokemon = readWord(data, offset + i * 4);
 			if (pokemon != 0) {
@@ -1686,15 +1682,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				enc.setLevel(data[offset + 2 + i * 4]);
 				enc.setMaxLevel(data[offset + 3 + i * 4]);
 				enc.setPokemon(pokes[pokemon]);
-				es.encounters.add(enc);
+				area.add(enc);
 			}
 		}
-		return es;
+		return area;
 	}
 
-	private EncounterArea readBCCEncountersHGSS(byte[] data, int offset, int amount) {
-		EncounterArea es = new EncounterArea();
-		es.setRate(1);
+	private EncounterArea readBCCEncounterAreaHGSS(byte[] data, int offset, int amount) {
+		EncounterArea area = new EncounterArea();
+		area.setRate(1);
 		for (int i = 0; i < amount; i++) {
 			int pokemon = readWord(data, offset + i * 8);
 			if (pokemon != 0) {
@@ -1702,28 +1698,27 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				enc.setLevel(data[offset + 2 + i * 8]);
 				enc.setMaxLevel(data[offset + 3 + i * 8]);
 				enc.setPokemon(pokes[pokemon]);
-				es.encounters.add(enc);
+				area.add(enc);
 			}
 		}
-		return es;
+		return area;
 	}
 
-	private List<EncounterArea> readTimeBasedRodEncountersHGSS(byte[] data, int offset, Pokemon replacement,
-															   int replacementIndex) {
-		List<EncounterArea> encounters = new ArrayList<>();
+	private List<EncounterArea> readTimeBasedRodEncounterAreasHGSS(byte[] data, int offset, Pokemon replacement,
+																   int replacementIndex) {
+		List<EncounterArea> encounterAreas = new ArrayList<>();
 		List<Encounter> rodMorningDayEncounters = readSeaEncountersHGSS(data, offset, 5);
-		EncounterArea rodMorningDay = new EncounterArea();
-		rodMorningDay.encounters = rodMorningDayEncounters;
-		encounters.add(rodMorningDay);
+		EncounterArea rodMorningDayArea = new EncounterArea(rodMorningDayEncounters);
+		encounterAreas.add(rodMorningDayArea);
 
 		List<Encounter> rodNightEncounters = new ArrayList<>(rodMorningDayEncounters);
 		Encounter replacedEncounter = cloneEncounterAndReplacePokemon(rodMorningDayEncounters.get(replacementIndex),
 				replacement);
 		rodNightEncounters.set(replacementIndex, replacedEncounter);
-		EncounterArea rodNight = new EncounterArea();
-		rodNight.encounters = rodNightEncounters;
-		encounters.add(rodNight);
-		return encounters;
+		EncounterArea rodNight = new EncounterArea(rodNightEncounters);
+		encounterAreas.add(rodNight);
+
+		return encounterAreas;
 	}
 
 	private Encounter cloneEncounterAndReplacePokemon(Encounter enc, Pokemon pkmn) {
@@ -2356,7 +2351,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 
 			// Hoenn/Sinnoh Radio
-			EncounterArea radio = readOptionalEncountersHGSS(b, 92, 4);
+			EncounterArea radio = readOptionalEncounterAreaHGSS(b, 92, 4);
 			for (Encounter enc : radio.encounters) {
 				specialTarget[enc.getPokemon().getNumber()].add(index);
 			}
@@ -2381,7 +2376,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// the night fishing replacement
 			Pokemon nightFishingReplacement = pokes[readWord(b, 192)];
 			if (rates[4] != 0) {
-				List<EncounterArea> goodRodEncounters = readTimeBasedRodEncountersHGSS(b, offset,
+				List<EncounterArea> goodRodEncounters = readTimeBasedRodEncounterAreasHGSS(b, offset,
 						nightFishingReplacement, Gen4Constants.hgssGoodRodReplacementIndex);
 				for (Encounter enc : goodRodEncounters.get(0).encounters) {
 					target[enc.getPokemon().getNumber()][0].add(index);
@@ -2392,7 +2387,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 			if (rates[5] != 0) {
-				List<EncounterArea> superRodEncounters = readTimeBasedRodEncountersHGSS(b, offset + 20,
+				List<EncounterArea> superRodEncounters = readTimeBasedRodEncounterAreasHGSS(b, offset + 20,
 						nightFishingReplacement, Gen4Constants.hgssSuperRodReplacementIndex);
 				for (Encounter enc : superRodEncounters.get(0).encounters) {
 					target[enc.getPokemon().getNumber()][0].add(index);
