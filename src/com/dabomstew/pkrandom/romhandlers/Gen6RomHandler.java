@@ -1063,7 +1063,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+    public List<EncounterArea> getEncounters(boolean useTimeOfDay) {
         if (!loadedWildMapNames) {
             loadWildMapNames();
         }
@@ -1078,9 +1078,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private List<EncounterSet> getEncountersXY() throws IOException {
+    private List<EncounterArea> getEncountersXY() throws IOException {
         GARCArchive encounterGarc = readGARC(romEntry.getFile("WildPokemon"), false);
-        List<EncounterSet> encounters = new ArrayList<>();
+        List<EncounterArea> encounters = new ArrayList<>();
         for (int i = 0; i < encounterGarc.files.size() - 1; i++) {
             byte[] b = encounterGarc.files.get(i).get(0);
             if (!wildMapNames.containsKey(i)) {
@@ -1097,75 +1097,75 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             // TODO: Is there some rate we can check like in older gens?
             // First, 12 grass encounters, 12 rough terrain encounters, and 12 encounters each for yellow/purple/red flowers
-            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            EncounterArea grassEncounters = readEncounter(encounterData, 0, 12);
             if (grassEncounters.encounters.size() > 0) {
-                grassEncounters.displayName = mapName + " Grass/Cave";
+                grassEncounters.setDisplayName(mapName + " Grass/Cave");
                 encounters.add(grassEncounters);
             }
-            EncounterSet yellowFlowerEncounters = readEncounter(encounterData, 48, 12);
+            EncounterArea yellowFlowerEncounters = readEncounter(encounterData, 48, 12);
             if (yellowFlowerEncounters.encounters.size() > 0) {
-                yellowFlowerEncounters.displayName = mapName + " Yellow Flowers";
+                yellowFlowerEncounters.setDisplayName(mapName + " Yellow Flowers");
                 encounters.add(yellowFlowerEncounters);
             }
-            EncounterSet purpleFlowerEncounters = readEncounter(encounterData, 96, 12);
+            EncounterArea purpleFlowerEncounters = readEncounter(encounterData, 96, 12);
             if (purpleFlowerEncounters.encounters.size() > 0) {
-                purpleFlowerEncounters.displayName = mapName + " Purple Flowers";
+                purpleFlowerEncounters.setDisplayName(mapName + " Purple Flowers");
                 encounters.add(purpleFlowerEncounters);
             }
-            EncounterSet redFlowerEncounters = readEncounter(encounterData, 144, 12);
+            EncounterArea redFlowerEncounters = readEncounter(encounterData, 144, 12);
             if (redFlowerEncounters.encounters.size() > 0) {
-                redFlowerEncounters.displayName = mapName + " Red Flowers";
+                redFlowerEncounters.setDisplayName(mapName + " Red Flowers");
                 encounters.add(redFlowerEncounters);
             }
-            EncounterSet roughTerrainEncounters = readEncounter(encounterData, 192, 12);
+            EncounterArea roughTerrainEncounters = readEncounter(encounterData, 192, 12);
             if (roughTerrainEncounters.encounters.size() > 0) {
-                roughTerrainEncounters.displayName = mapName + " Rough Terrain/Tall Grass";
+                roughTerrainEncounters.setDisplayName(mapName + " Rough Terrain/Tall Grass");
                 encounters.add(roughTerrainEncounters);
             }
 
             // 5 surf and 5 rock smash encounters
-            EncounterSet surfEncounters = readEncounter(encounterData, 240, 5);
+            EncounterArea surfEncounters = readEncounter(encounterData, 240, 5);
             if (surfEncounters.encounters.size() > 0) {
-                surfEncounters.displayName = mapName + " Surf";
+                surfEncounters.setDisplayName(mapName + " Surf");
                 encounters.add(surfEncounters);
             }
-            EncounterSet rockSmashEncounters = readEncounter(encounterData, 260, 5);
+            EncounterArea rockSmashEncounters = readEncounter(encounterData, 260, 5);
             if (rockSmashEncounters.encounters.size() > 0) {
-                rockSmashEncounters.displayName = mapName + " Rock Smash";
+                rockSmashEncounters.setDisplayName(mapName + " Rock Smash");
                 encounters.add(rockSmashEncounters);
             }
 
             // 3 Encounters for each type of rod
-            EncounterSet oldRodEncounters = readEncounter(encounterData, 280, 3);
+            EncounterArea oldRodEncounters = readEncounter(encounterData, 280, 3);
             if (oldRodEncounters.encounters.size() > 0) {
-                oldRodEncounters.displayName = mapName + " Old Rod";
+                oldRodEncounters.setDisplayName(mapName + " Old Rod");
                 encounters.add(oldRodEncounters);
             }
-            EncounterSet goodRodEncounters = readEncounter(encounterData, 292, 3);
+            EncounterArea goodRodEncounters = readEncounter(encounterData, 292, 3);
             if (goodRodEncounters.encounters.size() > 0) {
-                goodRodEncounters.displayName = mapName + " Good Rod";
+                goodRodEncounters.setDisplayName(mapName + " Good Rod");
                 encounters.add(goodRodEncounters);
             }
-            EncounterSet superRodEncounters = readEncounter(encounterData, 304, 3);
+            EncounterArea superRodEncounters = readEncounter(encounterData, 304, 3);
             if (superRodEncounters.encounters.size() > 0) {
-                superRodEncounters.displayName = mapName + " Super Rod";
+                superRodEncounters.setDisplayName(mapName + " Super Rod");
                 encounters.add(superRodEncounters);
             }
 
             // Lastly, 5 for each kind of Horde
-            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 316, 5);
+            EncounterArea hordeCommonEncounters = readEncounter(encounterData, 316, 5);
             if (hordeCommonEncounters.encounters.size() > 0) {
-                hordeCommonEncounters.displayName = mapName + " Common Horde";
+                hordeCommonEncounters.setDisplayName(mapName + " Common Horde");
                 encounters.add(hordeCommonEncounters);
             }
-            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 336, 5);
+            EncounterArea hordeUncommonEncounters = readEncounter(encounterData, 336, 5);
             if (hordeUncommonEncounters.encounters.size() > 0) {
-                hordeUncommonEncounters.displayName = mapName + " Uncommon Horde";
+                hordeUncommonEncounters.setDisplayName(mapName + " Uncommon Horde");
                 encounters.add(hordeUncommonEncounters);
             }
-            EncounterSet hordeRareEncounters = readEncounter(encounterData, 356, 5);
+            EncounterArea hordeRareEncounters = readEncounter(encounterData, 356, 5);
             if (hordeRareEncounters.encounters.size() > 0) {
-                hordeRareEncounters.displayName = mapName + " Rare Horde";
+                hordeRareEncounters.setDisplayName(mapName + " Rare Horde");
                 encounters.add(hordeRareEncounters);
             }
         }
@@ -1176,34 +1176,34 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int startingOffsetOfCurrentName = 0;
         for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
             int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fieldEncounterSize;
-            EncounterSet fallingEncounter = readFieldEncounter(fieldCRO, offset);
+            EncounterArea fallingEncounter = readFieldEncounter(fieldCRO, offset);
             if (Gen6Constants.fallingEncounterNameMap.containsKey(i)) {
                 currentName = Gen6Constants.fallingEncounterNameMap.get(i);
                 startingOffsetOfCurrentName = i;
             }
             int encounterNumber = (i - startingOffsetOfCurrentName) + 1;
-            fallingEncounter.displayName = currentName + " #" + encounterNumber;
+            fallingEncounter.setDisplayName(currentName + " #" + encounterNumber);
             encounters.add(fallingEncounter);
         }
         currentName = Gen6Constants.rustlingBushEncounterNameMap.get(0);
         startingOffsetOfCurrentName = 0;
         for (int i = 0; i < Gen6Constants.rustlingBushEncounterCount; i++) {
             int offset = Gen6Constants.rustlingBushEncounterOffset + i * Gen6Constants.fieldEncounterSize;
-            EncounterSet rustlingBushEncounter = readFieldEncounter(fieldCRO, offset);
+            EncounterArea rustlingBushEncounter = readFieldEncounter(fieldCRO, offset);
             if (Gen6Constants.rustlingBushEncounterNameMap.containsKey(i)) {
                 currentName = Gen6Constants.rustlingBushEncounterNameMap.get(i);
                 startingOffsetOfCurrentName = i;
             }
             int encounterNumber = (i - startingOffsetOfCurrentName) + 1;
-            rustlingBushEncounter.displayName = currentName + " #" + encounterNumber;
+            rustlingBushEncounter.setDisplayName(currentName + " #" + encounterNumber);
             encounters.add(rustlingBushEncounter);
         }
         return encounters;
     }
 
-    private List<EncounterSet> getEncountersORAS() throws IOException {
+    private List<EncounterArea> getEncountersORAS() throws IOException {
         GARCArchive encounterGarc = readGARC(romEntry.getFile("WildPokemon"), false);
-        List<EncounterSet> encounters = new ArrayList<>();
+        List<EncounterArea> encounters = new ArrayList<>();
         for (int i = 0; i < encounterGarc.files.size() - 2; i++) {
             byte[] b = encounterGarc.files.get(i).get(0);
             if (!wildMapNames.containsKey(i)) {
@@ -1220,87 +1220,87 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             System.arraycopy(b, offset, encounterData, 0, 0xF6);
 
             // First, read 12 grass encounters and 12 long grass encounters
-            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            EncounterArea grassEncounters = readEncounter(encounterData, 0, 12);
             if (grassEncounters.encounters.size() > 0) {
-                grassEncounters.displayName = mapName + " Grass/Cave";
-                grassEncounters.offset = i;
+                grassEncounters.setDisplayName(mapName + " Grass/Cave");
+                grassEncounters.setOffset(i);
                 encounters.add(grassEncounters);
             }
-            EncounterSet longGrassEncounters = readEncounter(encounterData, 48, 12);
+            EncounterArea longGrassEncounters = readEncounter(encounterData, 48, 12);
             if (longGrassEncounters.encounters.size() > 0) {
-                longGrassEncounters.displayName = mapName + " Long Grass";
-                longGrassEncounters.offset = i;
+                longGrassEncounters.setDisplayName(mapName + " Long Grass");
+                longGrassEncounters.setOffset(i);
                 encounters.add(longGrassEncounters);
             }
 
             // Now, 3 DexNav Foreign encounters
-            EncounterSet dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
+            EncounterArea dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
             if (dexNavForeignEncounters.encounters.size() > 0) {
-                dexNavForeignEncounters.displayName = mapName + " DexNav Foreign Encounter";
-                dexNavForeignEncounters.offset = i;
+                dexNavForeignEncounters.setDisplayName(mapName + " DexNav Foreign Encounter");
+                dexNavForeignEncounters.setOffset(i);
                 encounters.add(dexNavForeignEncounters);
             }
 
             // 5 surf and 5 rock smash encounters
-            EncounterSet surfEncounters = readEncounter(encounterData, 108, 5);
+            EncounterArea surfEncounters = readEncounter(encounterData, 108, 5);
             if (surfEncounters.encounters.size() > 0) {
-                surfEncounters.displayName = mapName + " Surf";
-                surfEncounters.offset = i;
+                surfEncounters.setDisplayName(mapName + " Surf");
+                surfEncounters.setOffset(i);
                 encounters.add(surfEncounters);
             }
-            EncounterSet rockSmashEncounters = readEncounter(encounterData, 128, 5);
+            EncounterArea rockSmashEncounters = readEncounter(encounterData, 128, 5);
             if (rockSmashEncounters.encounters.size() > 0) {
-                rockSmashEncounters.displayName = mapName + " Rock Smash";
-                rockSmashEncounters.offset = i;
+                rockSmashEncounters.setDisplayName(mapName + " Rock Smash");
+                rockSmashEncounters.setOffset(i);
                 encounters.add(rockSmashEncounters);
             }
 
             // 3 Encounters for each type of rod
-            EncounterSet oldRodEncounters = readEncounter(encounterData, 148, 3);
+            EncounterArea oldRodEncounters = readEncounter(encounterData, 148, 3);
             if (oldRodEncounters.encounters.size() > 0) {
-                oldRodEncounters.displayName = mapName + " Old Rod";
-                oldRodEncounters.offset = i;
+                oldRodEncounters.setDisplayName(mapName + " Old Rod");
+                oldRodEncounters.setOffset(i);
                 encounters.add(oldRodEncounters);
             }
-            EncounterSet goodRodEncounters = readEncounter(encounterData, 160, 3);
+            EncounterArea goodRodEncounters = readEncounter(encounterData, 160, 3);
             if (goodRodEncounters.encounters.size() > 0) {
-                goodRodEncounters.displayName = mapName + " Good Rod";
-                goodRodEncounters.offset = i;
+                goodRodEncounters.setDisplayName(mapName + " Good Rod");
+                goodRodEncounters.setOffset(i);
                 encounters.add(goodRodEncounters);
             }
-            EncounterSet superRodEncounters = readEncounter(encounterData, 172, 3);
+            EncounterArea superRodEncounters = readEncounter(encounterData, 172, 3);
             if (superRodEncounters.encounters.size() > 0) {
-                superRodEncounters.displayName = mapName + " Super Rod";
-                superRodEncounters.offset = i;
+                superRodEncounters.setDisplayName(mapName + " Super Rod");
+                superRodEncounters.setOffset(i);
                 encounters.add(superRodEncounters);
             }
 
             // Lastly, 5 for each kind of Horde
-            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 184, 5);
+            EncounterArea hordeCommonEncounters = readEncounter(encounterData, 184, 5);
             if (hordeCommonEncounters.encounters.size() > 0) {
-                hordeCommonEncounters.displayName = mapName + " Common Horde";
-                hordeCommonEncounters.offset = i;
+                hordeCommonEncounters.setDisplayName(mapName + " Common Horde");
+                hordeCommonEncounters.setOffset(i);
                 encounters.add(hordeCommonEncounters);
             }
-            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
+            EncounterArea hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
             if (hordeUncommonEncounters.encounters.size() > 0) {
-                hordeUncommonEncounters.displayName = mapName + " Uncommon Horde";
-                hordeUncommonEncounters.offset = i;
+                hordeUncommonEncounters.setDisplayName(mapName + " Uncommon Horde");
+                hordeUncommonEncounters.setOffset(i);
                 encounters.add(hordeUncommonEncounters);
             }
-            EncounterSet hordeRareEncounters = readEncounter(encounterData, 224, 5);
+            EncounterArea hordeRareEncounters = readEncounter(encounterData, 224, 5);
             if (hordeRareEncounters.encounters.size() > 0) {
-                hordeRareEncounters.displayName = mapName + " Rare Horde";
-                hordeRareEncounters.offset = i;
+                hordeRareEncounters.setDisplayName(mapName + " Rare Horde");
+                hordeRareEncounters.setOffset(i);
                 encounters.add(hordeRareEncounters);
             }
         }
         return encounters;
     }
 
-    private EncounterSet readEncounter(byte[] data, int offset, int amount) {
-        EncounterSet es = new EncounterSet();
-        es.rate = 1;
+    private EncounterArea readEncounter(byte[] data, int offset, int amount) {
+        EncounterArea es = new EncounterArea();
+        es.setRate(1);
         for (int i = 0; i < amount; i++) {
             int species = readWord(data, offset + i * 4) & 0x7FF;
             int forme = readWord(data, offset + i * 4) >> 11;
@@ -1315,33 +1315,33 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 // 30 = Spawn the cosmetic forme specific to the user's region (Scatterbug line)
                 // 31 = Spawn *any* cosmetic forme with equal probability (Unown Mirage Cave)
                 if (forme <= baseForme.getCosmeticForms() || forme == 30 || forme == 31) {
-                    e.pokemon = pokes[species];
+                    e.setPokemon(pokes[species]);
                 } else {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
-                    e.pokemon = pokes[speciesWithForme];
+                    e.setPokemon(pokes[speciesWithForme]);
                 }
-                e.formeNumber = forme;
-                e.level = data[offset + 2 + i * 4];
-                e.maxLevel = data[offset + 3 + i * 4];
+                e.setFormeNumber(forme);
+                e.setLevel(data[offset + 2 + i * 4]);
+                e.setMaxLevel(data[offset + 3 + i * 4]);
                 es.encounters.add(e);
             }
         }
         return es;
     }
 
-    private EncounterSet readFieldEncounter(byte[] data, int offset) {
-        EncounterSet es = new EncounterSet();
+    private EncounterArea readFieldEncounter(byte[] data, int offset) {
+        EncounterArea es = new EncounterArea();
         for (int i = 0; i < 7; i++) {
             int species = readWord(data, offset + 4 + i * 8);
             int level = data[offset + 8 + i * 8];
             if (species != 0) {
                 Encounter e = new Encounter();
-                e.pokemon = pokes[species];
-                e.formeNumber = 0;
-                e.level = level;
-                e.maxLevel = level;
+                e.setPokemon(pokes[species]);
+                e.setFormeNumber(0);
+                e.setLevel(level);
+                e.setMaxLevel(level);
                 es.encounters.add(e);
             }
         }
@@ -1349,7 +1349,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encountersList) {
         try {
             if (romEntry.getRomType() == Gen6Constants.Type_ORAS) {
                 setEncountersORAS(encountersList);
@@ -1361,10 +1361,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    private void setEncountersXY(List<EncounterSet> encountersList) throws IOException {
+    private void setEncountersXY(List<EncounterArea> encountersList) throws IOException {
         String encountersFile = romEntry.getFile("WildPokemon");
         GARCArchive encounterGarc = readGARC(encountersFile, false);
-        Iterator<EncounterSet> encounters = encountersList.iterator();
+        Iterator<EncounterArea> encounters = encountersList.iterator();
         for (int i = 0; i < encounterGarc.files.size() - 1; i++) {
             byte[] b = encounterGarc.files.get(i).get(0);
             int offset = FileFunctions.readFullInt(b, 0x10) + 0x10;
@@ -1377,61 +1377,61 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             // First, 12 grass encounters, 12 rough terrain encounters, and 12 encounters each for yellow/purple/red flowers
             if (readEncounter(encounterData, 0, 12).encounters.size() > 0) {
-                EncounterSet grass = encounters.next();
+                EncounterArea grass = encounters.next();
                 writeEncounter(encounterData, 0, grass.encounters);
             }
             if (readEncounter(encounterData, 48, 12).encounters.size() > 0) {
-                EncounterSet yellowFlowers = encounters.next();
+                EncounterArea yellowFlowers = encounters.next();
                 writeEncounter(encounterData, 48, yellowFlowers.encounters);
             }
             if (readEncounter(encounterData, 96, 12).encounters.size() > 0) {
-                EncounterSet purpleFlowers = encounters.next();
+                EncounterArea purpleFlowers = encounters.next();
                 writeEncounter(encounterData, 96, purpleFlowers.encounters);
             }
             if (readEncounter(encounterData, 144, 12).encounters.size() > 0) {
-                EncounterSet redFlowers = encounters.next();
+                EncounterArea redFlowers = encounters.next();
                 writeEncounter(encounterData, 144, redFlowers.encounters);
             }
             if (readEncounter(encounterData, 192, 12).encounters.size() > 0) {
-                EncounterSet roughTerrain = encounters.next();
+                EncounterArea roughTerrain = encounters.next();
                 writeEncounter(encounterData, 192, roughTerrain.encounters);
             }
 
             // 5 surf and 5 rock smash encounters
             if (readEncounter(encounterData, 240, 5).encounters.size() > 0) {
-                EncounterSet surf = encounters.next();
+                EncounterArea surf = encounters.next();
                 writeEncounter(encounterData, 240, surf.encounters);
             }
             if (readEncounter(encounterData, 260, 5).encounters.size() > 0) {
-                EncounterSet rockSmash = encounters.next();
+                EncounterArea rockSmash = encounters.next();
                 writeEncounter(encounterData, 260, rockSmash.encounters);
             }
 
             // 3 Encounters for each type of rod
             if (readEncounter(encounterData, 280, 3).encounters.size() > 0) {
-                EncounterSet oldRod = encounters.next();
+                EncounterArea oldRod = encounters.next();
                 writeEncounter(encounterData, 280, oldRod.encounters);
             }
             if (readEncounter(encounterData, 292, 3).encounters.size() > 0) {
-                EncounterSet goodRod = encounters.next();
+                EncounterArea goodRod = encounters.next();
                 writeEncounter(encounterData, 292, goodRod.encounters);
             }
             if (readEncounter(encounterData, 304, 3).encounters.size() > 0) {
-                EncounterSet superRod = encounters.next();
+                EncounterArea superRod = encounters.next();
                 writeEncounter(encounterData, 304, superRod.encounters);
             }
 
             // Lastly, 5 for each kind of Horde
             if (readEncounter(encounterData, 316, 5).encounters.size() > 0) {
-                EncounterSet commonHorde = encounters.next();
+                EncounterArea commonHorde = encounters.next();
                 writeEncounter(encounterData, 316, commonHorde.encounters);
             }
             if (readEncounter(encounterData, 336, 5).encounters.size() > 0) {
-                EncounterSet uncommonHorde = encounters.next();
+                EncounterArea uncommonHorde = encounters.next();
                 writeEncounter(encounterData, 336, uncommonHorde.encounters);
             }
             if (readEncounter(encounterData, 356, 5).encounters.size() > 0) {
-                EncounterSet rareHorde = encounters.next();
+                EncounterArea rareHorde = encounters.next();
                 writeEncounter(encounterData, 356, rareHorde.encounters);
             }
 
@@ -1446,12 +1446,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         byte[] fieldCRO = readFile(romEntry.getFile("Field"));
         for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
             int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fieldEncounterSize;
-            EncounterSet fallingEncounter = encounters.next();
+            EncounterArea fallingEncounter = encounters.next();
             writeFieldEncounter(fieldCRO, offset, fallingEncounter.encounters);
         }
         for (int i = 0; i < Gen6Constants.rustlingBushEncounterCount; i++) {
             int offset = Gen6Constants.rustlingBushEncounterOffset + i * Gen6Constants.fieldEncounterSize;
-            EncounterSet rustlingBushEncounter = encounters.next();
+            EncounterArea rustlingBushEncounter = encounters.next();
             writeFieldEncounter(fieldCRO, offset, rustlingBushEncounter.encounters);
         }
 
@@ -1461,10 +1461,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         this.updatePokedexAreaDataXY(encounterGarc, fieldCRO);
     }
 
-    private void setEncountersORAS(List<EncounterSet> encountersList) throws IOException {
+    private void setEncountersORAS(List<EncounterArea> encountersList) throws IOException {
         String encountersFile = romEntry.getFile("WildPokemon");
         GARCArchive encounterGarc = readGARC(encountersFile, false);
-        Iterator<EncounterSet> encounters = encountersList.iterator();
+        Iterator<EncounterArea> encounters = encountersList.iterator();
         byte[] decStorage = encounterGarc.files.get(encounterGarc.files.size() - 1).get(0);
         for (int i = 0; i < encounterGarc.files.size() - 2; i++) {
             byte[] b = encounterGarc.files.get(i).get(0);
@@ -1479,55 +1479,55 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             // First, 12 grass encounters and 12 long grass encounters
             if (readEncounter(encounterData, 0, 12).encounters.size() > 0) {
-                EncounterSet grass = encounters.next();
+                EncounterArea grass = encounters.next();
                 writeEncounter(encounterData, 0, grass.encounters);
             }
             if (readEncounter(encounterData, 48, 12).encounters.size() > 0) {
-                EncounterSet longGrass = encounters.next();
+                EncounterArea longGrass = encounters.next();
                 writeEncounter(encounterData, 48, longGrass.encounters);
             }
 
             // Now, 3 DexNav Foreign encounters
             if (readEncounter(encounterData, 96, 3).encounters.size() > 0) {
-                EncounterSet dexNav = encounters.next();
+                EncounterArea dexNav = encounters.next();
                 writeEncounter(encounterData, 96, dexNav.encounters);
             }
 
             // 5 surf and 5 rock smash encounters
             if (readEncounter(encounterData, 108, 5).encounters.size() > 0) {
-                EncounterSet surf = encounters.next();
+                EncounterArea surf = encounters.next();
                 writeEncounter(encounterData, 108, surf.encounters);
             }
             if (readEncounter(encounterData, 128, 5).encounters.size() > 0) {
-                EncounterSet rockSmash = encounters.next();
+                EncounterArea rockSmash = encounters.next();
                 writeEncounter(encounterData, 128, rockSmash.encounters);
             }
 
             // 3 Encounters for each type of rod
             if (readEncounter(encounterData, 148, 3).encounters.size() > 0) {
-                EncounterSet oldRod = encounters.next();
+                EncounterArea oldRod = encounters.next();
                 writeEncounter(encounterData, 148, oldRod.encounters);
             }
             if (readEncounter(encounterData, 160, 3).encounters.size() > 0) {
-                EncounterSet goodRod = encounters.next();
+                EncounterArea goodRod = encounters.next();
                 writeEncounter(encounterData, 160, goodRod.encounters);
             }
             if (readEncounter(encounterData, 172, 3).encounters.size() > 0) {
-                EncounterSet superRod = encounters.next();
+                EncounterArea superRod = encounters.next();
                 writeEncounter(encounterData, 172, superRod.encounters);
             }
 
             // Lastly, 5 for each kind of Horde
             if (readEncounter(encounterData, 184, 5).encounters.size() > 0) {
-                EncounterSet commonHorde = encounters.next();
+                EncounterArea commonHorde = encounters.next();
                 writeEncounter(encounterData, 184, commonHorde.encounters);
             }
             if (readEncounter(encounterData, 204, 5).encounters.size() > 0) {
-                EncounterSet uncommonHorde = encounters.next();
+                EncounterArea uncommonHorde = encounters.next();
                 writeEncounter(encounterData, 204, uncommonHorde.encounters);
             }
             if (readEncounter(encounterData, 224, 5).encounters.size() > 0) {
-                EncounterSet rareHorde = encounters.next();
+                EncounterArea rareHorde = encounters.next();
                 writeEncounter(encounterData, 224, rareHorde.encounters);
             }
 
@@ -1565,31 +1565,31 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             byte[] encounterData = new byte[0x178];
             System.arraycopy(b, offset, encounterData, 0, 0x178);
 
-            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            EncounterArea grassEncounters = readEncounter(encounterData, 0, 12);
             updatePokedexAreaDataFromEncounterSet(grassEncounters, pokedexAreaData, areaIndex, 0x1);
-            EncounterSet yellowFlowerEncounters = readEncounter(encounterData, 48, 12);
+            EncounterArea yellowFlowerEncounters = readEncounter(encounterData, 48, 12);
             updatePokedexAreaDataFromEncounterSet(yellowFlowerEncounters, pokedexAreaData, areaIndex, 0x2);
-            EncounterSet purpleFlowerEncounters = readEncounter(encounterData, 96, 12);
+            EncounterArea purpleFlowerEncounters = readEncounter(encounterData, 96, 12);
             updatePokedexAreaDataFromEncounterSet(purpleFlowerEncounters, pokedexAreaData, areaIndex, 0x4);
-            EncounterSet redFlowerEncounters = readEncounter(encounterData, 144, 12);
+            EncounterArea redFlowerEncounters = readEncounter(encounterData, 144, 12);
             updatePokedexAreaDataFromEncounterSet(redFlowerEncounters, pokedexAreaData, areaIndex, 0x8);
-            EncounterSet roughTerrainEncounters = readEncounter(encounterData, 192, 12);
+            EncounterArea roughTerrainEncounters = readEncounter(encounterData, 192, 12);
             updatePokedexAreaDataFromEncounterSet(roughTerrainEncounters, pokedexAreaData, areaIndex, 0x10);
-            EncounterSet surfEncounters = readEncounter(encounterData, 240, 5);
+            EncounterArea surfEncounters = readEncounter(encounterData, 240, 5);
             updatePokedexAreaDataFromEncounterSet(surfEncounters, pokedexAreaData, areaIndex, 0x20);
-            EncounterSet rockSmashEncounters = readEncounter(encounterData, 260, 5);
+            EncounterArea rockSmashEncounters = readEncounter(encounterData, 260, 5);
             updatePokedexAreaDataFromEncounterSet(rockSmashEncounters, pokedexAreaData, areaIndex, 0x40);
-            EncounterSet oldRodEncounters = readEncounter(encounterData, 280, 3);
+            EncounterArea oldRodEncounters = readEncounter(encounterData, 280, 3);
             updatePokedexAreaDataFromEncounterSet(oldRodEncounters, pokedexAreaData, areaIndex, 0x80);
-            EncounterSet goodRodEncounters = readEncounter(encounterData, 292, 3);
+            EncounterArea goodRodEncounters = readEncounter(encounterData, 292, 3);
             updatePokedexAreaDataFromEncounterSet(goodRodEncounters, pokedexAreaData, areaIndex, 0x100);
-            EncounterSet superRodEncounters = readEncounter(encounterData, 304, 3);
+            EncounterArea superRodEncounters = readEncounter(encounterData, 304, 3);
             updatePokedexAreaDataFromEncounterSet(superRodEncounters, pokedexAreaData, areaIndex, 0x200);
-            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 316, 5);
+            EncounterArea hordeCommonEncounters = readEncounter(encounterData, 316, 5);
             updatePokedexAreaDataFromEncounterSet(hordeCommonEncounters, pokedexAreaData, areaIndex, 0x400);
-            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 336, 5);
+            EncounterArea hordeUncommonEncounters = readEncounter(encounterData, 336, 5);
             updatePokedexAreaDataFromEncounterSet(hordeUncommonEncounters, pokedexAreaData, areaIndex, 0x400);
-            EncounterSet hordeRareEncounters = readEncounter(encounterData, 356, 5);
+            EncounterArea hordeRareEncounters = readEncounter(encounterData, 356, 5);
             updatePokedexAreaDataFromEncounterSet(hordeRareEncounters, pokedexAreaData, areaIndex, 0x400);
             currentMapNum++;
         }
@@ -1598,14 +1598,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         for (int i = 0; i < Gen6Constants.fallingEncounterCount; i++) {
             int areaIndex = Gen6Constants.xyMapNumToPokedexIndex[currentMapNum];
             int offset = Gen6Constants.fallingEncounterOffset + i * Gen6Constants.fieldEncounterSize;
-            EncounterSet fallingEncounter = readFieldEncounter(fieldCRO, offset);
+            EncounterArea fallingEncounter = readFieldEncounter(fieldCRO, offset);
             updatePokedexAreaDataFromEncounterSet(fallingEncounter, pokedexAreaData, areaIndex, 0x800);
             currentMapNum++;
         }
         for (int i = 0; i < Gen6Constants.rustlingBushEncounterCount; i++) {
             int areaIndex = Gen6Constants.xyMapNumToPokedexIndex[currentMapNum];
             int offset = Gen6Constants.rustlingBushEncounterOffset + i * Gen6Constants.fieldEncounterSize;
-            EncounterSet rustlingBushEncounter = readFieldEncounter(fieldCRO, offset);
+            EncounterArea rustlingBushEncounter = readFieldEncounter(fieldCRO, offset);
             updatePokedexAreaDataFromEncounterSet(rustlingBushEncounter, pokedexAreaData, areaIndex, 0x800);
             currentMapNum++;
         }
@@ -1635,28 +1635,28 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             byte[] encounterData = new byte[0xF6];
             System.arraycopy(b, offset, encounterData, 0, 0xF6);
 
-            EncounterSet grassEncounters = readEncounter(encounterData, 0, 12);
+            EncounterArea grassEncounters = readEncounter(encounterData, 0, 12);
             updatePokedexAreaDataFromEncounterSet(grassEncounters, pokedexAreaData, areaIndex, 0x1);
-            EncounterSet longGrassEncounters = readEncounter(encounterData, 48, 12);
+            EncounterArea longGrassEncounters = readEncounter(encounterData, 48, 12);
             updatePokedexAreaDataFromEncounterSet(longGrassEncounters, pokedexAreaData, areaIndex, 0x2);
             int foreignEncounterType = grassEncounters.encounters.size() > 0 ? 0x04 : 0x08;
-            EncounterSet dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
+            EncounterArea dexNavForeignEncounters = readEncounter(encounterData, 96, 3);
             updatePokedexAreaDataFromEncounterSet(dexNavForeignEncounters, pokedexAreaData, areaIndex, foreignEncounterType);
-            EncounterSet surfEncounters = readEncounter(encounterData, 108, 5);
+            EncounterArea surfEncounters = readEncounter(encounterData, 108, 5);
             updatePokedexAreaDataFromEncounterSet(surfEncounters, pokedexAreaData, areaIndex, 0x10);
-            EncounterSet rockSmashEncounters = readEncounter(encounterData, 128, 5);
+            EncounterArea rockSmashEncounters = readEncounter(encounterData, 128, 5);
             updatePokedexAreaDataFromEncounterSet(rockSmashEncounters, pokedexAreaData, areaIndex, 0x20);
-            EncounterSet oldRodEncounters = readEncounter(encounterData, 148, 3);
+            EncounterArea oldRodEncounters = readEncounter(encounterData, 148, 3);
             updatePokedexAreaDataFromEncounterSet(oldRodEncounters, pokedexAreaData, areaIndex, 0x40);
-            EncounterSet goodRodEncounters = readEncounter(encounterData, 160, 3);
+            EncounterArea goodRodEncounters = readEncounter(encounterData, 160, 3);
             updatePokedexAreaDataFromEncounterSet(goodRodEncounters, pokedexAreaData, areaIndex, 0x80);
-            EncounterSet superRodEncounters = readEncounter(encounterData, 172, 3);
+            EncounterArea superRodEncounters = readEncounter(encounterData, 172, 3);
             updatePokedexAreaDataFromEncounterSet(superRodEncounters, pokedexAreaData, areaIndex, 0x100);
-            EncounterSet hordeCommonEncounters = readEncounter(encounterData, 184, 5);
+            EncounterArea hordeCommonEncounters = readEncounter(encounterData, 184, 5);
             updatePokedexAreaDataFromEncounterSet(hordeCommonEncounters, pokedexAreaData, areaIndex, 0x200);
-            EncounterSet hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
+            EncounterArea hordeUncommonEncounters = readEncounter(encounterData, 204, 5);
             updatePokedexAreaDataFromEncounterSet(hordeUncommonEncounters, pokedexAreaData, areaIndex, 0x200);
-            EncounterSet hordeRareEncounters = readEncounter(encounterData, 224, 5);
+            EncounterArea hordeRareEncounters = readEncounter(encounterData, 224, 5);
             updatePokedexAreaDataFromEncounterSet(hordeRareEncounters, pokedexAreaData, areaIndex, 0x200);
             currentMapNum++;
         }
@@ -1666,9 +1666,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         writeGARC(romEntry.getFile("PokedexAreaData"), pokedexAreaGarc);
     }
 
-    private void updatePokedexAreaDataFromEncounterSet(EncounterSet es, byte[] pokedexAreaData, int areaIndex, int encounterType) {
+    private void updatePokedexAreaDataFromEncounterSet(EncounterArea es, byte[] pokedexAreaData, int areaIndex, int encounterType) {
         for (Encounter enc : es.encounters) {
-            Pokemon pkmn = enc.pokemon;
+            Pokemon pkmn = enc.getPokemon();
             int perPokemonAreaDataLength = romEntry.getRomType() == Gen6Constants.Type_XY ?
                     Gen6Constants.perPokemonAreaDataLengthXY : Gen6Constants.perPokemonAreaDataLengthORAS;
             int offset = pkmn.getBaseNumber() * perPokemonAreaDataLength + areaIndex * 4;
@@ -1681,18 +1681,18 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     private void writeEncounter(byte[] data, int offset, List<Encounter> encounters) {
         for (int i = 0; i < encounters.size(); i++) {
             Encounter encounter = encounters.get(i);
-            int speciesAndFormeData = (encounter.formeNumber << 11) + encounter.pokemon.getBaseNumber();
+            int speciesAndFormeData = (encounter.getFormeNumber() << 11) + encounter.getPokemon().getBaseNumber();
             writeWord(data, offset + i * 4, speciesAndFormeData);
-            data[offset + 2 + i * 4] = (byte) encounter.level;
-            data[offset + 3 + i * 4] = (byte) encounter.maxLevel;
+            data[offset + 2 + i * 4] = (byte) encounter.getLevel();
+            data[offset + 3 + i * 4] = (byte) encounter.getMaxLevel();
         }
     }
 
     private void writeFieldEncounter(byte[] data, int offset, List<Encounter> encounters) {
         for (int i = 0; i < encounters.size(); i++) {
             Encounter encounter = encounters.get(i);
-            writeWord(data, offset + 4 + i * 8, encounter.pokemon.getBaseNumber());
-            data[offset + 8 + i * 8] = (byte) encounter.level;
+            writeWord(data, offset + 4 + i * 8, encounter.getPokemon().getBaseNumber());
+            data[offset + 8 + i * 8] = (byte) encounter.getLevel();
         }
     }
 

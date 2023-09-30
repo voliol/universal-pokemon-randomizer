@@ -29,16 +29,46 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class EncounterSet {
+public class EncounterArea extends ArrayList<Encounter> {
 
-    public int rate;
-    public List<Encounter> encounters = new ArrayList<>();
-    public Set<Pokemon> bannedPokemon = new HashSet<>();
-    public String displayName;
-    public int offset;
+    private int rate;
+    private Set<Pokemon> bannedPokemon = new HashSet<>();
+    private String displayName;
+    private int offset;
 
-    public String toString() {
-        return "Encounter [Rate = " + rate + ", Encounters = " + encounters + "]";
+    public int getRate() {
+        return rate;
     }
 
+    public void setRate(int rate) {
+        this.rate = rate;
+    }
+
+    public Set<Pokemon> getBannedPokemon() {
+        return bannedPokemon;
+    }
+
+    public void setBannedPokemon(Set<Pokemon> bannedPokemon) {
+        this.bannedPokemon = bannedPokemon;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public String toString() {
+        return "Encounter [Rate = " + rate + ", Encounters = " + super.toString() + "]";
+    }
 }

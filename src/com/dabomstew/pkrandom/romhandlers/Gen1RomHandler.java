@@ -767,8 +767,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
-        List<EncounterSet> encounters = new ArrayList<>();
+    public List<EncounterArea> getEncounters(boolean useTimeOfDay) {
+        List<EncounterArea> encounters = new ArrayList<>();
 
         Pokemon ghostMarowak = pokes[Species.marowak];
         if (canChangeStaticPokemon()) {
@@ -791,17 +791,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     int rate = rom[offset++] & 0xFF;
                     if (rate > 0) {
                         // there is data here
-                        EncounterSet thisSet = new EncounterSet();
-                        thisSet.rate = rate;
-                        thisSet.offset = rootOffset;
-                        thisSet.displayName = (a == 1 ? "Surfing" : "Grass/Cave") + " on " + mapNames[mapID];
+                        EncounterArea thisSet = new EncounterArea();
+                        thisSet.setRate(rate);
+                        thisSet.setOffset(rootOffset);
+                        thisSet.setDisplayName((a == 1 ? "Surfing" : "Grass/Cave") + " on " + mapNames[mapID]);
                         if (mapID >= Gen1Constants.towerMapsStartIndex && mapID <= Gen1Constants.towerMapsEndIndex) {
-                            thisSet.bannedPokemon.add(ghostMarowak);
+                            thisSet.getBannedPokemon().add(ghostMarowak);
                         }
                         for (int slot = 0; slot < Gen1Constants.encounterTableSize; slot++) {
                             Encounter enc = new Encounter();
-                            enc.level = rom[offset] & 0xFF;
-                            enc.pokemon = pokes[pokeRBYToNumTable[rom[offset + 1] & 0xFF]];
+                            enc.setLevel(rom[offset] & 0xFF);
+                            enc.setPokemon(pokes[pokeRBYToNumTable[rom[offset + 1] & 0xFF]]);
                             thisSet.encounters.add(enc);
                             offset += 2;
                         }
@@ -809,9 +809,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     }
                 }
             } else {
-                for (EncounterSet es : encounters) {
-                    if (es.offset == offset) {
-                        es.displayName += ", " + mapNames[mapID];
+                for (EncounterArea es : encounters) {
+                    if (es.getOffset() == offset) {
+                        es.setDisplayName(es.getDisplayName() + ", " + mapNames[mapID]);
                     }
                 }
             }
@@ -820,26 +820,26 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // old rod
         int oldRodOffset = romEntry.getIntValue("OldRodOffset");
-        EncounterSet oldRodSet = new EncounterSet();
-        oldRodSet.displayName = "Old Rod Fishing";
+        EncounterArea oldRodSet = new EncounterArea();
+        oldRodSet.setDisplayName("Old Rod Fishing");
         Encounter oldRodEnc = new Encounter();
-        oldRodEnc.level = rom[oldRodOffset + 2] & 0xFF;
-        oldRodEnc.pokemon = pokes[pokeRBYToNumTable[rom[oldRodOffset + 1] & 0xFF]];
+        oldRodEnc.setLevel(rom[oldRodOffset + 2] & 0xFF);
+        oldRodEnc.setPokemon(pokes[pokeRBYToNumTable[rom[oldRodOffset + 1] & 0xFF]]);
         oldRodSet.encounters.add(oldRodEnc);
-        oldRodSet.bannedPokemon.add(ghostMarowak);
+        oldRodSet.getBannedPokemon().add(ghostMarowak);
         encounters.add(oldRodSet);
 
         // good rod
         int goodRodOffset = romEntry.getIntValue("GoodRodOffset");
-        EncounterSet goodRodSet = new EncounterSet();
-        goodRodSet.displayName = "Good Rod Fishing";
+        EncounterArea goodRodSet = new EncounterArea();
+        goodRodSet.setDisplayName("Good Rod Fishing");
         for (int grSlot = 0; grSlot < 2; grSlot++) {
             Encounter enc = new Encounter();
-            enc.level = rom[goodRodOffset + grSlot * 2] & 0xFF;
-            enc.pokemon = pokes[pokeRBYToNumTable[rom[goodRodOffset + grSlot * 2 + 1] & 0xFF]];
+            enc.setLevel(rom[goodRodOffset + grSlot * 2] & 0xFF);
+            enc.setPokemon(pokes[pokeRBYToNumTable[rom[goodRodOffset + grSlot * 2 + 1] & 0xFF]]);
             goodRodSet.encounters.add(enc);
         }
-        goodRodSet.bannedPokemon.add(ghostMarowak);
+        goodRodSet.getBannedPokemon().add(ghostMarowak);
         encounters.add(goodRodSet);
 
         // super rod
@@ -847,16 +847,16 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             int superRodOffset = romEntry.getIntValue("SuperRodTableOffset");
             while ((rom[superRodOffset] & 0xFF) != 0xFF) {
                 int map = rom[superRodOffset++] & 0xFF;
-                EncounterSet thisSet = new EncounterSet();
-                thisSet.displayName = "Super Rod Fishing on " + mapNames[map];
+                EncounterArea thisSet = new EncounterArea();
+                thisSet.setDisplayName("Super Rod Fishing on " + mapNames[map]);
                 for (int encN = 0; encN < Gen1Constants.yellowSuperRodTableSize; encN++) {
                     Encounter enc = new Encounter();
-                    enc.level = rom[superRodOffset + 1] & 0xFF;
-                    enc.pokemon = pokes[pokeRBYToNumTable[rom[superRodOffset] & 0xFF]];
+                    enc.setLevel(rom[superRodOffset + 1] & 0xFF);
+                    enc.setPokemon(pokes[pokeRBYToNumTable[rom[superRodOffset] & 0xFF]]);
                     thisSet.encounters.add(enc);
                     superRodOffset += 2;
                 }
-                thisSet.bannedPokemon.add(ghostMarowak);
+                thisSet.getBannedPokemon().add(ghostMarowak);
                 encounters.add(thisSet);
             }
         } else {
@@ -869,23 +869,23 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 superRodOffset += 2;
                 if (!usedSROffsets.contains(setOffset)) {
                     usedSROffsets.add(setOffset);
-                    EncounterSet thisSet = new EncounterSet();
-                    thisSet.displayName = "Super Rod Fishing on " + mapNames[map];
-                    thisSet.offset = setOffset;
+                    EncounterArea thisSet = new EncounterArea();
+                    thisSet.setDisplayName("Super Rod Fishing on " + mapNames[map]);
+                    thisSet.setOffset(setOffset);
                     int pokesInSet = rom[setOffset++] & 0xFF;
                     for (int encN = 0; encN < pokesInSet; encN++) {
                         Encounter enc = new Encounter();
-                        enc.level = rom[setOffset] & 0xFF;
-                        enc.pokemon = pokes[pokeRBYToNumTable[rom[setOffset + 1] & 0xFF]];
+                        enc.setLevel(rom[setOffset] & 0xFF);
+                        enc.setPokemon(pokes[pokeRBYToNumTable[rom[setOffset + 1] & 0xFF]]);
                         thisSet.encounters.add(enc);
                         setOffset += 2;
                     }
-                    thisSet.bannedPokemon.add(ghostMarowak);
+                    thisSet.getBannedPokemon().add(ghostMarowak);
                     encounters.add(thisSet);
                 } else {
-                    for (EncounterSet es : encounters) {
-                        if (es.offset == setOffset) {
-                            es.displayName += ", " + mapNames[map];
+                    for (EncounterArea es : encounters) {
+                        if (es.getOffset() == setOffset) {
+                            es.setDisplayName(es.getDisplayName() + ", " + mapNames[map]);
                         }
                     }
                 }
@@ -896,8 +896,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
-        Iterator<EncounterSet> encsetit = encounters.iterator();
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters) {
+        Iterator<EncounterArea> encsetit = encounters.iterator();
 
         // grass & water
         List<Integer> usedOffsets = new ArrayList<>();
@@ -912,12 +912,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     int rate = rom[offset++] & 0xFF;
                     if (rate > 0) {
                         // there is data here
-                        EncounterSet thisSet = encsetit.next();
+                        EncounterArea thisSet = encsetit.next();
                         for (int slot = 0; slot < Gen1Constants.encounterTableSize; slot++) {
                             Encounter enc = thisSet.encounters.get(slot);
                             writeBytes(offset, new byte[]{
-                                    (byte) enc.level,
-                                    (byte) pokeNumToRBYTable[enc.pokemon.getNumber()]
+                                    (byte) enc.getLevel(),
+                                    (byte) pokeNumToRBYTable[enc.getPokemon().getNumber()]
                             });
                             offset += 2;
                         }
@@ -929,21 +929,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // old rod
         int oldRodOffset = romEntry.getIntValue("OldRodOffset");
-        EncounterSet oldRodSet = encsetit.next();
+        EncounterArea oldRodSet = encsetit.next();
         Encounter oldRodEnc = oldRodSet.encounters.get(0);
         writeBytes(oldRodOffset + 1, new byte[]{
-                (byte) pokeNumToRBYTable[oldRodEnc.pokemon.getNumber()],
-                (byte) oldRodEnc.level
+                (byte) pokeNumToRBYTable[oldRodEnc.getPokemon().getNumber()],
+                (byte) oldRodEnc.getLevel()
         });
 
         // good rod
         int goodRodOffset = romEntry.getIntValue("GoodRodOffset");
-        EncounterSet goodRodSet = encsetit.next();
+        EncounterArea goodRodSet = encsetit.next();
         for (int grSlot = 0; grSlot < 2; grSlot++) {
             Encounter enc = goodRodSet.encounters.get(grSlot);
             writeBytes(goodRodOffset + grSlot * 2, new byte[]{
-                    (byte) enc.level,
-                    (byte) pokeNumToRBYTable[enc.pokemon.getNumber()]
+                    (byte) enc.getLevel(),
+                    (byte) pokeNumToRBYTable[enc.getPokemon().getNumber()]
             });
         }
 
@@ -952,12 +952,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (romEntry.isYellow()) {
             while ((rom[superRodOffset] & 0xFF) != 0xFF) {
                 superRodOffset++;
-                EncounterSet thisSet = encsetit.next();
+                EncounterArea thisSet = encsetit.next();
                 for (int encN = 0; encN < Gen1Constants.yellowSuperRodTableSize; encN++) {
                     Encounter enc = thisSet.encounters.get(encN);
                     writeBytes(superRodOffset, new byte[] {
-                            (byte) pokeNumToRBYTable[enc.pokemon.getNumber()],
-                            (byte) enc.level
+                            (byte) pokeNumToRBYTable[enc.getPokemon().getNumber()],
+                            (byte) enc.getLevel()
                     });
                     superRodOffset += 2;
                 }
@@ -972,12 +972,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 if (!usedSROffsets.contains(setOffset)) {
                     usedSROffsets.add(setOffset);
                     int pokesInSet = rom[setOffset++] & 0xFF;
-                    EncounterSet thisSet = encsetit.next();
+                    EncounterArea thisSet = encsetit.next();
                     for (int encN = 0; encN < pokesInSet; encN++) {
                         Encounter enc = thisSet.encounters.get(encN);
                         writeBytes(setOffset, new byte[]{
-                                (byte) enc.level,
-                                (byte) pokeNumToRBYTable[enc.pokemon.getNumber()]});
+                                (byte) enc.getLevel(),
+                                (byte) pokeNumToRBYTable[enc.getPokemon().getNumber()]});
                         setOffset += 2;
                     }
                 }

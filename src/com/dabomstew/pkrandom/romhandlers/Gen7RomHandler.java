@@ -1146,8 +1146,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
-        List<EncounterSet> encounters = new ArrayList<>();
+    public List<EncounterArea> getEncounters(boolean useTimeOfDay) {
+        List<EncounterArea> encounters = new ArrayList<>();
         for (AreaData areaData : areaDataList) {
             if (!areaData.hasTables) {
                 continue;
@@ -1156,17 +1156,17 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 byte[] encounterTable = areaData.encounterTables.get(i);
                 byte[] dayTable = new byte[0x164];
                 System.arraycopy(encounterTable, 0, dayTable, 0, 0x164);
-                EncounterSet dayEncounters = readEncounterTable(dayTable);
+                EncounterArea dayEncounters = readEncounterTable(dayTable);
                 if (!useTimeOfDay) {
-                    dayEncounters.displayName = areaData.name + ", Table " + (i + 1);
+                    dayEncounters.setDisplayName(areaData.name + ", Table " + (i + 1));
                     encounters.add(dayEncounters);
                 } else {
-                    dayEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Day)";
+                    dayEncounters.setDisplayName(areaData.name + ", Table " + (i + 1) + " (Day)");
                     encounters.add(dayEncounters);
                     byte[] nightTable = new byte[0x164];
                     System.arraycopy(encounterTable, 0x164, nightTable, 0, 0x164);
-                    EncounterSet nightEncounters = readEncounterTable(nightTable);
-                    nightEncounters.displayName = areaData.name + ", Table " + (i + 1) + " (Night)";
+                    EncounterArea nightEncounters = readEncounterTable(nightTable);
+                    nightEncounters.setDisplayName(areaData.name + ", Table " + (i + 1) + " (Night)");
                     encounters.add(nightEncounters);
                 }
             }
@@ -1174,11 +1174,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return encounters;
     }
 
-    private EncounterSet readEncounterTable(byte[] encounterTable) {
+    private EncounterArea readEncounterTable(byte[] encounterTable) {
         int minLevel = encounterTable[0];
         int maxLevel = encounterTable[1];
-        EncounterSet es = new EncounterSet();
-        es.rate = 1;
+        EncounterArea es = new EncounterArea();
+        es.setRate(1);
         for (int i = 0; i < 10; i++) {
             int offset = 0xC + (i * 4);
             int speciesAndFormeData = readWord(encounterTable, offset);
@@ -1186,10 +1186,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             int forme = speciesAndFormeData >> 11;
             if (species != 0) {
                 Encounter e = new Encounter();
-                e.pokemon = getPokemonForEncounter(species, forme);
-                e.formeNumber = forme;
-                e.level = minLevel;
-                e.maxLevel = maxLevel;
+                e.setPokemon(getPokemonForEncounter(species, forme));
+                e.setFormeNumber(forme);
+                e.setLevel(minLevel);
+                e.setMaxLevel(maxLevel);
                 es.encounters.add(e);
 
                 // Get all the SOS encounters for this non-SOS encounter
@@ -1197,12 +1197,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     species = readWord(encounterTable, offset + (40 * j)) & 0x7FF;
                     forme = readWord(encounterTable, offset + (40 * j)) >> 11;
                     Encounter sos = new Encounter();
-                    sos.pokemon = getPokemonForEncounter(species, forme);
-                    sos.formeNumber = forme;
-                    sos.level = minLevel;
-                    sos.maxLevel = maxLevel;
-                    sos.isSOS = true;
-                    sos.sosType = SOSType.GENERIC;
+                    sos.setPokemon(getPokemonForEncounter(species, forme));
+                    sos.setFormeNumber(forme);
+                    sos.setLevel(minLevel);
+                    sos.setMaxLevel(maxLevel);
+                    sos.setSOS(true);
+                    sos.setSosType(SOSType.GENERIC);
                     es.encounters.add(sos);
                 }
             }
@@ -1215,12 +1215,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             int forme = readWord(encounterTable, offset) >> 11;
             if (species != 0) {
                 Encounter weatherSOS = new Encounter();
-                weatherSOS.pokemon = getPokemonForEncounter(species, forme);
-                weatherSOS.formeNumber = forme;
-                weatherSOS.level = minLevel;
-                weatherSOS.maxLevel = maxLevel;
-                weatherSOS.isSOS = true;
-                weatherSOS.sosType = getSOSTypeForIndex(i);
+                weatherSOS.setPokemon(getPokemonForEncounter(species, forme));
+                weatherSOS.setFormeNumber(forme);
+                weatherSOS.setLevel(minLevel);
+                weatherSOS.setMaxLevel(maxLevel);
+                weatherSOS.setSOS(true);
+                weatherSOS.setSosType(getSOSTypeForIndex(i));
                 es.encounters.add(weatherSOS);
             }
         }
@@ -1253,8 +1253,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encountersList) {
-        Iterator<EncounterSet> encounters = encountersList.iterator();
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encountersList) {
+        Iterator<EncounterArea> encounters = encountersList.iterator();
         for (AreaData areaData : areaDataList) {
             if (!areaData.hasTables) {
                 continue;
@@ -1263,12 +1263,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 0; i < areaData.encounterTables.size(); i++) {
                 byte[] encounterTable = areaData.encounterTables.get(i);
                 if (useTimeOfDay) {
-                    EncounterSet dayEncounters = encounters.next();
-                    EncounterSet nightEncounters = encounters.next();
+                    EncounterArea dayEncounters = encounters.next();
+                    EncounterArea nightEncounters = encounters.next();
                     writeEncounterTable(encounterTable, 0, dayEncounters.encounters);
                     writeEncounterTable(encounterTable, 0x164, nightEncounters.encounters);
                 } else {
-                    EncounterSet dayEncounters = encounters.next();
+                    EncounterArea dayEncounters = encounters.next();
                     writeEncounterTable(encounterTable, 0, dayEncounters.encounters);
                     writeEncounterTable(encounterTable, 0x164, dayEncounters.encounters);
                 }
@@ -1286,19 +1286,19 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     private void writeEncounterTable(byte[] encounterTable, int offset, List<Encounter> encounters) {
         Iterator<Encounter> encounter = encounters.iterator();
         Encounter firstEncounter = encounters.get(0);
-        encounterTable[offset] = (byte) firstEncounter.level;
-        encounterTable[offset + 1] = (byte) firstEncounter.maxLevel;
+        encounterTable[offset] = (byte) firstEncounter.getLevel();
+        encounterTable[offset + 1] = (byte) firstEncounter.getMaxLevel();
         int numberOfEncounterSlots = encounters.size() / 8;
         for (int i = 0; i < numberOfEncounterSlots; i++) {
             int currentOffset = offset + 0xC + (i * 4);
             Encounter enc = encounter.next();
-            int speciesAndFormeData = (enc.formeNumber << 11) + enc.pokemon.getBaseNumber();
+            int speciesAndFormeData = (enc.getFormeNumber() << 11) + enc.getPokemon().getBaseNumber();
             writeWord(encounterTable, currentOffset, speciesAndFormeData);
 
             // SOS encounters for this encounter
             for (int j = 1; j < 8; j++) {
                 Encounter sosEncounter = encounter.next();
-                speciesAndFormeData = (sosEncounter.formeNumber << 11) + sosEncounter.pokemon.getBaseNumber();
+                speciesAndFormeData = (sosEncounter.getFormeNumber() << 11) + sosEncounter.getPokemon().getBaseNumber();
                 writeWord(encounterTable, currentOffset + (40 * j), speciesAndFormeData);
             }
         }
@@ -1308,7 +1308,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 0; i < 6; i++) {
                 int currentOffset = offset + 0x14C + (i * 4);
                 Encounter weatherSOSEncounter = encounter.next();
-                int speciesAndFormeData = (weatherSOSEncounter.formeNumber << 11) + weatherSOSEncounter.pokemon.getBaseNumber();
+                int speciesAndFormeData = (weatherSOSEncounter.getFormeNumber() << 11) + weatherSOSEncounter.getPokemon().getBaseNumber();
                 writeWord(encounterTable, currentOffset, speciesAndFormeData);
             }
         }

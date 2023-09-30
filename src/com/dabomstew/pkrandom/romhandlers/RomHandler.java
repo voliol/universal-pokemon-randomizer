@@ -220,9 +220,9 @@ public interface RomHandler {
     // Wild Pokemon
     // ============
 
-    List<EncounterSet> getEncounters(boolean useTimeOfDay);
+    List<EncounterArea> getEncounters(boolean useTimeOfDay);
 
-    void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
+    void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
     void randomEncounters(Settings settings);
 

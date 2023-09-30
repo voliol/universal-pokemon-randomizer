@@ -600,10 +600,10 @@ public class Randomizer {
 
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-        List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
-        for (EncounterSet es : encounters) {
-            for (Encounter e : es.encounters) {
-                checkValue = addToCV(checkValue, e.level, e.pokemon.getNumber());
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeBasedEncounters);
+        for (EncounterArea area : encounterAreas) {
+            for (Encounter e : area) {
+                checkValue = addToCV(checkValue, e.getLevel(), e.getPokemon().getNumber());
             }
         }
 
@@ -1085,21 +1085,21 @@ public class Randomizer {
         log.println("--Wild Pokemon--");
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-        List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeBasedEncounters);
         int idx = 0;
-        for (EncounterSet es : encounters) {
+        for (EncounterArea area : encounterAreas) {
             idx++;
             log.print("Set #" + idx + " ");
-            if (es.displayName != null) {
-                log.print("- " + es.displayName + " ");
+            if (area.getDisplayName() != null) {
+                log.print("- " + area.getDisplayName() + " ");
             }
-            log.print("(rate=" + es.rate + ")");
+            log.print("(rate=" + area.getRate() + ")");
             log.println();
-            for (Encounter e : es.encounters) {
+            for (Encounter e : area) {
                 StringBuilder sb = new StringBuilder();
-                if (e.isSOS) {
+                if (e.isSOS()) {
                     String stringToAppend;
-                    switch (e.sosType) {
+                    switch (e.getSosType()) {
                         case RAIN:
                             stringToAppend = "Rain SOS: ";
                             break;
@@ -1115,19 +1115,19 @@ public class Randomizer {
                     }
                     sb.append(stringToAppend);
                 }
-                sb.append(e.pokemon.fullName()).append(" Lv");
-                if (e.maxLevel > 0 && e.maxLevel != e.level) {
-                    sb.append("s ").append(e.level).append("-").append(e.maxLevel);
+                sb.append(e.getPokemon().fullName()).append(" Lv");
+                if (e.getMaxLevel() > 0 && e.getMaxLevel() != e.getLevel()) {
+                    sb.append("s ").append(e.getLevel()).append("-").append(e.getMaxLevel());
                 } else {
-                    sb.append(e.level);
+                    sb.append(e.getLevel());
                 }
                 String whitespaceFormat = romHandler.generationOfPokemon() == 7 ? "%-31s" : "%-25s";
                 log.print(String.format(whitespaceFormat, sb));
                 StringBuilder sb2 = new StringBuilder();
                 if (romHandler instanceof Gen1RomHandler) {
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPECIAL %-3d SPEED %-3d", e.pokemon.getHp(), e.pokemon.getAttack(), e.pokemon.getDefense(), e.pokemon.getSpecial(), e.pokemon.getSpeed()));
+                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPECIAL %-3d SPEED %-3d", e.getPokemon().getHp(), e.getPokemon().getAttack(), e.getPokemon().getDefense(), e.getPokemon().getSpecial(), e.getPokemon().getSpeed()));
                 } else {
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.getHp(), e.pokemon.getAttack(), e.pokemon.getDefense(), e.pokemon.getSpatk(), e.pokemon.getSpdef(), e.pokemon.getSpeed()));
+                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.getPokemon().getHp(), e.getPokemon().getAttack(), e.getPokemon().getDefense(), e.getPokemon().getSpatk(), e.getPokemon().getSpdef(), e.getPokemon().getSpeed()));
                 }
                 log.print(sb2);
                 log.println();

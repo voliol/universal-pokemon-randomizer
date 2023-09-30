@@ -26,14 +26,62 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class Encounter {
 
-    public int level;
-    public int maxLevel;
-    public Pokemon pokemon;
-    public int formeNumber;
+    private int level;
+    private int maxLevel;
+    private Pokemon pokemon;
+    private int formeNumber;
 
     // Used only for Gen 7's SOS mechanic
-    public boolean isSOS;
-    public SOSType sosType;
+    private boolean isSOS;
+    private SOSType sosType;
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getMaxLevel() {
+        return maxLevel;
+    }
+
+    public void setMaxLevel(int maxLevel) {
+        this.maxLevel = maxLevel;
+    }
+
+    public Pokemon getPokemon() {
+        return pokemon;
+    }
+
+    public void setPokemon(Pokemon pokemon) {
+        this.pokemon = pokemon;
+    }
+
+    public int getFormeNumber() {
+        return formeNumber;
+    }
+
+    public void setFormeNumber(int formeNumber) {
+        this.formeNumber = formeNumber;
+    }
+
+    public boolean isSOS() {
+        return isSOS;
+    }
+
+    public void setSOS(boolean SOS) {
+        isSOS = SOS;
+    }
+
+    public SOSType getSosType() {
+        return sosType;
+    }
+
+    public void setSosType(SOSType sosType) {
+        this.sosType = sosType;
+    }
 
     public String toString() {
         if (pokemon == null) {
