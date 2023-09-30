@@ -21,7 +21,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	// generic, leading to bad type conversions
 	public static PokemonSet<Pokemon> inArea(EncounterArea area) {
 		PokemonSet<Pokemon> pokemonSet = new PokemonSet<>();
-		for (Encounter enc : area.encounters) {
+		for (Encounter enc : area) {
 			pokemonSet.add(enc.getPokemon());
 		}
 		return pokemonSet;
