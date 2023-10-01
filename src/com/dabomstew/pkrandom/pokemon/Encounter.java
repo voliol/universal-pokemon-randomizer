@@ -83,6 +83,7 @@ public class Encounter {
         this.sosType = sosType;
     }
 
+    @Override
     public String toString() {
         if (pokemon == null) {
             return "ERROR";
@@ -92,6 +93,15 @@ public class Encounter {
         } else {
             return pokemon.getName() + " Lvs " + level + "-" + maxLevel;
         }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Encounter otherEnc) {
+            return level == otherEnc.level && maxLevel == otherEnc.maxLevel && pokemon.equals(otherEnc.pokemon)
+                    && formeNumber == otherEnc.formeNumber && isSOS == otherEnc.isSOS && sosType == otherEnc.sosType;
+        }
+        return false;
     }
 
 }

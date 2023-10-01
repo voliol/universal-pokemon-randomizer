@@ -72,6 +72,7 @@ public class EncounterArea extends ArrayList<Encounter> {
         this.offset = offset;
     }
 
+    @Override
     public String toString() {
         return "Encounters [Rate = " + rate + ", Encounters = " + super.toString() + "]";
     }

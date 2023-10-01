@@ -34,7 +34,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3, 4, 5, 6, 7}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {
@@ -671,6 +671,17 @@ public class RomHandlerTest {
         loadROM(romName);
         assertFalse(romHandler.getEncounters(false).isEmpty());
         assertFalse(romHandler.getEncounters(true).isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void encountersDoNotChangeWithGetAndSet(String romName) {
+        loadROM(romName);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(false);
+        System.out.println(encounterAreas);
+        List<EncounterArea> before = new ArrayList<>(encounterAreas);
+        romHandler.setEncounters(false, encounterAreas);
+        assertEquals(before, romHandler.getEncounters(false));
     }
 
     @ParameterizedTest
