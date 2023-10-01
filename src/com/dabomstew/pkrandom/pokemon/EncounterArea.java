@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
-/*--  EncounterSet.java - contains a group of wild Pokemon                  --*/
+/*--  EncounterArea.java - contains a group of wild Pokemon                 --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
@@ -73,6 +73,6 @@ public class EncounterArea extends ArrayList<Encounter> {
     }
 
     public String toString() {
-        return "Encounter [Rate = " + rate + ", Encounters = " + super.toString() + "]";
+        return "Encounters [Rate = " + rate + ", Encounters = " + super.toString() + "]";
     }
 }
