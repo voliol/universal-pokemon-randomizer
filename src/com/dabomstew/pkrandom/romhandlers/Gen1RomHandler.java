@@ -803,7 +803,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         thisArea.setOffset(rootOffset);
                         thisArea.setDisplayName((a == 1 ? "Surfing" : "Grass/Cave") + " on " + mapNames[mapID]);
                         if (mapID >= Gen1Constants.towerMapsStartIndex && mapID <= Gen1Constants.towerMapsEndIndex) {
-                            thisArea.getBannedPokemon().add(ghostMarowak);
+                            thisArea.banPokemon(ghostMarowak);
                         }
                         for (int slot = 0; slot < Gen1Constants.encounterTableSize; slot++) {
                             Encounter enc = new Encounter();
@@ -840,7 +840,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         oldRodEnc.setLevel(rom[oldRodOffset + 2] & 0xFF);
         oldRodEnc.setPokemon(pokes[pokeRBYToNumTable[rom[oldRodOffset + 1] & 0xFF]]);
         area.add(oldRodEnc);
-        area.getBannedPokemon().add(getGhostMarowakPoke());
+        area.banPokemon(getGhostMarowakPoke());
 
         encounterAreas.add(area);
     }
@@ -855,7 +855,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             enc.setPokemon(pokes[pokeRBYToNumTable[rom[goodRodOffset + slot * 2 + 1] & 0xFF]]);
             area.add(enc);
         }
-        area.getBannedPokemon().add(getGhostMarowakPoke());
+        area.banPokemon(getGhostMarowakPoke());
 
         encounterAreas.add(area);
     }
@@ -876,7 +876,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     area.add(enc);
                     superRodOffset += 2;
                 }
-                area.getBannedPokemon().add(ghostMarowak);
+                area.banPokemon(ghostMarowak);
                 encounterAreas.add(area);
             }
         } else {
@@ -900,7 +900,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         area.add(enc);
                         areaOffset += 2;
                     }
-                    area.getBannedPokemon().add(ghostMarowak);
+                    area.banPokemon(ghostMarowak);
                     encounterAreas.add(area);
                 } else {
                     for (EncounterArea area : encounterAreas) {

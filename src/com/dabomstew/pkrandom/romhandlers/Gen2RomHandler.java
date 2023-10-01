@@ -797,7 +797,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             area.add(enc);
         }
         // Unown is banned for Bug Catching Contest (5/8/2016)
-        area.getBannedPokemon().add(pokes[Species.unown]);
+        area.banPokemon(pokes[Species.unown]);
         encounterAreas.add(area);
     }
 

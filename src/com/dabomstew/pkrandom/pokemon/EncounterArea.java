@@ -29,7 +29,7 @@ import java.util.*;
 public class EncounterArea extends ArrayList<Encounter> {
 
     private int rate;
-    private Set<Pokemon> bannedPokemon = new HashSet<>();
+    private final Set<Pokemon> bannedPokemon = new HashSet<>();
     private String displayName;
     private int offset;
 
@@ -48,12 +48,19 @@ public class EncounterArea extends ArrayList<Encounter> {
         this.rate = rate;
     }
 
+    /**
+     * Returns an unmodifiable set of the {@link Pokemon} which should NOT have {@link Encounter}s in this area.
+     */
     public Set<Pokemon> getBannedPokemon() {
-        return bannedPokemon;
+        return Collections.unmodifiableSet(bannedPokemon);
     }
 
-    public void setBannedPokemon(Set<Pokemon> bannedPokemon) {
-        this.bannedPokemon = bannedPokemon;
+    public void banPokemon(Pokemon toBan) {
+        bannedPokemon.add(toBan);
+    }
+
+    public void banAllPokemon(Collection<? extends Pokemon> toBan) {
+        bannedPokemon.addAll(toBan);
     }
 
     public String getDisplayName() {
