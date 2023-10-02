@@ -168,12 +168,12 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+    public List<EncounterArea> getEncounters(boolean useTimeOfDay) {
         return null;
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters) {
 
     }
 

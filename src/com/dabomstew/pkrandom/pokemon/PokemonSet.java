@@ -19,10 +19,10 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
 	// has to be static (instead of a constructor) because EncounterSet is not
 	// generic, leading to bad type conversions
-	public static PokemonSet<Pokemon> inArea(EncounterSet area) {
+	public static PokemonSet<Pokemon> inArea(EncounterArea area) {
 		PokemonSet<Pokemon> pokemonSet = new PokemonSet<>();
-		for (Encounter enc : area.encounters) {
-			pokemonSet.add(enc.pokemon);
+		for (Encounter enc : area) {
+			pokemonSet.add(enc.getPokemon());
 		}
 		return pokemonSet;
 	}

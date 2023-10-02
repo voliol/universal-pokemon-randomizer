@@ -610,21 +610,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        List<EncounterArea> currentEncounterAreas = this.getEncounters(useTimeOfDay);
 
         if (isORAS) {
-            List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
-            area1to1EncountersImpl(collapsedEncounters, settings);
-            enhanceRandomEncountersORAS(collapsedEncounters, settings);
-            setEncounters(useTimeOfDay, currentEncounters);
+            List<EncounterArea> collapsedEncounterAreas = collapseAreasORAS(currentEncounterAreas);
+            area1to1EncountersImpl(collapsedEncounterAreas, settings);
+            enhanceRandomEncountersORAS(collapsedEncounterAreas, settings);
+            setEncounters(useTimeOfDay, currentEncounterAreas);
             return;
         }
 
-        // New: randomize the order encounter sets are randomized in.
+        // New: randomize the order encounter areas are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
-        List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
-        Collections.shuffle(scrambledEncounters, this.random);
+        List<EncounterArea> scrambledEncounterAreas = new ArrayList<>(currentEncounterAreas);
+        Collections.shuffle(scrambledEncounterAreas, this.random);
 
         checkPokemonRestrictions();
         PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
@@ -632,14 +632,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (catchEmAll) {
             PokemonSet<Pokemon> allPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>(allPokes);
-                pickablePokemon.removeAll(area.bannedPokemon);
-                for (Encounter enc : area.encounters) {
+                pickablePokemon.removeAll(area.getBannedPokemon());
+                for (Encounter enc : area) {
                     // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
                     // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
                     // randomly appears as a static or unless it becomes a random evolution.
-                    if (banned.contains(enc.pokemon)) {
+                    if (banned.contains(enc.getPokemon())) {
                         continue;
                     }
 
@@ -657,21 +657,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                             tempPickable.addAll(noLegendaries ? getNonlegendaryPokemon() : restrictedPokemon);
                         }
                         tempPickable.removeAll(banned);
-                        tempPickable.removeAll(area.bannedPokemon);
+                        tempPickable.removeAll(area.getBannedPokemon());
                         if (tempPickable.size() == 0) {
                             throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                         }
-                        enc.pokemon = tempPickable.getRandom(random);
-                        setFormeForEncounter(enc, enc.pokemon);
+                        enc.setPokemon(tempPickable.getRandom(random));
+                        setFormeForEncounter(enc, enc.getPokemon());
                     } else {
                         // Picked this Pokemon, remove it
                         Pokemon picked = pickablePokemon.getRandom(random);
                         pickablePokemon.remove(picked);
-                        enc.pokemon = picked;
+                        enc.setPokemon(picked);
                         if (allPokes != pickablePokemon) {
-                            allPokes.remove(enc.pokemon);
+                            allPokes.remove(enc.getPokemon());
                         }
-                        setFormeForEncounter(enc, enc.pokemon);
+                        setFormeForEncounter(enc, enc.getPokemon());
                         if (allPokes.size() == 0) {
                             // Start again
                             // TODO: ^ code repetition should be minimized, refactor into methods and/or loops!
@@ -685,7 +685,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             allPokes.removeAll(banned);
                             if (pickablePokemon != allPokes) {
                                 pickablePokemon.addAll(allPokes);
-                                pickablePokemon.removeAll(area.bannedPokemon);
+                                pickablePokemon.removeAll(area.getBannedPokemon());
                             }
                         }
                     }
@@ -693,7 +693,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         } else if (typeThemed) {
             Map<Type, PokemonSet<Pokemon>> cachedPokeSets = new TreeMap<>();
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 PokemonSet<Pokemon> possiblePokemon = null;
                 int iterLoops = 0;
                 while (possiblePokemon == null && iterLoops < 10000) { // TODO: max iterLoops should be a constant
@@ -704,7 +704,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         cachedPokeSets.put(areaTheme, pType);
                     }
                     possiblePokemon = new PokemonSet<>(cachedPokeSets.get(areaTheme));
-                    possiblePokemon.removeAll(area.bannedPokemon);
+                    possiblePokemon.removeAll(area.getBannedPokemon());
                     if (possiblePokemon.size() == 0) {
                         // Can't use this type for this area
                         possiblePokemon = null;
@@ -714,63 +714,63 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (possiblePokemon == null) {
                     throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
                 }
-                for (Encounter enc : area.encounters) {
+                for (Encounter enc : area) {
                     // Pick a random themed pokemon
-                    enc.pokemon = possiblePokemon.getRandom(random);
-                    while (enc.pokemon.isActuallyCosmetic()) {
-                        enc.pokemon = possiblePokemon.getRandom(random);
+                    enc.setPokemon(possiblePokemon.getRandom(random));
+                    while (enc.getPokemon().isActuallyCosmetic()) {
+                        enc.setPokemon(possiblePokemon.getRandom(random));
                     }
-                    setFormeForEncounter(enc, enc.pokemon);
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
             }
         } else if (usePowerLevels) {
             PokemonSet<Pokemon> allowedPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, true, banned);
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 PokemonSet<Pokemon> localAllowed = new PokemonSet<>(allowedPokes);
-                localAllowed.removeAll(area.bannedPokemon);
-                for (Encounter enc : area.encounters) {
+                localAllowed.removeAll(area.getBannedPokemon());
+                for (Encounter enc : area) {
                     if (balanceShakingGrass) {
-                        if (area.displayName.contains("Shaking")) {
-                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2);
-                            while (enc.pokemon.isActuallyCosmetic()) {
-                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2);
+                        if (area.getDisplayName().contains("Shaking")) {
+                            enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, (enc.getLevel() + enc.getMaxLevel()) / 2));
+                            while (enc.getPokemon().isActuallyCosmetic()) {
+                                enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, (enc.getLevel() + enc.getMaxLevel()) / 2));
                             }
-                            setFormeForEncounter(enc, enc.pokemon);
+                            setFormeForEncounter(enc, enc.getPokemon());
                         } else {
-                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
-                            while (enc.pokemon.isActuallyCosmetic()) {
-                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                            enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, 100));
+                            while (enc.getPokemon().isActuallyCosmetic()) {
+                                enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, 100));
                             }
-                            setFormeForEncounter(enc, enc.pokemon);
+                            setFormeForEncounter(enc, enc.getPokemon());
                         }
                     } else {
-                        enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
-                        while (enc.pokemon.isActuallyCosmetic()) {
-                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                        enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, 100));
+                        while (enc.getPokemon().isActuallyCosmetic()) {
+                            enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, 100));
                         }
-                        setFormeForEncounter(enc, enc.pokemon);
+                        setFormeForEncounter(enc, enc.getPokemon());
                     }
                 }
             }
         } else {
             // Entirely random
-            for (EncounterSet area : scrambledEncounters) {
-                for (Encounter enc : area.encounters) {
-                    enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                    setFormeForEncounter(enc, enc.pokemon);
+            for (EncounterArea area : scrambledEncounterAreas) {
+                for (Encounter enc : area) {
+                    enc.setPokemon(pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned));
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
             }
         }
         if (levelModifier != 0) {
-            for (EncounterSet area : currentEncounters) {
-                for (Encounter enc : area.encounters) {
-                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
-                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+            for (EncounterArea area : currentEncounterAreas) {
+                for (Encounter enc : area) {
+                    enc.setLevel(Math.min(100, (int) Math.round(enc.getLevel() * (1 + levelModifier / 100.0))));
+                    enc.setMaxLevel(Math.min(100, (int) Math.round(enc.getMaxLevel() * (1 + levelModifier / 100.0))));
                 }
             }
         }
 
-        setEncounters(useTimeOfDay, currentEncounters);
+        setEncounters(useTimeOfDay, currentEncounterAreas);
     }
 
     private PokemonSet<Pokemon> getBannedForWildEncounters(boolean banIrregularAltFormes,
@@ -797,18 +797,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void area1to1Encounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
 
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        List<EncounterArea> currentEncounterAreas = this.getEncounters(useTimeOfDay);
         if (isORAS) {
-            List<EncounterSet> collapsedEncounters = collapseAreasORAS(currentEncounters);
-            area1to1EncountersImpl(collapsedEncounters, settings);
-            setEncounters(useTimeOfDay, currentEncounters);
+            List<EncounterArea> collapsedEncounterAreas = collapseAreasORAS(currentEncounterAreas);
+            area1to1EncountersImpl(collapsedEncounterAreas, settings);
+            setEncounters(useTimeOfDay, currentEncounterAreas);
         } else {
-            area1to1EncountersImpl(currentEncounters, settings);
-            setEncounters(useTimeOfDay, currentEncounters);
+            area1to1EncountersImpl(currentEncounterAreas, settings);
+            setEncounters(useTimeOfDay, currentEncounterAreas);
         }
     }
 
-    private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, Settings settings) {
+    private void area1to1EncountersImpl(List<EncounterArea> currentEncounterAreas, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
@@ -822,66 +822,66 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         PokemonSet<Pokemon> banned = this.getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
 
-        // New: randomize the order encounter sets are randomized in.
+        // New: randomize the order encounter areas are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
-        List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
-        Collections.shuffle(scrambledEncounters, this.random);
+        List<EncounterArea> scrambledEncounterAreas = new ArrayList<>(currentEncounterAreas);
+        Collections.shuffle(scrambledEncounterAreas, this.random);
 
         // Assume EITHER catch em all OR type themed for now
         if (catchEmAll) {
 
             PokemonSet<Pokemon> allPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using catch em all
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 PokemonSet<Pokemon> pickablePokemon = new PokemonSet<>(allPokes);
-                pickablePokemon.removeAll(area.bannedPokemon);
+                pickablePokemon.removeAll(area.getBannedPokemon());
                 for (Pokemon areaPk : inArea) {
                     if (pickablePokemon.size() == 0) {
                         // No more pickable pokes left, take a random one
                         PokemonSet<Pokemon> tempPickable = setupAllowedPokemon(noLegendaries, allowAltFormes,
                                 false, banned);
-                        tempPickable.removeAll(area.bannedPokemon);
+                        tempPickable.removeAll(area.getBannedPokemon());
                         if (tempPickable.size() == 0) {
                             throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                         }
-                        Pokemon pickedMN = tempPickable.getRandom(random);
-                        areaMap.put(areaPk, pickedMN);
+                        Pokemon picked = tempPickable.getRandom(random);
+                        areaMap.put(areaPk, picked);
                     } else {
-                        Pokemon pickedMN = allPokes.getRandom(random);
-                        areaMap.put(areaPk, pickedMN);
-                        pickablePokemon.remove(pickedMN);
+                        Pokemon picked = allPokes.getRandom(random);
+                        areaMap.put(areaPk, picked);
+                        pickablePokemon.remove(picked);
                         if (allPokes != pickablePokemon) {
-                            allPokes.remove(pickedMN);
+                            allPokes.remove(picked);
                         }
                         if (allPokes.size() == 0) {
                             // Start again
                             allPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
                             if (pickablePokemon != allPokes) {
                                 pickablePokemon.addAll(allPokes);
-                                pickablePokemon.removeAll(area.bannedPokemon);
+                                pickablePokemon.removeAll(area.getBannedPokemon());
                             }
                         }
                     }
                 }
-                for (Encounter enc : area.encounters) {
+                for (Encounter enc : area) {
                     // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
                     // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
                     // randomly appears as a static or unless it becomes a random evolution.
-                    if (banned.contains(enc.pokemon)) {
+                    if (banned.contains(enc.getPokemon())) {
                         continue;
                     }
                     // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
+                    enc.setPokemon(areaMap.get(enc.getPokemon()));
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
             }
         } else if (typeThemed) {
             Map<Type, PokemonSet<Pokemon>> cachedPokeLists = new TreeMap<>();
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 // Poke-set
                 PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 PokemonSet<Pokemon> possiblePokemon = null;
@@ -894,7 +894,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         cachedPokeLists.put(areaTheme, pType);
                     }
                     possiblePokemon = new PokemonSet<>(cachedPokeLists.get(areaTheme));
-                    possiblePokemon.removeAll(area.bannedPokemon);
+                    possiblePokemon.removeAll(area.getBannedPokemon());
                     if (possiblePokemon.size() < inArea.size()) {
                         // Can't use this type for this area
                         possiblePokemon = null;
@@ -915,24 +915,24 @@ public abstract class AbstractRomHandler implements RomHandler {
                     areaMap.put(areaPk, picked);
                     possiblePokemon.remove(picked);
                 }
-                for (Encounter enc : area.encounters) {
+                for (Encounter enc : area) {
                     // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
+                    enc.setPokemon(areaMap.get(enc.getPokemon()));
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
             }
         } else if (usePowerLevels) {
 
             PokemonSet<Pokemon> allowedPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, true, banned);
 
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 // Poke-set
                 PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using randoms
                 Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
                 PokemonSet<Pokemon> usedPks = new PokemonSet<>();
                 PokemonSet<Pokemon> localAllowed = new PokemonSet<>(allowedPokes);
-                localAllowed.removeAll(area.bannedPokemon);
+                localAllowed.removeAll(area.getBannedPokemon());
                 for (Pokemon areaPk : inArea) {
                     Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
                     while (picked.isActuallyCosmetic()) {
@@ -941,15 +941,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                     areaMap.put(areaPk, picked);
                     usedPks.add(picked);
                 }
-                for (Encounter enc : area.encounters) {
+                for (Encounter enc : area) {
                     // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
+                    enc.setPokemon(areaMap.get(enc.getPokemon()));
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
             }
         } else {
             // Entirely random
-            for (EncounterSet area : scrambledEncounters) {
+            for (EncounterArea area : scrambledEncounterAreas) {
                 // Poke-set
                 PokemonSet<Pokemon> inArea = PokemonSet.inArea(area);
                 // Build area map using randoms
@@ -961,19 +961,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                     areaMap.put(areaPk, picked);
                 }
-                for (Encounter enc : area.encounters) {
+                for (Encounter enc : area) {
                     // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
+                    enc.setPokemon(areaMap.get(enc.getPokemon()));
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
             }
         }
 
         if (levelModifier != 0) {
-            for (EncounterSet area : currentEncounters) {
-                for (Encounter enc : area.encounters) {
-                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
-                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+            for (EncounterArea area : currentEncounterAreas) {
+                for (Encounter enc : area) {
+                    enc.setLevel(Math.min(100, (int) Math.round(enc.getLevel() * (1 + levelModifier / 100.0))));
+                    enc.setMaxLevel(Math.min(100, (int) Math.round(enc.getMaxLevel() * (1 + levelModifier / 100.0))));
                 }
             }
         }
@@ -1059,39 +1059,39 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+        List<EncounterArea> currentEncounterAreas = this.getEncounters(useTimeOfDay);
 
-        for (EncounterSet area : currentEncounters) {
-            for (Encounter enc : area.encounters) {
+        for (EncounterArea area : currentEncounterAreas) {
+            for (Encounter enc : area) {
                 // Apply the map
-                enc.pokemon = translateMap.get(enc.pokemon);
-                if (area.bannedPokemon.contains(enc.pokemon)) {
+                enc.setPokemon(translateMap.get(enc.getPokemon()));
+                if (area.getBannedPokemon().contains(enc.getPokemon())) {
                     // Ignore the map and put a random non-banned poke
                     PokemonSet<Pokemon> tempPickable = setupAllowedPokemon(noLegendaries, allowAltFormes,
                             false, banned);
-                    tempPickable.removeAll(area.bannedPokemon);
+                    tempPickable.removeAll(area.getBannedPokemon());
                     if (tempPickable.size() == 0) {
                         throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                     }
                     if (usePowerLevels) {
-                        enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, false, null, 100);
+                        enc.setPokemon(pickWildPowerLvlReplacement(tempPickable, enc.getPokemon(), false, null, 100));
                     } else {
-                        enc.pokemon = tempPickable.getRandom(random);
+                        enc.setPokemon(tempPickable.getRandom(random));
                     }
                 }
-                setFormeForEncounter(enc, enc.pokemon);
+                setFormeForEncounter(enc, enc.getPokemon());
             }
         }
         if (levelModifier != 0) {
-            for (EncounterSet area : currentEncounters) {
-                for (Encounter enc : area.encounters) {
-                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
-                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+            for (EncounterArea area : currentEncounterAreas) {
+                for (Encounter enc : area) {
+                    enc.setLevel(Math.min(100, (int) Math.round(enc.getLevel() * (1 + levelModifier / 100.0))));
+                    enc.setMaxLevel(Math.min(100, (int) Math.round(enc.getMaxLevel() * (1 + levelModifier / 100.0))));
                 }
             }
         }
 
-        setEncounters(useTimeOfDay, currentEncounters);
+        setEncounters(useTimeOfDay, currentEncounterAreas);
 
     }
 
@@ -1099,20 +1099,21 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void onlyChangeWildLevels(Settings settings) {
         int levelModifier = settings.getWildLevelModifier();
 
-        List<EncounterSet> currentEncounters = this.getEncounters(true);
+        List<EncounterArea> currentEncounterAreas = this.getEncounters(true);
 
         if (levelModifier != 0) {
-            for (EncounterSet area : currentEncounters) {
-                for (Encounter enc : area.encounters) {
-                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
-                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+            for (EncounterArea area : currentEncounterAreas) {
+                for (Encounter enc : area) {
+                    enc.setLevel(Math.min(100, (int) Math.round(enc.getLevel() * (1 + levelModifier / 100.0))));
+                    enc.setMaxLevel(Math.min(100, (int) Math.round(enc.getMaxLevel() * (1 + levelModifier / 100.0))));
                 }
             }
-            setEncounters(true, currentEncounters);
+            setEncounters(true, currentEncounterAreas);
         }
     }
 
-    private void enhanceRandomEncountersORAS(List<EncounterSet> collapsedEncounters, Settings settings) {
+    // TODO: should not be in AbstractRomHandler
+    private void enhanceRandomEncountersORAS(List<EncounterArea> collapsedEncounterAreas, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
@@ -1123,22 +1124,22 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
 
-        Map<Integer, List<EncounterSet>> zonesToEncounters = mapZonesToEncounters(collapsedEncounters);
+        Map<Integer, List<EncounterArea>> zonesToEncounterAreas = mapZonesToEncounterAreas(collapsedEncounterAreas);
         Map<Type, PokemonSet<Pokemon>> cachedPokeSets = new TreeMap<>();
-        for (List<EncounterSet> encountersInZone : zonesToEncounters.values()) {
+        for (List<EncounterArea> areasInZone : zonesToEncounterAreas.values()) {
             int currentAreaIndex = -1;
-            List<EncounterSet> nonRockSmashAreas = new ArrayList<>();
+            List<EncounterArea> nonRockSmashAreas = new ArrayList<>();
             Map<Integer, List<Integer>> areasAndEncountersToRandomize = new TreeMap<>();
             // Since Rock Smash Pokemon do not show up on DexNav, they can be fully randomized
-            for (EncounterSet area : encountersInZone) {
-                if (area.displayName.contains("Rock Smash")) {
+            for (EncounterArea area : areasInZone) {
+                if (area.getDisplayName().contains("Rock Smash")) {
                     // Assume EITHER catch em all OR type themed OR match strength for now
                     if (catchEmAll) {
-                        for (Encounter enc : area.encounters) {
+                        for (Encounter enc : area) {
                             boolean shouldRandomize = doesAnotherEncounterWithSamePokemonExistInArea(enc, area);
                             if (shouldRandomize) {
-                                enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                                setFormeForEncounter(enc, enc.pokemon);
+                                enc.setPokemon(pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned));
+                                setFormeForEncounter(enc, enc.getPokemon());
                             }
                         }
                     } else if (typeThemed) {
@@ -1152,7 +1153,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 cachedPokeSets.put(areaTheme, pType);
                             }
                             possiblePokemon = new PokemonSet<>(cachedPokeSets.get(areaTheme));
-                            possiblePokemon.removeAll(area.bannedPokemon);
+                            possiblePokemon.removeAll(area.getBannedPokemon());
                             if (possiblePokemon.size() == 0) {
                                 // Can't use this type for this area
                                 possiblePokemon = null;
@@ -1162,37 +1163,37 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (possiblePokemon == null) {
                             throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
                         }
-                        for (Encounter enc : area.encounters) {
+                        for (Encounter enc : area) {
                             // Pick a random themed pokemon
-                            enc.pokemon = possiblePokemon.getRandom(random);
-                            while (enc.pokemon.isActuallyCosmetic()) {
+                            enc.setPokemon(possiblePokemon.getRandom(random));
+                            while (enc.getPokemon().isActuallyCosmetic()) {
                             	// Could this not loop forever? // voliol 2022-08-13
-                                enc.pokemon = possiblePokemon.getRandom(random);
+                                enc.setPokemon(possiblePokemon.getRandom(random));
                             }
-                            setFormeForEncounter(enc, enc.pokemon);
+                            setFormeForEncounter(enc, enc.getPokemon());
                         }
                     } else if (usePowerLevels) {
                         PokemonSet<Pokemon> allowedPokes = setupAllowedPokemon(noLegendaries, allowAltFormes, true, banned);
-                        allowedPokes.removeAll(area.bannedPokemon);
-                        for (Encounter enc : area.encounters) {
-                            enc.pokemon = pickWildPowerLvlReplacement(allowedPokes, enc.pokemon, false, null, 100);
-                            while (enc.pokemon.isActuallyCosmetic()) {
-                                enc.pokemon = pickWildPowerLvlReplacement(allowedPokes, enc.pokemon, false, null, 100);
+                        allowedPokes.removeAll(area.getBannedPokemon());
+                        for (Encounter enc : area) {
+                            enc.setPokemon(pickWildPowerLvlReplacement(allowedPokes, enc.getPokemon(), false, null, 100));
+                            while (enc.getPokemon().isActuallyCosmetic()) {
+                                enc.setPokemon(pickWildPowerLvlReplacement(allowedPokes, enc.getPokemon(), false, null, 100));
                             }
-                            setFormeForEncounter(enc, enc.pokemon);
+                            setFormeForEncounter(enc, enc.getPokemon());
                         }
                     } else {
                         // Entirely random
-                        for (Encounter enc : area.encounters) {
-                            enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                            setFormeForEncounter(enc, enc.pokemon);
+                        for (Encounter enc : area) {
+                            enc.setPokemon(pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned));
+                            setFormeForEncounter(enc, enc.getPokemon());
                         }
                     }
                 } else {
                     currentAreaIndex++;
                     nonRockSmashAreas.add(area);
                     List<Integer> encounterIndices = new ArrayList<>();
-                    for (int i = 0; i < area.encounters.size(); i++) {
+                    for (int i = 0; i < area.size(); i++) {
                         encounterIndices.add(i);
                     }
                     areasAndEncountersToRandomize.put(currentAreaIndex, encounterIndices);
@@ -1200,21 +1201,21 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             // Now, randomize non-Rock Smash Pokemon until we hit the threshold for DexNav
-            int crashThreshold = computeDexNavCrashThreshold(encountersInZone);
+            int crashThreshold = computeDexNavCrashThreshold(areasInZone);
             while (crashThreshold < 18 && areasAndEncountersToRandomize.size() > 0) {
                 Set<Integer> areaIndices = areasAndEncountersToRandomize.keySet();
                 int areaIndex = areaIndices.stream().skip(this.random.nextInt(areaIndices.size())).findFirst().orElse(-1);
                 List<Integer> encounterIndices = areasAndEncountersToRandomize.get(areaIndex);
                 int indexInListOfEncounterIndices = this.random.nextInt(encounterIndices.size());
                 int randomEncounterIndex = encounterIndices.get(indexInListOfEncounterIndices);
-                EncounterSet area = nonRockSmashAreas.get(areaIndex);
-                Encounter enc = area.encounters.get(randomEncounterIndex);
+                EncounterArea area = nonRockSmashAreas.get(areaIndex);
+                Encounter enc = area.get(randomEncounterIndex);
                 // Assume EITHER catch em all OR type themed OR match strength for now
                 if (catchEmAll) {
                     boolean shouldRandomize = doesAnotherEncounterWithSamePokemonExistInArea(enc, area);
                     if (shouldRandomize) {
-                        enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                        setFormeForEncounter(enc, enc.pokemon);
+                        enc.setPokemon(pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned));
+                        setFormeForEncounter(enc, enc.getPokemon());
                     }
                 } else if (typeThemed) {
                     Type areaTheme = getTypeForArea(area);
@@ -1224,31 +1225,31 @@ public abstract class AbstractRomHandler implements RomHandler {
                         cachedPokeSets.put(areaTheme, pType);
                     }
                     PokemonSet<Pokemon> possiblePokemon = new PokemonSet<>(cachedPokeSets.get(areaTheme));
-                    possiblePokemon.removeAll(area.bannedPokemon);
+                    possiblePokemon.removeAll(area.getBannedPokemon());
                     if (possiblePokemon.size() == 0) {
                         // Can't use this type for this area
                         throw new RandomizationException("Could not find a possible Pokemon of the correct type.");
                     }
                     // Pick a random themed pokemon
-                    enc.pokemon = possiblePokemon.getRandom(random);
-                    while (enc.pokemon.isActuallyCosmetic()) {
-                        enc.pokemon = possiblePokemon.getRandom(random);
+                    enc.setPokemon(possiblePokemon.getRandom(random));
+                    while (enc.getPokemon().isActuallyCosmetic()) {
+                        enc.setPokemon(possiblePokemon.getRandom(random));
                     }
-                    setFormeForEncounter(enc, enc.pokemon);
+                    setFormeForEncounter(enc, enc.getPokemon());
                 } else if (usePowerLevels) {
                     PokemonSet<Pokemon> localAllowed = setupAllowedPokemon(noLegendaries, allowAltFormes, true, banned);
-                    localAllowed.removeAll(area.bannedPokemon);
-                    enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
-                    while (enc.pokemon.isActuallyCosmetic()) {
-                        enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100);
+                    localAllowed.removeAll(area.getBannedPokemon());
+                    enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, 100));
+                    while (enc.getPokemon().isActuallyCosmetic()) {
+                        enc.setPokemon(pickWildPowerLvlReplacement(localAllowed, enc.getPokemon(), false, null, 100));
                     }
-                    setFormeForEncounter(enc, enc.pokemon);
+                    setFormeForEncounter(enc, enc.getPokemon());
                 } else {
                     // Entirely random
-                    enc.pokemon = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                    setFormeForEncounter(enc, enc.pokemon);
+                    enc.setPokemon(pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned));
+                    setFormeForEncounter(enc, enc.getPokemon());
                 }
-                crashThreshold = computeDexNavCrashThreshold(encountersInZone);
+                crashThreshold = computeDexNavCrashThreshold(areasInZone);
                 encounterIndices.remove(indexInListOfEncounterIndices);
                 if (encounterIndices.size() == 0) {
                     areasAndEncountersToRandomize.remove(areaIndex);
@@ -1257,10 +1258,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private Type getTypeForArea(EncounterSet area) {
-        Pokemon firstPokemon = area.encounters.get(0).pokemon;
-        if (area.encounters.get(0).formeNumber != 0) {
-            firstPokemon = getAltFormeOfPokemon(firstPokemon, area.encounters.get(0).formeNumber);
+    private Type getTypeForArea(EncounterArea area) {
+        Pokemon firstPokemon = area.get(0).getPokemon();
+        if (area.get(0).getFormeNumber() != 0) {
+            firstPokemon = getAltFormeOfPokemon(firstPokemon, area.get(0).getFormeNumber());
         }
         Type primaryType = firstPokemon.getPrimaryType();
         int primaryCount = 1;
@@ -1270,10 +1271,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             secondaryType = firstPokemon.getSecondaryType();
             secondaryCount = 1;
         }
-        for (int i = 1; i < area.encounters.size(); i++) {
-            Pokemon pokemon = area.encounters.get(i).pokemon;
-            if (area.encounters.get(i).formeNumber != 0) {
-                pokemon = getAltFormeOfPokemon(pokemon, area.encounters.get(i).formeNumber);
+        for (int i = 1; i < area.size(); i++) {
+            Pokemon pokemon = area.get(i).getPokemon();
+            if (area.get(i).getFormeNumber() != 0) {
+                pokemon = getAltFormeOfPokemon(pokemon, area.get(i).getFormeNumber());
             }
             if (pokemon.getPrimaryType() == primaryType || pokemon.getSecondaryType() == primaryType) {
                 primaryCount++;
@@ -1285,45 +1286,46 @@ public abstract class AbstractRomHandler implements RomHandler {
         return primaryCount > secondaryCount ? primaryType : secondaryType;
     }
 
-    private boolean doesAnotherEncounterWithSamePokemonExistInArea(Encounter enc, EncounterSet area) {
-        for (Encounter encounterToCheck : area.encounters) {
-            if (enc != encounterToCheck && enc.pokemon == encounterToCheck.pokemon) {
+    private boolean doesAnotherEncounterWithSamePokemonExistInArea(Encounter enc, EncounterArea area) {
+        for (Encounter encounterToCheck : area) {
+            if (enc != encounterToCheck && enc.getPokemon() == encounterToCheck.getPokemon()) {
                 return true;
             }
         }
         return false;
     }
 
-    private List<EncounterSet> collapseAreasORAS(List<EncounterSet> currentEncounters) {
-        List<EncounterSet> output = new ArrayList<>();
-        Map<Integer, List<EncounterSet>> zonesToEncounters = mapZonesToEncounters(currentEncounters);
-        for (Integer zone : zonesToEncounters.keySet()) {
-            List<EncounterSet> encountersInZone = zonesToEncounters.get(zone);
-            int crashThreshold = computeDexNavCrashThreshold(encountersInZone);
+    // TODO: should not be in AbstractRomHandler
+    private List<EncounterArea> collapseAreasORAS(List<EncounterArea> currentEncounterAreas) {
+        List<EncounterArea> output = new ArrayList<>();
+        Map<Integer, List<EncounterArea>> zonesToEncounterAreas = mapZonesToEncounterAreas(currentEncounterAreas);
+        for (Integer zone : zonesToEncounterAreas.keySet()) {
+            List<EncounterArea> areasInZone = zonesToEncounterAreas.get(zone);
+            int crashThreshold = computeDexNavCrashThreshold(areasInZone);
             if (crashThreshold <= 18) {
-                output.addAll(encountersInZone);
+                output.addAll(areasInZone);
                 continue;
             }
 
             // Naive Area 1-to-1 randomization will crash the game, so let's start collapsing areas to prevent this.
             // Start with combining all the fishing rod encounters, since it's a little less noticeable when they've
             // been collapsed.
-            List<EncounterSet> collapsedEncounters = new ArrayList<>(encountersInZone);
-            EncounterSet rodGroup = new EncounterSet();
-            rodGroup.offset = zone;
-            rodGroup.displayName = "Rod Group";
-            for (EncounterSet area : encountersInZone) {
-                if (area.displayName.contains("Old Rod") || area.displayName.contains("Good Rod") || area.displayName.contains("Super Rod")) {
-                    collapsedEncounters.remove(area);
-                    rodGroup.encounters.addAll(area.encounters);
+            List<EncounterArea> collapsedEncounterAreas = new ArrayList<>(areasInZone);
+            EncounterArea rodGroup = new EncounterArea();
+            rodGroup.setOffset(zone);
+            rodGroup.setDisplayName("Rod Group");
+            for (EncounterArea area : areasInZone) {
+                if (area.getDisplayName().contains("Old Rod") || area.getDisplayName().contains("Good Rod") || area.getDisplayName().contains("Super Rod")) {
+                    collapsedEncounterAreas.remove(area);
+                    rodGroup.addAll(area);
                 }
             }
-            if (rodGroup.encounters.size() > 0) {
-                collapsedEncounters.add(rodGroup);
+            if (rodGroup.size() > 0) {
+                collapsedEncounterAreas.add(rodGroup);
             }
-            crashThreshold = computeDexNavCrashThreshold(collapsedEncounters);
+            crashThreshold = computeDexNavCrashThreshold(collapsedEncounterAreas);
             if (crashThreshold <= 18) {
-                output.addAll(collapsedEncounters);
+                output.addAll(collapsedEncounterAreas);
                 continue;
             }
 
@@ -1331,36 +1333,36 @@ public abstract class AbstractRomHandler implements RomHandler {
             // DexNav from crashing the game. Combine all the grass encounters now to drop us below the threshold;
             // we've combined everything that DexNav normally combines, so at this point, we're *guaranteed* not
             // to crash the game.
-            EncounterSet grassGroup = new EncounterSet();
-            grassGroup.offset = zone;
-            grassGroup.displayName = "Grass Group";
-            for (EncounterSet area : encountersInZone) {
-                if (area.displayName.contains("Grass/Cave") || area.displayName.contains("Long Grass") || area.displayName.contains("Horde")) {
-                    collapsedEncounters.remove(area);
-                    grassGroup.encounters.addAll(area.encounters);
+            EncounterArea grassGroup = new EncounterArea();
+            grassGroup.setOffset(zone);
+            grassGroup.setDisplayName("Grass Group");
+            for (EncounterArea area : areasInZone) {
+                if (area.getDisplayName().contains("Grass/Cave") || area.getDisplayName().contains("Long Grass") || area.getDisplayName().contains("Horde")) {
+                    collapsedEncounterAreas.remove(area);
+                    grassGroup.addAll(area);
                 }
             }
-            if (grassGroup.encounters.size() > 0) {
-                collapsedEncounters.add(grassGroup);
+            if (grassGroup.size() > 0) {
+                collapsedEncounterAreas.add(grassGroup);
             }
 
-            output.addAll(collapsedEncounters);
+            output.addAll(collapsedEncounterAreas);
         }
         return output;
     }
 
-    private int computeDexNavCrashThreshold(List<EncounterSet> encountersInZone) {
+    private int computeDexNavCrashThreshold(List<EncounterArea> encounterAreasInZone) {
         int crashThreshold = 0;
-        for (EncounterSet area : encountersInZone) {
-            if (area.displayName.contains("Rock Smash")) {
+        for (EncounterArea area : encounterAreasInZone) {
+            if (area.getDisplayName().contains("Rock Smash")) {
                 continue; // Rock Smash Pokemon don't display on DexNav
             }
             Set<Pokemon> uniquePokemonInArea = new HashSet<>();
-            for (Encounter enc : area.encounters) {
-                if (enc.pokemon.getBaseForme() != null) { // DexNav treats different forms as one Pokemon
-                    uniquePokemonInArea.add(enc.pokemon.getBaseForme());
+            for (Encounter enc : area) {
+                if (enc.getPokemon().getBaseForme() != null) { // DexNav treats different forms as one Pokemon
+                    uniquePokemonInArea.add(enc.getPokemon().getBaseForme());
                 } else {
-                    uniquePokemonInArea.add(enc.pokemon);
+                    uniquePokemonInArea.add(enc.getPokemon());
                 }
             }
             crashThreshold += uniquePokemonInArea.size();
@@ -6462,34 +6464,35 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void setFormeForEncounter(Encounter enc, Pokemon pk) {
         boolean checkCosmetics = true;
-        enc.formeNumber = 0;
-        if (enc.pokemon.getFormeNumber() > 0) {
-            enc.formeNumber = enc.pokemon.getFormeNumber();
-            enc.pokemon = enc.pokemon.getBaseForme();
+        enc.setFormeNumber(0);
+        if (enc.getPokemon().getFormeNumber() > 0) {
+            enc.setFormeNumber(enc.getPokemon().getFormeNumber());
+            enc.setPokemon(enc.getPokemon().getBaseForme());
             checkCosmetics = false;
         }
-        if (checkCosmetics && enc.pokemon.getCosmeticForms() > 0) {
-            enc.formeNumber = enc.pokemon.getCosmeticFormNumber(this.random.nextInt(enc.pokemon.getCosmeticForms()));
+        if (checkCosmetics && enc.getPokemon().getCosmeticForms() > 0) {
+            enc.setFormeNumber(enc.getPokemon().getCosmeticFormNumber(this.random.nextInt(enc.getPokemon().getCosmeticForms())));
         } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
-            enc.formeNumber += pk.getCosmeticFormNumber(this.random.nextInt(pk.getCosmeticForms()));
+            enc.setFormeNumber(enc.getFormeNumber() + pk.getCosmeticFormNumber(this.random.nextInt(pk.getCosmeticForms())));
         }
     }
 
-    private Map<Integer, List<EncounterSet>> mapZonesToEncounters(List<EncounterSet> encountersForAreas) {
-        Map<Integer, List<EncounterSet>> zonesToEncounters = new TreeMap<>();
-        for (EncounterSet encountersInArea : encountersForAreas) {
-            if (zonesToEncounters.containsKey(encountersInArea.offset)) {
-                zonesToEncounters.get(encountersInArea.offset).add(encountersInArea);
+    // TODO: should not be in AbstractRomHandler
+    private Map<Integer, List<EncounterArea>> mapZonesToEncounterAreas(List<EncounterArea> areas) {
+        Map<Integer, List<EncounterArea>> zonesToEncounterAreas = new TreeMap<>();
+        for (EncounterArea area : areas) {
+            if (zonesToEncounterAreas.containsKey(area.getOffset())) {
+                zonesToEncounterAreas.get(area.getOffset()).add(area);
             } else {
-                List<EncounterSet> encountersForZone = new ArrayList<>();
-                encountersForZone.add(encountersInArea);
-                zonesToEncounters.put(encountersInArea.offset, encountersForZone);
+                List<EncounterArea> encountersForZone = new ArrayList<>();
+                encountersForZone.add(area);
+                zonesToEncounterAreas.put(area.getOffset(), encountersForZone);
             }
         }
-        return zonesToEncounters;
+        return zonesToEncounterAreas;
     }
 
-    public Pokemon pickEntirelyRandomPokemon(boolean includeFormes, boolean noLegendaries, EncounterSet area,
+    public Pokemon pickEntirelyRandomPokemon(boolean includeFormes, boolean noLegendaries, EncounterArea area,
                                              PokemonSet<Pokemon> banned) {
         Pokemon result;
         Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
@@ -6500,7 +6503,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
             result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
         }
-        while (banned.contains(result) || area.bannedPokemon.contains(result)) {
+        while (banned.contains(result) || area.getBannedPokemon().contains(result)) {
             randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
             randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
             result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
