@@ -1430,6 +1430,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
+    private void writeWildArea(int offset, int numOfEntries, EncounterArea area) {
+        // Grab the *real* pointer to data
+        int dataOffset = readPointer(offset + 4);
+        // Write the entries
+        for (int i = 0; i < numOfEntries; i++) {
+            Encounter enc = area.get(i);
+            // min, max, species, species
+            int levels = enc.getLevel() | (enc.getMaxLevel() << 8);
+            writeWord(dataOffset + i * 4, levels);
+            writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.getPokemon().getNumber()]);
+        }
+    }
+
     @Override
     public boolean hasWildAltFormes() {
         return false;
@@ -1734,19 +1747,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			}
 		}
 	}
-
-    private void writeWildArea(int offset, int numOfEntries, EncounterArea area) {
-        // Grab the *real* pointer to data
-        int dataOffset = readPointer(offset + 4);
-        // Write the entries
-        for (int i = 0; i < numOfEntries; i++) {
-            Encounter enc = area.get(i);
-            // min, max, species, species
-            int levels = enc.getLevel() | (enc.getMaxLevel() << 8);
-            writeWord(dataOffset + i * 4, levels);
-            writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.getPokemon().getNumber()]);
-        }
-    }
 
     @Override
     public List<Pokemon> getPokemon() {
