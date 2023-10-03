@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
@@ -328,7 +329,7 @@ public class Settings {
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
-        byte[] settings = toString().getBytes("UTF-8");
+        byte[] settings = toString().getBytes(StandardCharsets.UTF_8);
         ByteBuffer buf = ByteBuffer.allocate(settings.length + 8);
         buf.putInt(VERSION);
         buf.putInt(settings.length);
@@ -356,7 +357,7 @@ public class Settings {
         }
         int length = ByteBuffer.wrap(lengthBytes).getInt();
         byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
-        String settings = new String(buffer, "UTF-8");
+        String settings = new String(buffer, StandardCharsets.UTF_8);
         boolean oldUpdate = false;
 
         if (version < VERSION) {
@@ -599,7 +600,7 @@ public class Settings {
                 pokemonPalettesShinyFromNormal));
 
         try {
-            byte[] romName = this.romName.getBytes("US-ASCII");
+            byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
             out.write(romName.length);
             out.write(romName);
         } catch (IOException e) {
@@ -896,7 +897,7 @@ public class Settings {
         settings.setPokemonPalettesShinyFromNormal(restoreState(data[51], 4));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
-        String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
+        String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
         settings.setRomName(romName);
 
         return settings;

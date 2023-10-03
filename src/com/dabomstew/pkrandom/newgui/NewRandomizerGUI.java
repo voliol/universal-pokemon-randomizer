@@ -46,6 +46,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -1016,11 +1017,7 @@ public class NewRandomizerGUI {
         // Setup verbose log
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream log;
-        try {
-            log = new PrintStream(baos, false, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log = new PrintStream(baos);
-        }
+        log = new PrintStream(baos, false, StandardCharsets.UTF_8);
 
         final PrintStream verboseLog = log;
 
@@ -2005,7 +2002,7 @@ public class NewRandomizerGUI {
         if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 9 + nameLength) {
             return null; // not valid length
         }
-        return new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
+        return new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, StandardCharsets.US_ASCII);
     }
 
     private void initialState() {
@@ -3468,7 +3465,7 @@ public class NewRandomizerGUI {
         }
 
         try {
-            Scanner sc = new Scanner(fh, "UTF-8");
+            Scanner sc = new Scanner(fh, StandardCharsets.UTF_8);
             boolean isReadingUpdates = false;
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
@@ -3540,7 +3537,7 @@ public class NewRandomizerGUI {
         }
 
         try {
-            PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
+            PrintStream ps = new PrintStream(new FileOutputStream(fh), true, StandardCharsets.UTF_8);
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
             ps.println("unloadgameonsuccess=" + unloadGameOnSuccess);

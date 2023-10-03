@@ -27,33 +27,30 @@ import java.util.function.Function;
 import randompoint.RandomPointSelector;
 
 /**
- * RandomColorSelector can select 
+ * RandomColorSelector can select a random {@link Color} according to some weight function.
  */
 public class RandomColorSelector {
 
-	public static enum Mode {
-		RGB, HSV;
+	public enum Mode {
+		RGB, HSV
 	}
 
-	public static double[] defaultLowerBounds(Mode mode) {
+	public static double[] defaultLowerBounds() {
 		return new double[] { 0, 0, 0 };
 	}
 
 	public static double[] defaultUpperBounds(Mode mode) {
-		switch (mode) {
-		case HSV:
-			return new double[] { 360, 1, 1 };
-		case RGB:
-			return new double[] { 255, 255, 255 };
-		}
-		return null;
+		return switch (mode) {
+			case HSV -> new double[]{360, 1, 1};
+			case RGB -> new double[]{255, 255, 255};
+		};
 	}
 
-	private RandomPointSelector randomPointSelector;
-	private Mode mode;
+	private final RandomPointSelector randomPointSelector;
+	private final Mode mode;
 
 	public RandomColorSelector(Random random, Mode mode, Function<double[], Double> weightFunction) {
-		this(random, mode, weightFunction, defaultLowerBounds(mode), defaultUpperBounds(mode));
+		this(random, mode, weightFunction, defaultLowerBounds(), defaultUpperBounds(mode));
 	}
 
 	public RandomColorSelector(Random random, Mode mode, Function<double[], Double> weightFunction,
@@ -64,13 +61,10 @@ public class RandomColorSelector {
 
 	public Color getRandomColor() {
 		double[] point = randomPointSelector.getRandomPoint();
-		switch (mode) {
-		case RGB:
-			return new Color((int) point[0], (int) point[1], (int) point[2]);
-		case HSV:
-			return Color.colorFromHSV(point[0], point[1], point[2]);
-		}
-		return null;
+		return switch (mode) {
+			case RGB -> new Color((int) point[0], (int) point[1], (int) point[2]);
+			case HSV -> Color.colorFromHSV(point[0], point[1], point[2]);
+		};
 	}
 	
 	public Random getRandom() {

@@ -277,7 +277,7 @@ public class RomFunctions {
                     if (linesWritten > 0) {
                         fullDesc.append(newline);
                     }
-                    fullDesc.append(thisLine.toString());
+                    fullDesc.append(thisLine);
                     linesWritten++;
                     thisLine = new StringBuilder();
                 }
@@ -293,7 +293,7 @@ public class RomFunctions {
             if (linesWritten > 0) {
                 fullDesc.append(newline);
             }
-            fullDesc.append(thisLine.toString());
+            fullDesc.append(thisLine);
         }
 
         return fullDesc.toString();
@@ -342,7 +342,7 @@ public class RomFunctions {
                 }
                 if ((currLineCC + reqLength > maxLineLength)
                         || (currLineCC >= sentenceNewLineSize && (currLineLastChar == '.' || currLineLastChar == '?'
-                        || currLineLastChar == '!' || currLineLastChar == '?' || currLineLastChar == ','))) {
+                        || currLineLastChar == '!' || currLineLastChar == ','))) {
                     // new line
                     // Save current line, if applicable
                     if (currLineWC > 0) {
@@ -351,7 +351,7 @@ public class RomFunctions {
                         } else if (linesWritten == 1) {
                             fullPara.append(newline);
                         }
-                        fullPara.append(thisLine.toString());
+                        fullPara.append(thisLine);
                         linesWritten++;
                         thisLine = new StringBuilder();
                     }
@@ -387,12 +387,12 @@ public class RomFunctions {
                 } else if (linesWritten == 1) {
                     fullPara.append(newline);
                 }
-                fullPara.append(thisLine.toString());
+                fullPara.append(thisLine);
             }
             if (para > 0) {
                 finalResult.append(newpara);
             }
-            finalResult.append(fullPara.toString());
+            finalResult.append(fullPara);
         }
         if (endsWithPara) {
             finalResult.append(newpara);

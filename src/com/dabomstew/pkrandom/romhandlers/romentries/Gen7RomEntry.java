@@ -2,9 +2,6 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 
-import java.io.IOException;
-import java.util.Collection;
-
 /**
  * A {@link RomEntry} for Gen 7.
  */

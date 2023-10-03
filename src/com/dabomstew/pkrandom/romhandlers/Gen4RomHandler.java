@@ -1218,7 +1218,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int starterHeldItemOffset = romEntry.getIntValue("StarterPokemonHeldItemOffset");
         byte[] file = scriptNarc.files.get(starterScriptNumber);
         int item = FileFunctions.read2ByteInt(file, starterHeldItemOffset);
-        return Arrays.asList(item);
+        return List.of(item);
     }
 
     @Override
@@ -5413,7 +5413,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		int ability = this.getAbilityForTrainerPokemon(tp);
 		if (ability == Abilities.levitate) {
-			items.removeAll(Arrays.asList(Items.shucaBerry));
+			items.removeAll(List.of(Items.shucaBerry));
 		}
 
 		if (!consumableOnly) {

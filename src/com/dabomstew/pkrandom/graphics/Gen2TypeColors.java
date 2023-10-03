@@ -78,6 +78,6 @@ public class Gen2TypeColors {
 	public static TypeColor getRandomDarkColor(Random random) {
 		darkColorSelector.setRandom(random);
 		return new TypeColor(darkColorSelector.getRandomColor(), null);
-	};
+	}
 
 }

@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  */
 public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
-	// has to be static (instead of a constructor) because EncounterSet is not
+	// has to be static (instead of a constructor) because EncounterArea is not
 	// generic, leading to bad type conversions
 	public static PokemonSet<Pokemon> inArea(EncounterArea area) {
 		PokemonSet<Pokemon> pokemonSet = new PokemonSet<>();
