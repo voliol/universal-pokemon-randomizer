@@ -27,14 +27,11 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
-import com.dabomstew.pkrandom.graphics.palettes.Color;
+import com.dabomstew.pkrandom.graphics.palettes.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
-import com.dabomstew.pkrandom.graphics.palettes.Gen2PaletteHandler;
-import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen2Cmp;
 import compressors.Gen2Decmp;
@@ -152,6 +149,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     Gen2Constants.krisFrontImageOffset);
             addRelativeOffsetToRomEntry("KrisTrainerCardImage", "ChrisTrainerCardImage",
                     Gen2Constants.krisTrainerCardImageOffset);
+            addRelativeOffsetToRomEntry("KrisSpritePalette", "ChrisSpritePalette",
+                    Gen2Constants.krisSpritePaletteOffset);
         }
 
         int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");
@@ -2851,6 +2850,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int fishOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "FishSprite");
             writeImage(fishOffset, playerGraphics.getFishSprite());
         }
+
+        if (playerGraphics.hasSpritePaletteID()) {
+            rewritePlayerSpritePalette(playerGraphics.getSpritePaletteID(), toReplace);
+        }
     }
 
     private void rewritePlayerFrontImage(GBCImage frontImage, Settings.PlayerCharacterMod toReplace) {
@@ -2928,6 +2931,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int newDudeOffset = newOffset + lengthOfCompressedDataAt(newOffset);
         int dudeBackPointerOffset = romEntry.getIntValue("DudeBackImagePointer");
         writePointer(dudeBackPointerOffset, newDudeOffset);
+    }
+
+    private void rewritePlayerSpritePalette(Gen2SpritePaletteID spritePaletteID,
+                                            Settings.PlayerCharacterMod toReplace) {
+        int offset1 = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "SpritePalette");
+        byte value1 = (byte) ((spritePaletteID.ordinal() | 0b1000) << 4);
+        System.out.println(spritePaletteID);
+        System.out.println("SpritePalette Offset: 0x" + Integer.toHexString(offset1));
+        System.out.println("SpritePalette Value: 0x" + Integer.toHexString(Byte.toUnsignedInt(value1)));
+        writeByte(offset1, value1);
     }
 
     @Override

@@ -49,7 +49,7 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.SGBPaletteID;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
@@ -2710,7 +2710,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		for (Pokemon pk : getPokemonSet()) {
             // they are in Pokédex order
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
-			gen1pk.setPaletteID((PaletteID.values()[rom[palIndex + gen1pk.getNumber()]]));
+			gen1pk.setPaletteID((SGBPaletteID.values()[rom[palIndex + gen1pk.getNumber()]]));
 		}
 	}
 

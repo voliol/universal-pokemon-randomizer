@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.graphics.palettes.PaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.SGBPaletteID;
 
 public class Gen1Pokemon extends Pokemon {
 
@@ -41,7 +41,7 @@ public class Gen1Pokemon extends Pokemon {
     private int frontImagePointer;
     private int backImagePointer;
 	
-	private PaletteID paletteID;
+	private SGBPaletteID paletteID;
 
 	@Override
 	public void copyShuffledStatsUpEvolution(Pokemon evolvesFrom) {
@@ -167,11 +167,11 @@ public class Gen1Pokemon extends Pokemon {
         this.backImagePointer = backImagePointer;
     }
 
-    public PaletteID getPaletteID() {
+    public SGBPaletteID getPaletteID() {
         return paletteID;
     }
 
-    public void setPaletteID(PaletteID paletteID) {
+    public void setPaletteID(SGBPaletteID paletteID) {
         this.paletteID = paletteID;
     }
 }

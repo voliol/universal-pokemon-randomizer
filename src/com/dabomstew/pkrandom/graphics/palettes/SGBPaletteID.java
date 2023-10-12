@@ -27,14 +27,14 @@ import java.util.Random;
  * The Super Gameboy palette IDs, names taken from
  * pret/pokered/constants/paletteconstants.asm
  */
-public enum PaletteID {
+public enum SGBPaletteID {
     ROUTE, PALLET, VIRIDIAN, PEWTER, CERULEAN, LAVENDER, VERMILION, CELADON, FUCHSIA, CINNABAR, INDIGO, SAFFRON,
     TOWNMAP, LOGO1, LOGO2, ZEROF, MEWMON, BLUEMON, REDMON, CYANMON, PURPLEMON, BROWNMON, GREENMON, PINKMON, YELLOWMON,
     GREYMON, SLOTS1, SLOTS2, SLOTS3, SLOTS4, BLACK, GREENBAR, YELLOWBAR, REDBAR, BADGE, CAVE, GAMEFREAK;
 
-    public static PaletteID getRandomPokemonPaletteID(Random random) {
-        PaletteID[] pokemonPaletteIDs = new PaletteID[]{MEWMON, BLUEMON, REDMON, CYANMON, PURPLEMON, BROWNMON, GREENMON,
-                PINKMON, YELLOWMON, GREYMON};
+    public static SGBPaletteID getRandomPokemonPaletteID(Random random) {
+        SGBPaletteID[] pokemonPaletteIDs = new SGBPaletteID[]{MEWMON, BLUEMON, REDMON, CYANMON, PURPLEMON, BROWNMON,
+                GREENMON, PINKMON, YELLOWMON, GREYMON};
         return pokemonPaletteIDs[random.nextInt(pokemonPaletteIDs.length)];
     }
 }

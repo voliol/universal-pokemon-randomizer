@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
+import com.dabomstew.pkrandom.graphics.palettes.Gen2SpritePaletteID;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -15,10 +16,12 @@ public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
     private static final int TRAINER_CARD_IMAGE_HEIGHT = 7;
 
     private final GBCImage trainerCard;
+    private final Gen2SpritePaletteID spritePaletteID;
 
     public Gen2PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
         this.trainerCard = initTrainerCard();
+        this.spritePaletteID = initSpritePaletteID();
     }
 
     @Override
@@ -52,10 +55,27 @@ public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
         return getFrontImage().getSubimageFromTileRect(1, 0, TRAINER_CARD_IMAGE_WIDTH, TRAINER_CARD_IMAGE_HEIGHT);
     }
 
+    private Gen2SpritePaletteID initSpritePaletteID() {
+        String paletteName = getEntry().getStringValue("SpritePalette");
+        try {
+            return Gen2SpritePaletteID.valueOf(paletteName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     // no hasTrainerCardImage(); redundant with hasFrontImage()
 
     public GBCImage getTrainerCardImage() {
         return trainerCard;
+    }
+
+    public boolean hasSpritePaletteID() {
+        return spritePaletteID != null;
+    }
+
+    public Gen2SpritePaletteID getSpritePaletteID() {
+        return spritePaletteID;
     }
 
     @Override

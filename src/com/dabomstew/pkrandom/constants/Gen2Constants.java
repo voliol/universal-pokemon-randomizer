@@ -150,6 +150,8 @@ public class Gen2Constants {
     // directly after chris's respective images
     public static final int krisTrainerCardImageOffset = 16 * 5 * 7, krisFrontImageOffset = 16 * 7 * 7;
 
+    public static final int krisSpritePaletteOffset = 16;
+
     public static final int chrisBackBankOffsetGS0 = 16, dudeBackPointerOffset = 10, // battle script GS
                             chrisBackBankOffsetGS1 = 6, // hall of fame script GS
                             chrisBackBankOffsetCrystal0 = -2, // battle script Crystal

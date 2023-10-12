@@ -39,6 +39,11 @@ public class GraphicsPackEntry extends IniEntry {
         return reader.readEntriesFromFile(folderPath + "/info.ini");
     }
 
+    public static List<GraphicsPackEntry> readAllFromString(String string) {
+        GraphicsPackEntryReader reader = new GraphicsPackEntryReader("NO FOLDER PATH");
+        return reader.readFromString(string);
+    }
+
     private enum Category {
         POKEMON, GAMES, OTHER
     }
