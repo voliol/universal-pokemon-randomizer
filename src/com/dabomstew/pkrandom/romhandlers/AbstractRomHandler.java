@@ -995,85 +995,44 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier,
                                    boolean allowAltFormes, boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
-        // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
-
         checkPokemonRestrictions();
-
         PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
-        // Banned pokemon should be mapped to themselves
-        for (Pokemon bannedPK : banned) {
-            translateMap.put(bannedPK, bannedPK);
-        }
+        PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
+        PokemonSet<Pokemon> remaining = new PokemonSet<>(allowed);
 
-        PokemonSet<Pokemon> remainingLeft = getPokemonSetInclFormes()
-                .filter(pk -> !pk.isActuallyCosmetic() && !banned.contains(pk));
-        PokemonSet<Pokemon> remainingRight = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
+        List<EncounterArea> encounterAreas = getEncounters(useTimeOfDay);
 
-        while (!remainingLeft.isEmpty()) {
-            if (usePowerLevels) {
-                Pokemon pickedLeft = remainingLeft.getRandom(random);
-                remainingLeft.remove(pickedLeft);
-                Pokemon pickedRight;
-                if (remainingRight.size() == 1) {
-                    // pick this (it may or may not be the same poke) (getRandom() returns the only element)
-                    pickedRight = remainingRight.getRandom(random);
-                } else {
-                    // pick on power level with the current one blocked
-                    pickedRight = pickWildPowerLvlReplacement(remainingRight, pickedLeft, true, null, 100);
-                }
-                remainingRight.remove(pickedRight);
-                translateMap.put(pickedLeft, pickedRight);
+        // Shuffle so the order of the areas/encounters doesn't matter when picking.
+        // Though pokes with many encounters will still get a priority when it comes
+        // to picking similar-strength, since they are more likely to be handled early.
+        List<Encounter> shuffled = new ArrayList<>();
+        encounterAreas.forEach(shuffled::addAll);
+        Collections.shuffle(shuffled, random);
+        for (Encounter enc : shuffled) {
+            Pokemon current = enc.getPokemon();
+
+            Pokemon replacement;
+            if (translateMap.containsKey(current)) {
+                replacement = translateMap.get(current);
             } else {
-                Pokemon pickedLeft = remainingLeft.getRandom(random);
-                remainingLeft.remove(pickedLeft);
-                Pokemon pickedRight = remainingRight.getRandom(random);
-                while (pickedLeft.getNumber() == pickedRight.getNumber() && remainingRight.size() != 1) {
-                    // Reroll for a different pokemon if at all possible
-                    pickedRight = remainingRight.getRandom(random);
+                replacement = usePowerLevels ?
+                        pickWildPowerLvlReplacement(remaining, current, true, null, 100) :
+                        remaining.getRandom(random);
+                // In case it runs out of unique Pokémon, picks something already mapped to.
+                // Shouldn't happen unless restrictions are really harsh, normally [#allowed Pokémon] > [#Pokémon which appear in the wild]
+                if (replacement == null) {
+                    replacement = allowed.getRandom(random);
+                } else {
+                    remaining.remove(replacement);
                 }
-                remainingRight.remove(pickedRight);
-                translateMap.put(pickedLeft, pickedRight);
+                translateMap.put(current, replacement);
             }
-            if (remainingRight.size() == 0) {
-                // restart
-                remainingRight = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
-            }
+            enc.setPokemon(replacement);
         }
 
-        // Map remaining to themselves just in case
-        for (Pokemon poke : getPokemonSetInclFormes()) {
-            if (!translateMap.containsKey(poke)) {
-                translateMap.put(poke, poke);
-            }
-        }
-
-        List<EncounterArea> currentEncounterAreas = this.getEncounters(useTimeOfDay);
-
-        for (EncounterArea area : currentEncounterAreas) {
-            for (Encounter enc : area) {
-                // Apply the map
-                enc.setPokemon(translateMap.get(enc.getPokemon()));
-                if (area.getBannedPokemon().contains(enc.getPokemon())) {
-                    // Ignore the map and put a random non-banned poke
-                    PokemonSet<Pokemon> tempPickable = setupAllowedPokemon(noLegendaries, allowAltFormes,
-                            false, banned);
-                    tempPickable.removeAll(area.getBannedPokemon());
-                    if (tempPickable.size() == 0) {
-                        throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
-                    }
-                    if (usePowerLevels) {
-                        enc.setPokemon(pickWildPowerLvlReplacement(tempPickable, enc.getPokemon(), false, null, 100));
-                    } else {
-                        enc.setPokemon(tempPickable.getRandom(random));
-                    }
-                }
-                setFormeForEncounter(enc, enc.getPokemon());
-            }
-        }
-
-        applyLevelModifier(levelModifier, currentEncounterAreas);
-        setEncounters(useTimeOfDay, currentEncounterAreas);
+        applyLevelModifier(levelModifier, encounterAreas);
+        setEncounters(useTimeOfDay, encounterAreas);
     }
 
     private static void applyLevelModifier(int levelModifier, List<EncounterArea> currentEncounterAreas) {

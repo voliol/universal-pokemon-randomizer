@@ -93,7 +93,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
-                false, 0, false, true,
+                false, 0, true, true,
                 false);
         List<EncounterArea> after = romHandler.getEncounters(true);
         Map<Pokemon, Pokemon> map = new HashMap<>();
@@ -133,7 +133,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
-                false, 0, false, true,
+                false, 0, true, true,
                 false);
         List<EncounterArea> after = romHandler.getEncounters(true);
         Map<Pokemon, Pokemon> map = new HashMap<>();
@@ -184,7 +184,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     public void game1to1EncountersCanBanLegendaries(String romName) {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
-                true, 0, false, true,
+                true, 0, true, true,
                 false);
         for (EncounterArea area : romHandler.getEncounters(true)) {
             System.out.println(area.getDisplayName() + ":");
@@ -239,4 +239,49 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         }
         assertTrue(hasAltFormes);
     }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void game1to1EncountersCanGiveSimilarPowerLevelReplacements(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
+        ((AbstractRomHandler) romHandler).game1to1Encounters(true, true,
+                false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+        Map<Pokemon, Pokemon> map = new HashMap<>();
+
+        Iterator<EncounterArea> beforeIterator = before.iterator();
+        Iterator<EncounterArea> afterIterator = after.iterator();
+        while (beforeIterator.hasNext()) {
+            EncounterArea beforeArea = beforeIterator.next();
+            EncounterArea afterArea = afterIterator.next();
+            if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                        + afterArea.getDisplayName());
+            }
+
+            Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+            Iterator<Encounter> afterEncIterator = afterArea.iterator();
+            while (beforeEncIterator.hasNext()) {
+                Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                Pokemon afterPk = afterEncIterator.next().getPokemon();
+
+                if (!map.containsKey(beforePk)) {
+                    map.put(beforePk, afterPk);
+                }
+            }
+        }
+
+        List<Double> diffs = new ArrayList<>();
+        for (Map.Entry<Pokemon, Pokemon> entry : map.entrySet()) {
+            diffs.add(Math.abs((double) entry.getKey().bstForPowerLevels() /
+                    (double) entry.getValue().bstForPowerLevels() - 1));
+        }
+        double averageDiff = diffs.stream().mapToDouble(d -> d).average().getAsDouble();
+        System.out.println(diffs);
+        System.out.println(averageDiff);
+        assertTrue(averageDiff < 0.06);
+    }
+
 }

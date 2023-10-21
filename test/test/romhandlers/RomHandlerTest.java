@@ -93,11 +93,4 @@ public class RomHandlerTest {
         return romName.split("\\(")[0].trim();
     }
 
-    @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void loadingDoesNotGiveNullRomHandler(String romName) {
-        loadROM(romName);
-        assertNotNull(romHandler);
-    }
-
 }

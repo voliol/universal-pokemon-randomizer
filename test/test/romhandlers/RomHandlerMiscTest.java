@@ -20,6 +20,13 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerMiscTest extends RomHandlerTest {
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void loadingDoesNotGiveNullRomHandler(String romName) {
+        loadROM(romName);
+        assertNotNull(romHandler);
+    }
+
     /**
      * Checks all ROMs found as {@link RomEntry}s in the .ini files, to see if they are is testable.
      * I.e. does the actual ROM exist within the test/roms folder.
