@@ -759,15 +759,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        if (levelModifier != 0) {
-            for (EncounterArea area : currentEncounterAreas) {
-                for (Encounter enc : area) {
-                    enc.setLevel(Math.min(100, (int) Math.round(enc.getLevel() * (1 + levelModifier / 100.0))));
-                    enc.setMaxLevel(Math.min(100, (int) Math.round(enc.getMaxLevel() * (1 + levelModifier / 100.0))));
-                }
-            }
-        }
 
+        applyLevelModifier(levelModifier, currentEncounterAreas);
         setEncounters(useTimeOfDay, currentEncounterAreas);
     }
 
@@ -967,14 +960,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        if (levelModifier != 0) {
-            for (EncounterArea area : currentEncounterAreas) {
-                for (Encounter enc : area) {
-                    enc.setLevel(Math.min(100, (int) Math.round(enc.getLevel() * (1 + levelModifier / 100.0))));
-                    enc.setMaxLevel(Math.min(100, (int) Math.round(enc.getMaxLevel() * (1 + levelModifier / 100.0))));
-                }
-            }
-        }
+        applyLevelModifier(levelModifier, currentEncounterAreas);
     }
 
     /**
@@ -1003,7 +989,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
+        game1to1Encounters(useTimeOfDay, usePowerLevels, noLegendaries, levelModifier, allowAltFormes, banIrregularAltFormes,
+                abilitiesAreRandomized);
+    }
 
+    public void game1to1Encounters(boolean useTimeOfDay, boolean usePowerLevels, boolean noLegendaries, int levelModifier,
+                                   boolean allowAltFormes, boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
         // Build the full 1-to-1 map
         Map<Pokemon, Pokemon> translateMap = new TreeMap<>();
 
@@ -1080,6 +1071,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 setFormeForEncounter(enc, enc.getPokemon());
             }
         }
+
+        applyLevelModifier(levelModifier, currentEncounterAreas);
+        setEncounters(useTimeOfDay, currentEncounterAreas);
+    }
+
+    private static void applyLevelModifier(int levelModifier, List<EncounterArea> currentEncounterAreas) {
         if (levelModifier != 0) {
             for (EncounterArea area : currentEncounterAreas) {
                 for (Encounter enc : area) {
@@ -1088,9 +1085,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-
-        setEncounters(useTimeOfDay, currentEncounterAreas);
-
     }
 
     @Override
