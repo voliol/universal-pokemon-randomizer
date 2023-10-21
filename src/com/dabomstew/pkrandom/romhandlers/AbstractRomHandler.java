@@ -1029,7 +1029,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 translateMap.put(current, replacement);
             }
             enc.setPokemon(replacement);
-            enc.setFormeNumber(replacement.getFormeNumber()); // TODO: what is the purpose of encounters having separate forme number?
+            setFormeForEncounter(enc, replacement);
+            // TODO: formes need more fiddling with, to fulfil the test cases
+            //  (and maybe make it clever, so e.g. Wormadam and Deoxys aren't more common replacements)
         }
 
         applyLevelModifier(levelModifier, encounterAreas);
