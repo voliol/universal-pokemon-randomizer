@@ -68,7 +68,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         pw.close();
 
         String orig = Files.readString(Path.of("test/resources/encounters/" + romHandler.getROMName() + ".txt"));
-        assertEquals(orig, sw.toString());
+        assertEquals(orig.replaceAll("\r\n", "\n"),
+                sw.toString().replaceAll("\r\n", "\n"));
     }
 
     private String encounterAreasToMultilineString(List<EncounterArea> encounterAreas) {

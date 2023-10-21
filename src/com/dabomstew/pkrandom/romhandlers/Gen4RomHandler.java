@@ -1276,10 +1276,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			int grassRate = readLong(b, 0);
 			if (grassRate != 0) {
 				// up to 4
-				List<Encounter> grassEncounters = readEncountersDPPt(b, 4, 12);
-				EncounterArea grassArea = new EncounterArea();
+				EncounterArea grassArea = new EncounterArea(readEncountersDPPt(b, 4, 12));
 				grassArea.setDisplayName(mapName + " Grass/Cave");
-				grassArea.addAll(grassEncounters);
 				grassArea.setRate(grassRate);
 				grassArea.setOffset(c);
 				encounterAreas.add(grassArea);
@@ -1291,9 +1289,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
 							Pokemon pk = pokes[pknum];
 							Encounter enc = new Encounter();
-							enc.setLevel(grassEncounters.get(Gen4Constants.dpptAlternateSlots[i + 2]).getLevel());
+							enc.setLevel(grassArea.get(Gen4Constants.dpptAlternateSlots[i + 2]).getLevel());
 							enc.setPokemon(pk);
-							grassEncounters.add(enc);
+							grassArea.add(enc);
 						}
 					}
 				}
@@ -1314,7 +1312,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
 						Pokemon pk = pokes[pknum];
 						Encounter enc = new Encounter();
-						enc.setLevel(grassEncounters.get(Gen4Constants.dpptAlternateSlots[i]).getLevel());
+						enc.setLevel(grassArea.get(Gen4Constants.dpptAlternateSlots[i]).getLevel());
 						enc.setPokemon(pk);
 						condsArea.add(enc);
 					}
@@ -1334,10 +1332,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				if (rate == 0 || i == 1) {
 					continue;
 				}
-				EncounterArea seaArea = new EncounterArea();
+				EncounterArea seaArea = new EncounterArea(seaEncounters);
 				seaArea.setDisplayName(mapName + " " + Gen4Constants.dpptWaterSlotSetNames[i]);
 				seaArea.setOffset(c);
-				seaArea.addAll(seaEncounters);
 				seaArea.setRate(rate);
 				encounterAreas.add(seaArea);
 			}
