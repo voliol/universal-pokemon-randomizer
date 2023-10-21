@@ -14,8 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerEncounterTest extends RomHandlerTest {
 
@@ -29,13 +29,24 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void encountersDoNotChangeWithGetAndSet(String romName) {
+    public void encountersDoNotChangeWithGetAndSetNotUsingTimeOfDay(String romName) {
         loadROM(romName);
         List<EncounterArea> encounterAreas = romHandler.getEncounters(false);
         System.out.println(encounterAreas);
         List<EncounterArea> before = new ArrayList<>(encounterAreas);
         romHandler.setEncounters(false, encounterAreas);
         assertEquals(before, romHandler.getEncounters(false));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void encountersDoNotChangeWithGetAndSetUsingTimeOfDay(String romName) {
+        loadROM(romName);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(true);
+        System.out.println(encounterAreas);
+        List<EncounterArea> before = new ArrayList<>(encounterAreas);
+        romHandler.setEncounters(true, encounterAreas);
+        assertEquals(before, romHandler.getEncounters(true));
     }
 
     @ParameterizedTest
@@ -182,5 +193,50 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 assertFalse(enc.getPokemon().isLegendary());
             }
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void game1to1EncountersCanBanAltFormes(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
+                false, 0, false, true,
+                false);
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println(area.getDisplayName() + ":");
+            System.out.println(area);
+            for (Encounter enc : area) {
+                assertNull(enc.getPokemon().getBaseForme());
+            }
+        }
+    }
+
+    // since alt formes are not guaranteed, this test can be considered "reverse";
+    // any success is a success for the test as a whole
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void game1to1EncountersCanHaveAltFormesIfNotBanned(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
+                false, 0, true, true,
+                false);
+        boolean hasAltFormes = false;
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println(area.getDisplayName() + ":");
+            System.out.println(area);
+            for (Encounter enc : area) {
+                if (enc.getPokemon().getBaseForme() != null) {
+                    System.out.println(enc.getPokemon());
+                    hasAltFormes = true;
+                    break;
+                }
+            }
+            if (hasAltFormes) {
+                break;
+            }
+        }
+        assertTrue(hasAltFormes);
     }
 }
