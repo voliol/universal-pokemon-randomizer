@@ -78,7 +78,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void game1to1EncountersAre1to1(String romName) {
+    public void game1to1EncountersGivesConsequentReplacementsForEachMon(String romName) {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
@@ -116,6 +116,46 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         System.out.println(pokemapToString(map));
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void game1to1EncountersGivesUniqueReplacementsForEachMon(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
+        ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
+                false, 0, false, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+        Map<Pokemon, Pokemon> map = new HashMap<>();
+
+        Iterator<EncounterArea> beforeIterator = before.iterator();
+        Iterator<EncounterArea> afterIterator = after.iterator();
+        while (beforeIterator.hasNext()) {
+            EncounterArea beforeArea = beforeIterator.next();
+            EncounterArea afterArea = afterIterator.next();
+            if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                        + afterArea.getDisplayName());
+            }
+
+            System.out.println(beforeArea.getDisplayName() + ":");
+            System.out.println(beforeArea);
+            System.out.println(afterArea);
+            Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+            Iterator<Encounter> afterEncIterator = afterArea.iterator();
+            while (beforeEncIterator.hasNext()) {
+                Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                Pokemon afterPk = afterEncIterator.next().getPokemon();
+
+                if (!map.containsKey(afterPk)) {
+                    map.put(afterPk, beforePk);
+                }
+                assertEquals(map.get(afterPk), beforePk);
+            }
+        }
+
+        System.out.println(pokemapToString(map));
+    }
+
     private String pokemapToString(Map<Pokemon, Pokemon> map) {
         StringBuilder sb = new StringBuilder("{\n");
         for (Map.Entry<Pokemon, Pokemon> entry : map.entrySet()) {
@@ -126,5 +166,21 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void game1to1EncountersCanBanLegendaries(String romName) {
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
+                true, 0, false, true,
+                false);
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println(area.getDisplayName() + ":");
+            System.out.println(area);
+            for (Encounter enc : area) {
+                assertFalse(enc.getPokemon().isLegendary());
+            }
+        }
     }
 }
