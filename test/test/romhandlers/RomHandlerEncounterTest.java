@@ -1,8 +1,6 @@
 package test.romhandlers;
 
-import com.dabomstew.pkrandom.pokemon.Encounter;
-import com.dabomstew.pkrandom.pokemon.EncounterArea;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerEncounterTest extends RomHandlerTest {
+
+    private static final double MAX_AVERAGE_POWER_LEVEL_DIFF = 0.06;
 
     @ParameterizedTest
     @MethodSource("getRomNames")
@@ -86,6 +86,182 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         }
         sb.append("\n]");
         return sb.toString();
+    }
+
+    private void checkForNoLegendaries() {
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println(area.getDisplayName() + ":");
+            System.out.println(area);
+            for (Encounter enc : area) {
+                assertFalse(enc.getPokemon().isLegendary());
+            }
+        }
+    }
+
+    /**
+     * not to be confused with {@link #checkForAlternateFormes()}
+     */
+    private void checkForNoAlternateFormes() {
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println(area.getDisplayName() + ":");
+            System.out.println(area);
+            for (Encounter enc : area) {
+                assertNull(enc.getPokemon().getBaseForme());
+            }
+        }
+    }
+
+    /**
+     * not to be confused with {@link #checkForNoAlternateFormes()}
+     */
+    private void checkForAlternateFormes() {
+        boolean hasAltFormes = false;
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println(area.getDisplayName() + ":");
+            System.out.println(area);
+            for (Encounter enc : area) {
+                if (enc.getPokemon().getBaseForme() != null) {
+                    System.out.println(enc.getPokemon());
+                    hasAltFormes = true;
+                    break;
+                }
+            }
+            if (hasAltFormes) {
+                break;
+            }
+        }
+        assertTrue(hasAltFormes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCanBanLegendaries(String romName) {
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, false,
+                false, true, false, 0, true,
+                true, false);
+        checkForNoLegendaries();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCanBanAltFormes(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, false,
+                false, true, false, 0, false,
+                true, false);
+        checkForNoAlternateFormes();
+    }
+
+    // since alt formes are not guaranteed, this test can be considered "reverse";
+    // any success is a success for the test as a whole
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCanHaveAltFormesIfNotBanned(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, false,
+                false, true, false, 0, true,
+                true, false);
+        checkForAlternateFormes();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCatchEmAllWorks(String romName) {
+        loadROM(romName);
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomEncounters(true, true, false,
+                false, false, false, 0, true,
+                true, false);
+        PokemonSet<Pokemon> catchable = new PokemonSet<>();
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            catchable.addAll(PokemonSet.inArea(area));
+        }
+        allPokes.removeAll(catchable);
+        System.out.println(allPokes);
+        assertTrue(allPokes.isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersTypeThemedWorks(String romName) {
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, true,
+                false, false, false, 0, true,
+                true, false);
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            System.out.println("\n" + area.getDisplayName() + ":\n" + area);
+            Pokemon firstPk = area.get(0).getPokemon();
+            PokemonSet<Pokemon> allInArea = PokemonSet.inArea(area);
+
+            Type primaryType = firstPk.getPrimaryType();
+            PokemonSet<Pokemon> ofFirstType = PokemonSet.inArea(area).filterByType(primaryType);
+            PokemonSet<Pokemon> notOfFirstType = new PokemonSet<>(allInArea).filter(pk -> !ofFirstType.contains(pk));
+            System.out.println(notOfFirstType);
+
+            if (!notOfFirstType.isEmpty()) {
+                System.out.println("Not " + primaryType);
+                Type secondaryType = firstPk.getSecondaryType();
+                if (secondaryType == null) {
+                    fail();
+                }
+                PokemonSet<Pokemon> ofSecondaryType = PokemonSet.inArea(area).filterByType(secondaryType);
+                PokemonSet<Pokemon> notOfSecondaryType = new PokemonSet<>(allInArea)
+                        .filter(pk -> !ofSecondaryType.contains(pk));
+                System.out.println(notOfSecondaryType);
+                if (!notOfSecondaryType.isEmpty()) {
+                    System.out.println("Not " + secondaryType);
+                    fail();
+                } else {
+                    System.out.println(secondaryType);
+                }
+            } else {
+                System.out.println(primaryType);
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersUsePowerLevelsWorks(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, false,
+                true, false, false, 0, true,
+                true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        List<Double> diffs = new ArrayList<>();
+        Iterator<EncounterArea> beforeIterator = before.iterator();
+        Iterator<EncounterArea> afterIterator = after.iterator();
+        while (beforeIterator.hasNext()) {
+            EncounterArea beforeArea = beforeIterator.next();
+            EncounterArea afterArea = afterIterator.next();
+            if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                        + afterArea.getDisplayName());
+            }
+
+            Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+            Iterator<Encounter> afterEncIterator = afterArea.iterator();
+            while (beforeEncIterator.hasNext()) {
+                Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                Pokemon afterPk = afterEncIterator.next().getPokemon();
+                diffs.add(calcPowerLevelDiff(beforePk, afterPk));
+            }
+        }
+
+        double averageDiff = diffs.stream().mapToDouble(d -> d).average().getAsDouble();
+        System.out.println(diffs);
+        System.out.println(averageDiff);
+        assertTrue(averageDiff <= MAX_AVERAGE_POWER_LEVEL_DIFF);
+    }
+
+    private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
+        return Math.abs((double) a.bstForPowerLevels() /
+                b.bstForPowerLevels() - 1);
     }
 
     @ParameterizedTest
@@ -187,13 +363,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
                 true, 0, true, true,
                 false);
-        for (EncounterArea area : romHandler.getEncounters(true)) {
-            System.out.println(area.getDisplayName() + ":");
-            System.out.println(area);
-            for (Encounter enc : area) {
-                assertFalse(enc.getPokemon().isLegendary());
-            }
-        }
+        checkForNoLegendaries();
     }
 
     @ParameterizedTest
@@ -204,13 +374,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
                 false, 0, false, true,
                 false);
-        for (EncounterArea area : romHandler.getEncounters(true)) {
-            System.out.println(area.getDisplayName() + ":");
-            System.out.println(area);
-            for (Encounter enc : area) {
-                assertNull(enc.getPokemon().getBaseForme());
-            }
-        }
+        checkForNoAlternateFormes();
     }
 
     // since alt formes are not guaranteed, this test can be considered "reverse";
@@ -223,27 +387,12 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, false,
                 false, 0, true, true,
                 false);
-        boolean hasAltFormes = false;
-        for (EncounterArea area : romHandler.getEncounters(true)) {
-            System.out.println(area.getDisplayName() + ":");
-            System.out.println(area);
-            for (Encounter enc : area) {
-                if (enc.getPokemon().getBaseForme() != null) {
-                    System.out.println(enc.getPokemon());
-                    hasAltFormes = true;
-                    break;
-                }
-            }
-            if (hasAltFormes) {
-                break;
-            }
-        }
-        assertTrue(hasAltFormes);
+        checkForAlternateFormes();
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void game1to1EncountersCanGiveSimilarPowerLevelReplacements(String romName) {
+    public void game1to1EncountersUsePowerLevelsWorks(String romName) {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).game1to1Encounters(true, true,
@@ -276,13 +425,12 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
         List<Double> diffs = new ArrayList<>();
         for (Map.Entry<Pokemon, Pokemon> entry : map.entrySet()) {
-            diffs.add(Math.abs((double) entry.getKey().bstForPowerLevels() /
-                    (double) entry.getValue().bstForPowerLevels() - 1));
+            diffs.add(calcPowerLevelDiff(entry.getKey(), entry.getValue()));
         }
         double averageDiff = diffs.stream().mapToDouble(d -> d).average().getAsDouble();
         System.out.println(diffs);
         System.out.println(averageDiff);
-        assertTrue(averageDiff < 0.06);
+        assertTrue(averageDiff <= MAX_AVERAGE_POWER_LEVEL_DIFF);
     }
 
 }

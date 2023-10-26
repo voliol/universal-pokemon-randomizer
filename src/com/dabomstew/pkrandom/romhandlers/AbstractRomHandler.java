@@ -607,19 +607,34 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allowAltFormes = settings.isAllowWildAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
+        randomEncounters(useTimeOfDay, catchEmAll, typeThemed, usePowerLevels, noLegendaries, balanceShakingGrass,
+                levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
+    }
+
+    public void randomEncounters(boolean useTimeOfDay, boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
+                                 boolean noLegendaries, boolean balanceShakingGrass, int levelModifier,
+                                 boolean allowAltFormes, boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
+        // - prep settings
+        // - get encounters
+        // TODO: - do something special in ORAS
+        // - randomize inner
+        // - apply level modifier
+        // - set encounters
 
         List<EncounterArea> currentEncounterAreas = this.getEncounters(useTimeOfDay);
+        randomEncountersInner(currentEncounterAreas, catchEmAll, typeThemed, usePowerLevels, noLegendaries,
+                balanceShakingGrass, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
+        applyLevelModifier(levelModifier, currentEncounterAreas);
+        setEncounters(useTimeOfDay, currentEncounterAreas);
+    }
 
-        if (isORAS) {
-            List<EncounterArea> collapsedEncounterAreas = collapseAreasORAS(currentEncounterAreas);
-            area1to1EncountersImpl(collapsedEncounterAreas, settings);
-            enhanceRandomEncountersORAS(collapsedEncounterAreas, settings);
-            setEncounters(useTimeOfDay, currentEncounterAreas);
-            return;
-        }
+    private void randomEncountersInner(List<EncounterArea> currentEncounterAreas,
+                                       boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
+                                       boolean noLegendaries, boolean balanceShakingGrass, boolean allowAltFormes,
+                                       boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
 
-        // New: randomize the order encounter areas are randomized in.
-        // Leads to less predictable results for various modifiers.
+        // Shuffling the order encounter areas are randomized in
+        // leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
         List<EncounterArea> scrambledEncounterAreas = new ArrayList<>(currentEncounterAreas);
         Collections.shuffle(scrambledEncounterAreas, this.random);
@@ -759,9 +774,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-
-        applyLevelModifier(levelModifier, currentEncounterAreas);
-        setEncounters(useTimeOfDay, currentEncounterAreas);
     }
 
     private PokemonSet<Pokemon> getBannedForWildEncounters(boolean banIrregularAltFormes,
