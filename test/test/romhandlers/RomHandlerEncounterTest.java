@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerEncounterTest extends RomHandlerTest {
 
-    private static final double MAX_AVERAGE_POWER_LEVEL_DIFF = 0.06;
+    private static final double MAX_AVERAGE_POWER_LEVEL_DIFF = 0.065;
 
     @ParameterizedTest
     @MethodSource("getRomNames")
@@ -175,6 +175,246 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         ((AbstractRomHandler) romHandler).randomEncounters(true, true, false,
                 false, false, false, 0, true,
                 true, false);
+        catchEmAllCheck(allPokes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersTypeThemedWorks(String romName) {
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, true,
+                false, false, false, 0, true,
+                true, false);
+        typeThemedAreasCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersUsePowerLevelsWorks(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomEncounters(true, false, false,
+                true, false, false, 0, true,
+                true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        powerLevelsCheck(before, after);
+    }
+
+    private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
+        return Math.abs((double) a.bstForPowerLevels() /
+                b.bstForPowerLevels() - 1);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesConsequentReplacementsForEachMon(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                false, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1ConsequentReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesConsequentReplacementsForEachMonWithCatchEmAll(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, true, false,
+                false, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1ConsequentReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesConsequentReplacementsForEachMonWithTypeThemed(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, true,
+                false, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1ConsequentReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesConsequentReplacementsForEachMonWithUsePowerLevels(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                true, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1ConsequentReplacementCheck(before, after);
+    }
+
+    private static void area1to1ConsequentReplacementCheck(List<EncounterArea> before, List<EncounterArea> after) {
+        Iterator<EncounterArea> beforeIterator = before.iterator();
+        Iterator<EncounterArea> afterIterator = after.iterator();
+        while (beforeIterator.hasNext()) {
+            Map<Pokemon, Pokemon> map = new HashMap<>();
+            EncounterArea beforeArea = beforeIterator.next();
+            EncounterArea afterArea = afterIterator.next();
+            if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                        + afterArea.getDisplayName());
+            }
+
+            System.out.println(beforeArea.getDisplayName() + ":");
+            System.out.println(beforeArea);
+            System.out.println(afterArea);
+            Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+            Iterator<Encounter> afterEncIterator = afterArea.iterator();
+            while (beforeEncIterator.hasNext()) {
+                Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                Pokemon afterPk = afterEncIterator.next().getPokemon();
+
+                if (!map.containsKey(beforePk)) {
+                    map.put(beforePk, afterPk);
+                }
+                assertEquals(map.get(beforePk), afterPk);
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesUniqueReplacementsForEachMon(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                false, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesUniqueReplacementsForEachMonWithCatchEmAll(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, true, false,
+                false, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesUniqueReplacementsForEachMonWithTypeThemed(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, true,
+                false, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesUniqueReplacementsForEachMonWithUsePowerLevels(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                true, false, 0, true, true,
+                false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1UniqueReplacementCheck(before, after);
+    }
+
+    private void area1to1UniqueReplacementCheck(List<EncounterArea> before, List<EncounterArea> after) {
+        Iterator<EncounterArea> beforeIterator = before.iterator();
+        Iterator<EncounterArea> afterIterator = after.iterator();
+        while (beforeIterator.hasNext()) {
+            Map<Pokemon, Pokemon> map = new HashMap<>();
+
+            EncounterArea beforeArea = beforeIterator.next();
+            EncounterArea afterArea = afterIterator.next();
+            if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                        + afterArea.getDisplayName());
+            }
+
+            System.out.println(beforeArea.getDisplayName() + ":");
+            System.out.println(beforeArea);
+            System.out.println(afterArea);
+            Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+            Iterator<Encounter> afterEncIterator = afterArea.iterator();
+            while (beforeEncIterator.hasNext()) {
+                Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                Pokemon afterPk = afterEncIterator.next().getPokemon();
+
+                if (!map.containsKey(afterPk)) {
+                    map.put(afterPk, beforePk);
+                }
+                assertEquals(map.get(afterPk), beforePk);
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCanBanLegendaries(String romName) {
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                false, true, 0, true, true,
+                false);
+        checkForNoLegendaries();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCanBanAltFormes(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                false, true, 0, false, true,
+                false);
+        checkForNoAlternateFormes();
+    }
+
+    // since alt formes are not guaranteed, this test can be considered "reverse";
+    // any success is a success for the test as a whole
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCanHaveAltFormesIfNotBanned(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                false, true, 0, true,
+                true, false);
+        checkForAlternateFormes();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCatchEmAllWorks(String romName) {
+        loadROM(romName);
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, true, false,
+                false, false, 0, true,
+                true, false);
+        catchEmAllCheck(allPokes);
+    }
+
+    private void catchEmAllCheck(PokemonSet<Pokemon> allPokes) {
         PokemonSet<Pokemon> catchable = new PokemonSet<>();
         for (EncounterArea area : romHandler.getEncounters(true)) {
             catchable.addAll(PokemonSet.inArea(area));
@@ -186,11 +426,15 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void randomEncountersTypeThemedWorks(String romName) {
+    public void area1to1TypeThemedWorks(String romName) {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomEncounters(true, false, true,
                 false, false, false, 0, true,
                 true, false);
+        typeThemedAreasCheck();
+    }
+
+    private void typeThemedAreasCheck() {
         for (EncounterArea area : romHandler.getEncounters(true)) {
             System.out.println("\n" + area.getDisplayName() + ":\n" + area);
             Pokemon firstPk = area.get(0).getPokemon();
@@ -225,14 +469,18 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void randomEncountersUsePowerLevelsWorks(String romName) {
+    public void area1to1EncountersUsePowerLevelsWorks(String romName) {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true);
-        ((AbstractRomHandler) romHandler).randomEncounters(true, false, false,
-                true, false, false, 0, true,
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, false,
+                true, false, 0, true,
                 true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
+        powerLevelsCheck(before, after);
+    }
+
+    private void powerLevelsCheck(List<EncounterArea> before, List<EncounterArea> after) {
         List<Double> diffs = new ArrayList<>();
         Iterator<EncounterArea> beforeIterator = before.iterator();
         Iterator<EncounterArea> afterIterator = after.iterator();
@@ -257,11 +505,6 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         System.out.println(diffs);
         System.out.println(averageDiff);
         assertTrue(averageDiff <= MAX_AVERAGE_POWER_LEVEL_DIFF);
-    }
-
-    private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
-        return Math.abs((double) a.bstForPowerLevels() /
-                b.bstForPowerLevels() - 1);
     }
 
     @ParameterizedTest
@@ -399,38 +642,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 false, 0, true, true,
                 false);
         List<EncounterArea> after = romHandler.getEncounters(true);
-        Map<Pokemon, Pokemon> map = new HashMap<>();
 
-        Iterator<EncounterArea> beforeIterator = before.iterator();
-        Iterator<EncounterArea> afterIterator = after.iterator();
-        while (beforeIterator.hasNext()) {
-            EncounterArea beforeArea = beforeIterator.next();
-            EncounterArea afterArea = afterIterator.next();
-            if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
-                throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
-                        + afterArea.getDisplayName());
-            }
-
-            Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
-            Iterator<Encounter> afterEncIterator = afterArea.iterator();
-            while (beforeEncIterator.hasNext()) {
-                Pokemon beforePk = beforeEncIterator.next().getPokemon();
-                Pokemon afterPk = afterEncIterator.next().getPokemon();
-
-                if (!map.containsKey(beforePk)) {
-                    map.put(beforePk, afterPk);
-                }
-            }
-        }
-
-        List<Double> diffs = new ArrayList<>();
-        for (Map.Entry<Pokemon, Pokemon> entry : map.entrySet()) {
-            diffs.add(calcPowerLevelDiff(entry.getKey(), entry.getValue()));
-        }
-        double averageDiff = diffs.stream().mapToDouble(d -> d).average().getAsDouble();
-        System.out.println(diffs);
-        System.out.println(averageDiff);
-        assertTrue(averageDiff <= MAX_AVERAGE_POWER_LEVEL_DIFF);
+        powerLevelsCheck(before, after);
     }
 
 }

@@ -1717,6 +1717,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    protected void randomEncountersInner(List<EncounterArea> currentEncounterAreas,
+                                         boolean catchEmAll, boolean typeThemed, boolean usePowerLevels,
+                                         boolean noLegendaries, boolean balanceShakingGrass, boolean allowAltFormes,
+                                         boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
+        // TODO: it should do something different for ORAS...
+        super.randomEncountersInner(currentEncounterAreas, catchEmAll, typeThemed, usePowerLevels, noLegendaries,
+                balanceShakingGrass, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
+    }
+
+    @Override
     public List<Trainer> getTrainers() {
         List<Trainer> allTrainers = new ArrayList<>();
         boolean isORAS = romEntry.getRomType() == Gen6Constants.Type_ORAS;
