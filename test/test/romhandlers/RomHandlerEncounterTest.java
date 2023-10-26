@@ -201,6 +201,18 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         powerLevelsCheck(before, after);
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCatchEmAllANDTypeThemedWorks(String romName) {
+        loadROM(romName);
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomEncounters(true, true, true,
+                false, false, false, 0, true,
+                true, false);
+        catchEmAllCheck(allPokes);
+        typeThemedAreasCheck();
+    }
+
     private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
         return Math.abs((double) a.bstForPowerLevels() /
                 b.bstForPowerLevels() - 1);
@@ -427,7 +439,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void area1to1TypeThemedWorks(String romName) {
+    public void area1to1EncountersTypeThemedWorks(String romName) {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomEncounters(true, false, true,
                 false, false, false, 0, true,
