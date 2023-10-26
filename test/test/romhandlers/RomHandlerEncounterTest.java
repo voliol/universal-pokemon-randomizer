@@ -316,6 +316,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void area1to1EncountersGivesUniqueReplacementsForEachMonWithTypeThemed(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) != 1); // Too few mons of some types, so it always fails
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).area1to1Encounters(true, false, true,
@@ -505,6 +506,18 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         System.out.println(diffs);
         System.out.println(averageDiff);
         assertTrue(averageDiff <= MAX_AVERAGE_POWER_LEVEL_DIFF);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCatchEmAllANDTypeThemedWorks(String romName) {
+        loadROM(romName);
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).area1to1Encounters(true, true, true,
+                false, false, 0, true,
+                true, false);
+        catchEmAllCheck(allPokes);
+        typeThemedAreasCheck();
     }
 
     @ParameterizedTest
