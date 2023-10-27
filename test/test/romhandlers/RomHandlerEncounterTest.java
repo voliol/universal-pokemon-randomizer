@@ -140,14 +140,14 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 false, false, false, true, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         checkForNoLegendaries();
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void randomEncountersCanBanAltFormes(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 false, false, false, false, false,
@@ -160,11 +160,11 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void randomEncountersCanHaveAltFormesIfNotBanned(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 false, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         checkForAlternateFormes();
     }
 
@@ -175,7 +175,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 true, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
     }
 
@@ -185,7 +185,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 false, true, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         typeThemedAreasCheck();
     }
 
@@ -196,7 +196,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 false, false, true, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         powerLevelsCheck(before, after);
@@ -209,7 +209,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, true,
                 true, true, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
         typeThemedAreasCheck();
     }
@@ -226,7 +226,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1ConsequentReplacementCheck(before, after);
@@ -239,7 +239,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 true, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1ConsequentReplacementCheck(before, after);
@@ -252,7 +252,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, true, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1ConsequentReplacementCheck(before, after);
@@ -265,7 +265,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, true, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1ConsequentReplacementCheck(before, after);
@@ -307,7 +307,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1UniqueReplacementCheck(before, after);
@@ -320,7 +320,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 true, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1UniqueReplacementCheck(before, after);
@@ -334,7 +334,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, true, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1UniqueReplacementCheck(before, after);
@@ -347,7 +347,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, true, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         area1to1UniqueReplacementCheck(before, after);
@@ -390,14 +390,14 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, false, true, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         checkForNoLegendaries();
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void area1to1EncountersCanBanAltFormes(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, false, false, false,
@@ -410,11 +410,11 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void area1to1EncountersCanHaveAltFormesIfNotBanned(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         checkForAlternateFormes();
     }
 
@@ -425,7 +425,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 true, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
     }
 
@@ -445,7 +445,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, true, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         typeThemedAreasCheck();
     }
 
@@ -489,7 +489,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 false, false, true, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         powerLevelsCheck(before, after);
@@ -529,7 +529,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, true,
                 true, true, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
         typeThemedAreasCheck();
     }
@@ -541,7 +541,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.GLOBAL_MAPPING, true,
                 false, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
         Map<Pokemon, Pokemon> map = new HashMap<>();
 
@@ -581,7 +581,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.GLOBAL_MAPPING, true,
                 false, false, false, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
         Map<Pokemon, Pokemon> map = new HashMap<>();
 
@@ -632,14 +632,14 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.GLOBAL_MAPPING, true,
                 false, false, false, true, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         checkForNoLegendaries();
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void game1to1EncountersCanBanAltFormes(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.GLOBAL_MAPPING, true,
                 false, false, false, false, false,
@@ -652,11 +652,11 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void game1to1EncountersCanHaveAltFormesIfNotBanned(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) >= 4);
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.GLOBAL_MAPPING, true,
                 false, false, false, false, false,
-                0, false, true, false);
+                0, true, true, false);
         checkForAlternateFormes();
     }
 
@@ -667,7 +667,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.GLOBAL_MAPPING, true,
                 false, false, true, false, false,
-                0, true, true, false);
+                0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
 
         powerLevelsCheck(before, after);
