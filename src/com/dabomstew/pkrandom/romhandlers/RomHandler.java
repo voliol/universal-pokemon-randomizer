@@ -224,13 +224,7 @@ public interface RomHandler {
 
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
-    void randomEncounters(Settings settings);
-
-    void area1to1Encounters(Settings settings);
-
-    void game1to1Encounters(Settings settings);
-
-    void onlyChangeWildLevels(Settings settings);
+    void randomizeEncounters(Settings settings);
 
     boolean hasTimeBasedEncounters();
 

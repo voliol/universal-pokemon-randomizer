@@ -569,25 +569,10 @@ public class Randomizer {
             romHandler.changeCatchRates(settings);
         }
 
-        switch (settings.getWildPokemonMod()) {
-            case RANDOM:
-                romHandler.randomEncounters(settings);
-                wildsChanged = true;
-                break;
-            case AREA_MAPPING:
-                romHandler.area1to1Encounters(settings);
-                wildsChanged = true;
-                break;
-            case GLOBAL_MAPPING:
-                romHandler.game1to1Encounters(settings);
-                wildsChanged = true;
-                break;
-            default:
-                if (settings.isWildLevelsModified()) {
-                    romHandler.onlyChangeWildLevels(settings);
-                    wildsChanged = true;
-                }
-                break;
+        if (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
+                settings.isWildLevelsModified()) {
+            romHandler.randomizeEncounters(settings);
+            wildsChanged = true;
         }
 
         if (wildsChanged) {
