@@ -201,7 +201,9 @@ public class Settings {
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
-    private WildPokemonRestrictionMod wildPokemonRestrictionMod = WildPokemonRestrictionMod.NONE;
+    private boolean similarStrengthEncounters;
+    private boolean catchEmAllEncounters;
+    private boolean typeThemeEncounterAreas;
     private boolean useTimeBasedEncounters;
     private boolean blockWildLegendaries = true;
     private boolean useMinimumCatchRate;
@@ -424,16 +426,16 @@ public class Settings {
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
 
         // 15 wild pokemon
-        out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
+        out.write(makeByteSelected(catchEmAllEncounters,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                false, // remainder from when a "mod" was turned into multiple separately togglable options, can be reused
+                typeThemeEncounterAreas,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
 
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
+                similarStrengthEncounters, randomizeWildPokemonHeldItems,
                 banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass));
 
         // 17 static pokemon
@@ -706,11 +708,9 @@ public class Settings {
                 1, // AREA_MAPPING
                 4 // GLOBAL_MAPPING
         ));
-        settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
-                restoreState(data[16], 2), // SIMILAR_STRENGTH
-                restoreState(data[15], 0), // CATCH_EM_ALL
-                restoreState(data[15], 3) // TYPE_THEME_AREAS
-        ));
+        settings.setSimilarStrengthEncounters(restoreState(data[16], 2));
+        settings.setCatchEmAllEncounters(restoreState(data[15], 0));
+        settings.setTypeThemeEncounterAreas(restoreState(data[15], 3));
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
         settings.setUseMinimumCatchRate(restoreState(data[16], 0));
@@ -1803,17 +1803,30 @@ public class Settings {
         this.wildPokemonMod = wildPokemonMod;
     }
 
-    public WildPokemonRestrictionMod getWildPokemonRestrictionMod() {
-        return wildPokemonRestrictionMod;
+    public boolean isSimilarStrengthEncounters() {
+        return similarStrengthEncounters;
     }
 
-    public void setWildPokemonRestrictionMod(boolean... bools) {
-        setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
+    public void setSimilarStrengthEncounters(boolean similarStrengthEncounters) {
+        this.similarStrengthEncounters = similarStrengthEncounters;
     }
 
-    private void setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
-        this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
+    public boolean isCatchEmAllEncounters() {
+        return catchEmAllEncounters;
     }
+
+    public void setCatchEmAllEncounters(boolean catchEmAllEncounters) {
+        this.catchEmAllEncounters = catchEmAllEncounters;
+    }
+
+    public boolean isTypeThemeEncounterAreas() {
+        return typeThemeEncounterAreas;
+    }
+
+    public void setTypeThemeEncounterAreas(boolean typeThemeEncounterAreas) {
+        this.typeThemeEncounterAreas = typeThemeEncounterAreas;
+    }
+
 
     public boolean isUseTimeBasedEncounters() {
         return useTimeBasedEncounters;

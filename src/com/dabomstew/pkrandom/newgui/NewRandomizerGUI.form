@@ -2255,78 +2255,6 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpGlobal1To1RadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <grid id="ff19e" layout-manager="GridBagLayout">
-                    <constraints>
-                      <grid row="1" column="2" row-span="6" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                      <gridbag top="0" left="0" bottom="0" right="80" weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties/>
-                    <border type="none" title-resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" title-key="GUI.wpARPanel.title"/>
-                    <children>
-                      <component id="6fd8b" class="javax.swing.JRadioButton" binding="wpARNoneRadioButton">
-                        <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARNoneRadioButton.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARNoneRadioButton.toolTipText"/>
-                        </properties>
-                      </component>
-                      <hspacer id="cc8ed">
-                        <constraints>
-                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                      </hspacer>
-                      <vspacer id="6eb45">
-                        <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.1"/>
-                        </constraints>
-                      </vspacer>
-                      <hspacer id="697e1">
-                        <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                      </hspacer>
-                      <component id="f5f68" class="javax.swing.JRadioButton" binding="wpARSimilarStrengthRadioButton">
-                        <constraints>
-                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARSimilarStrengthRadioButton.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARSimilarStrengthRadioButton.toolTipText"/>
-                        </properties>
-                      </component>
-                      <component id="f3f94" class="javax.swing.JRadioButton" binding="wpARCatchEmAllModeRadioButton">
-                        <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARCatchEmAllModeRadioButton.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARCatchEmAllModeRadioButton.toolTipText"/>
-                        </properties>
-                      </component>
-                      <component id="bc941" class="javax.swing.JRadioButton" binding="wpARTypeThemeAreasRadioButton">
-                        <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARTypeThemeAreasRadioButton.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARTypeThemeAreasRadioButton.toolTipText"/>
-                        </properties>
-                      </component>
-                    </children>
-                  </grid>
                   <component id="58553" class="javax.swing.JCheckBox" binding="wpUseTimeBasedEncountersCheckBox">
                     <constraints>
                       <grid row="1" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -2446,6 +2374,39 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpAllowAltFormesCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="f5f68" class="javax.swing.JCheckBox" binding="wpSimilarStrengthCheckBox">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARSimilarStrengthRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARSimilarStrengthRadioButton.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="f3f94" class="javax.swing.JCheckBox" binding="wpCatchEmAllModeCheckBox">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARCatchEmAllModeRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARCatchEmAllModeRadioButton.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="bc941" class="javax.swing.JCheckBox" binding="wpTypeThemeAreasCheckBox">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARTypeThemeAreasRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARTypeThemeAreasRadioButton.toolTipText"/>
                     </properties>
                   </component>
                 </children>
@@ -4014,9 +3975,6 @@
     </group>
     <group name="wildPokemonAdditionalButtonGroup">
       <member id="6fd8b"/>
-      <member id="f5f68"/>
-      <member id="f3f94"/>
-      <member id="bc941"/>
     </group>
     <group name="tmsButtonGroup">
       <member id="77153"/>

@@ -596,9 +596,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeEncounters(Settings settings) {
         Settings.WildPokemonMod mode = settings.getWildPokemonMod();
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
-        boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
-        boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
-        boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean catchEmAll = settings.isCatchEmAllEncounters();
+        boolean typeThemed = settings.isTypeThemeEncounterAreas();
+        boolean usePowerLevels = settings.isSimilarStrengthEncounters();
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
