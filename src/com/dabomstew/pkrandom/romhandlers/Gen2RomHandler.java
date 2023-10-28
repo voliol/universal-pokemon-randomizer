@@ -1898,7 +1898,28 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setShopItems(Map<Integer, Shop> shopItems) {
-        // Not implemented
+        int tableOffset = romEntry.getIntValue("ShopItemOffset");
+
+        for (Map.Entry<Integer, Shop> entry : shopItems.entrySet()) {
+            int shopNum = entry.getKey();
+            Shop shop = entry.getValue();
+            new GBDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
+                    this::lengthOfShopAt);
+        }
+    }
+
+    private byte[] shopToBytes(Shop shop) {
+        byte[] data = new byte[shop.items.size() + 2];
+        data[0] = (byte) shop.items.size();
+        for (int i = 0; i < shop.items.size(); i++) {
+            data[i + 1] = (byte) (shop.items.get(i) & 0xFF);
+        }
+        data[shop.items.size() - 1] = (byte) 0xFF;
+        return data;
+    }
+
+    private int lengthOfShopAt(int offset) {
+        return shopToBytes(readShop(offset)).length;
     }
 
     @Override
