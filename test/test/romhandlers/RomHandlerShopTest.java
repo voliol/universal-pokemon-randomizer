@@ -28,6 +28,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
         System.out.println(shopItems);
         Map<Integer, Shop> before = new HashMap<>(shopItems);
         romHandler.setShopItems(shopItems);
+        System.out.println(romHandler.getShopItems());
         assertEquals(before, romHandler.getShopItems());
     }
 

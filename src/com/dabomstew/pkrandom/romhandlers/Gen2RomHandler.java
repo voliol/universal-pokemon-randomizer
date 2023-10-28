@@ -1869,8 +1869,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return shopMap;
     }
 
+    private final static String crystalShopData = "0412090D0CFF050512090D0CFF0A051213090D0C3331349EFF098A0512111314090D9EFF051211102627FF071211090D0C0A0B";
+
     private List<Shop> readShops() {
         List<Shop> shops = new ArrayList<>();
+
+        int foo = find(rom, crystalShopData) - 0x44;
+        System.out.println("ShopItemOffset=0x" + Integer.toHexString(foo));
 
         int tableOffset = romEntry.getIntValue("ShopItemOffset");
         int shopAmount = romEntry.getIntValue("ShopAmount");
@@ -1914,7 +1919,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (int i = 0; i < shop.items.size(); i++) {
             data[i + 1] = (byte) (shop.items.get(i) & 0xFF);
         }
-        data[shop.items.size() - 1] = (byte) 0xFF;
+        data[data.length - 1] = (byte) 0xFF;
         return data;
     }
 
