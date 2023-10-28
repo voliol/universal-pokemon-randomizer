@@ -1854,12 +1854,46 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        return false;
+        return true; // obviously not yet, but needed for testing
     }
 
     @Override
     public Map<Integer, Shop> getShopItems() {
-        return null; // Not implemented
+        List<Shop> shops = readShops();
+
+        // TODO no notion of maingame/skip shops (the Mahogany pre-rocket shop should be a skip)
+        Map<Integer, Shop> shopMap = new HashMap<>();
+        for (int i = 0; i < shops.size(); i++) {
+            shopMap.put(i, shops.get(i));
+        }
+        return shopMap;
+    }
+
+    private List<Shop> readShops() {
+        List<Shop> shops = new ArrayList<>();
+
+        int tableOffset = romEntry.getIntValue("ShopItemOffset");
+        int shopAmount = romEntry.getIntValue("ShopAmount");
+        int shopNum = 0;
+        while (shopNum < shopAmount) {
+            int shopOffset = readPointer(tableOffset + shopNum * 2, bankOf(tableOffset));
+            shops.add(readShop(shopOffset));
+            shopNum++;
+        }
+        return shops;
+    }
+
+    private Shop readShop(int offset) {
+        Shop shop = new Shop();
+        shop.items = new ArrayList<>();
+        int itemAmount = rom[offset++];
+        for (int itemNum = 0; itemNum < itemAmount; itemNum++) {
+            shop.items.add((int) rom[offset++] & 0xFF);
+        }
+        if (rom[offset] != Gen2Constants.shopItemsTerminator) {
+            throw new RandomizerIOException("Invalid shop data");
+        }
+        return shop;
     }
 
     @Override

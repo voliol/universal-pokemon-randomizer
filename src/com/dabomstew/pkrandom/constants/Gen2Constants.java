@@ -134,6 +134,8 @@ public class Gen2Constants {
     // probably the terminator for all move-lists, like TM/HM compatibility
     public static final byte eggMovesTerminator = (byte) 0xFF;
 
+    public static final byte shopItemsTerminator = (byte) 0xFF;
+
     public static final String friendshipValueForEvoLocator = "FEDCDA";
 
     private static Type[] constructTypeTable() {
