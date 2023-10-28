@@ -175,37 +175,26 @@ public class Color implements Cloneable {
 	}
 
 	public int getComp(int i) {
-		switch (i) {
-		case 0:
-			return r;
-		case 1:
-			return g;
-		case 2:
-			return b;
-		default:
-			throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
-		}
+		return switch (i) {
+			case 0 -> r;
+			case 1 -> g;
+			case 2 -> b;
+			default -> throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
+		};
 	}
 
 	public void setComp(int i, int value) {
 		switch (i) {
-		case 0:
-			r = value;
-			break;
-		case 1:
-			g = value;
-			break;
-		case 2:
-			b = value;
-			break;
-		default:
-			throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
+			case 0 -> r = value;
+			case 1 -> g = value;
+			case 2 -> b = value;
+			default -> throw new IndexOutOfBoundsException(i + " out of bounds for RGB color (0=r, 1=g, 2=b).");
 		}
 	}
 
 	@FunctionalInterface
-	public static interface ColorChange {
-		public int change(Color orig, int i);
+	public interface ColorChange {
+		int change(Color orig, int i);
 	}
 
 	public void setComps(ColorChange cc) {

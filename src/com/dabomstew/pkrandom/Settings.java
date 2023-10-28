@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
@@ -200,7 +201,9 @@ public class Settings {
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
-    private WildPokemonRestrictionMod wildPokemonRestrictionMod = WildPokemonRestrictionMod.NONE;
+    private boolean similarStrengthEncounters;
+    private boolean catchEmAllEncounters;
+    private boolean typeThemeEncounterAreas;
     private boolean useTimeBasedEncounters;
     private boolean blockWildLegendaries = true;
     private boolean useMinimumCatchRate;
@@ -328,7 +331,7 @@ public class Settings {
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
-        byte[] settings = toString().getBytes("UTF-8");
+        byte[] settings = toString().getBytes(StandardCharsets.UTF_8);
         ByteBuffer buf = ByteBuffer.allocate(settings.length + 8);
         buf.putInt(VERSION);
         buf.putInt(settings.length);
@@ -356,7 +359,7 @@ public class Settings {
         }
         int length = ByteBuffer.wrap(lengthBytes).getInt();
         byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
-        String settings = new String(buffer, "UTF-8");
+        String settings = new String(buffer, StandardCharsets.UTF_8);
         boolean oldUpdate = false;
 
         if (version < VERSION) {
@@ -423,16 +426,16 @@ public class Settings {
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
 
         // 15 wild pokemon
-        out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
+        out.write(makeByteSelected(catchEmAllEncounters,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                false, // remainder from when a "mod" was turned into multiple separately togglable options, can be reused
+                typeThemeEncounterAreas,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
 
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
+                similarStrengthEncounters, randomizeWildPokemonHeldItems,
                 banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass));
 
         // 17 static pokemon
@@ -599,7 +602,7 @@ public class Settings {
                 pokemonPalettesShinyFromNormal));
 
         try {
-            byte[] romName = this.romName.getBytes("US-ASCII");
+            byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
             out.write(romName.length);
             out.write(romName);
         } catch (IOException e) {
@@ -705,11 +708,9 @@ public class Settings {
                 1, // AREA_MAPPING
                 4 // GLOBAL_MAPPING
         ));
-        settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
-                restoreState(data[16], 2), // SIMILAR_STRENGTH
-                restoreState(data[15], 0), // CATCH_EM_ALL
-                restoreState(data[15], 3) // TYPE_THEME_AREAS
-        ));
+        settings.setSimilarStrengthEncounters(restoreState(data[16], 2));
+        settings.setCatchEmAllEncounters(restoreState(data[15], 0));
+        settings.setTypeThemeEncounterAreas(restoreState(data[15], 3));
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
         settings.setUseMinimumCatchRate(restoreState(data[16], 0));
@@ -896,7 +897,7 @@ public class Settings {
         settings.setPokemonPalettesShinyFromNormal(restoreState(data[51], 4));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
-        String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
+        String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
         settings.setRomName(romName);
 
         return settings;
@@ -1802,17 +1803,30 @@ public class Settings {
         this.wildPokemonMod = wildPokemonMod;
     }
 
-    public WildPokemonRestrictionMod getWildPokemonRestrictionMod() {
-        return wildPokemonRestrictionMod;
+    public boolean isSimilarStrengthEncounters() {
+        return similarStrengthEncounters;
     }
 
-    public void setWildPokemonRestrictionMod(boolean... bools) {
-        setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
+    public void setSimilarStrengthEncounters(boolean similarStrengthEncounters) {
+        this.similarStrengthEncounters = similarStrengthEncounters;
     }
 
-    private void setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
-        this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
+    public boolean isCatchEmAllEncounters() {
+        return catchEmAllEncounters;
     }
+
+    public void setCatchEmAllEncounters(boolean catchEmAllEncounters) {
+        this.catchEmAllEncounters = catchEmAllEncounters;
+    }
+
+    public boolean isTypeThemeEncounterAreas() {
+        return typeThemeEncounterAreas;
+    }
+
+    public void setTypeThemeEncounterAreas(boolean typeThemeEncounterAreas) {
+        this.typeThemeEncounterAreas = typeThemeEncounterAreas;
+    }
+
 
     public boolean isUseTimeBasedEncounters() {
         return useTimeBasedEncounters;

@@ -52,14 +52,19 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     @Override
     protected void midLoadingSetUp() {
         super.midLoadingSetUp();
-        this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize);
+        this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize, rom.length / GBConstants.bankSize,
+                getRomEntry().getArrayValue("ReservedBanks"));
         freeUnusedSpaceAtEndOfBanks();
     }
 
     /**
      * Frees the unused space at the end of some banks, so the randomizer knows to use it.
      */
-    protected abstract void freeUnusedSpaceAtEndOfBanks();
+    protected void freeUnusedSpaceAtEndOfBanks() {
+        for (Map.Entry<Integer, Integer> margin : getRomEntry().getBankEndFreeSpaceMargins().entrySet()) {
+            freeUnusedSpaceAtEndOfBank(margin.getKey(), margin.getValue());
+        }
+    }
 
     @Override
     protected void loadGameData() {

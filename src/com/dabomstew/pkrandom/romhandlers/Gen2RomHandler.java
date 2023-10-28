@@ -118,31 +118,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         preprocessMaps();
     }
 
-    /**
-     * Frees the unused space at the end of some banks, so the randomizer knows to use it.<br>
-     * Assumes most kinds of data is always found in the same banks (e.g. trainer data in Bank 0x0E).
-     */
-    @Override
-    protected void freeUnusedSpaceAtEndOfBanks() {
-        // Bank XX ends with YY data, which decides the frontMargin.
-        // (because data either ends with a terminator, or has a set length we can know)
-        // 08: Egg moves
-        freeUnusedSpaceAtEndOfBank(0x08, 0);
-        // 0E: Trainer
-        freeUnusedSpaceAtEndOfBank(0x0E, 0);
-        // 10: Evolution/MovesLearnt data
-        if (isVietCrystal) {
-            freeUnusedSpaceBefore(0x43DFF, 1);
-        } else {
-            freeUnusedSpaceAtEndOfBank(0x10, 1);
-        }
-        // Bank which contains events. Arbitrary high frontMargin since the event structure is not known
-        // (to the programmer).
-        if (hasMoveTutors()) {
-            freeUnusedSpaceAtEndOfBank(bankOf(romEntry.getIntValue("MoveTutorMenuOffset")), 20);
-        }
-    }
-
     @Override
     protected void loadGameData() {
         super.loadGameData();
@@ -661,22 +636,93 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
-        int offset = romEntry.getIntValue("WildPokemonOffset");
-        List<EncounterSet> areas = new ArrayList<>();
-        offset = readLandEncounters(offset, areas, useTimeOfDay); // Johto
-        offset = readSeaEncounters(offset, areas); // Johto
-        offset = readLandEncounters(offset, areas, useTimeOfDay); // Kanto
-        offset = readSeaEncounters(offset, areas); // Kanto
-        offset = readLandEncounters(offset, areas, useTimeOfDay); // Specials
-        offset = readSeaEncounters(offset, areas); // Specials
+    public List<EncounterArea> getEncounters(boolean useTimeOfDay) {
+        List<EncounterArea> encounterAreas = new ArrayList<>();
 
-        // Fishing Data
-        offset = romEntry.getIntValue("FishingWildsOffset");
+        readNormalEncounters(encounterAreas, useTimeOfDay);
+        readFishingEncounters(encounterAreas, useTimeOfDay);
+        readHeadbuttEncounters(encounterAreas);
+        readBugCatchingContestEncounters(encounterAreas);
+
+        return encounterAreas;
+    }
+
+    private void readNormalEncounters(List<EncounterArea> encounterAreas, boolean useTimeOfDay) {
+        int offset = romEntry.getIntValue("WildPokemonOffset");
+        offset = readLandEncounters(offset, encounterAreas, useTimeOfDay); // Johto
+        offset = readSeaEncounters(offset, encounterAreas); // Johto
+        offset = readLandEncounters(offset, encounterAreas, useTimeOfDay); // Kanto
+        offset = readSeaEncounters(offset, encounterAreas); // Kanto
+        offset = readLandEncounters(offset, encounterAreas, useTimeOfDay); // Specials
+        readSeaEncounters(offset, encounterAreas); // Specials
+    }
+
+    private int readLandEncounters(int offset, List<EncounterArea> areas, boolean useTimeOfDay) {
+        String[] todNames = new String[]{"Morning", "Day", "Night"};
+        while ((rom[offset] & 0xFF) != 0xFF) {
+            int mapBank = rom[offset] & 0xFF;
+            int mapNumber = rom[offset + 1] & 0xFF;
+            String mapName = mapNames[mapBank][mapNumber];
+            if (useTimeOfDay) {
+                for (int i = 0; i < 3; i++) {
+                    EncounterArea area = new EncounterArea();
+                    area.setRate(rom[offset + 2 + i] & 0xFF);
+                    area.setDisplayName(mapName + " Grass/Cave (" + todNames[i] + ")");
+                    for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
+                        Encounter enc = new Encounter();
+                        enc.setLevel(rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] & 0xFF);
+                        enc.setMaxLevel(0);
+                        enc.setPokemon(pokes[rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] & 0xFF]);
+                        area.add(enc);
+                    }
+                    areas.add(area);
+                }
+            } else {
+                // Use Day only
+                EncounterArea area = new EncounterArea();
+                area.setRate(rom[offset + 3] & 0xFF);
+                area.setDisplayName(mapName + " Grass/Cave");
+                for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
+                    Encounter enc = new Encounter();
+                    enc.setLevel(rom[offset + 5 + Gen2Constants.landEncounterSlots * 2 + (j * 2)] & 0xFF);
+                    enc.setMaxLevel(0);
+                    enc.setPokemon(pokes[rom[offset + 5 + Gen2Constants.landEncounterSlots * 2 + (j * 2) + 1] & 0xFF]);
+                    area.add(enc);
+                }
+                areas.add(area);
+            }
+            offset += 5 + 6 * Gen2Constants.landEncounterSlots;
+        }
+        return offset + 1;
+    }
+
+    private int readSeaEncounters(int offset, List<EncounterArea> areas) {
+        while ((rom[offset] & 0xFF) != 0xFF) {
+            int mapBank = rom[offset] & 0xFF;
+            int mapNumber = rom[offset + 1] & 0xFF;
+            String mapName = mapNames[mapBank][mapNumber];
+            EncounterArea area = new EncounterArea();
+            area.setRate(rom[offset + 2] & 0xFF);
+            area.setDisplayName(mapName + " Surfing");
+            for (int j = 0; j < Gen2Constants.seaEncounterSlots; j++) {
+                Encounter enc = new Encounter();
+                enc.setLevel(rom[offset + 3 + (j * 2)] & 0xFF);
+                enc.setMaxLevel(0);
+                enc.setPokemon(pokes[rom[offset + 3 + (j * 2) + 1] & 0xFF]);
+                area.add(enc);
+            }
+            areas.add(area);
+            offset += 3 + Gen2Constants.seaEncounterSlots * 2;
+        }
+        return offset + 1;
+    }
+
+    private void readFishingEncounters(List<EncounterArea> encounterAreas, boolean useTimeOfDay) {
+        int offset = romEntry.getIntValue("FishingWildsOffset");
         int rootOffset = offset;
         for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
-            EncounterSet es = new EncounterSet();
-            es.displayName = "Fishing Group " + (k + 1);
+            EncounterArea area = new EncounterArea();
+            area.setDisplayName("Fishing Group " + (k + 1));
             for (int i = 0; i < Gen2Constants.pokesPerFishingGroup; i++) {
                 offset++;
                 int pokeNum = rom[offset++] & 0xFF;
@@ -687,234 +733,192 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                         int specialOffset = rootOffset + Gen2Constants.fishingGroupEntryLength
                                 * Gen2Constants.pokesPerFishingGroup * Gen2Constants.fishingGroupCount + level * 4 + 2;
                         Encounter enc = new Encounter();
-                        enc.pokemon = pokes[rom[specialOffset] & 0xFF];
-                        enc.level = rom[specialOffset + 1] & 0xFF;
-                        es.encounters.add(enc);
+                        enc.setPokemon(pokes[rom[specialOffset] & 0xFF]);
+                        enc.setLevel(rom[specialOffset + 1] & 0xFF);
+                        area.add(enc);
                     }
                     // else will be handled by code below
                 } else {
                     Encounter enc = new Encounter();
-                    enc.pokemon = pokes[pokeNum];
-                    enc.level = level;
-                    es.encounters.add(enc);
+                    enc.setPokemon(pokes[pokeNum]);
+                    enc.setLevel(level);
+                    area.add(enc);
                 }
             }
-            areas.add(es);
+            encounterAreas.add(area);
         }
         if (useTimeOfDay) {
             for (int k = 0; k < Gen2Constants.timeSpecificFishingGroupCount; k++) {
-                EncounterSet es = new EncounterSet();
-                es.displayName = "Time-Specific Fishing " + (k + 1);
+                EncounterArea area = new EncounterArea();
+                area.setDisplayName("Time-Specific Fishing " + (k + 1));
                 for (int i = 0; i < Gen2Constants.pokesPerTSFishingGroup; i++) {
                     int pokeNum = rom[offset++] & 0xFF;
                     int level = rom[offset++] & 0xFF;
                     Encounter enc = new Encounter();
-                    enc.pokemon = pokes[pokeNum];
-                    enc.level = level;
-                    es.encounters.add(enc);
+                    enc.setPokemon(pokes[pokeNum]);
+                    enc.setLevel(level);
+                    area.add(enc);
                 }
-                areas.add(es);
+                encounterAreas.add(area);
             }
         }
+    }
 
-        // Headbutt Data
-        offset = romEntry.getIntValue("HeadbuttWildsOffset");
+    private void readHeadbuttEncounters(List<EncounterArea> encounterAreas) {
+        int offset = romEntry.getIntValue("HeadbuttWildsOffset");
         int limit = romEntry.getIntValue("HeadbuttTableSize");
         for (int i = 0; i < limit; i++) {
-            EncounterSet es = new EncounterSet();
-            es.displayName = "Headbutt Trees Set " + (i + 1);
+            EncounterArea area = new EncounterArea();
+            area.setDisplayName("Headbutt Trees Set " + (i + 1));
             while ((rom[offset] & 0xFF) != 0xFF) {
                 offset++;
                 int pokeNum = rom[offset++] & 0xFF;
                 int level = rom[offset++] & 0xFF;
                 Encounter enc = new Encounter();
-                enc.pokemon = pokes[pokeNum];
-                enc.level = level;
-                es.encounters.add(enc);
+                enc.setPokemon(pokes[pokeNum]);
+                enc.setLevel(level);
+                area.add(enc);
             }
             offset++;
-            areas.add(es);
+            encounterAreas.add(area);
         }
+    }
 
-        // Bug Catching Contest Data
-        offset = romEntry.getIntValue("BCCWildsOffset");
-        EncounterSet bccES = new EncounterSet();
-        bccES.displayName = "Bug Catching Contest";
+    private void readBugCatchingContestEncounters(List<EncounterArea> encounterAreas) {
+        int offset = romEntry.getIntValue("BCCWildsOffset");
+        EncounterArea area = new EncounterArea();
+        area.setDisplayName("Bug Catching Contest");
         while ((rom[offset] & 0xFF) != 0xFF) {
             offset++;
             Encounter enc = new Encounter();
-            enc.pokemon = pokes[rom[offset++] & 0xFF];
-            enc.level = rom[offset++] & 0xFF;
-            enc.maxLevel = rom[offset++] & 0xFF;
-            bccES.encounters.add(enc);
+            enc.setPokemon(pokes[rom[offset++] & 0xFF]);
+            enc.setLevel(rom[offset++] & 0xFF);
+            enc.setMaxLevel(rom[offset++] & 0xFF);
+            area.add(enc);
         }
         // Unown is banned for Bug Catching Contest (5/8/2016)
-        bccES.bannedPokemon.add(pokes[Species.unown]);
-        areas.add(bccES);
-
-        return areas;
-    }
-
-    private int readLandEncounters(int offset, List<EncounterSet> areas, boolean useTimeOfDay) {
-        String[] todNames = new String[]{"Morning", "Day", "Night"};
-        while ((rom[offset] & 0xFF) != 0xFF) {
-            int mapBank = rom[offset] & 0xFF;
-            int mapNumber = rom[offset + 1] & 0xFF;
-            String mapName = mapNames[mapBank][mapNumber];
-            if (useTimeOfDay) {
-                for (int i = 0; i < 3; i++) {
-                    EncounterSet encset = new EncounterSet();
-                    encset.rate = rom[offset + 2 + i] & 0xFF;
-                    encset.displayName = mapName + " Grass/Cave (" + todNames[i] + ")";
-                    for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
-                        Encounter enc = new Encounter();
-                        enc.level = rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] & 0xFF;
-                        enc.maxLevel = 0;
-                        enc.pokemon = pokes[rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] & 0xFF];
-                        encset.encounters.add(enc);
-                    }
-                    areas.add(encset);
-                }
-            } else {
-                // Use Day only
-                EncounterSet encset = new EncounterSet();
-                encset.rate = rom[offset + 3] & 0xFF;
-                encset.displayName = mapName + " Grass/Cave";
-                for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
-                    Encounter enc = new Encounter();
-                    enc.level = rom[offset + 5 + Gen2Constants.landEncounterSlots * 2 + (j * 2)] & 0xFF;
-                    enc.maxLevel = 0;
-                    enc.pokemon = pokes[rom[offset + 5 + Gen2Constants.landEncounterSlots * 2 + (j * 2) + 1] & 0xFF];
-                    encset.encounters.add(enc);
-                }
-                areas.add(encset);
-            }
-            offset += 5 + 6 * Gen2Constants.landEncounterSlots;
-        }
-        return offset + 1;
-    }
-
-    private int readSeaEncounters(int offset, List<EncounterSet> areas) {
-        while ((rom[offset] & 0xFF) != 0xFF) {
-            int mapBank = rom[offset] & 0xFF;
-            int mapNumber = rom[offset + 1] & 0xFF;
-            String mapName = mapNames[mapBank][mapNumber];
-            EncounterSet encset = new EncounterSet();
-            encset.rate = rom[offset + 2] & 0xFF;
-            encset.displayName = mapName + " Surfing";
-            for (int j = 0; j < Gen2Constants.seaEncounterSlots; j++) {
-                Encounter enc = new Encounter();
-                enc.level = rom[offset + 3 + (j * 2)] & 0xFF;
-                enc.maxLevel = 0;
-                enc.pokemon = pokes[rom[offset + 3 + (j * 2) + 1] & 0xFF];
-                encset.encounters.add(enc);
-            }
-            areas.add(encset);
-            offset += 3 + Gen2Constants.seaEncounterSlots * 2;
-        }
-        return offset + 1;
+        area.banPokemon(pokes[Species.unown]);
+        encounterAreas.add(area);
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters) {
         if (!havePatchedFleeing) {
             patchFleeing();
         }
-        int offset = romEntry.getIntValue("WildPokemonOffset");
-        Iterator<EncounterSet> areas = encounters.iterator();
-        offset = writeLandEncounters(offset, areas, useTimeOfDay); // Johto
-        offset = writeSeaEncounters(offset, areas); // Johto
-        offset = writeLandEncounters(offset, areas, useTimeOfDay); // Kanto
-        offset = writeSeaEncounters(offset, areas); // Kanto
-        offset = writeLandEncounters(offset, areas, useTimeOfDay); // Specials
-        offset = writeSeaEncounters(offset, areas); // Specials
 
+        Iterator<EncounterArea> areaIterator = encounters.iterator();
+
+        writeNormalEncounters(areaIterator, useTimeOfDay);
+        writeFishingEncounters(areaIterator, useTimeOfDay);
+        writeHeadbuttEncounters(areaIterator);
+        writeBugCatchingContestEncounters(areaIterator);
+
+    }
+
+    private void writeNormalEncounters(Iterator<EncounterArea> areaIterator, boolean useTimeOfDay) {
+        int offset = romEntry.getIntValue("WildPokemonOffset");
+        offset = writeLandEncounters(offset, areaIterator, useTimeOfDay); // Johto
+        offset = writeSeaEncounters(offset, areaIterator); // Johto
+        offset = writeLandEncounters(offset, areaIterator, useTimeOfDay); // Kanto
+        offset = writeSeaEncounters(offset, areaIterator); // Kanto
+        offset = writeLandEncounters(offset, areaIterator, useTimeOfDay); // Specials
+        writeSeaEncounters(offset, areaIterator); // Specials
+    }
+
+    private void writeFishingEncounters(Iterator<EncounterArea> areaIterator, boolean useTimeOfDay) {
+        int offset;
         // Fishing Data
         offset = romEntry.getIntValue("FishingWildsOffset");
         for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
-            EncounterSet es = areas.next();
-            Iterator<Encounter> encs = es.encounters.iterator();
+            EncounterArea area = areaIterator.next();
+            Iterator<Encounter> encounterIterator = area.iterator();
             for (int i = 0; i < Gen2Constants.pokesPerFishingGroup; i++) {
                 offset++;
                 if (rom[offset] == 0) {
                     if (!useTimeOfDay) {
                         // overwrite with a static encounter
-                        Encounter enc = encs.next();
-                        rom[offset++] = (byte) enc.pokemon.getNumber();
-                        rom[offset++] = (byte) enc.level;
+                        Encounter enc = encounterIterator.next();
+                        rom[offset++] = (byte) enc.getPokemon().getNumber();
+                        rom[offset++] = (byte) enc.getLevel();
                     } else {
                         // else handle below
                         offset += 2;
                     }
                 } else {
-                    Encounter enc = encs.next();
-                    rom[offset++] = (byte) enc.pokemon.getNumber();
-                    rom[offset++] = (byte) enc.level;
+                    Encounter enc = encounterIterator.next();
+                    rom[offset++] = (byte) enc.getPokemon().getNumber();
+                    rom[offset++] = (byte) enc.getLevel();
                 }
             }
         }
         if (useTimeOfDay) {
             for (int k = 0; k < Gen2Constants.timeSpecificFishingGroupCount; k++) {
-                EncounterSet es = areas.next();
-                Iterator<Encounter> encs = es.encounters.iterator();
+                EncounterArea area = areaIterator.next();
+                Iterator<Encounter> encounterIterator = area.iterator();
                 for (int i = 0; i < Gen2Constants.pokesPerTSFishingGroup; i++) {
-                    Encounter enc = encs.next();
-                    rom[offset++] = (byte) enc.pokemon.getNumber();
-                    rom[offset++] = (byte) enc.level;
+                    Encounter enc = encounterIterator.next();
+                    rom[offset++] = (byte) enc.getPokemon().getNumber();
+                    rom[offset++] = (byte) enc.getLevel();
                 }
             }
         }
+    }
 
+    private void writeHeadbuttEncounters(Iterator<EncounterArea> areaIterator) {
+        int offset;
         // Headbutt Data
         offset = romEntry.getIntValue("HeadbuttWildsOffset");
         int limit = romEntry.getIntValue("HeadbuttTableSize");
         for (int i = 0; i < limit; i++) {
-            EncounterSet es = areas.next();
-            Iterator<Encounter> encs = es.encounters.iterator();
+            EncounterArea area = areaIterator.next();
+            Iterator<Encounter> encounterIterator = area.iterator();
             while ((rom[offset] & 0xFF) != 0xFF) {
-                Encounter enc = encs.next();
+                Encounter enc = encounterIterator.next();
                 offset++;
-                rom[offset++] = (byte) enc.pokemon.getNumber();
-                rom[offset++] = (byte) enc.level;
+                rom[offset++] = (byte) enc.getPokemon().getNumber();
+                rom[offset++] = (byte) enc.getLevel();
             }
             offset++;
         }
-
-        // Bug Catching Contest Data
-        offset = romEntry.getIntValue("BCCWildsOffset");
-        EncounterSet bccES = areas.next();
-        Iterator<Encounter> bccEncs = bccES.encounters.iterator();
-        while ((rom[offset] & 0xFF) != 0xFF) {
-            offset++;
-            Encounter enc = bccEncs.next();
-            rom[offset++] = (byte) enc.pokemon.getNumber();
-            rom[offset++] = (byte) enc.level;
-            rom[offset++] = (byte) enc.maxLevel;
-        }
-
     }
 
-    private int writeLandEncounters(int offset, Iterator<EncounterSet> areas, boolean useTimeOfDay) {
+    private void writeBugCatchingContestEncounters(Iterator<EncounterArea> areaIterator) {
+        int offset;
+        // Bug Catching Contest Data
+        offset = romEntry.getIntValue("BCCWildsOffset");
+        EncounterArea bugCatchingContestArea = areaIterator.next();
+        Iterator<Encounter> bccEncounterIterator = bugCatchingContestArea.iterator();
+        while ((rom[offset] & 0xFF) != 0xFF) {
+            offset++;
+            Encounter enc = bccEncounterIterator.next();
+            rom[offset++] = (byte) enc.getPokemon().getNumber();
+            rom[offset++] = (byte) enc.getLevel();
+            rom[offset++] = (byte) enc.getMaxLevel();
+        }
+    }
+
+    private int writeLandEncounters(int offset, Iterator<EncounterArea> areaIterator, boolean useTimeOfDay) {
         while ((rom[offset] & 0xFF) != 0xFF) {
             if (useTimeOfDay) {
                 for (int i = 0; i < 3; i++) {
-                    EncounterSet encset = areas.next();
-                    Iterator<Encounter> encountersHere = encset.encounters.iterator();
+                    EncounterArea area = areaIterator.next();
+                    Iterator<Encounter> encounterIterator = area.iterator();
                     for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
-                        Encounter enc = encountersHere.next();
-                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] = (byte) enc.level;
-                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) enc.pokemon.getNumber();
+                        Encounter enc = encounterIterator.next();
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] = (byte) enc.getLevel();
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) enc.getPokemon().getNumber();
                     }
                 }
             } else {
                 // Write the set to all 3 equally
-                EncounterSet encset = areas.next();
+                EncounterArea area = areaIterator.next();
                 for (int i = 0; i < 3; i++) {
-                    Iterator<Encounter> encountersHere = encset.encounters.iterator();
+                    Iterator<Encounter> encounterIterator = area.iterator();
                     for (int j = 0; j < Gen2Constants.landEncounterSlots; j++) {
-                        Encounter enc = encountersHere.next();
-                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] = (byte) enc.level;
-                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) enc.pokemon.getNumber();
+                        Encounter enc = encounterIterator.next();
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2)] = (byte) enc.getLevel();
+                        rom[offset + 5 + (i * Gen2Constants.landEncounterSlots * 2) + (j * 2) + 1] = (byte) enc.getPokemon().getNumber();
                     }
                 }
             }
@@ -923,14 +927,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return offset + 1;
     }
 
-    private int writeSeaEncounters(int offset, Iterator<EncounterSet> areas) {
+    private int writeSeaEncounters(int offset, Iterator<EncounterArea> areaIterator) {
         while ((rom[offset] & 0xFF) != 0xFF) {
-            EncounterSet encset = areas.next();
-            Iterator<Encounter> encountersHere = encset.encounters.iterator();
+            EncounterArea area = areaIterator.next();
+            Iterator<Encounter> encounterIterator = area.iterator();
             for (int j = 0; j < Gen2Constants.seaEncounterSlots; j++) {
-                Encounter enc = encountersHere.next();
-                rom[offset + 3 + (j * 2)] = (byte) enc.level;
-                rom[offset + 3 + (j * 2) + 1] = (byte) enc.pokemon.getNumber();
+                Encounter enc = encounterIterator.next();
+                rom[offset + 3 + (j * 2)] = (byte) enc.getLevel();
+                rom[offset + 3 + (j * 2) + 1] = (byte) enc.getPokemon().getNumber();
             }
             offset += 3 + Gen2Constants.seaEncounterSlots * 2;
         }

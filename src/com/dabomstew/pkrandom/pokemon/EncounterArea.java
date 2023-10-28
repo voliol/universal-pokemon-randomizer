@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
-/*--  EncounterSet.java - contains a group of wild Pokemon                  --*/
+/*--  EncounterArea.java - contains a group of wild Pokemon                 --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
@@ -24,21 +24,63 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public class EncounterSet {
+public class EncounterArea extends ArrayList<Encounter> {
 
-    public int rate;
-    public List<Encounter> encounters = new ArrayList<>();
-    public Set<Pokemon> bannedPokemon = new HashSet<>();
-    public String displayName;
-    public int offset;
+    private int rate;
+    private final Set<Pokemon> bannedPokemon = new HashSet<>();
+    private String displayName;
+    private int offset;
 
-    public String toString() {
-        return "Encounter [Rate = " + rate + ", Encounters = " + encounters + "]";
+    public EncounterArea() {
     }
 
+    public EncounterArea(Collection<? extends Encounter> collection) {
+        super(collection);
+    }
+
+    public int getRate() {
+        return rate;
+    }
+
+    public void setRate(int rate) {
+        this.rate = rate;
+    }
+
+    /**
+     * Returns an unmodifiable set of the {@link Pokemon} which should NOT have {@link Encounter}s in this area.
+     */
+    public Set<Pokemon> getBannedPokemon() {
+        return Collections.unmodifiableSet(bannedPokemon);
+    }
+
+    public void banPokemon(Pokemon toBan) {
+        bannedPokemon.add(toBan);
+    }
+
+    public void banAllPokemon(Collection<? extends Pokemon> toBan) {
+        bannedPokemon.addAll(toBan);
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    @Override
+    public String toString() {
+        return "Encounters [Rate = " + rate + ", Encounters = " + super.toString() + "]";
+    }
 }

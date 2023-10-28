@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class PalettePartDescription {
 
-	private static enum CharType {
+	private enum CharType {
 		DIGIT, LETTER, SIBLING_DELIMITER, IGNORE;
 
 		public static CharType of(char c) {
@@ -51,7 +51,7 @@ public class PalettePartDescription {
 		}
 	}
 
-	private static enum LightDarkSuffix {
+	private enum LightDarkSuffix {
 		ANY, LIGHT, DARK, BASE, NO_LIGHT, NO_DARK
 	}
 
@@ -315,11 +315,11 @@ public class PalettePartDescription {
 		} else {
 			sb.append(Arrays.toString(getSlots()));
 			if (hasSibling()) {
-				sb.append(" SIB:" + Arrays.toString(getSiblingSlots()));
-				sb.append(" SHARED:" + getSharedSlot());
+				sb.append(" SIB:").append(Arrays.toString(getSiblingSlots()));
+				sb.append(" SHARED:").append(getSharedSlot());
 			}
 			if (lightDarkSuffix != LightDarkSuffix.ANY) {
-				sb.append(" " + lightDarkSuffix);
+				sb.append(" ").append(lightDarkSuffix);
 			}
 			if (isEndDarkened()) {
 				sb.append("END_DARKENED");

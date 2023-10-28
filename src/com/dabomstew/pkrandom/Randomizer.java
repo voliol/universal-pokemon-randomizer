@@ -189,16 +189,16 @@ public class Randomizer {
 
         // Base stat randomization
         switch (settings.getBaseStatisticsMod()) {
-            case SHUFFLE:
+            case SHUFFLE -> {
                 romHandler.shufflePokemonStats(settings);
                 pokemonTraitsChanged = true;
-                break;
-            case RANDOM:
+            }
+            case RANDOM -> {
                 romHandler.randomizePokemonStats(settings);
                 pokemonTraitsChanged = true;
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
 
         // Abilities
@@ -258,21 +258,21 @@ public class Randomizer {
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
-        switch(settings.getStartersMod()) {
-            case CUSTOM:
+        switch (settings.getStartersMod()) {
+            case CUSTOM -> {
                 romHandler.customStarters(settings);
                 startersChanged = true;
-                break;
-            case COMPLETELY_RANDOM:
+            }
+            case COMPLETELY_RANDOM -> {
                 romHandler.randomizeStarters(settings);
                 startersChanged = true;
-                break;
-            case RANDOM_WITH_TWO_EVOLUTIONS:
+            }
+            case RANDOM_WITH_TWO_EVOLUTIONS -> {
                 romHandler.randomizeBasicTwoEvosStarters(settings);
                 startersChanged = true;
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
             romHandler.randomizeStarterHeldItems(settings);
@@ -340,17 +340,16 @@ public class Randomizer {
         // 5. Copy to cosmetic forms
 
         switch (settings.getTmsHmsCompatibilityMod()) {
-            case COMPLETELY_RANDOM:
-            case RANDOM_PREFER_TYPE:
+            case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> {
                 romHandler.randomizeTMHMCompatibility(settings);
                 tmsHmsCompatChanged = true;
-                break;
-            case FULL:
+            }
+            case FULL -> {
                 romHandler.fullTMHMCompatibility();
                 tmsHmsCompatChanged = true;
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
 
         if (settings.isTmLevelUpMoveSanity()) {
@@ -399,17 +398,16 @@ public class Randomizer {
             // 4. Copy to cosmetic forms
 
             switch (settings.getMoveTutorsCompatibilityMod()) {
-                case COMPLETELY_RANDOM:
-                case RANDOM_PREFER_TYPE:
+                case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> {
                     romHandler.randomizeMoveTutorCompatibility(settings);
                     tutorCompatChanged = true;
-                    break;
-                case FULL:
+                }
+                case FULL -> {
                     romHandler.fullMoveTutorCompatibility();
                     tutorCompatChanged = true;
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
 
             if (settings.isTutorLevelUpMoveSanity()) {
@@ -571,25 +569,10 @@ public class Randomizer {
             romHandler.changeCatchRates(settings);
         }
 
-        switch (settings.getWildPokemonMod()) {
-            case RANDOM:
-                romHandler.randomEncounters(settings);
-                wildsChanged = true;
-                break;
-            case AREA_MAPPING:
-                romHandler.area1to1Encounters(settings);
-                wildsChanged = true;
-                break;
-            case GLOBAL_MAPPING:
-                romHandler.game1to1Encounters(settings);
-                wildsChanged = true;
-                break;
-            default:
-                if (settings.isWildLevelsModified()) {
-                    romHandler.onlyChangeWildLevels(settings);
-                    wildsChanged = true;
-                }
-                break;
+        if (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
+                settings.isWildLevelsModified()) {
+            romHandler.randomizeEncounters(settings);
+            wildsChanged = true;
         }
 
         if (wildsChanged) {
@@ -600,10 +583,10 @@ public class Randomizer {
 
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-        List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
-        for (EncounterSet es : encounters) {
-            for (Encounter e : es.encounters) {
-                checkValue = addToCV(checkValue, e.level, e.pokemon.getNumber());
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeBasedEncounters);
+        for (EncounterArea area : encounterAreas) {
+            for (Encounter e : area) {
+                checkValue = addToCV(checkValue, e.getLevel(), e.getPokemon().getNumber());
             }
         }
 
@@ -611,14 +594,13 @@ public class Randomizer {
         // In-game trades
 
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
-        switch(settings.getInGameTradesMod()) {
-            case RANDOMIZE_GIVEN:
-            case RANDOMIZE_GIVEN_AND_REQUESTED:
+        switch (settings.getInGameTradesMod()) {
+            case RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED -> {
                 romHandler.randomizeIngameTrades(settings);
                 tradesChanged = true;
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
 
         if (tradesChanged) {
@@ -626,31 +608,26 @@ public class Randomizer {
         }
 
         // Field Items
-        switch(settings.getFieldItemsMod()) {
-            case SHUFFLE:
-                romHandler.shuffleFieldItems();
-                break;
-            case RANDOM:
-            case RANDOM_EVEN:
-                romHandler.randomizeFieldItems(settings);
-                break;
-            default:
-                break;
+        switch (settings.getFieldItemsMod()) {
+            case SHUFFLE -> romHandler.shuffleFieldItems();
+            case RANDOM, RANDOM_EVEN -> romHandler.randomizeFieldItems(settings);
+            default -> {
+            }
         }
 
         // Shops
 
-        switch(settings.getShopItemsMod()) {
-            case SHUFFLE:
+        switch (settings.getShopItemsMod()) {
+            case SHUFFLE -> {
                 romHandler.shuffleShopItems();
                 shopsChanged = true;
-                break;
-            case RANDOM:
+            }
+            case RANDOM -> {
                 romHandler.randomizeShopItems(settings);
                 shopsChanged = true;
-                break;
-            default:
-                break;
+            }
+            default -> {
+            }
         }
 
         if (shopsChanged) {
@@ -881,7 +858,7 @@ public class Randomizer {
                             evoStr.append(", ").append(pk.getEvolutionsFrom().get(i).toFullName());
                         }
                     }
-                    log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr.toString());
+                    log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr);
                 }
             }
         }
@@ -1040,7 +1017,7 @@ public class Randomizer {
             }
             log.println("|");
         }
-        log.println("");
+        log.println();
     }
 
     private void logUpdatedEvolutions(final PrintStream log, Set<EvolutionUpdate> updatedEvolutions,
@@ -1057,18 +1034,12 @@ public class Randomizer {
 
     private void logStarters(final PrintStream log) {
 
-        switch(settings.getStartersMod()) {
-            case CUSTOM:
-                log.println("--Custom Starters--");
-                break;
-            case COMPLETELY_RANDOM:
-                log.println("--Random Starters--");
-                break;
-            case RANDOM_WITH_TWO_EVOLUTIONS:
-                log.println("--Random 2-Evolution Starters--");
-                break;
-            default:
-                break;
+        switch (settings.getStartersMod()) {
+            case CUSTOM -> log.println("--Custom Starters--");
+            case COMPLETELY_RANDOM -> log.println("--Random Starters--");
+            case RANDOM_WITH_TWO_EVOLUTIONS -> log.println("--Random 2-Evolution Starters--");
+            default -> {
+            }
         }
 
         List<Pokemon> starters = romHandler.getPickedStarters();
@@ -1085,49 +1056,40 @@ public class Randomizer {
         log.println("--Wild Pokemon--");
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-        List<EncounterSet> encounters = romHandler.getEncounters(useTimeBasedEncounters);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeBasedEncounters);
         int idx = 0;
-        for (EncounterSet es : encounters) {
+        for (EncounterArea area : encounterAreas) {
             idx++;
             log.print("Set #" + idx + " ");
-            if (es.displayName != null) {
-                log.print("- " + es.displayName + " ");
+            if (area.getDisplayName() != null) {
+                log.print("- " + area.getDisplayName() + " ");
             }
-            log.print("(rate=" + es.rate + ")");
+            log.print("(rate=" + area.getRate() + ")");
             log.println();
-            for (Encounter e : es.encounters) {
+            for (Encounter e : area) {
                 StringBuilder sb = new StringBuilder();
-                if (e.isSOS) {
-                    String stringToAppend;
-                    switch (e.sosType) {
-                        case RAIN:
-                            stringToAppend = "Rain SOS: ";
-                            break;
-                        case HAIL:
-                            stringToAppend = "Hail SOS: ";
-                            break;
-                        case SAND:
-                            stringToAppend = "Sand SOS: ";
-                            break;
-                        default:
-                            stringToAppend = "  SOS: ";
-                            break;
-                    }
+                if (e.isSOS()) {
+                    String stringToAppend = switch (e.getSosType()) {
+                        case RAIN -> "Rain SOS: ";
+                        case HAIL -> "Hail SOS: ";
+                        case SAND -> "Sand SOS: ";
+                        default -> "  SOS: ";
+                    };
                     sb.append(stringToAppend);
                 }
-                sb.append(e.pokemon.fullName()).append(" Lv");
-                if (e.maxLevel > 0 && e.maxLevel != e.level) {
-                    sb.append("s ").append(e.level).append("-").append(e.maxLevel);
+                sb.append(e.getPokemon().fullName()).append(" Lv");
+                if (e.getMaxLevel() > 0 && e.getMaxLevel() != e.getLevel()) {
+                    sb.append("s ").append(e.getLevel()).append("-").append(e.getMaxLevel());
                 } else {
-                    sb.append(e.level);
+                    sb.append(e.getLevel());
                 }
                 String whitespaceFormat = romHandler.generationOfPokemon() == 7 ? "%-31s" : "%-25s";
-                log.print(String.format(whitespaceFormat, sb));
+                log.printf(whitespaceFormat, sb);
                 StringBuilder sb2 = new StringBuilder();
                 if (romHandler instanceof Gen1RomHandler) {
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPECIAL %-3d SPEED %-3d", e.pokemon.getHp(), e.pokemon.getAttack(), e.pokemon.getDefense(), e.pokemon.getSpecial(), e.pokemon.getSpeed()));
+                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPECIAL %-3d SPEED %-3d", e.getPokemon().getHp(), e.getPokemon().getAttack(), e.getPokemon().getDefense(), e.getPokemon().getSpecial(), e.getPokemon().getSpeed()));
                 } else {
-                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.pokemon.getHp(), e.pokemon.getAttack(), e.pokemon.getDefense(), e.pokemon.getSpatk(), e.pokemon.getSpdef(), e.pokemon.getSpeed()));
+                    sb2.append(String.format("HP %-3d ATK %-3d DEF %-3d SPATK %-3d SPDEF %-3d SPEED %-3d", e.getPokemon().getHp(), e.getPokemon().getAttack(), e.getPokemon().getDefense(), e.getPokemon().getSpatk(), e.getPokemon().getSpdef(), e.getPokemon().getSpeed()));
                 }
                 log.print(sb2);
                 log.println();

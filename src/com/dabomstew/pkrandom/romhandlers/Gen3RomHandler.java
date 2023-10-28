@@ -1292,14 +1292,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public List<EncounterSet> getEncounters(boolean useTimeOfDay) {
+    public List<EncounterArea> getEncounters(boolean useTimeOfDay) {
         if (!mapLoadingDone) {
             preprocessMaps();
             mapLoadingDone = true;
         }
 
         int startOffs = romEntry.getIntValue("WildPokemon");
-        List<EncounterSet> encounterAreas = new ArrayList<>();
+        List<EncounterArea> encounterAreas = new ArrayList<>();
         Set<Integer> seenOffsets = new TreeSet<>();
         int offs = startOffs;
         while (true) {
@@ -1343,7 +1343,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         int[] battleTrappersBannedAreas = romEntry.getArrayValue("BattleTrappersBanned");
         if (battleTrappersBannedAreas.length > 0) {
-            // Some encounter sets aren't allowed to have Pokemon
+            // Some encounter areas aren't allowed to have Pokemon
             // with Arena Trap, Shadow Tag etc.
             Set<Pokemon> battleTrappers = new HashSet<>();
             for (Pokemon pk : getPokemon()) {
@@ -1352,7 +1352,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
             for (int areaIdx : battleTrappersBannedAreas) {
-                encounterAreas.get(areaIdx).bannedPokemon.addAll(battleTrappers);
+                encounterAreas.get(areaIdx).banAllPokemon(battleTrappers);
             }
         }
         return encounterAreas;
@@ -1364,31 +1364,31 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         .contains(pokemon.getAbility2()));
     }
 
-    private EncounterSet readWildArea(int offset, int numOfEntries, String setName) {
-        EncounterSet thisSet = new EncounterSet();
-        thisSet.rate = rom[offset];
-        thisSet.displayName = setName;
+    private EncounterArea readWildArea(int offset, int numOfEntries, String setName) {
+        EncounterArea area = new EncounterArea();
+        area.setRate(rom[offset]);
+        area.setDisplayName(setName);
         // Grab the *real* pointer to data
         int dataOffset = readPointer(offset + 4);
         // Read the entries
         for (int i = 0; i < numOfEntries; i++) {
             // min, max, species, species
             Encounter enc = new Encounter();
-            enc.level = rom[dataOffset + i * 4];
-            enc.maxLevel = rom[dataOffset + i * 4 + 1];
-            enc.pokemon = pokesInternal[readWord(dataOffset + i * 4 + 2)];
-            thisSet.encounters.add(enc);
+            enc.setLevel(rom[dataOffset + i * 4]);
+            enc.setMaxLevel(rom[dataOffset + i * 4 + 1]);
+            enc.setPokemon(pokesInternal[readWord(dataOffset + i * 4 + 2)]);
+            area.add(enc);
         }
-        return thisSet;
+        return area;
     }
 
     @Override
-    public void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters) {
+    public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounterAreas) {
         // Support Deoxys/Mew catches in E/FR/LG
         attemptObedienceEvolutionPatches();
 
         int startOffs = romEntry.getIntValue("WildPokemon");
-        Iterator<EncounterSet> encounterAreas = encounters.iterator();
+        Iterator<EncounterArea> areaIterator = encounterAreas.iterator();
         Set<Integer> seenOffsets = new TreeSet<>();
         int offs = startOffs;
         while (true) {
@@ -1407,26 +1407,39 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Add pokemanz
             if (grassPokes != -1 && rom[grassPokes] != 0
                     && !seenOffsets.contains(readPointer(grassPokes + 4))) {
-                writeWildArea(grassPokes, Gen3Constants.grassSlots, encounterAreas.next());
+                writeWildArea(grassPokes, Gen3Constants.grassSlots, areaIterator.next());
                 seenOffsets.add(readPointer(grassPokes + 4));
             }
             if (waterPokes != -1 && rom[waterPokes] != 0
                     && !seenOffsets.contains(readPointer(waterPokes + 4))) {
-                writeWildArea(waterPokes, Gen3Constants.surfingSlots, encounterAreas.next());
+                writeWildArea(waterPokes, Gen3Constants.surfingSlots, areaIterator.next());
                 seenOffsets.add(readPointer(waterPokes + 4));
             }
             if (treePokes != -1 && rom[treePokes] != 0
                     && !seenOffsets.contains(readPointer(treePokes + 4))) {
-                writeWildArea(treePokes, Gen3Constants.rockSmashSlots, encounterAreas.next());
+                writeWildArea(treePokes, Gen3Constants.rockSmashSlots, areaIterator.next());
                 seenOffsets.add(readPointer(treePokes + 4));
             }
             if (fishPokes != -1 && rom[fishPokes] != 0
                     && !seenOffsets.contains(readPointer(fishPokes + 4))) {
-                writeWildArea(fishPokes, Gen3Constants.fishingSlots, encounterAreas.next());
+                writeWildArea(fishPokes, Gen3Constants.fishingSlots, areaIterator.next());
                 seenOffsets.add(readPointer(fishPokes + 4));
             }
 
             offs += 20;
+        }
+    }
+
+    private void writeWildArea(int offset, int numOfEntries, EncounterArea area) {
+        // Grab the *real* pointer to data
+        int dataOffset = readPointer(offset + 4);
+        // Write the entries
+        for (int i = 0; i < numOfEntries; i++) {
+            Encounter enc = area.get(i);
+            // min, max, species, species
+            int levels = enc.getLevel() | (enc.getMaxLevel() << 8);
+            writeWord(dataOffset + i * 4, levels);
+            writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.getPokemon().getNumber()]);
         }
     }
 
@@ -1734,19 +1747,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 			}
 		}
 	}
-
-    private void writeWildArea(int offset, int numOfEntries, EncounterSet encounters) {
-        // Grab the *real* pointer to data
-        int dataOffset = readPointer(offset + 4);
-        // Write the entries
-        for (int i = 0; i < numOfEntries; i++) {
-            Encounter enc = encounters.encounters.get(i);
-            // min, max, species, species
-            int levels = enc.level | (enc.maxLevel << 8);
-            writeWord(dataOffset + i * 4, levels);
-            writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.pokemon.getNumber()]);
-        }
-    }
 
     @Override
     public List<Pokemon> getPokemon() {
