@@ -2248,12 +2248,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return null; // TODO: Not implemented
+        return Gen2Constants.regularShopItems;
     }
 
     @Override
     public List<Integer> getOPShopItems() {
-        return null; // TODO: Not implemented
+        return Gen2Constants.opShopItems;
     }
 
     @Override
