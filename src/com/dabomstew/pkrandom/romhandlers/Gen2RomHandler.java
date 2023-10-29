@@ -1154,7 +1154,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean supportsTrainerHeldItems() {
         // Not a technical issue nor a space-based one, Gen II does support held items for trainers.
-        // Rather, getAllHeldItems() etc. needs to be filled.
+        // Rather, getAllHeldItems() etc. needs to be filled. // TODO
         return false;
     }
 
@@ -1869,20 +1869,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return shopMap;
     }
 
-    private final static String crystalShopData = "0412090D0CFF050512090D0CFF0A051213090D0C3331349EFF098A0512111314090D9EFF051211102627FF071211090D0C0A0B";
-
     private List<Shop> readShops() {
         List<Shop> shops = new ArrayList<>();
-
-        int foo = find(rom, crystalShopData) - 0x44;
-        System.out.println("ShopItemOffset=0x" + Integer.toHexString(foo));
 
         int tableOffset = romEntry.getIntValue("ShopItemOffset");
         int shopAmount = romEntry.getIntValue("ShopAmount");
         int shopNum = 0;
         while (shopNum < shopAmount) {
             int shopOffset = readPointer(tableOffset + shopNum * 2, bankOf(tableOffset));
-            shops.add(readShop(shopOffset));
+            Shop shop = readShop(shopOffset);
+            shop.name = Gen2Constants.shopNames.get(shopNum);
+            shops.add(shop);
             shopNum++;
         }
         return shops;
@@ -1929,7 +1926,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setShopPrices() {
-        // Not implemented
+        // TODO: Not implemented
     }
 
     @Override
@@ -1985,7 +1982,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getEvolutionItems() {
-        return null;
+        return Gen2Constants.evolutionItems;
+    }
+
+    @Override
+    public List<Integer> getXItems() {
+        return Gen2Constants.xItems;
     }
 
     @Override
@@ -2246,12 +2248,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return null; // Not implemented
+        return null; // TODO: Not implemented
     }
 
     @Override
     public List<Integer> getOPShopItems() {
-        return null; // Not implemented
+        return null; // TODO: Not implemented
     }
 
     @Override

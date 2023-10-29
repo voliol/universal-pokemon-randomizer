@@ -24,13 +24,13 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Gen2Constants {
 
@@ -135,6 +135,54 @@ public class Gen2Constants {
     public static final byte eggMovesTerminator = (byte) 0xFF;
 
     public static final byte shopItemsTerminator = (byte) 0xFF;
+
+    public static final List<String> shopNames = List.of(
+            "Cherrygrove Poké Mart (Before Pokédex)",
+            "Cherrygrove Poké Mart (After Pokédex)",
+            "Violet Poké Mart",
+            "Azalea Poké Mart",
+            "Cianwood Poké Mart",
+            "Goldenrod Department Store 2F Upper",
+            "Goldenrod Department Store 2F Lower",
+            "Goldenrod Department Store 3F",
+            "Goldenrod Department Store 4F",
+            "Goldenrod Department Store 5F (neither TM02 nor TM08 unlocked)", // TODO: how does this work?
+            "Goldenrod Department Store 5F (TM02 unlocked)",
+            "Goldenrod Department Store 5F (TM08 unlocked)",
+            "Goldenrod Department Store 5F (TM02 and TM08 unlocked)",
+            "Olivine Poké Mart",
+            "Ecruteak Poké Mart",
+            "Mahogany Souvenir Shop (Before Team Rocket HQ)",
+            "Mahogany Souvenir Shop (After Team Rocket HQ)",
+            "Blackthorn Poké Mart",
+            "Viridian Poké Mart",
+            "Pewter Poké Mart",
+            "Cerulean Poké Mart",
+            "Lavender Poké Mart",
+            "Vermilion Poké Mart",
+            "Celadon Department Store 2F Left",
+            "Celadon Department Store 2F Right",
+            "Celadon Department Store 3F",
+            "Celadon Department Store 4F",
+            "Celadon Department Store 5F Left",
+            "Celadon Department Store 5F Right",
+            "Fuchsia Poké Mart",
+            "Saffron Poké Mart",
+            "Mt. Moon Square Shop",
+            "Indigo Plateau Poké Mart",
+            "Goldenrod Tunnel Herb Shop"
+    );
+
+    public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
+            Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
+
+    public static final List<Integer> xItems = List.of(Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
+            Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial);
+
+    public static final List<Integer> consumableHeldItems = List.of(Gen2Items.psnCureBerry, Gen2Items.przCureBerry,
+            Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry, Gen2Items.mintBerry,
+            Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
+            Gen2Items.berryJuice, Gen2Items.berserkGene);
 
     public static final String friendshipValueForEvoLocator = "FEDCDA";
 
