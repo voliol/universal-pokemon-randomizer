@@ -1854,14 +1854,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        return true; // obviously not yet, but needed for testing
+        // shop reading/writing methods and all(?) the required constants are present,
+        // but the randomization logic in AbstractRomHandler does not allow it
+        return false;
     }
 
     @Override
     public Map<Integer, Shop> getShopItems() {
         List<Shop> shops = readShops();
 
-        // TODO no notion of maingame/skip shops (the Mahogany pre-rocket shop should be a skip)
+        // no notion of skip shops
         Map<Integer, Shop> shopMap = new HashMap<>();
         for (int i = 0; i < shops.size(); i++) {
             shopMap.put(i, shops.get(i));
@@ -1927,7 +1929,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setShopPrices() {
-        // TODO: Not implemented
+        // Not implemented
     }
 
     @Override
