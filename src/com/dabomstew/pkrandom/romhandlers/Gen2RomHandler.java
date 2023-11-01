@@ -1154,7 +1154,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean supportsTrainerHeldItems() {
         // Not a technical issue nor a space-based one, Gen II does support held items for trainers.
-        // Rather, getAllHeldItems() etc. needs to be filled.
+        // Rather, getAllHeldItems() etc. needs to be filled. // TODO
         return false;
     }
 
@@ -1854,17 +1854,77 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
+        // shop reading/writing methods and all(?) the required constants are present,
+        // but the randomization logic in AbstractRomHandler does not allow it
         return false;
     }
 
     @Override
     public Map<Integer, Shop> getShopItems() {
-        return null; // Not implemented
+        List<Shop> shops = readShops();
+
+        // no notion of skip shops
+        Map<Integer, Shop> shopMap = new HashMap<>();
+        for (int i = 0; i < shops.size(); i++) {
+            shopMap.put(i, shops.get(i));
+        }
+        return shopMap;
+    }
+
+    private List<Shop> readShops() {
+        List<Shop> shops = new ArrayList<>();
+
+        int tableOffset = romEntry.getIntValue("ShopItemOffset");
+        int shopAmount = romEntry.getIntValue("ShopAmount");
+        int shopNum = 0;
+        while (shopNum < shopAmount) {
+            int shopOffset = readPointer(tableOffset + shopNum * 2, bankOf(tableOffset));
+            Shop shop = readShop(shopOffset);
+            shop.name = Gen2Constants.shopNames.get(shopNum);
+            shop.isMainGame = Gen2Constants.mainGameShops.contains(shopNum);
+            shops.add(shop);
+            shopNum++;
+        }
+        return shops;
+    }
+
+    private Shop readShop(int offset) {
+        Shop shop = new Shop();
+        shop.items = new ArrayList<>();
+        int itemAmount = rom[offset++];
+        for (int itemNum = 0; itemNum < itemAmount; itemNum++) {
+            shop.items.add((int) rom[offset++] & 0xFF);
+        }
+        if (rom[offset] != Gen2Constants.shopItemsTerminator) {
+            throw new RandomizerIOException("Invalid shop data");
+        }
+        return shop;
     }
 
     @Override
     public void setShopItems(Map<Integer, Shop> shopItems) {
-        // Not implemented
+        int tableOffset = romEntry.getIntValue("ShopItemOffset");
+
+        for (Map.Entry<Integer, Shop> entry : shopItems.entrySet()) {
+            int shopNum = entry.getKey();
+            Shop shop = entry.getValue();
+            new GBDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
+                    this::lengthOfShopAt);
+        }
+    }
+
+    private byte[] shopToBytes(Shop shop) {
+        byte[] data = new byte[shop.items.size() + 2];
+        data[0] = (byte) shop.items.size();
+        for (int i = 0; i < shop.items.size(); i++) {
+            data[i + 1] = (byte) (shop.items.get(i) & 0xFF);
+        }
+        data[data.length - 1] = (byte) 0xFF;
+        return data;
+    }
+
+    private int lengthOfShopAt(int offset) {
+        return shopToBytes(readShop(offset)).length;
     }
 
     @Override
@@ -1925,7 +1985,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getEvolutionItems() {
-        return null;
+        return Gen2Constants.evolutionItems;
+    }
+
+    @Override
+    public List<Integer> getXItems() {
+        return Gen2Constants.xItems;
     }
 
     @Override
@@ -2186,12 +2251,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getRegularShopItems() {
-        return null; // Not implemented
+        return Gen2Constants.regularShopItems;
     }
 
     @Override
     public List<Integer> getOPShopItems() {
-        return null; // Not implemented
+        return Gen2Constants.opShopItems;
     }
 
     @Override
