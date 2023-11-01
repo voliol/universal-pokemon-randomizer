@@ -1879,6 +1879,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int shopOffset = readPointer(tableOffset + shopNum * 2, bankOf(tableOffset));
             Shop shop = readShop(shopOffset);
             shop.name = Gen2Constants.shopNames.get(shopNum);
+            shop.isMainGame = Gen2Constants.mainGameShops.contains(shopNum);
             shops.add(shop);
             shopNum++;
         }

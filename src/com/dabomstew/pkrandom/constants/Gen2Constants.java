@@ -173,6 +173,9 @@ public class Gen2Constants {
             "Goldenrod Tunnel Herb Shop"
     );
 
+    public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24, 29, 30, 32);
+
     public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
             Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
 
