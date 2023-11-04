@@ -28,10 +28,7 @@ import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Gen2Constants {
 
@@ -183,17 +180,27 @@ public class Gen2Constants {
     public static final List<Integer> xItems = List.of(Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
             Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial);
 
-    public static final List<Integer> consumableHeldItems = List.of(Gen2Items.psnCureBerry, Gen2Items.przCureBerry,
-            Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry, Gen2Items.mintBerry,
-            Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
-            Gen2Items.berryJuice, Gen2Items.berserkGene);
+    public static final List<Integer> generalPurposeConsumableItems = List.of(Gen2Items.psnCureBerry,
+            Gen2Items.przCureBerry, Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry,
+            Gen2Items.mintBerry,Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
+            Gen2Items.berryJuice);
+
+    public static final List<Integer> consumableHeldItems = setupConsumableHeldItems();
+
+    private static List<Integer> setupConsumableHeldItems() {
+        List<Integer> consumableHeldItems = new ArrayList<>(generalPurposeConsumableItems);
+        consumableHeldItems.add(Gen2Items.berserkGene);
+        return Collections.unmodifiableList(consumableHeldItems);
+    }
+
+    public static final List<Integer> generalPurposeItems = List.of(Gen2Items.brightPowder, Gen2Items.quickClaw,
+            Gen2Items.kingsRock, Gen2Items.smokeBall);
 
     public static final List<Integer> allHeldItems = setupAllHeldItems();
 
     private static List<Integer> setupAllHeldItems() {
-        List<Integer> allHeldItems = new ArrayList<>();
-        allHeldItems.addAll(List.of(Gen2Items.brightPowder, Gen2Items.quickClaw, Gen2Items.kingsRock,
-                Gen2Items.smokeBall,
+        List<Integer> allHeldItems = new ArrayList<>(generalPurposeItems);
+        allHeldItems.addAll(List.of(
                 // type-boosting items
                 Gen2Items.blackbelt, Gen2Items.blackGlasses, Gen2Items.charcoal, Gen2Items.dragonScale,
                 Gen2Items.hardStone, Gen2Items.magnet, Gen2Items.metalCoat, Gen2Items.miracleSeed,
@@ -202,6 +209,44 @@ public class Gen2Constants {
                 Gen2Items.twistedSpoon));
         allHeldItems.addAll(consumableHeldItems);
         return Collections.unmodifiableList(allHeldItems);
+    }
+
+    public static final Map<Type, List<Integer>> typeBoostingItems = initializeTypeBoostingItems();
+
+    private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
+        Map<Type, List<Integer>> map = new HashMap<>();
+        map.put(Type.BUG, List.of(Gen2Items.silverPowder));
+        map.put(Type.DARK, List.of(Gen2Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Gen2Items.dragonScale)); // NOT Dragon Fang due to a bug in the game's code
+        map.put(Type.ELECTRIC, List.of(Gen2Items.magnet));
+        map.put(Type.FIGHTING, List.of(Gen2Items.blackbelt));
+        map.put(Type.FIRE, List.of(Gen2Items.charcoal));
+        map.put(Type.FLYING, List.of(Gen2Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Gen2Items.spellTag));
+        map.put(Type.GRASS, List.of(Gen2Items.miracleSeed));
+        map.put(Type.GROUND, List.of(Gen2Items.softSand));
+        map.put(Type.ICE, List.of(Gen2Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Gen2Items.pinkBow, Gen2Items.polkadotBow));
+        map.put(Type.POISON, List.of(Gen2Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Gen2Items.twistedSpoon));
+        map.put(Type.ROCK, List.of(Gen2Items.hardStone));
+        map.put(Type.STEEL, List.of(Gen2Items.metalCoat));
+        map.put(Type.WATER, List.of(Gen2Items.mysticWater));
+        map.put(null, Collections.emptyList()); // ??? type
+        return Collections.unmodifiableMap(map);
+    }
+
+    public static final Map<Integer, List<Integer>> speciesBoostingItems = initializeSpeciesBoostingItems();
+
+    private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        map.put(Species.pikachu, List.of(Gen2Items.lightBall));
+        map.put(Species.chansey, List.of(Gen2Items.luckyPunch));
+        map.put(Species.ditto, List.of(Gen2Items.metalPowder));
+        map.put(Species.cubone, List.of(Gen2Items.thickClub));
+        map.put(Species.marowak, List.of(Gen2Items.thickClub));
+        map.put(Species.farfetchd, List.of(Gen2Items.stick));
+        return Collections.unmodifiableMap(map);
     }
 
     public static final List<Integer> regularShopItems = List.of(Gen2Items.pokeBall, Gen2Items.greatBall,

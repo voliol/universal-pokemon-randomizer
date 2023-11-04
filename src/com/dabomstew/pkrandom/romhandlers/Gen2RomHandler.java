@@ -1155,7 +1155,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public boolean supportsTrainerHeldItems() {
         // Not a technical issue nor a space-based one, Gen II does support held items for trainers.
         // Rather, getAllHeldItems() etc. needs to be filled. // TODO
-        return false;
+        return true;
     }
 
     @Override
@@ -1166,6 +1166,31 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public List<Integer> getAllHeldItems() {
         return Gen2Constants.allHeldItems;
+    }
+
+    @Override
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+        List<Integer> items = new ArrayList<>(Gen2Constants.generalPurposeConsumableItems);
+
+        if (!consumableOnly) {
+            items.addAll(Gen2Constants.generalPurposeItems);
+
+            for (int moveIdx : pokeMoves) {
+                Move move = moves.get(moveIdx);
+                if (move == null) {
+                    continue;
+                }
+                items.addAll(Gen2Constants.typeBoostingItems.get(move.type));
+            }
+
+            List<Integer> speciesItems = Gen2Constants.speciesBoostingItems.get(tp.pokemon.getNumber());
+            if (speciesItems != null) {
+                for (int i = 0; i < 6; i++) {  // Increase the likelihood of using species specific items.
+                    items.addAll(speciesItems);
+                }
+            }
+        }
+        return items;
     }
 
     @Override
