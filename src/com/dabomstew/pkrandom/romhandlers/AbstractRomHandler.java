@@ -6536,6 +6536,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         return List.of(0);
     }
 
+    /**
+     * Returns a list of item IDs of all items that may have an effect for enemy trainers in battle.<br>
+     * So e.g. Everstone is excluded, but also Metal Powder or other items that only have effects for
+     * certain Pokémon species, since when picked for any other Pokémon they will do nothing.
+     */
     @Override
     public List<Integer> getAllHeldItems() {
         return List.of(0);

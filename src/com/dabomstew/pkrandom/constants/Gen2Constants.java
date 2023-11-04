@@ -28,6 +28,7 @@ import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -186,6 +187,22 @@ public class Gen2Constants {
             Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry, Gen2Items.mintBerry,
             Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
             Gen2Items.berryJuice, Gen2Items.berserkGene);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> allHeldItems = new ArrayList<>();
+        allHeldItems.addAll(List.of(Gen2Items.brightPowder, Gen2Items.quickClaw, Gen2Items.kingsRock,
+                Gen2Items.smokeBall,
+                // type-boosting items
+                Gen2Items.blackbelt, Gen2Items.blackGlasses, Gen2Items.charcoal, Gen2Items.dragonScale,
+                Gen2Items.hardStone, Gen2Items.magnet, Gen2Items.metalCoat, Gen2Items.miracleSeed,
+                Gen2Items.mysticWater, Gen2Items.neverMeltIce, Gen2Items.pinkBow, Gen2Items.polkadotBow,
+                Gen2Items.sharpBeak, Gen2Items.silverPowder, Gen2Items.softSand, Gen2Items.spellTag,
+                Gen2Items.twistedSpoon));
+        allHeldItems.addAll(consumableHeldItems);
+        return Collections.unmodifiableList(allHeldItems);
+    }
 
     public static final List<Integer> regularShopItems = List.of(Gen2Items.pokeBall, Gen2Items.greatBall,
             Gen2Items.ultraBall, Gen2Items.potion, Gen2Items.superPotion, Gen2Items.hyperPotion, Gen2Items.maxPotion,

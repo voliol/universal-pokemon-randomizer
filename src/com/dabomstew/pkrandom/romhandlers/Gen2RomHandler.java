@@ -1159,6 +1159,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen2Constants.consumableHeldItems;
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Gen2Constants.allHeldItems;
+    }
+
+    @Override
     public List<Pokemon> getPokemon() {
         return pokemonList;
     }
