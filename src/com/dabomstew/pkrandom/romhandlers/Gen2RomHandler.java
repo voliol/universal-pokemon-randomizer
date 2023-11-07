@@ -1152,10 +1152,20 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean supportsTrainerHeldItems() {
-        // Not a technical issue nor a space-based one, Gen II does support held items for trainers.
-        // Rather, getAllHeldItems() etc. needs to be filled. // TODO
-        return true;
+    public boolean canAddHeldItemsToBossTrainers() {
+        return romEntry.isNonJapanese();
+    }
+
+    @Override
+    public boolean canAddHeldItemsToImportantTrainers() {
+        return romEntry.isNonJapanese();
+    }
+
+    @Override
+    public boolean canAddHeldItemsToRegularTrainers() {
+        // there should be enough space in the trainer data bank for the international Crystal versions,
+        // but the randomizer needs better space allocation methods to use it
+        return romEntry.isNonJapanese() && !romEntry.isCrystal();
     }
 
     @Override

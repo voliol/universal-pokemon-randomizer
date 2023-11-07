@@ -260,7 +260,11 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(Settings settings);
 
-    boolean supportsTrainerHeldItems();
+    boolean canAddHeldItemsToBossTrainers();
+
+    boolean canAddHeldItemsToImportantTrainers();
+
+    boolean canAddHeldItemsToRegularTrainers();
 
     void randomizeTrainerHeldItems(Settings settings);
 

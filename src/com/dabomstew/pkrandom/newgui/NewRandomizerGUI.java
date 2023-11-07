@@ -2432,20 +2432,23 @@ public class NewRandomizerGUI {
             tpRegularTrainersCheckBox.setEnabled(false);
             tpRegularTrainersSpinner.setVisible(canAddPokesToRegular);
 
-            boolean trainersHeldItemSupport = romHandler.supportsTrainerHeldItems();
+            boolean canAddHeldItemsToBoss = romHandler.canAddHeldItemsToBossTrainers();
+            boolean canAddHeldItemsToImportant = romHandler.canAddPokemonToImportantTrainers();
+            boolean canAddHeldItemsToRegular = romHandler.canAddHeldItemsToRegularTrainers();
+            boolean heldItemsAvailable = canAddHeldItemsToBoss || canAddHeldItemsToImportant || canAddHeldItemsToRegular;
 
-            tpHeldItemsLabel.setVisible(trainersHeldItemSupport);
-            tpBossTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpHeldItemsLabel.setVisible(heldItemsAvailable);
+            tpBossTrainersItemsCheckBox.setVisible(canAddHeldItemsToBoss);
             tpBossTrainersItemsCheckBox.setEnabled(false);
-            tpImportantTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpImportantTrainersItemsCheckBox.setVisible(canAddHeldItemsToImportant);
             tpImportantTrainersItemsCheckBox.setEnabled(false);
-            tpRegularTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpRegularTrainersItemsCheckBox.setVisible(canAddHeldItemsToRegular);
             tpRegularTrainersItemsCheckBox.setEnabled(false);
-            tpConsumableItemsOnlyCheckBox.setVisible(trainersHeldItemSupport);
+            tpConsumableItemsOnlyCheckBox.setVisible(heldItemsAvailable);
             tpConsumableItemsOnlyCheckBox.setEnabled(false);
-            tpSensibleItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpSensibleItemsCheckBox.setVisible(heldItemsAvailable);
             tpSensibleItemsCheckBox.setEnabled(false);
-            tpHighestLevelGetsItemCheckBox.setVisible(trainersHeldItemSupport);
+            tpHighestLevelGetsItemCheckBox.setVisible(heldItemsAvailable);
             tpHighestLevelGetsItemCheckBox.setEnabled(false);
 
             tpEliteFourUniquePokemonCheckBox.setVisible(pokemonGeneration >= 3);

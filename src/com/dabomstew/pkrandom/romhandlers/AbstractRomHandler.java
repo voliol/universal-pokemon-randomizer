@@ -1280,9 +1280,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public boolean supportsTrainerHeldItems() {
-        return true; // because it's likely just Gen I which doesn't
-        // (Gen II doesn't either atm, but that's just because item indexes are missing)
+    public boolean canAddHeldItemsToBossTrainers() {
+        return true;
+    }
+
+    @Override
+    public boolean canAddHeldItemsToImportantTrainers() {
+        return true;
+    }
+
+    @Override
+    public boolean canAddHeldItemsToRegularTrainers() {
+        return true;
     }
 
     @Override
