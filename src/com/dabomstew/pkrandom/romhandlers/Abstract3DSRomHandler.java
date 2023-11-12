@@ -349,10 +349,6 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		}
 	}
 
-	protected void loadPokemonPalettes() {
-		// not applicable
-	}
-
 	@Override
 	public void savePokemonPalettes() {
 		// not applicable

@@ -1717,6 +1717,16 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay, boolean catchEmAll,
+                                    boolean typeThemed, boolean usePowerLevels, boolean noLegendaries,
+                                    boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
+                                    boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
+        // TODO: do some extra steps for ORAS. The code needed is found old commits.
+        super.randomizeEncounters(mode, useTimeOfDay, catchEmAll, typeThemed, usePowerLevels, noLegendaries,
+                balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
+    }
+
+    @Override
     public List<Trainer> getTrainers() {
         List<Trainer> allTrainers = new ArrayList<>();
         boolean isORAS = romEntry.getRomType() == Gen6Constants.Type_ORAS;
@@ -4054,7 +4064,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         int ability = this.getAbilityForTrainerPokemon(tp);
         if (ability == Abilities.levitate) {
-            items.removeAll(Arrays.asList(Items.shucaBerry));
+            items.removeAll(List.of(Items.shucaBerry));
         } else if (byType.get(Type.GROUND) == Effectiveness.DOUBLE || byType.get(Type.GROUND) == Effectiveness.QUADRUPLE) {
             items.add(Items.airBalloon);
         }

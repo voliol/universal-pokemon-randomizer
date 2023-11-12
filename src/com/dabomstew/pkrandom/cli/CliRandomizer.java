@@ -7,6 +7,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -45,11 +46,7 @@ public class CliRandomizer {
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream log;
-        try {
-            log = new PrintStream(baos, false, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log = new PrintStream(baos);
-        }
+        log = new PrintStream(baos, false, StandardCharsets.UTF_8);
 
         final PrintStream verboseLog = log;
 

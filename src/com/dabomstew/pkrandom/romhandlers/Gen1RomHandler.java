@@ -1315,7 +1315,17 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean supportsTrainerHeldItems() {
+    public boolean canAddHeldItemsToBossTrainers() {
+        return false;
+    }
+
+    @Override
+    public boolean canAddHeldItemsToImportantTrainers() {
+        return false;
+    }
+
+    @Override
+    public boolean canAddHeldItemsToRegularTrainers() {
         return false;
     }
 

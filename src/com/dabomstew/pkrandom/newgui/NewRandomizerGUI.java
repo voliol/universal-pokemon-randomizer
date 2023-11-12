@@ -48,6 +48,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -148,10 +149,9 @@ public class NewRandomizerGUI {
     private JRadioButton wpRandomRadioButton;
     private JRadioButton wpArea1To1RadioButton;
     private JRadioButton wpGlobal1To1RadioButton;
-    private JRadioButton wpARNoneRadioButton;
-    private JRadioButton wpARSimilarStrengthRadioButton;
-    private JRadioButton wpARCatchEmAllModeRadioButton;
-    private JRadioButton wpARTypeThemeAreasRadioButton;
+    private JCheckBox wpSimilarStrengthCheckBox;
+    private JCheckBox wpCatchEmAllModeCheckBox;
+    private JCheckBox wpTypeThemeAreasCheckBox;
     private JCheckBox wpUseTimeBasedEncountersCheckBox;
     private JCheckBox wpDontUseLegendariesCheckBox;
     private JCheckBox wpSetMinimumCatchRateCheckBox;
@@ -470,6 +470,7 @@ public class NewRandomizerGUI {
         wpRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpArea1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpGlobal1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpSimilarStrengthCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpSetMinimumCatchRateCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -1038,11 +1039,7 @@ public class NewRandomizerGUI {
         // Setup verbose log
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream log;
-        try {
-            log = new PrintStream(baos, false, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log = new PrintStream(baos);
-        }
+        log = new PrintStream(baos, false, StandardCharsets.UTF_8);
 
         final PrintStream verboseLog = log;
 
@@ -1617,12 +1614,9 @@ public class NewRandomizerGUI {
         totpPercentageLevelModifierCheckBox.setSelected(settings.isTotemLevelsModified());
         totpPercentageLevelModifierSlider.setValue(settings.getTotemLevelModifier());
 
-        wpARCatchEmAllModeRadioButton
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL);
+        wpCatchEmAllModeCheckBox.setSelected(settings.isCatchEmAllEncounters());
         wpArea1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
-        wpARNoneRadioButton.setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.NONE);
-        wpARTypeThemeAreasRadioButton
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS);
+        wpTypeThemeAreasCheckBox.setSelected(settings.isTypeThemeEncounterAreas());
         wpGlobal1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
         wpRandomRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
         wpUnchangedRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
@@ -1631,8 +1625,7 @@ public class NewRandomizerGUI {
         wpSetMinimumCatchRateCheckBox.setSelected(settings.isUseMinimumCatchRate());
         wpSetMinimumCatchRateSlider.setValue(settings.getMinimumCatchRateLevel());
         wpDontUseLegendariesCheckBox.setSelected(settings.isBlockWildLegendaries());
-        wpARSimilarStrengthRadioButton
-                .setSelected(settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH);
+        wpSimilarStrengthCheckBox.setSelected(settings.isSimilarStrengthEncounters());
         wpRandomizeHeldItemsCheckBox.setSelected(settings.isRandomizeWildPokemonHeldItems());
         wpBanBadItemsCheckBox.setSelected(settings.isBanBadRandomWildPokemonHeldItems());
         wpBalanceShakingGrassPokemonCheckBox.setSelected(settings.isBalanceShakingGrass());
@@ -1855,8 +1848,9 @@ public class NewRandomizerGUI {
 
         settings.setWildPokemonMod(wpUnchangedRadioButton.isSelected(), wpRandomRadioButton.isSelected(), wpArea1To1RadioButton.isSelected(),
                 wpGlobal1To1RadioButton.isSelected());
-        settings.setWildPokemonRestrictionMod(wpARNoneRadioButton.isSelected(), wpARSimilarStrengthRadioButton.isSelected(),
-                wpARCatchEmAllModeRadioButton.isSelected(), wpARTypeThemeAreasRadioButton.isSelected());
+        settings.setTypeThemeEncounterAreas(wpTypeThemeAreasCheckBox.isSelected());
+        settings.setCatchEmAllEncounters(wpCatchEmAllModeCheckBox.isSelected());
+        settings.setTypeThemeEncounterAreas(wpTypeThemeAreasCheckBox.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeBasedEncountersCheckBox.isSelected());
         settings.setUseMinimumCatchRate(wpSetMinimumCatchRateCheckBox.isSelected());
         settings.setMinimumCatchRateLevel(wpSetMinimumCatchRateSlider.getValue());
@@ -2031,7 +2025,7 @@ public class NewRandomizerGUI {
         if (data.length != Settings.LENGTH_OF_SETTINGS_DATA + 9 + nameLength) {
             return null; // not valid length
         }
-        return new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, "US-ASCII");
+        return new String(data, Settings.LENGTH_OF_SETTINGS_DATA + 1, nameLength, StandardCharsets.US_ASCII);
     }
 
     private void initialState() {
@@ -2203,12 +2197,12 @@ public class NewRandomizerGUI {
 		totpPercentageLevelModifierSlider.setEnabled(false);
 		totpPercentageLevelModifierSlider.setValue(0);
 
-		Arrays.asList(wpUnchangedRadioButton, wpRandomRadioButton, wpArea1To1RadioButton, wpGlobal1To1RadioButton,
-				wpARNoneRadioButton, wpARSimilarStrengthRadioButton, wpARCatchEmAllModeRadioButton,
-				wpARTypeThemeAreasRadioButton, wpUseTimeBasedEncountersCheckBox, wpDontUseLegendariesCheckBox,
-				wpSetMinimumCatchRateCheckBox, wpRandomizeHeldItemsCheckBox, wpBanBadItemsCheckBox,
-				wpBalanceShakingGrassPokemonCheckBox, wpPercentageLevelModifierCheckBox, wpAllowAltFormesCheckBox)
-				.forEach(this::setInitialButtonState);
+        Arrays.asList(wpUnchangedRadioButton, wpRandomRadioButton, wpArea1To1RadioButton, wpGlobal1To1RadioButton,
+                        wpSimilarStrengthCheckBox, wpCatchEmAllModeCheckBox,
+                        wpTypeThemeAreasCheckBox, wpUseTimeBasedEncountersCheckBox, wpDontUseLegendariesCheckBox,
+                        wpSetMinimumCatchRateCheckBox, wpRandomizeHeldItemsCheckBox, wpBanBadItemsCheckBox,
+                        wpBalanceShakingGrassPokemonCheckBox, wpPercentageLevelModifierCheckBox, wpAllowAltFormesCheckBox)
+                .forEach(this::setInitialButtonState);
 		wpSetMinimumCatchRateSlider.setVisible(true);
 		wpSetMinimumCatchRateSlider.setEnabled(false);
 		wpSetMinimumCatchRateSlider.setValue(wpSetMinimumCatchRateSlider.getMinimum());
@@ -2471,20 +2465,23 @@ public class NewRandomizerGUI {
             tpRegularTrainersCheckBox.setEnabled(false);
             tpRegularTrainersSpinner.setVisible(canAddPokesToRegular);
 
-            boolean trainersHeldItemSupport = romHandler.supportsTrainerHeldItems();
+            boolean canAddHeldItemsToBoss = romHandler.canAddHeldItemsToBossTrainers();
+            boolean canAddHeldItemsToImportant = romHandler.canAddPokemonToImportantTrainers();
+            boolean canAddHeldItemsToRegular = romHandler.canAddHeldItemsToRegularTrainers();
+            boolean heldItemsAvailable = canAddHeldItemsToBoss || canAddHeldItemsToImportant || canAddHeldItemsToRegular;
 
-            tpHeldItemsLabel.setVisible(trainersHeldItemSupport);
-            tpBossTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpHeldItemsLabel.setVisible(heldItemsAvailable);
+            tpBossTrainersItemsCheckBox.setVisible(canAddHeldItemsToBoss);
             tpBossTrainersItemsCheckBox.setEnabled(false);
-            tpImportantTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpImportantTrainersItemsCheckBox.setVisible(canAddHeldItemsToImportant);
             tpImportantTrainersItemsCheckBox.setEnabled(false);
-            tpRegularTrainersItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpRegularTrainersItemsCheckBox.setVisible(canAddHeldItemsToRegular);
             tpRegularTrainersItemsCheckBox.setEnabled(false);
-            tpConsumableItemsOnlyCheckBox.setVisible(trainersHeldItemSupport);
+            tpConsumableItemsOnlyCheckBox.setVisible(heldItemsAvailable);
             tpConsumableItemsOnlyCheckBox.setEnabled(false);
-            tpSensibleItemsCheckBox.setVisible(trainersHeldItemSupport);
+            tpSensibleItemsCheckBox.setVisible(heldItemsAvailable);
             tpSensibleItemsCheckBox.setEnabled(false);
-            tpHighestLevelGetsItemCheckBox.setVisible(trainersHeldItemSupport);
+            tpHighestLevelGetsItemCheckBox.setVisible(heldItemsAvailable);
             tpHighestLevelGetsItemCheckBox.setEnabled(false);
 
             tpEliteFourUniquePokemonCheckBox.setVisible(pokemonGeneration >= 3);
@@ -2525,8 +2522,6 @@ public class NewRandomizerGUI {
             wpRandomRadioButton.setEnabled(true);
             wpArea1To1RadioButton.setEnabled(true);
             wpGlobal1To1RadioButton.setEnabled(true);
-
-            wpARNoneRadioButton.setSelected(true);
 
             wpUseTimeBasedEncountersCheckBox.setVisible(romHandler.hasTimeBasedEncounters());
             wpSetMinimumCatchRateCheckBox.setEnabled(true);
@@ -3159,33 +3154,26 @@ public class NewRandomizerGUI {
         }
 
         if (wpRandomRadioButton.isSelected()) {
-            wpARNoneRadioButton.setEnabled(true);
-            wpARSimilarStrengthRadioButton.setEnabled(true);
-            wpARCatchEmAllModeRadioButton.setEnabled(true);
-            wpARTypeThemeAreasRadioButton.setEnabled(true);
-            wpBalanceShakingGrassPokemonCheckBox.setEnabled(true);
+            wpSimilarStrengthCheckBox.setEnabled(true);
+            wpCatchEmAllModeCheckBox.setEnabled(true);
+            wpTypeThemeAreasCheckBox.setEnabled(true);
         } else if (wpArea1To1RadioButton.isSelected()) {
-            wpARNoneRadioButton.setEnabled(true);
-            wpARSimilarStrengthRadioButton.setEnabled(true);
-            wpARCatchEmAllModeRadioButton.setEnabled(true);
-            wpARTypeThemeAreasRadioButton.setEnabled(true);
-            wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
+            wpSimilarStrengthCheckBox.setEnabled(true);
+            wpCatchEmAllModeCheckBox.setEnabled(true);
+            wpTypeThemeAreasCheckBox.setEnabled(true);
         } else if (wpGlobal1To1RadioButton.isSelected()) {
-            if (wpARCatchEmAllModeRadioButton.isSelected() || wpARTypeThemeAreasRadioButton.isSelected()) {
-                wpARNoneRadioButton.setSelected(true);
-            }
-            wpARNoneRadioButton.setEnabled(true);
-            wpARSimilarStrengthRadioButton.setEnabled(true);
-            wpARCatchEmAllModeRadioButton.setEnabled(false);
-            wpARTypeThemeAreasRadioButton.setEnabled(false);
-            wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
+            wpSimilarStrengthCheckBox.setEnabled(true);
+            wpCatchEmAllModeCheckBox.setEnabled(false);
+            wpCatchEmAllModeCheckBox.setSelected(false);
+            wpTypeThemeAreasCheckBox.setEnabled(false);
+            wpTypeThemeAreasCheckBox.setSelected(false);
         } else {
-            wpARNoneRadioButton.setEnabled(false);
-            wpARNoneRadioButton.setSelected(true);
-            wpARSimilarStrengthRadioButton.setEnabled(false);
-            wpARCatchEmAllModeRadioButton.setEnabled(false);
-            wpARTypeThemeAreasRadioButton.setEnabled(false);
-            wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
+            wpSimilarStrengthCheckBox.setEnabled(false);
+            wpSimilarStrengthCheckBox.setSelected(false);
+            wpCatchEmAllModeCheckBox.setEnabled(false);
+            wpCatchEmAllModeCheckBox.setSelected(false);
+            wpTypeThemeAreasCheckBox.setEnabled(false);
+            wpTypeThemeAreasCheckBox.setSelected(false);
         }
 
         if (wpUnchangedRadioButton.isSelected()) {
@@ -3199,6 +3187,13 @@ public class NewRandomizerGUI {
             wpUseTimeBasedEncountersCheckBox.setEnabled(true);
             wpDontUseLegendariesCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setEnabled(true);
+        }
+
+        if (wpSimilarStrengthCheckBox.isSelected() && !wpGlobal1To1RadioButton.isSelected()) {
+            wpBalanceShakingGrassPokemonCheckBox.setEnabled(true);
+        } else {
+            wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
+            wpBalanceShakingGrassPokemonCheckBox.setSelected(false);
         }
 
         if (wpRandomizeHeldItemsCheckBox.isSelected()
@@ -3578,7 +3573,7 @@ public class NewRandomizerGUI {
         }
 
         try {
-            Scanner sc = new Scanner(fh, "UTF-8");
+            Scanner sc = new Scanner(fh, StandardCharsets.UTF_8);
             boolean isReadingUpdates = false;
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
@@ -3650,7 +3645,7 @@ public class NewRandomizerGUI {
         }
 
         try {
-            PrintStream ps = new PrintStream(new FileOutputStream(fh), true, "UTF-8");
+            PrintStream ps = new PrintStream(new FileOutputStream(fh), true, StandardCharsets.UTF_8);
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
             ps.println("unloadgameonsuccess=" + unloadGameOnSuccess);

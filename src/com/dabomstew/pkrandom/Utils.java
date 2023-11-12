@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.zip.CRC32;
 
@@ -119,7 +120,7 @@ public class Utils {
         URL location = NewRandomizerGUI.class.getProtectionDomain().getCodeSource().getLocation();
         String file = location.getFile();
         String plusEncoded = file.replaceAll("\\+", "%2b");
-        return new File(java.net.URLDecoder.decode(plusEncoded, "UTF-8"));
+        return new File(java.net.URLDecoder.decode(plusEncoded, StandardCharsets.UTF_8));
     }
 
     public static class InvalidROMException extends Exception {

@@ -225,13 +225,7 @@ public interface RomHandler {
 
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
-    void randomEncounters(Settings settings);
-
-    void area1to1Encounters(Settings settings);
-
-    void game1to1Encounters(Settings settings);
-
-    void onlyChangeWildLevels(Settings settings);
+    void randomizeEncounters(Settings settings);
 
     boolean hasTimeBasedEncounters();
 
@@ -267,7 +261,11 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(Settings settings);
 
-    boolean supportsTrainerHeldItems();
+    boolean canAddHeldItemsToBossTrainers();
+
+    boolean canAddHeldItemsToImportantTrainers();
+
+    boolean canAddHeldItemsToRegularTrainers();
 
     void randomizeTrainerHeldItems(Settings settings);
 

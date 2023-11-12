@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.newnds;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -105,7 +106,7 @@ public class NDSRom {
 
         byte[] sig = new byte[4];
         baseRom.readFully(sig);
-        this.romCode = new String(sig, "US-ASCII");
+        this.romCode = new String(sig, StandardCharsets.US_ASCII);
 
         baseRom.seek(0x1E);
         this.version = baseRom.readByte();
@@ -613,7 +614,7 @@ public class NDSRom {
             int namelen = control & 0x7F;
             byte[] rawname = new byte[namelen];
             baseRom.readFully(rawname);
-            String name = new String(rawname, "US-ASCII");
+            String name = new String(rawname, StandardCharsets.US_ASCII);
             if ((control & 0x80) > 0x00) {
                 // sub-directory
                 int subDirectoryID = readFromFile(baseRom, 2);

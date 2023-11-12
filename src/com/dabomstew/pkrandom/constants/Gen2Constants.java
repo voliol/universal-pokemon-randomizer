@@ -24,14 +24,12 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
+
+import java.util.*;
 
 public class Gen2Constants {
 
@@ -135,6 +133,176 @@ public class Gen2Constants {
     // probably the terminator for all move-lists, like TM/HM compatibility
     public static final byte eggMovesTerminator = (byte) 0xFF;
 
+    public static final byte shopItemsTerminator = (byte) 0xFF;
+
+    public static final List<String> shopNames = List.of(
+            "Cherrygrove Poké Mart (Before Pokédex)",
+            "Cherrygrove Poké Mart (After Pokédex)",
+            "Violet Poké Mart",
+            "Azalea Poké Mart",
+            "Cianwood Poké Mart",
+            "Goldenrod Department Store 2F Upper",
+            "Goldenrod Department Store 2F Lower",
+            "Goldenrod Department Store 3F",
+            "Goldenrod Department Store 4F",
+            "Goldenrod Department Store 5F (neither TM02 nor TM08 unlocked)", // TODO: how does this work?
+            "Goldenrod Department Store 5F (TM02 unlocked)",
+            "Goldenrod Department Store 5F (TM08 unlocked)",
+            "Goldenrod Department Store 5F (TM02 and TM08 unlocked)",
+            "Olivine Poké Mart",
+            "Ecruteak Poké Mart",
+            "Mahogany Souvenir Shop (Before Team Rocket HQ)",
+            "Mahogany Souvenir Shop (After Team Rocket HQ)",
+            "Blackthorn Poké Mart",
+            "Viridian Poké Mart",
+            "Pewter Poké Mart",
+            "Cerulean Poké Mart",
+            "Lavender Poké Mart",
+            "Vermilion Poké Mart",
+            "Celadon Department Store 2F Left",
+            "Celadon Department Store 2F Right",
+            "Celadon Department Store 3F",
+            "Celadon Department Store 4F",
+            "Celadon Department Store 5F Left",
+            "Celadon Department Store 5F Right",
+            "Fuchsia Poké Mart",
+            "Saffron Poké Mart",
+            "Mt. Moon Square Shop",
+            "Indigo Plateau Poké Mart",
+            "Goldenrod Tunnel Herb Shop"
+    );
+
+    public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23, 24, 29, 30, 32);
+
+    public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
+            Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
+
+    public static final List<Integer> xItems = List.of(Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
+            Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial);
+
+    public static final List<Integer> generalPurposeConsumableItems = List.of(Gen2Items.psnCureBerry,
+            Gen2Items.przCureBerry, Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry,
+            Gen2Items.mintBerry,Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
+            Gen2Items.berryJuice);
+
+    public static final List<Integer> consumableHeldItems = setupConsumableHeldItems();
+
+    private static List<Integer> setupConsumableHeldItems() {
+        List<Integer> consumableHeldItems = new ArrayList<>(generalPurposeConsumableItems);
+        consumableHeldItems.add(Gen2Items.berserkGene);
+        return Collections.unmodifiableList(consumableHeldItems);
+    }
+
+    public static final List<Integer> generalPurposeItems = List.of(Gen2Items.brightPowder, Gen2Items.quickClaw,
+            Gen2Items.kingsRock, Gen2Items.smokeBall);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> allHeldItems = new ArrayList<>(generalPurposeItems);
+        allHeldItems.addAll(List.of(
+                // type-boosting items
+                Gen2Items.blackbelt, Gen2Items.blackGlasses, Gen2Items.charcoal, Gen2Items.dragonScale,
+                Gen2Items.hardStone, Gen2Items.magnet, Gen2Items.metalCoat, Gen2Items.miracleSeed,
+                Gen2Items.mysticWater, Gen2Items.neverMeltIce, Gen2Items.pinkBow, Gen2Items.polkadotBow,
+                Gen2Items.sharpBeak, Gen2Items.silverPowder, Gen2Items.softSand, Gen2Items.spellTag,
+                Gen2Items.twistedSpoon));
+        allHeldItems.addAll(consumableHeldItems);
+        return Collections.unmodifiableList(allHeldItems);
+    }
+
+    public static final Map<Type, List<Integer>> typeBoostingItems = initializeTypeBoostingItems();
+
+    private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
+        Map<Type, List<Integer>> map = new HashMap<>();
+        map.put(Type.BUG, List.of(Gen2Items.silverPowder));
+        map.put(Type.DARK, List.of(Gen2Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Gen2Items.dragonScale)); // NOT Dragon Fang due to a bug in the game's code
+        map.put(Type.ELECTRIC, List.of(Gen2Items.magnet));
+        map.put(Type.FIGHTING, List.of(Gen2Items.blackbelt));
+        map.put(Type.FIRE, List.of(Gen2Items.charcoal));
+        map.put(Type.FLYING, List.of(Gen2Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Gen2Items.spellTag));
+        map.put(Type.GRASS, List.of(Gen2Items.miracleSeed));
+        map.put(Type.GROUND, List.of(Gen2Items.softSand));
+        map.put(Type.ICE, List.of(Gen2Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Gen2Items.pinkBow, Gen2Items.polkadotBow));
+        map.put(Type.POISON, List.of(Gen2Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Gen2Items.twistedSpoon));
+        map.put(Type.ROCK, List.of(Gen2Items.hardStone));
+        map.put(Type.STEEL, List.of(Gen2Items.metalCoat));
+        map.put(Type.WATER, List.of(Gen2Items.mysticWater));
+        map.put(null, Collections.emptyList()); // ??? type
+        return Collections.unmodifiableMap(map);
+    }
+
+    public static final Map<Integer, List<Integer>> speciesBoostingItems = initializeSpeciesBoostingItems();
+
+    private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        map.put(Species.pikachu, List.of(Gen2Items.lightBall));
+        map.put(Species.chansey, List.of(Gen2Items.luckyPunch));
+        map.put(Species.ditto, List.of(Gen2Items.metalPowder));
+        map.put(Species.cubone, List.of(Gen2Items.thickClub));
+        map.put(Species.marowak, List.of(Gen2Items.thickClub));
+        map.put(Species.farfetchd, List.of(Gen2Items.stick));
+        return Collections.unmodifiableMap(map);
+    }
+
+    public static final List<Integer> regularShopItems = List.of(Gen2Items.pokeBall, Gen2Items.greatBall,
+            Gen2Items.ultraBall, Gen2Items.potion, Gen2Items.superPotion, Gen2Items.hyperPotion, Gen2Items.maxPotion,
+            Gen2Items.antidote, Gen2Items.burnHeal, Gen2Items.iceHeal, Gen2Items.awakening, Gen2Items.parlyzHeal,
+            Gen2Items.fullHeal, Gen2Items.fullRestore, Gen2Items.revive, Gen2Items.repel, Gen2Items.superRepel,
+            Gen2Items.maxRepel, Gen2Items.escapeRope);
+
+    // rare candy, lucky egg, and all the "valuable items"
+    public static final List<Integer> opShopItems = List.of(Gen2Items.rareCandy, Gen2Items.luckyEgg,
+            Gen2Items.nugget, Gen2Items.tinyMushroom, Gen2Items.bigMushroom, Gen2Items.pearl, Gen2Items.bigPearl,
+            Gen2Items.stardust, Gen2Items.stardust, Gen2Items.brickPiece, Gen2Items.silverLeaf, Gen2Items.goldLeaf);
+
+    public static ItemList allowedItems;
+    public static ItemList nonBadItems;
+
+    static {
+        setupAllowedItems();
+    }
+
+    private static void setupAllowedItems() {
+        allowedItems = new ItemList(Gen2Items.hm07); // 250-255 are junk and cancel
+        // Assorted key items
+        allowedItems.banSingles(Gen2Items.bicycle, Gen2Items.coinCase, Gen2Items.itemfinder, Gen2Items.oldRod,
+                Gen2Items.goodRod, Gen2Items.superRod, Gen2Items.gsBall, Gen2Items.blueCard, Gen2Items.basementKey,
+                Gen2Items.pass, Gen2Items.squirtBottle, Gen2Items.rainbowWing);
+        allowedItems.banRange(Gen2Items.redScale, 6);
+        allowedItems.banRange(Gen2Items.cardKey, 4);
+        // HMs
+        allowedItems.banRange(Gen2Items.hm01, 7);
+        // Unused items (Teru-Samas and dummy TMs)
+        allowedItems.banSingles(Gen2Items.terusama6, Gen2Items.terusama25, Gen2Items.terusama45,
+                Gen2Items.terusama50, Gen2Items.terusama56, Gen2Items.terusama90, Gen2Items.terusama100,
+                Gen2Items.terusama120, Gen2Items.terusama135, Gen2Items.terusama136, Gen2Items.terusama137,
+                Gen2Items.terusama141, Gen2Items.terusama142, Gen2Items.terusama145, Gen2Items.terusama147,
+                Gen2Items.terusama148, Gen2Items.terusama149, Gen2Items.terusama153, Gen2Items.terusama154,
+                Gen2Items.terusama155, Gen2Items.terusama162, Gen2Items.terusama171, Gen2Items.terusama176,
+                Gen2Items.terusama179, Gen2Items.terusama190, Gen2Items.tm04Unused, Gen2Items.tm28Unused);
+        // Real TMs
+        allowedItems.tmRange(tmBlockOneIndex, tmBlockOneSize);
+        allowedItems.tmRange(tmBlockTwoIndex, tmBlockTwoSize);
+        allowedItems.tmRange(tmBlockThreeIndex, tmBlockThreeSize);
+
+        // non-bad items
+        // ban specific pokemon hold items, berries, apricorns, mail
+        nonBadItems = allowedItems.copy();
+        nonBadItems.banSingles(Gen2Items.luckyPunch, Gen2Items.metalPowder, Gen2Items.silverLeaf,
+                Gen2Items.goldLeaf, Gen2Items.redApricorn, Gen2Items.bluApricorn, Gen2Items.whtApricorn,
+                Gen2Items.blkApricorn, Gen2Items.pnkApricorn, Gen2Items.stick, Gen2Items.thickClub,
+                Gen2Items.flowerMail, Gen2Items.lightBall, Gen2Items.berry, Gen2Items.brickPiece);
+        nonBadItems.banRange(Gen2Items.ylwApricorn, 2);
+        nonBadItems.banRange(Gen2Items.normalBox, 2);
+        nonBadItems.banRange(Gen2Items.surfMail, 9);
+    }
+
     public static final String friendshipValueForEvoLocator = "FEDCDA";
 
     public static String getName(Settings.PlayerCharacterMod playerCharacter) {
@@ -223,49 +391,6 @@ public class Gen2Constants {
         default:
             return 0; // normal by default
         }
-    }
-
-    public static ItemList allowedItems;
-
-    public static ItemList nonBadItems;
-
-    static {
-        setupAllowedItems();
-    }
-
-    private static void setupAllowedItems() {
-        allowedItems = new ItemList(Gen2Items.hm07); // 250-255 are junk and cancel
-        // Assorted key items
-        allowedItems.banSingles(Gen2Items.bicycle, Gen2Items.coinCase, Gen2Items.itemfinder, Gen2Items.oldRod,
-                Gen2Items.goodRod, Gen2Items.superRod, Gen2Items.gsBall, Gen2Items.blueCard, Gen2Items.basementKey,
-                Gen2Items.pass, Gen2Items.squirtBottle, Gen2Items.rainbowWing);
-        allowedItems.banRange(Gen2Items.redScale, 6);
-        allowedItems.banRange(Gen2Items.cardKey, 4);
-        // HMs
-        allowedItems.banRange(Gen2Items.hm01, 7);
-        // Unused items (Teru-Samas and dummy TMs)
-        allowedItems.banSingles(Gen2Items.terusama6, Gen2Items.terusama25, Gen2Items.terusama45,
-                Gen2Items.terusama50, Gen2Items.terusama56, Gen2Items.terusama90, Gen2Items.terusama100,
-                Gen2Items.terusama120, Gen2Items.terusama135, Gen2Items.terusama136, Gen2Items.terusama137,
-                Gen2Items.terusama141, Gen2Items.terusama142, Gen2Items.terusama145, Gen2Items.terusama147,
-                Gen2Items.terusama148, Gen2Items.terusama149, Gen2Items.terusama153, Gen2Items.terusama154,
-                Gen2Items.terusama155, Gen2Items.terusama162, Gen2Items.terusama171, Gen2Items.terusama176,
-                Gen2Items.terusama179, Gen2Items.terusama190, Gen2Items.tm04Unused, Gen2Items.tm28Unused);
-        // Real TMs
-        allowedItems.tmRange(tmBlockOneIndex, tmBlockOneSize);
-        allowedItems.tmRange(tmBlockTwoIndex, tmBlockTwoSize);
-        allowedItems.tmRange(tmBlockThreeIndex, tmBlockThreeSize);
-
-        // non-bad items
-        // ban specific pokemon hold items, berries, apricorns, mail
-        nonBadItems = allowedItems.copy();
-        nonBadItems.banSingles(Gen2Items.luckyPunch, Gen2Items.metalPowder, Gen2Items.silverLeaf,
-                Gen2Items.goldLeaf, Gen2Items.redApricorn, Gen2Items.bluApricorn, Gen2Items.whtApricorn,
-                Gen2Items.blkApricorn, Gen2Items.pnkApricorn, Gen2Items.stick, Gen2Items.thickClub,
-                Gen2Items.flowerMail, Gen2Items.lightBall, Gen2Items.berry, Gen2Items.brickPiece);
-        nonBadItems.banRange(Gen2Items.ylwApricorn, 2);
-        nonBadItems.banRange(Gen2Items.normalBox, 2);
-        nonBadItems.banRange(Gen2Items.surfMail, 9);
     }
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {

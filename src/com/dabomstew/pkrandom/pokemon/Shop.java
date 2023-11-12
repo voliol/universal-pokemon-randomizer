@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import java.util.List;
+import java.util.Objects;
 
 public class Shop {
     public List<Integer> items;
@@ -39,5 +40,23 @@ public class Shop {
         this.items = otherShop.items;
         this.name = otherShop.name;
         this.isMainGame = otherShop.isMainGame;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(items, name, isMainGame);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Shop other) {
+            return Objects.equals(items, other.items) && Objects.equals(name, other.name) && isMainGame == other.isMainGame;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Shop [name=" + name + ", isMainGame=" + isMainGame + ", items=" + items + "]";
     }
 }

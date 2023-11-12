@@ -91,7 +91,7 @@ public class PaletteDescription {
 		StringBuilder sb = new StringBuilder(getName());
 		int tabs = (MAX_NAME_LENGTH - getName().length() + TAB_LENGTH - 1) / TAB_LENGTH;
 		sb.append("\t".repeat(tabs));
-		sb.append("[" + getBody() + "]");
+		sb.append("[").append(getBody()).append("]");
 		sb.append(getNote());
 		return sb.toString();
 	}
