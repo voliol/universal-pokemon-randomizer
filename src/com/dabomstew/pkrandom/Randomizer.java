@@ -575,6 +575,8 @@ public class Randomizer {
             wildsChanged = true;
         }
 
+        wildsChanged = true; // temp
+
         if (wildsChanged) {
             logWildPokemonChanges(log);
         } else {

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.dabomstew.pkrandom.pokemon.EncounterArea;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -355,6 +356,39 @@ public class Gen1Constants {
                     return;
                 }
             }
+        }
+    }
+
+    private static final List<String> locationTags = List.of(
+            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
+            "ROUTE 10", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE17", "ROUTE18",
+            "ROUTE 19/20", "ROUTE 21", "ROUTE 21", "ROUTE 22", "ROUTE 23", "ROUTE 24", "ROUTE 25",
+            "VIRIDIAN FOREST", "MT.MOON", "MT.MOON", "MT.MOON", "ROCK TUNNEL", "POWER PLANT", "VICTORY ROAD",
+            "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "SEAFOAM ISLANDS",
+            "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "POKEMON MANSION", "SEAFOAM ISLANDS",
+            "VICTORY ROAD", "DIGLETT'S CAVE", "VICTORY ROAD", "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "CERULEAN CAVE", "CERULEAN CAVE",
+            "CERULEAN CAVE", "ROCK TUNNEL",
+            "OLD ROD", "GOOD ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD",
+            "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD");
+
+    /**
+     * The order the player is "expected" to traverse locations. Taken from
+     * <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Red_and_Blue/Walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrder = List.of(
+            "ROUTE 1", "ROUTE 2", "ROUTE 22", "VIRIDIAN FOREST", "ROUTE 3", "MT.MOON", "ROUTE 4", "ROUTE 24",
+            "ROUTE 25", "ROUTE 5", "ROUTE 6", "ROUTE 11", "DIGLETT'S CAVE", "ROUTE 9", "ROUTE 10", "ROCK TUNNEL",
+            "ROUTE 8", "ROUTE 7", "POKEMON TOWER", "ROUTE 17", "ROUTE 18", "ROUTE 19", "SAFARI ZONE", "ROUTE 12",
+            "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 21", "POKEMON MANSION", "POWER PLANT", "ROUTE 19/20",
+            "SEAFOAM ISLANDS", "ROUTE 23", "VICTORY ROAD", "CERULEAN CAVE");
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
         }
     }
 

@@ -773,6 +773,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         readNormalEncounters(encounterAreas);
         readFishingEncounters(encounterAreas);
 
+        Gen1Constants.tagEncounterAreas(encounterAreas);
+
         return encounterAreas;
     }
 
