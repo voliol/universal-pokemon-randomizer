@@ -658,11 +658,37 @@ public class Gen2Constants {
             // Fishing, Headbutt, BCC
             "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING",
             "FISHING", "FISHING", "FISHING",
-            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
+            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "ROCK SMASH",
             "BUG CATCHING CONTEST");
 
-    private static final List<String> locationTagsUseTimeGS = List.of(
-    );
+    private static final List<String> locationTagsUseTimeGS = initLocationTagsUseTimeGS();
+
+    private static List<String> initLocationTagsUseTimeGS() {
+        List<String> locationTags = new ArrayList<>();
+        for (int areaNum = 0; areaNum < 61; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeGS.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeGS.subList(61, 99));
+        for (int areaNum = 99; areaNum < 129; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeGS.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeGS.subList(129, 153));
+        for (int areaNum = 153; areaNum < 157; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeGS.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeGS.subList(157, 170));
+        locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+                "FISHING DRATINI 1", "FISHING QUILFISH FARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
+                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QUILFISH"));
+        locationTags.addAll(locationTagsNoTimeGS.subList(170, 176));
+        return Collections.unmodifiableList(locationTags);
+    }
 
     private static final List<String> locationTagsNoTimeCrystal = List.of(
             // Johto cave/grass
@@ -731,33 +757,62 @@ public class Gen2Constants {
             "ROUTE 35",
             // Fishing, Headbutt, BCC
             "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND", "FISHING DRATINI 1",
-            "FISHING QUILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS", "FISHING DRATINI 2",
+            "FISHING QWILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS", "FISHING DRATINI 2",
             "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
             "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
-            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
+            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "ROCK SMASH",
             "BUG CATCHING CONTEST");
 
-    private static final List<String> locationTagsUseTimeCrystal = List.of(
-    );
+    private static final List<String> locationTagsUseTimeCrystal = initLocationTagsUseTimeCrystal();
+
+    private static List<String> initLocationTagsUseTimeCrystal() {
+        List<String> locationTags = new ArrayList<>();
+        for (int areaNum = 0; areaNum < 61; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeCrystal.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(61, 99));
+        for (int areaNum = 99; areaNum < 129; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeCrystal.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(129, 153));
+        for (int areaNum = 153; areaNum < 155; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeCrystal.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(155, 167));
+        locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+                "FISHING DRATINI 1", "FISHING QUILFISH FARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
+                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QUILFISH"));
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(167, 181));
+        return Collections.unmodifiableList(locationTags);
+    }
 
     /**
-     * The order the player is "expected" to traverse locations. Taken from
+     * The order the player is "expected" to traverse locations. Based on
      * <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Gold_and_Silver/Walkthrough>this walkthrough</a>.
      */
     public static final List<String> locationTagsTraverseOrder = List.of(
-            "NEW BARK TOWN", "ROUTE 29", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
+            "NEW BARK TOWN", "ROUTE 29", "ROUTE 46", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
             "VIOLET CITY", "SPROUT TOWER", "ROUTE 32", "RUINS OF ALPH", "UNION CAVE", "ROUTE 33",
             "SLOWPOKE WELL", "ILEX FOREST", "ROUTE 34", "GOLDENROD CITY", "ROUTE 35", "NATIONAL PARK",
             "ROUTE 36", "ROUTE 37", "ECRUTEAK CITY", "BURNED TOWER", "ROUTE 38", "ROUTE 39", "OLIVINE CITY",
-            "ROUTE 40", "ROUTE 41", "CIANWOOD CITY", "ROUTE 42", "ROUTE 43", "LAKE OF RAGE",
-            "ROUTE 44", "ICE PATH", "BLACKTHORN CITY", "DRAGON'S DEN", "MT.MORTAR", "WHIRL ISLANDS",
-            "TIN TOWER", "ROUTE 46", "ROUTE 27", "ROUTE 26", "VICTORY ROAD",
+            "ROUTE 40", "ROUTE 41", "CIANWOOD CITY", "ROUTE 42", "MT.MORTAR", "ROUTE 43", "LAKE OF RAGE",
+            "ROUTE 44", "ICE PATH", "BLACKTHORN CITY", "DRAGON'S DEN", "ROUTE 45", "WHIRL ISLANDS",
+            "TIN TOWER", "ROUTE 27", "TOHJO FALLS", "ROUTE 26", "VICTORY ROAD",
             "VERMILION CITY", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROCK TUNNEL", "ROUTE 10", "ROUTE 9",
             "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "CELADON CITY", "ROUTE 16", "ROUTE 17",
             "ROUTE 18", "FUCHSIA CITY", "ROUTE 15", "ROUTE 14", "ROUTE 13", "ROUTE 12", "ROUTE 11",
             "DIGLETT'S CAVE", "ROUTE 2", "ROUTE 3", "MT.MOON", "ROUTE 4", "VIRIDIAN CITY", "ROUTE 1", "PALLET TOWN",
             "ROUTE 21", "CINNABAR ISLAND", "ROUTE 20", "ROUTE 19", "ROUTE 22", "ROUTE 28", "SILVER CAVE",
-            "FISHING", "HEADBUTT", "BUG CATCHING CONTEST"
+            "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+            "FISHING QWILFISH", "FISHING QWILFISH SWARM", "FISHING REMORAID", "FISHING REMORAID SWARM",
+            "FISHING GYARADOS", "FISHING DRATINI 1", "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING",
+            "HEADBUTT", "ROCK SMASH", "BUG CATCHING CONTEST"
     );
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
