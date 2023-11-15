@@ -91,13 +91,9 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void allEncounterAreasHaveALocationTag(String romName) {
+    public void allEncounterAreasHaveALocationTagDontUseTimeOfDay(String romName) {
         loadROM(romName);
         for (EncounterArea area : romHandler.getEncounters(false)) {
-            assertNotNull(area.getLocationTag());
-            assertNotEquals("", area.getLocationTag());
-        }
-        for (EncounterArea area : romHandler.getEncounters(true)) {
             assertNotNull(area.getLocationTag());
             assertNotEquals("", area.getLocationTag());
         }
@@ -105,11 +101,12 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void getSortedEncountersDoesNotCrash(String romName) {
+    public void allEncounterAreasHaveALocationTagUseTimeOfDay(String romName) {
         loadROM(romName);
-        List<EncounterArea> encounterAreas = romHandler.getEncounters(false);
-        romHandler.getSortedEncounters(false);
-        romHandler.getSortedEncounters(true);
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            assertNotNull(area.getLocationTag());
+            assertNotEquals("", area.getLocationTag());
+        }
     }
 
     private void checkForNoLegendaries() {

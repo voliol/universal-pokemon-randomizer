@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.pokemon.EncounterArea;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -566,6 +567,194 @@ public class Gen2Constants {
                 }
             }
         }
+    }
+
+    private static final List<String> locationTagsNoTimeGS = List.of(
+            // Johto cave/grass
+            "SPROUT TOWER", "SPROUT TOWER",
+            "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER",
+            "BURNED TOWER", "BURNED TOWER",
+            "NATIONAL PARK",
+            "RUINS OF ALPH", "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE", "SILVER CAVE", "SILVER CAVE", "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37",
+            "ROUTE 38", "ROUTE 39", "ROUTE 42", "ROUTE 43", "ROUTE 44", "ROUTE 45", "ROUTE 46",
+            "SILVER CAVE",
+            // Johto surfing
+            "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "DRAGON'S DEN",
+            "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 34", "ROUTE 35", "ROUTE 40", "ROUTE 41", "ROUTE 42", "ROUTE 43",
+            "ROUTE 44", "ROUTE 45",
+            "NEW BARK TOWN",
+            "CHERRYGROVE CITY",
+            "VIOLET CITY",
+            "CIANWOOD CITY",
+            "OLIVINE CITY",
+            "ECRUTEAK CITY",
+            "LAKE OF RAGE",
+            "BLACKTHORN CITY",
+            "SILVER CAVE",
+            "OLIVINE CITY",
+            // Kanto cave/grass
+            "DIGLETT'S CAVE",
+            "MT.MOON",
+            "ROCK TUNNEL", "ROCK TUNNEL",
+            "VICTORY ROAD",
+            "TOHJO FALLS",
+            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
+            "ROUTE 10", "ROUTE 11", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28",
+            // Kanto surfing
+            "ROUTE 4", "ROUTE 6", "ROUTE 9", "ROUTE 10", "ROUTE 12", "ROUTE 13", "ROUTE 19", "ROUTE 20",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27",
+            "TOHJO FALLS",
+            "ROUTE 28",
+            "PALLET TOWN",
+            "VIRIDIAN CITY",
+            "CERULEAN CITY",
+            "VERMILION CITY",
+            "CELADON CITY",
+            "FUCHSIA CITY",
+            "CINNABAR ISLAND",
+            "VERMILION CITY",
+            // Swarms
+            "ROUTE 35",
+            "ROUTE 38",
+            "DARK CAVE",
+            "MT.MORTAR", "MT.MORTAR",
+            // Fishing, Headbutt, BCC
+            "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING",
+            "FISHING", "FISHING", "FISHING",
+            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
+            "BUG CATCHING CONTEST");
+
+    private static final List<String> locationTagsUseTimeGS = List.of(
+    );
+
+    private static final List<String> locationTagsNoTimeCrystal = List.of(
+            // Johto cave/grass
+            "SPROUT TOWER", "SPROUT TOWER",
+            "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER",
+            "BURNED TOWER", "BURNED TOWER",
+            "NATIONAL PARK",
+            "RUINS OF ALPH", "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE", "SILVER CAVE", "SILVER CAVE", "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37",
+            "ROUTE 38", "ROUTE 39", "ROUTE 42", "ROUTE 43", "ROUTE 44", "ROUTE 45", "ROUTE 46",
+            "SILVER CAVE",
+            // Johto surfing
+            "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "DRAGON'S DEN",
+            "OLIVINE CITY",
+            "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 34", "ROUTE 35", "ROUTE 40", "ROUTE 41", "ROUTE 42", "ROUTE 43",
+            "ROUTE 44", "ROUTE 45",
+            "NEW BARK TOWN",
+            "CHERRYGROVE CITY",
+            "VIOLET CITY",
+            "CIANWOOD CITY",
+            "OLIVINE CITY",
+            "ECRUTEAK CITY",
+            "LAKE OF RAGE",
+            "BLACKTHORN CITY",
+            "SILVER CAVE",
+            // Kanto cave/grass
+            "DIGLETT'S CAVE",
+            "MT.MOON",
+            "ROCK TUNNEL", "ROCK TUNNEL",
+            "VICTORY ROAD",
+            "TOHJO FALLS",
+            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
+            "ROUTE 10", "ROUTE 11", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28",
+            // Kanto surfing
+            "TOHJO FALLS",
+            "VERMILION CITY",
+            "ROUTE 4", "ROUTE 6", "ROUTE 9", "ROUTE 10", "ROUTE 12", "ROUTE 13", "ROUTE 19", "ROUTE 20",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28",
+            "PALLET TOWN",
+            "VIRIDIAN CITY",
+            "CERULEAN CITY",
+            "VERMILION CITY",
+            "CELADON CITY",
+            "FUCHSIA CITY",
+            "CINNABAR ISLAND",
+            // Swarms
+            "DARK CAVE",
+            "ROUTE 35",
+            // Fishing, Headbutt, BCC
+            "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING",
+            "FISHING", "FISHING", "FISHING",
+            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
+            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
+            "BUG CATCHING CONTEST");
+
+    private static final List<String> locationTagsUseTimeCrystal = List.of(
+    );
+
+    /**
+     * The order the player is "expected" to traverse locations. Taken from
+     * <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Gold_and_Silver/Walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrder = List.of(
+            "NEW BARK TOWN", "ROUTE 29", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
+            "VIOLET CITY", "SPROUT TOWER", "ROUTE 32", "RUINS OF ALPH", "UNION CAVE", "ROUTE 33",
+            "SLOWPOKE WELL", "ILEX FOREST", "ROUTE 34", "GOLDENROD CITY", "ROUTE 35", "NATIONAL PARK",
+            "ROUTE 36", "ROUTE 37", "ECRUTEAK CITY", "BURNED TOWER", "ROUTE 38", "ROUTE 39", "OLIVINE CITY",
+            "ROUTE 40", "ROUTE 41", "CIANWOOD CITY", "ROUTE 42", "ROUTE 43", "LAKE OF RAGE",
+            "ROUTE 44", "ICE PATH", "BLACKTHORN CITY", "DRAGON'S DEN", "MT.MORTAR", "WHIRL ISLANDS",
+            "TIN TOWER", "ROUTE 46", "ROUTE 27", "ROUTE 26", "VICTORY ROAD",
+            "VERMILION CITY", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROCK TUNNEL", "ROUTE 10", "ROUTE 9",
+            "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "CELADON CITY", "ROUTE 16", "ROUTE 17",
+            "ROUTE 18", "FUCHSIA CITY", "ROUTE 15", "ROUTE 14", "ROUTE 13", "ROUTE 12", "ROUTE 11",
+            "DIGLETT'S CAVE", "ROUTE 2", "ROUTE 3", "MT.MOON", "ROUTE 4", "VIRIDIAN CITY", "ROUTE 1", "PALLET TOWN",
+            "ROUTE 21", "CINNABAR ISLAND", "ROUTE 20", "ROUTE 19", "ROUTE 22", "ROUTE 28", "SILVER CAVE",
+            "FISHING", "HEADBUTT", "BUG CATCHING CONTEST"
+    );
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, boolean useTimeOfDay, boolean isCrystal) {
+        List<String> locationTags = isCrystal ?
+                (useTimeOfDay ? locationTagsUseTimeCrystal : locationTagsNoTimeCrystal) :
+                (useTimeOfDay ? locationTagsUseTimeGS : locationTagsNoTimeGS);
+        tagEncounterAreas(encounterAreas, locationTags);
     }
 
 }

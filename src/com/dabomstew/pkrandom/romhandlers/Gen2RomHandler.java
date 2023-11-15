@@ -644,6 +644,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         readHeadbuttEncounters(encounterAreas);
         readBugCatchingContestEncounters(encounterAreas);
 
+        Gen2Constants.tagEncounterAreas(encounterAreas, useTimeOfDay, romEntry.isCrystal());
+
         return encounterAreas;
     }
 
@@ -799,6 +801,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // Unown is banned for Bug Catching Contest (5/8/2016)
         area.banPokemon(pokes[Species.unown]);
         encounterAreas.add(area);
+    }
+
+    @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> Gen2Constants.locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
     }
 
     @Override
