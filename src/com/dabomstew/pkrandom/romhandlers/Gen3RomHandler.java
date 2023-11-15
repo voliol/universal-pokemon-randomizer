@@ -1355,6 +1355,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 encounterAreas.get(areaIdx).banAllPokemon(battleTrappers);
             }
         }
+
+        Gen3Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
+
         return encounterAreas;
     }
 
@@ -1380,6 +1383,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             area.add(enc);
         }
         return area;
+    }
+
+    @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        List<String> locationTagsTraverseOrder = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                Gen3Constants.locationTagsTraverseOrderFRLG : Gen3Constants.locationTagsTraverseOrderRSE;
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
     }
 
     @Override

@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.dabomstew.pkrandom.pokemon.EncounterArea;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -945,6 +946,193 @@ public class Gen3Constants {
                 allTrainers.get(num - 1).multiBattleStatus = status;
             }
         }
+    }
+
+    public static final List<String> locationTagsRS = List.of(
+            "PETALBURG CITY", "PETALBURG CITY",
+            "SLATEPORT CITY", "SLATEPORT CITY",
+            "LILYCOVE CITY", "LILYCOVE CITY",
+            "MOSSDEEP CITY", "MOSSDEEP CITY",
+            "SOOTOPOLIS CITY", "SOOTOPOLIS CITY",
+            "EVER GRANDE CITY", "EVER GRANDE CITY",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "RUSTURF TUNNEL",
+            "GRANITE CAVE", "GRANITE CAVE", "GRANITE CAVE", "GRANITE CAVE", "GRANITE CAVE",
+            "PETALBURG WOODS",
+            "JAGGED PASS",
+            "FIERY PATH",
+            "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN",
+            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
+            "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE",
+            "SHOAL CAVE", "SHOAL CAVE",
+            "NEW MAUVILLE", "NEW MAUVILLE",
+            "ABANDONED SHIP", "ABANDONED SHIP", "ABANDONED SHIP", "ABANDONED SHIP",
+            "SKY PILLAR", "SKY PILLAR", "SKY PILLAR",
+            "ROUTE 101",
+            "ROUTE 102", "ROUTE 102", "ROUTE 102",
+            "ROUTE 103", "ROUTE 103", "ROUTE 103",
+            "ROUTE 104", "ROUTE 104", "ROUTE 104",
+            "ROUTE 105", "ROUTE 105",
+            "ROUTE 106", "ROUTE 106",
+            "ROUTE 107", "ROUTE 107",
+            "ROUTE 108", "ROUTE 108",
+            "ROUTE 109", "ROUTE 109",
+            "ROUTE 110", "ROUTE 110", "ROUTE 110",
+            "ROUTE 111", "ROUTE 111", "ROUTE 111", "ROUTE 111",
+            "ROUTE 112",
+            "ROUTE 113",
+            "ROUTE 114", "ROUTE 114", "ROUTE 114", "ROUTE 114",
+            "ROUTE 115", "ROUTE 115", "ROUTE 115",
+            "ROUTE 116",
+            "ROUTE 117", "ROUTE 117", "ROUTE 117",
+            "ROUTE 118", "ROUTE 118", "ROUTE 118",
+            "ROUTE 119", "ROUTE 119", "ROUTE 119",
+            "ROUTE 120", "ROUTE 120", "ROUTE 120",
+            "ROUTE 121", "ROUTE 121", "ROUTE 121",
+            "ROUTE 122", "ROUTE 122",
+            "ROUTE 123", "ROUTE 123", "ROUTE 123",
+            "ROUTE 124", "ROUTE 124",
+            "ROUTE 125", "ROUTE 125",
+            "ROUTE 126", "ROUTE 126",
+            "ROUTE 127", "ROUTE 127",
+            "ROUTE 128", "ROUTE 128",
+            "ROUTE 129", "ROUTE 129",
+            "ROUTE 130", "ROUTE 130", "ROUTE 130",
+            "ROUTE 131", "ROUTE 131",
+            "ROUTE 132", "ROUTE 132",
+            "ROUTE 133", "ROUTE 133",
+            "ROUTE 134", "ROUTE 134",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "SAFARI ZONE", "SAFARI ZONE",
+            "DEWFORD TOWN", "DEWFORD TOWN",
+            "PACIFIDLOG TOWN", "PACIFIDLOG TOWN",
+            "UNDERWATER", "UNDERWATER"
+    );
+
+    public static final List<String> locationTagsEm = List.of(
+            "ROUTE 101",
+            "ROUTE 102", "ROUTE 102", "ROUTE 102",
+            "ROUTE 103", "ROUTE 103", "ROUTE 103",
+            "ROUTE 104", "ROUTE 104", "ROUTE 104",
+            "ROUTE 105", "ROUTE 105",
+            "ROUTE 110", "ROUTE 110", "ROUTE 110",
+            "ROUTE 111", "ROUTE 111", "ROUTE 111", "ROUTE 111",
+            "ROUTE 112",
+            "ROUTE 113",
+            "ROUTE 114", "ROUTE 114", "ROUTE 114", "ROUTE 114",
+            "ROUTE 116",
+            "ROUTE 117", "ROUTE 117", "ROUTE 117",
+            "ROUTE 118", "ROUTE 118", "ROUTE 118",
+            "ROUTE 124", "ROUTE 124",
+            "PETALBURG WOODS",
+            "RUSTURF TUNNEL",
+            "GRANITE CAVE", "GRANITE CAVE",
+            "MT. PYRE",
+            "VICTORY ROAD",
+            "SAFARI ZONE",
+            "UNDERWATER",
+            "ABANDONED SHIP", "ABANDONED SHIP",
+            "GRANITE CAVE", "GRANITE CAVE",
+            "FIERY PATH",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "JAGGED PASS",
+            "ROUTE 106", "ROUTE 106",
+            "ROUTE 107", "ROUTE 107",
+            "ROUTE 108", "ROUTE 108",
+            "ROUTE 109", "ROUTE 109",
+            "ROUTE 115", "ROUTE 115", "ROUTE 115",
+            "NEW MAUVILLE",
+            "ROUTE 119", "ROUTE 119", "ROUTE 119",
+            "ROUTE 120", "ROUTE 120", "ROUTE 120",
+            "ROUTE 121", "ROUTE 121", "ROUTE 121",
+            "ROUTE 122", "ROUTE 122",
+            "ROUTE 123", "ROUTE 123", "ROUTE 123",
+            "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE",
+            "GRANITE CAVE",
+            "ROUTE 125", "ROUTE 125",
+            "ROUTE 126", "ROUTE 126",
+            "ROUTE 127", "ROUTE 127",
+            "ROUTE 128", "ROUTE 128",
+            "ROUTE 129", "ROUTE 129",
+            "ROUTE 130", "ROUTE 130", "ROUTE 130",
+            "ROUTE 131", "ROUTE 131",
+            "ROUTE 132", "ROUTE 132",
+            "ROUTE 133", "ROUTE 133",
+            "ROUTE 134", "ROUTE 134",
+            "ABANDONED SHIP", "ABANDONED SHIP",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN",
+            "NEW MAUVILLE",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "SAFARI ZONE",
+            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE",
+            "SHOAL CAVE",
+            "LILYCOVE CITY", "LILYCOVE CITY",
+            "DEWFORD TOWN", "DEWFORD TOWN",
+            "SLATEPORT CITY", "SLATEPORT CITY",
+            "MOSSDEEP CITY", "MOSSDEEP CITY",
+            "PACIFIDLOG TOWN", "PACIFIDLOW TOWN",
+            "EVER GRANDE CITY", "EVER GRANDE CITY",
+            "PETALBURG CITY", "PETALBURG CITY",
+            "UNDERWATER",
+            "SHOAL CAVE",
+            "SKY PILLAR",
+            "SOOTOPOLIS CITY", "SOOTOPOLIS CITY",
+            "SKY PILLAR", "SKY PILLAR",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT",
+            "MAGMA HIDEOUT", "MAGMA HIDEOUT",
+            "MIRAGE TOWER", "MIRAGE TOWER", "MIRAGE TOWER", "MIRAGE TOWER",
+            "DESERT UNDERPASS",
+            "ARTISAN CAVE", "ARTISAN CAVE",
+            "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE",
+            "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE",
+            "METEOR FALLS"
+    );
+
+    public static final List<String> locationTagsFRLG = List.of();
+
+    public static final List<String> locationTagsTraverseOrderRSE = List.of("ROUTE 101", "ROUTE 103",
+            "ROUTE 102", "PETALBURG CITY", "ROUTE 104", "PETALBURG WOODS", "ROUTE 116", "RUSTURF TUNNEL",
+            "DEWFORD TOWN", "GRANITE CAVE", "ROUTE 109", "SLATEPORT CITY", "ROUTE 110", "MAUVILLE CITY",
+            "ROUTE 117", "ROUTE 111", "MIRAGE TOWER", "ROUTE 112", "FIERY PATH", "ROUTE 113", "ROUTE 114",
+            "METEOR FALLS", "JAGGED PASS", "ROUTE 118", "ROUTE 119", "ROUTE 120", "ROUTE 121", "SAFARI ZONE",
+            "LILYCOVE CITY", "ROUTE 122", "MT. PYRE", "ROUTE 123", "MAGMA HIDEOUT", "ROUTE 124", "MOSSDEEP CITY",
+            "ROUTE 125", "SHOAL CAVE", "ROUTE 127", "ROUTE 128", "SEAFLOOR CAVERN", "ROUTE 126", "SOOTOPOLIS CITY",
+            "CAVE OF ORIGIN", "ROUTE 129", "ROUTE 130", "ROUTE 131", "SKY PILLAR", "PACIFIDLOG TOWN",
+            "ROUTE 132", "ROUTE 133", "ROUTE 134", "ROUTE 105", "ROUTE 106", "ROUTE 107", "ROUTE 108",
+            "ABANDONED SHIP", "EVER GRANDE CITY", "VICTORY ROAD", "DESERT UNDERPASS", "ARTISAN CAVE",
+            "ALTERING CAVE"); // TODO: A separate one for RS which places sky pillar at the end
+
+    public static final List<String> locationTagsTraverseOrderFRLG = List.of();
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType) {
+        List<String> locationTags = switch (romType) {
+            case 0, 1 -> locationTagsRS;
+            case 2 -> locationTagsEm;
+            case 3 -> locationTagsFRLG;
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, locationTags);
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
