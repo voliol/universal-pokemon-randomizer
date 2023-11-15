@@ -29,15 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
@@ -773,9 +765,19 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         readNormalEncounters(encounterAreas);
         readFishingEncounters(encounterAreas);
 
-        Gen1Constants.tagEncounterAreas(encounterAreas);
+        tagEncounterAreas(encounterAreas);
 
         return encounterAreas;
+    }
+
+    private void tagEncounterAreas(List<EncounterArea> encounterAreas) {
+        if (romEntry.isYellow()) {
+            Gen1Constants.tagEncounterAreasYellow(encounterAreas);
+        } else if (romEntry.getName().equals("Blue (J)")) { // kind of ugly to refer to a specific ROM name
+            Gen1Constants.tagEncounterAreasJapaneseBlue(encounterAreas);
+        } else {
+            Gen1Constants.tagEncounterAreasRBG(encounterAreas);
+        }
     }
 
     private Pokemon getGhostMarowakPoke() {
@@ -913,6 +915,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 }
             }
         }
+    }
+
+    @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> Gen1Constants.locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
     }
 
     @Override

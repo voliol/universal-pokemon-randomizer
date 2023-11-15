@@ -617,6 +617,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        return getEncounters(useTimeOfDay);
+    }
+
+    @Override
     public void randomizeEncounters(Settings settings) {
         Settings.WildPokemonMod mode = settings.getWildPokemonMod();
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();

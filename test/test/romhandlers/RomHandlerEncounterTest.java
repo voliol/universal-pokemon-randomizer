@@ -89,6 +89,29 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         return sb.toString();
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void allEncounterAreasHaveALocationTag(String romName) {
+        loadROM(romName);
+        for (EncounterArea area : romHandler.getEncounters(false)) {
+            assertNotNull(area.getLocationTag());
+            assertNotEquals("", area.getLocationTag());
+        }
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            assertNotNull(area.getLocationTag());
+            assertNotEquals("", area.getLocationTag());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void getSortedEncountersDoesNotCrash(String romName) {
+        loadROM(romName);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(false);
+        romHandler.getSortedEncounters(false);
+        romHandler.getSortedEncounters(true);
+    }
+
     private void checkForNoLegendaries() {
         for (EncounterArea area : romHandler.getEncounters(true)) {
             System.out.println(area.getDisplayName() + ":");

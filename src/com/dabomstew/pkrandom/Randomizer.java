@@ -1058,7 +1058,7 @@ public class Randomizer {
         log.println("--Wild Pokemon--");
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-        List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeBasedEncounters);
+        List<EncounterArea> encounterAreas = romHandler.getSortedEncounters(useTimeBasedEncounters);
         int idx = 0;
         for (EncounterArea area : encounterAreas) {
             idx++;

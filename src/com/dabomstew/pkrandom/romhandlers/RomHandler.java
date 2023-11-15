@@ -222,6 +222,15 @@ public interface RomHandler {
 
     List<EncounterArea> getEncounters(boolean useTimeOfDay);
 
+    /**
+     * Returns a list identical to {@link #getEncounters(boolean)}, except it is sorted according to when in the game
+     * the player is expected to go to the location of each {@link EncounterArea}.<br>
+     * E.g. {@link EncounterArea}s at early routes come early, and victory road and post-game locations ones are at
+     * the end.<br>
+     * (if the order has been implemented; the default implementation does not sort)
+     */
+    List<EncounterArea> getSortedEncounters(boolean useTimeOfDay);
+
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
     void randomizeEncounters(Settings settings);
