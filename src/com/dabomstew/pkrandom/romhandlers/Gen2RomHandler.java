@@ -720,20 +720,22 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void readFishingEncounters(List<EncounterArea> encounterAreas, boolean useTimeOfDay) {
+        // TODO: The Remoraid fishing group is not used in Crystal, nor the Remoraid swarm one;
+        //       they should thusly be skipped.
         int offset = romEntry.getIntValue("FishingWildsOffset");
         int rootOffset = offset;
-        for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
+        for (int k = 0; k < Gen2Constants.fishingAreaCount; k++) {
             EncounterArea area = new EncounterArea();
-            area.setDisplayName("Fishing Group " + (k + 1));
-            for (int i = 0; i < Gen2Constants.pokesPerFishingGroup; i++) {
+            area.setDisplayName("Fishing " + Gen2Constants.fishingAreaNames[k]);
+            for (int i = 0; i < Gen2Constants.pokesPerFishingArea; i++) {
                 offset++;
                 int pokeNum = rom[offset++] & 0xFF;
                 int level = rom[offset++] & 0xFF;
                 if (pokeNum == 0) {
                     if (!useTimeOfDay) {
                         // read the encounter they put here for DAY
-                        int specialOffset = rootOffset + Gen2Constants.fishingGroupEntryLength
-                                * Gen2Constants.pokesPerFishingGroup * Gen2Constants.fishingGroupCount + level * 4 + 2;
+                        int specialOffset = rootOffset + Gen2Constants.fishingAreaEntryLength
+                                * Gen2Constants.pokesPerFishingArea * Gen2Constants.fishingAreaCount + level * 4 + 2;
                         Encounter enc = new Encounter();
                         enc.setPokemon(pokes[rom[specialOffset] & 0xFF]);
                         enc.setLevel(rom[specialOffset + 1] & 0xFF);
@@ -750,10 +752,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             encounterAreas.add(area);
         }
         if (useTimeOfDay) {
-            for (int k = 0; k < Gen2Constants.timeSpecificFishingGroupCount; k++) {
+            for (int k = 0; k < Gen2Constants.timeSpecificFishingAreaCount; k++) {
                 EncounterArea area = new EncounterArea();
                 area.setDisplayName("Time-Specific Fishing " + (k + 1));
-                for (int i = 0; i < Gen2Constants.pokesPerTSFishingGroup; i++) {
+                for (int i = 0; i < Gen2Constants.pokesPerTSFishingArea; i++) {
                     int pokeNum = rom[offset++] & 0xFF;
                     int level = rom[offset++] & 0xFF;
                     Encounter enc = new Encounter();
@@ -769,9 +771,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void readHeadbuttEncounters(List<EncounterArea> encounterAreas) {
         int offset = romEntry.getIntValue("HeadbuttWildsOffset");
         int limit = romEntry.getIntValue("HeadbuttTableSize");
+        String[] names = romEntry.isCrystal() ? Gen2Constants.headbuttAreaNamesCrystal : Gen2Constants.headbuttAreaNamesGS;
         for (int i = 0; i < limit; i++) {
             EncounterArea area = new EncounterArea();
-            area.setDisplayName("Headbutt Trees Set " + (i + 1));
+            area.setDisplayName(names[i]);
             while ((rom[offset] & 0xFF) != 0xFF) {
                 offset++;
                 int pokeNum = rom[offset++] & 0xFF;
@@ -839,10 +842,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int offset;
         // Fishing Data
         offset = romEntry.getIntValue("FishingWildsOffset");
-        for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
+        for (int k = 0; k < Gen2Constants.fishingAreaCount; k++) {
             EncounterArea area = areaIterator.next();
             Iterator<Encounter> encounterIterator = area.iterator();
-            for (int i = 0; i < Gen2Constants.pokesPerFishingGroup; i++) {
+            for (int i = 0; i < Gen2Constants.pokesPerFishingArea; i++) {
                 offset++;
                 if (rom[offset] == 0) {
                     if (!useTimeOfDay) {
@@ -862,10 +865,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
         if (useTimeOfDay) {
-            for (int k = 0; k < Gen2Constants.timeSpecificFishingGroupCount; k++) {
+            for (int k = 0; k < Gen2Constants.timeSpecificFishingAreaCount; k++) {
                 EncounterArea area = areaIterator.next();
                 Iterator<Encounter> encounterIterator = area.iterator();
-                for (int i = 0; i < Gen2Constants.pokesPerTSFishingGroup; i++) {
+                for (int i = 0; i < Gen2Constants.pokesPerTSFishingArea; i++) {
                     Encounter enc = encounterIterator.next();
                     rom[offset++] = (byte) enc.getPokemon().getNumber();
                     rom[offset++] = (byte) enc.getLevel();

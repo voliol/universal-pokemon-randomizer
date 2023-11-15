@@ -55,10 +55,28 @@ public class Gen2Constants {
             bsCatchRateOffset = 9, bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12, bsPicDimensionsOffset = 17,
             bsGrowthCurveOffset = 22, bsTMHMCompatOffset = 24, bsMTCompatOffset = 31;
 
-    public static final String[] starterNames = new String[] { "CYNDAQUIL", "TOTODILE", "CHIKORITA" };
+    public static final int fishingAreaCount = 12, pokesPerFishingArea = 11, fishingAreaEntryLength = 3,
+            timeSpecificFishingAreaCount = 11, pokesPerTSFishingArea = 4;
 
-    public static final int fishingGroupCount = 12, pokesPerFishingGroup = 11, fishingGroupEntryLength = 3,
-            timeSpecificFishingGroupCount = 11, pokesPerTSFishingGroup = 4;
+    public static final String[] fishingAreaNames = new String[]{"Shore", "Ocean", "Lake", "Pond",
+            "Dratini 1 (Ice Path, Dragon's Den)", "Qwilfish Swarm (Route 32)", "Remoraid Swarm (Route 44)",
+            "Gyarados (Lake of Rage, Fuchsia City)", "Dratini 2 (Route 45)", "Whirl Islands",
+            "Qwilfish (Routes 32, 12, 13)", "Remoraid (Route 44)"};
+
+    public static final String[] headbuttAreaNamesGS = new String[]{
+            "Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common)",
+            "Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare)",
+            "Headbutt (Routes 29-33, 42-46) (common)", "Headbutt (Routes 29-33, 42-46) (rare)",
+            "Rock Smash"};
+
+    public static final String[] headbuttAreaNamesCrystal = new String[]{
+            "Headbutt (Routes 44, 45, 46) (common)", "Headbutt (Routes 44, 45, 46) (rare)",
+            "Headbutt (Azalea Town, Route 42) (common)", "Headbutt (Azalea Town, Route 42) (rare)",
+            "Headbutt (Routes 29-31, 34-39) (common)", "Headbutt (Routes 29-31, 34-39) (rare)",
+            "Headbutt (Routes 32, 26, 27) (common)", "Headbutt (Routes 32, 26, 27) (rare)",
+            "Headbutt (Route 43) (common)", "Headbutt (Route 43) (rare)",
+            "Headbutt (Ilex Forest) (common)", "Headbutt (Ilex Forest) (rare)",
+            "Rock Smash"};
 
     public static final int landEncounterSlots = 7, seaEncounterSlots = 3;
 
@@ -640,7 +658,7 @@ public class Gen2Constants {
             // Fishing, Headbutt, BCC
             "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING",
             "FISHING", "FISHING", "FISHING",
-            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
+            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
             "BUG CATCHING CONTEST");
 
     private static final List<String> locationTagsUseTimeGS = List.of(
@@ -712,8 +730,9 @@ public class Gen2Constants {
             "DARK CAVE",
             "ROUTE 35",
             // Fishing, Headbutt, BCC
-            "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING",
-            "FISHING", "FISHING", "FISHING",
+            "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND", "FISHING DRATINI 1",
+            "FISHING QUILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS", "FISHING DRATINI 2",
+            "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
             "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
             "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
             "BUG CATCHING CONTEST");
