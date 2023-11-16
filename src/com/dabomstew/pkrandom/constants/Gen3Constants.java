@@ -24,15 +24,15 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 import com.dabomstew.pkrandom.pokemon.EncounterArea;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Gen3Constants {
 
@@ -1081,7 +1081,7 @@ public class Gen3Constants {
             "DEWFORD TOWN", "DEWFORD TOWN",
             "SLATEPORT CITY", "SLATEPORT CITY",
             "MOSSDEEP CITY", "MOSSDEEP CITY",
-            "PACIFIDLOG TOWN", "PACIFIDLOW TOWN",
+            "PACIFIDLOG TOWN", "PACIFIDLOG TOWN",
             "EVER GRANDE CITY", "EVER GRANDE CITY",
             "PETALBURG CITY", "PETALBURG CITY",
             "UNDERWATER",
@@ -1100,21 +1100,113 @@ public class Gen3Constants {
             "METEOR FALLS"
     );
 
-    public static final List<String> locationTagsFRLG = List.of();
+    public static final List<String> locationTagsFRLG = List.of(
+            "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS",
+            "TANOBY CHAMBERS", "TANOBY CHAMBERS",
+            "VIRIDIAN FOREST",
+            "MT. MOON", "MT. MOON", "MT. MOON",
+            "S.S. ANNE", "S.S. ANNE",
+            "DIGLETT'S CAVE",
+            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
+            "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE",
+            "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE",
+            "ROCK TUNNEL", "ROCK TUNNEL", "ROCK TUNNEL",
+            "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS",
+            "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS",
+            "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER",
+            "POWER PLANT",
+            "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER",
+            "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER",
+            "MT. EMBER", "MT. EMBER",
+            "BERRY FOREST", "BERRY FOREST", "BERRY FOREST",
+            "ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE",
+            "ICEFALL CAVE",
+            "PATTERN BUSH",
+            "LOST CAVE", "LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE",
+            "LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE",
+            "KINDLE ROAD","KINDLE ROAD","KINDLE ROAD","KINDLE ROAD",
+            "TREASURE BEACH","TREASURE BEACH","TREASURE BEACH",
+            "CAPE BRINK","CAPE BRINK","CAPE BRINK",
+            "BOND BRIDGE", "BOND BRIDGE", "BOND BRIDGE",
+            "THREE ISLAND PORT",
+            "RESORT GORGEOUS", "RESORT GORGEOUS",
+            "WATER LABYRINTH", "WATER LABYRINTH",
+            "FIVE ISLE MEADOW","FIVE ISLE MEADOW","FIVE ISLE MEADOW",
+            "MEMORIAL PILLAR","MEMORIAL PILLAR","MEMORIAL PILLAR",
+            "OUTCAST ISLAND","OUTCAST ISLAND",
+            "GREEN PATH", "GREEN PATH",
+            "WATER PATH", "WATER PATH", "WATER PATH",
+            "RUIN VALLEY","RUIN VALLEY","RUIN VALLEY",
+            "TRAINER TOWER", "TRAINER TOWER",
+            "CANYON ENTRANCE",
+            "SEVAULT CANYON", "SEVAULT CANYON",
+            "TANOBY RUINS", "TANOBY RUINS",
+            "ROUTE 1",
+            "ROUTE 2",
+            "ROUTE 3",
+            "ROUTE 4", "ROUTE 4", "ROUTE 4",
+            "ROUTE 5",
+            "ROUTE 6", "ROUTE 6", "ROUTE 6",
+            "ROUTE 7",
+            "ROUTE 8",
+            "ROUTE 9",
+            "ROUTE 10", "ROUTE 10", "ROUTE 10",
+            "ROUTE 11", "ROUTE 11", "ROUTE 11",
+            "ROUTE 12", "ROUTE 12", "ROUTE 12",
+            "ROUTE 13", "ROUTE 13", "ROUTE 13",
+            "ROUTE 14",
+            "ROUTE 15",
+            "ROUTE 16",
+            "ROUTE 17",
+            "ROUTE 18",
+            "ROUTE 19", "ROUTE 19",
+            "ROUTE 20", "ROUTE 20",
+            "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21",
+            "ROUTE 22", "ROUTE 22", "ROUTE 22",
+            "ROUTE 23", "ROUTE 23", "ROUTE 23",
+            "ROUTE 24", "ROUTE 24", "ROUTE 24",
+            "ROUTE 25", "ROUTE 25", "ROUTE 25",
+            "PALLET TOWN", "PALLET TOWN",
+            "VIRIDIAN CITY", "VIRIDIAN CITY",
+            "CERULEAN CITY", "CERULEAN CITY",
+            "VERMILION CITY", "VERMILION CITY",
+            "CELADON CITY", "CELADON CITY",
+            "FUCHSIA CITY", "FUCHSIA CITY",
+            "CINNABAR ISLAND", "CINNABAR ISLAND",
+            "ONE ISLAND", "ONE ISLAND",
+            "FOUR ISLAND", "FOUR ISLAND",
+            "FIVE ISLAND", "FIVE ISLAND",
+            "ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE",
+            "ALTERING CAVE","ALTERING CAVE","ALTERING CAVE"
+    );
 
     public static final List<String> locationTagsTraverseOrderRSE = List.of("ROUTE 101", "ROUTE 103",
             "ROUTE 102", "PETALBURG CITY", "ROUTE 104", "PETALBURG WOODS", "ROUTE 116", "RUSTURF TUNNEL",
-            "DEWFORD TOWN", "GRANITE CAVE", "ROUTE 109", "SLATEPORT CITY", "ROUTE 110", "MAUVILLE CITY",
-            "ROUTE 117", "ROUTE 111", "MIRAGE TOWER", "ROUTE 112", "FIERY PATH", "ROUTE 113", "ROUTE 114",
-            "METEOR FALLS", "JAGGED PASS", "ROUTE 118", "ROUTE 119", "ROUTE 120", "ROUTE 121", "SAFARI ZONE",
-            "LILYCOVE CITY", "ROUTE 122", "MT. PYRE", "ROUTE 123", "MAGMA HIDEOUT", "ROUTE 124", "MOSSDEEP CITY",
-            "ROUTE 125", "SHOAL CAVE", "ROUTE 127", "ROUTE 128", "SEAFLOOR CAVERN", "ROUTE 126", "SOOTOPOLIS CITY",
-            "CAVE OF ORIGIN", "ROUTE 129", "ROUTE 130", "ROUTE 131", "SKY PILLAR", "PACIFIDLOG TOWN",
-            "ROUTE 132", "ROUTE 133", "ROUTE 134", "ROUTE 105", "ROUTE 106", "ROUTE 107", "ROUTE 108",
-            "ABANDONED SHIP", "EVER GRANDE CITY", "VICTORY ROAD", "DESERT UNDERPASS", "ARTISAN CAVE",
-            "ALTERING CAVE"); // TODO: A separate one for RS which places sky pillar at the end
+            "DEWFORD TOWN", "GRANITE CAVE", "ROUTE 109", "SLATEPORT CITY", "ROUTE 110", "ALTERING CAVE",
+            "MAUVILLE CITY", "NEW MAUVILLE", "ROUTE 117", "ROUTE 111", "MIRAGE TOWER", "ROUTE 112", "FIERY PATH",
+            "ROUTE 113", "ROUTE 114", "METEOR FALLS", "ROUTE 115", "JAGGED PASS", "ROUTE 118", "ROUTE 119", "ROUTE 120",
+            "ROUTE 121", "SAFARI ZONE", "LILYCOVE CITY", "ROUTE 122", "MT. PYRE", "ROUTE 123", "MAGMA HIDEOUT",
+            "ROUTE 124", "MOSSDEEP CITY", "UNDERWATER", "ROUTE 125", "SHOAL CAVE", "ROUTE 127", "ROUTE 128",
+            "SEAFLOOR CAVERN", "ROUTE 126", "SOOTOPOLIS CITY", "CAVE OF ORIGIN", "ROUTE 129", "ROUTE 130", "ROUTE 131",
+            "PACIFIDLOG TOWN", "ROUTE 132", "ROUTE 133", "ROUTE 134", "ROUTE 105", "ROUTE 106", "ROUTE 107",
+            "ROUTE 108", "ABANDONED SHIP", "EVER GRANDE CITY", "VICTORY ROAD", "SKY PILLAR", "DESERT UNDERPASS",
+            "ARTISAN CAVE");
 
-    public static final List<String> locationTagsTraverseOrderFRLG = List.of();
+    public static final List<String> locationTagsTraverseOrderFRLG = List.of("PALLET TOWN", "ROUTE 1",
+            "VIRIDIAN CITY", "ROUTE 22", "ROUTE 2", "VIRIDIAN FOREST", "ROUTE 3", "MT. MOON", "ROUTE 4",
+            "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "ROUTE 6", "VERMILION CITY", "S.S. ANNE", "ROUTE 11",
+            "DIGLETT'S CAVE", "ROUTE 9", "ROUTE 10", "ROCK TUNNEL", "ROUTE 8", "ROUTE 7", "CELADON CITY",
+            "POKEMON TOWER", "ROUTE 16", "ROUTE 17", "ROUTE 18", "FUCHSIA CITY", "SAFARI ZONE", "ROUTE 15", "ROUTE 14",
+            "ROUTE 13", "ROUTE 12", "POWER PLANT", "ROUTE 19", "ROUTE 20", "SEAFOAM ISLANDS", "CINNABAR ISLAND",
+            "POKEMON MANSION", "ROUTE 21", "ONE ISLAND", "TREASURE BEACH", "THREE ISLE PORT", "BOND BRIDGE",
+            "BERRY FOREST", "CAPE BRINK", "KINDLE ROAD", "MT. EMBER", "ROUTE 23", "VICTORY ROAD", "FOUR ISLAND",
+            "ICEFALL CAVE", "WATER PATH", "GREEN PATH", "PATTERN BUSH", "RUIN VALLEY", "OUTCAST ISLAND", 
+            "ALTERING CAVE", "FIVE ISLAND", "FIVE ISLE MEADOW", "MEMORIAL PILLAR", "WATER LABYRINTH", "RESORT GORGEOUS",
+            "LOST CAVE", "TRAINER TOWER", "CANYON ENTRANCE", "SEVAULT CANYON", "TANOBY RUINS", "TANOBY CHAMBERS",
+            "CERULEAN CAVE");
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
         if (encounterAreas.size() != locationTags.size()) {
