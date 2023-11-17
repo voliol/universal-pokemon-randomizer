@@ -1240,15 +1240,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			loadWildMapNames();
 		}
 
+		List<EncounterArea> encounterAreas;
 		try {
 			if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
-				return getEncountersHGSS(useTimeOfDay);
+				encounterAreas = getEncountersHGSS(useTimeOfDay);
 			} else {
-				return getEncountersDPPt(useTimeOfDay);
+				encounterAreas = getEncountersDPPt(useTimeOfDay);
 			}
 		} catch (IOException ex) {
 			throw new RandomizerIOException(ex);
 		}
+
+		Gen4Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
+		return encounterAreas;
 	}
 
 	private List<EncounterArea> getEncountersDPPt(boolean useTimeOfDay) throws IOException {
@@ -1755,6 +1759,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		clone.setMaxLevel(enc.getMaxLevel());
 		clone.setPokemon(pkmn);
 		return clone;
+	}
+
+	@Override
+	public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+		List<String> locationTagsTraverseOrder = romEntry.getRomType() == Gen4Constants.Type_HGSS ?
+				Gen4Constants.locationTagsTraverseOrderHGSS : Gen4Constants.locationTagsTraverseOrderDPPt;
+		return getEncounters(useTimeOfDay).stream()
+				.sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+				.toList();
 	}
 
 	@Override
