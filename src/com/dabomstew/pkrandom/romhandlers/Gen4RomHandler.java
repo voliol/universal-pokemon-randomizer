@@ -1251,7 +1251,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			throw new RandomizerIOException(ex);
 		}
 
-		Gen4Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
+		Gen4Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType(), useTimeOfDay);
 		return encounterAreas;
 	}
 
@@ -1566,6 +1566,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 
+			// TODO: these are time dependent (only on wednesdays/thursdays),
+			//  should they not be excluded when useTimeOfDay == false ?
 			// Hoenn/Sinnoh Radio
 			EncounterArea radioArea = readOptionalEncounterAreaHGSS(b, 92, 4);
 			radioArea.setDisplayName(mapName + " Hoenn/Sinnoh Radio");
@@ -1594,6 +1596,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (swarmArea.size() > 0) {
 				encounterAreas.add(swarmArea);
 			}
+			// TODO: Disable these... somehow when useTimeOfDay == false. It's tricky since I don't know what
+			//  encounters are being replaced in the usual fishing area/how it works
 			EncounterArea nightFishingReplacementArea = readOptionalEncounterAreaHGSS(b, offset + 4, 1);
 			nightFishingReplacementArea.setDisplayName(mapName + " Night Fishing Replacement");
 			if (nightFishingReplacementArea.size() > 0) {
