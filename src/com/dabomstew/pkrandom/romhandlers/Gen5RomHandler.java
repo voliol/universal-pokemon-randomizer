@@ -753,6 +753,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     processEncounterEntry(encounterAreas, entry, 0, idx);
                 }
             }
+
+            Gen5Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType(), useTimeOfDay);
             return encounterAreas;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -807,6 +809,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             encounters.add(enc);
         }
         return encounters;
+    }
+
+    @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        List<String> locationTagsTraverseOrder = romEntry.getRomType() == Gen5Constants.Type_BW ?
+                Gen5Constants.locationTagsTraverseOrderBW : Gen5Constants.locationTagsTraverseOrderBW2;
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
     }
 
     @Override
