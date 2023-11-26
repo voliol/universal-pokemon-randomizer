@@ -1943,179 +1943,265 @@ public class Gen5Constants {
         }
     }
 
-    private static final List<String> locationTagsBW = List.of(
-            "STRIATON CITY", "STRIATON CITY", "STRIATON CITY", "STRIATON CITY",
-            "DRIFTVEIL CITY", "DRIFTVEIL CITY", "DRIFTVEIL CITY", "DRIFTVEIL CITY",
-            "ICIRRUS CITY", "ICIRRUS CITY", "ICIRRUS CITY", "ICIRRUS CITY", "ICIRRUS CITY",
-            "DREAMYARD", "DREAMYARD", "DREAMYARD", "DREAMYARD",
-            "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST",
-            "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST",
-            "DESERT RESORT", "DESERT RESORT",
-            "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE",
-            "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE",
-            "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE",
-            "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE",
-            "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE",
-            "RELIC CASTLE",
-            "COLD STORAGE", "COLD STORAGE", "COLD STORAGE",
-            "CHARGESTONE CAVE", "CHARGESTONE CAVE", "CHARGESTONE CAVE", "CHARGESTONE CAVE", "CHARGESTONE CAVE",
-            "CHARGESTONE CAVE",
-            "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN",
-            "TWIST MOUNTAIN", "TWIST MOUNTAIN",
-            "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER",
-            "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER",
-            "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM",
-            "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM",
-            "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM",
-            "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY",
-            "UNDELLA BAY", "UNDELLA BAY", "UNDELLA BAY", "UNDELLA BAY",
-            "DRIFTVEIL DRAWBRIDGE",
-            "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE",
-            "VILLAGE BRIDGE",
-            "MARVELOUS BRIDGE",
-            "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1",
-            "ROUTE 2", "ROUTE 2",
-            "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3",
-            "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE",
-            "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE",
-            "WELLSPRING CAVE", "WELLSPRING CAVE",
-            "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4",
-            "ROUTE 5", "ROUTE 5", "ROUTE 5",
-            "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6",
-            "MISTRALTON CAVE", "MISTRALTON CAVE", "MISTRALTON CAVE", "MISTRALTON CAVE", "MISTRALTON CAVE",
-            "MISTRALTON CAVE",
-            "ROUTE 7", "ROUTE 7", "ROUTE 7",
-            "CELESTIAL TOWER", "CELESTIAL TOWER", "CELESTIAL TOWER", "CELESTIAL TOWER",
-            "ROUTE 8", "ROUTE 8", "ROUTE 8", "ROUTE 8", "ROUTE 8",
-            "MOOR OF ICIRRUS", "MOOR OF ICIRRUS", "MOOR OF ICIRRUS", "MOOR OF ICIRRUS", "MOOR OF ICIRRUS",
-            "ROUTE 9", "ROUTE 9", "ROUTE 9",
-            "CHALLENGER'S CAVE", "CHALLENGER'S CAVE", "CHALLENGER'S CAVE", "CHALLENGER'S CAVE", "CHALLENGER'S CAVE",
-            "CHALLENGER'S CAVE", "CHALLENGER'S CAVE", "CHALLENGER'S CAVE", "CHALLENGER'S CAVE", "CHALLENGER'S CAVE",
-            "ROUTE 10", "ROUTE 10", "ROUTE 10", "ROUTE 10", "ROUTE 10", "ROUTE 10",
-            "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11",
-            "ROUTE 12", "ROUTE 12", "ROUTE 12",
-            "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13",
-            "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14",
-            "ABUNDANT SHRINE", "ABUNDANT SHRINE", "ABUNDANT SHRINE", "ABUNDANT SHRINE", "ABUNDANT SHRINE",
-            "ABUNDANT SHRINE", "ABUNDANT SHRINE",
-            "ROUTE 15", "ROUTE 15", "ROUTE 15",
-            "ROUTE 16", "ROUTE 16", "ROUTE 16",
-            "LOSTLORN FOREST", "LOSTLORN FOREST", "LOSTLORN FOREST", "LOSTLORN FOREST", "LOSTLORN FOREST",
-            "LOSTLORN FOREST", "LOSTLORN FOREST",
-            "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18",
-            "UNDELLA TOWN", "UNDELLA TOWN", "UNDELLA TOWN", "UNDELLA TOWN",
-            "ROUTE 17", "ROUTE 17", "ROUTE 17", "ROUTE 17"
-    );
+    public static void main(String[] args) {
+        foo(locationTagsNoTimeBW);
+    }
 
-    private static final List<String> locationTagsBW2 = List.of(
-            "STRIATON CITY", "STRIATON CITY", "STRIATON CITY", "STRIATON CITY",
-            "CASTELIA CITY", "CASTELIA CITY", "CASTELIA CITY",
-            "ICIRRUS CITY", "ICIRRUS CITY", "ICIRRUS CITY", "ICIRRUS CITY", "ICIRRUS CITY",
-            "ASPERTIA CITY", "ASPERTIA CITY", "ASPERTIA CITY", "ASPERTIA CITY",
-            "VIRBANK CITY", "VIRBANK CITY", "VIRBANK CITY", "VIRBANK CITY",
-            "HUMILAU CITY", "HUMILAU CITY", "HUMILAU CITY", "HUMILAU CITY",
-            "DREAMYARD", "DREAMYARD", "DREAMYARD", "DREAMYARD",
-            "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST",
-            "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST", "PINWHEEL FOREST",
-            "DESERT RESORT", "DESERT RESORT",
-            "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE", "RELIC CASTLE",
-            "RELIC CASTLE", "RELIC CASTLE",
-            "CHARGESTONE CAVE", "CHARGESTONE CAVE", "CHARGESTONE CAVE", "CHARGESTONE CAVE", "CHARGESTONE CAVE",
-            "CHARGESTONE CAVE",
-            "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN", "TWIST MOUNTAIN",
-            "TWIST MOUNTAIN", "TWIST MOUNTAIN",
-            "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER",
-            "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER",
-            "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER", "DRAGONSPIRAL TOWER",
-            "VICTORY ROAD", "VICTORY ROAD",
-            "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM",
-            "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM",
-            "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM", "GIANT CHASM",
-            "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS",
-            "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS",
-            "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS",
-            "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS",
-            "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS", "CASTELIA SEWERS",
-            "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY", "P2 LABORATORY",
-            "UNDELLA BAY", "UNDELLA BAY", "UNDELLA BAY", "UNDELLA BAY",
-            "FLOCCESY RANCH", "FLOCCESY RANCH", "FLOCCESY RANCH", "FLOCCESY RANCH", "FLOCCESY RANCH", "FLOCCESY RANCH",
-            "FLOCCESY RANCH", "FLOCCESY RANCH", "FLOCCESY RANCH", "FLOCCESY RANCH",
-            "VIRBANK COMPLEX", "VIRBANK COMPLEX", "VIRBANK COMPLEX", "VIRBANK COMPLEX", "VIRBANK COMPLEX",
-            "VIRBANK COMPLEX", "VIRBANK COMPLEX", "VIRBANK COMPLEX", "VIRBANK COMPLEX",
-            "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN",
-            "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN",
-            "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN",
-            "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN",
-            "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN",
-            "REVERSAL MOUNTAIN", "REVERSAL MOUNTAIN",
-            "STRANGE HOUSE", "STRANGE HOUSE", "STRANGE HOUSE", "STRANGE HOUSE", "STRANGE HOUSE", "STRANGE HOUSE",
-            "STRANGE HOUSE", "STRANGE HOUSE", "STRANGE HOUSE", "STRANGE HOUSE",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
-            "RELIC PASSAGE", "RELIC PASSAGE", "RELIC PASSAGE", "RELIC PASSAGE", "RELIC PASSAGE", "RELIC PASSAGE",
-            "RELIC PASSAGE", "RELIC PASSAGE", "RELIC PASSAGE", "RELIC PASSAGE",
-            "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL",
-            "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL", "CLAY TUNNEL",
-            "UNDERGROUND RUINS", "UNDERGROUND RUINS", "UNDERGROUND RUINS", "UNDERGROUND RUINS", "UNDERGROUND RUINS",
-            "UNDERGROUND RUINS", "UNDERGROUND RUINS", "UNDERGROUND RUINS", "UNDERGROUND RUINS", "UNDERGROUND RUINS",
-            "UNDERGROUND RUINS", "UNDERGROUND RUINS",
-            "SEASIDE CAVERN", "SEASIDE CAVERN", "SEASIDE CAVERN", "SEASIDE CAVERN", "SEASIDE CAVERN", "SEASIDE CAVERN",
-            "SEASIDE CAVERN", "SEASIDE CAVERN",
-            "NATURE PRESERVE", "NATURE PRESERVE", "NATURE PRESERVE", "NATURE PRESERVE", "NATURE PRESERVE",
-            "NATURE PRESERVE", "NATURE PRESERVE",
-            "DRIFTVEIL DRAWBRIDGE",
-            "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE", "VILLAGE BRIDGE",
-            "VILLAGE BRIDGE",
-            "MARVELOUS BRIDGE",
-            "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1", "ROUTE 1",
-            "ROUTE 2", "ROUTE 2",
-            "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3", "ROUTE 3",
-            "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE",
-            "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE", "WELLSPRING CAVE",
-            "WELLSPRING CAVE", "WELLSPRING CAVE",
-            "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4", "ROUTE 4",
-            "ROUTE 4",
-            "ROUTE 5", "ROUTE 5", "ROUTE 5",
-            "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6", "ROUTE 6",
-            "MISTRALTON CAVE", "MISTRALTON CAVE", "MISTRALTON CAVE", "MISTRALTON CAVE", "MISTRALTON CAVE",
-            "MISTRALTON CAVE",
-            "ROUTE 7", "ROUTE 7", "ROUTE 7",
-            "CELESTIAL TOWER", "CELESTIAL TOWER", "CELESTIAL TOWER", "CELESTIAL TOWER",
-            "ROUTE 8", "ROUTE 8", "ROUTE 8", "ROUTE 8", "ROUTE 8",
-            "MOOR OF ICIRRUS", "MOOR OF ICIRRUS", "MOOR OF ICIRRUS", "MOOR OF ICIRRUS", "MOOR OF ICIRRUS",
-            "ROUTE 9", "ROUTE 9", "ROUTE 9",
-            "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11", "ROUTE 11",
-            "ROUTE 12", "ROUTE 12", "ROUTE 12",
-            "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13", "ROUTE 13",
-            "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14", "ROUTE 14",
-            "ABUNDANT SHRINE", "ABUNDANT SHRINE", "ABUNDANT SHRINE", "ABUNDANT SHRINE", "ABUNDANT SHRINE",
-            "ABUNDANT SHRINE", "ABUNDANT SHRINE",
-            "ROUTE 15", "ROUTE 15", "ROUTE 15",
-            "ROUTE 16", "ROUTE 16", "ROUTE 16",
-            "LOSTLORN FOREST", "LOSTLORN FOREST", "LOSTLORN FOREST", "LOSTLORN FOREST", "LOSTLORN FOREST",
-            "LOSTLORN FOREST", "LOSTLORN FOREST",
-            "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18", "ROUTE 18",
-            "ROUTE 19", "ROUTE 19", "ROUTE 19", "ROUTE 19", "ROUTE 19", "ROUTE 19",
-            "ROUTE 20", "ROUTE 20", "ROUTE 20", "ROUTE 20", "ROUTE 20", "ROUTE 20", "ROUTE 20",
-            "ROUTE 22", "ROUTE 22", "ROUTE 22", "ROUTE 22", "ROUTE 22", "ROUTE 22", "ROUTE 22",
-            "ROUTE 23", "ROUTE 23", "ROUTE 23", "ROUTE 23", "ROUTE 23", "ROUTE 23", "ROUTE 23",
-            "UNDELLA TOWN", "UNDELLA TOWN", "UNDELLA TOWN", "UNDELLA TOWN",
-            "ROUTE 17", "ROUTE 17", "ROUTE 17", "ROUTE 17",
-            "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21"
-    );
+    private static void foo(List<String> strings) {
+        List<String> withTerminator = new ArrayList<>(strings);
+        withTerminator.add("");
+
+        int count = 0;
+        String prev = "";
+        for (String curr : withTerminator) {
+            if (!curr.equals(prev)) {
+                System.out.printf("addCopies(tags, %d, \"%s\");\n", count, prev);
+                count = 0;
+            }
+            count++;
+            prev = curr;
+        }
+    }
+
+    private static void addCopies(List<String> list, int n, String s) {
+        list.addAll(Collections.nCopies(n, s));
+    }
+
+    private static final List<String> locationTagsNoTimeBW = initLocationTagsNoTimeBW();
+
+    private static List<String> initLocationTagsNoTimeBW() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 4, "DRIFTVEIL CITY");
+        addCopies(tags, 5, "ICIRRUS CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 31, "RELIC CASTLE");
+        addCopies(tags, 3, "COLD STORAGE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 8, "TWIST MOUNTAIN");
+        addCopies(tags, 11, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 39, "VICTORY ROAD");
+        addCopies(tags, 18, "GIANT CHASM");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 4, "UNDELLA BAY");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 5, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 7, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 5, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 10, "CHALLENGER'S CAVE");
+        addCopies(tags, 6, "ROUTE 10");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeBW = initLocationTagsUseTimeBW();
+
+    private static List<String> initLocationTagsUseTimeBW() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 4, "DRIFTVEIL CITY");
+        addCopies(tags, 19, "ICIRRUS CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 31, "RELIC CASTLE");
+        addCopies(tags, 3, "COLD STORAGE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 32, "TWIST MOUNTAIN");
+        addCopies(tags, 39, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 39, "VICTORY ROAD");
+        addCopies(tags, 18, "GIANT CHASM");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 16, "UNDELLA BAY");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 5, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 28, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 12, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 19, "ROUTE 8");
+        addCopies(tags, 19, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 10, "CHALLENGER'S CAVE");
+        addCopies(tags, 6, "ROUTE 10");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsNoTimeBW2 = initLocationTagsNoTimeBW2();
+
+    private static List<String> initLocationTagsNoTimeBW2() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 3, "CASTELIA CITY");
+        addCopies(tags, 5, "ICIRRUS CITY");
+        addCopies(tags, 4, "ASPERTIA CITY");
+        addCopies(tags, 4, "VIRBANK CITY");
+        addCopies(tags, 4, "HUMILAU CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 8, "RELIC CASTLE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 8, "TWIST MOUNTAIN");
+        addCopies(tags, 11, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 2, "VICTORY ROAD");
+        addCopies(tags, 21, "GIANT CHASM");
+        addCopies(tags, 25, "CASTELIA SEWERS");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 4, "UNDELLA BAY");
+        addCopies(tags, 10, "FLOCCESY RANCH");
+        addCopies(tags, 9, "VIRBANK COMPLEX");
+        addCopies(tags, 27, "REVERSAL MOUNTAIN");
+        addCopies(tags, 10, "STRANGE HOUSE");
+        addCopies(tags, 42, "VICTORY ROAD");
+        addCopies(tags, 10, "RELIC PASSAGE");
+        addCopies(tags, 14, "CLAY TUNNEL");
+        addCopies(tags, 12, "UNDERGROUND RUINS");
+        addCopies(tags, 8, "SEASIDE CAVERN");
+        addCopies(tags, 7, "NATURE PRESERVE");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 10, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 7, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 5, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 6, "ROUTE 19");
+        addCopies(tags, 7, "ROUTE 20");
+        addCopies(tags, 7, "ROUTE 22");
+        addCopies(tags, 7, "ROUTE 23");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        addCopies(tags, 4, "ROUTE 21");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeBW2 = initLocationTagsUseTimeBW2();
+
+    private static List<String> initLocationTagsUseTimeBW2() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 3, "CASTELIA CITY");
+        addCopies(tags, 19, "ICIRRUS CITY");
+        addCopies(tags, 4, "ASPERTIA CITY");
+        addCopies(tags, 4, "VIRBANK CITY");
+        addCopies(tags, 4, "HUMILAU CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 8, "RELIC CASTLE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 32, "TWIST MOUNTAIN");
+        addCopies(tags, 39, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 2, "VICTORY ROAD");
+        addCopies(tags, 21, "GIANT CHASM");
+        addCopies(tags, 25, "CASTELIA SEWERS");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 16, "UNDELLA BAY");
+        addCopies(tags, 10, "FLOCCESY RANCH");
+        addCopies(tags, 9, "VIRBANK COMPLEX");
+        addCopies(tags, 27, "REVERSAL MOUNTAIN");
+        addCopies(tags, 10, "STRANGE HOUSE");
+        addCopies(tags, 42, "VICTORY ROAD");
+        addCopies(tags, 10, "RELIC PASSAGE");
+        addCopies(tags, 14, "CLAY TUNNEL");
+        addCopies(tags, 12, "UNDERGROUND RUINS");
+        addCopies(tags, 8, "SEASIDE CAVERN");
+        addCopies(tags, 7, "NATURE PRESERVE");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 10, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 28, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 12, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 19, "ROUTE 8");
+        addCopies(tags, 19, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 6, "ROUTE 19");
+        addCopies(tags, 28, "ROUTE 20");
+        addCopies(tags, 7, "ROUTE 22");
+        addCopies(tags, 7, "ROUTE 23");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        addCopies(tags, 4, "ROUTE 21");
+        return Collections.unmodifiableList(tags);
+    }
 
     public static final List<String> locationTagsTraverseOrderBW = List.of();
 
@@ -2132,8 +2218,8 @@ public class Gen5Constants {
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
         List<String> locationTags = switch (romType) {
-            case 0 -> locationTagsBW;
-            case 1 -> locationTagsBW2;
+            case 0 -> (useTimeOfDay ? locationTagsUseTimeBW : locationTagsNoTimeBW);
+            case 1 -> (useTimeOfDay ? locationTagsUseTimeBW2 : locationTagsNoTimeBW2);
             default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
         };
         for (int i = 0; i < Math.max(locationTags.size(), encounterAreas.size()); i++) {
