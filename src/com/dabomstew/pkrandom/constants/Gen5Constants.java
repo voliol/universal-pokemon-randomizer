@@ -194,7 +194,7 @@ public class Gen5Constants {
     );
 
     public static final List<Integer> emptyPlaythroughTrainers = List.of();
-    
+
     public static final List<Integer> bw1MainPlaythroughTrainers = Arrays.asList(
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -260,7 +260,7 @@ public class Gen5Constants {
             71, 72, 73, 74, 75, 76, 77);
 
     public static final int normalTrainerNameLength = 813, normalTrainerClassLength = 236;
-    
+
 //    public static final Map<Integer, String> bw1ShopIndex = new HashMap<Integer, String>() {1:"Check"};
 
     public static final List<Integer> bw1MainGameShops = Arrays.asList(
@@ -298,7 +298,7 @@ public class Gen5Constants {
     public static final List<Integer> bw2MainGameShops = Arrays.asList(
             9, 11, 14, 15, 16, 18, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31
     );
-    
+
     public static final List<String> bw2ShopNames = Arrays.asList(
             "Primary 0 Badges",
             "Primary 1 Badges",
@@ -339,7 +339,7 @@ public class Gen5Constants {
             Items.ovalStone, Items.kingsRock, Items.deepSeaTooth, Items.deepSeaScale, Items.metalCoat, Items.dragonScale,
             Items.upgrade, Items.protector, Items.electirizer, Items.magmarizer, Items.dubiousDisc, Items.reaperCloth,
             Items.razorClaw, Items.razorFang, Items.prismScale);
-    
+
     public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(2, 3, 5, 6, 9, 12, 13, 19,
             22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47, 50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90,
             91, 92, 93);
@@ -1644,7 +1644,7 @@ public class Gen5Constants {
         12,
         54,
     };
-    
+
     private static final int[] bw2WildFileToAreaMap = {
         2,
         4,
@@ -1943,30 +1943,6 @@ public class Gen5Constants {
         }
     }
 
-    public static void main(String[] args) {
-        foo(locationTagsNoTimeBW);
-    }
-
-    private static void foo(List<String> strings) {
-        List<String> withTerminator = new ArrayList<>(strings);
-        withTerminator.add("");
-
-        int count = 0;
-        String prev = "";
-        for (String curr : withTerminator) {
-            if (!curr.equals(prev)) {
-                System.out.printf("addCopies(tags, %d, \"%s\");\n", count, prev);
-                count = 0;
-            }
-            count++;
-            prev = curr;
-        }
-    }
-
-    private static void addCopies(List<String> list, int n, String s) {
-        list.addAll(Collections.nCopies(n, s));
-    }
-
     private static final List<String> locationTagsNoTimeBW = initLocationTagsNoTimeBW();
 
     private static List<String> initLocationTagsNoTimeBW() {
@@ -2097,9 +2073,8 @@ public class Gen5Constants {
         addCopies(tags, 10, "STRANGE HOUSE");
         addCopies(tags, 42, "VICTORY ROAD");
         addCopies(tags, 10, "RELIC PASSAGE");
-        addCopies(tags, 14, "CLAY TUNNEL");
-        addCopies(tags, 12, "UNDERGROUND RUINS");
-        addCopies(tags, 8, "SEASIDE CAVERN");
+        addCopies(tags, 26, "CLAY TUNNEL");
+        addCopies(tags, 8, "SEASIDE CAVE");
         addCopies(tags, 7, "NATURE PRESERVE");
         addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
         addCopies(tags, 7, "VILLAGE BRIDGE");
@@ -2164,9 +2139,8 @@ public class Gen5Constants {
         addCopies(tags, 10, "STRANGE HOUSE");
         addCopies(tags, 42, "VICTORY ROAD");
         addCopies(tags, 10, "RELIC PASSAGE");
-        addCopies(tags, 14, "CLAY TUNNEL");
-        addCopies(tags, 12, "UNDERGROUND RUINS");
-        addCopies(tags, 8, "SEASIDE CAVERN");
+        addCopies(tags, 26, "CLAY TUNNEL");
+        addCopies(tags, 8, "SEASIDE CAVE");
         addCopies(tags, 7, "NATURE PRESERVE");
         addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
         addCopies(tags, 7, "VILLAGE BRIDGE");
@@ -2203,9 +2177,40 @@ public class Gen5Constants {
         return Collections.unmodifiableList(tags);
     }
 
-    public static final List<String> locationTagsTraverseOrderBW = List.of();
+    private static void addCopies(List<String> list, int n, String s) {
+        list.addAll(Collections.nCopies(n, s));
+    }
 
-    public static final List<String> locationTagsTraverseOrderBW2 = List.of();
+    /**
+     * Based on
+     * <a href=https://bulbapedia.bulbagarden.net/wiki/Appendix:Black_and_White_walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrderBW = List.of(
+            "ROUTE 1", "ROUTE 2", "STRIATON CITY", "DREAMYARD", "ROUTE 3", "WELLSPRING CAVE",
+            "PINWHEEL FOREST", "CASTELIA CITY", "ROUTE 4", "DESERT RESORT", "ROUTE 5", "RELIC CASTLE", "ROUTE 5",
+            "DRIFTVEIL DRAWBRIDGE", "DRIFTVEIL CITY", "COLD STORAGE", "ROUTE 6", "CHARGESTONE CAVE", "ROUTE 7",
+            "CELESTIAL TOWER", "ROUTE 17", "ROUTE 18", "P2 LABORATORY", "MISTRALTON CAVE", "TWIST MOUNTAIN",
+            "ICIRRUS CITY", "DRAGONSPIRAL TOWER", "ROUTE 8", "MOOR OF ICIRRUS", "ROUTE 9", "ROUTE 10", "VICTORY ROAD",
+            "CHALLENGER'S CAVE", "ROUTE 11", "VILLAGE BRIDGE", "ROUTE 12", "ROUTE 13", "GIANT CHASM",
+            "UNDELLA TOWN", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 15", "MARVELOUS BRIDGE", "ROUTE 16",
+            "LOSTLORN FOREST"
+    );
+
+    /**
+     * Same order as the in-game Pokédex Habitat List.
+     */
+    public static final List<String> locationTagsTraverseOrderBW2 = List.of(
+            "ASPERTIA CITY", "ROUTE 19", "ROUTE 20", "FLOCCESY RANCH", "VIRBANK CITY", "VIRBANK COMPLEX",
+            "CASTELIA CITY", "CASTELIA SEWERS", "ROUTE 4", "DESERT RESORT", "RELIC CASTLE", "ROUTE 5", "ROUTE 16",
+            "LOSTLORN FOREST", "DRIFTVEIL DRAWBRIDGE", "ROUTE 6", "RELIC PASSAGE", "CLAY TUNNEL", "MISTRALTON CAVE",
+            "CHARGESTONE CAVE", "ROUTE 7", "CELESTIAL TOWER", "REVERSAL MOUNTAIN", "STRANGE HOUSE", "UNDELLA TOWN",
+            "ROUTE 13", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 12", "VILLAGE BRIDGE", "ROUTE 11",
+            "ROUTE 9", "SEASIDE CAVE", "ROUTE 21", "ROUTE 15", "MARVELOUS BRIDGE", "HUMILAU CITY", "ROUTE 22",
+            "GIANT CHASM", "ROUTE 23", "VICTORY ROAD", "ROUTE 8", "MOOR OF ICIRRUS", "ICIRRUS CITY",
+            "DRAGONSPIRAL TOWER", "TWIST MOUNTAIN", "PINWHEEL FOREST", "ROUTE 3", "WELLSPRING CAVE", "STRIATON CITY",
+            "DREAMYARD", "ROUTE 2", "ROUTE 1", "ROUTE 17", "ROUTE 18", "P2 LABORATORY",
+            "NATURE PRESERVE"
+    );
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
         if (encounterAreas.size() != locationTags.size()) {
@@ -2222,15 +2227,6 @@ public class Gen5Constants {
             case 1 -> (useTimeOfDay ? locationTagsUseTimeBW2 : locationTagsNoTimeBW2);
             default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
         };
-        for (int i = 0; i < Math.max(locationTags.size(), encounterAreas.size()); i++) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(i).append(".    ");
-            String part1 = i < locationTags.size() ? locationTags.get(i) : "------";
-            sb.append(part1);
-            sb.append(" ".repeat(25 - part1.length()));
-            sb.append(i < encounterAreas.size() ? encounterAreas.get(i).getDisplayName() : "------");
-            System.out.println(sb);
-        }
         tagEncounterAreas(encounterAreas, locationTags);
     }
 

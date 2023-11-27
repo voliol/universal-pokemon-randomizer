@@ -1,8 +1,9 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.*;
-import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
+import com.dabomstew.pkrandom.romhandlers.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -107,6 +108,45 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             assertNotNull(area.getLocationTag());
             assertNotEquals("", area.getLocationTag());
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void allLocationTagsAreFoundInTraverseOrder(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) <= 5);
+        loadROM(romName);
+        Set<String> inOrder = new HashSet<>(getLocationTagsTraverseOrder());
+        Set<String> used = new HashSet<>();
+        for (EncounterArea area : romHandler.getEncounters(false)) {
+            used.add(area.getLocationTag());
+        }
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            used.add(area.getLocationTag());
+        }
+        System.out.println("In traverse order:\n" + inOrder);
+        System.out.println("Used:\n" + used);
+        Set<String> notUsed = new HashSet<>(used);
+        notUsed.removeAll(inOrder);
+        System.out.println("Used but not in traverse order:\n" + notUsed);
+        assertTrue(notUsed.isEmpty());
+    }
+
+    private List<String> getLocationTagsTraverseOrder() {
+        if (romHandler instanceof Gen1RomHandler) {
+            return Gen1Constants.locationTagsTraverseOrder;
+        } else if (romHandler instanceof Gen2RomHandler) {
+            return Gen2Constants.locationTagsTraverseOrder;
+        } else if (romHandler instanceof Gen3RomHandler gen3RomHandler) {
+            return (gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG ?
+                    Gen3Constants.locationTagsTraverseOrderFRLG : Gen3Constants.locationTagsTraverseOrderRSE);
+        } else if (romHandler instanceof Gen4RomHandler gen4RomHandler) {
+            return (gen4RomHandler.getRomEntry().getRomType() == Gen4Constants.Type_HGSS ?
+                    Gen4Constants.locationTagsTraverseOrderHGSS : Gen4Constants.locationTagsTraverseOrderDPPt);
+        } else if (romHandler instanceof Gen5RomHandler gen5RomHandler) {
+            return (gen5RomHandler.getRomEntry().getRomType() == Gen5Constants.Type_BW2 ?
+                    Gen5Constants.locationTagsTraverseOrderBW2 : Gen5Constants.locationTagsTraverseOrderBW);
+        }
+        return Collections.emptyList();
     }
 
     private void checkForNoLegendaries() {

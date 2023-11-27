@@ -684,8 +684,8 @@ public class Gen2Constants {
         }
         locationTags.addAll(locationTagsNoTimeGS.subList(157, 170));
         locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
-                "FISHING DRATINI 1", "FISHING QUILFISH FARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
-                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QUILFISH"));
+                "FISHING DRATINI 1", "FISHING QWILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
+                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
         locationTags.addAll(locationTagsNoTimeGS.subList(170, 176));
         return Collections.unmodifiableList(locationTags);
     }
@@ -786,8 +786,8 @@ public class Gen2Constants {
         }
         locationTags.addAll(locationTagsNoTimeCrystal.subList(155, 167));
         locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
-                "FISHING DRATINI 1", "FISHING QUILFISH FARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
-                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QUILFISH"));
+                "FISHING DRATINI 1", "FISHING QWILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
+                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
         locationTags.addAll(locationTagsNoTimeCrystal.subList(167, 181));
         return Collections.unmodifiableList(locationTags);
     }
