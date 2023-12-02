@@ -196,11 +196,16 @@ public class Settings {
     }
 
     public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS
+        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL
+    }
+    
+    public enum WildPokemonTypeMod {
+        NONE, THEMED_AREAS, KEEP_PRIMARY
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
     private WildPokemonRestrictionMod wildPokemonRestrictionMod = WildPokemonRestrictionMod.NONE;
+    private WildPokemonTypeMod wildPokemonTypeMod = WildPokemonTypeMod.NONE;
     private boolean useTimeBasedEncounters;
     private boolean blockWildLegendaries = true;
     private boolean useMinimumCatchRate;
@@ -417,14 +422,14 @@ public class Settings {
         out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.TYPE_THEME_AREAS,
+                wildPokemonTypeMod == WildPokemonTypeMod.THEMED_AREAS,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
 
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass));
+                banBadRandomWildPokemonHeldItems, wildPokemonTypeMod == WildPokemonTypeMod.NONE, wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY, balanceShakingGrass));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -691,9 +696,13 @@ public class Settings {
         ));
         settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
                 restoreState(data[16], 2), // SIMILAR_STRENGTH
-                restoreState(data[15], 0), // CATCH_EM_ALL
-                restoreState(data[15], 3) // TYPE_THEME_AREAS
+                restoreState(data[15], 0) // CATCH_EM_ALL
         ));
+        settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
+                restoreState(data[15], 3), // THEMED_AREAS
+                restoreState(data[16], 6) // KEEP_PRIMARY
+        ));
+        
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
         settings.setUseMinimumCatchRate(restoreState(data[16], 0));
@@ -1788,6 +1797,18 @@ public class Settings {
 
     private void setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
         this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
+    }
+
+    public WildPokemonTypeMod getWildPokemonTypeMod() {
+        return wildPokemonTypeMod;
+    }
+
+    public void setWildPokemonTypeMod(boolean... bools) {
+        setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, bools));
+    }
+
+    private void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
+        this.wildPokemonTypeMod = wildPokemonTypeMod;
     }
 
     public boolean isUseTimeBasedEncounters() {

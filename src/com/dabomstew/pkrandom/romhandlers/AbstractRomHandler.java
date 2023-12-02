@@ -702,8 +702,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomEncounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
-        boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
+        boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
@@ -739,6 +740,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(getIrregularFormes());
         }
         // Assume EITHER catch em all OR type themed OR match strength for now
+        // TODO: separate typing to its own block
+        // TODO: also do whatever makes match strength have a wide enough pool
+        //note re TODO: this is random-each-time method.
+        // (actually, possibly random + similar strength + type theme is no good, because small pools?)
         if (catchEmAll) {
             List<Pokemon> allPokes;
             if (allowAltFormes) {
@@ -927,8 +932,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
-        boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
+        boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
         boolean noLegendaries = settings.isBlockWildLegendaries();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
         boolean allowAltFormes = settings.isAllowWildAltFormes();
@@ -953,6 +959,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         Collections.shuffle(scrambledEncounters, this.random);
 
         // Assume EITHER catch em all OR type themed for now
+        // TODO: separate type theming out
+        // note: this is area 1-to-1.
         if (catchEmAll) {
             List<Pokemon> allPokes;
             if (allowAltFormes) {
@@ -1147,11 +1155,15 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void game1to1Encounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
         boolean noLegendaries = settings.isBlockWildLegendaries();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
         boolean allowAltFormes = settings.isAllowWildAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
+
+        //TODO: make keepPrimary function
+        //note: this is global 1-to-1
 
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
@@ -1293,8 +1305,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void enhanceRandomEncountersORAS(List<EncounterSet> collapsedEncounters, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
-        boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
+        boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
+        // TODO: figure out what this function does, and propagate changes to it if needed. (Probably yes.)
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean allowAltFormes = settings.isAllowWildAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
