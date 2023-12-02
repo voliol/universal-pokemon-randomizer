@@ -742,8 +742,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Assume EITHER catch em all OR type themed OR match strength for now
         // TODO: separate typing to its own block
         // TODO: also do whatever makes match strength have a wide enough pool
-        //note re TODO: this is random-each-time method.
-        // (actually, possibly random + similar strength + type theme is no good, because small pools?)
+        // note: this is random-each-time method.
+        // (actually, possibly random + similar strength + type restriction is no good, because small pools?
+        // that would at least explain why it's disallowed)
         if (catchEmAll) {
             List<Pokemon> allPokes;
             if (allowAltFormes) {
@@ -1162,8 +1163,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
-        //TODO: make keepPrimary function
+        //TODO: make keepPrimary function for settings other than usePowerLevels=true;
+        //TODO: figure out a way to get the original typing of left list. (is this even possible?)
         //note: this is global 1-to-1
+        //...this is weird. the way this functions is weird.
+        //why not build the map as you go? and then only populate as much as is needed?
+        //whatever. I'm not going to attempt a big change like that.
+        //(...but i think it would work better-- it'd run faster,
+        // it ought to make banned pokemon get in the map properly
+        // (i'm pretty sure their current implementation is causing a bug regarding them),
+        // and it won't be straight up guaranteed that we'll hit the end of type lists, for keepPrimary.)
+        // oh, and that also means tighter bounds on similar-strength pokemon!
+        // so yeah. why the heck does it work this way.
+        // ...maybe i WILL change it.)
+        // TODO: that i guess??
 
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
@@ -1194,24 +1207,67 @@ public abstract class AbstractRomHandler implements RomHandler {
             remainingLeft.remove(bannedPK);
             remainingRight.remove(bannedPK);
         }
+        //build type lists for right
+        Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
+        Map<Type, List<Pokemon>> initialTypeLists = new EnumMap<>(Type.class);
+        if(keepPrimary) {
+            for (Type type : Type.values()) {
+                typeListMap.put(type, new ArrayList<>());
+            }
+            for (Pokemon poke : remainingRight) {
+                typeListMap.get(poke.primaryType).add(poke);
+                //I'm not sure which is the correct way to validate, so we're doing both
+                if (poke.secondaryType != null && poke.secondaryType != poke.primaryType) {
+                    typeListMap.get(poke.secondaryType).add(poke);
+                }
+            }
+            //store the initial lists, since rebuilding them would be an O(n) operation each time,
+            //and it's very likely we will have to.
+            for (Type type : Type.values()) {
+                initialTypeLists.put(type, new ArrayList<>(typeListMap.get(type)));
+            }
+        }
+
+
         while (!remainingLeft.isEmpty()) {
+            int pickedLeft = this.random.nextInt(remainingLeft.size());
+            Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
             if (usePowerLevels) {
-                int pickedLeft = this.random.nextInt(remainingLeft.size());
-                Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
                 Pokemon pickedRightP;
-                if (remainingRight.size() == 1) {
-                    // pick this (it may or may not be the same poke)
-                    pickedRightP = remainingRight.get(0);
+                if (keepPrimary) {
+                    List<Pokemon> typeList = typeListMap.get(pickedLeftP.primaryType);
+                    if (typeList.size() == 1) {
+                        // pick this (it may or may not be the same poke)
+                        pickedRightP = typeList.get(0);
+                    } else {
+                        // pick on power level with the current one blocked
+                        pickedRightP = pickWildPowerLvlReplacement(typeList, pickedLeftP, true, null, 100);
+                    }
+                    typeListMap.get(pickedRightP.primaryType).remove(pickedRightP);
+                    if(typeListMap.get(pickedRightP.primaryType).isEmpty()) {
+                        List<Pokemon> clone = new ArrayList<>(initialTypeLists.get(pickedRightP.primaryType));
+                        typeListMap.put(pickedRightP.primaryType, clone);
+                    }
+                    if(pickedRightP.secondaryType != null && pickedRightP.secondaryType != pickedRightP.primaryType) {
+                        typeListMap.get(pickedRightP.secondaryType).remove(pickedRightP);
+                        if(typeListMap.get(pickedRightP.secondaryType).isEmpty()) {
+                            List<Pokemon> clone = new ArrayList<>(initialTypeLists.get(pickedRightP.secondaryType));
+                            typeListMap.put(pickedRightP.secondaryType, new ArrayList<>(initialTypeLists.get(pickedRightP.secondaryType)));
+                        }
+                    }
                 } else {
-                    // pick on power level with the current one blocked
-                    pickedRightP = pickWildPowerLvlReplacement(remainingRight, pickedLeftP, true, null, 100);
+                    if (remainingRight.size() == 1) {
+                        // pick this (it may or may not be the same poke)
+                        pickedRightP = remainingRight.get(0);
+                    } else {
+                        // pick on power level with the current one blocked
+                        pickedRightP = pickWildPowerLvlReplacement(remainingRight, pickedLeftP, true, null, 100);
+                    }
                 }
                 remainingRight.remove(pickedRightP);
                 translateMap.put(pickedLeftP, pickedRightP);
             } else {
-                int pickedLeft = this.random.nextInt(remainingLeft.size());
                 int pickedRight = this.random.nextInt(remainingRight.size());
-                Pokemon pickedLeftP = remainingLeft.remove(pickedLeft);
                 Pokemon pickedRightP = remainingRight.get(pickedRight);
                 while (pickedLeftP.number == pickedRightP.number && remainingRight.size() != 1) {
                     // Reroll for a different pokemon if at all possible
