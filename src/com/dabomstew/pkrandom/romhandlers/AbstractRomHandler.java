@@ -162,6 +162,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         for (Pokemon p : mainPokemonListInclFormes) {
+            //ok. that should ACTUALLY do all of them.
+            //...kinda sus though. am tempted to hit it on AllPokemonList.
+            p.originalPrimaryType = p.primaryType;
             if (p.isLegendary()) {
                 onlyLegendaryListInclFormes.add(p);
             } else if (!ultraBeastList.contains(p)) {
@@ -1163,7 +1166,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
-        //TODO: figure out a way to get the original typing of left list. (is this even possible?)
         //and further TODO: update this to *use* the original types where appropriate.
         //note: this is global 1-to-1
 
@@ -1224,7 +1226,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (usePowerLevels) {
                 Pokemon pickedRightP;
                 if (keepPrimary) {
-                    List<Pokemon> typeList = typeListMap.get(pickedLeftP.primaryType);
+                    List<Pokemon> typeList = typeListMap.get(pickedLeftP.originalPrimaryType);
                     if (typeList.size() == 1) {
                         // pick this (it may or may not be the same poke)
                         pickedRightP = typeList.get(0);
@@ -1232,6 +1234,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         // pick on power level with the current one blocked
                         pickedRightP = pickWildPowerLvlReplacement(typeList, pickedLeftP, true, null, 100);
                     }
+                    //remove from both type lists
                     typeListMap.get(pickedRightP.primaryType).remove(pickedRightP);
                     if(typeListMap.get(pickedRightP.primaryType).isEmpty()) {
                         List<Pokemon> clone = new ArrayList<>(initialTypeLists.get(pickedRightP.primaryType));
@@ -1257,7 +1260,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 translateMap.put(pickedLeftP, pickedRightP);
             } else {
                 if (keepPrimary) {
-                    List<Pokemon> typeList = typeListMap.get(pickedLeftP.primaryType);
+                    List<Pokemon> typeList = typeListMap.get(pickedLeftP.originalPrimaryType);
                     int pickedRight = this.random.nextInt(typeList.size());
                     Pokemon pickedRightP = typeList.get(pickedRight);
                     while (pickedLeftP.number == pickedRightP.number && typeList.size() != 1) {
@@ -1320,7 +1323,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     // Ignore the map and put a random non-banned poke
                     List<Pokemon> tempPickable;
                     if (keepPrimary) {
-                        tempPickable = new ArrayList<>(initialTypeLists.get(enc.pokemon.primaryType));
+                        tempPickable = new ArrayList<>(initialTypeLists.get(enc.pokemon.originalPrimaryType));
                     } else if (allowAltFormes) {
                         tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
                                 : new ArrayList<>(mainPokemonListInclFormes);
