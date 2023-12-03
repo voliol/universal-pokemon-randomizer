@@ -962,188 +962,175 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
         Collections.shuffle(scrambledEncounters, this.random);
 
-        // Assume EITHER catch em all OR type themed for now
-        // TODO: separate type theming out
-        // note: this is area 1-to-1.
-        if (catchEmAll) {
-            List<Pokemon> allPokes;
-            if (allowAltFormes) {
-                allPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                        mainPokemonListInclFormes);
-                allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
-            } else {
-                allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                        mainPokemonList);
-            }
-            allPokes.removeAll(banned);
-            for (EncounterSet area : scrambledEncounters) {
-                Set<Pokemon> inArea = pokemonInArea(area);
-                // Build area map using catch em all
-                Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
-                List<Pokemon> pickablePokemon = allPokes;
-                if (area.bannedPokemon.size() > 0) {
-                    pickablePokemon = new ArrayList<>(allPokes);
-                    pickablePokemon.removeAll(area.bannedPokemon);
-                }
-                for (Pokemon areaPk : inArea) {
-                    if (pickablePokemon.size() == 0) {
-                        // No more pickable pokes left, take a random one
-                        List<Pokemon> tempPickable;
-                        if (allowAltFormes) {
-                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                                    mainPokemonListInclFormes);
-                            tempPickable.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
-                        } else {
-                            tempPickable = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                                    mainPokemonList);
-                        }
-                        tempPickable.removeAll(banned);
-                        tempPickable.removeAll(area.bannedPokemon);
-                        if (tempPickable.size() == 0) {
-                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
-                        }
-                        int picked = this.random.nextInt(tempPickable.size());
-                        Pokemon pickedMN = tempPickable.get(picked);
-                        areaMap.put(areaPk, pickedMN);
-                    } else {
-                        int picked = this.random.nextInt(allPokes.size());
-                        Pokemon pickedMN = allPokes.get(picked);
-                        areaMap.put(areaPk, pickedMN);
-                        pickablePokemon.remove(pickedMN);
-                        if (allPokes != pickablePokemon) {
-                            allPokes.remove(pickedMN);
-                        }
-                        if (allPokes.size() == 0) {
-                            // Start again
-                            if (allowAltFormes) {
-                                allPokes.addAll(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
-                                allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
-                            } else {
-                                allPokes.addAll(noLegendaries ? noLegendaryList : mainPokemonList);
-                            }
-                            allPokes.removeAll(banned);
-                            if (pickablePokemon != allPokes) {
-                                pickablePokemon.addAll(allPokes);
-                                pickablePokemon.removeAll(area.bannedPokemon);
-                            }
-                        }
-                    }
-                }
-                for (Encounter enc : area.encounters) {
-                    // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
-                    // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
-                    // randomly appears as a static or unless it becomes a random evolution.
-                    if (banned.contains(enc.pokemon)) {
-                        continue;
-                    }
-                    // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
-                }
-            }
-        } else if (typeThemed) {
-            Map<Type, List<Pokemon>> cachedPokeLists = new TreeMap<>();
-            for (EncounterSet area : scrambledEncounters) {
-                // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
-                List<Pokemon> possiblePokemon = null;
-                int iterLoops = 0;
-                while (possiblePokemon == null && iterLoops < 10000) {
-                    Type areaTheme = randomType();
-                    if (!cachedPokeLists.containsKey(areaTheme)) {
-                        List<Pokemon> pType = allowAltFormes ? pokemonOfTypeInclFormes(areaTheme, noLegendaries) :
-                                pokemonOfType(areaTheme, noLegendaries);
-                        pType.removeAll(banned);
-                        cachedPokeLists.put(areaTheme, pType);
-                    }
-                    possiblePokemon = new ArrayList<>(cachedPokeLists.get(areaTheme));
-                    if (area.bannedPokemon.size() > 0) {
-                        possiblePokemon.removeAll(area.bannedPokemon);
-                    }
-                    if (possiblePokemon.size() < inArea.size()) {
-                        // Can't use this type for this area
-                        possiblePokemon = null;
-                    }
-                    iterLoops++;
-                }
-                if (possiblePokemon == null) {
-                    throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
-                }
-
-                // Build area map using type theme.
-                Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
-                for (Pokemon areaPk : inArea) {
-                    int picked = this.random.nextInt(possiblePokemon.size());
-                    Pokemon pickedMN = possiblePokemon.get(picked);
-                    while (pickedMN.actuallyCosmetic) {
-                        picked = this.random.nextInt(possiblePokemon.size());
-                        pickedMN = possiblePokemon.get(picked);
-                    }
-                    areaMap.put(areaPk, pickedMN);
-                    possiblePokemon.remove(picked);
-                }
-                for (Encounter enc : area.encounters) {
-                    // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
-                }
-            }
-        } else if (usePowerLevels) {
-            List<Pokemon> allowedPokes;
-            if (allowAltFormes) {
-                allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
-                        : new ArrayList<>(mainPokemonListInclFormes);
-            } else {
-                allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
-                        : new ArrayList<>(mainPokemonList);
-            }
-            allowedPokes.removeAll(banned);
-            for (EncounterSet area : scrambledEncounters) {
-                // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
-                // Build area map using randoms
-                Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
-                List<Pokemon> usedPks = new ArrayList<>();
-                List<Pokemon> localAllowed = allowedPokes;
-                if (area.bannedPokemon.size() > 0) {
-                    localAllowed = new ArrayList<>(allowedPokes);
-                    localAllowed.removeAll(area.bannedPokemon);
-                }
-                for (Pokemon areaPk : inArea) {
-                    Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
-                    while (picked.actuallyCosmetic) {
-                        picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100);
-                    }
-                    areaMap.put(areaPk, picked);
-                    usedPks.add(picked);
-                }
-                for (Encounter enc : area.encounters) {
-                    // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
-                }
-            }
+        // ok. some refactoring was needed here, to make the type and additional rule elements work together.
+        // (basically it's just a little interweaving of the algorithms)
+        // themed_areas and catch_em_all are still assumed to be mutually exclusive (might result in randomizer fail if used together)
+        // (I may revisit that pairing)
+        // step 1: get list of all allowable wilds
+        List<Pokemon> allPokes;
+        if (allowAltFormes) {
+            allPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
+                    mainPokemonListInclFormes);
+            allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
         } else {
-            // Entirely random
-            for (EncounterSet area : scrambledEncounters) {
-                // Poke-set
-                Set<Pokemon> inArea = pokemonInArea(area);
-                // Build area map using randoms
-                Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
-                for (Pokemon areaPk : inArea) {
-                    Pokemon picked = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                    while (areaMap.containsValue(picked)) {
-                        picked = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned);
-                    }
-                    areaMap.put(areaPk, picked);
+            allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
+                    mainPokemonList);
+        }
+        allPokes.removeAll(banned);
+        List<Pokemon> initialPokes = new ArrayList<>(allPokes);
+
+        //step 2: if types matter, then get a typemap.
+        Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
+        Map<Type, List<Pokemon>> initialTypeLists = new EnumMap<>(Type.class);
+        if (typeThemed || keepPrimary) {
+            for (Type type : Type.values()) {
+                if(typeInGame(type)) {
+                    typeListMap.put(type, new ArrayList<>());
                 }
-                for (Encounter enc : area.encounters) {
-                    // Apply the map
-                    enc.pokemon = areaMap.get(enc.pokemon);
-                    setFormeForEncounter(enc, enc.pokemon);
+            }
+            //we could use the pokemonOfType method
+            //however, that would make us iterate once per type.
+            //iterating once over the whole list is much more efficient.
+            for (Pokemon poke : allPokes) {
+                typeListMap.get(poke.primaryType).add(poke);
+                if(poke.secondaryType != null) {
+                    typeListMap.get(poke.secondaryType).add(poke);
+                }
+            }
+            //make a copy in case we empty the list
+            //(only relevant for certain algorithms)
+            for (Type type : Type.values()) {
+                if(typeInGame(type)) {
+                    initialTypeLists.put(type, new ArrayList<>(typeListMap.get(type)));
                 }
             }
         }
+
+        //step 3: iterate over areas
+        for (EncounterSet area : scrambledEncounters) {
+            Set<Pokemon> inArea = pokemonInArea(area);
+            Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
+
+            //step 4: generate pickable list (for all algorithms except keepPrimary,
+            // as it has a different pool per-Pokemon)
+            List<Pokemon> pickablePokemon;
+            if(typeThemed) {
+                int iterLoops = 0;
+                pickablePokemon = null;
+                while (pickablePokemon == null && iterLoops < 10000) {
+                    Type areaTheme = randomType();
+                    pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
+                    if (!area.bannedPokemon.isEmpty()) {
+                        pickablePokemon.removeAll(area.bannedPokemon);
+                    }
+                    if (pickablePokemon.size() < inArea.size()) {
+                        // Can't use this type for this area
+                        pickablePokemon = null;
+                    }
+                    iterLoops++;
+                }
+                if (pickablePokemon == null) {
+                    throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
+                }
+            } else {
+                pickablePokemon = new ArrayList<>(allPokes);
+                if (! area.bannedPokemon.isEmpty()) {
+                    pickablePokemon.removeAll(area.bannedPokemon);
+                }
+            }
+            //this is only relevant for keepPrimary, but it needs to be declared in this scope.
+            List<Pokemon> usedPks = new ArrayList<>();
+
+            //step 5: iterate over Pokemon in area to generate map
+            for (Pokemon areaPk : inArea) {
+                if (catchEmAll && banned.contains(areaPk)) {
+                    //I question the wisdom of leaving banned Pokemon in the location for catch em all
+                    //however, given that's the policy, this prevents using up a Pokemon without creating an encounter
+                    continue;
+                }
+
+                //step 4 again: generate pickable list for keepPrimary
+                if(keepPrimary) {
+                    pickablePokemon = new ArrayList<>(typeListMap.get(areaPk.originalPrimaryType));
+                    pickablePokemon.removeAll(usedPks);
+                    if (! area.bannedPokemon.isEmpty()) {
+                        pickablePokemon.removeAll(area.bannedPokemon);
+                    }
+                }
+
+                //step 6: handle empty pickable lists
+                if(pickablePokemon.isEmpty()) {
+                    if( keepPrimary ) {
+                        pickablePokemon = new ArrayList<>(initialTypeLists.get(areaPk.originalPrimaryType));
+                        if(typeListMap.get(areaPk.originalPrimaryType).isEmpty()) {
+                            //restart only if empty
+                            typeListMap.put(areaPk.originalPrimaryType, new ArrayList<>(pickablePokemon));
+                        }
+                        pickablePokemon.removeAll(usedPks);
+                        if (!area.bannedPokemon.isEmpty()) {
+                            pickablePokemon.removeAll(area.bannedPokemon);
+                        }
+                        if (pickablePokemon.isEmpty()) {
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon with type "
+                                    + areaPk.originalPrimaryType.toString());
+                        }
+                    } else if (typeThemed) {
+                        //this shouldn't happen in the current implementation
+                    } else {
+                        pickablePokemon = new ArrayList<>(initialPokes);
+                        if(allPokes.isEmpty()) {
+                            //restart fully
+                            allPokes = new ArrayList<>(pickablePokemon);
+                        }
+                        pickablePokemon.removeAll(usedPks);
+                        if (!area.bannedPokemon.isEmpty()) {
+                            pickablePokemon.removeAll(area.bannedPokemon);
+                        }
+                        if (pickablePokemon.isEmpty()) {
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
+                        }
+                    }
+                }
+
+                //step 7: Choose a Pokemon from the pickable list
+                Pokemon picked;
+                if(usePowerLevels) {
+                    picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, false, null, 100);
+                } else {
+                    int pickedNum = this.random.nextInt(pickablePokemon.size());
+                    picked = pickablePokemon.get(pickedNum);
+                }
+
+                //step 8: add to map & remove from pickable
+                areaMap.put(areaPk, picked);
+                pickablePokemon.remove(picked);
+                usedPks.add(picked); //this being for keepPrimary without catchEmAll
+                if(catchEmAll) {
+                    if(keepPrimary || typeThemed) {
+                        typeListMap.get(picked.primaryType).remove(picked);
+                        if(picked.secondaryType != null) {
+                            typeListMap.get(picked.secondaryType).remove(picked);
+                        }
+                    } else {
+                        allPokes.remove(picked);
+                    }
+                }
+            }
+
+            //step 9: assign encounters using map
+            for (Encounter enc : area.encounters) {
+                // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
+                // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
+                // randomly appears as a static or unless it becomes a random evolution.
+                if (catchEmAll && banned.contains(enc.pokemon)) {
+                    continue;
+                }
+                // Apply the map
+                enc.pokemon = areaMap.get(enc.pokemon);
+                setFormeForEncounter(enc, enc.pokemon);
+            }
+        }
+
 
         if (levelModifier != 0) {
             for (EncounterSet area : currentEncounters) {
@@ -1165,9 +1152,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allowAltFormes = settings.isAllowWildAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
-
-        //and further TODO: update this to *use* the original types where appropriate.
-        //note: this is global 1-to-1
 
         checkPokemonRestrictions();
         // Build the full 1-to-1 map
@@ -1207,8 +1191,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             for (Pokemon poke : remainingRight) {
                 typeListMap.get(poke.primaryType).add(poke);
-                //I'm not sure which is the correct way to validate, so we're doing both
-                if (poke.secondaryType != null && poke.secondaryType != poke.primaryType) {
+                if (poke.secondaryType != null) {
                     typeListMap.get(poke.secondaryType).add(poke);
                 }
             }
@@ -1240,7 +1223,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         List<Pokemon> clone = new ArrayList<>(initialTypeLists.get(pickedRightP.primaryType));
                         typeListMap.put(pickedRightP.primaryType, clone);
                     }
-                    if(pickedRightP.secondaryType != null && pickedRightP.secondaryType != pickedRightP.primaryType) {
+                    if(pickedRightP.secondaryType != null) {
                         typeListMap.get(pickedRightP.secondaryType).remove(pickedRightP);
                         if(typeListMap.get(pickedRightP.secondaryType).isEmpty()) {
                             List<Pokemon> clone = new ArrayList<>(initialTypeLists.get(pickedRightP.secondaryType));
