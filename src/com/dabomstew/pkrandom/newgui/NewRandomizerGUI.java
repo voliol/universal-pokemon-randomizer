@@ -2926,6 +2926,7 @@ public class NewRandomizerGUI {
             wpGlobal1To1RadioButton.setEnabled(true);
 
             wpARNoneRadioButton.setSelected(true);
+            wpTRNoneRadioButton.setSelected(true);
 
             wpUseTimeBasedEncountersCheckBox.setVisible(romHandler.hasTimeBasedEncounters());
             wpSetMinimumCatchRateCheckBox.setEnabled(true);
