@@ -47,6 +47,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
     public Type primaryType, secondaryType;
+    public Type originalPrimaryType;
 
     public int hp, attack, defense, spatk, spdef, speed, special;
 
