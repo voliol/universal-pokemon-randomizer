@@ -429,7 +429,8 @@ public class Settings {
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, wildPokemonTypeMod == WildPokemonTypeMod.NONE, wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY, balanceShakingGrass));
+                banBadRandomWildPokemonHeldItems, wildPokemonTypeMod == WildPokemonTypeMod.NONE,
+                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY, balanceShakingGrass));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
