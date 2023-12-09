@@ -321,11 +321,11 @@ public class SettingsUpdater {
             //added new enum WildPokemonTypeMod and moved TypeThemed to it,
             //so we need to select None on RestrictionMod if TypeThemed is selected,
             //and select None on TypeMod otherwise
-            int typeThemed = dataBlock[15] & 0x10;
+            int typeThemed = dataBlock[15] & 0x08;
             if (typeThemed != 0) {
-                dataBlock[15] |= 0x20;
+                dataBlock[15] |= 0x04;
             } else {
-                dataBlock[16] |= 0x04;
+                dataBlock[16] |= 0x20;
             }
         }
 
