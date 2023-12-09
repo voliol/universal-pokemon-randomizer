@@ -428,6 +428,11 @@ public class Randomizer {
 
         }
 
+        // do part of wild Pokemon early if needed
+        if(settings.isTrainersUseLocalPokemon()) {
+            wildsChanged = randomizeWildPokemon();
+        }
+
         // Trainer Pokemon
         // 1. Add extra Trainer Pokemon
         // 2. Set trainers to be double battles and add extra Pokemon if necessary
@@ -565,32 +570,9 @@ public class Randomizer {
         }
 
         // Wild Pokemon
-        // 1. Update catch rates
-        // 2. Randomize Wild Pokemon
 
-        if (settings.isUseMinimumCatchRate()) {
-            romHandler.changeCatchRates(settings);
-        }
-
-        switch (settings.getWildPokemonMod()) {
-            case RANDOM:
-                romHandler.randomEncounters(settings);
-                wildsChanged = true;
-                break;
-            case AREA_MAPPING:
-                romHandler.area1to1Encounters(settings);
-                wildsChanged = true;
-                break;
-            case GLOBAL_MAPPING:
-                romHandler.game1to1Encounters(settings);
-                wildsChanged = true;
-                break;
-            default:
-                if (settings.isWildLevelsModified()) {
-                    romHandler.onlyChangeWildLevels(settings);
-                    wildsChanged = true;
-                }
-                break;
+        if (!settings.isTrainersUseLocalPokemon()) {
+            wildsChanged = randomizeWildPokemon();
         }
 
         if (wildsChanged) {
@@ -700,6 +682,41 @@ public class Randomizer {
         romHandler.printRomDiagnostics(log);
 
         return checkValue;
+    }
+
+    private boolean randomizeWildPokemon() {
+
+        boolean wildsChanged = false;
+
+        // 1. Update catch rates
+        // 2. Randomize Wild Pokemon
+
+        if (settings.isUseMinimumCatchRate()) {
+            romHandler.changeCatchRates(settings);
+        }
+
+        switch (settings.getWildPokemonMod()) {
+            case RANDOM:
+                romHandler.randomEncounters(settings);
+                wildsChanged = true;
+                break;
+            case AREA_MAPPING:
+                romHandler.area1to1Encounters(settings);
+                wildsChanged = true;
+                break;
+            case GLOBAL_MAPPING:
+                romHandler.game1to1Encounters(settings);
+                wildsChanged = true;
+                break;
+            default:
+                if (settings.isWildLevelsModified()) {
+                    romHandler.onlyChangeWildLevels(settings);
+                    wildsChanged = true;
+                }
+                break;
+        }
+
+        return wildsChanged;
     }
 
     private int logMoveTutorMoves(PrintStream log, int checkValue, List<Integer> oldMtMoves) {
