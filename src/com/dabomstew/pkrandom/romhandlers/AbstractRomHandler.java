@@ -36,6 +36,7 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.sun.corba.se.impl.encoding.EncapsOutputStream;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -1657,6 +1658,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeTrainerPokes(Settings settings) {
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
+        boolean useLocalPokemon = settings.isTrainersUseLocalPokemon();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
         boolean noEarlyWonderGuard = settings.isTrainersBlockEarlyWonderGuard();
         int levelModifier = settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0;
@@ -1679,20 +1681,35 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Set up Pokemon pool
         cachedReplacementLists = new TreeMap<>();
-        cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                mainPokemonList);
-        if (includeFormes) {
-            if (noLegendaries) {
-                cachedAllList.addAll(noLegendaryAltsList);
-            } else {
-                cachedAllList.addAll(altFormesList);
+        if (useLocalPokemon) {
+            cachedAllList = new ArrayList<>(allWildPokemon(settings.isUseTimeBasedEncounters()));
+            addEvolutionaryRelatives(cachedAllList);
+            //well, there's probably a way to add the alt formes of pokemon already in the list...
+            //but i don't know what it is. so.
+            //we'll only remove the formes, if they're disallowed.
+            if (!includeFormes) {
+                cachedAllList.removeAll(altFormesList);
             }
+            if(noLegendaries) {
+                cachedAllList.removeAll(onlyLegendaryListInclFormes);
+            }
+            cachedAllList.removeIf(pk -> pk.actuallyCosmetic);
+        } else {
+            cachedAllList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
+                    mainPokemonList);
+            if (includeFormes) {
+                if (noLegendaries) {
+                    cachedAllList.addAll(noLegendaryAltsList);
+                } else {
+                    cachedAllList.addAll(altFormesList);
+                }
+            }
+            cachedAllList =
+                    cachedAllList
+                            .stream()
+                            .filter(pk -> !pk.actuallyCosmetic)
+                            .collect(Collectors.toList());
         }
-        cachedAllList =
-                cachedAllList
-                        .stream()
-                        .filter(pk -> !pk.actuallyCosmetic)
-                        .collect(Collectors.toList());
 
         List<Pokemon> banned = this.getBannedFormesForTrainerPokemon();
         if (!abilitiesAreRandomized) {
@@ -6508,6 +6525,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         return inArea;
     }
 
+    private Set<Pokemon> allWildPokemon(boolean useTimeOfDay) {
+        Set<Pokemon> wildPokemon = new TreeSet<>();
+        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
+        for (EncounterSet area : areas) {
+            for (Encounter enc : area.encounters) {
+                wildPokemon.add(enc.pokemon);
+            }
+        }
+        return wildPokemon;
+    }
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;
 
