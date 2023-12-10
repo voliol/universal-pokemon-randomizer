@@ -302,6 +302,7 @@ public class NewRandomizerGUI {
     private JCheckBox paEnsureTwoAbilitiesCheckbox;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox miscDisableLowHPMusicCheckBox;
+    private JCheckBox tpUseLocalPokemonCheckBox;
 
 
     private static JFrame frame;
@@ -1549,6 +1550,7 @@ public class NewRandomizerGUI {
         tpRivalCarriesStarterCheckBox.setSelected(settings.isRivalCarriesStarterThroughout());
         tpWeightTypesCheckBox.setSelected(settings.isTrainersMatchTypingDistribution());
         tpDontUseLegendariesCheckBox.setSelected(settings.isTrainersBlockLegendaries());
+        tpUseLocalPokemonCheckBox.setSelected(settings.isTrainersUseLocalPokemon());
         tpNoEarlyWonderGuardCheckBox.setSelected(settings.isTrainersBlockEarlyWonderGuard());
         tpForceFullyEvolvedAtCheckBox.setSelected(settings.isTrainersForceFullyEvolved());
         tpForceFullyEvolvedAtSlider.setValue(settings.getTrainersForceFullyEvolvedLevel());
@@ -1796,6 +1798,7 @@ public class NewRandomizerGUI {
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCheckBox.isSelected());
         settings.setTrainersMatchTypingDistribution(tpWeightTypesCheckBox.isSelected());
         settings.setTrainersBlockLegendaries(tpDontUseLegendariesCheckBox.isSelected());
+        settings.setTrainersUseLocalPokemon(tpUseLocalPokemonCheckBox.isSelected());
         settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyWonderGuardCheckBox.isSelected());
         settings.setTrainersForceFullyEvolved(tpForceFullyEvolvedAtCheckBox.isSelected());
         settings.setTrainersForceFullyEvolvedLevel(tpForceFullyEvolvedAtSlider.getValue());
@@ -2317,6 +2320,9 @@ public class NewRandomizerGUI {
         tpDontUseLegendariesCheckBox.setVisible(true);
         tpDontUseLegendariesCheckBox.setEnabled(false);
         tpDontUseLegendariesCheckBox.setSelected(false);
+        tpUseLocalPokemonCheckBox.setVisible(true);
+        tpUseLocalPokemonCheckBox.setEnabled(false);
+        tpUseLocalPokemonCheckBox.setSelected(false);
         tpNoEarlyWonderGuardCheckBox.setVisible(true);
         tpNoEarlyWonderGuardCheckBox.setEnabled(false);
         tpNoEarlyWonderGuardCheckBox.setSelected(false);
@@ -3347,6 +3353,8 @@ public class NewRandomizerGUI {
             tpSimilarStrengthCheckBox.setSelected(false);
             tpDontUseLegendariesCheckBox.setEnabled(false);
             tpDontUseLegendariesCheckBox.setSelected(false);
+            tpUseLocalPokemonCheckBox.setEnabled(false);
+            tpUseLocalPokemonCheckBox.setSelected(false);
             tpNoEarlyWonderGuardCheckBox.setEnabled(false);
             tpNoEarlyWonderGuardCheckBox.setSelected(false);
             tpAllowAlternateFormesCheckBox.setEnabled(false);
@@ -3380,6 +3388,7 @@ public class NewRandomizerGUI {
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
+            tpUseLocalPokemonCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setEnabled(true);
             tpAllowAlternateFormesCheckBox.setEnabled(true);
             if (currentRestrictions == null || currentRestrictions.allowTrainerSwapMegaEvolvables(

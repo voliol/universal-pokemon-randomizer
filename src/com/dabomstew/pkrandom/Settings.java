@@ -166,6 +166,7 @@ public class Settings {
     private boolean trainersUsePokemonOfSimilarStrength;
     private boolean trainersMatchTypingDistribution;
     private boolean trainersBlockLegendaries = true;
+    private boolean trainersUseLocalPokemon;
     private boolean trainersBlockEarlyWonderGuard = true;
     private boolean trainersEnforceDistribution;
     private boolean trainersEnforceMainPlaythrough;
@@ -571,14 +572,15 @@ public class Settings {
         // 47 Static level modifier
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
-        // 48 trainer pokemon held items / pokemon ensure two abilities
+        // 48 trainer pokemon held items / pokemon ensure two abilities / trainers use local pokemon
         out.write(makeByteSelected(randomizeHeldItemsForBossTrainerPokemon,
                 randomizeHeldItemsForImportantTrainerPokemon,
                 randomizeHeldItemsForRegularTrainerPokemon,
                 consumableItemsOnlyForTrainerPokemon,
                 sensibleItemsOnlyForTrainerPokemon,
                 highestLevelOnlyGetsItemsForTrainerPokemon,
-                ensureTwoAbilities));
+                ensureTwoAbilities,
+                trainersUseLocalPokemon));
 
         // 49 pickup item randomization
         out.write(makeByteSelected(pickupItemsMod == PickupItemsMod.RANDOM,
@@ -1579,6 +1581,14 @@ public class Settings {
 
     public void setTrainersBlockLegendaries(boolean trainersBlockLegendaries) {
         this.trainersBlockLegendaries = trainersBlockLegendaries;
+    }
+
+    public boolean isTrainersUseLocalPokemon() {
+        return trainersUseLocalPokemon;
+    }
+
+    public void setTrainersUseLocalPokemon(boolean trainersUseLocalPokemon) {
+        this.trainersUseLocalPokemon = trainersUseLocalPokemon;
     }
 
     public boolean isTrainersEnforceDistribution() {
