@@ -830,6 +830,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void location1to1EncountersCatchEmAllWorks(String romName) {
+        // does not hold in BW1, presumably too few wild Pokémon species and too many in the national dex
         loadROM(romName);
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,

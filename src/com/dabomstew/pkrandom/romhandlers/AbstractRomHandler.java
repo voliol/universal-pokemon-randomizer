@@ -664,6 +664,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         switch (mode) {
             case RANDOM -> er.randomEncounters(encounterAreas);
             case AREA_MAPPING -> er.area1to1Encounters(encounterAreas);
+            case LOCATION_MAPPING -> er.location1to1Encounters(encounterAreas);
             case GLOBAL_MAPPING -> er.game1to1Encounters(encounterAreas);
             default -> {
             }
@@ -682,11 +683,15 @@ public abstract class AbstractRomHandler implements RomHandler {
         private Map<Type, PokemonSet<Pokemon>> remainingByType;
         private Type areaType;
         private PokemonSet<Pokemon> allowedForArea;
+        private Map<Pokemon, Pokemon> areaMap;
 
         private final boolean catchEmAll;
         private final boolean typeThemed;
         private final boolean similarStrength;
         private final boolean balanceShakingGrass;
+
+        private boolean map1to1;
+        private boolean useLocations;
 
         public EncounterRandomizer(PokemonSet<Pokemon> allowed, PokemonSet<Pokemon> banned, boolean catchEmAll,
                                    boolean typeThemed, boolean similarStrength, boolean balanceShakingGrass) {
@@ -718,38 +723,36 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         public void randomEncounters(List<EncounterArea> encounterAreas) {
-            List<EncounterArea> preppedEncounterAreas = prepEncounterAreas(encounterAreas);
-            for (EncounterArea area : preppedEncounterAreas) {
-                areaType = pickAreaType();
-                allowedForArea = setupAllowedForArea();
-
-                for (Encounter enc : area) {
-                    Pokemon replacement = pickReplacement(enc);
-
-                    enc.setPokemon(replacement);
-                    setFormeForEncounter(enc, replacement);
-
-                    if (catchEmAll) {
-                        removeFromRemaining(replacement);
-                        if (allowedForArea.isEmpty()) {
-                            refillAllowedForArea();
-                        }
-                    }
-                }
-            }
+            map1to1 = false;
+            useLocations = false;
+            randomEncountersInner(encounterAreas);
         }
 
         public void area1to1Encounters(List<EncounterArea> encounterAreas) {
+            map1to1 = true;
+            useLocations = false;
+            randomEncountersInner(encounterAreas);
+        }
+
+        public void location1to1Encounters(List<EncounterArea> encounterAreas) {
+            map1to1 = true;
+            useLocations = true;
+            randomEncountersInner(encounterAreas);
+        }
+
+        private void randomEncountersInner(List<EncounterArea> encounterAreas) {
             List<EncounterArea> preppedEncounterAreas = prepEncounterAreas(encounterAreas);
             for (EncounterArea area : preppedEncounterAreas) {
                 areaType = pickAreaType();
                 allowedForArea = setupAllowedForArea();
 
-                Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
+                areaMap = new TreeMap<>();
 
                 for (Encounter enc : area) {
-                    Pokemon replacement = pickReplacement(enc, areaMap);
-                    areaMap.put(enc.getPokemon(), replacement);
+                    Pokemon replacement = pickReplacement(enc);
+                    if (map1to1) {
+                        areaMap.put(enc.getPokemon(), replacement);
+                    }
 
                     enc.setPokemon(replacement);
                     setFormeForEncounter(enc, replacement);
@@ -765,11 +768,43 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         private List<EncounterArea> prepEncounterAreas(List<EncounterArea> unprepped) {
+            if (useLocations) {
+                unprepped = flattenLocations(unprepped);
+            }
             // Shuffling the EncounterAreas leads to less predictable results for various modifiers.
             // Need to keep the original ordering around for saving though.
             List<EncounterArea> prepped = new ArrayList<>(unprepped);
             Collections.shuffle(prepped, random);
             return prepped;
+        }
+
+        private List<EncounterArea> flattenLocations(List<EncounterArea> unflattened) {
+            Map<String, List<EncounterArea>> grouped = groupAreasByLocation(unflattened);
+            List<EncounterArea> flattenedLocations = new ArrayList<>();
+            for (Map.Entry<String, List<EncounterArea>> locEntry : grouped.entrySet()) {
+                EncounterArea flattened = new EncounterArea();
+                flattened.setDisplayName("All of location " + locEntry.getKey());
+                locEntry.getValue().forEach(flattened::addAll);
+                flattenedLocations.add(flattened);
+            }
+            return flattenedLocations;
+        }
+
+        private Map<String, List<EncounterArea>> groupAreasByLocation(List<EncounterArea> ungrouped) {
+            Map<String, List<EncounterArea>> grouped = new HashMap<>();
+            int untagged = 0;
+            for (EncounterArea area : ungrouped) {
+                String tag = area.getLocationTag();
+                if (tag == null) {
+                    tag = "UNTAGGED-" + untagged;
+                    untagged++;
+                }
+                if (!grouped.containsKey(tag)) {
+                    grouped.put(tag, new ArrayList<>());
+                }
+                grouped.get(tag).add(area);
+            }
+            return grouped;
         }
 
         private Type pickAreaType() {
@@ -792,6 +827,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         private Pokemon pickReplacement(Encounter enc) {
+            if (map1to1) {
+                return pickReplacement1to1(enc);
+            } else {
+                return pickReplacementInner(enc);
+            }
+        }
+
+        private Pokemon pickReplacementInner(Encounter enc) {
             Pokemon current = enc.getPokemon();
             Pokemon replacement;
             // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
@@ -811,7 +854,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             return replacement;
         }
 
-        private Pokemon pickReplacement(Encounter enc, Map<Pokemon, Pokemon> areaMap) {
+        private Pokemon pickReplacement1to1(Encounter enc) {
             Pokemon current = enc.getPokemon();
             if (areaMap.containsKey(current)) {
                 return areaMap.get(current);
@@ -820,7 +863,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // unless that's impossible due to the (small) size of allowedForArea
                 Pokemon replacement;
                 do {
-                    replacement = pickReplacement(enc);
+                    replacement = pickReplacementInner(enc);
                 } while (areaMap.containsValue(replacement) && areaMap.size() < allowedForArea.size());
                 return replacement;
             }
@@ -843,6 +886,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             allowedForArea = typeThemed ? allowedByType.get(areaType) : remaining;
         }
 
+        // quite different functionally from the other random encounter methods,
+        // but still grouped in this subclass due to conceptual cohesion
         public void game1to1Encounters(List<EncounterArea> encounterAreas) {
             remaining = new PokemonSet<>(allowed);
             Map<Pokemon, Pokemon> translateMap = new HashMap<>();
