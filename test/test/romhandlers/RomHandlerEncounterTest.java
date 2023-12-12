@@ -596,6 +596,328 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void locations1to1EncountersGivesConsequentReplacementsForEachMon(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        locations1to1ConsequentReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void locations1to1EncountersGivesConsequentReplacementsForEachMonWithCatchEmAll(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                true, false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        locations1to1ConsequentReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void locations1to1EncountersGivesConsequentReplacementsForEachMonWithTypeThemed(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        locations1to1ConsequentReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void locations1to1EncountersGivesConsequentReplacementsForEachMonWithUsePowerLevels(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, true, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        locations1to1ConsequentReplacementCheck(before, after);
+    }
+
+    private void locations1to1ConsequentReplacementCheck(List<EncounterArea> before, List<EncounterArea> after) {
+
+        Map<String, List<EncounterArea>> groupedBefore = groupEncountersByLocation(before);
+        Map<String, List<EncounterArea>> groupedAfter = groupEncountersByLocation(after);
+
+        for (String tag : groupedBefore.keySet()) {
+            Map<Pokemon, Pokemon> map = new HashMap<>();
+
+            System.out.println("\nLocation: " + tag);
+            Iterator<EncounterArea> beforeIterator = groupedBefore.get(tag).iterator();
+            Iterator<EncounterArea> afterIterator = groupedAfter.get(tag).iterator();
+
+            while (beforeIterator.hasNext()) {
+                EncounterArea beforeArea = beforeIterator.next();
+                EncounterArea afterArea = afterIterator.next();
+                if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                    throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                            + afterArea.getDisplayName());
+                }
+
+                System.out.println(beforeArea.getDisplayName() + ":");
+                System.out.println(beforeArea);
+                System.out.println(afterArea);
+                Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+                Iterator<Encounter> afterEncIterator = afterArea.iterator();
+                while (beforeEncIterator.hasNext()) {
+                    Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                    Pokemon afterPk = afterEncIterator.next().getPokemon();
+
+                    if (!map.containsKey(beforePk)) {
+                        map.put(beforePk, afterPk);
+                    }
+                    assertEquals(map.get(beforePk), afterPk);
+                }
+            }
+        }
+    }
+
+    private Map<String, List<EncounterArea>> groupEncountersByLocation(List<EncounterArea> ungrouped) {
+        Map<String, List<EncounterArea>> grouped = new HashMap<>();
+        int untagged = 0;
+        for (EncounterArea area : ungrouped) {
+            String tag = area.getLocationTag();
+            if (tag == null) {
+                tag = "UNTAGGED-" + untagged;
+                untagged++;
+            }
+            if (!grouped.containsKey(tag)) {
+                grouped.put(tag, new ArrayList<>());
+            }
+            grouped.get(tag).add(area);
+        }
+        return grouped;
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersGivesUniqueReplacementsForEachMon(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        location1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersGivesUniqueReplacementsForEachMonWithCatchEmAll(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                true, false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        location1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersGivesUniqueReplacementsForEachMonWithTypeThemed(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) > 2); // Too few mons of some types, so it always fails
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        location1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersGivesUniqueReplacementsForEachMonWithUsePowerLevels(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, true, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        location1to1UniqueReplacementCheck(before, after);
+    }
+
+    private void location1to1UniqueReplacementCheck(List<EncounterArea> before, List<EncounterArea> after) {
+
+        Map<String, List<EncounterArea>> groupedBefore = groupEncountersByLocation(before);
+        Map<String, List<EncounterArea>> groupedAfter = groupEncountersByLocation(after);
+
+        for (String tag : groupedBefore.keySet()) {
+            Map<Pokemon, Pokemon> map = new HashMap<>();
+
+            System.out.println("\nLocation: " + tag);
+            Iterator<EncounterArea> beforeIterator = groupedBefore.get(tag).iterator();
+            Iterator<EncounterArea> afterIterator = groupedAfter.get(tag).iterator();
+
+            while (beforeIterator.hasNext()) {
+                EncounterArea beforeArea = beforeIterator.next();
+                EncounterArea afterArea = afterIterator.next();
+                if (!beforeArea.getDisplayName().equals(afterArea.getDisplayName())) {
+                    throw new RuntimeException("Area mismatch; " + beforeArea.getDisplayName() + " and "
+                            + afterArea.getDisplayName());
+                }
+
+                System.out.println(beforeArea.getDisplayName() + ":");
+                System.out.println(beforeArea);
+                System.out.println(afterArea);
+                Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
+                Iterator<Encounter> afterEncIterator = afterArea.iterator();
+                while (beforeEncIterator.hasNext()) {
+                    Pokemon beforePk = beforeEncIterator.next().getPokemon();
+                    Pokemon afterPk = afterEncIterator.next().getPokemon();
+
+                    if (!map.containsKey(afterPk)) {
+                        map.put(afterPk, beforePk);
+                    }
+                    assertEquals(map.get(afterPk), beforePk);
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersCanBanLegendaries(String romName) {
+        loadROM(romName);
+
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, false, true, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        checkForNoLegendaries();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersCanBanAltFormes(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, false, false, false,
+                0, false, true, false);
+        checkForNoAlternateFormes();
+    }
+
+    // since alt formes are not guaranteed, this test can be considered "reverse";
+    // any success is a success for the test as a whole
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersCanHaveAltFormesIfNotBanned(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 5);
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        checkForAlternateFormes();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersCatchEmAllWorks(String romName) {
+        loadROM(romName);
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                true, false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        catchEmAllCheck(allPokes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersTypeThemedWorks(String romName) {
+        loadROM(romName);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        typeThemedLocationsCheck();
+    }
+
+    private void typeThemedLocationsCheck() {
+
+        Map<String, List<EncounterArea>> grouped = groupEncountersByLocation(romHandler.getEncounters(true));
+
+        for (Map.Entry<String, List<EncounterArea>> loc : grouped.entrySet()) {
+            // lazy solution mashing together all of a location's associated EncounterAreas into a single one,
+            // so old code can be reused to a greater extent
+            EncounterArea area = new EncounterArea();
+            area.setDisplayName("All of location " + loc.getKey());
+            loc.getValue().forEach(area::addAll);
+
+            System.out.println("\n" + area.getDisplayName() + ":\n" + area);
+            Pokemon firstPk = area.get(0).getPokemon();
+            PokemonSet<Pokemon> allInArea = PokemonSet.inArea(area);
+
+            Type primaryType = firstPk.getPrimaryType();
+            PokemonSet<Pokemon> ofFirstType = PokemonSet.inArea(area).filterByType(primaryType);
+            PokemonSet<Pokemon> notOfFirstType = new PokemonSet<>(allInArea).filter(pk -> !ofFirstType.contains(pk));
+            System.out.println(notOfFirstType);
+
+            if (!notOfFirstType.isEmpty()) {
+                System.out.println("Not " + primaryType);
+                Type secondaryType = firstPk.getSecondaryType();
+                if (secondaryType == null) {
+                    fail();
+                }
+                PokemonSet<Pokemon> ofSecondaryType = PokemonSet.inArea(area).filterByType(secondaryType);
+                PokemonSet<Pokemon> notOfSecondaryType = new PokemonSet<>(allInArea)
+                        .filter(pk -> !ofSecondaryType.contains(pk));
+                System.out.println(notOfSecondaryType);
+                if (!notOfSecondaryType.isEmpty()) {
+                    System.out.println("Not " + secondaryType);
+                    fail();
+                } else {
+                    System.out.println(secondaryType);
+                }
+            } else {
+                System.out.println(primaryType);
+            }
+        }
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersUsePowerLevelsWorks(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                false, false, true, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        powerLevelsCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void location1to1EncountersCatchEmAllANDTypeThemedWorks(String romName) {
+        loadROM(romName);
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, true,
+                true, true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        catchEmAllCheck(allPokes);
+        typeThemedLocationsCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void game1to1EncountersGivesConsequentReplacementsForEachMon(String romName) {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true); // TODO: deep copy just in case
