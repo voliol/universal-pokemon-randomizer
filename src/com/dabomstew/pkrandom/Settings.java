@@ -196,10 +196,6 @@ public class Settings {
         UNCHANGED, RANDOM, AREA_MAPPING, LOCATION_MAPPING, GLOBAL_MAPPING
     }
 
-    public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS
-    }
-
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
     private boolean similarStrengthEncounters;
     private boolean catchEmAllEncounters;
@@ -428,7 +424,7 @@ public class Settings {
         // 15 wild pokemon
         out.write(makeByteSelected(catchEmAllEncounters,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
-                false, // remainder from when a "mod" was turned into multiple separately togglable options, can be reused
+                wildPokemonMod == WildPokemonMod.LOCATION_MAPPING,
                 typeThemeEncounterAreas,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
@@ -706,6 +702,7 @@ public class Settings {
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
                 1, // AREA_MAPPING
+                2, // LOCATION_MAPPING
                 4 // GLOBAL_MAPPING
         ));
         settings.setSimilarStrengthEncounters(restoreState(data[16], 2));

@@ -1028,6 +1028,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasEncounterLocations() {
+        return true;
+    }
+
+    @Override
     public boolean hasWildAltFormes() {
         return false;
     }

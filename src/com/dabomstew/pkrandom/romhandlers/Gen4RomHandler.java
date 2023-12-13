@@ -3770,6 +3770,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
+	public boolean hasEncounterLocations() {
+		return true;
+	}
+
+	@Override
 	public boolean hasTimeBasedEncounters() {
 		// dppt technically do but we ignore them completely
 		return romEntry.getRomType() == Gen4Constants.Type_HGSS;

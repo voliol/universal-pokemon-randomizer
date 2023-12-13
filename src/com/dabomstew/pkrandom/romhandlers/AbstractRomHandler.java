@@ -6480,6 +6480,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean hasEncounterLocations() {
+        return false;
+    }
+
+    @Override
     public boolean hasTimeBasedEncounters() {
         // DEFAULT: no
         return false;

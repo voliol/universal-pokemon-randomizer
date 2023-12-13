@@ -235,6 +235,8 @@ public interface RomHandler {
 
     void randomizeEncounters(Settings settings);
 
+    boolean hasEncounterLocations();
+
     boolean hasTimeBasedEncounters();
 
     boolean hasWildAltFormes();

@@ -1456,6 +1456,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public boolean hasEncounterLocations() {
+        return true;
+    }
+
+    @Override
     public boolean hasWildAltFormes() {
         return false;
     }

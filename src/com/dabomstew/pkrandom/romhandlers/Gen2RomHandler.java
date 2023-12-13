@@ -1765,6 +1765,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasEncounterLocations() {
+        return true;
+    }
+
+    @Override
     public boolean hasTimeBasedEncounters() {
         return true; // All GSC do
     }
