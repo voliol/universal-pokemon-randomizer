@@ -656,9 +656,10 @@ public class Gen2Constants {
             "DARK CAVE",
             "MT.MORTAR", "MT.MORTAR",
             // Fishing, Headbutt, BCC
-            "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING", "FISHING",
-            "FISHING", "FISHING", "FISHING",
-            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "ROCK SMASH",
+            "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND", "FISHING DRATINI 1",
+            "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS", "FISHING DRATINI 2",
+            "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
+            "HEADBUTT FOREST GS", "HEADBUTT FOREST GS", "HEADBUTT CANYON GS", "HEADBUTT CANYON GS", "ROCK SMASH",
             "BUG CATCHING CONTEST");
 
     private static final List<String> locationTagsUseTimeGS = initLocationTagsUseTimeGS();
@@ -684,7 +685,7 @@ public class Gen2Constants {
         }
         locationTags.addAll(locationTagsNoTimeGS.subList(157, 170));
         locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
-                "FISHING DRATINI 1", "FISHING QWILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
+                "FISHING DRATINI 1", "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS",
                 "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
         locationTags.addAll(locationTagsNoTimeGS.subList(170, 176));
         return Collections.unmodifiableList(locationTags);
@@ -757,10 +758,11 @@ public class Gen2Constants {
             "ROUTE 35",
             // Fishing, Headbutt, BCC
             "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND", "FISHING DRATINI 1",
-            "FISHING QWILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS", "FISHING DRATINI 2",
+            "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS", "FISHING DRATINI 2",
             "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
-            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT",
-            "HEADBUTT", "HEADBUTT", "HEADBUTT", "HEADBUTT", "ROCK SMASH",
+            "HEADBUTT CANYON C", "HEADBUTT CANYON C", "HEADBUTT TOWN", "HEADBUTT TOWN", "HEADBUTT ROUTE",
+            "HEADBUTT ROUTE", "HEADBUTT KANTO", "HEADBUTT KANTO", "HEADBUTT LAKE", "HEADBUTT LAKE", "HEADBUTT FOREST C",
+            "HEADBUTT FOREST C", "ROCK SMASH",
             "BUG CATCHING CONTEST");
 
     private static final List<String> locationTagsUseTimeCrystal = initLocationTagsUseTimeCrystal();
@@ -786,7 +788,7 @@ public class Gen2Constants {
         }
         locationTags.addAll(locationTagsNoTimeCrystal.subList(155, 167));
         locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
-                "FISHING DRATINI 1", "FISHING QWILFISH SWARM", "FISHING REMORAID SWARM", "FISHING GYARADOS",
+                "FISHING DRATINI 1", "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS",
                 "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
         locationTags.addAll(locationTagsNoTimeCrystal.subList(167, 181));
         return Collections.unmodifiableList(locationTags);
@@ -810,9 +812,12 @@ public class Gen2Constants {
             "DIGLETT'S CAVE", "ROUTE 2", "ROUTE 3", "MT.MOON", "ROUTE 4", "VIRIDIAN CITY", "ROUTE 1", "PALLET TOWN",
             "ROUTE 21", "CINNABAR ISLAND", "ROUTE 20", "ROUTE 19", "ROUTE 22", "ROUTE 28", "SILVER CAVE",
             "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
-            "FISHING QWILFISH", "FISHING QWILFISH SWARM", "FISHING REMORAID", "FISHING REMORAID SWARM",
-            "FISHING GYARADOS", "FISHING DRATINI 1", "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING",
-            "HEADBUTT", "ROCK SMASH", "BUG CATCHING CONTEST"
+            "FISHING QWILFISH", "FISHING REMORAID",
+            "FISHING GYARADOS", "FISHING DRATINI 1", "FISHING DRATINI 2", "FISHING WHIRL ISLANDS",
+            "HEADBUTT FOREST GS", "HEADBUTT CANYON GS",
+            "HEADBUTT ROUTE", "HEADBUTT TOWN", "HEADBUTT KANTO", "HEADBUTT FOREST C", "HEADBUTT LAKE",
+            "HEADBUTT CANYON C",
+            "ROCK SMASH", "BUG CATCHING CONTEST"
     );
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {

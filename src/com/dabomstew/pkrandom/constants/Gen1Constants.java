@@ -359,7 +359,7 @@ public class Gen1Constants {
         }
     }
 
-    // the ones tagged "SUPER ROD" are super rod encounters shared between several locations
+    // the ones tagged "SUPER ROD N" are super rod encounters shared between several locations
     private static final List<String> locationTagsRBG = List.of(
             "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
             "ROUTE 10", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
@@ -370,8 +370,8 @@ public class Gen1Constants {
             "VICTORY ROAD", "DIGLETT'S CAVE", "VICTORY ROAD", "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION",
             "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "CERULEAN CAVE", "CERULEAN CAVE",
             "CERULEAN CAVE", "ROCK TUNNEL",
-            "OLD ROD", "GOOD ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD",
-            "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD");
+            "OLD ROD", "GOOD ROD", "SUPER ROD 1", "SUPER ROD 2", "SUPER ROD 3", "SUPER ROD 4", "SUPER ROD 5",
+            "SUPER ROD 6", "SUPER ROD 7", "SUPER ROD 8", "SUPER ROD 9", "SUPER ROD 10");
 
     // for whatever reason Japanese blue loads Route 19/20 as separate encounters,
     // the only difference to locationTagsRBG.
@@ -385,8 +385,8 @@ public class Gen1Constants {
             "VICTORY ROAD", "DIGLETT'S CAVE", "VICTORY ROAD", "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION",
             "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "CERULEAN CAVE", "CERULEAN CAVE",
             "CERULEAN CAVE", "ROCK TUNNEL",
-            "OLD ROD", "GOOD ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD",
-            "SUPER ROD", "SUPER ROD", "SUPER ROD", "SUPER ROD");
+            "OLD ROD", "GOOD ROD", "SUPER ROD 1", "SUPER ROD 2", "SUPER ROD 3", "SUPER ROD 4", "SUPER ROD 5",
+            "SUPER ROD 6", "SUPER ROD 7", "SUPER ROD 8", "SUPER ROD 9", "SUPER ROD 10");
 
     // yellow has more specific super rod encounters
     private static final List<String> locationTagsYellow = List.of(
@@ -420,7 +420,18 @@ public class Gen1Constants {
             "POKEMON TOWER", "ROUTE 16", "ROUTE 17", "ROUTE 18", "FUCHSIA CITY", "SAFARI ZONE", "ROUTE 12", "ROUTE 13",
             "ROUTE 14", "ROUTE 15", "ROUTE 21", "CINNABAR ISLAND", "POKEMON MANSION", "POWER PLANT", "ROUTE 19",
             "ROUTE 20", "ROUTE 19/20", "SEAFOAM ISLANDS", "ROUTE 23", "VICTORY ROAD", "CERULEAN CAVE",
-            "OLD ROD", "GOOD ROD", "SUPER ROD");
+            "OLD ROD", "GOOD ROD",
+            "SUPER ROD 1", // pallet, viridian
+            "SUPER ROD 2", // route 22
+            "SUPER ROD 3", // route 4, cerulean, cerulean gym, route 24, route 25
+            "SUPER ROD 4", // route 6, vermilion, vermilion dock, route 11
+            "SUPER ROD 5", // route 10, celadon city
+            "SUPER ROD 7", // route 17, route 18, route 12, route 13
+            "SUPER ROD 10", // fuchsia city
+            "SUPER ROD 6", // safari zone
+            "SUPER ROD 8", // route 19, route 20, route 21, seafoam islands
+            "SUPER ROD 9" // route 23, cerulean cave
+    );
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
         if (encounterAreas.size() != locationTags.size()) {
