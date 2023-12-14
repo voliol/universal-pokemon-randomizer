@@ -6535,6 +6535,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         return wildPokemon;
     }
+
+    protected abstract Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay);
+
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;
 

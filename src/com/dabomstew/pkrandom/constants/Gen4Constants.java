@@ -1722,6 +1722,25 @@ public class Gen4Constants {
         return m;
     }
 
+    public static String[] dpptPostGameEncounterAreas = new String[] {
+            "Super Rod", "Radar", "Swarm", //post-game techniques
+            "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway? doesn't hurt
+            "224", "225", "226", "227", "228", "229", "230", //routes
+            "Stark Mountain", "Seabreak Path" //named areas
+            //...hmm. we also need the back of Victory Road, but... the name does not distinguish.
+            //May need to use numbered areas. But that kinda sucks.
+            //(Especially since I can't be sure the numbers are the same in DP and Pt)
+    };
+
+    public static String[] hgssPostGameEncounterAreas = new String[] {
+            "Super Rod", "Swarm", //post-game techniques
+            "", //Kanto cities
+            "Route 28", "Mount Silver" //Johto but post-game
+            //the National Park is a weird case, as it either has a post-game area...
+            //or, if you chose to start with the national dex, an entirely inaccessible area
+            //not sure what, if anything, to do about that
+    };
+
     public static void tagTrainersDP(List<Trainer> trs) {
         // Gym Trainers
         tag(trs, "GYM1", 0xf4, 0xf5);
