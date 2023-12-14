@@ -426,6 +426,14 @@ public class Randomizer {
 
         }
 
+        // do part of wild Pokemon early if needed
+        if (settings.isTrainersUseLocalPokemon() &&
+                (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
+                        settings.isWildLevelsModified())) {
+            romHandler.randomizeEncounters(settings);
+            wildsChanged = true;
+        }
+
         // Trainer Pokemon
         // 1. Add extra Trainer Pokemon
         // 2. Set trainers to be double battles and add extra Pokemon if necessary
@@ -451,6 +459,7 @@ public class Randomizer {
             case MAINPLAYTHROUGH:
             case TYPE_THEMED:
             case TYPE_THEMED_ELITE4_GYMS:
+            case KEEP_THEMED:
                 romHandler.randomizeTrainerPokes(settings);
                 trainersChanged = true;
                 break;
@@ -562,20 +571,19 @@ public class Randomizer {
         }
 
         // Wild Pokemon
-        // 1. Update catch rates
-        // 2. Randomize Wild Pokemon
 
         if (settings.isUseMinimumCatchRate()) {
             romHandler.changeCatchRates(settings);
         }
 
-        if (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
-                settings.isWildLevelsModified()) {
+        if (!settings.isTrainersUseLocalPokemon() &&
+                (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
+                settings.isWildLevelsModified())) {
             romHandler.randomizeEncounters(settings);
             wildsChanged = true;
         }
 
-        wildsChanged = true; // temp
+        wildsChanged = true; // temp TODO: remove
 
         if (wildsChanged) {
             logWildPokemonChanges(log);

@@ -159,7 +159,7 @@ public class Settings {
     private boolean evolutionMovesForAll;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED, TYPE_THEMED_ELITE4_GYMS
+        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED, TYPE_THEMED_ELITE4_GYMS, KEEP_THEMED
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -167,6 +167,7 @@ public class Settings {
     private boolean trainersUsePokemonOfSimilarStrength;
     private boolean trainersMatchTypingDistribution;
     private boolean trainersBlockLegendaries = true;
+    private boolean trainersUseLocalPokemon;
     private boolean trainersBlockEarlyWonderGuard = true;
     private boolean trainersEnforceDistribution;
     private boolean trainersEnforceMainPlaythrough;
@@ -195,11 +196,15 @@ public class Settings {
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, LOCATION_MAPPING, GLOBAL_MAPPING
     }
+    
+    public enum WildPokemonTypeMod {
+        NONE, THEMED_AREAS, KEEP_PRIMARY
+    }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
     private boolean similarStrengthEncounters;
     private boolean catchEmAllEncounters;
-    private boolean typeThemeEncounterAreas;
+    private WildPokemonTypeMod wildPokemonTypeMod = WildPokemonTypeMod.NONE;
     private boolean useTimeBasedEncounters;
     private boolean blockWildLegendaries = true;
     private boolean useMinimumCatchRate;
@@ -416,7 +421,8 @@ public class Settings {
                 trainersMod == TrainersMod.DISTRIBUTED,
                 trainersMod == TrainersMod.MAINPLAYTHROUGH,
                 trainersMod == TrainersMod.TYPE_THEMED,
-                trainersMod == TrainersMod.TYPE_THEMED_ELITE4_GYMS));
+                trainersMod == TrainersMod.TYPE_THEMED_ELITE4_GYMS,
+                trainersMod == TrainersMod.KEEP_THEMED));
         
         // 14 trainer pokemon force evolutions
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
@@ -425,14 +431,15 @@ public class Settings {
         out.write(makeByteSelected(catchEmAllEncounters,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
                 wildPokemonMod == WildPokemonMod.LOCATION_MAPPING,
-                typeThemeEncounterAreas,
+                wildPokemonTypeMod == WildPokemonTypeMod.THEMED_AREAS,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
 
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 similarStrengthEncounters, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass));
+                banBadRandomWildPokemonHeldItems, wildPokemonTypeMod == WildPokemonTypeMod.NONE,
+                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY, balanceShakingGrass));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -573,14 +580,15 @@ public class Settings {
         // 47 Static level modifier
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
-        // 48 trainer pokemon held items / pokemon ensure two abilities
+        // 48 trainer pokemon held items / pokemon ensure two abilities / trainers use local pokemon
         out.write(makeByteSelected(randomizeHeldItemsForBossTrainerPokemon,
                 randomizeHeldItemsForImportantTrainerPokemon,
                 randomizeHeldItemsForRegularTrainerPokemon,
                 consumableItemsOnlyForTrainerPokemon,
                 sensibleItemsOnlyForTrainerPokemon,
                 highestLevelOnlyGetsItemsForTrainerPokemon,
-                ensureTwoAbilities));
+                ensureTwoAbilities,
+                trainersUseLocalPokemon));
 
         // 49 pickup item randomization
         out.write(makeByteSelected(pickupItemsMod == PickupItemsMod.RANDOM,
@@ -693,7 +701,8 @@ public class Settings {
                 2, // DISTRIBUTED
                 3, // MAINPLAYTHROUGH 
                 4, // TYPE_THEMED
-                5 // TYPE_THEMED_ELITE4_GYMS
+                5, // TYPE_THEMED_ELITE4_GYMS
+                6 // KEEP_THEMED
         ));
 
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
@@ -707,7 +716,15 @@ public class Settings {
         ));
         settings.setSimilarStrengthEncounters(restoreState(data[16], 2));
         settings.setCatchEmAllEncounters(restoreState(data[15], 0));
-        settings.setTypeThemeEncounterAreas(restoreState(data[15], 3));
+        settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
+                restoreState(data[15], 3), // THEMED_AREAS
+                restoreState(data[16], 6) // KEEP_PRIMARY
+        ));
+              settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
+                restoreState(data[15], 3), // THEMED_AREAS
+                restoreState(data[16], 6) // KEEP_PRIMARY
+        ));
+        
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
         settings.setUseMinimumCatchRate(restoreState(data[16], 0));
@@ -1592,6 +1609,14 @@ public class Settings {
         this.trainersBlockLegendaries = trainersBlockLegendaries;
     }
 
+    public boolean isTrainersUseLocalPokemon() {
+        return trainersUseLocalPokemon;
+    }
+
+    public void setTrainersUseLocalPokemon(boolean trainersUseLocalPokemon) {
+        this.trainersUseLocalPokemon = trainersUseLocalPokemon;
+    }
+
     public boolean isTrainersEnforceDistribution() {
         return trainersEnforceDistribution;
     }
@@ -1816,14 +1841,17 @@ public class Settings {
         this.catchEmAllEncounters = catchEmAllEncounters;
     }
 
-    public boolean isTypeThemeEncounterAreas() {
-        return typeThemeEncounterAreas;
+    public WildPokemonTypeMod getWildPokemonTypeMod() {
+        return wildPokemonTypeMod;
     }
 
-    public void setTypeThemeEncounterAreas(boolean typeThemeEncounterAreas) {
-        this.typeThemeEncounterAreas = typeThemeEncounterAreas;
+    public void setWildPokemonTypeMod(boolean... bools) {
+        setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, bools));
     }
 
+    private void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
+        this.wildPokemonTypeMod = wildPokemonTypeMod;
+    }
 
     public boolean isUseTimeBasedEncounters() {
         return useTimeBasedEncounters;

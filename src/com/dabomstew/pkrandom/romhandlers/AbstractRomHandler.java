@@ -61,8 +61,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     private PokemonSet<Pokemon> legendaryPokemonInclFormes = new PokemonSet<>();
     private PokemonSet<Pokemon> nonlegendaryAltFormes = new PokemonSet<>();
     private PokemonSet<Pokemon> legendaryAltFormes = new PokemonSet<>();
-    
-	private CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(this::getPokemonSet);
+
+    private CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(this::getPokemonSet);
 
     private List<MegaEvolution> megaEvolutionsList;
     private PokemonSet<Pokemon> altFormes;
@@ -192,20 +192,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean evolutionSanity = settings.isBaseStatsFollowEvolutions();
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
 
-		copyUpEvolutionsHelper.apply(evolutionSanity, false,
-				pk -> pk.shuffleStats(random),
-				(evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom));
+        copyUpEvolutionsHelper.apply(evolutionSanity, false,
+                pk -> pk.shuffleStats(random),
+                (evFrom, evTo, toMonIsFinalEvo) -> evTo.copyShuffledStatsUpEvolution(evFrom));
 
-		getPokemonSetInclFormes().filterCosmetic()
-				.forEach(pk -> pk.copyBaseFormeBaseStats(pk.getBaseForme()));
+        getPokemonSetInclFormes().filterCosmetic()
+                .forEach(pk -> pk.copyBaseFormeBaseStats(pk.getBaseForme()));
 
-		if (megaEvolutionSanity) {
-			for (MegaEvolution megaEvo : getMegaEvolutions()) {
-				if (megaEvo.from.getMegaEvolutionsFrom().size() > 1)
-					continue;
-				megaEvo.to.copyShuffledStatsUpEvolution(megaEvo.from);
-			}
-		}
+        if (megaEvolutionSanity) {
+            for (MegaEvolution megaEvo : getMegaEvolutions()) {
+                if (megaEvo.from.getMegaEvolutionsFrom().size() > 1)
+                    continue;
+                megaEvo.to.copyShuffledStatsUpEvolution(megaEvo.from);
+            }
+        }
     }
 
     @Override
@@ -214,27 +214,27 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
         boolean assignEvoStatsRandomly = settings.isAssignEvoStatsRandomly();
 
-		BasicPokemonAction<Pokemon> bpAction = pk -> pk.randomizeStatsWithinBST(random);
-		EvolvedPokemonAction<Pokemon> randomEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
-				.assignNewStatsForEvolution(evFrom, random);
-		EvolvedPokemonAction<Pokemon> copyEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
-				.copyRandomizedStatsUpEvolution(evFrom);
-				
-		copyUpEvolutionsHelper.apply(evolutionSanity, true, bpAction,
-				assignEvoStatsRandomly ? randomEpAction : copyEpAction, randomEpAction, bpAction);
+        BasicPokemonAction<Pokemon> bpAction = pk -> pk.randomizeStatsWithinBST(random);
+        EvolvedPokemonAction<Pokemon> randomEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
+                .assignNewStatsForEvolution(evFrom, random);
+        EvolvedPokemonAction<Pokemon> copyEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
+                .copyRandomizedStatsUpEvolution(evFrom);
 
-		getPokemonSetInclFormes().filterCosmetic()
-				.forEach(pk -> pk.copyBaseFormeBaseStats(pk.getBaseForme()));
+        copyUpEvolutionsHelper.apply(evolutionSanity, true, bpAction,
+                assignEvoStatsRandomly ? randomEpAction : copyEpAction, randomEpAction, bpAction);
+
+        getPokemonSetInclFormes().filterCosmetic()
+                .forEach(pk -> pk.copyBaseFormeBaseStats(pk.getBaseForme()));
 
         if (megaEvolutionSanity) {
-			for (MegaEvolution megaEvo : getMegaEvolutions()) {
-				if (megaEvo.from.getMegaEvolutionsFrom().size() > 1 || assignEvoStatsRandomly) {
-					megaEvo.to.assignNewStatsForEvolution(megaEvo.from, this.random);
-				} else {
-					megaEvo.to.copyRandomizedStatsUpEvolution(megaEvo.from);
-				}
-			}
-		}
+            for (MegaEvolution megaEvo : getMegaEvolutions()) {
+                if (megaEvo.from.getMegaEvolutionsFrom().size() > 1 || assignEvoStatsRandomly) {
+                    megaEvo.to.assignNewStatsForEvolution(megaEvo.from, this.random);
+                } else {
+                    megaEvo.to.copyRandomizedStatsUpEvolution(megaEvo.from);
+                }
+            }
+        }
     }
 
     @Override
@@ -287,14 +287,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-	public PokemonSet<Pokemon> getPokemonSet() {
-	    return new PokemonSet<>(getPokemon()); // TODO: unmodifiable?
-	}
+    public PokemonSet<Pokemon> getPokemonSet() {
+        return new PokemonSet<>(getPokemon()); // TODO: unmodifiable?
+    }
 
-	@Override
-	public PokemonSet<Pokemon> getPokemonSetInclFormes() {
-	    return new PokemonSet<>(getPokemonInclFormes()); // TODO: unmodifiable?
-	}
+    @Override
+    public PokemonSet<Pokemon> getPokemonSetInclFormes() {
+        return new PokemonSet<>(getPokemonInclFormes()); // TODO: unmodifiable?
+    }
 
     @Override
     public PokemonSet<Pokemon> getRestrictedPokemon() {
@@ -308,21 +308,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         return restrictedPokemonInclAltFormes;
     }
 
-	private PokemonSet<Pokemon> getRestrictedPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
-	    PokemonSet<Pokemon> allowedPokes = new PokemonSet<>();
-	    if (allowAltFormes) {
-	        allowedPokes.addAll(noLegendaries ? nonlegendaryPokemonInclFormes : restrictedPokemonInclAltFormes);
-	        if (!allowCosmeticFormes) {
-	            allowedPokes.removeIf(Pokemon::isActuallyCosmetic);
-	        }
-	    } else {
-	        allowedPokes.addAll(noLegendaries ? getNonlegendaryPokemon() : restrictedPokemon);
-	    }
-	    // TODO: should make unmodifiable (?)
-	    return allowedPokes;
-	}
+    private PokemonSet<Pokemon> getRestrictedPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
+        PokemonSet<Pokemon> allowedPokes = new PokemonSet<>();
+        if (allowAltFormes) {
+            allowedPokes.addAll(noLegendaries ? nonlegendaryPokemonInclFormes : restrictedPokemonInclAltFormes);
+            if (!allowCosmeticFormes) {
+                allowedPokes.removeIf(Pokemon::isActuallyCosmetic);
+            }
+        } else {
+            allowedPokes.addAll(noLegendaries ? getNonlegendaryPokemon() : restrictedPokemon);
+        }
+        // TODO: should make unmodifiable (?)
+        return allowedPokes;
+    }
 
-	public Pokemon randomPokemon() {
+    public Pokemon randomPokemon() {
         checkPokemonRestrictions();
         return restrictedPokemon.getRandom(random);
     }
@@ -397,31 +397,31 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean dualTypeOnly = settings.isDualTypeOnly();
 
         PokemonSet<Pokemon> allPokes = getPokemonSetInclFormes();
-		copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
-			// Step 1: Basic or Excluded From Copying Pokemon
-			// A Basic/EFC pokemon has a 35% chance of a second type if
-			// it has an evolution that copies type/stats, a 50% chance
-			// otherwise
-			pk.setPrimaryType(randomType());
-			pk.setSecondaryType(null);
-			if (pk.getEvolutionsFrom().size() == 1 && pk.getEvolutionsFrom().get(0).carryStats) {
+        copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
+            // Step 1: Basic or Excluded From Copying Pokemon
+            // A Basic/EFC pokemon has a 35% chance of a second type if
+            // it has an evolution that copies type/stats, a 50% chance
+            // otherwise
+            pk.setPrimaryType(randomType());
+            pk.setSecondaryType(null);
+            if (pk.getEvolutionsFrom().size() == 1 && pk.getEvolutionsFrom().get(0).carryStats) {
                 assignRandomSecondaryType(pk, 0.35, dualTypeOnly);
-			} else {
+            } else {
                 assignRandomSecondaryType(pk, 0.5, dualTypeOnly);
-			}
-		}, (evFrom, evTo, toMonIsFinalEvo) -> {
-			evTo.setPrimaryType(evFrom.getPrimaryType());
-			evTo.setSecondaryType(evFrom.getSecondaryType());
+            }
+        }, (evFrom, evTo, toMonIsFinalEvo) -> {
+            evTo.setPrimaryType(evFrom.getPrimaryType());
+            evTo.setSecondaryType(evFrom.getSecondaryType());
 
-			if (evTo.getSecondaryType() == null) {
-				double chance = toMonIsFinalEvo ? 0.25 : 0.15;
+            if (evTo.getSecondaryType() == null) {
+                double chance = toMonIsFinalEvo ? 0.25 : 0.15;
                 assignRandomSecondaryType(evTo, chance, dualTypeOnly);
-			}
-		}, null, pk -> {
-			pk.setPrimaryType(randomType());
-			pk.setSecondaryType(null);
+            }
+        }, null, pk -> {
+            pk.setPrimaryType(randomType());
+            pk.setSecondaryType(null);
             assignRandomSecondaryType(pk, 0.5, dualTypeOnly);
-		});
+        });
 
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.isActuallyCosmetic()) {
@@ -509,50 +509,50 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // copy abilities straight up evolution lines
         // still keep WG as an exception, though
-		copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
-			if (pk.getAbility1() != Abilities.wonderGuard && pk.getAbility2() != Abilities.wonderGuard
-					&& pk.getAbility3() != Abilities.wonderGuard) {
-				// Pick first ability
-				pk.setAbility1(pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether));
+        copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
+            if (pk.getAbility1() != Abilities.wonderGuard && pk.getAbility2() != Abilities.wonderGuard
+                    && pk.getAbility3() != Abilities.wonderGuard) {
+                // Pick first ability
+                pk.setAbility1(pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether));
 
-				// Second ability?
-				if (ensureTwoAbilities || random.nextDouble() < 0.5) {
-					// Yes, second ability
-					pk.setAbility2(pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
+                // Second ability?
+                if (ensureTwoAbilities || random.nextDouble() < 0.5) {
+                    // Yes, second ability
+                    pk.setAbility2(pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
                             pk.getAbility1()));
-				} else {
-					// Nope
-					pk.setAbility2(0);
+                } else {
+                    // Nope
+                    pk.setAbility2(0);
                 }
 
-				// Third ability?
-				if (hasDWAbilities) {
-					pk.setAbility3(pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
+                // Third ability?
+                if (hasDWAbilities) {
+                    pk.setAbility3(pickRandomAbility(maxAbility, bannedAbilities, weighDuplicatesTogether,
                             pk.getAbility1(), pk.getAbility2()));
-				}
-			}
-		}, (evFrom, evTo, toMonIsFinalEvo) -> {
-			if (evTo.getAbility1() != Abilities.wonderGuard && evTo.getAbility2() != Abilities.wonderGuard
-					&& evTo.getAbility3() != Abilities.wonderGuard) {
-				evTo.setAbility1(evFrom.getAbility1());
+                }
+            }
+        }, (evFrom, evTo, toMonIsFinalEvo) -> {
+            if (evTo.getAbility1() != Abilities.wonderGuard && evTo.getAbility2() != Abilities.wonderGuard
+                    && evTo.getAbility3() != Abilities.wonderGuard) {
+                evTo.setAbility1(evFrom.getAbility1());
                 evTo.setAbility2(evFrom.getAbility2());
                 evTo.setAbility3(evFrom.getAbility3());
-			}
-		});
+            }
+        });
 
 
-		getPokemonSetInclFormes().filterCosmetic()
-				.forEach(pk -> pk.copyBaseFormeAbilities(pk.getBaseForme()));
+        getPokemonSetInclFormes().filterCosmetic()
+                .forEach(pk -> pk.copyBaseFormeAbilities(pk.getBaseForme()));
 
-		if (megaEvolutionSanity) {
-			for (MegaEvolution megaEvo : getMegaEvolutions()) {
-				if (megaEvo.from.getMegaEvolutionsFrom().size() > 1)
-					continue;
-				megaEvo.to.setAbility1(megaEvo.from.getAbility1());
-				megaEvo.to.setAbility2(megaEvo.from.getAbility2());
-				megaEvo.to.setAbility3(megaEvo.from.getAbility3());
-			}
-		}
+        if (megaEvolutionSanity) {
+            for (MegaEvolution megaEvo : getMegaEvolutions()) {
+                if (megaEvo.from.getMegaEvolutionsFrom().size() > 1)
+                    continue;
+                megaEvo.to.setAbility1(megaEvo.from.getAbility1());
+                megaEvo.to.setAbility2(megaEvo.from.getAbility2());
+                megaEvo.to.setAbility3(megaEvo.from.getAbility3());
+            }
+        }
     }
 
     private int pickRandomAbilityVariation(int selectedAbility, int... alreadySetAbilities) {
@@ -626,7 +626,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Settings.WildPokemonMod mode = settings.getWildPokemonMod();
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.isCatchEmAllEncounters();
-        boolean typeThemed = settings.isTypeThemeEncounterAreas();
+        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean similarStrength = settings.isSimilarStrengthEncounters();
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
@@ -640,9 +640,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay, boolean catchEmAll,
-                                 boolean typeThemed, boolean similarStrength, boolean noLegendaries,
-                                 boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
-                                 boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
+                                    boolean typeThemed, boolean similarStrength, boolean noLegendaries,
+                                    boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
+                                    boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
         // - prep settings
         // - get encounters
         // - setup banned + allowed
@@ -949,7 +949,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /**
-     * Returns a new, modifiable {@link PokemonSet} with the given boolean properties, 
+     * Returns a new, modifiable {@link PokemonSet} with the given boolean properties,
      * and the banned {@link Pokemon} exluded.
      * @param noLegendaries Exclude legendary Pokemon?
      * @param allowAltFormes Include alternate formes?
@@ -958,8 +958,8 @@ public abstract class AbstractRomHandler implements RomHandler {
      */
     private PokemonSet<Pokemon> setupAllowedPokemon(boolean noLegendaries, boolean allowAltFormes,
                                                     boolean allowCosmeticFormes, PokemonSet<Pokemon> banned) {
-    	PokemonSet<Pokemon> allowedPokemon = new PokemonSet<>();
-    	allowedPokemon.addAll(getRestrictedPokemon(noLegendaries, allowAltFormes, allowCosmeticFormes));
+        PokemonSet<Pokemon> allowedPokemon = new PokemonSet<>();
+        allowedPokemon.addAll(getRestrictedPokemon(noLegendaries, allowAltFormes, allowCosmeticFormes));
         allowedPokemon.removeAll(banned);
         return allowedPokemon;
     }
@@ -1230,7 +1230,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             PokemonSet<Pokemon> evolvesIntoTheWrongType = new PokemonSet<>();
             if (typeForTrainer != null) {
                 PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, includeFormes, false)
-                		.filterByType(typeForTrainer);
+                        .filterByType(typeForTrainer);
                 for (Pokemon pk : pokemonOfType) {
                     if (!pokemonOfType.contains(fullyEvolve(pk, t.index))) {
                         evolvesIntoTheWrongType.add(pk);
@@ -1279,17 +1279,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 Pokemon newPK = pickTrainerPokeReplacement(
-                                oldPK,
-                                usePowerLevels,
-                                typeForTrainer,
-                                noLegendaries,
-                                wgAllowed,
-                                distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
-                                swapThisMegaEvo,
-                                abilitiesAreRandomized,
-                                includeFormes,
-                                banIrregularAltFormes
-                        );
+                        oldPK,
+                        usePowerLevels,
+                        typeForTrainer,
+                        noLegendaries,
+                        wgAllowed,
+                        distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
+                        swapThisMegaEvo,
+                        abilitiesAreRandomized,
+                        includeFormes,
+                        banIrregularAltFormes
+                );
 
                 // Chosen Pokemon is locked in past here
                 if (distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index))) {
@@ -1332,8 +1332,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (swapThisMegaEvo) {
                     tp.heldItem = newPK
                             .getMegaEvolutionsFrom()
-                                    .get(this.random.nextInt(newPK.getMegaEvolutionsFrom().size()))
-                                    .argument;
+                            .get(this.random.nextInt(newPK.getMegaEvolutionsFrom().size()))
+                            .argument;
                 }
 
                 if (shinyChance) {
@@ -2775,7 +2775,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Roost 5 PP
                 updateMovePP(moves, Moves.roost, 5);
             }
-            
+
             if (generationOfPokemon() >= 7) {
                 // Shore Up 5 PP
                 updateMovePP(moves, Moves.shoreUp, 5);
@@ -3595,18 +3595,18 @@ public abstract class AbstractRomHandler implements RomHandler {
                             limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getBaseForme().getNumber());
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         PokemonSet<Pokemon> megaEvoPokemonLeft = megaEvolutionsList
-                                        .stream()
-                                        .filter(mega -> mega.method == 1)
-                                        .map(mega -> mega.from)
-                                        .filter(pokemonLeft::contains)
-                                        .collect(Collectors.toCollection(PokemonSet::new));
+                                .stream()
+                                .filter(mega -> mega.method == 1)
+                                .map(mega -> mega.from)
+                                .filter(pokemonLeft::contains)
+                                .collect(Collectors.toCollection(PokemonSet::new));
                         if (megaEvoPokemonLeft.isEmpty()) {
                             megaEvoPokemonLeft = megaEvolutionsList
-                                            .stream()
-                                            .filter(mega -> mega.method == 1)
-                                            .map(mega -> mega.from)
-                                            .filter(restrictedPokemon::contains)
-                                            .collect(Collectors.toCollection(PokemonSet::new));
+                                    .stream()
+                                    .filter(mega -> mega.method == 1)
+                                    .map(mega -> mega.from)
+                                    .filter(restrictedPokemon::contains)
+                                    .collect(Collectors.toCollection(PokemonSet::new));
                         }
                         newPK = pickStaticPowerLvlReplacement(
                                 megaEvoPokemonLeft,
@@ -3798,10 +3798,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                                       StaticEncounter newStatic) {
         List<MegaEvolution> megaEvos = megaEvolutionsList;
         PokemonSet<Pokemon> megaEvoPokemon = megaEvos
-                        .stream()
-                        .filter(mega -> mega.method == 1)
-                        .map(mega -> mega.from)
-                        .collect(Collectors.toCollection(PokemonSet::new));
+                .stream()
+                .filter(mega -> mega.method == 1)
+                .map(mega -> mega.from)
+                .collect(Collectors.toCollection(PokemonSet::new));
         PokemonSet<Pokemon> megaEvoPokemonLeft = new PokemonSet<>(megaEvoPokemon).filter(pokemonLeft::contains);
         if (megaEvoPokemonLeft.isEmpty()) {
             megaEvoPokemonLeft = new PokemonSet<>(megaEvoPokemon).filter(fullList::contains);
@@ -3912,17 +3912,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> tmHMs = new ArrayList<>(this.getTMMoves());
         tmHMs.addAll(this.getHMMoves());
 
-		if (followEvolutions) {
-			copyUpEvolutionsHelper.apply(true, false,
-					pk -> randomizePokemonMoveCompatibility(pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
-					(evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(evFrom, evTo,
-							compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType));
-		} else {
-			for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-				randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), tmHMs, requiredEarlyOn,
-						preferSameType);
-			}
-		}
+        if (followEvolutions) {
+            copyUpEvolutionsHelper.apply(true, false,
+                    pk -> randomizePokemonMoveCompatibility(pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
+                    (evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(evFrom, evTo,
+                            compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType));
+        } else {
+            for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+                randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), tmHMs, requiredEarlyOn,
+                        preferSameType);
+            }
+        }
 
         // Set the new compatibility
         this.setTMHMCompatibility(compat);
@@ -3975,22 +3975,22 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private double getMoveCompatibilityProbability(Pokemon pkmn, Move mv, boolean requiredEarlyOn,
-                                                  boolean preferSameType) {
-            double probability = 0.5;
-            if (preferSameType) {
-                if (pkmn.getPrimaryType().equals(mv.type)
-                        || (pkmn.getSecondaryType() != null && pkmn.getSecondaryType().equals(mv.type))) {
-                    probability = 0.9;
-                } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                    probability = 0.5;
-                } else {
-                    probability = 0.25;
-                }
+                                                   boolean preferSameType) {
+        double probability = 0.5;
+        if (preferSameType) {
+            if (pkmn.getPrimaryType().equals(mv.type)
+                    || (pkmn.getSecondaryType() != null && pkmn.getSecondaryType().equals(mv.type))) {
+                probability = 0.9;
+            } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
+                probability = 0.5;
+            } else {
+                probability = 0.25;
             }
-            if (requiredEarlyOn) {
-                probability = Math.min(1.0, probability * 1.8);
-            }
-            return probability;
+        }
+        if (requiredEarlyOn) {
+            probability = Math.min(1.0, probability * 1.8);
+        }
+        return probability;
     }
 
     @Override
@@ -4029,16 +4029,16 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void ensureTMEvolutionSanity() {
         Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-		// Don't do anything with the base, just copy upwards to ensure later evolutions
-		// retain learn compatibility
-		copyUpEvolutionsHelper.apply(true, true, pk -> {}, 
-				(evFrom, evTo, toMonIsFinalEvo) -> {
-					boolean[] fromCompat = compat.get(evFrom);
-					boolean[] toCompat = compat.get(evTo);
-					for (int i = 1; i < toCompat.length; i++) {
-						toCompat[i] |= fromCompat[i];
-					}
-				});
+        // Don't do anything with the base, just copy upwards to ensure later evolutions
+        // retain learn compatibility
+        copyUpEvolutionsHelper.apply(true, true, pk -> {},
+                (evFrom, evTo, toMonIsFinalEvo) -> {
+                    boolean[] fromCompat = compat.get(evFrom);
+                    boolean[] toCompat = compat.get(evTo);
+                    for (int i = 1; i < toCompat.length; i++) {
+                        toCompat[i] |= fromCompat[i];
+                    }
+                });
         this.setTMHMCompatibility(compat);
     }
 
@@ -4179,10 +4179,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> priorityTutors = new ArrayList<>();
 
         if (followEvolutions) {
-			copyUpEvolutionsHelper.apply(true, true,
-					pk -> randomizePokemonMoveCompatibility(pk, compat.get(pk), mts, priorityTutors, preferSameType),
-					(evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(evFrom, evTo,
-							compat.get(evFrom), compat.get(evTo), mts, preferSameType));
+            copyUpEvolutionsHelper.apply(true, true,
+                    pk -> randomizePokemonMoveCompatibility(pk, compat.get(pk), mts, priorityTutors, preferSameType),
+                    (evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(evFrom, evTo,
+                            compat.get(evFrom), compat.get(evTo), mts, preferSameType));
         }
         else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
@@ -4240,14 +4240,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
         // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
-        copyUpEvolutionsHelper.apply(true, true, pk -> {}, 
-				(evFrom, evTo, toMonIsFinalEvo) -> {
-					boolean[] fromCompat = compat.get(evFrom);
-					boolean[] toCompat = compat.get(evTo);
-					for (int i = 1; i < toCompat.length; i++) {
-						toCompat[i] |= fromCompat[i];
-					}
-				});
+        copyUpEvolutionsHelper.apply(true, true, pk -> {},
+                (evFrom, evTo, toMonIsFinalEvo) -> {
+                    boolean[] fromCompat = compat.get(evFrom);
+                    boolean[] toCompat = compat.get(evTo);
+                    for (int i = 1; i < toCompat.length; i++) {
+                        toCompat[i] |= fromCompat[i];
+                    }
+                });
         this.setMoveTutorCompatibility(compat);
     }
 
@@ -4661,7 +4661,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         Collections.shuffle(newItems, this.random);
         Collections.shuffle(newTMs, this.random);
-        
+
         this.setRegularFieldItems(newItems);
         this.setFieldTMs(newTMs);
     }
@@ -4830,8 +4830,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
         checkPokemonRestrictions();
-		PokemonSet<Pokemon> pokemonPool = getRestrictedPokemon(false, altFormesCanHaveDifferentEvolutions(), false);
-		int stageLimit = limitToThreeStages ? 3 : 10;
+        PokemonSet<Pokemon> pokemonPool = getRestrictedPokemon(false, altFormesCanHaveDifferentEvolutions(), false);
+        int stageLimit = limitToThreeStages ? 3 : 10;
 
         PokemonSet<Pokemon> banned = this.getBannedFormesForPlayerPokemon();
         if (!abilitiesAreRandomized) {
@@ -4841,7 +4841,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (banIrregularAltFormes) {
             banned.addAll(getIrregularFormes());
         }
-        
+
         // Cache old evolutions for data later
         Map<Pokemon, List<Evolution>> originalEvos = new HashMap<>();
         for (Pokemon pk : pokemonPool) {
@@ -4878,11 +4878,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             newEvoPairs.clear();
 
-            // TODO: is the below a possible problem for our PokemonSets? 
+            // TODO: is the below a possible problem for our PokemonSets?
 //            // Shuffle pokemon list so the results aren't overly predictable.
 //            Collections.shuffle(pokemonPool, this.random);
 
-            for (Pokemon fromPK : pokemonPool) { 
+            for (Pokemon fromPK : pokemonPool) {
                 List<Evolution> oldEvos = originalEvos.get(fromPK);
                 for (Evolution ev : oldEvos) {
                     // Pick a Pokemon as replacement
@@ -5049,8 +5049,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allowAltFormes = settings.isEvosAllowAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
-		checkPokemonRestrictions();
-		PokemonSet<Pokemon> pokemonPool = getRestrictedPokemon(true, altFormesCanHaveDifferentEvolutions(), false);
+        checkPokemonRestrictions();
+        PokemonSet<Pokemon> pokemonPool = getRestrictedPokemon(true, altFormesCanHaveDifferentEvolutions(), false);
 
         PokemonSet<Pokemon> banned = this.getBannedFormesForPlayerPokemon();
         if (!abilitiesAreRandomized) {
@@ -5084,7 +5084,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 pk.getEvolutionsFrom().clear();
                 pk.getEvolutionsTo().clear();
             }
-            
+
             // TODO: predictability could be a problem here as well
 
             for (Pokemon fromPK : pokemonPool) {
@@ -5385,7 +5385,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         switch (mod) {
             case LEGENDARIES:
                 for (Pokemon pk : pokes) {
-                	pk.setGrowthCurve(pk.isLegendary() ? ExpCurve.SLOW : expCurve);
+                    pk.setGrowthCurve(pk.isLegendary() ? ExpCurve.SLOW : expCurve);
                 }
                 break;
             case STRONG_LEGENDARIES:
@@ -5620,7 +5620,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         return false;
     }
-    
+
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;
 
@@ -5659,7 +5659,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Type t : Type.values()) {
             if (typeInGame(t)) {
                 PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
-                			.filterByType(t);
+                        .filterByType(t);
                 int pkWithTyping = pokemonOfType.size();
                 typeWeightings.put(t, pkWithTyping);
                 totalTypeWeighting += pkWithTyping;
@@ -5974,7 +5974,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // "Type Themed" settings
             if (!cachedReplacements.containsKey(type)) {
                 PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, false)
-                		.filterByType(type);
+                        .filterByType(type);
                 pokemonOfType.removeAll(this.getBannedFormesForPlayerPokemon());
                 if (!abilitiesAreRandomized) {
                     PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
@@ -6013,7 +6013,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pk.bstForPowerLevels() >= minTarget
                             && pk.bstForPowerLevels() <= maxTarget
                             && (wonderGuardAllowed || (pk.getAbility1() != Abilities.wonderGuard
-                                    && pk.getAbility2() != Abilities.wonderGuard && pk.getAbility3() != Abilities.wonderGuard))) {
+                            && pk.getAbility2() != Abilities.wonderGuard && pk.getAbility3() != Abilities.wonderGuard))) {
                         canPick.add(pk);
                     }
                 }
@@ -6052,7 +6052,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Pokemon pickWildPowerLvlReplacement(PokemonSet<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
-            PokemonSet<Pokemon> usedUp, int bstBalanceLevel) {
+                                                PokemonSet<Pokemon> usedUp, int bstBalanceLevel) {
         // start with within 10% and add 5% either direction till we find
         // something
         int balancedBST = bstBalanceLevel * 10 + 250;
@@ -6340,9 +6340,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-	protected void applyCamelCaseNames() {
-		getPokemonSet().forEach(pk -> pk.setName(RomFunctions.camelCase(pk.getName())));
-	}
+    protected void applyCamelCaseNames() {
+        getPokemonSet().forEach(pk -> pk.setName(RomFunctions.camelCase(pk.getName())));
+    }
 
     private void setPlacementHistory(Pokemon newPK) {
         int history = getPlacementHistory(newPK);
@@ -6371,7 +6371,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             placedPKNum += placementHistory.get(p);
         }
         float placedAverage = Math.round((float)placedPKNum / (float)placedPK.size());
-        
+
         if (placedAverage != placedAverage) { // this is checking for NaN, should only happen on first call
             placedAverage = 1;
         }
@@ -6678,36 +6678,36 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     protected abstract List<BufferedImage> getAllPokemonImages();
 
-	public abstract void savePokemonPalettes();
+    public abstract void savePokemonPalettes();
 
     @Override
-	public boolean saveRom(String filename, long seed, boolean saveAsDirectory) {
-    	try {
-    		prepareSaveRom();
-    		return saveAsDirectory ? saveRomDirectory(filename) : saveRomFile(filename, seed);
-    	} catch (RandomizerIOException e) {
-    		e.printStackTrace();
-    		return false;
-    	}
-	}
+    public boolean saveRom(String filename, long seed, boolean saveAsDirectory) {
+        try {
+            prepareSaveRom();
+            return saveAsDirectory ? saveRomDirectory(filename) : saveRomFile(filename, seed);
+        } catch (RandomizerIOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-	/**
-	 * Writes the remaining things to the ROM, before it is written to file. When
-	 * overridden, this should be called as a superclass method.
-	 */
-	protected void prepareSaveRom() {
-		savePokemonStats();
-		saveMoves();
-		savePokemonPalettes();
-	}
+    /**
+     * Writes the remaining things to the ROM, before it is written to file. When
+     * overridden, this should be called as a superclass method.
+     */
+    protected void prepareSaveRom() {
+        savePokemonStats();
+        saveMoves();
+        savePokemonPalettes();
+    }
 
-	public abstract void saveMoves();
+    public abstract void saveMoves();
 
     public abstract void savePokemonStats();
 
-	protected abstract boolean saveRomFile(String filename, long seed);
-	
-	protected abstract boolean saveRomDirectory(String filename);
+    protected abstract boolean saveRomFile(String filename, long seed);
+
+    protected abstract boolean saveRomDirectory(String filename);
 
     protected abstract RomEntry getRomEntry();
 
@@ -6725,5 +6725,5 @@ public abstract class AbstractRomHandler implements RomHandler {
     public String getSupportLevel() {
         return getRomEntry().hasStaticPokemonSupport() ? "Complete" : "No Static Pokemon";
     }
-	
+
 }

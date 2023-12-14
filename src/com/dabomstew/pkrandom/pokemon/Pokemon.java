@@ -51,6 +51,8 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private Type primaryType;
     private Type secondaryType;
+    private Type originalPrimaryType; 
+    private Type originalSecondaryType;
 
     private int hp;
     private int attack;
