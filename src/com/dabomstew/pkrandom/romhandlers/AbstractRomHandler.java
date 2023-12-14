@@ -823,8 +823,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
                 }
 
-                //TODO: remove this marker
-
                 // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
                 // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
                 // randomly appears as a static or unless it becomes a random evolution.
@@ -1436,8 +1434,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-
-        //TODO: finish method
 
         for (List<EncounterSet> encountersInZone : zonesToEncounters.values()) {
             int currentAreaIndex = -1;
