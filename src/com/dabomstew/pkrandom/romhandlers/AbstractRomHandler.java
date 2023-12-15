@@ -624,9 +624,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void randomizeEncounters(Settings settings) {
         Settings.WildPokemonMod mode = settings.getWildPokemonMod();
+        Settings.WildPokemonTypeMod typeMode = settings.getWildPokemonTypeMod();
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.isCatchEmAllEncounters();
-        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean similarStrength = settings.isSimilarStrengthEncounters();
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
@@ -635,14 +635,27 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
-        randomizeEncounters(mode, useTimeOfDay, catchEmAll, typeThemed, similarStrength, noLegendaries,
+        randomizeEncounters(mode, typeMode, useTimeOfDay, catchEmAll, similarStrength, noLegendaries,
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
     }
 
-    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay, boolean catchEmAll,
-                                    boolean typeThemed, boolean similarStrength, boolean noLegendaries,
-                                    boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
-                                    boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
+    @Deprecated
+    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay,
+                                    boolean catchEmAll, boolean typeThemed, boolean similarStrength,
+                                    boolean noLegendaries, boolean balanceShakingGrass, int levelModifier,
+                                    boolean allowAltFormes, boolean banIrregularAltFormes,
+                                    boolean abilitiesAreRandomized) {
+        Settings.WildPokemonTypeMod typeMode = typeThemed ?
+                Settings.WildPokemonTypeMod.THEMED_AREAS : Settings.WildPokemonTypeMod.NONE;
+        randomizeEncounters(mode, typeMode, useTimeOfDay, catchEmAll, similarStrength, noLegendaries,
+                balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
+    }
+
+    public void randomizeEncounters(Settings.WildPokemonMod mode, Settings.WildPokemonTypeMod typeMode, 
+                                    boolean useTimeOfDay, boolean catchEmAll, boolean similarStrength, 
+                                    boolean noLegendaries, boolean balanceShakingGrass, int levelModifier, 
+                                    boolean allowAltFormes, boolean banIrregularAltFormes,
+                                    boolean abilitiesAreRandomized) {
         // - prep settings
         // - get encounters
         // - setup banned + allowed
@@ -659,8 +672,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         PokemonSet<Pokemon> banned = this.getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
         PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
-        EncounterRandomizer er = new EncounterRandomizer(allowed, banned, catchEmAll, typeThemed, similarStrength,
-                balanceShakingGrass);
+        EncounterRandomizer er = new EncounterRandomizer(allowed, banned, convertTypeMode(typeMode),
+                catchEmAll, similarStrength, balanceShakingGrass);
         switch (mode) {
             case RANDOM -> er.randomEncounters(encounterAreas);
             case AREA_MAPPING -> er.area1to1Encounters(encounterAreas);
@@ -673,38 +686,59 @@ public abstract class AbstractRomHandler implements RomHandler {
         setEncounters(useTimeOfDay, encounterAreas);
     }
 
+    private EncounterRandomizer.TypeMode convertTypeMode(Settings.WildPokemonTypeMod typeMode) {
+        EncounterRandomizer.TypeMode innerTypeMode;
+        switch (typeMode) {
+            case NONE -> innerTypeMode = EncounterRandomizer.TypeMode.NONE;
+            case THEMED_AREAS -> innerTypeMode = EncounterRandomizer.TypeMode.RANDOM_THEME;
+            case KEEP_PRIMARY -> innerTypeMode = EncounterRandomizer.TypeMode.PRESERVE_PRIMARY;
+            default -> innerTypeMode = null;
+        }
+        return innerTypeMode;
+    }
+
     private class EncounterRandomizer {
+
+        // a separate enum from the Settings one for lower coupling
+        public enum TypeMode {NONE, RANDOM_THEME, PRESERVE_THEME, PRESERVE_PRIMARY}
 
         private final PokemonSet<Pokemon> allowed;
         private final PokemonSet<Pokemon> banned;
         private Map<Type, PokemonSet<Pokemon>> allowedByType;
+        private Map<Type, PokemonSet<Pokemon>> allowedByPrimaryType;
 
         private PokemonSet<Pokemon> remaining;
         private Map<Type, PokemonSet<Pokemon>> remainingByType;
+        private Map<Type, PokemonSet<Pokemon>> remainingByPrimaryType;
         private Type areaType;
         private PokemonSet<Pokemon> allowedForArea;
         private Map<Pokemon, Pokemon> areaMap;
 
+        private final TypeMode typeMode;
         private final boolean catchEmAll;
-        private final boolean typeThemed;
         private final boolean similarStrength;
         private final boolean balanceShakingGrass;
 
         private boolean map1to1;
         private boolean useLocations;
 
-        public EncounterRandomizer(PokemonSet<Pokemon> allowed, PokemonSet<Pokemon> banned, boolean catchEmAll,
-                                   boolean typeThemed, boolean similarStrength, boolean balanceShakingGrass) {
+        public EncounterRandomizer(PokemonSet<Pokemon> allowed, PokemonSet<Pokemon> banned, TypeMode typeMode,
+                                   boolean catchEmAll, boolean similarStrength, boolean balanceShakingGrass) {
             this.catchEmAll = catchEmAll;
-            this.typeThemed = typeThemed;
+            this.typeMode = typeMode;
             this.similarStrength = similarStrength;
             this.balanceShakingGrass = balanceShakingGrass;
             this.allowed = allowed;
             this.banned = banned;
-            if (typeThemed) {
+            if (typeMode == TypeMode.RANDOM_THEME) {
                 this.allowedByType = new EnumMap<>(Type.class);
                 for (Type t : Type.values()) {
                     allowedByType.put(t, allowed.filterByType(t));
+                }
+            } else if (typeMode == TypeMode.PRESERVE_PRIMARY) {
+                this.allowedByPrimaryType = new EnumMap<>(Type.class);
+                for (Type t : Type.values()) {
+                    allowedByPrimaryType.put(t, allowed.filter(pk -> pk.getPrimaryType() == t));
                 }
             }
             if (catchEmAll) {
@@ -714,7 +748,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private void refillRemainingPokemon() {
             remaining = new PokemonSet<>(allowed);
-            if (typeThemed) {
+            if (typeMode == TypeMode.RANDOM_THEME) {
                 remainingByType = new EnumMap<>(Type.class);
                 for (Type t : Type.values()) {
                     remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
@@ -743,7 +777,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         private void randomEncountersInner(List<EncounterArea> encounterAreas) {
             List<EncounterArea> preppedEncounterAreas = prepEncounterAreas(encounterAreas);
             for (EncounterArea area : preppedEncounterAreas) {
-                areaType = pickAreaType();
+                areaType = pickAreaType(area);
                 allowedForArea = setupAllowedForArea();
 
                 areaMap = new TreeMap<>();
@@ -807,22 +841,33 @@ public abstract class AbstractRomHandler implements RomHandler {
             return grouped;
         }
 
-        private Type pickAreaType() {
-            Type areaType = Type.randomType(random);
-            if (typeThemed) {
-                Map<Type, PokemonSet<Pokemon>> byType = catchEmAll ? remainingByType : allowedByType;
-                while (byType.get(areaType).isEmpty()) {
-                    areaType = Type.randomType(random);
-                }
+        private Type pickAreaType(EncounterArea area) {
+            if (typeMode == TypeMode.RANDOM_THEME) {
+                return pickRandomAreaType();
+            } else if (typeMode == TypeMode.PRESERVE_THEME) {
+                return getOriginalTypeTheme(PokemonSet.inArea(area));
+            } else {
+                return null;
             }
+        }
+
+        private Type pickRandomAreaType() {
+            Map<Type, PokemonSet<Pokemon>> byType = catchEmAll ? remainingByType : allowedByType;
+            Type areaType;
+            do {
+                areaType = Type.randomType(random);
+            } while (byType.get(areaType).isEmpty());
             return areaType;
         }
 
         private PokemonSet<Pokemon> setupAllowedForArea() {
-            if (catchEmAll) {
-                return typeThemed ? remainingByType.get(areaType) : remaining;
+            if (typeMode == TypeMode.RANDOM_THEME) {
+                return catchEmAll ? remainingByType.get(areaType) : allowedByType.get(areaType);
+            } else if (typeMode == TypeMode.PRESERVE_THEME) {
+                return catchEmAll && !remainingByType.get(areaType).isEmpty() 
+                        ? remainingByType.get(areaType) : allowedByType.get(areaType);
             } else {
-                return typeThemed ? allowedByType.get(areaType) : allowed;
+                return catchEmAll ? remaining : allowed;
             }
         }
 
@@ -836,6 +881,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private Pokemon pickReplacementInner(Encounter enc) {
             Pokemon current = enc.getPokemon();
+            
             Pokemon replacement;
             // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
             // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
@@ -871,19 +917,23 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private void removeFromRemaining(Pokemon replacement) {
             remaining.remove(replacement);
-            if (typeThemed) {
+            if (areaIsTypeThemed()) {
                 remainingByType.get(replacement.getPrimaryType()).remove(replacement);
                 if (replacement.getSecondaryType() != null) {
                     remainingByType.get(replacement.getSecondaryType()).remove(replacement);
                 }
-            }
+            } 
         }
 
         private void refillAllowedForArea() {
             if (remaining.isEmpty()) {
                 refillRemainingPokemon();
             }
-            allowedForArea = typeThemed ? allowedByType.get(areaType) : remaining;
+            allowedForArea = areaIsTypeThemed() ? allowedByType.get(areaType) : remaining;
+        }
+
+        private boolean areaIsTypeThemed() {
+            return typeMode == TypeMode.RANDOM_THEME || (typeMode == TypeMode.PRESERVE_THEME && areaType != null);
         }
 
         // quite different functionally from the other random encounter methods,
@@ -973,6 +1023,47 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the type theme of a collection of Pokemon, using their original (pre-randomization) types.<br>
+     * Returns null if there is no shared type/theme.<br>
+     * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal 
+     * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
+     */
+    private Type getOriginalTypeTheme(Collection<Pokemon> pokes) {
+        Type theme = null;
+        
+        Iterator<Pokemon> iter = pokes.iterator();
+        Pokemon pk = iter.next();
+        Type primary = pk.getOriginalPrimaryType();
+        Type secondary = pk.getOriginalSecondaryType();
+        while (iter.hasNext()) {
+            pk = iter.next();
+            if(secondary != null) {
+                if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
+                    secondary = null;
+                }
+            }
+            if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+                primary = secondary;
+                secondary = null;
+            }
+            if (primary == null) {
+                break; //no type is shared, no need to look at the remaining pokemon
+            }
+        }
+        if (primary != null) {
+            //we have a type theme!
+            if(primary == Type.NORMAL && secondary != null) {
+                //Bird override
+                //(Normal is less significant than other types, for example, Flying)
+                theme = secondary;
+            } else {
+                theme = primary;
+            }
+        }
+        return theme;
     }
 
     private void setEvoChainAsIllegal(Pokemon newPK, PokemonSet<Pokemon> illegalList, boolean willForceEvolve) {
@@ -1270,35 +1361,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (keepTypeThemes) {
-                //determine if this trainer has a type theme
-                Pokemon pk = trainerPokemonList.get(0).pokemon;
-                Type primary = pk.getOriginalPrimaryType();
-                Type secondary = pk.getOriginalSecondaryType();
-                for (int i = 1; i < trainerPokemonList.size(); i++) {
-                    pk = trainerPokemonList.get(i).pokemon;
-                    if(secondary != null) {
-                        if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
-                            secondary = null;
-                        }
-                    }
-                    if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
-                        primary = secondary;
-                        secondary = null;
-                    }
-                    if (primary == null) {
-                        break; //no type is shared, no need to look at the remaining pokemon
-                    }
-                }
-                if (primary != null) {
-                    //we have a type theme!
-                    if(primary == Type.NORMAL && secondary != null) {
-                        //Bird override
-                        //(Normal is less significant than other types, for example, Flying)
-                        typeForTrainer = secondary;
-                    } else {
-                        typeForTrainer = primary;
-                    }
-                }
+                List<Pokemon> trainerPokemonSpecies = trainerPokemonList.stream().map(tp -> tp.pokemon).toList();
+                typeForTrainer = getOriginalTypeTheme(trainerPokemonSpecies);
             }
 
             for (TrainerPokemon tp : trainerPokemonList) {
