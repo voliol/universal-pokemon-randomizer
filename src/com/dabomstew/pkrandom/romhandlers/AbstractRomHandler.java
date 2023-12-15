@@ -1197,7 +1197,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
             //make a copy in case we empty the list
-            //(only relevant for certain algorithms)
             for (Type type : Type.values()) {
                 if(typeInGame(type)) {
                     initialTypeLists.put(type, new ArrayList<>(typeListMap.get(type)));
@@ -1278,6 +1277,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //i feel that the chance is low enough it's not worth worrying about
                 //and that one pokemon the same is not the end of the world.
                 //however it IS a change so it probably should be returned to its previous state if pulling this branch.
+                //TODO: that, if applicable
                 Pokemon picked;
                 if(usePowerLevels) {
                     picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, false, null, 100);
