@@ -24,4 +24,16 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
 
  * "Local pokemon only"
      restricts trainers to only using pokemon that can be caught in the wild, or their evolutionary relatives
-     can be used together with type restrictions
+     can be used together with type restrictions  
+
+ * Starter type restricions:
+     a new radio button set including the following restrictions:  
+          * None
+          * Fire, Water, Grass
+          * Any type triangle
+          * All one type
+                related dropdown, default "Random", contains each type  
+     related checkbox: No dual types
+     
+ * Other starter restriction:
+     Random (any basic Pokemon)
