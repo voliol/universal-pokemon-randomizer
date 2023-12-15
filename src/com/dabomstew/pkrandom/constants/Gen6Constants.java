@@ -1076,6 +1076,16 @@ public class Gen6Constants {
         return map;
     }
 
+    public static String[] xyPostGameEncounterAreas = new String[] {
+            //as far as I can tell, there are none??
+            //TODO: confirm
+    };
+
+    public static String[] orasPostGameEncounterAreas = new String[] {
+            "Sky Pillar"
+            //TODO: populate
+    };
+
     public static void tagTrainersXY(List<Trainer> trs) {
 
         // Gym Trainers

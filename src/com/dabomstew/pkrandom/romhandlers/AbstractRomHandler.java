@@ -6525,7 +6525,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         return inArea;
     }
 
-    private Set<Pokemon> allWildPokemon(boolean useTimeOfDay) {
+    protected Set<Pokemon> allWildPokemon(boolean useTimeOfDay) {
         Set<Pokemon> wildPokemon = new TreeSet<>();
         List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
         for (EncounterSet area : areas) {

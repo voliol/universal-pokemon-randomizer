@@ -1724,17 +1724,26 @@ public class Gen4Constants {
 
     public static String[] dpptPostGameEncounterAreas = new String[] {
             "Super Rod", "Radar", "Swarm", //post-game techniques
-            "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway? doesn't hurt
+            "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway
             "224", "225", "226", "227", "228", "229", "230", //routes
             "Stark Mountain", "Seabreak Path" //named areas
-            //...hmm. we also need the back of Victory Road, but... the name does not distinguish.
+            //...hmm. we also want the back of Victory Road, but... the name does not distinguish.
             //May need to use numbered areas. But that kinda sucks.
             //(Especially since I can't be sure the numbers are the same in DP and Pt)
+            //One location isn't that big a deal though.
     };
 
     public static String[] hgssPostGameEncounterAreas = new String[] {
-            "Super Rod", "Swarm", //post-game techniques
-            "", //Kanto cities
+            "Super Rod", "Swarm", "Radio", //post-game techniques
+            "Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Vermilion City", "Lavender Town",
+            "Celadon City", "Fuschia City", "Saffron City", //Kanto cities
+            "Route 1", "Route 2", "Route 3", "Route 4", "Route 5",
+            "Route 6", "Route 7", "Route 8", "Route 9", "Route 10",
+            "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",
+            "Route 16", "Route 17", "Route 18", "Route 19", "Route 20",
+            "Route 21", "Route 22", "Route 23", "Route 24", "Route 25", //Kanto routes
+            "Cinnabar Island", "Cerulean Cave", "DIGLETT’s Cave", "Rock Tunnel",
+            "Seafoam Islands", "Viridian Forest", //other Kanto locations
             "Route 28", "Mount Silver" //Johto but post-game
             //the National Park is a weird case, as it either has a post-game area...
             //or, if you chose to start with the national dex, an entirely inaccessible area
