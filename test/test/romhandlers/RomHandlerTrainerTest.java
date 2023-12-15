@@ -1,11 +1,9 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
+import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -370,30 +368,6 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         }
     }
 
-    private void keepTypeThemedCheck(Map<Trainer, List<String>> beforeTrainerStrings, Map<Trainer, Type> typeThemedTrainers) {
-        for (Trainer tr : romHandler.getTrainers()) {
-            List<String> beforeStrings = beforeTrainerStrings.get(tr);
-            System.out.println("Before: " + beforeStrings.get(0));
-            for (int i = 1; i < beforeStrings.size(); i++) {
-                System.out.println("\t" + beforeStrings.get(i));
-            }
-
-            if (typeThemedTrainers.containsKey(tr)) {
-                Type theme = typeThemedTrainers.get(tr);
-                System.out.println("Type Theme: " + theme);
-                System.out.println("After: " + tr);
-                for (TrainerPokemon tp : tr.pokemon) {
-                    Pokemon pk = tp.pokemon;
-                    System.out.println("\t" + pk);
-                    assertTrue(pk.getPrimaryType() == theme || pk.getSecondaryType() == theme);
-                }
-            } else {
-                System.out.println("Not Type Themed");
-            }
-            System.out.println();
-        }
-    }
-
     private Type getThemedTrainerType(Trainer tr) {
         Pokemon first = tr.pokemon.get(0).pokemon;
         Type primary = first.getOriginalPrimaryType();
@@ -423,6 +397,67 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
             return primary;
         }
 
+    }
+
+    private void keepTypeThemedCheck(Map<Trainer, List<String>> beforeTrainerStrings, Map<Trainer, Type> typeThemedTrainers) {
+        for (Trainer tr : romHandler.getTrainers()) {
+            List<String> beforeStrings = beforeTrainerStrings.get(tr);
+            System.out.println("Before: " + beforeStrings.get(0));
+            for (int i = 1; i < beforeStrings.size(); i++) {
+                System.out.println("\t" + beforeStrings.get(i));
+            }
+
+            if (typeThemedTrainers.containsKey(tr)) {
+                Type theme = typeThemedTrainers.get(tr);
+                System.out.println("Type Theme: " + theme);
+                System.out.println("After: " + tr);
+                for (TrainerPokemon tp : tr.pokemon) {
+                    Pokemon pk = tp.pokemon;
+                    System.out.println("\t" + pk);
+                    assertTrue(pk.getPrimaryType() == theme || pk.getSecondaryType() == theme);
+                }
+            } else {
+                System.out.println("Not Type Themed");
+            }
+            System.out.println();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void useLocalPokemonGuaranteesLocalPokemonOnly(String romName) {
+        loadROM(romName);
+        Settings s = new Settings();
+        s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
+        s.setTrainersUseLocalPokemon(true);
+        romHandler.randomizeTrainerPokes(s);
+
+        PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            for (Pokemon pk : PokemonSet.inArea(area)) {
+                if (!localWithRelatives.contains(pk)) {
+                    localWithRelatives.addAll(PokemonSet.related(pk));
+                }
+            }
+        }
+
+        PokemonSet<Pokemon> all = romHandler.getPokemonSet();
+        PokemonSet<Pokemon> nonLocal = new PokemonSet<>(all);
+        nonLocal.removeAll(localWithRelatives);
+
+        for (Trainer tr : romHandler.getTrainers()) {
+            System.out.println(tr);
+
+            // ignore the yellow rival and his forced eevee
+            if (tr.tag != null && tr.tag.contains("RIVAL") && romHandler.isYellow()) {
+                continue;
+            }
+
+            for (TrainerPokemon tp : tr.pokemon) {
+                System.out.println(tp.pokemon);
+                assertTrue(localWithRelatives.contains(tp.pokemon));
+            }
+        }
     }
 
     @ParameterizedTest

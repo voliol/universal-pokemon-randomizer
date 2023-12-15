@@ -1690,6 +1690,7 @@
                     </constraints>
                     <properties>
                       <enabled value="false"/>
+                      <selected value="true"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpEliteFourUniquePokemonCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpEliteFourUniquePokemonCheckBox.toolTipText"/>
                     </properties>

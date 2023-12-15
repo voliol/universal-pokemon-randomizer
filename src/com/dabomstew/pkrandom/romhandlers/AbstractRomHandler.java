@@ -1062,6 +1062,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeTrainerPokes(Settings settings) {
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
+        boolean useLocalPokemon = settings.isTrainersUseLocalPokemon();
         boolean noLegendaries = settings.isTrainersBlockLegendaries();
         boolean noEarlyWonderGuard = settings.isTrainersBlockEarlyWonderGuard();
         int levelModifier = settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0;
@@ -1086,6 +1087,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Set up Pokemon pool
         cachedReplacements = new TreeMap<>();
         cachedAll = getRestrictedPokemon(noLegendaries, includeFormes, false);
+
+        if (useLocalPokemon) {
+            PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
+            for (EncounterArea area : getEncounters(settings.isUseTimeBasedEncounters())) {
+                for (Pokemon pk : PokemonSet.inArea(area)) {
+                    if (!localWithRelatives.contains(pk)) {
+                        localWithRelatives.addAll(PokemonSet.related(pk));
+                    }
+                }
+            }
+            cachedAll.retainAll(localWithRelatives);
+        }
 
         PokemonSet<Pokemon> banned = this.getBannedFormesForTrainerPokemon();
         if (!abilitiesAreRandomized) {
