@@ -1067,6 +1067,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         int levelModifier = settings.isTrainersLevelModified() ? settings.getTrainersLevelModifier() : 0;
         boolean isTypeThemed = settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED;
         boolean isTypeThemedEliteFourGymOnly = settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED_ELITE4_GYMS;
+        boolean keepTypeThemes = settings.getTrainersMod() == Settings.TrainersMod.KEEP_THEMED;
         boolean distributionSetting = settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED;
         boolean mainPlaythroughSetting = settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH;
         boolean includeFormes = settings.isAllowTrainerAlternateFormes();
@@ -1252,6 +1253,38 @@ public abstract class AbstractRomHandler implements RomHandler {
                 trainerPokemonList.sort((tp1, tp2) -> Integer.compare(tp2.level, tp1.level));
                 if (rivalCarriesStarter && (t.tag.contains("RIVAL") || t.tag.contains("FRIEND"))) {
                     eliteFourRival = true;
+                }
+            }
+
+            if (keepTypeThemes) {
+                //determine if this trainer has a type theme
+                Pokemon pk = trainerPokemonList.get(0).pokemon;
+                Type primary = pk.getOriginalPrimaryType();
+                Type secondary = pk.getOriginalSecondaryType();
+                for (int i = 1; i < trainerPokemonList.size(); i++) {
+                    pk = trainerPokemonList.get(i).pokemon;
+                    if(secondary != null) {
+                        if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
+                            secondary = null;
+                        }
+                    }
+                    if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+                        primary = secondary;
+                        secondary = null;
+                    }
+                    if (primary == null) {
+                        break; //no type is shared, no need to look at the remaining pokemon
+                    }
+                }
+                if (primary != null) {
+                    //we have a type theme!
+                    if(primary == Type.NORMAL && secondary != null) {
+                        //Bird override
+                        //(Normal is less significant than other types, for example, Flying)
+                        typeForTrainer = secondary;
+                    } else {
+                        typeForTrainer = primary;
+                    }
                 }
             }
 
