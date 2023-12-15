@@ -30,16 +30,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1403,6 +1394,30 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean hasRivalFinalBattle() {
         return true;
+    }
+
+    @Override
+    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
+        Set<Pokemon> wildPokemon = new TreeSet<>();
+        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
+
+        String[] postGameAreas = Gen1Constants.postGameEncounterAreas;
+
+        for (EncounterSet area : areas) {
+            boolean isPostGame = false;
+            for (String nameFragment : postGameAreas) {
+                if(area.displayName.contains(nameFragment)) {
+                    isPostGame = true;
+                    break;
+                }
+            }
+            if (!isPostGame) {
+                for (Encounter enc : area.encounters) {
+                    wildPokemon.add(enc.pokemon);
+                }
+            }
+        }
+        return wildPokemon;
     }
 
     @Override

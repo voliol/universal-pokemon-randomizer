@@ -4431,6 +4431,36 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
+        Set<Pokemon> wildPokemon = new TreeSet<>();
+        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
+
+        String[] postGameAreas;
+        if(romEntry.romType == Gen3Constants.RomType_FRLG) {
+            postGameAreas = Gen3Constants.frlgPostGameEncounterAreas;
+        } else {
+            postGameAreas = Gen3Constants.rsePostGameEncounterAreas;
+        }
+
+
+        for (EncounterSet area : areas) {
+            boolean isPostGame = false;
+            for (String nameFragment : postGameAreas) {
+                if(area.displayName.contains(nameFragment)) {
+                    isPostGame = true;
+                    break;
+                }
+            }
+            if (!isPostGame) {
+                for (Encounter enc : area.encounters) {
+                    wildPokemon.add(enc.pokemon);
+                }
+            }
+        }
+        return wildPokemon;
+    }
+
+    @Override
     public List<Integer> getAllConsumableHeldItems() {
         return Gen3Constants.consumableHeldItems;
     }

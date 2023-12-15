@@ -67,6 +67,36 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         super(random, logStream);
     }
 
+    @Override
+    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
+        Set<Pokemon> wildPokemon = new TreeSet<>();
+        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
+
+        String[] postGameAreas;
+        if(romEntry.romType == Gen5Constants.Type_BW) {
+            postGameAreas = Gen5Constants.bwPostGameEncounterAreas;
+        } else {
+            postGameAreas = Gen5Constants.bw2PostGameEncounterAreas;
+        }
+
+
+        for (EncounterSet area : areas) {
+            boolean isPostGame = false;
+            for (String nameFragment : postGameAreas) {
+                if(area.displayName.contains(nameFragment)) {
+                    isPostGame = true;
+                    break;
+                }
+            }
+            if (!isPostGame) {
+                for (Encounter enc : area.encounters) {
+                    wildPokemon.add(enc.pokemon);
+                }
+            }
+        }
+        return wildPokemon;
+    }
+
     private static class OffsetWithinEntry {
         private int entry;
         private int offset;
