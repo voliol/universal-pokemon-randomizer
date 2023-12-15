@@ -875,6 +875,7 @@ public class Settings {
         settings.setSensibleItemsOnlyForTrainers(restoreState(data[48], 4));
         settings.setHighestLevelGetsItemsForTrainers(restoreState(data[48], 5));
         settings.setEnsureTwoAbilities(restoreState(data[48], 6));
+        settings.setTrainersUseLocalPokemon(restoreState(data[48], 7));
 
         settings.setPickupItemsMod(restoreEnum(PickupItemsMod.class, data[49],
                 1, // UNCHANGED
