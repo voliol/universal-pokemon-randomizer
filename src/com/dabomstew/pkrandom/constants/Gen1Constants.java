@@ -148,7 +148,7 @@ public class Gen1Constants {
     }
 
     public static String[] postGameEncounterAreas = new String[] {
-            "Cerulean Cave"
+            "CERULEAN CAVE"
     };
 
     public static void tagTrainersUniversal(List<Trainer> trs) {

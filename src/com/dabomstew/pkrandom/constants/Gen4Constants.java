@@ -1727,10 +1727,7 @@ public class Gen4Constants {
             "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway
             "224", "225", "226", "227", "228", "229", "230", //routes
             "Stark Mountain", "Seabreak Path" //named areas
-            //...hmm. we also want the back of Victory Road, but... the name does not distinguish.
-            //May need to use numbered areas. But that kinda sucks.
-            //(Especially since I can't be sure the numbers are the same in DP and Pt)
-            //One location isn't that big a deal though.
+            //TODO: handling for Victory Road back
     };
 
     public static String[] hgssPostGameEncounterAreas = new String[] {
@@ -1745,9 +1742,7 @@ public class Gen4Constants {
             "Cinnabar Island", "Cerulean Cave", "DIGLETT’s Cave", "Rock Tunnel",
             "Seafoam Islands", "Viridian Forest", //other Kanto locations
             "Route 28", "Mount Silver" //Johto but post-game
-            //the National Park is a weird case, as it either has a post-game area...
-            //or, if you chose to start with the national dex, an entirely inaccessible area
-            //not sure what, if anything, to do about that
+            //TODO: Bug-Catching contest (post-national dex) handling
     };
 
     public static void tagTrainersDP(List<Trainer> trs) {

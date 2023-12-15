@@ -1078,12 +1078,12 @@ public class Gen6Constants {
 
     public static String[] xyPostGameEncounterAreas = new String[] {
             //as far as I can tell, there are none??
-            //TODO: confirm
     };
 
     public static String[] orasPostGameEncounterAreas = new String[] {
-            "Sky Pillar"
-            //TODO: populate
+            "Sky Pillar", "Battle Resort", "Mirage",
+            "DexNav Foreign Encounter" //technically not post-game, but would certainly not qualify as "local"
+            //which is the use case for this
     };
 
     public static void tagTrainersXY(List<Trainer> trs) {
