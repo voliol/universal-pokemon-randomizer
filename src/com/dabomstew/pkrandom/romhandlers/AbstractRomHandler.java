@@ -880,9 +880,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if(balanceShakingGrass && area.displayName.contains("Shaking")) {
                         //notice of change: shaking grass balance now uses new level rather than original level.
                         //could fix that, but it'd be complicated.
-                        picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2);
+                        picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
+                                false, null, (enc.level + enc.maxLevel) / 2);
                     } else {
-                        picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, false, null, 100);
+                        picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
+                                false, null, 100);
                     }
                 } else {
                     int pickedNum = this.random.nextInt(pickablePokemon.size());
@@ -1087,7 +1089,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //step 7: Choose a Pokemon from the pickable list
                 Pokemon picked;
                 if(usePowerLevels) {
-                    picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, false, null, 100);
+                    picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, Math.min(5, pickablePokemon.size() / 4),
+                            false, null, 100);
                 } else {
                     int pickedNum = this.random.nextInt(pickablePokemon.size());
                     picked = pickablePokemon.get(pickedNum);
@@ -1280,7 +1283,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //TODO: that, if applicable
                 Pokemon picked;
                 if(usePowerLevels) {
-                    picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, false, null, 100);
+                    picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, Math.min(5, pickablePokemon.size() / 4),
+                            false, null, 100);
                 } else {
                     int pickedNum = this.random.nextInt(pickablePokemon.size());
                     picked = pickablePokemon.get(pickedNum);
@@ -1318,7 +1322,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
                     }
                     if (usePowerLevels) {
-                        enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, false, null, 100);
+                        enc.pokemon = pickWildPowerLvlReplacement(tempPickable, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
+                                false, null, 100);
                     } else {
                         int picked = this.random.nextInt(tempPickable.size());
                         enc.pokemon = tempPickable.get(picked);
@@ -1533,7 +1538,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         //step 4: Choose a Pokemon from the pickable list
                         Pokemon picked;
                         if(usePowerLevels) {
-                            picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, false, null, 100);
+                            picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
+                                    false, null, 100);
                         } else {
                             int pickedNum = this.random.nextInt(pickablePokemon.size());
                             picked = pickablePokemon.get(pickedNum);
@@ -1647,7 +1653,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //step 3: Choose a Pokemon from the pickable list
                 Pokemon picked;
                 if(usePowerLevels) {
-                    picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, false, null, 100);
+                    picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
+                            false, null, 100);
                 } else {
                     int pickedNum = this.random.nextInt(pickablePokemon.size());
                     picked = pickablePokemon.get(pickedNum);
@@ -7245,6 +7252,37 @@ public abstract class AbstractRomHandler implements RomHandler {
             minTarget -= currentBST / 20;
             maxTarget += currentBST / 20;
             expandRounds++;
+        }
+        return canPick.get(this.random.nextInt(canPick.size()));
+    }
+
+    private Pokemon pickWildPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, int minimumPool, boolean banSamePokemon,
+                                                List<Pokemon> usedUp, int bstBalanceLevel) {
+
+        Set <Pokemon> realPool = new TreeSet<>(pokemonPool);
+        //so we don't have to worry about duplicates causing infinite loop
+
+        if(minimumPool >= realPool.size()) {
+            //minimum pool is whole pool
+            List<Pokemon> finalPool = new ArrayList<>(realPool);
+            //I don't like the back-and-forth conversion, but it's needed to randomize the culled list
+            return finalPool.get(this.random.nextInt(finalPool.size()));
+        }
+        // start with within 10% and add 5% either direction until the pool is big enough
+        int balancedBST = bstBalanceLevel * 10 + 250;
+        int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
+        int minTarget = currentBST - currentBST / 10;
+        int maxTarget = currentBST + currentBST / 10;
+        List<Pokemon> canPick = new ArrayList<>();
+        while (canPick.size() < minimumPool) {
+            for (Pokemon pk : realPool) {
+                if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
+                        && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))) {
+                    canPick.add(pk);
+                }
+            }
+            minTarget -= currentBST / 20;
+            maxTarget += currentBST / 20;
         }
         return canPick.get(this.random.nextInt(canPick.size()));
     }
