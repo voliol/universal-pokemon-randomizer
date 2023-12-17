@@ -639,18 +639,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
     }
 
-    @Deprecated
-    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay,
-                                    boolean catchEmAll, boolean typeThemed, boolean similarStrength,
-                                    boolean noLegendaries, boolean balanceShakingGrass, int levelModifier,
-                                    boolean allowAltFormes, boolean banIrregularAltFormes,
-                                    boolean abilitiesAreRandomized) {
-        Settings.WildPokemonTypeMod typeMode = typeThemed ?
-                Settings.WildPokemonTypeMod.THEMED_AREAS : Settings.WildPokemonTypeMod.NONE;
-        randomizeEncounters(mode, typeMode, useTimeOfDay, catchEmAll, similarStrength, noLegendaries,
-                balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
-    }
-
     public void randomizeEncounters(Settings.WildPokemonMod mode, Settings.WildPokemonTypeMod typeMode, 
                                     boolean useTimeOfDay, boolean catchEmAll, boolean similarStrength, 
                                     boolean noLegendaries, boolean balanceShakingGrass, int levelModifier, 

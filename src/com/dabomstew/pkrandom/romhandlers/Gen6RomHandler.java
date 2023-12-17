@@ -1717,12 +1717,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay, boolean catchEmAll,
-                                    boolean typeThemed, boolean usePowerLevels, boolean noLegendaries,
+    public void randomizeEncounters(Settings.WildPokemonMod mode, Settings.WildPokemonTypeMod typeMode,
+                                    boolean useTimeOfDay, boolean catchEmAll,
+                                    boolean usePowerLevels, boolean noLegendaries,
                                     boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
                                     boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
         // TODO: do some extra steps for ORAS. The code needed is found old commits.
-        super.randomizeEncounters(mode, useTimeOfDay, catchEmAll, typeThemed, usePowerLevels, noLegendaries,
+        super.randomizeEncounters(mode, typeMode, useTimeOfDay, catchEmAll, usePowerLevels, noLegendaries,
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
     }
 
