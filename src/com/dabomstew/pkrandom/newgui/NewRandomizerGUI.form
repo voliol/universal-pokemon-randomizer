@@ -930,7 +930,7 @@
                     <children>
                       <component id="7222b" class="javax.swing.JRadioButton" binding="spTypeNoneRadioButton">
                         <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="1.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -961,33 +961,60 @@
                       </component>
                       <component id="28ca" class="javax.swing.JRadioButton" binding="spTypeSingleRadioButton">
                         <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="1.0" weighty="0.0"/>
                         </constraints>
                         <properties>
                           <enabled value="false"/>
                           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spTypeSingleRadioButton"/>
+                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spTypeSingleRadioButton.toolTipText"/>
                         </properties>
                       </component>
                       <component id="24890" class="javax.swing.JComboBox" binding="spTypeSingleComboBox">
                         <constraints>
-                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
                           <editable value="false"/>
                           <enabled value="false"/>
+                          <model>
+                            <item value="--"/>
+                          </model>
                         </properties>
                       </component>
                       <hspacer id="5513f">
                         <constraints>
-                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                       </hspacer>
+                      <vspacer id="ea50e">
+                        <constraints>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                      </vspacer>
+                      <hspacer id="e9948">
+                        <constraints>
+                          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                      </hspacer>
+                      <component id="787a" class="javax.swing.JRadioButton" binding="spTypeUniqueRadioButton">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spTypeUniqueRadioButton.text"/>
+                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spTypeUniqueRadioButton.toolTipText"/>
+                        </properties>
+                      </component>
                       <component id="edb45" class="javax.swing.JCheckBox" binding="spTypeNoDualCheckbox">
                         <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -996,18 +1023,6 @@
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spTypeNoDualCheckBox.toolTipText"/>
                         </properties>
                       </component>
-                      <vspacer id="ea50e">
-                        <constraints>
-                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                      </vspacer>
-                      <hspacer id="e9948">
-                        <constraints>
-                          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                      </hspacer>
                     </children>
                   </grid>
                   <vspacer id="4575b">
@@ -4036,11 +4051,12 @@
       <member id="62bb6"/>
       <member id="478a"/>
     </group>
-    <group name="spTypeRadioButtons">
-      <member id="7222b"/>
-      <member id="76f59"/>
-      <member id="85fd7"/>
+    <group name="starterPokemonTypeButtonGroup">
+      <member id="787a"/>
       <member id="28ca"/>
+      <member id="85fd7"/>
+      <member id="76f59"/>
+      <member id="7222b"/>
     </group>
   </buttonGroups>
   <inspectionSuppressions>
