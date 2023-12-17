@@ -1682,7 +1682,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Set up Pokemon pool
         cachedReplacementLists = new TreeMap<>();
         if (useLocalPokemon) {
-            cachedAllList = new ArrayList<>(allWildPokemon(settings.isUseTimeBasedEncounters()));
+            cachedAllList = new ArrayList<>(mainGameWildPokemon(settings.isUseTimeBasedEncounters()));
             addEvolutionaryRelatives(cachedAllList);
             //well, there's probably a way to add the alt formes of pokemon already in the list...
             //but i don't know what it is. so.
