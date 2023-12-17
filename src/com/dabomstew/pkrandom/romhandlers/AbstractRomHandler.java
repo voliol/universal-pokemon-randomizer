@@ -744,6 +744,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (Type t : Type.values()) {
                     remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
                 }
+            } else if (typeMode == TypeMode.PRESERVE_PRIMARY) {
+                remainingByPrimaryType = new EnumMap<>(Type.class);
+                for (Type t : Type.values()) {
+                    remainingByPrimaryType.put(t, new PokemonSet<>(allowedByPrimaryType.get(t)));
+                }
             }
         }
 
@@ -925,7 +930,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (replacement.getSecondaryType() != null) {
                     remainingByType.get(replacement.getSecondaryType()).remove(replacement);
                 }
-            } 
+            } else if (typeMode == TypeMode.PRESERVE_PRIMARY) {
+                remainingByPrimaryType.get(replacement.getPrimaryType()).remove(replacement);
+            }
         }
 
         private void refillAllowedForArea() {
