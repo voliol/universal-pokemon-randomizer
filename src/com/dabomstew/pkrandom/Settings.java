@@ -907,7 +907,7 @@ public class Settings {
         if(data[52] == 0) {
             settings.setStartersSingleType(null);
         } else {
-            settings.setStartersSingleType(Type.fromInt(data[52] - 1 | 0x1F));
+            settings.setStartersSingleType(Type.fromInt((data[52] | 0x1F) - 1));
         }
 
 

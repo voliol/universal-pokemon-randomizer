@@ -317,6 +317,13 @@ public class SettingsUpdater {
             dataBlock[50] |= ((oldMinimumCatchRate - 1) << 3);
         }
 
+        if (oldVersion < 323) {
+            //add two new bytes, including new enum
+            dataBlock[51] = 0x01;
+            dataBlock[52] = 0;
+            actualDataLength += 2;
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);
