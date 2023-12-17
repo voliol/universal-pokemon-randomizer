@@ -107,7 +107,7 @@ public class Settings {
     private StartersMod startersMod = StartersMod.UNCHANGED;
 
     public enum StartersTypeMod {
-        NONE, FIRE_WATER_GRASS, TRIANGLE, SINGLE_TYPE
+        NONE, FIRE_WATER_GRASS, TRIANGLE, UNIQUE, SINGLE_TYPE
     }
 
     private StartersTypeMod startersTypeMod = StartersTypeMod.NONE;
@@ -595,10 +595,15 @@ public class Settings {
         // 51 starter type mod / starter no dual type checkbox
         out.write(makeByteSelected(startersTypeMod == StartersTypeMod.NONE,
                 startersTypeMod == StartersTypeMod.FIRE_WATER_GRASS, startersTypeMod == StartersTypeMod.TRIANGLE,
-                startersTypeMod == StartersTypeMod.SINGLE_TYPE, false, false, false, startersNoDualTypes));
+                startersTypeMod == StartersTypeMod.UNIQUE, startersTypeMod == StartersTypeMod.SINGLE_TYPE,
+                false, false, startersNoDualTypes));
 
         // 52 starter single-type type choice (5 bits)
-        out.write(startersSingleType.toInt());
+        if(startersSingleType != null) {
+            out.write(startersSingleType.toInt() + 1);
+        } else {
+            out.write(0);
+        }
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -893,12 +898,18 @@ public class Settings {
         settings.setStartersTypeMod(restoreEnum(StartersTypeMod.class, data[51], 0, //NONE
                 1, //FIRE_WATER_GRASS
                 2, //TRIANGLE
-                3  //SINGLE_TYPE
+                3, //UNIQUE
+                4  //SINGLE_TYPE
             ));
 
         settings.setStartersNoDualTypes(restoreState(data[51], 7));
 
-        settings.setStartersSingleType(Type.fromInt(data[52] | 0x1F));
+        if(data[52] == 0) {
+            settings.setStartersSingleType(null);
+        } else {
+            settings.setStartersSingleType(Type.fromInt(data[52] - 1 | 0x1F));
+        }
+
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1379,7 +1390,11 @@ public class Settings {
     }
 
     public void setStartersSingleType(int typeIndex) {
-        startersSingleType = Type.fromInt(typeIndex);
+        if(typeIndex == 0) {
+            startersSingleType = null;
+        } else {
+            startersSingleType = Type.fromInt(typeIndex - 1);
+        }
     }
 
     public int[] getCustomStarters() {

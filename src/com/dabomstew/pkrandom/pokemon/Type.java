@@ -33,36 +33,26 @@ import com.dabomstew.pkrandom.RomFunctions;
 
 public enum Type {
 
-    NORMAL(1), FIGHTING(2), FLYING(3), GRASS(4), WATER(5), FIRE(6),
-    ROCK(7), GROUND(8), PSYCHIC(9), BUG(10), DRAGON(11), ELECTRIC(12),
-    GHOST(13), POISON(14), ICE(15), STEEL(16), DARK(17), FAIRY(18),
+    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY,
     GAS(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true), TRI(true);
 
     public boolean isHackOnly;
-    private final int index;
 
     Type() {
         this.isHackOnly = false;
-        this.index = -1;
-    }
-
-    Type(int index) {
-        this.isHackOnly = false;
-        this.index = index;
     }
 
     Type(boolean isHackOnly) {
         this.isHackOnly = isHackOnly;
-        this.index = -1;
     }
 
     public int toInt() {
-        return this.index;
+        return this.ordinal();
     }
 
     public static Type fromInt(int index) {
         for(Type type : Type.values()) {
-            if(type.index == index) {
+            if(type.ordinal() == index) {
                 return type;
             }
         }
