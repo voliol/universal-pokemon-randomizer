@@ -679,6 +679,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         switch (typeMode) {
             case NONE -> innerTypeMode = EncounterRandomizer.TypeMode.NONE;
             case THEMED_AREAS -> innerTypeMode = EncounterRandomizer.TypeMode.RANDOM_THEME;
+            case KEEP_THEMED_AREAS -> innerTypeMode = EncounterRandomizer.TypeMode.PRESERVE_THEME;
             case KEEP_PRIMARY -> innerTypeMode = EncounterRandomizer.TypeMode.PRESERVE_PRIMARY;
             default -> innerTypeMode = null;
         }
@@ -720,7 +721,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             this.balanceShakingGrass = balanceShakingGrass;
             this.allowed = allowed;
             this.banned = banned;
-            if (typeMode == TypeMode.RANDOM_THEME) {
+            if (typeMode == TypeMode.RANDOM_THEME || typeMode == TypeMode.PRESERVE_THEME) {
                 this.allowedByType = new EnumMap<>(Type.class);
                 for (Type t : Type.values()) {
                     allowedByType.put(t, allowed.filterByType(t));
@@ -738,7 +739,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private void refillRemainingPokemon() {
             remaining = new PokemonSet<>(allowed);
-            if (typeMode == TypeMode.RANDOM_THEME) {
+            if (typeMode == TypeMode.RANDOM_THEME || typeMode == TypeMode.PRESERVE_THEME) {
                 remainingByType = new EnumMap<>(Type.class);
                 for (Type t : Type.values()) {
                     remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
@@ -853,7 +854,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         private PokemonSet<Pokemon> setupAllowedForArea() {
             if (typeMode == TypeMode.RANDOM_THEME) {
                 return catchEmAll ? remainingByType.get(areaType) : allowedByType.get(areaType);
-            } else if (typeMode == TypeMode.PRESERVE_THEME) {
+            } else if (typeMode == TypeMode.PRESERVE_THEME && areaType != null) {
                 return catchEmAll && !remainingByType.get(areaType).isEmpty() 
                         ? remainingByType.get(areaType) : allowedByType.get(areaType);
             } else {

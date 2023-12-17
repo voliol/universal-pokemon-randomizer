@@ -198,7 +198,7 @@ public class Settings {
     }
     
     public enum WildPokemonTypeMod {
-        NONE, THEMED_AREAS, KEEP_PRIMARY
+        NONE, THEMED_AREAS, KEEP_THEMED_AREAS, KEEP_PRIMARY
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
