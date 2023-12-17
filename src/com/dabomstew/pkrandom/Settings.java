@@ -39,6 +39,7 @@ import java.util.zip.CRC32;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
@@ -100,10 +101,17 @@ public class Settings {
     private boolean ensureTwoAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_BASIC
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
+
+    public enum StartersTypeMod {
+        NONE, FIRE_WATER_GRASS, TRIANGLE, SINGLE_TYPE
+    }
+
+    private StartersTypeMod startersTypeMod = StartersTypeMod.NONE;
+    Type StarterSingleType = null;
     private boolean allowStarterAltFormes;
 
     // index in the rom's list of pokemon
