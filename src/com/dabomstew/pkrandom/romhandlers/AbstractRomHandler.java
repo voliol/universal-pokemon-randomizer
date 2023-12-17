@@ -702,6 +702,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         // a separate enum from the Settings one for lower coupling
         public enum TypeMode {NONE, RANDOM_THEME, PRESERVE_THEME, PRESERVE_PRIMARY}
 
+        private final TypeMode typeMode;
+        private final boolean catchEmAll;
+        private final boolean similarStrength;
+        private final boolean balanceShakingGrass;
+
+        private boolean map1to1;
+        private boolean useLocations;
+
         private final PokemonSet<Pokemon> allowed;
         private final PokemonSet<Pokemon> banned;
         private Map<Type, PokemonSet<Pokemon>> allowedByType;
@@ -710,17 +718,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         private PokemonSet<Pokemon> remaining;
         private Map<Type, PokemonSet<Pokemon>> remainingByType;
         private Map<Type, PokemonSet<Pokemon>> remainingByPrimaryType;
+
         private Type areaType;
         private PokemonSet<Pokemon> allowedForArea;
         private Map<Pokemon, Pokemon> areaMap;
-
-        private final TypeMode typeMode;
-        private final boolean catchEmAll;
-        private final boolean similarStrength;
-        private final boolean balanceShakingGrass;
-
-        private boolean map1to1;
-        private boolean useLocations;
+        private PokemonSet<Pokemon> allowedForReplacement;
 
         public EncounterRandomizer(PokemonSet<Pokemon> allowed, PokemonSet<Pokemon> banned, TypeMode typeMode,
                                    boolean catchEmAll, boolean similarStrength, boolean balanceShakingGrass) {
@@ -872,11 +874,23 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         private Pokemon pickReplacement(Encounter enc) {
+            allowedForReplacement = allowedForArea;
+            if (typeMode == TypeMode.PRESERVE_PRIMARY) {
+                allowedForReplacement = getAllowedReplacementPreservePrimaryType(enc);
+            }
+
             if (map1to1) {
                 return pickReplacement1to1(enc);
             } else {
                 return pickReplacementInner(enc);
             }
+        }
+
+        private PokemonSet<Pokemon> getAllowedReplacementPreservePrimaryType(Encounter enc) {
+            Pokemon current = enc.getPokemon();
+            Type primaryType = current.getPrimaryType();
+            return catchEmAll && !remainingByPrimaryType.get(primaryType).isEmpty()
+                    ? remainingByPrimaryType.get(primaryType) : allowedByPrimaryType.get(primaryType);
         }
 
         private Pokemon pickReplacementInner(Encounter enc) {
@@ -890,12 +904,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 replacement = current;
             } else if (similarStrength) {
                 replacement = balanceShakingGrass ?
-                        pickWildPowerLvlReplacement(allowedForArea, current, false,
+                        pickWildPowerLvlReplacement(allowedForReplacement, current, false,
                                 null, (enc.getLevel() + enc.getMaxLevel()) / 2) :
-                        pickWildPowerLvlReplacement(allowedForArea, current, false, null,
+                        pickWildPowerLvlReplacement(allowedForReplacement, current, false, null,
                                 100);
             } else {
-                replacement = allowedForArea.getRandom(random);
+                replacement = allowedForReplacement.getRandom(random);
             }
             return replacement;
         }
