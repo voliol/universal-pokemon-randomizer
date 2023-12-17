@@ -1704,6 +1704,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     cachedAllList.addAll(altFormesList);
                 }
             }
+            //...this seems like the worst way to do this but whatever
             cachedAllList =
                     cachedAllList
                             .stream()
@@ -1802,6 +1803,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> bannedFromUniqueList = new ArrayList<>();
         boolean illegalEvoChains = false;
         List<Integer> eliteFourIndices = getEliteFourTrainers(forceChallengeMode);
+        List<Pokemon> eliteFourExceptionList = null;
+        List<Pokemon> nonEliteFourExceptionList = null;
         if (eliteFourUniquePokemon) {
             // Sort Elite Four Trainers to the start of the list
             scrambledTrainers.sort((t1, t2) ->
@@ -1823,6 +1826,22 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                 }
+            }
+            if(useLocalPokemon) {
+                //elite four unique pokemon are excepted from local requirement
+                //and in fact, non-local pokemon should be chosen first
+                eliteFourExceptionList = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
+                        mainPokemonList);
+                if (includeFormes) {
+                    if (noLegendaries) {
+                        eliteFourExceptionList.addAll(noLegendaryAltsList);
+                    } else {
+                        eliteFourExceptionList.addAll(altFormesList);
+                    }
+                }
+                eliteFourExceptionList.removeIf(pk -> pk.actuallyCosmetic);
+
+                nonEliteFourExceptionList = cachedAllList;
             }
         }
 
@@ -1899,6 +1918,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 if (eliteFourSetUniquePokemon) {
                     bannedList.addAll(bannedFromUniqueList);
+                    if(eliteFourExceptionList != null) {
+                        cachedAllList = eliteFourExceptionList;
+                        bannedList.addAll(nonEliteFourExceptionList);
+                    }
                 }
                 if (willForceEvolve) {
                     bannedList.addAll(evolvesIntoTheWrongType);
@@ -1941,6 +1964,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                             if (illegalEvoChains) {
                                 setEvoChainAsIllegal(actualPK, illegalIfEvolvedList, willForceEvolve);
                             }
+                        }
+
+                        if(eliteFourExceptionList != null) {
+                            //return to normal list
+                            cachedAllList = nonEliteFourExceptionList;
                         }
                     }
                     if (eliteFourTrackPokemon) {
