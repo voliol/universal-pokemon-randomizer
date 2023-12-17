@@ -3918,6 +3918,290 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void generateStarters(Settings settings) {
+        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
+        boolean allowAltFormes = settings.isAllowStarterAltFormes();
+        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
+        boolean noLegendaries = settings.isStartersNoLegendaries();
+        boolean noDualTypes = settings.isStartersNoDualTypes();
+        boolean useCustomStarters = settings.getStartersMod() == Settings.StartersMod.CUSTOM;
+        boolean triStageOnly = settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS;
+        boolean basicOnly = triStageOnly || settings.getStartersMod() == Settings.StartersMod.RANDOM_BASIC;
+        boolean typeFwg = settings.getStartersTypeMod() == Settings.StartersTypeMod.FIRE_WATER_GRASS;
+        boolean typeUnique = settings.getStartersTypeMod() == Settings.StartersTypeMod.UNIQUE;
+        boolean typeTriangle = settings.getStartersTypeMod() == Settings.StartersTypeMod.TRIANGLE;
+        boolean typeSingle = settings.getStartersTypeMod() == Settings.StartersTypeMod.SINGLE_TYPE;
+        boolean hasTypeRestriction = typeFwg || typeUnique || typeTriangle || typeSingle;
+        Type singleType = settings.getStartersSingleType();
+        int[] customStarters = settings.getCustomStarters();
+        int starterCount = starterCount();
+        int generation = this.generationOfPokemon();
+        boolean effectivenessUpdated = isEffectivenessUpdated();
+
+        List<Pokemon> choosableList;
+
+        if (allowAltFormes) {
+            choosableList = new ArrayList<>(noLegendaries ? noLegendaryListInclFormes : mainPokemonListInclFormes);
+            if(abilitiesUnchanged) {
+                choosableList.removeAll(getAbilityDependentFormes());
+            }
+            if(banIrregularAltFormes) {
+                choosableList.removeAll(getIrregularFormes());
+            }
+            choosableList.removeIf(p -> p.actuallyCosmetic);
+        } else {
+            choosableList = new ArrayList<>(noLegendaries ? noLegendaryList : mainPokemonList);
+        }
+
+        pickedStarters = new ArrayList<>();
+
+        if(useCustomStarters) {
+            List<Pokemon> romPokemon = getPokemonInclFormes()
+                    .stream()
+                    .filter(pk -> pk == null || !pk.actuallyCosmetic)
+                    .collect(Collectors.toList());
+
+            for (int i = 0; i < customStarters.length; i = i + 1) {
+                if (!(customStarters[i] - 1 == 0)) {
+                    Pokemon starter = romPokemon.get(customStarters[i] - 1);
+                    choosableList.remove(starter);
+                    pickedStarters.add(starter);
+                }
+            }
+
+            if(pickedStarters.size() == starterCount) {
+                return;
+            } else if (pickedStarters.size() > starterCount) {
+                //what.
+                throw new RandomizationException("Custom starter list exceeded starter count?!");
+            }
+        }
+
+        if (noDualTypes) {
+            choosableList.removeIf(p -> p.secondaryType != null);
+        }
+        if(basicOnly) {
+            choosableList.removeIf(p -> !p.evolutionsTo.isEmpty());
+        }
+        if(triStageOnly) {
+            List<Pokemon> invalids = new ArrayList<>();
+            for(Pokemon poke : choosableList) {
+                boolean isTriStage = false;
+                for(Evolution evo : poke.evolutionsFrom) {
+                    if(!evo.to.evolutionsFrom.isEmpty()) {
+                        isTriStage = true;
+                    }
+                }
+                if(!isTriStage) {
+                    invalids.add(poke);
+                }
+            }
+            choosableList.removeAll(invalids);
+            //there's probably a better way to do this but im too sleepy to think of it
+        }
+
+        //all constraints except type done!
+        //sanity check
+        if(choosableList.size() < starterCount - pickedStarters.size()) {
+            throw new RandomizationException("Not enough valid starters");
+        }
+
+        if(!hasTypeRestriction) {
+            while (pickedStarters.size() < starterCount) {
+                Pokemon picked = choosableList.get(this.random.nextInt(choosableList.size()));
+                pickedStarters.add(picked);
+                choosableList.remove(picked);
+            }
+            return; //here for clarity
+        } else if(typeUnique) {
+            //we don't actually need a type map for this one
+            while (pickedStarters.size() < starterCount) {
+                Pokemon picked = choosableList.get(this.random.nextInt(choosableList.size()));
+                pickedStarters.add(picked);
+                choosableList.remove(picked);
+                choosableList.removeIf(p -> (p.primaryType == picked.primaryType || p.secondaryType == picked.primaryType));
+                if(picked.secondaryType != null) {
+                    choosableList.removeIf(p -> (p.primaryType == picked.secondaryType || p.secondaryType == picked.secondaryType));
+                    //probably could combine these into one removeIf—it would be more efficient, even—but it's not worth it.
+                }
+            }
+            return; //here for clarity
+        } else {
+
+            //build type map
+            Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
+            for(Type type : Type.getAllTypes(generation)) {
+                typeListMap.put(type, new ArrayList<>());
+            }
+            for (Pokemon poke : choosableList) {
+                typeListMap.get(poke.primaryType).add(poke);
+                if(poke.secondaryType != null) {
+                    typeListMap.get(poke.secondaryType).add(poke);
+                }
+            }
+
+            //assuming only one type restriction (not counting noDualTypes)
+            //also assuming that the triangle restrictions (typeTriangle, fireWaterGrass)
+            //are not used with custom starters
+            if(typeTriangle) {
+                //find type triangles
+                List<Set<Type>> typeTriangles = null;
+                typeTriangles = new ArrayList<>();
+                for(Type typeOne : Type.getAllTypes(generation)) {
+                    List<Type> superEffectiveOne = Effectiveness.superEffective(typeOne, generation, effectivenessUpdated);
+                    superEffectiveOne.remove(typeOne);
+                    //don't want a Ghost-Ghost-Ghost "triangle"
+                    //(although it would be funny)
+                    for (Type typeTwo : superEffectiveOne) {
+                        List<Type> superEffectiveTwo = Effectiveness.superEffective(typeTwo, generation, effectivenessUpdated);
+                        superEffectiveTwo.remove(typeOne);
+                        superEffectiveTwo.remove(typeTwo);
+                        for (Type typeThree : superEffectiveTwo) {
+                            List<Type> superEffectiveThree = Effectiveness.superEffective(typeThree, generation, effectivenessUpdated);
+                            if (superEffectiveThree.contains(typeOne)) {
+                                //we found a triangle!
+                                Set<Type> triangle = EnumSet.of(typeOne, typeTwo, typeThree);
+                                typeTriangles.add(triangle);
+                                //not entirely sure if the uniqueness constraint will work in this case,
+                                //but that's okay, we don't actually need it.
+                            }
+                        }
+                    }
+                }
+
+                //okay, we found our triangles! now pick one and pick starters from it.
+                while(pickedStarters.isEmpty() && !typeTriangles.isEmpty()) {
+                    //loop because we might find that there isn't a pokemon set of the appropriate types
+                    Set<Type> triangle = typeTriangles.get(this.random.nextInt(typeTriangles.size()));
+                    boolean noPokemonSet = false;
+                    for (Type type : triangle) {
+                        List<Pokemon> typeList = new ArrayList<>(typeListMap.get(type));
+                        //clone so we can safely drain it
+                        boolean noPick = true;
+                        while(noPick && !typeList.isEmpty()) {
+                            Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+                            typeList.remove(picked);
+                            Type otherType = null;
+                            if (picked.primaryType == type) {
+                                otherType = picked.secondaryType;
+                            } else {
+                                otherType = picked.primaryType;
+                            }
+                            if(!triangle.contains(otherType)) {
+                                //this pokemon works
+                                noPick = false;
+                                pickedStarters.add(picked);
+                            }
+                        }
+                        if(noPick) {
+                            pickedStarters = new ArrayList();
+                            break;
+                        }
+                    }
+                    if(pickedStarters.isEmpty()) {
+                        typeTriangles.remove(triangle);
+                    }
+                }
+                if(pickedStarters.isEmpty()) {
+                    throw new RandomizationException("No valid starter set with a type triangle could be found!");
+                }
+
+            } else if (typeFwg) {
+                //Fire
+                List<Pokemon> typeList = new ArrayList<>(typeListMap.get(Type.FIRE));
+                //clone so we can safely drain it
+                boolean noPick = true;
+                while(noPick && !typeList.isEmpty()) {
+                    Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+                    typeList.remove(picked);
+                    Type otherType = null;
+                    if (picked.primaryType == Type.FIRE) {
+                        otherType = picked.secondaryType;
+                    } else {
+                        otherType = picked.primaryType;
+                    }
+                    if(otherType != Type.WATER && otherType != Type.GRASS) {
+                        //this pokemon works
+                        noPick = false;
+                        pickedStarters.add(picked);
+                    }
+                }
+                if(noPick) {
+                    throw new RandomizationException("No valid Fire-type starter found!");
+                }
+
+                //Water
+                typeList = new ArrayList<>(typeListMap.get(Type.WATER));
+                //clone so we can safely drain it
+                noPick = true;
+                while(noPick && !typeList.isEmpty()) {
+                    Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+                    typeList.remove(picked);
+                    Type otherType = null;
+                    if (picked.primaryType == Type.WATER) {
+                        otherType = picked.secondaryType;
+                    } else {
+                        otherType = picked.primaryType;
+                    }
+                    if(otherType != Type.FIRE && otherType != Type.GRASS) {
+                        //this pokemon works
+                        noPick = false;
+                        pickedStarters.add(picked);
+                    }
+                }
+                if(noPick) {
+                    throw new RandomizationException("No valid Water-type starter found!");
+                }
+
+                //Grass
+                typeList = new ArrayList<>(typeListMap.get(Type.GRASS));
+                //clone so we can safely drain it
+                noPick = true;
+                while(noPick && !typeList.isEmpty()) {
+                    Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+                    typeList.remove(picked);
+                    Type otherType = null;
+                    if (picked.primaryType == Type.GRASS) {
+                        otherType = picked.secondaryType;
+                    } else {
+                        otherType = picked.primaryType;
+                    }
+                    if(otherType != Type.FIRE && otherType != Type.WATER) {
+                        //this pokemon works
+                        noPick = false;
+                        pickedStarters.add(picked);
+                    }
+                }
+                if(noPick) {
+                    throw new RandomizationException("No valid Grass-type starter found!");
+                }
+
+                //done.
+            } else if(typeSingle) {
+                int iterLoops = 0;
+                while(singleType == null && iterLoops < 10000) {
+                    singleType = this.randomType();
+                    if(typeListMap.get(singleType).size() < (starterCount - pickedStarters.size())) {
+                        singleType = null;
+                    }
+                    iterLoops++;
+                }
+
+                List<Pokemon> typeList = typeListMap.get(singleType);
+
+                while(pickedStarters.size() < starterCount) {
+                    Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+                    pickedStarters.add(picked);
+                    typeList.remove(picked);
+                    //there is no longer anything that can invalidate this pokemon
+                }
+            } //no other case
+        }
+
+
+    }
+
+    @Override
     public void customStarters(Settings settings) {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         int[] customStarters = settings.getCustomStarters();
