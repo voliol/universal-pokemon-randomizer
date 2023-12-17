@@ -111,7 +111,8 @@ public class Settings {
     }
 
     private StartersTypeMod startersTypeMod = StartersTypeMod.NONE;
-    Type StarterSingleType = null;
+    private Type startersSingleType = null;
+    private boolean startersNoDualTypes;
     private boolean allowStarterAltFormes;
 
     // index in the rom's list of pokemon
@@ -394,7 +395,8 @@ public class Settings {
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes,
+                startersMod == StartersMod.RANDOM_BASIC));
 
         // 5 - 10: dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -590,6 +592,14 @@ public class Settings {
         // 50 elite four unique pokemon (3 bits) + catch rate level (3 bits)
         out.write(eliteFourUniquePokemonNumber | ((minimumCatchRateLevel - 1) << 3));
 
+        // 51 starter type mod / starter no dual type checkbox
+        out.write(makeByteSelected(startersTypeMod == StartersTypeMod.NONE,
+                startersTypeMod == StartersTypeMod.FIRE_WATER_GRASS, startersTypeMod == StartersTypeMod.TRIANGLE,
+                startersTypeMod == StartersTypeMod.SINGLE_TYPE, false, false, false, startersNoDualTypes));
+
+        // 52 starter single-type type choice (5 bits)
+        out.write(startersSingleType.toInt());
+
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
             out.write(romName.length);
@@ -659,7 +669,8 @@ public class Settings {
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
                 1, // COMPLETELY_RANDOM
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
+                3, // RANDOM_WITH_TWO_EVOLUTIONS
+                7  // RANDOM_BASIC
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
@@ -878,6 +889,16 @@ public class Settings {
 
         settings.setEliteFourUniquePokemonNumber(data[50] & 0x7);
         settings.setMinimumCatchRateLevel(((data[50] & 0x38) >> 3) + 1);
+
+        settings.setStartersTypeMod(restoreEnum(StartersTypeMod.class, data[51], 0, //NONE
+                1, //FIRE_WATER_GRASS
+                2, //TRIANGLE
+                3  //SINGLE_TYPE
+            ));
+
+        settings.setStartersNoDualTypes(restoreState(data[51], 7));
+
+        settings.setStartersSingleType(Type.fromInt(data[52] | 0x1F));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1327,6 +1348,38 @@ public class Settings {
 
     private void setStartersMod(StartersMod startersMod) {
         this.startersMod = startersMod;
+    }
+
+    public StartersTypeMod getStartersTypeMod() {
+        return startersTypeMod;
+    }
+
+    public void setStartersTypeMod(boolean... bools) {
+        setStartersTypeMod(getEnum(StartersTypeMod.class, bools));
+    }
+
+    private void setStartersTypeMod(StartersTypeMod startersTypeMod) {
+        this.startersTypeMod = startersTypeMod;
+    }
+
+    public boolean isStartersNoDualTypes() {
+        return startersNoDualTypes;
+    }
+
+    public void setStartersNoDualTypes(boolean startersNoDualTypes) {
+        this.startersNoDualTypes = startersNoDualTypes;
+    }
+
+    public Type getStartersSingleType() {
+        return startersSingleType;
+    }
+
+    private void setStartersSingleType(Type type) {
+        startersSingleType = type;
+    }
+
+    public void setStartersSingleType(int typeIndex) {
+        startersSingleType = Type.fromInt(typeIndex);
     }
 
     public int[] getCustomStarters() {
