@@ -1523,7 +1523,11 @@ public class NewRandomizerGUI {
         spTypeTriangleRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.TRIANGLE);
         spTypeUniqueRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.UNIQUE);
         spTypeSingleRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.SINGLE_TYPE);
-        spTypeSingleComboBox.setSelectedIndex(settings.getStartersSingleType().toInt() + 1);
+        if(settings.getStartersSingleType() == null) {
+            spTypeSingleComboBox.setSelectedIndex(0);
+        } else {
+            spTypeSingleComboBox.setSelectedIndex(settings.getStartersSingleType().toInt() + 1);
+        }
         spTypeNoDualCheckbox.setSelected(settings.isStartersNoDualTypes());
         spRandomizeStarterHeldItemsCheckBox.setSelected(settings.isRandomizeStartersHeldItems());
         spBanBadItemsCheckBox.setSelected(settings.isBanBadRandomStarterHeldItems());
@@ -2211,6 +2215,9 @@ public class NewRandomizerGUI {
         spTypeTriangleRadioButton.setVisible(true);
         spTypeTriangleRadioButton.setEnabled(false);
         spTypeTriangleRadioButton.setSelected(false);
+        spTypeUniqueRadioButton.setVisible(true);
+        spTypeUniqueRadioButton.setEnabled(false);
+        spTypeUniqueRadioButton.setSelected(false);
         spTypeSingleRadioButton.setVisible(true);
         spTypeSingleRadioButton.setEnabled(false);
         spTypeSingleRadioButton.setSelected(false);
