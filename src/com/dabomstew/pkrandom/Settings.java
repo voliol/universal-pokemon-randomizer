@@ -114,6 +114,7 @@ public class Settings {
     private Type startersSingleType = null;
     private boolean startersNoDualTypes;
     private boolean allowStarterAltFormes;
+    private boolean startersNoLegendaries;
 
     // index in the rom's list of pokemon
     // offset from the dropdown index from RandomizerGUI by 1
@@ -592,11 +593,11 @@ public class Settings {
         // 50 elite four unique pokemon (3 bits) + catch rate level (3 bits)
         out.write(eliteFourUniquePokemonNumber | ((minimumCatchRateLevel - 1) << 3));
 
-        // 51 starter type mod / starter no dual type checkbox
+        // 51 starter type mod / starter no legendaries / starter no dual type checkbox
         out.write(makeByteSelected(startersTypeMod == StartersTypeMod.NONE,
                 startersTypeMod == StartersTypeMod.FIRE_WATER_GRASS, startersTypeMod == StartersTypeMod.TRIANGLE,
                 startersTypeMod == StartersTypeMod.UNIQUE, startersTypeMod == StartersTypeMod.SINGLE_TYPE,
-                false, false, startersNoDualTypes));
+                false, startersNoLegendaries, startersNoDualTypes));
 
         // 52 starter single-type type choice (5 bits)
         if(startersSingleType != null) {
@@ -902,6 +903,7 @@ public class Settings {
                 4  //SINGLE_TYPE
             ));
 
+        settings.setStartersNoLegendaries(restoreState(data[51], 6));
         settings.setStartersNoDualTypes(restoreState(data[51], 7));
 
         if(data[52] == 0) {
@@ -1379,6 +1381,14 @@ public class Settings {
 
     public void setStartersNoDualTypes(boolean startersNoDualTypes) {
         this.startersNoDualTypes = startersNoDualTypes;
+    }
+
+    public boolean isStartersNoLegendaries() {
+        return startersNoLegendaries;
+    }
+
+    public void setStartersNoLegendaries(boolean startersNoLegendaries) {
+        this.startersNoLegendaries = startersNoLegendaries;
     }
 
     public Type getStartersSingleType() {

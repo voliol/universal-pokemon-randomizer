@@ -309,6 +309,7 @@ public class NewRandomizerGUI {
     private JComboBox spTypeSingleComboBox;
     private JCheckBox spTypeNoDualCheckbox;
     private JRadioButton spTypeUniqueRadioButton;
+    private JCheckBox spNoLegendariesCheckBox;
 
     private static JFrame frame;
 
@@ -1527,6 +1528,7 @@ public class NewRandomizerGUI {
         spRandomizeStarterHeldItemsCheckBox.setSelected(settings.isRandomizeStartersHeldItems());
         spBanBadItemsCheckBox.setSelected(settings.isBanBadRandomStarterHeldItems());
         spAllowAltFormesCheckBox.setSelected(settings.isAllowStarterAltFormes());
+        spNoLegendariesCheckBox.setSelected(settings.isStartersNoLegendaries());
 
         int[] customStarters = settings.getCustomStarters();
         spComboBox1.setSelectedIndex(customStarters[0] - 1);
@@ -1773,6 +1775,7 @@ public class NewRandomizerGUI {
         settings.setRandomizeStartersHeldItems(spRandomizeStarterHeldItemsCheckBox.isSelected() && spRandomizeStarterHeldItemsCheckBox.isVisible());
         settings.setBanBadRandomStarterHeldItems(spBanBadItemsCheckBox.isSelected() && spBanBadItemsCheckBox.isVisible());
         settings.setAllowStarterAltFormes(spAllowAltFormesCheckBox.isSelected() && spAllowAltFormesCheckBox.isVisible());
+        settings.setStartersNoLegendaries(spNoLegendariesCheckBox.isSelected());
 
         int[] customStarters = new int[] { spComboBox1.getSelectedIndex() + 1,
                 spComboBox2.getSelectedIndex() + 1, spComboBox3.getSelectedIndex() + 1 };
@@ -2218,6 +2221,9 @@ public class NewRandomizerGUI {
         spTypeNoDualCheckbox.setVisible(true);
         spTypeNoDualCheckbox.setEnabled(false);
         spTypeNoDualCheckbox.setSelected(false);
+        spNoLegendariesCheckBox.setVisible(true);
+        spNoLegendariesCheckBox.setEnabled(false);
+        spNoLegendariesCheckBox.setSelected(false);
         spRandomizeStarterHeldItemsCheckBox.setVisible(true);
         spRandomizeStarterHeldItemsCheckBox.setEnabled(false);
         spRandomizeStarterHeldItemsCheckBox.setSelected(false);
@@ -3295,12 +3301,15 @@ public class NewRandomizerGUI {
             spTypeNoDualCheckbox.setEnabled(false);
             spAllowAltFormesCheckBox.setEnabled(false);
             spAllowAltFormesCheckBox.setSelected(false);
+            spNoLegendariesCheckBox.setEnabled(false);
+            spNoLegendariesCheckBox.setSelected(false);
         } else {
             spTypeNoneRadioButton.setEnabled(true);
             spTypeUniqueRadioButton.setEnabled(true);
             spTypeSingleRadioButton.setEnabled(true);
             spTypeNoDualCheckbox.setEnabled(true);
             spAllowAltFormesCheckBox.setEnabled(true);
+            spNoLegendariesCheckBox.setEnabled(true);
             if (spCustomRadioButton.isSelected()) {
                 spTypeFwgRadioButton.setEnabled(false);
                 spTypeTriangleRadioButton.setEnabled(false);
@@ -3314,6 +3323,8 @@ public class NewRandomizerGUI {
                 && (spTypeFwgRadioButton.isSelected() || spTypeTriangleRadioButton.isSelected())) {
             //gen 1 has NO single-type first-of-three type triangles
             //so we need to disable the impossible option
+            //...wait, hold on, type randomization is a thing. Never mind?
+            //...I'm not sure how to handle that. Because that also means that other gens might just randomly fail...
             spTypeNoDualCheckbox.setSelected(false);
             spTypeNoDualCheckbox.setEnabled(false);
         }
