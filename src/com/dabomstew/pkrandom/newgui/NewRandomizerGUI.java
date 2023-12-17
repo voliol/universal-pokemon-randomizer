@@ -300,6 +300,13 @@ public class NewRandomizerGUI {
     private JCheckBox paEnsureTwoAbilitiesCheckbox;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox miscDisableLowHPMusicCheckBox;
+    private JRadioButton spTypeTriangleRadioButton;
+    private JRadioButton spTypeNoneRadioButton;
+    private JRadioButton spRandomBasicRadioButton;
+    private JRadioButton spTypeFwgRadioButton;
+    private JRadioButton spTypeSingleRadioButton;
+    private JComboBox spTypeSingleComboBox;
+    private JCheckBox spTypeNoDualCheckbox;
 
     private static JFrame frame;
 
