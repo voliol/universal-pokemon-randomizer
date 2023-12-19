@@ -155,6 +155,10 @@ public class Gen1Constants {
         return allowedItems;
     }
 
+    public static String[] postGameEncounterAreas = new String[] {
+            "CERULEAN CAVE"
+    };
+
     public static void tagTrainersUniversal(List<Trainer> trs) {
         // Gym Leaders
         tbc(trs, 34, 0, "GYM1-LEADER");

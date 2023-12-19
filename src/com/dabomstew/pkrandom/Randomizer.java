@@ -258,21 +258,9 @@ public class Randomizer {
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
-        switch (settings.getStartersMod()) {
-            case CUSTOM -> {
-                romHandler.customStarters(settings);
-                startersChanged = true;
-            }
-            case COMPLETELY_RANDOM -> {
-                romHandler.randomizeStarters(settings);
-                startersChanged = true;
-            }
-            case RANDOM_WITH_TWO_EVOLUTIONS -> {
-                romHandler.randomizeBasicTwoEvosStarters(settings);
-                startersChanged = true;
-            }
-            default -> {
-            }
+        if(settings.getStartersMod() != Settings.StartersMod.UNCHANGED) {
+            romHandler.generateStarters(settings);
+            startersChanged = true;
         }
         if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
             romHandler.randomizeStarterHeldItems(settings);

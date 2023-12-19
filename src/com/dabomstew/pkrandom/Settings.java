@@ -40,6 +40,7 @@ import java.util.zip.CRC32;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
@@ -50,7 +51,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 52;
+    public static final int LENGTH_OF_SETTINGS_DATA = 53;
 
     private CustomNamesSet customNames;
 
@@ -101,11 +102,20 @@ public class Settings {
     private boolean ensureTwoAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_BASIC
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
+
+    public enum StartersTypeMod {
+        NONE, FIRE_WATER_GRASS, TRIANGLE, UNIQUE, SINGLE_TYPE
+    }
+
+    private StartersTypeMod startersTypeMod = StartersTypeMod.NONE;
+    private Type startersSingleType = null;
+    private boolean startersNoDualTypes;
     private boolean allowStarterAltFormes;
+    private boolean startersNoLegendaries;
 
     // index in the rom's list of pokemon
     // offset from the dropdown index from RandomizerGUI by 1
@@ -399,7 +409,8 @@ public class Settings {
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes,
+                startersMod == StartersMod.RANDOM_BASIC));
 
         // 5 - 10: dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -605,6 +616,19 @@ public class Settings {
                 pokemonPalettesFollowEvolutions,
                 pokemonPalettesShinyFromNormal));
 
+        // 52 starter type mod / starter no legendaries / starter no dual type checkbox
+        out.write(makeByteSelected(startersTypeMod == StartersTypeMod.NONE,
+                startersTypeMod == StartersTypeMod.FIRE_WATER_GRASS, startersTypeMod == StartersTypeMod.TRIANGLE,
+                startersTypeMod == StartersTypeMod.UNIQUE, startersTypeMod == StartersTypeMod.SINGLE_TYPE,
+                false, startersNoLegendaries, startersNoDualTypes));
+
+        // 53 starter single-type type choice (5 bits)
+        if(startersSingleType != null) {
+            out.write(startersSingleType.toInt() + 1);
+        } else {
+            out.write(0);
+        }
+
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
             out.write(romName.length);
@@ -674,7 +698,8 @@ public class Settings {
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
                 1, // COMPLETELY_RANDOM
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
+                3, // RANDOM_WITH_TWO_EVOLUTIONS
+                7  // RANDOM_BASIC
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
@@ -910,6 +935,22 @@ public class Settings {
         settings.setPokemonPalettesFollowTypes(restoreState(data[51], 2));
         settings.setPokemonPalettesFollowEvolutions(restoreState(data[51], 3));
         settings.setPokemonPalettesShinyFromNormal(restoreState(data[51], 4));
+
+        settings.setStartersTypeMod(restoreEnum(StartersTypeMod.class, data[52], 0, //NONE
+                1, //FIRE_WATER_GRASS
+                2, //TRIANGLE
+                3, //UNIQUE
+                4  //SINGLE_TYPE
+            ));
+
+        settings.setStartersNoLegendaries(restoreState(data[52], 6));
+        settings.setStartersNoDualTypes(restoreState(data[52], 7));
+
+        if(data[53] == 0) {
+            settings.setStartersSingleType(null);
+        } else {
+            settings.setStartersSingleType(Type.fromInt((data[53] | 0x1F) - 1));
+        }
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
@@ -1359,6 +1400,50 @@ public class Settings {
 
     private void setStartersMod(StartersMod startersMod) {
         this.startersMod = startersMod;
+    }
+
+    public StartersTypeMod getStartersTypeMod() {
+        return startersTypeMod;
+    }
+
+    public void setStartersTypeMod(boolean... bools) {
+        setStartersTypeMod(getEnum(StartersTypeMod.class, bools));
+    }
+
+    private void setStartersTypeMod(StartersTypeMod startersTypeMod) {
+        this.startersTypeMod = startersTypeMod;
+    }
+
+    public boolean isStartersNoDualTypes() {
+        return startersNoDualTypes;
+    }
+
+    public void setStartersNoDualTypes(boolean startersNoDualTypes) {
+        this.startersNoDualTypes = startersNoDualTypes;
+    }
+
+    public boolean isStartersNoLegendaries() {
+        return startersNoLegendaries;
+    }
+
+    public void setStartersNoLegendaries(boolean startersNoLegendaries) {
+        this.startersNoLegendaries = startersNoLegendaries;
+    }
+
+    public Type getStartersSingleType() {
+        return startersSingleType;
+    }
+
+    private void setStartersSingleType(Type type) {
+        startersSingleType = type;
+    }
+
+    public void setStartersSingleType(int typeIndex) {
+        if(typeIndex == 0) {
+            startersSingleType = null;
+        } else {
+            startersSingleType = Type.fromInt(typeIndex - 1);
+        }
     }
 
     public int[] getCustomStarters() {

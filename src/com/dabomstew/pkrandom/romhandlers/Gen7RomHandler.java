@@ -3634,6 +3634,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return Gen7Constants.postGameEncounterAreas;
+    }
+
+    @Override
     protected Gen7RomEntry getRomEntry() {
         return romEntry;
     }

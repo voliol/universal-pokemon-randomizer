@@ -4007,11 +4007,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return romEntry.getRomType() == Gen3Constants.RomType_FRLG;
     }
 
-    @Override
-    public List<Integer> getAllConsumableHeldItems() {
-        return Gen3Constants.consumableHeldItems;
-    }
-
     public void enableGuaranteedPokemonCatching() {
         int offset = find(rom, Gen3Constants.perfectOddsBranchLocator);
         if (offset > 0) {
@@ -4209,6 +4204,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen3Constants.consumableHeldItems;
+    }
+
+    @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
         List<Integer> items = new ArrayList<>(Gen3Constants.generalPurposeConsumableItems);
         if (!consumableOnly) {
@@ -4243,7 +4243,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         return items;
     }
-    
+
+    @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                Gen3Constants.frlgPostGameEncounterAreas : Gen3Constants.rsePostGameEncounterAreas;
+    }
+
     @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;

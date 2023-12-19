@@ -568,6 +568,14 @@ public class Gen3Constants {
         }
     }
 
+    public static String[] frlgPostGameEncounterAreas = new String[] {
+            "CERULEAN CAVE"
+    };
+
+    public static String[] rsePostGameEncounterAreas = new String[] {
+            "SKY PILLAR", "ALTERING CAVE", "DESERT UNDERPASS"
+    };
+
     public static void trainerTagsRS(List<Trainer> trs, int romType) {
         // Gym Trainers
         tag(trs, "GYM1", 0x140, 0x141);

@@ -389,6 +389,20 @@ public class Gen2Constants {
         }
     }
 
+    public static String[] postGameEncounterAreas = new String[] {
+            "PALLET TOWN", "VIRIDIAN CITY", "PEWTER CITY", "CERULEAN CITY", "VERMILION CITY", "LAVENDER TOWN",
+            "CELADON CITY", "FUSCHIA CITY", "SAFFRON CITY", //Kanto cities
+            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5",
+            "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9", "ROUTE 10",
+            "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15",
+            "ROUTE 16", "ROUTE 17", "ROUTE 18", "ROUTE 19", "ROUTE 20",
+            "ROUTE 21", "ROUTE 22", "ROUTE 23", "ROUTE 24", "ROUTE 25", //Kanto routes
+            "CINNABAR ISLAND", "CERULEAN CAVE", "DIGLETT’S CAVE", "ROCK TUNNEL",
+            "SEAFOAM ISLANDS", "VIRIDIAN FOREST", //other Kanto locations
+            "ROUTE 28", "MOUNT SILVER", //Johto but post-game
+            //TODO: special case for Super Rod fish
+    };
+
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders
         tbc(allTrainers, 1, 0, "GYM1-LEADER");

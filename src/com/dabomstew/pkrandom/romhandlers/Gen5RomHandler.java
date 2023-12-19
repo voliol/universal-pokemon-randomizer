@@ -3999,7 +3999,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             default -> null;
         };
     }
-    
+
+    @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return romEntry.getRomType() == Gen5Constants.Type_BW2 ?
+                Gen5Constants.bw2PostGameEncounterAreas : Gen5Constants.bwPostGameEncounterAreas;
+    }
+
     @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;

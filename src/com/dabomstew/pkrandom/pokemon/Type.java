@@ -46,6 +46,19 @@ public enum Type {
         this.isHackOnly = isHackOnly;
     }
 
+    public int toInt() {
+        return this.ordinal();
+    }
+
+    public static Type fromInt(int index) {
+        for(Type type : Type.values()) {
+            if(type.ordinal() == index) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     private static final List<Type> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
     private static final int SIZE = VALUES.size();
 

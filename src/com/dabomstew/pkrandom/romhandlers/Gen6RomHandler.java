@@ -4091,6 +4091,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return romEntry.getRomType() == Gen6Constants.Type_ORAS ?
+                Gen6Constants.orasPostGameEncounterAreas : Gen6Constants.xyPostGameEncounterAreas;
+    }
+
+    @Override
     protected Gen6RomEntry getRomEntry() {
         return romEntry;
     }

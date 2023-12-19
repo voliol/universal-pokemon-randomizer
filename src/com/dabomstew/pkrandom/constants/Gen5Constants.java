@@ -1707,6 +1707,26 @@ public class Gen5Constants {
         68,
     };
 
+    public static String[] bwPostGameEncounterAreas = new String[] {
+            "Fishing", //post-game techniques
+            "Challenger's Cave", "Abundant Shrine", "Giant Chasm", //caves, etc
+            "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",//routes
+            "Lacunosa Town", "Undella Town", //cities
+            "Village Bridge", "Undella Bay", "White Forest", "Marvelous Bridge" //other overworld locations
+            //swarms apparently aren't handled as wilds in this game,
+            //so no need to exclude them.
+            //TODO: relic castle bottom floor handling
+    };
+
+    public static String[] bw2PostGameEncounterAreas = new String[] {
+            "Fishing", //post-game techniques
+            "Moor of Icirrus", "Clay Tunnel", "Underground Ruins", "Pinwheel Forest", "P2 Laboratory", //caves, etc
+            "Route 1", "Route 2", "Route 3", "Route 8", "Route 15", "Route 17", "Route 18", //routes
+            "Icirrus City", "Striaton City", //cities
+            "White Forest", "Marvelous Bridge", "Dragonspiral Tower", "Twist Mountain", "Dreamyard", "Nature Preserve"//other overworld locations
+            //again, swarms aren't wilds
+    };
+
     public static void tagTrainersBW(List<Trainer> trs) {
         // We use different Gym IDs to cheat the system for the 3 n00bs
         // Chili, Cress, and Cilan

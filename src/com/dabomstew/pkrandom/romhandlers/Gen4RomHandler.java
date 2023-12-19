@@ -946,16 +946,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				// Fix starter text
 				List<String> spStrings = getStrings(romEntry.getIntValue("StarterScreenTextOffset"));
-				String[] intros = new String[] { "So, you like", "You??�ll take", "Do you want" };
+				String[] intros = new String[] { "So, you like", "You???�ll take", "Do you want" };
 				for (int i = 0; i < 3; i++) {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "Professor Elm: " + intros[i] + " \\vFF00\\z000" + color
 							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType().camelCase()
-							+ "-type Pok??�mon?";
+							+ "-type Pok???�mon?";
 					spStrings.set(i + 1, newStarterDesc);
 					String altStarterDesc = "\\vFF00\\z000" + color + newStarter.getName() + "\\vFF00\\z0000, the "
-							+ newStarter.getPrimaryType().camelCase() + "-type Pok??�mon, is\\nin this Pok??� Ball!";
+							+ newStarter.getPrimaryType().camelCase() + "-type Pok???�mon, is\\nin this Pok???� Ball!";
 					spStrings.set(i + 4, altStarterDesc);
 				}
 				setStrings(romEntry.getIntValue("StarterScreenTextOffset"), spStrings);
@@ -1182,7 +1182,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "\\vFF00\\z000" + color + pokedexSpeciesStrings.get(newStarter.getNumber())
-							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pok??�mon?";
+							+ " " + newStarter.getName() + "\\vFF00\\z0000!\\nWill you take this Pok???�mon?";
 					spStrings.set(i + 1, newStarterDesc);
 				}
 				// rewrite starter picking screen
@@ -1191,13 +1191,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// what rival says after we get the Pokemon
 					List<String> lakeStrings = getStrings(romEntry.getIntValue("StarterLocationTextOffset"));
 					lakeStrings.set(Gen4Constants.dpStarterStringIndex,
-							"\\v0103\\z0000: Fwaaah!\\nYour Pok??�mon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people??�s\\nPok??�mon, though...\\pBut we had to use them...\\nThey won??�t mind, will they?\\p");
+							"\\v0103\\z0000: Fwaaah!\\nYour Pok???�mon totally rocked!\\pBut mine was way tougher\\nthan yours!\\p...They were other people???�s\\nPok???�mon, though...\\pBut we had to use them...\\nThey won???�t mind, will they?\\p");
 					setStrings(romEntry.getIntValue("StarterLocationTextOffset"), lakeStrings);
 				} else {
 					// what rival says after we get the Pokemon
 					List<String> r201Strings = getStrings(romEntry.getIntValue("StarterLocationTextOffset"));
 					r201Strings.set(Gen4Constants.ptStarterStringIndex,
-							"\\v0103\\z0000\\z0000: Then, I choose you!\\nI??�m picking this one!\\p");
+							"\\v0103\\z0000\\z0000: Then, I choose you!\\nI???�m picking this one!\\p");
 					setStrings(romEntry.getIntValue("StarterLocationTextOffset"), r201Strings);
 				}
 			} catch (IOException e) {
@@ -5648,6 +5648,12 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					"DP";
 			default -> null;
 		};
+	}
+
+	@Override
+	protected String[] getPostGameAreaIdentifiers() {
+		return romEntry.getRomType() == Gen4Constants.Type_HGSS ?
+				Gen4Constants.hgssPostGameEncounterAreas : Gen4Constants.dpptPostGameEncounterAreas;
 	}
 
 	@Override

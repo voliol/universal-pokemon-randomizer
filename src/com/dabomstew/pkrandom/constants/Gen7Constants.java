@@ -1081,6 +1081,11 @@ public class Gen7Constants {
         }
     }
 
+    public static String[] postGameEncounterAreas = new String[] {
+            "Poni Grove", "Poni Plains", "Poni Coast", "Poni Meadow", "Poni Gauntlet",
+            "Resolution Cave"
+    };
+
     public static void tagTrainersSM(List<Trainer> trs) {
 
         tag(trs,"ELITE1", 23, 152, 349); // Hala
