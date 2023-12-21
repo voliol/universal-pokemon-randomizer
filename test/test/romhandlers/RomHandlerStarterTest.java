@@ -69,17 +69,33 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         loadROM(romName);
         Settings settings = new Settings();
         settings.setStartersMod(false, true, false);
-        settings.setCustomStarters(new int[]{1, 2, 3});
+        int customCount = romHandler.starterCount();
+        int[] custom = new int[customCount];
+        for (int i = 0; i < custom.length; i++) {
+            custom[i] = i + 1;
+        }
+        settings.setCustomStarters(custom);
 
         romHandler.randomizeStarters(settings);
 
         List<Pokemon> starters = romHandler.getStarters();
         List<Pokemon> allPokes = romHandler.getPokemon();
 
-        System.out.println("Starters (should be Bulbasaur, Ivysaur, Venusaur): " + starters);
-        assertEquals(starters.get(0), allPokes.get(1));
-        assertEquals(starters.get(1), allPokes.get(2));
-        assertEquals(starters.get(2), allPokes.get(3));
+        StringBuilder sb = new StringBuilder("Starters");
+        sb.append(" (should be ");
+        for (int i = 0; i < customCount; i++) {
+            sb.append(allPokes.get(custom[i]).getName());
+            if (i != customCount - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("): ");
+        sb.append(starters);
+        System.out.println(sb);
+
+        for (int i = 0; i < customCount; i++) {
+            assertEquals(starters.get(i), allPokes.get(custom[i]));
+        }
     }
 
     @ParameterizedTest
@@ -212,5 +228,118 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         System.out.println(isSuperEffective);
         return isSuperEffective;
     }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void uniqueTypesWorksWithCompletelyRandom(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, true, false, false);
+        settings.setStartersTypeMod(false, false, false, true, false);
+        romHandler.randomizeStarters(settings);
+
+        uniqueTypesCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void uniqueTypesWorksWithRandomWithTwoEvos(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, false, true, false);
+        settings.setStartersTypeMod(false, false, false, true, false);
+        romHandler.randomizeStarters(settings);
+
+        uniqueTypesCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void uniqueTypesWorksWithRandomBasic(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, false, false, true);
+        settings.setStartersTypeMod(false, false, false, true, false);
+        romHandler.randomizeStarters(settings);
+
+        uniqueTypesCheck();
+    }
+
+    private void uniqueTypesCheck() {
+        List<Pokemon> starters = romHandler.getStarters();
+        System.out.println(starters);
+        for (int i = 0; i < starters.size(); i++) {
+            for (int j = i + 1; j < starters.size(); j++) {
+                assertFalse(sharesTypes(starters.get(i), starters.get(j)));
+            }
+        }
+    }
+
+    private boolean sharesTypes(Pokemon a, Pokemon b) {
+        if (a.getPrimaryType() == b.getPrimaryType()) {
+            return true;
+        }
+        if (b.getSecondaryType() != null) {
+            if (a.getPrimaryType() == b.getSecondaryType()) {
+                return true;
+            }
+        }
+        if (a.getSecondaryType() != null) {
+            return a.getSecondaryType() == b.getPrimaryType() || a.getSecondaryType() == b.getSecondaryType();
+        }
+        return false;
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void singleTypeWorksWithCompletelyRandom(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, true, false, false);
+        settings.setStartersTypeMod(false, false, false, false, true);
+
+        singleTypeCheck(settings);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void singleTypeWorksWithRandomWithTwoEvos(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, false, true, false);
+        settings.setStartersTypeMod(false, false, false, false, true);
+
+        singleTypeCheck(settings);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void singleTypeWorksWithRandomBasic(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, false, false, true);
+        settings.setStartersTypeMod(false, false, false, false, true);
+
+        singleTypeCheck(settings);
+    }
+
+    private void singleTypeCheck(Settings settings) {
+        for (int i = 0; i < Type.values().length; i++) {
+            Type t = Type.values()[i];
+            if (romHandler.typeInGame(t)) {
+                settings.setStartersSingleType(i + 1);
+                System.out.println(t);
+                romHandler.randomizeStarters(settings);
+
+                List<Pokemon> starters = romHandler.getStarters();
+                System.out.println(starters.stream().map(pk -> pk.getName() + " " + pk.getPrimaryType() +
+                        (pk.getSecondaryType() == null ? "" : " / " + pk.getSecondaryType())).toList());
+                for (Pokemon starter : starters) {
+                    assertTrue(starter.getPrimaryType() == t || starter.getSecondaryType() == t);
+                }
+            }
+        }
+    }
+
 
 }
