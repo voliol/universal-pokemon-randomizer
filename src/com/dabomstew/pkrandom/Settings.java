@@ -413,9 +413,9 @@ public class Settings {
                 startersMod == StartersMod.RANDOM_BASIC));
 
         // 5 - 10: dropdowns
-        write2ByteInt(out, customStarters[0] - 1);
-        write2ByteInt(out, customStarters[1] - 1);
-        write2ByteInt(out, customStarters[2] - 1);
+        write2ByteInt(out, customStarters[0]);
+        write2ByteInt(out, customStarters[1]);
+        write2ByteInt(out, customStarters[2]);
 
         // 11 movesets
         out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
@@ -705,8 +705,8 @@ public class Settings {
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
         settings.setAllowStarterAltFormes(restoreState(data[4],6));
 
-        settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
-                FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
+        settings.setCustomStarters(new int[]{FileFunctions.read2ByteInt(data, 5),
+                FileFunctions.read2ByteInt(data, 7), FileFunctions.read2ByteInt(data, 9)});
 
         settings.setMovesetsMod(restoreEnum(MovesetsMod.class, data[11], 2, // UNCHANGED
                 1, // RANDOM_PREFER_SAME_TYPE

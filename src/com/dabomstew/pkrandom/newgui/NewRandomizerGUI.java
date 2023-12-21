@@ -1549,9 +1549,9 @@ public class NewRandomizerGUI {
         spNoLegendariesCheckBox.setSelected(settings.isStartersNoLegendaries());
 
         int[] customStarters = settings.getCustomStarters();
-        spComboBox1.setSelectedIndex(customStarters[0] - 1);
-        spComboBox2.setSelectedIndex(customStarters[1] - 1);
-        spComboBox3.setSelectedIndex(customStarters[2] - 1);
+        spComboBox1.setSelectedIndex(customStarters[0]);
+        spComboBox2.setSelectedIndex(customStarters[1]);
+        spComboBox3.setSelectedIndex(customStarters[2]);
 
         peUnchangedRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
         peRandomRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
@@ -1803,8 +1803,8 @@ public class NewRandomizerGUI {
         settings.setAllowStarterAltFormes(spAllowAltFormesCheckBox.isSelected() && spAllowAltFormesCheckBox.isVisible());
         settings.setStartersNoLegendaries(spNoLegendariesCheckBox.isSelected());
 
-        int[] customStarters = new int[] { spComboBox1.getSelectedIndex() + 1,
-                spComboBox2.getSelectedIndex() + 1, spComboBox3.getSelectedIndex() + 1 };
+        int[] customStarters = new int[] { spComboBox1.getSelectedIndex(),
+                spComboBox2.getSelectedIndex(), spComboBox3.getSelectedIndex()};
         settings.setCustomStarters(customStarters);
 
         settings.setEvolutionsMod(peUnchangedRadioButton.isSelected(), peRandomRadioButton.isSelected(), peRandomEveryLevelRadioButton.isSelected());

@@ -67,7 +67,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<MegaEvolution> megaEvolutionsList;
     private PokemonSet<Pokemon> altFormes;
 
-    private List<Pokemon> pickedStarters;
     private final Random cosmeticRandom;
     private List<Pokemon> alreadyPicked = new ArrayList<>();
     private Map<Pokemon, Integer> placementHistory = new HashMap<>();
@@ -3477,7 +3476,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void generateStarters(Settings settings) {
+    public void randomizeStarters(Settings settings) {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
@@ -3497,6 +3496,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         int generation = this.generationOfPokemon();
         boolean effectivenessUpdated = isEffectivenessUpdated();
 
+        checkPokemonRestrictions();
+
         PokemonSet<Pokemon> choosable;
 
         if (allowAltFormes) {
@@ -3512,7 +3513,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             choosable = new PokemonSet<>(noLegendaries ? nonlegendaryPokemon : restrictedPokemon);
         }
 
-        pickedStarters = new ArrayList<>();
+        List<Pokemon> pickedStarters = new ArrayList<>();
 
         if(useCustomStarters) {
             List<Pokemon> romPokemon = getPokemonInclFormes()
@@ -3521,14 +3522,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                     .toList();
 
             for (int customStarter : customStarters) {
-                if (!(customStarter - 1 == 0)) {
-                    Pokemon starter = romPokemon.get(customStarter - 1);
+                if (!(customStarter == 0)) {
+                    Pokemon starter = romPokemon.get(customStarter);
                     choosable.remove(starter);
                     pickedStarters.add(starter);
                 }
             }
 
-            if(pickedStarters.size() == starterCount) {
+            if (pickedStarters.size() == starterCount) {
+                setStarters(pickedStarters);
                 return;
             } else if (pickedStarters.size() > starterCount) {
                 //what.
@@ -3572,7 +3574,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 pickedStarters.add(picked);
                 choosable.remove(picked);
             }
-            return; //here for clarity
         } else if(typeUnique) {
             //we don't actually need a type map for this one
             while (pickedStarters.size() < starterCount) {
@@ -3585,7 +3586,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     //probably could combine these into one removeIf—it would be more efficient, even—but it's not worth it.
                 }
             }
-            return; //here for clarity
         } else {
 
             //build type map
@@ -3756,139 +3756,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             } //no other case
         }
-    }
 
-    @Override
-    public void customStarters(Settings settings) {
-        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
-        int[] customStarters = settings.getCustomStarters();
-        boolean allowAltFormes = settings.isAllowStarterAltFormes();
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-
-        List<Pokemon> romPokemon = getPokemonInclFormes()
-                .stream()
-                .filter(pk -> pk == null || !pk.isActuallyCosmetic())
-                .toList();
-
-        PokemonSet<Pokemon> banned = getBannedFormesForPlayerPokemon();
-        pickedStarters = new ArrayList<>();
-        if (abilitiesUnchanged) {
-            PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
-            banned.addAll(abilityDependentFormes);
-        }
-        if (banIrregularAltFormes) {
-            banned.addAll(getIrregularFormes());
-        }
-        // loop to add chosen pokemon to banned, preventing it from being a random option.
-        for (int customStarter : customStarters) {
-            if (!(customStarter - 1 == 0)) {
-                banned.add(romPokemon.get(customStarter - 1));
-            }
-        }
-        if (customStarters[0] - 1 == 0){
-            Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.isActuallyCosmetic()) {
-                pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            }
-            pickedStarters.add(pkmn);
-        } else {
-            Pokemon pkmn1 = romPokemon.get(customStarters[0] - 1);
-            pickedStarters.add(pkmn1);
-        }
-        if (customStarters[1] - 1 == 0){
-            Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.isActuallyCosmetic()) {
-                pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            }
-            pickedStarters.add(pkmn);
-        } else {
-            Pokemon pkmn2 = romPokemon.get(customStarters[1] - 1);
-            pickedStarters.add(pkmn2);
-        }
-
-        if (isYellow()) {
-            setStarters(pickedStarters);
-        } else {
-            if (customStarters[2] - 1 == 0){
-                Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-                while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.isActuallyCosmetic()) {
-                    pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-                }
-                pickedStarters.add(pkmn);
-            } else {
-                Pokemon pkmn3 = romPokemon.get(customStarters[2] - 1);
-                pickedStarters.add(pkmn3);
-            }
-            if (starterCount() > 3) {
-                for (int i = 3; i < starterCount(); i++) {
-                    Pokemon pkmn = random2EvosPokemon(allowAltFormes);
-                    while (pickedStarters.contains(pkmn)) {
-                        pkmn = random2EvosPokemon(allowAltFormes);
-                    }
-                    pickedStarters.add(pkmn);
-                }
-                setStarters(pickedStarters);
-            } else {
-                setStarters(pickedStarters);
-            }
-        }
-    }
-
-    @Override
-    public void randomizeStarters(Settings settings) {
-        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
-        boolean allowAltFormes = settings.isAllowStarterAltFormes();
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-
-        int starterCount = starterCount();
-        pickedStarters = new ArrayList<>();
-        PokemonSet<Pokemon> banned = getBannedFormesForPlayerPokemon();
-        if (abilitiesUnchanged) {
-            PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
-            banned.addAll(abilityDependentFormes);
-        }
-        if (banIrregularAltFormes) {
-            banned.addAll(getIrregularFormes());
-        }
-        for (int i = 0; i < starterCount; i++) {
-            Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.isActuallyCosmetic()) {
-                pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
-            }
-            pickedStarters.add(pkmn);
-        }
         setStarters(pickedStarters);
-    }
-
-    @Override
-    public void randomizeBasicTwoEvosStarters(Settings settings) {
-        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
-        boolean allowAltFormes = settings.isAllowStarterAltFormes();
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-
-        int starterCount = starterCount();
-        pickedStarters = new ArrayList<>();
-        PokemonSet<Pokemon> banned = getBannedFormesForPlayerPokemon();
-        if (abilitiesUnchanged) {
-            PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
-            banned.addAll(abilityDependentFormes);
-        }
-        if (banIrregularAltFormes) {
-            banned.addAll(getIrregularFormes());
-        }
-        for (int i = 0; i < starterCount; i++) {
-            Pokemon pkmn = random2EvosPokemon(allowAltFormes);
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn)) {
-                pkmn = random2EvosPokemon(allowAltFormes);
-            }
-            pickedStarters.add(pkmn);
-        }
-        setStarters(pickedStarters);
-    }
-
-    @Override
-    public List<Pokemon> getPickedStarters() {
-        return pickedStarters;
     }
 
     @Override

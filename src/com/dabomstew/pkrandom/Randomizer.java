@@ -259,7 +259,7 @@ public class Randomizer {
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
         if(settings.getStartersMod() != Settings.StartersMod.UNCHANGED) {
-            romHandler.generateStarters(settings);
+            romHandler.randomizeStarters(settings);
             startersChanged = true;
         }
         if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
@@ -1035,12 +1035,13 @@ public class Randomizer {
         switch (settings.getStartersMod()) {
             case CUSTOM -> log.println("--Custom Starters--");
             case COMPLETELY_RANDOM -> log.println("--Random Starters--");
+            case RANDOM_BASIC -> log.println("--Random Basic Starters--");
             case RANDOM_WITH_TWO_EVOLUTIONS -> log.println("--Random 2-Evolution Starters--");
             default -> {
             }
         }
 
-        List<Pokemon> starters = romHandler.getPickedStarters();
+        List<Pokemon> starters = romHandler.getStarters();
         int i = 1;
         for (Pokemon starter: starters) {
             log.println("Set starter " + i + " to " + starter.fullName());
