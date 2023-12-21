@@ -3475,6 +3475,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    private static final int MAX_TYPE_TRIANGLE_STARTER_TRIES = 500;
+
     @Override
     public void randomizeStarters(Settings settings) {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
@@ -3604,41 +3606,24 @@ public abstract class AbstractRomHandler implements RomHandler {
             //also assuming that the triangle restrictions (typeTriangle, fireWaterGrass)
             //are not used with custom starters
             if(typeTriangle) {
-                //find type triangles
-                List<Set<Type>> typeTriangles;
-                typeTriangles = new ArrayList<>();
-                for(Type typeOne : Type.getAllTypes(generation)) {
-                    List<Type> superEffectiveOne = Effectiveness.superEffective(typeOne, generation, effectivenessUpdated);
-                    superEffectiveOne.remove(typeOne);
-                    //don't want a Ghost-Ghost-Ghost "triangle"
-                    //(although it would be funny)
-                    for (Type typeTwo : superEffectiveOne) {
-                        List<Type> superEffectiveTwo = Effectiveness.superEffective(typeTwo, generation, effectivenessUpdated);
-                        superEffectiveTwo.remove(typeOne);
-                        superEffectiveTwo.remove(typeTwo);
-                        for (Type typeThree : superEffectiveTwo) {
-                            List<Type> superEffectiveThree = Effectiveness.superEffective(typeThree, generation, effectivenessUpdated);
-                            if (superEffectiveThree.contains(typeOne)) {
-                                //we found a triangle!
-                                Set<Type> triangle = EnumSet.of(typeOne, typeTwo, typeThree);
-                                typeTriangles.add(triangle);
-                                //not entirely sure if the uniqueness constraint will work in this case,
-                                //but that's okay, we don't actually need it.
-                            }
-                        }
-                    }
+                Set<List<Type>> typeTriangles = findTypeTriangles();
+                if (typeTriangles.isEmpty()) {
+                    throw new RandomizationException("Could not find any type triangles");
                 }
+                // to pick randomly from
+                List<List<Type>> typeTriangleList = new ArrayList<>(typeTriangles);
 
-                //okay, we found our triangles! now pick one and pick starters from it.
-                while(pickedStarters.isEmpty() && !typeTriangles.isEmpty()) {
-                    //loop because we might find that there isn't a pokemon set of the appropriate types
-                    Set<Type> triangle = typeTriangles.get(this.random.nextInt(typeTriangles.size()));
+                int tries = 0;
+                // okay, we found our triangles! now pick one and pick starters from it.
+                // loop because we might find that there isn't a pokemon set of the appropriate types
+                while (pickedStarters.isEmpty() && tries < MAX_TYPE_TRIANGLE_STARTER_TRIES) {
+                    List<Type> triangle = typeTriangleList.get(random.nextInt(typeTriangleList.size()));
                     for (Type type : triangle) {
                         List<Pokemon> typeList = new ArrayList<>(typeListMap.get(type));
                         //clone so we can safely drain it
                         boolean noPick = true;
-                        while(noPick && !typeList.isEmpty()) {
-                            Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+                        while (noPick && !typeList.isEmpty()) {
+                            Pokemon picked = typeList.get(random.nextInt(typeList.size()));
                             typeList.remove(picked);
                             Type otherType;
                             if (picked.getPrimaryType() == type) {
@@ -3646,23 +3631,26 @@ public abstract class AbstractRomHandler implements RomHandler {
                             } else {
                                 otherType = picked.getPrimaryType();
                             }
-                            if(!triangle.contains(otherType)) {
+                            if (!triangle.contains(otherType)) {
                                 //this pokemon works
                                 noPick = false;
                                 pickedStarters.add(picked);
                             }
                         }
-                        if(noPick) {
+                        if (noPick) {
                             pickedStarters = new ArrayList<>();
                             break;
                         }
                     }
-                    if(pickedStarters.isEmpty()) {
+                    if (pickedStarters.isEmpty()) {
                         typeTriangles.remove(triangle);
                     }
+                    tries++;
                 }
-                if(pickedStarters.isEmpty()) {
-                    throw new RandomizationException("No valid starter set with a type triangle could be found!");
+
+                if (pickedStarters.isEmpty()) {
+                    throw new RandomizationException("No valid starter set with a type triangle could be found within "
+                             + MAX_TYPE_TRIANGLE_STARTER_TRIES + " tries!");
                 }
 
             } else if (typeFwg) {
@@ -3758,6 +3746,38 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         setStarters(pickedStarters);
+    }
+
+    private Set<List<Type>> findTypeTriangles() {
+        int generation = this.generationOfPokemon();
+        boolean effectivenessUpdated = isEffectivenessUpdated();
+        Set<List<Type>> typeTriangles;
+        typeTriangles = new HashSet<>();
+        for(Type typeOne : Type.getAllTypes(generation)) {
+            List<Type> superEffectiveOne = Effectiveness.superEffective(typeOne, generation, effectivenessUpdated);
+            superEffectiveOne.remove(typeOne);
+            //don't want a Ghost-Ghost-Ghost "triangle"
+            //(although it would be funny)
+            for (Type typeTwo : superEffectiveOne) {
+                List<Type> superEffectiveTwo = Effectiveness.superEffective(typeTwo, generation, effectivenessUpdated);
+                superEffectiveTwo.remove(typeOne);
+                superEffectiveTwo.remove(typeTwo);
+                for (Type typeThree : superEffectiveTwo) {
+                    List<Type> superEffectiveThree = Effectiveness.superEffective(typeThree, generation, effectivenessUpdated);
+                    if (superEffectiveThree.contains(typeOne)) {
+                        // The below is an ArrayList because the immutable list created by List.of throws a
+                        // NullPointerException when you check whether it contains null.
+
+                        // It is "reverse" direction because it's used for starter generation,
+                        // and the starter list expects type triangles to be this way
+                        // (it's [Fire, Water, Grass] in vanilla)
+                        List<Type> triangle = new ArrayList<>(List.of(typeThree, typeTwo, typeOne));
+                        typeTriangles.add(triangle);
+                    }
+                }
+            }
+        }
+        return typeTriangles;
     }
 
     @Override
