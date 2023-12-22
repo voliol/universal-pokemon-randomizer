@@ -336,11 +336,6 @@ public class SettingsUpdater {
             actualDataLength += 2;
         }
 
-            } else {
-                dataBlock[16] |= 0x20;
-            }
-        }
-
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);
