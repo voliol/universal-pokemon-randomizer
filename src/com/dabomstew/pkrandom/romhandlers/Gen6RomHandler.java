@@ -973,6 +973,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasStarterTypeTriangleSupport() {
+        return false;
+    }
+
+    @Override
     public boolean hasStarterAltFormes() {
         return true;
     }

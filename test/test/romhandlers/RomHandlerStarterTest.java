@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerStarterTest extends RomHandlerTest {
 
@@ -100,8 +101,36 @@ public class RomHandlerStarterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void completelyRandomWithNoOtherOptionsDoesntThrow(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, true);
+        romHandler.randomizeStarters(settings);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomWithTwoEvosWithNoOtherOptionsDoesntThrow(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, false, true);
+        romHandler.randomizeStarters(settings);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomBasicWithNoOtherOptionsDoesntThrow(String romName) {
+        loadROM(romName);
+        Settings settings = new Settings();
+        settings.setStartersMod(false, false, false, false, true);
+        romHandler.randomizeStarters(settings);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void fwgTriangleWorksWithCompletelyRandom(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasStarterTypeTriangleSupport());
         Settings settings = new Settings();
         settings.setStartersMod(false, false, true, false, false);
         settings.setStartersTypeMod(false, true, false, false, false);
@@ -114,6 +143,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void fwgTriangleWorksWithRandomWithTwoEvos(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasStarterTypeTriangleSupport());
         Settings settings = new Settings();
         settings.setStartersMod(false, false, false, true, false);
         settings.setStartersTypeMod(false, true, false, false, false);
@@ -126,6 +156,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void fwgTriangleWorksWithRandomBasic(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasStarterTypeTriangleSupport());
         Settings settings = new Settings();
         settings.setStartersMod(false, false, false, false, true);
         settings.setStartersTypeMod(false, true, false, false, false);
@@ -160,6 +191,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void typeTriangleWorksWithCompletelyRandom(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasStarterTypeTriangleSupport());
         Settings settings = new Settings();
         settings.setStartersMod(false, false, true, false, false);
         settings.setStartersTypeMod(false, false, true, false, false);
@@ -172,6 +204,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void typeTriangleWorksWithRandomWithTwoEvos(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasStarterTypeTriangleSupport());
         Settings settings = new Settings();
         settings.setStartersMod(false, false, false, true, false);
         settings.setStartersTypeMod(false, false, true, false, false);
@@ -184,6 +217,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void typeTriangleWorksWithRandomBasic(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasStarterTypeTriangleSupport());
         Settings settings = new Settings();
         settings.setStartersMod(false, false, false, false, true);
         settings.setStartersTypeMod(false, false, true, false, false);

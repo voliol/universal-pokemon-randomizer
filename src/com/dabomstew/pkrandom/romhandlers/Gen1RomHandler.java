@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -589,14 +590,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
         // Amount?
-        int starterAmount = 2;
-        if (!romEntry.isYellow()) {
-            starterAmount = 3;
-        }
+        int starterAmount = isYellow() ? 2 : 3;
 
         // Basic checks
         if (newStarters.size() != starterAmount) {
-            return false;
+            throw new RandomizationException("Unexpected amount of new starters. Should be " + starterAmount +
+                    ", was " + newStarters.size());
         }
 
         // Patch starter bytes
@@ -708,7 +707,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         return true;
+    }
 
+    @Override
+    public boolean hasStarterTypeTriangleSupport() {
+        return !isYellow();
     }
 
     @Override

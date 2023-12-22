@@ -2093,7 +2093,6 @@ public class NewRandomizerGUI {
 
         // the buttons in the main part of the gui (randomization options):
 
-		// TODO: make sure to include the buttons added by foxoftheasterisk
 		Arrays.asList(pbsUnchangedRadioButton, pbsShuffleRadioButton, pbsRandomRadioButton,
 				pbsLegendariesSlowRadioButton, pbsStrongLegendariesSlowRadioButton, pbsAllMediumFastRadioButton,
 				pbsStandardizeEXPCurvesCheckBox, pbsFollowEvolutionsCheckBox, pbsUpdateBaseStatsCheckBox,
@@ -2389,6 +2388,10 @@ public class NewRandomizerGUI {
                 spComboBox3.setVisible(false);
             }
             populateDropdowns();
+
+            boolean typeTriangleSupport = romHandler.hasStarterTypeTriangleSupport();
+            spTypeFwgRadioButton.setVisible(typeTriangleSupport);
+            spTypeTriangleRadioButton.setVisible(typeTriangleSupport);
 
             spAllowAltFormesCheckBox.setVisible(romHandler.hasStarterAltFormes());
             boolean supportsStarterHeldItems = romHandler.supportsStarterHeldItems();
@@ -2911,16 +2914,6 @@ public class NewRandomizerGUI {
             spTypeNoDualCheckbox.setEnabled(true);
             spAllowAltFormesCheckBox.setEnabled(true);
             spNoLegendariesCheckBox.setEnabled(true);
-        }
-
-        if(spRandomTwoEvosRadioButton.isSelected() && romHandler.generationOfPokemon() == 1
-                && (spTypeFwgRadioButton.isSelected() || spTypeTriangleRadioButton.isSelected())) {
-            //gen 1 has NO single-type first-of-three type triangles
-            //so we need to disable the impossible option
-            //...wait, hold on, type randomization is a thing. Never mind?
-            //...I'm not sure how to handle that. Because that also means that other gens might just randomly fail...
-            spTypeNoDualCheckbox.setSelected(false);
-            spTypeNoDualCheckbox.setEnabled(false);
         }
 
         if(spTypeSingleRadioButton.isSelected()) {

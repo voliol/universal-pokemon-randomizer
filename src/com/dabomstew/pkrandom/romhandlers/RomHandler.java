@@ -129,6 +129,8 @@ public interface RomHandler {
 
     void randomizeStarters(Settings settings);
 
+    boolean hasStarterTypeTriangleSupport();
+
     boolean supportsStarterHeldItems();
 
     List<Integer> getStarterHeldItems();

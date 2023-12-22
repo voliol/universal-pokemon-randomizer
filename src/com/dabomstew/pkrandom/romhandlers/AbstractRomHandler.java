@@ -3478,6 +3478,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     private static final int MAX_TYPE_TRIANGLE_STARTER_TRIES = 500;
 
     @Override
+    public boolean hasStarterTypeTriangleSupport() {
+        return true;
+    }
+
+    @Override
     public void randomizeStarters(Settings settings) {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
@@ -3496,7 +3501,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         int[] customStarters = settings.getCustomStarters();
         int starterCount = starterCount();
         int generation = this.generationOfPokemon();
-        boolean effectivenessUpdated = isEffectivenessUpdated();
 
         checkPokemonRestrictions();
 
