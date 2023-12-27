@@ -51,7 +51,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 53;
+    public static final int LENGTH_OF_SETTINGS_DATA = 54;
 
     private CustomNamesSet customNames;
 
@@ -208,10 +208,11 @@ public class Settings {
     }
     
     public enum WildPokemonTypeMod {
-        NONE, THEMED_AREAS, KEEP_THEMED_AREAS, KEEP_PRIMARY
+        NONE, THEMED_AREAS, KEEP_PRIMARY
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
+    private boolean keepWildTypeThemes;
     private boolean similarStrengthEncounters;
     private boolean catchEmAllEncounters;
     private WildPokemonTypeMod wildPokemonTypeMod = WildPokemonTypeMod.NONE;
@@ -629,6 +630,9 @@ public class Settings {
             out.write(0);
         }
 
+        // 54 Wild Pokemon 3
+        out.write(makeByteSelected(keepWildTypeThemes));
+
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
             out.write(romName.length);
@@ -742,10 +746,6 @@ public class Settings {
         settings.setSimilarStrengthEncounters(restoreState(data[16], 2));
         settings.setCatchEmAllEncounters(restoreState(data[15], 0));
         settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
-                restoreState(data[15], 3), // THEMED_AREAS
-                restoreState(data[16], 6) // KEEP_PRIMARY
-        ));
-              settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
                 restoreState(data[15], 3), // THEMED_AREAS
                 restoreState(data[16], 6) // KEEP_PRIMARY
         ));
@@ -951,6 +951,8 @@ public class Settings {
         } else {
             settings.setStartersSingleType(Type.fromInt((data[53] | 0x1F) - 1));
         }
+
+        settings.setKeepWildTypeThemes(restoreState(data[54], 0));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
@@ -1909,6 +1911,14 @@ public class Settings {
 
     private void setWildPokemonMod(WildPokemonMod wildPokemonMod) {
         this.wildPokemonMod = wildPokemonMod;
+    }
+
+    public boolean isKeepWildTypeThemes() {
+        return keepWildTypeThemes;
+    }
+
+    public void setKeepWildTypeThemes(boolean keepWildTypeThemes) {
+        this.keepWildTypeThemes = keepWildTypeThemes;
     }
 
     public boolean isSimilarStrengthEncounters() {
