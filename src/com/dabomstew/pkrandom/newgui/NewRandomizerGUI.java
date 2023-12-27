@@ -322,6 +322,7 @@ public class NewRandomizerGUI {
     private JCheckBox spTypeNoDualCheckbox;
     private JRadioButton spTypeUniqueRadioButton;
     private JCheckBox spNoLegendariesCheckBox;
+    private JCheckBox wpTRKeepThemesCheckBox;
 
     private static JFrame frame;
 
@@ -476,6 +477,9 @@ public class NewRandomizerGUI {
         wpArea1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpLocation1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpGlobal1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpTRNoneRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpTRThemedAreasRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpTRKeepPrimaryRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpSimilarStrengthCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpSetMinimumCatchRateCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -3151,13 +3155,23 @@ public class NewRandomizerGUI {
 
         if (wpUnchangedRadioButton.isSelected() || wpGlobal1To1RadioButton.isSelected()) {
             wpTRNoneRadioButton.setSelected(true);
+            wpTRNoneRadioButton.setEnabled(false);
             wpTRThemedAreasRadioButton.setSelected(false);
             wpTRThemedAreasRadioButton.setEnabled(false);
             wpTRKeepPrimaryRadioButton.setSelected(false);
             wpTRKeepPrimaryRadioButton.setEnabled(false);
+            wpTRKeepThemesCheckBox.setEnabled(false);
+            wpTRKeepThemesCheckBox.setSelected(false);
         } else {
+            wpTRNoneRadioButton.setEnabled(true);
             wpTRThemedAreasRadioButton.setEnabled(true);
             wpTRKeepPrimaryRadioButton.setEnabled(true);
+            if (wpTRKeepPrimaryRadioButton.isSelected()) {
+                wpTRKeepThemesCheckBox.setEnabled(false);
+                wpTRKeepThemesCheckBox.setSelected(false);
+            } else {
+                wpTRKeepThemesCheckBox.setEnabled(true);
+            }
         }
 
         if (wpRandomRadioButton.isSelected()) {
@@ -3192,7 +3206,7 @@ public class NewRandomizerGUI {
             wpDontUseLegendariesCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setEnabled(true);
         }
-
+        
         if (wpSimilarStrengthCheckBox.isSelected() && !wpGlobal1To1RadioButton.isSelected()) {
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(true);
         } else {
