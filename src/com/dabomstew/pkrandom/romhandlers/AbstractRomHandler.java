@@ -911,6 +911,19 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             if (randomTypeThemes && picked == null) {
                 picked = pickRandomAreaType();
+
+                // Unown clause - since Unown (and other banned Pokemon) aren't randomized with catchEmAll active,
+                // the "random" type theme must be one of the banned's types.
+                // The implementation below supports multiple banned Pokemon of the same type in the same area,
+                // because why not?
+                if (catchEmAll) {
+                    PokemonSet<Pokemon> bannedInArea = new PokemonSet<>(banned);
+                    bannedInArea.retainAll(PokemonSet.inArea(area));
+                    Type themeOfBanned = getTypeTheme(bannedInArea);
+                    if (themeOfBanned != null) {
+                        picked = themeOfBanned;
+                    }
+                }
             }
             return picked;
         }
@@ -1103,11 +1116,15 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * Returns the type theme of a collection of Pokemon, using their original (pre-randomization) types.
      * Compare with {@link #getTypeTheme(Collection)}<br>
-     * Returns null if there is no shared type/theme.<br>
+     * Returns null if there is no shared type/theme, or the Collection is empty.<br>
      * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal 
      * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
      */
     private Type getOriginalTypeTheme(Collection<Pokemon> pokes) {
+        if (pokes.isEmpty()) {
+            return null;
+        }
+
         Type theme = null;
         
         Iterator<Pokemon> iter = pokes.iterator();
@@ -1145,11 +1162,15 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * Returns the type theme of a collection of Pokemon, using their types current (possible post-randomization) types.
      * Compare with {@link #getOriginalTypeTheme(Collection)}<br>
-     * Returns null if there is no shared type/theme.<br>
+     * Returns null if there is no shared type/theme, or the Collection is empty.<br>
      * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal
      * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
      */
     private Type getTypeTheme(Collection<Pokemon> pokes) {
+        if (pokes.isEmpty()) {
+            return null;
+        }
+
         Type theme = null;
 
         Iterator<Pokemon> iter = pokes.iterator();

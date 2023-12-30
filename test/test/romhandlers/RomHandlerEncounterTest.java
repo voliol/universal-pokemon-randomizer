@@ -1359,9 +1359,6 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void location1to1EncountersCatchEmAllANDRandomTypeThemesWorks(String romName) {
-        // Usually fails for any game with Unown, since they are banned from being picked in most of the enc randomization,
-        // and thus forced to be placed in Ruins of Alph etc. when Catch-Em-All is active so they appear somewhere.
-        // And that even if they do not comply to the Ruins of Alph etc. type theme.
         loadROM(romName);
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
