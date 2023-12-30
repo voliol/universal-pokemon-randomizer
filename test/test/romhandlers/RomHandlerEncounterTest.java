@@ -194,6 +194,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         assertTrue(hasAltFormes);
     }
 
+
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void randomEncountersCanBanLegendaries(String romName) {
@@ -245,13 +246,50 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void randomEncountersTypeThemedWorks(String romName) {
+    public void randomEncountersRandomTypeThemesWorks(String romName) {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, Settings.WildPokemonTypeMod.THEMED_AREAS,
                 true,
                 false, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
-        typeThemedAreasCheck();
+        randomTypeThemesAreasCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersKeepTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM,
+                true,
+                false, true, false,
+                false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersKeepTypeThemesANDRandomTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM,
+                true,
+                true, true, false,
+                false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
+        randomTypeThemesAreasCheck();
     }
 
     @ParameterizedTest
@@ -287,7 +325,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void randomEncountersCatchEmAllANDTypeThemedWorks(String romName) {
+    public void randomEncountersCatchEmAllANDRandomTypeThemesWorks(String romName) {
         loadROM(romName);
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, Settings.WildPokemonTypeMod.THEMED_AREAS,
@@ -295,7 +333,48 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 true, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
-        typeThemedAreasCheck();
+        randomTypeThemesAreasCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCatchEmAllANDKeepTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM,
+                true,
+                false, true, false,
+                true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+
+        catchEmAllCheck(allPokes);
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEncountersCatchEmAllANDRandomTypeThemesANDKeepTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM,
+                true,
+                true, true, false,
+                true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+
+        catchEmAllCheck(allPokes);
+        randomTypeThemesAreasCheck();
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
     }
 
     private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
@@ -333,7 +412,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void area1to1EncountersGivesConsequentReplacementsForEachMonWithTypeThemed(String romName) {
+    public void area1to1EncountersGivesConsequentReplacementsForEachMonWithRandomTypeThemes(String romName) {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
@@ -345,6 +424,20 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         area1to1ConsequentReplacementCheck(before, after);
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesConsequentReplacementsForEachMonWithKeepTypeThemes(String romName) {
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING,
+                true,
+                false, true, false,
+                false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1ConsequentReplacementCheck(before, after);
+    }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
@@ -433,12 +526,28 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void area1to1EncountersGivesUniqueReplacementsForEachMonWithTypeThemed(String romName) {
+    public void area1to1EncountersGivesUniqueReplacementsForEachMonWithRandomTypeThemes(String romName) {
         assumeTrue(getGenerationNumberOf(romName) > 2); // Too few mons of some types, so it always fails
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
                 true,
+                false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        List<EncounterArea> after = romHandler.getEncounters(true);
+
+        area1to1UniqueReplacementCheck(before, after);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersGivesUniqueReplacementsForEachMonWithKeepTypeThemes(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) > 2); // Too few mons of some types, so it always fails
+        loadROM(romName);
+        List<EncounterArea> before = romHandler.getEncounters(true);
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING,
+                true,
+                false, true, false,
                 false, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
         List<EncounterArea> after = romHandler.getEncounters(true);
@@ -561,19 +670,37 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             catchable.addAll(PokemonSet.inArea(area));
         }
         allPokes.removeAll(catchable);
-        System.out.println(allPokes);
+        System.out.println("Not catchable: " + allPokes.stream().map(Pokemon::getName).toList());
         assertTrue(allPokes.isEmpty());
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void area1to1EncountersTypeThemedWorks(String romName) {
+    public void area1to1EncountersRandomTypeThemesWorks(String romName) {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
                 true,
                 false, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
-        typeThemedAreasCheck();
+        randomTypeThemesAreasCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersKeepTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING,
+                true,
+                false, true, false,
+                false, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
     }
 
     @ParameterizedTest
@@ -593,7 +720,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         keepPrimaryTypeCheck(beforeAreasStrings, beforePrimaryTypes);
     }
 
-    private void typeThemedAreasCheck() {
+    private void randomTypeThemesAreasCheck() {
         for (EncounterArea area : romHandler.getEncounters(true)) {
             System.out.println("\n" + area.getDisplayName() + ":\n" + area);
             Pokemon firstPk = area.get(0).getPokemon();
@@ -626,6 +753,11 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         }
     }
 
+    private String toNameAndTypesString(Pokemon pk) {
+        return pk.getName() + ", " + pk.getPrimaryType()
+                + (pk.getSecondaryType() == null ? "" : " / " + pk.getSecondaryType());
+    }
+
     private void recordTypeThemeBefore(List<List<String>> beforeAreaStrings, Map<Integer, Type> typeThemedAreas) {
         List<EncounterArea> encounterAreas = romHandler.getEncounters(true);
         for (int i = 0; i < encounterAreas.size(); i++) {
@@ -634,7 +766,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             beforeAreaStrings.add(beforeStrings);
             beforeStrings.add(area.toString());
             for (Encounter enc : area) {
-                beforeStrings.add(enc.getPokemon().toString());
+                beforeStrings.add(toNameAndTypesString(enc.getPokemon()));
             }
 
             Type theme = getThemedAreaType(area);
@@ -691,7 +823,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 System.out.println("After: " + area);
                 for (Encounter enc : area) {
                     Pokemon pk = enc.getPokemon();
-                    System.out.println("\t" + pk);
+                    System.out.println("\t" + toNameAndTypesString(pk));
                     assertTrue(pk.getPrimaryType() == theme || pk.getSecondaryType() == theme);
                 }
             } else {
@@ -711,8 +843,9 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             List<Type> beforeTypes = new ArrayList<>();
             beforePrimaryTypes.add(beforeTypes);
             for (Encounter enc : area) {
-                beforeStrings.add(enc.getPokemon().toString());
-                beforeTypes.add(enc.getPokemon().getPrimaryType());
+                Pokemon pk = enc.getPokemon();
+                beforeStrings.add(toNameAndTypesString(pk));
+                beforeTypes.add(pk.getPrimaryType());
             }
         }
     }
@@ -731,7 +864,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             for (int j = 0; j < area.size(); j++) {
                 Pokemon pk = area.get(j).getPokemon();
                 Type primary = beforePrimaryTypes.get(i).get(j);
-                System.out.println("\t" + pk);
+                System.out.println("\t" + toNameAndTypesString(pk));
                 assertTrue(pk.getPrimaryType() == primary);
             }
             System.out.println();
@@ -781,7 +914,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void area1to1EncountersCatchEmAllANDTypeThemedWorks(String romName) {
+    public void area1to1EncountersCatchEmAllANDRandomTypeThemesWorks(String romName) {
         loadROM(romName);
         PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
@@ -789,7 +922,48 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 true, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
-        typeThemedAreasCheck();
+        randomTypeThemesAreasCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCatchEmAllANDKeepTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING,
+                true,
+                false, true, false,
+                true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        catchEmAllCheck(allPokes);
+
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void area1to1EncountersCatchEmAllANDRandomTypeThemesANDKeepTypeThemesWorks(String romName) {
+        loadROM(romName);
+
+        List<List<String>> beforeAreaStrings = new ArrayList<>();
+        Map<Integer, Type> typeThemedAreas = new HashMap<>();
+        recordTypeThemeBefore(beforeAreaStrings, typeThemedAreas);
+
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
+        ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.AREA_MAPPING,
+                true,
+                true, true, false,
+                true, false, false, false,
+                0, getGenerationNumberOf(romName) >= 5, true, false);
+        catchEmAllCheck(allPokes);
+
+        randomTypeThemesAreasCheck();
+        keepTypeThemedAreasCheck(beforeAreaStrings, typeThemedAreas);
     }
 
     @ParameterizedTest
@@ -801,11 +975,13 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         List<List<Type>> beforePrimaryTypes = new ArrayList<>();
         recordPrimaryTypesBefore(beforeAreasStrings, beforePrimaryTypes);
 
+        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSet();
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.RANDOM, Settings.WildPokemonTypeMod.KEEP_PRIMARY,
                 true,
                 true, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
 
+        catchEmAllCheck(allPokes);
         keepPrimaryTypeCheck(beforeAreasStrings, beforePrimaryTypes);
     }
 
@@ -839,7 +1015,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void locations1to1EncountersGivesConsequentReplacementsForEachMonWithTypeThemed(String romName) {
+    public void locations1to1EncountersGivesConsequentReplacementsForEachMonWithRandomTypeThemes(String romName) {
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
@@ -964,7 +1140,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void location1to1EncountersGivesUniqueReplacementsForEachMonWithTypeThemed(String romName) {
+    public void location1to1EncountersGivesUniqueReplacementsForEachMonWithRandomTypeThemes(String romName) {
         assumeTrue(getGenerationNumberOf(romName) > 2); // Too few mons of some types, so it always fails
         loadROM(romName);
         List<EncounterArea> before = romHandler.getEncounters(true);
@@ -1097,13 +1273,13 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void location1to1EncountersTypeThemedWorks(String romName) {
+    public void location1to1EncountersRandomTypeThemesWorks(String romName) {
         loadROM(romName);
         ((AbstractRomHandler) romHandler).randomizeEncounters(Settings.WildPokemonMod.LOCATION_MAPPING, Settings.WildPokemonTypeMod.THEMED_AREAS,
                 true,
                 false, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
-        typeThemedLocationsCheck();
+        randomTypeThemesLocationsCheck();
     }
 
     @ParameterizedTest
@@ -1123,7 +1299,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         keepPrimaryTypeCheck(beforeAreasStrings, beforePrimaryTypes);
     }
 
-    private void typeThemedLocationsCheck() {
+    private void randomTypeThemesLocationsCheck() {
 
         Map<String, List<EncounterArea>> grouped = groupEncountersByLocation(romHandler.getEncounters(true));
 
@@ -1182,7 +1358,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void location1to1EncountersCatchEmAllANDTypeThemedWorks(String romName) {
+    public void location1to1EncountersCatchEmAllANDRandomTypeThemesWorks(String romName) {
         // Usually fails for any game with Unown, since they are banned from being picked in most of the enc randomization,
         // and thus forced to be placed in Ruins of Alph etc. when Catch-Em-All is active so they appear somewhere.
         // And that even if they do not comply to the Ruins of Alph etc. type theme.
@@ -1193,7 +1369,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 true, false, false, false,
                 0, getGenerationNumberOf(romName) >= 5, true, false);
         catchEmAllCheck(allPokes);
-        typeThemedLocationsCheck();
+        randomTypeThemesLocationsCheck();
     }
 
     @ParameterizedTest

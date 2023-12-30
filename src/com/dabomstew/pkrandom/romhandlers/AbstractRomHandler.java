@@ -658,6 +658,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 abilitiesAreRandomized);
     }
 
+    private static final long MAX_ENCOUNTER_RANDOMIZATION_TIME = 50; // in milliseconds, 10 seconds
+
     public void randomizeEncounters(Settings.WildPokemonMod mode,
                                     boolean useTimeOfDay,
                                     boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
@@ -676,34 +678,71 @@ public abstract class AbstractRomHandler implements RomHandler {
         // TODO: formes need more fiddling with, to fulfil the test cases
         //  (and maybe make it clever, so e.g. Wormadam and Deoxys aren't more common replacements)
 
-        List<EncounterArea> encounterAreas = this.getEncounters(useTimeOfDay);
         checkPokemonRestrictions();
-        PokemonSet<Pokemon> banned = this.getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
-        PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
+        List<EncounterArea> encounterAreas;
 
-        EncounterRandomizer er = new EncounterRandomizer(allowed, banned,
-                randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, balanceShakingGrass);
-        switch (mode) {
-            case RANDOM -> er.randomEncounters(encounterAreas);
-            case AREA_MAPPING -> er.area1to1Encounters(encounterAreas);
-            case LOCATION_MAPPING -> er.location1to1Encounters(encounterAreas);
-            case GLOBAL_MAPPING -> er.game1to1Encounters(encounterAreas);
-            default -> {
+        long before = System.currentTimeMillis();
+        long totalTime;
+        boolean succeeded;
+        int tries = 0;
+        do {
+            // assumes getEncounters() always returns a new list, which can be safely modified and then reset
+            // in case the encounter randomization fails
+            encounterAreas = getEncounters(useTimeOfDay);
+            PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
+            PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
+
+            EncounterRandomizer er = new EncounterRandomizer(allowed, banned,
+                    randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, balanceShakingGrass);
+            switch (mode) {
+                case RANDOM -> er.randomEncounters(encounterAreas);
+                case AREA_MAPPING -> er.area1to1Encounters(encounterAreas);
+                case LOCATION_MAPPING -> er.location1to1Encounters(encounterAreas);
+                case GLOBAL_MAPPING -> er.game1to1Encounters(encounterAreas);
+                default -> {
+                }
             }
+            succeeded = didEncounterRandomizationSucceed(encounterAreas, allowed, randomTypeThemes, catchEmAll);
+            tries++;
+            totalTime = System.currentTimeMillis() - before;
+        } while (!succeeded && totalTime <= MAX_ENCOUNTER_RANDOMIZATION_TIME);
+        if (!succeeded) {
+            System.out.println("WARNING: encounter randomization did not succeed in fulfilling all its goals,\n" +
+                    "in " + totalTime + " ms, " + tries + " tries.");
+        } else {
+            System.out.println("Encounter randomization finished successfully in " + totalTime + " ms, "
+                    + tries + " tries.");
         }
+
         applyLevelModifier(levelModifier, encounterAreas);
         setEncounters(useTimeOfDay, encounterAreas);
     }
 
-    private EncounterRandomizer.TypeMode convertTypeMode(Settings.WildPokemonTypeMod typeMode) {
-        EncounterRandomizer.TypeMode innerTypeMode;
-        switch (typeMode) {
-            case NONE -> innerTypeMode = EncounterRandomizer.TypeMode.NONE;
-            case THEMED_AREAS -> innerTypeMode = EncounterRandomizer.TypeMode.RANDOM_THEME;
-            case KEEP_PRIMARY -> innerTypeMode = EncounterRandomizer.TypeMode.KEEP_PRIMARY;
-            default -> innerTypeMode = null;
+    private boolean didEncounterRandomizationSucceed(List<EncounterArea> encounterAreas, PokemonSet<Pokemon> allowed,
+                                                     boolean randomTypeThemes, boolean catchEmAll) {
+        boolean succeeded = true;
+        if (randomTypeThemes && !allAreasHaveTypeThemes(encounterAreas)) {
+            succeeded = false;
         }
-        return innerTypeMode;
+        if (catchEmAll && !canCatchEmAll(encounterAreas, allowed)) {
+            succeeded = false;
+        }
+        return succeeded;
+    }
+
+    private boolean allAreasHaveTypeThemes(List<EncounterArea> encounterAreas) {
+        for (EncounterArea area : encounterAreas) {
+            if (getTypeTheme(PokemonSet.inArea(area)) == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean canCatchEmAll(List<EncounterArea> encounterAreas, PokemonSet<Pokemon> allowed) {
+        PokemonSet<Pokemon> extant = new PokemonSet<>();
+        encounterAreas.forEach(area -> extant.addAll(PokemonSet.inArea(area)));
+        return extant.containsAll(allowed);
     }
 
     private class EncounterRandomizer {
@@ -887,7 +926,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private PokemonSet<Pokemon> setupAllowedForArea() {
             if (areaType != null) {
-                return catchEmAll ? remainingByType.get(areaType) : allowedByType.get(areaType);
+                return catchEmAll && !remainingByType.get(areaType).isEmpty()
+                        ? remainingByType.get(areaType) : allowedByType.get(areaType);
             } else {
                 return catchEmAll ? remaining : allowed;
             }
@@ -914,6 +954,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         private Pokemon pickReplacementInner(Encounter enc) {
+            if (allowedForReplacement.isEmpty()) {
+                throw new IllegalStateException("No allowed Pokemon to pick as replacement.");
+            }
             Pokemon current = enc.getPokemon();
             
             Pokemon replacement;
@@ -1058,7 +1101,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /**
-     * Returns the type theme of a collection of Pokemon, using their original (pre-randomization) types.<br>
+     * Returns the type theme of a collection of Pokemon, using their original (pre-randomization) types.
+     * Compare with {@link #getTypeTheme(Collection)}<br>
      * Returns null if there is no shared type/theme.<br>
      * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal 
      * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
@@ -1078,6 +1122,48 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
             if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+                primary = secondary;
+                secondary = null;
+            }
+            if (primary == null) {
+                break; //no type is shared, no need to look at the remaining pokemon
+            }
+        }
+        if (primary != null) {
+            //we have a type theme!
+            if(primary == Type.NORMAL && secondary != null) {
+                //Bird override
+                //(Normal is less significant than other types, for example, Flying)
+                theme = secondary;
+            } else {
+                theme = primary;
+            }
+        }
+        return theme;
+    }
+
+    /**
+     * Returns the type theme of a collection of Pokemon, using their types current (possible post-randomization) types.
+     * Compare with {@link #getOriginalTypeTheme(Collection)}<br>
+     * Returns null if there is no shared type/theme.<br>
+     * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal
+     * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
+     */
+    private Type getTypeTheme(Collection<Pokemon> pokes) {
+        Type theme = null;
+
+        Iterator<Pokemon> iter = pokes.iterator();
+        Pokemon pk = iter.next();
+        Type primary = pk.getPrimaryType();
+        Type secondary = pk.getSecondaryType();
+        while (iter.hasNext()) {
+            pk = iter.next();
+            if(secondary != null) {
+                if (secondary != pk.getPrimaryType() && secondary != pk.getSecondaryType()) {
+                    secondary = null;
+                }
+            }
+            if (primary != pk.getPrimaryType() && primary != pk.getSecondaryType()) {
                 primary = secondary;
                 secondary = null;
             }
