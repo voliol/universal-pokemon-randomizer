@@ -658,8 +658,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 abilitiesAreRandomized);
     }
 
-    private static final long MAX_ENCOUNTER_RANDOMIZATION_TIME = 50; // in milliseconds, 10 seconds
-
     public void randomizeEncounters(Settings.WildPokemonMod mode,
                                     boolean useTimeOfDay,
                                     boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
@@ -679,70 +677,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         //  (and maybe make it clever, so e.g. Wormadam and Deoxys aren't more common replacements)
 
         checkPokemonRestrictions();
-        List<EncounterArea> encounterAreas;
 
-        long before = System.currentTimeMillis();
-        long totalTime;
-        boolean succeeded;
-        int tries = 0;
-        do {
-            // assumes getEncounters() always returns a new list, which can be safely modified and then reset
-            // in case the encounter randomization fails
-            encounterAreas = getEncounters(useTimeOfDay);
-            PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
-            PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
+        List<EncounterArea> encounterAreas = getEncounters(useTimeOfDay);
+        PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
+        PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
 
-            EncounterRandomizer er = new EncounterRandomizer(allowed, banned,
-                    randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, balanceShakingGrass);
-            switch (mode) {
-                case RANDOM -> er.randomEncounters(encounterAreas);
-                case AREA_MAPPING -> er.area1to1Encounters(encounterAreas);
-                case LOCATION_MAPPING -> er.location1to1Encounters(encounterAreas);
-                case GLOBAL_MAPPING -> er.game1to1Encounters(encounterAreas);
-                default -> {
-                }
+        EncounterRandomizer er = new EncounterRandomizer(allowed, banned,
+                randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, balanceShakingGrass);
+        switch (mode) {
+            case RANDOM -> er.randomEncounters(encounterAreas);
+            case AREA_MAPPING -> er.area1to1Encounters(encounterAreas);
+            case LOCATION_MAPPING -> er.location1to1Encounters(encounterAreas);
+            case GLOBAL_MAPPING -> er.game1to1Encounters(encounterAreas);
+            default -> {
             }
-            succeeded = didEncounterRandomizationSucceed(encounterAreas, allowed, randomTypeThemes, catchEmAll);
-            tries++;
-            totalTime = System.currentTimeMillis() - before;
-        } while (!succeeded && totalTime <= MAX_ENCOUNTER_RANDOMIZATION_TIME);
-        if (!succeeded) {
-            System.out.println("WARNING: encounter randomization did not succeed in fulfilling all its goals,\n" +
-                    "in " + totalTime + " ms, " + tries + " tries.");
-        } else {
-            System.out.println("Encounter randomization finished successfully in " + totalTime + " ms, "
-                    + tries + " tries.");
         }
 
         applyLevelModifier(levelModifier, encounterAreas);
         setEncounters(useTimeOfDay, encounterAreas);
-    }
-
-    private boolean didEncounterRandomizationSucceed(List<EncounterArea> encounterAreas, PokemonSet<Pokemon> allowed,
-                                                     boolean randomTypeThemes, boolean catchEmAll) {
-        boolean succeeded = true;
-        if (randomTypeThemes && !allAreasHaveTypeThemes(encounterAreas)) {
-            succeeded = false;
-        }
-        if (catchEmAll && !canCatchEmAll(encounterAreas, allowed)) {
-            succeeded = false;
-        }
-        return succeeded;
-    }
-
-    private boolean allAreasHaveTypeThemes(List<EncounterArea> encounterAreas) {
-        for (EncounterArea area : encounterAreas) {
-            if (getTypeTheme(PokemonSet.inArea(area)) == null) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean canCatchEmAll(List<EncounterArea> encounterAreas, PokemonSet<Pokemon> allowed) {
-        PokemonSet<Pokemon> extant = new PokemonSet<>();
-        encounterAreas.forEach(area -> extant.addAll(PokemonSet.inArea(area)));
-        return extant.containsAll(allowed);
     }
 
     private class EncounterRandomizer {
