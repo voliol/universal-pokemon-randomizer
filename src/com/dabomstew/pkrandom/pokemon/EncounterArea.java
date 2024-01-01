@@ -32,7 +32,7 @@ public class EncounterArea extends ArrayList<Encounter> {
     private final Set<Pokemon> bannedPokemon = new HashSet<>();
     private String displayName;
     private int offset;
-    private String locationTag = "";
+    private String locationTag;
 
     public EncounterArea() {
     }
