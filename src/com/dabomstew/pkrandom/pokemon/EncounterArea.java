@@ -32,6 +32,7 @@ public class EncounterArea extends ArrayList<Encounter> {
     private final Set<Pokemon> bannedPokemon = new HashSet<>();
     private String displayName;
     private int offset;
+    private String locationTag;
 
     public EncounterArea() {
     }
@@ -79,8 +80,16 @@ public class EncounterArea extends ArrayList<Encounter> {
         this.offset = offset;
     }
 
+    public String getLocationTag() {
+        return locationTag;
+    }
+
+    public void setLocationTag(String locationTag) {
+        this.locationTag = locationTag;
+    }
+
     @Override
     public String toString() {
-        return "Encounters [Rate = " + rate + ", Encounters = " + super.toString() + "]";
+        return "Encounters [Name = " + displayName + ", Rate = " + rate + ", Encounters = " + super.toString() + "]";
     }
 }

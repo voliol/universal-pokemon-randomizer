@@ -317,6 +317,29 @@ public class SettingsUpdater {
             dataBlock[50] |= ((oldMinimumCatchRate - 1) << 3);
         }
 
+        if (oldVersion < 322) {
+            // Pokemon palettes
+            insertExtraByte(51, (byte) 0x1);
+        }
+        
+        if (oldVersion < 326) {
+            //added new enum WildPokemonTypeMod and moved TypeThemed to it,
+            //so we need to select None on RestrictionMod if TypeThemed is selected,
+            //and select None on TypeMod otherwise
+            int typeThemed = dataBlock[15] & 0x08;
+            if (typeThemed != 0) {
+                dataBlock[15] |= 0x04;
+            } else {
+                dataBlock[16] |= 0x20;
+            }
+            // starter type mod / starter no legendaries / starter no dual type checkbox
+            insertExtraByte(52, (byte) 0x1);
+            // starter single-type type choice
+            insertExtraByte(53, (byte) 0);
+            // new wild pokes byte
+            insertExtraByte(54, (byte) 0);
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);

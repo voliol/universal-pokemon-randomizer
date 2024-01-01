@@ -1722,6 +1722,29 @@ public class Gen4Constants {
         return m;
     }
 
+    public static String[] dpptPostGameEncounterAreas = new String[] {
+            "Super Rod", "Radar", "Swarm", //post-game techniques
+            "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway
+            "224", "225", "226", "227", "228", "229", "230", //routes
+            "Stark Mountain", "Seabreak Path" //named areas
+            //TODO: handling for Victory Road back
+    };
+
+    public static String[] hgssPostGameEncounterAreas = new String[] {
+            "Super Rod", "Swarm", "Radio", //post-game techniques
+            "Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Vermilion City", "Lavender Town",
+            "Celadon City", "Fuschia City", "Saffron City", //Kanto cities
+            "Route 1", "Route 2", "Route 3", "Route 4", "Route 5",
+            "Route 6", "Route 7", "Route 8", "Route 9", "Route 10",
+            "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",
+            "Route 16", "Route 17", "Route 18", "Route 19", "Route 20",
+            "Route 21", "Route 22", "Route 23", "Route 24", "Route 25", //Kanto routes
+            "Cinnabar Island", "Cerulean Cave", "DIGLETT’s Cave", "Rock Tunnel",
+            "Seafoam Islands", "Viridian Forest", //other Kanto locations
+            "Route 28", "Mount Silver" //Johto but post-game
+            //TODO: Bug-Catching contest (post-national dex) handling
+    };
+
     public static void tagTrainersDP(List<Trainer> trs) {
         // Gym Trainers
         tag(trs, "GYM1", 0xf4, 0xf5);
@@ -2103,6 +2126,372 @@ public class Gen4Constants {
                 allTrainers.get(num - 1).multiBattleStatus = status;
             }
         }
+    }
+
+    public static final List<String> locationTagsDP = initLocationTagsDP();
+
+    private static List<String> initLocationTagsDP() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "CANACLAVE CITY");
+        addCopies(tags, 4, "ETERNA CITY");
+        addCopies(tags, 4, "PASTORIA CITY");
+        addCopies(tags, 4, "SUNYSHORE CITY");
+        addCopies(tags, 4, "POKEMON LEAGUE");
+        addCopies(tags, 4, "OREBURGH MINE");
+        addCopies(tags, 6, "VALLEY WINDWORKS");
+        addCopies(tags, 2, "ETERNA FOREST");
+        addCopies(tags, 6, "FUEGO IRONWORKS");
+        addCopies(tags, 38, "MT. CORONET");
+        addCopies(tags, 32, "GREAT MARSH");
+        addCopies(tags, 36, "SOLACEON RUINS");
+        addCopies(tags, 20, "VICTORY ROAD");
+        addCopies(tags, 6, "RAVAGED PATH");
+        addCopies(tags, 8, "OREBURGH GATE");
+        addCopies(tags, 6, "STARK MOUNTAIN");
+        addCopies(tags, 6, "SENDOFF SPRING");
+        addCopies(tags, 6, "UNKNOWN");
+        addCopies(tags, 34, "TURNBACK CAVE");
+        addCopies(tags, 52, "UNKNOWN");
+        addCopies(tags, 12, "SNOWPOINT TEMPLE");
+        addCopies(tags, 4, "WAYWARD CAVE");
+        addCopies(tags, 6, "MANIAC TUNNEL");
+        addCopies(tags, 2, "TROPHY GARDEN");
+        addCopies(tags, 16, "IRON ISLAND");
+        addCopies(tags, 18, "OLD CHATEAU");
+        addCopies(tags, 12, "LAKE VERITY");
+        addCopies(tags, 6, "LAKE VALOR");
+        addCopies(tags, 6, "LAKE ACUITY");
+        addCopies(tags, 2, "VALOR LAKEFRONT");
+        addCopies(tags, 2, "ACUITY LAKEFRONT");
+        addCopies(tags, 2, "ROUTE 201");
+        addCopies(tags, 2, "ROUTE 202");
+        addCopies(tags, 6, "ROUTE 203");
+        addCopies(tags, 12, "ROUTE 204");
+        addCopies(tags, 12, "ROUTE 205");
+        addCopies(tags, 2, "ROUTE 206");
+        addCopies(tags, 2, "ROUTE 207");
+        addCopies(tags, 6, "ROUTE 208");
+        addCopies(tags, 16, "ROUTE 209");
+        addCopies(tags, 8, "ROUTE 210");
+        addCopies(tags, 4, "ROUTE 211");
+        addCopies(tags, 12, "ROUTE 212");
+        addCopies(tags, 6, "ROUTE 213");
+        addCopies(tags, 6, "ROUTE 214");
+        addCopies(tags, 2, "ROUTE 215");
+        addCopies(tags, 2, "ROUTE 216");
+        addCopies(tags, 2, "ROUTE 217");
+        addCopies(tags, 6, "ROUTE 218");
+        addCopies(tags, 4, "ROUTE 219");
+        addCopies(tags, 6, "ROUTE 221");
+        addCopies(tags, 6, "ROUTE 222");
+        addCopies(tags, 6, "ROUTE 224");
+        addCopies(tags, 6, "ROUTE 225");
+        addCopies(tags, 6, "ROUTE 227");
+        addCopies(tags, 6, "ROUTE 228");
+        addCopies(tags, 6, "ROUTE 229");
+        addCopies(tags, 4, "TWINLEAF TOWN");
+        addCopies(tags, 4, "CELESTIC TOWN");
+        addCopies(tags, 4, "RESORT AREA");
+        addCopies(tags, 4, "ROUTE 220");
+        addCopies(tags, 4, "ROUTE 223");
+        addCopies(tags, 6, "ROUTE 226");
+        addCopies(tags, 6, "ROUTE 230");
+        addCopies(tags, 1, "MT. CORONET");
+        addCopies(tags, 3, "HONEY TREE");
+        addCopies(tags, 1, "TROPHY GARDEN");
+        addCopies(tags, 2, "GREAT MARSH");
+        return Collections.unmodifiableList(tags);
+    }
+
+    public static final List<String> locationTagsPt = initLocationTagsPt();
+
+    private static List<String> initLocationTagsPt() {
+        List<String> locationTags = new ArrayList<>();
+        locationTags.addAll(locationTagsDP.subList(0, 108));
+        locationTags.addAll(List.of("GREAT MARSH", "GREAT MARSH", "GREAT MARSH", "GREAT MARSH"));
+        locationTags.addAll(locationTagsDP.subList(108, 561));
+        return Collections.unmodifiableList(locationTags);
+    }
+
+    public static final List<String> locationTagsNoTimeHGSS = initLocationTagsNoTimeHGSS();
+
+    private static List<String> initLocationTagsNoTimeHGSS() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 7, "NEW BARK TOWN");
+        addCopies(tags, 3, "ROUTE 29");
+        addCopies(tags, 7, "CHERRYGROVE CITY");
+        addCopies(tags, 9, "ROUTE 30");
+        addCopies(tags, 9, "ROUTE 31");
+        addCopies(tags, 7, "VIOLET CITY");
+        addCopies(tags, 6, "SPROUT TOWER");
+        addCopies(tags, 9, "ROUTE 32");
+        addCopies(tags, 22, "RUINS OF ALPH");
+        addCopies(tags, 27, "UNION CAVE");
+        addCopies(tags, 3, "ROUTE 33");
+        addCopies(tags, 18, "SLOWPOKE WELL");
+        addCopies(tags, 9, "ILEX FOREST");
+        addCopies(tags, 9, "ROUTE 34");
+        addCopies(tags, 9, "ROUTE 35");
+        addCopies(tags, 6, "NATIONAL PARK");
+        addCopies(tags, 3, "ROUTE 36");
+        addCopies(tags, 3, "ROUTE 37");
+        addCopies(tags, 7, "ECRUTEAK CITY");
+        addCopies(tags, 6, "BURNED TOWER");
+        addCopies(tags, 24, "BELL TOWER");
+        addCopies(tags, 3, "ROUTE 38");
+        addCopies(tags, 3, "ROUTE 39");
+        addCopies(tags, 7, "OLIVINE CITY");
+        addCopies(tags, 7, "ROUTE 40");
+        addCopies(tags, 7, "ROUTE 41");
+        addCopies(tags, 24, "WHIRL ISLANDS");
+        addCopies(tags, 8, "CIANWOOD CITY");
+        addCopies(tags, 9, "ROUTE 42");
+        addCopies(tags, 30, "MT. MORTAR");
+        addCopies(tags, 9, "ROUTE 43");
+        addCopies(tags, 7, "LAKE OF RAGE");
+        addCopies(tags, 9, "ROUTE 44");
+        addCopies(tags, 12, "ICE PATH");
+        addCopies(tags, 7, "BLACKTHORN CITY");
+        addCopies(tags, 7, "DRAGON'S DEN");
+        addCopies(tags, 9, "ROUTE 45");
+        addCopies(tags, 3, "ROUTE 46");
+        addCopies(tags, 19, "DARK CAVE");
+        addCopies(tags, 9, "ROUTE 47");
+        addCopies(tags, 14, "MT. MOON");
+        addCopies(tags, 21, "SEAFOAM ISLANDS");
+        addCopies(tags, 27, "MT. SILVER CAVE");
+        addCopies(tags, 11, "CLIFF EDGE GATE");
+        addCopies(tags, 3, "BELL TOWER");
+        addCopies(tags, 9, "MT. SILVER");
+        addCopies(tags, 23, "MT. SILVER CAVE");
+        addCopies(tags, 9, "SAFARI ZONE");
+        addCopies(tags, 7, "ROUTE 12");
+        addCopies(tags, 8, "ROUTE 19");
+        addCopies(tags, 7, "ROUTE 20");
+        addCopies(tags, 7, "PALLET TOWN");
+        addCopies(tags, 7, "VIRIDIAN CITY");
+        addCopies(tags, 7, "CERULEAN CITY");
+        addCopies(tags, 8, "VERMILION CITY");
+        addCopies(tags, 2, "CELADON CITY");
+        addCopies(tags, 8, "FUCHSIA CITY");
+        addCopies(tags, 7, "CINNABAR ISLAND");
+        addCopies(tags, 3, "ROUTE 48");
+        addCopies(tags, 9, "ROUTE 26");
+        addCopies(tags, 9, "ROUTE 27");
+        addCopies(tags, 9, "ROUTE 28");
+        addCopies(tags, 6, "MT. MOON");
+        addCopies(tags, 7, "ROCK TUNNEL");
+        addCopies(tags, 3, "VICTORY ROAD");
+        addCopies(tags, 3, "ROUTE 1");
+        addCopies(tags, 3, "ROUTE 2");
+        addCopies(tags, 3, "ROUTE 3");
+        addCopies(tags, 9, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 9, "ROUTE 6");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 3, "ROUTE 8");
+        addCopies(tags, 9, "ROUTE 9");
+        addCopies(tags, 9, "ROUTE 10");
+        addCopies(tags, 3, "ROUTE 11");
+        addCopies(tags, 9, "ROUTE 13");
+        addCopies(tags, 3, "ROUTE 14");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 3, "ROUTE 17");
+        addCopies(tags, 3, "ROUTE 18");
+        addCopies(tags, 9, "ROUTE 21");
+        addCopies(tags, 9, "ROUTE 22");
+        addCopies(tags, 9, "ROUTE 24");
+        addCopies(tags, 9, "ROUTE 25");
+        addCopies(tags, 9, "TOHJO FALLS");
+        addCopies(tags, 3, "DIGLETT'S CAVE");
+        addCopies(tags, 7, "VICTORY ROAD");
+        addCopies(tags, 3, "ROUTE 2");
+        addCopies(tags, 3, "VIRIDIAN FOREST");
+        addCopies(tags, 29, "CERULEAN CAVE");
+        // headbutt
+        tags.addAll(List.of("ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7",
+                "ROUTE 8", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 18", "ROUTE 22",
+                "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28", "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32",
+                "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37", "ROUTE 38", "ROUTE 39", "ROUTE 42",
+                "ROUTE 43", "ROUTE 44", "ROUTE 45", "ROUTE 46", "PALLET TOWN", "VIRIDIAN CITY", "PEWTER CITY",
+                "CERULEAN CITY", "VERMILION CITY", "CELADON CITY", "FUCHSIA CITY", "NEW BARK TOWN", "CHERRYGROVE CITY",
+                "VIOLET CITY", "AZALEA TOWN", "ECRUTEAK CITY", "LAKE OF RAGE", "MT. SILVER", "ROUTE 21",
+                "NATIONAL PARK", "ILEX FOREST", "VIRIDIAN FOREST", "ROUTE 47", "ROUTE 48", "SAFARI ZONE", "ROUTE 2",
+                "ROUTE 16", "MT. SILVER CAVE"));
+        addCopies(tags, 4, "BUG CATCHING CONTEST");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeHGSS = initLocationTagsUseTimeHGSS();
+
+    private static List<String> initLocationTagsUseTimeHGSS() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 7, "NEW BARK TOWN");
+        addCopies(tags, 5, "ROUTE 29");
+        addCopies(tags, 7, "CHERRYGROVE CITY");
+        addCopies(tags, 11, "ROUTE 30");
+        addCopies(tags, 11, "ROUTE 31");
+        addCopies(tags, 7, "VIOLET CITY");
+        addCopies(tags, 10, "SPROUT TOWER");
+        addCopies(tags, 11, "ROUTE 32");
+        addCopies(tags, 32, "RUINS OF ALPH");
+        addCopies(tags, 33, "UNION CAVE");
+        addCopies(tags, 5, "ROUTE 33");
+        addCopies(tags, 22, "SLOWPOKE WELL");
+        addCopies(tags, 11, "ILEX FOREST");
+        addCopies(tags, 11, "ROUTE 34");
+        addCopies(tags, 11, "ROUTE 35");
+        addCopies(tags, 10, "NATIONAL PARK");
+        addCopies(tags, 5, "ROUTE 36");
+        addCopies(tags, 5, "ROUTE 37");
+        addCopies(tags, 7, "ECRUTEAK CITY");
+        addCopies(tags, 10, "BURNED TOWER");
+        addCopies(tags, 40, "BELL TOWER");
+        addCopies(tags, 5, "ROUTE 38");
+        addCopies(tags, 5, "ROUTE 39");
+        addCopies(tags, 7, "OLIVINE CITY");
+        addCopies(tags, 7, "ROUTE 40");
+        addCopies(tags, 7, "ROUTE 41");
+        addCopies(tags, 32, "WHIRL ISLANDS");
+        addCopies(tags, 8, "CIANWOOD CITY");
+        addCopies(tags, 11, "ROUTE 42");
+        addCopies(tags, 38, "MT. MORTAR");
+        addCopies(tags, 11, "ROUTE 43");
+        addCopies(tags, 7, "LAKE OF RAGE");
+        addCopies(tags, 11, "ROUTE 44");
+        addCopies(tags, 20, "ICE PATH");
+        addCopies(tags, 7, "BLACKTHORN CITY");
+        addCopies(tags, 7, "DRAGON'S DEN");
+        addCopies(tags, 11, "ROUTE 45");
+        addCopies(tags, 5, "ROUTE 46");
+        addCopies(tags, 23, "DARK CAVE");
+        addCopies(tags, 11, "ROUTE 47");
+        addCopies(tags, 14, "MT. MOON");
+        addCopies(tags, 31, "SEAFOAM ISLANDS");
+        addCopies(tags, 33, "MT. SILVER CAVE");
+        addCopies(tags, 13, "CLIFF EDGE GATE");
+        addCopies(tags, 5, "BELL TOWER");
+        addCopies(tags, 11, "MT. SILVER");
+        addCopies(tags, 31, "MT. SILVER CAVE");
+        addCopies(tags, 11, "SAFARI ZONE");
+        addCopies(tags, 7, "ROUTE 12");
+        addCopies(tags, 8, "ROUTE 19");
+        addCopies(tags, 7, "ROUTE 20");
+        addCopies(tags, 7, "PALLET TOWN");
+        addCopies(tags, 7, "VIRIDIAN CITY");
+        addCopies(tags, 7, "CERULEAN CITY");
+        addCopies(tags, 8, "VERMILION CITY");
+        addCopies(tags, 2, "CELADON CITY");
+        addCopies(tags, 8, "FUCHSIA CITY");
+        addCopies(tags, 7, "CINNABAR ISLAND");
+        addCopies(tags, 5, "ROUTE 48");
+        addCopies(tags, 11, "ROUTE 26");
+        addCopies(tags, 11, "ROUTE 27");
+        addCopies(tags, 11, "ROUTE 28");
+        addCopies(tags, 10, "MT. MOON");
+        addCopies(tags, 11, "ROCK TUNNEL");
+        addCopies(tags, 5, "VICTORY ROAD");
+        addCopies(tags, 5, "ROUTE 1");
+        addCopies(tags, 5, "ROUTE 2");
+        addCopies(tags, 5, "ROUTE 3");
+        addCopies(tags, 11, "ROUTE 4");
+        addCopies(tags, 5, "ROUTE 5");
+        addCopies(tags, 11, "ROUTE 6");
+        addCopies(tags, 5, "ROUTE 7");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 11, "ROUTE 9");
+        addCopies(tags, 11, "ROUTE 10");
+        addCopies(tags, 5, "ROUTE 11");
+        addCopies(tags, 11, "ROUTE 13");
+        addCopies(tags, 5, "ROUTE 14");
+        addCopies(tags, 5, "ROUTE 15");
+        addCopies(tags, 5, "ROUTE 16");
+        addCopies(tags, 5, "ROUTE 17");
+        addCopies(tags, 5, "ROUTE 18");
+        addCopies(tags, 11, "ROUTE 21");
+        addCopies(tags, 11, "ROUTE 22");
+        addCopies(tags, 11, "ROUTE 24");
+        addCopies(tags, 11, "ROUTE 25");
+        addCopies(tags, 11, "TOHJO FALLS");
+        addCopies(tags, 5, "DIGLETT'S CAVE");
+        addCopies(tags, 11, "VICTORY ROAD");
+        addCopies(tags, 5, "ROUTE 2");
+        addCopies(tags, 5, "VIRIDIAN FOREST");
+        addCopies(tags, 35, "CERULEAN CAVE");
+        // headbutt
+        tags.addAll(List.of("ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7",
+                "ROUTE 8", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 18", "ROUTE 22",
+                "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28", "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32",
+                "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37", "ROUTE 38", "ROUTE 39", "ROUTE 42",
+                "ROUTE 43", "ROUTE 44", "ROUTE 45", "ROUTE 46", "PALLET TOWN", "VIRIDIAN CITY", "PEWTER CITY",
+                "CERULEAN CITY", "VERMILION CITY", "CELADON CITY", "FUCHSIA CITY", "NEW BARK TOWN", "CHERRYGROVE CITY",
+                "VIOLET CITY", "AZALEA TOWN", "ECRUTEAK CITY", "LAKE OF RAGE", "MT. SILVER", "ROUTE 21",
+                "NATIONAL PARK", "ILEX FOREST", "VIRIDIAN FOREST", "ROUTE 47", "ROUTE 48", "SAFARI ZONE", "ROUTE 2",
+                "ROUTE 16", "MT. SILVER CAVE"));
+        addCopies(tags, 4, "BUG CATCHING CONTEST");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static void addCopies(List<String> list, int n, String s) {
+        list.addAll(Collections.nCopies(n, s));
+    }
+
+    /**
+     * Based on <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Diamond_and_Pearl/Walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrderDPPt = List.of(
+            "TWINLEAF TOWN", "ROUTE 201", "LAKE VERITY", "ROUTE 202", "ROUTE 203", "OREBURGH GATE",
+            "OREBURGH MINE", "ROUTE 204", "RAVAGED PATH", "VALLEY WINDWORKS", "ROUTE 205", "ETERNA FOREST",
+            "OLD CHATEAU", "ETERNA CITY", "ROUTE 206", "WAYWARD CAVE", "ROUTE 207", "ROUTE 208", "ROUTE 209",
+            "SOLACEON RUINS", "ROUTE 210", "ROUTE 215", "ROUTE 214", "MANIAC TUNNEL", "VALOR LAKEFRONT", "ROUTE 213",
+            "PASTORIA CITY", "GREAT MARSH", "ROUTE 212", "TROPHY GARDEN", "CELESTIC TOWN", "FUEGO IRONWORKS",
+            "ROUTE 219", "ROUTE 220", "ROUTE 221", "ROUTE 218", "CANACLAVE CITY", "IRON ISLAND", "LAKE VALOR",
+            "ROUTE 211", "MT. CORONET", "ROUTE 216", "ROUTE 217", "ACUITY LAKEFRONT", "LAKE ACUITY", "ROUTE 222",
+            "SUNYSHORE CITY", "ROUTE 223", "VICTORY ROAD", "POKEMON LEAGUE", "ROUTE 224", "ROUTE 230", "ROUTE 229",
+            "RESORT AREA", "ROUTE 228", "ROUTE 226", "ROUTE 227", "ROUTE 225", "STARK MOUNTAIN", "SNOWPOINT TEMPLE",
+            "SENDOFF SPRING", "TURNBACK CAVE", "HONEY TREE", "UNKNOWN"
+    );
+
+    /**
+     * Based on <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Gold_and_Silver/Walkthrough>this walkthrough</a>,
+     * with Gen IV-only locations added.
+     */
+    public static final List<String> locationTagsTraverseOrderHGSS = List.of(
+            "NEW BARK TOWN", "ROUTE 29", "ROUTE 46", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
+            "VIOLET CITY", "SPROUT TOWER", "ROUTE 32", "RUINS OF ALPH", "UNION CAVE", "ROUTE 33", "AZALEA TOWN",
+            "SLOWPOKE WELL", "ILEX FOREST", "ROUTE 34", "GOLDENROD CITY", "ROUTE 35", "NATIONAL PARK",
+            "ROUTE 36", "ROUTE 37", "ECRUTEAK CITY", "BURNED TOWER", "ROUTE 38", "ROUTE 39", "OLIVINE CITY",
+            "ROUTE 40", "ROUTE 41", "CIANWOOD CITY", "CLIFF EDGE GATE", "ROUTE 47", "CLIFF CAVE", "ROUTE 48",
+            "SAFARI ZONE", "ROUTE 42", "MT. MORTAR", "ROUTE 43", "LAKE OF RAGE",
+            "ROUTE 44", "ICE PATH", "BLACKTHORN CITY", "DRAGON'S DEN", "ROUTE 45", "WHIRL ISLANDS",
+            "BELL TOWER", "ROUTE 27", "TOHJO FALLS", "ROUTE 26", "VICTORY ROAD",
+            "VERMILION CITY", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROCK TUNNEL", "ROUTE 10", "ROUTE 9",
+            "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "CELADON CITY", "ROUTE 16", "ROUTE 17",
+            "ROUTE 18", "FUCHSIA CITY", "ROUTE 15", "ROUTE 14", "ROUTE 13", "ROUTE 12", "ROUTE 11",
+            "DIGLETT'S CAVE", "ROUTE 2", "VIRIDIAN FOREST", "ROUTE 3", "PEWTER CITY", "MT. MOON", "ROUTE 4",
+            "VIRIDIAN CITY", "ROUTE 1", "PALLET TOWN",
+            "ROUTE 21", "CINNABAR ISLAND", "ROUTE 20", "SEAFOAM ISLANDS", "ROUTE 19", "ROUTE 22", "ROUTE 28",
+            "MT. SILVER", "MT. SILVER CAVE", "CERULEAN CAVE", "BUG CATCHING CONTEST"
+    );
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
+        List<String> locationTags = switch (romType) {
+            case 0 -> locationTagsDP;
+            case 1 -> locationTagsPt;
+            case 2 -> (useTimeOfDay ? locationTagsUseTimeHGSS : locationTagsNoTimeHGSS);
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, locationTags);
     }
 
 }

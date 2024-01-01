@@ -973,6 +973,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasStarterTypeTriangleSupport() {
+        return false;
+    }
+
+    @Override
     public boolean hasStarterAltFormes() {
         return true;
     }
@@ -1717,12 +1722,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay, boolean catchEmAll,
-                                    boolean typeThemed, boolean usePowerLevels, boolean noLegendaries,
+    public void randomizeEncounters(Settings.WildPokemonMod mode, Settings.WildPokemonTypeMod typeMode,
+                                    boolean useTimeOfDay, boolean catchEmAll,
+                                    boolean usePowerLevels, boolean noLegendaries,
                                     boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
                                     boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
         // TODO: do some extra steps for ORAS. The code needed is found old commits.
-        super.randomizeEncounters(mode, useTimeOfDay, catchEmAll, typeThemed, usePowerLevels, noLegendaries,
+        super.randomizeEncounters(mode, typeMode, useTimeOfDay, catchEmAll, usePowerLevels, noLegendaries,
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
     }
 
@@ -4089,6 +4095,12 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
         }
         return items;
+    }
+
+    @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return romEntry.getRomType() == Gen6Constants.Type_ORAS ?
+                Gen6Constants.orasPostGameEncounterAreas : Gen6Constants.xyPostGameEncounterAreas;
     }
 
     @Override

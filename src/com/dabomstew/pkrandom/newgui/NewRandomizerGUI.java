@@ -37,6 +37,7 @@ import com.dabomstew.pkrandom.graphics.packs.*;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import javax.swing.*;
@@ -148,10 +149,13 @@ public class NewRandomizerGUI {
     private JRadioButton wpUnchangedRadioButton;
     private JRadioButton wpRandomRadioButton;
     private JRadioButton wpArea1To1RadioButton;
+    private JRadioButton wpLocation1To1RadioButton;
     private JRadioButton wpGlobal1To1RadioButton;
     private JCheckBox wpSimilarStrengthCheckBox;
     private JCheckBox wpCatchEmAllModeCheckBox;
-    private JCheckBox wpTypeThemeAreasCheckBox;
+    private JRadioButton wpTRNoneRadioButton;
+    private JRadioButton wpTRThemedAreasRadioButton;
+    private JRadioButton wpTRKeepPrimaryRadioButton;
     private JCheckBox wpUseTimeBasedEncountersCheckBox;
     private JCheckBox wpDontUseLegendariesCheckBox;
     private JCheckBox wpSetMinimumCatchRateCheckBox;
@@ -319,6 +323,17 @@ public class NewRandomizerGUI {
     private JRadioButton cpgReplaceRadioButton2;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox miscDisableLowHPMusicCheckBox;
+    private JCheckBox tpUseLocalPokemonCheckBox;
+    private JRadioButton spTypeTriangleRadioButton;
+    private JRadioButton spTypeNoneRadioButton;
+    private JRadioButton spRandomBasicRadioButton;
+    private JRadioButton spTypeFwgRadioButton;
+    private JRadioButton spTypeSingleRadioButton;
+    private JComboBox spTypeSingleComboBox;
+    private JCheckBox spTypeNoDualCheckbox;
+    private JRadioButton spTypeUniqueRadioButton;
+    private JCheckBox spNoLegendariesCheckBox;
+    private JCheckBox wpTRKeepThemesCheckBox;
 
     private static final Random RND = new Random();
 
@@ -363,7 +378,7 @@ public class NewRandomizerGUI {
     private List<String> trainerSettings = new ArrayList<>();
     private List<String> trainerSettingToolTips = new ArrayList<>();
     private final int TRAINER_UNCHANGED = 0, TRAINER_RANDOM = 1, TRAINER_RANDOM_EVEN = 2, TRAINER_RANDOM_EVEN_MAIN = 3,
-                        TRAINER_TYPE_THEMED = 4, TRAINER_TYPE_THEMED_ELITE4_GYMS = 5;
+                        TRAINER_TYPE_THEMED = 4, TRAINER_TYPE_THEMED_ELITE4_GYMS = 5, TRAINER_KEEP_THEMED = 6;
 
     private BatchRandomizationSettings batchRandomizationSettings;
 
@@ -449,6 +464,11 @@ public class NewRandomizerGUI {
         spCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomTwoEvosRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spRandomBasicRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spTypeNoneRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spTypeFwgRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spTypeTriangleRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spTypeSingleRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpSwapLegendariesSwapStandardsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -469,7 +489,11 @@ public class NewRandomizerGUI {
         wpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpArea1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpLocation1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpGlobal1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpTRNoneRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpTRThemedAreasRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpTRKeepPrimaryRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpSimilarStrengthCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpSetMinimumCatchRateCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -1533,14 +1557,27 @@ public class NewRandomizerGUI {
         spRandomCompletelyRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM);
         spUnchangedRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
         spRandomTwoEvosRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS);
+        spRandomBasicRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_BASIC);
+        spTypeNoneRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.NONE);
+        spTypeFwgRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.FIRE_WATER_GRASS);
+        spTypeTriangleRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.TRIANGLE);
+        spTypeUniqueRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.UNIQUE);
+        spTypeSingleRadioButton.setSelected(settings.getStartersTypeMod() == Settings.StartersTypeMod.SINGLE_TYPE);
+        if(settings.getStartersSingleType() == null) {
+            spTypeSingleComboBox.setSelectedIndex(0);
+        } else {
+            spTypeSingleComboBox.setSelectedIndex(settings.getStartersSingleType().toInt() + 1);
+        }
+        spTypeNoDualCheckbox.setSelected(settings.isStartersNoDualTypes());
         spRandomizeStarterHeldItemsCheckBox.setSelected(settings.isRandomizeStartersHeldItems());
         spBanBadItemsCheckBox.setSelected(settings.isBanBadRandomStarterHeldItems());
         spAllowAltFormesCheckBox.setSelected(settings.isAllowStarterAltFormes());
+        spNoLegendariesCheckBox.setSelected(settings.isStartersNoLegendaries());
 
         int[] customStarters = settings.getCustomStarters();
-        spComboBox1.setSelectedIndex(customStarters[0] - 1);
-        spComboBox2.setSelectedIndex(customStarters[1] - 1);
-        spComboBox3.setSelectedIndex(customStarters[2] - 1);
+        spComboBox1.setSelectedIndex(customStarters[0]);
+        spComboBox2.setSelectedIndex(customStarters[1]);
+        spComboBox3.setSelectedIndex(customStarters[2]);
 
         peUnchangedRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
         peRandomRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
@@ -1574,6 +1611,7 @@ public class NewRandomizerGUI {
         tpRivalCarriesStarterCheckBox.setSelected(settings.isRivalCarriesStarterThroughout());
         tpWeightTypesCheckBox.setSelected(settings.isTrainersMatchTypingDistribution());
         tpDontUseLegendariesCheckBox.setSelected(settings.isTrainersBlockLegendaries());
+        tpUseLocalPokemonCheckBox.setSelected(settings.isTrainersUseLocalPokemon());
         tpNoEarlyWonderGuardCheckBox.setSelected(settings.isTrainersBlockEarlyWonderGuard());
         tpForceFullyEvolvedAtCheckBox.setSelected(settings.isTrainersForceFullyEvolved());
         tpForceFullyEvolvedAtSlider.setValue(settings.getTrainersForceFullyEvolvedLevel());
@@ -1614,18 +1652,24 @@ public class NewRandomizerGUI {
         totpPercentageLevelModifierCheckBox.setSelected(settings.isTotemLevelsModified());
         totpPercentageLevelModifierSlider.setValue(settings.getTotemLevelModifier());
 
-        wpCatchEmAllModeCheckBox.setSelected(settings.isCatchEmAllEncounters());
-        wpArea1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
-        wpTypeThemeAreasCheckBox.setSelected(settings.isTypeThemeEncounterAreas());
-        wpGlobal1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
-        wpRandomRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
         wpUnchangedRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED);
-        wpUseTimeBasedEncountersCheckBox.setSelected(settings.isUseTimeBasedEncounters());
+        wpRandomRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.RANDOM);
+        wpArea1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.AREA_MAPPING);
+        wpLocation1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.LOCATION_MAPPING);
+        wpGlobal1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
 
+        wpTRNoneRadioButton.setSelected(settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.NONE);
+        wpTRThemedAreasRadioButton.setSelected(settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS);
+        wpTRKeepPrimaryRadioButton.setSelected(settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY);
+        wpTRKeepThemesCheckBox.setSelected(settings.isKeepWildTypeThemes());
+
+        wpCatchEmAllModeCheckBox.setSelected(settings.isCatchEmAllEncounters());
+        wpSimilarStrengthCheckBox.setSelected(settings.isSimilarStrengthEncounters());
+
+        wpUseTimeBasedEncountersCheckBox.setSelected(settings.isUseTimeBasedEncounters());
         wpSetMinimumCatchRateCheckBox.setSelected(settings.isUseMinimumCatchRate());
         wpSetMinimumCatchRateSlider.setValue(settings.getMinimumCatchRateLevel());
         wpDontUseLegendariesCheckBox.setSelected(settings.isBlockWildLegendaries());
-        wpSimilarStrengthCheckBox.setSelected(settings.isSimilarStrengthEncounters());
         wpRandomizeHeldItemsCheckBox.setSelected(settings.isRandomizeWildPokemonHeldItems());
         wpBanBadItemsCheckBox.setSelected(settings.isBanBadRandomWildPokemonHeldItems());
         wpBalanceShakingGrassPokemonCheckBox.setSelected(settings.isBalanceShakingGrass());
@@ -1776,13 +1820,18 @@ public class NewRandomizerGUI {
         settings.setRemoveTimeBasedEvolutions(peRemoveTimeBasedEvolutionsCheckBox.isSelected());
 
         settings.setStartersMod(spUnchangedRadioButton.isSelected(), spCustomRadioButton.isSelected(), spRandomCompletelyRadioButton.isSelected(),
-                spRandomTwoEvosRadioButton.isSelected());
+                spRandomTwoEvosRadioButton.isSelected(), spRandomBasicRadioButton.isSelected());
+        settings.setStartersTypeMod(spTypeNoneRadioButton.isSelected(), spTypeFwgRadioButton.isSelected(), spTypeTriangleRadioButton.isSelected(),
+                spTypeUniqueRadioButton.isSelected(), spTypeSingleRadioButton.isSelected());
+        settings.setStartersSingleType(spTypeSingleComboBox.getSelectedIndex());
+        settings.setStartersNoDualTypes(spTypeNoDualCheckbox.isSelected());
         settings.setRandomizeStartersHeldItems(spRandomizeStarterHeldItemsCheckBox.isSelected() && spRandomizeStarterHeldItemsCheckBox.isVisible());
         settings.setBanBadRandomStarterHeldItems(spBanBadItemsCheckBox.isSelected() && spBanBadItemsCheckBox.isVisible());
         settings.setAllowStarterAltFormes(spAllowAltFormesCheckBox.isSelected() && spAllowAltFormesCheckBox.isVisible());
+        settings.setStartersNoLegendaries(spNoLegendariesCheckBox.isSelected());
 
-        int[] customStarters = new int[] { spComboBox1.getSelectedIndex() + 1,
-                spComboBox2.getSelectedIndex() + 1, spComboBox3.getSelectedIndex() + 1 };
+        int[] customStarters = new int[] { spComboBox1.getSelectedIndex(),
+                spComboBox2.getSelectedIndex(), spComboBox3.getSelectedIndex()};
         settings.setCustomStarters(customStarters);
 
         settings.setEvolutionsMod(peUnchangedRadioButton.isSelected(), peRandomRadioButton.isSelected(), peRandomEveryLevelRadioButton.isSelected());
@@ -1812,11 +1861,13 @@ public class NewRandomizerGUI {
 
         settings.setTrainersMod(isTrainerSetting(TRAINER_UNCHANGED), isTrainerSetting(TRAINER_RANDOM),
                 isTrainerSetting(TRAINER_RANDOM_EVEN), isTrainerSetting(TRAINER_RANDOM_EVEN_MAIN),
-                isTrainerSetting(TRAINER_TYPE_THEMED), isTrainerSetting(TRAINER_TYPE_THEMED_ELITE4_GYMS));
+                isTrainerSetting(TRAINER_TYPE_THEMED), isTrainerSetting(TRAINER_TYPE_THEMED_ELITE4_GYMS),
+                isTrainerSetting(TRAINER_KEEP_THEMED));
         settings.setTrainersUsePokemonOfSimilarStrength(tpSimilarStrengthCheckBox.isSelected());
         settings.setRivalCarriesStarterThroughout(tpRivalCarriesStarterCheckBox.isSelected());
         settings.setTrainersMatchTypingDistribution(tpWeightTypesCheckBox.isSelected());
         settings.setTrainersBlockLegendaries(tpDontUseLegendariesCheckBox.isSelected());
+        settings.setTrainersUseLocalPokemon(tpUseLocalPokemonCheckBox.isSelected());
         settings.setTrainersBlockEarlyWonderGuard(tpNoEarlyWonderGuardCheckBox.isSelected());
         settings.setTrainersForceFullyEvolved(tpForceFullyEvolvedAtCheckBox.isSelected());
         settings.setTrainersForceFullyEvolvedLevel(tpForceFullyEvolvedAtSlider.getValue());
@@ -1846,11 +1897,12 @@ public class NewRandomizerGUI {
         settings.setTotemLevelsModified(totpPercentageLevelModifierCheckBox.isSelected());
         settings.setTotemLevelModifier(totpPercentageLevelModifierSlider.getValue());
 
-        settings.setWildPokemonMod(wpUnchangedRadioButton.isSelected(), wpRandomRadioButton.isSelected(), wpArea1To1RadioButton.isSelected(),
-                wpGlobal1To1RadioButton.isSelected());
-        settings.setTypeThemeEncounterAreas(wpTypeThemeAreasCheckBox.isSelected());
+        settings.setWildPokemonMod(wpUnchangedRadioButton.isSelected(), wpRandomRadioButton.isSelected(),
+                wpArea1To1RadioButton.isSelected(), wpLocation1To1RadioButton.isSelected(), wpGlobal1To1RadioButton.isSelected());
+        settings.setWildPokemonTypeMod(wpTRNoneRadioButton.isSelected(), wpTRThemedAreasRadioButton.isSelected(),
+                wpTRKeepPrimaryRadioButton.isSelected());
+        settings.setKeepWildTypeThemes(wpTRKeepThemesCheckBox.isSelected());
         settings.setCatchEmAllEncounters(wpCatchEmAllModeCheckBox.isSelected());
-        settings.setTypeThemeEncounterAreas(wpTypeThemeAreasCheckBox.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeBasedEncountersCheckBox.isSelected());
         settings.setUseMinimumCatchRate(wpSetMinimumCatchRateCheckBox.isSelected());
         settings.setMinimumCatchRateLevel(wpSetMinimumCatchRateSlider.getValue());
@@ -2069,6 +2121,9 @@ public class NewRandomizerGUI {
         saveSettingsButton.setVisible(true);
         saveSettingsButton.setEnabled(false);
         saveSettingsButton.setSelected(false);
+        tpUseLocalPokemonCheckBox.setVisible(true);
+        tpUseLocalPokemonCheckBox.setEnabled(false);
+        tpUseLocalPokemonCheckBox.setSelected(false);
 
         // the buttons in the main part of the gui (randomization options):
 
@@ -2103,9 +2158,10 @@ public class NewRandomizerGUI {
 				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox).forEach(this::setInitialButtonState);
 
 		Arrays.asList(spUnchangedRadioButton, spCustomRadioButton, spRandomCompletelyRadioButton,
-				spRandomTwoEvosRadioButton, spRandomizeStarterHeldItemsCheckBox, spBanBadItemsCheckBox,
-				spAllowAltFormesCheckBox)
-				.forEach(this::setInitialButtonState);
+				spRandomTwoEvosRadioButton, spTypeNoneRadioButton, spTypeFwgRadioButton, spTypeTriangleRadioButton,
+				spTypeUniqueRadioButton, spTypeSingleRadioButton, spTypeNoDualCheckbox, spNoLegendariesCheckBox,
+				spRandomizeStarterHeldItemsCheckBox, spBanBadItemsCheckBox, spAllowAltFormesCheckBox)
+                .forEach(this::setInitialButtonState);
 		spComboBox1.setVisible(true);
 		spComboBox1.setEnabled(false);
 		spComboBox1.setSelectedIndex(0);
@@ -2156,6 +2212,7 @@ public class NewRandomizerGUI {
 		tpComboBox.setEnabled(false);
 		tpComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "Unchanged" }));
 		Arrays.asList(tpRivalCarriesStarterCheckBox, tpSimilarStrengthCheckBox, tpWeightTypesCheckBox,
+                tpUseLocalPokemonCheckBox,
 				tpDontUseLegendariesCheckBox, tpNoEarlyWonderGuardCheckBox, tpRandomizeTrainerNamesCheckBox,
 				tpRandomizeTrainerClassNamesCheckBox, tpForceFullyEvolvedAtCheckBox, tpPercentageLevelModifierCheckBox,
 				tpEliteFourUniquePokemonCheckBox, tpAllowAlternateFormesCheckBox, tpSwapMegaEvosCheckBox,
@@ -2197,9 +2254,10 @@ public class NewRandomizerGUI {
 		totpPercentageLevelModifierSlider.setEnabled(false);
 		totpPercentageLevelModifierSlider.setValue(0);
 
-        Arrays.asList(wpUnchangedRadioButton, wpRandomRadioButton, wpArea1To1RadioButton, wpGlobal1To1RadioButton,
+        Arrays.asList(wpUnchangedRadioButton, wpRandomRadioButton, wpArea1To1RadioButton, wpLocation1To1RadioButton,
+                        wpGlobal1To1RadioButton, wpTRNoneRadioButton, wpTRThemedAreasRadioButton, wpTRKeepPrimaryRadioButton,
                         wpSimilarStrengthCheckBox, wpCatchEmAllModeCheckBox,
-                        wpTypeThemeAreasCheckBox, wpUseTimeBasedEncountersCheckBox, wpDontUseLegendariesCheckBox,
+                        wpUseTimeBasedEncountersCheckBox, wpDontUseLegendariesCheckBox,
                         wpSetMinimumCatchRateCheckBox, wpRandomizeHeldItemsCheckBox, wpBanBadItemsCheckBox,
                         wpBalanceShakingGrassPokemonCheckBox, wpPercentageLevelModifierCheckBox, wpAllowAltFormesCheckBox)
                 .forEach(this::setInitialButtonState);
@@ -2366,12 +2424,17 @@ public class NewRandomizerGUI {
             spCustomRadioButton.setEnabled(true);
             spRandomCompletelyRadioButton.setEnabled(true);
             spRandomTwoEvosRadioButton.setEnabled(true);
-            spAllowAltFormesCheckBox.setVisible(romHandler.hasStarterAltFormes());
+            spRandomBasicRadioButton.setEnabled(true);
             if (romHandler.isYellow()) {
                 spComboBox3.setVisible(false);
             }
             populateDropdowns();
 
+            boolean typeTriangleSupport = romHandler.hasStarterTypeTriangleSupport();
+            spTypeFwgRadioButton.setVisible(typeTriangleSupport);
+            spTypeTriangleRadioButton.setVisible(typeTriangleSupport);
+
+            spAllowAltFormesCheckBox.setVisible(romHandler.hasStarterAltFormes());
             boolean supportsStarterHeldItems = romHandler.supportsStarterHeldItems();
             spRandomizeStarterHeldItemsCheckBox.setEnabled(supportsStarterHeldItems);
             spRandomizeStarterHeldItemsCheckBox.setVisible(supportsStarterHeldItems);
@@ -2521,9 +2584,12 @@ public class NewRandomizerGUI {
             wpUnchangedRadioButton.setSelected(true);
             wpRandomRadioButton.setEnabled(true);
             wpArea1To1RadioButton.setEnabled(true);
+            wpLocation1To1RadioButton.setVisible(romHandler.hasEncounterLocations());
+            if (wpLocation1To1RadioButton.isVisible()) {
+                wpLocation1To1RadioButton.setEnabled(true);
+            }
             wpGlobal1To1RadioButton.setEnabled(true);
-
-            wpUseTimeBasedEncountersCheckBox.setVisible(romHandler.hasTimeBasedEncounters());
+;            wpUseTimeBasedEncountersCheckBox.setVisible(romHandler.hasTimeBasedEncounters());
             wpSetMinimumCatchRateCheckBox.setEnabled(true);
             wpRandomizeHeldItemsCheckBox.setEnabled(true);
             wpRandomizeHeldItemsCheckBox.setVisible(pokemonGeneration != 1);
@@ -2763,6 +2829,11 @@ public class NewRandomizerGUI {
                 spRandomTwoEvosRadioButton.setSelected(false);
                 spRandomCompletelyRadioButton.setSelected(true);
             }
+            spRandomBasicRadioButton.setEnabled(false);
+            if (spRandomBasicRadioButton.isSelected()) {
+                spRandomBasicRadioButton.setSelected(false);
+                spRandomCompletelyRadioButton.setSelected(true);
+            }
             paFollowEvolutionsCheckBox.setSelected(false);
             tmFollowEvolutionsCheckBox.setSelected(false);
             mtFollowEvolutionsCheckBox.setSelected(false);
@@ -2793,6 +2864,7 @@ public class NewRandomizerGUI {
             // except this one, so manually enable it again.
             ptRandomFollowEvolutionsRadioButton.setEnabled(true);
             spRandomTwoEvosRadioButton.setEnabled(true);
+            spRandomBasicRadioButton.setEnabled(true);
 
             // The controls that make evolutions easier/possible, however,
             // need to all be manually re-enabled.
@@ -2915,18 +2987,41 @@ public class NewRandomizerGUI {
         spComboBox2.setEnabled(spCustomStatus);
         spComboBox3.setEnabled(spCustomStatus);
 
-        if (spUnchangedRadioButton.isSelected()) {
-            spAllowAltFormesCheckBox.setEnabled(false);
-            spAllowAltFormesCheckBox.setSelected(false);
-        } else {
-            spAllowAltFormesCheckBox.setEnabled(true);
-        }
-
         if (spRandomizeStarterHeldItemsCheckBox.isSelected()) {
             spBanBadItemsCheckBox.setEnabled(true);
         } else {
             spBanBadItemsCheckBox.setEnabled(false);
             spBanBadItemsCheckBox.setSelected(false);
+        }
+
+        if (spUnchangedRadioButton.isSelected() || spCustomRadioButton.isSelected()) {
+            spTypeNoneRadioButton.setSelected(true);
+            spTypeNoneRadioButton.setEnabled(false);
+            spTypeFwgRadioButton.setEnabled(false);
+            spTypeTriangleRadioButton.setEnabled(false);
+            spTypeUniqueRadioButton.setEnabled(false);
+            spTypeSingleRadioButton.setEnabled(false);
+            spTypeNoDualCheckbox.setSelected(false);
+            spTypeNoDualCheckbox.setEnabled(false);
+            spAllowAltFormesCheckBox.setEnabled(false);
+            spAllowAltFormesCheckBox.setSelected(false);
+            spNoLegendariesCheckBox.setEnabled(false);
+            spNoLegendariesCheckBox.setSelected(false);
+        } else {
+            spTypeNoneRadioButton.setEnabled(true);
+            spTypeFwgRadioButton.setEnabled(true);
+            spTypeTriangleRadioButton.setEnabled(true);
+            spTypeUniqueRadioButton.setEnabled(true);
+            spTypeSingleRadioButton.setEnabled(true);
+            spTypeNoDualCheckbox.setEnabled(true);
+            spAllowAltFormesCheckBox.setEnabled(true);
+            spNoLegendariesCheckBox.setEnabled(true);
+        }
+
+        if(spTypeSingleRadioButton.isSelected()) {
+            spTypeSingleComboBox.setEnabled(true);
+        } else {
+            spTypeSingleComboBox.setEnabled(false);
         }
 
         if (stpUnchangedRadioButton.isSelected()) {
@@ -3019,6 +3114,8 @@ public class NewRandomizerGUI {
             tpSimilarStrengthCheckBox.setSelected(false);
             tpDontUseLegendariesCheckBox.setEnabled(false);
             tpDontUseLegendariesCheckBox.setSelected(false);
+            tpUseLocalPokemonCheckBox.setEnabled(false);
+            tpUseLocalPokemonCheckBox.setSelected(false);
             tpNoEarlyWonderGuardCheckBox.setEnabled(false);
             tpNoEarlyWonderGuardCheckBox.setSelected(false);
             tpAllowAlternateFormesCheckBox.setEnabled(false);
@@ -3052,6 +3149,7 @@ public class NewRandomizerGUI {
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
+            tpUseLocalPokemonCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setEnabled(true);
             tpAllowAlternateFormesCheckBox.setEnabled(true);
             if (currentRestrictions == null || currentRestrictions.allowTrainerSwapMegaEvolvables(
@@ -3153,27 +3251,45 @@ public class NewRandomizerGUI {
             totpPercentageLevelModifierSlider.setValue(0);
         }
 
+        if (wpUnchangedRadioButton.isSelected() || wpGlobal1To1RadioButton.isSelected()) {
+            wpTRNoneRadioButton.setSelected(true);
+            wpTRNoneRadioButton.setEnabled(false);
+            wpTRThemedAreasRadioButton.setSelected(false);
+            wpTRThemedAreasRadioButton.setEnabled(false);
+            wpTRKeepPrimaryRadioButton.setSelected(false);
+            wpTRKeepPrimaryRadioButton.setEnabled(false);
+            wpTRKeepThemesCheckBox.setEnabled(false);
+            wpTRKeepThemesCheckBox.setSelected(false);
+        } else {
+            wpTRNoneRadioButton.setEnabled(true);
+            wpTRThemedAreasRadioButton.setEnabled(true);
+            wpTRKeepPrimaryRadioButton.setEnabled(true);
+            if (wpTRKeepPrimaryRadioButton.isSelected()) {
+                wpTRKeepThemesCheckBox.setEnabled(false);
+                wpTRKeepThemesCheckBox.setSelected(false);
+            } else {
+                wpTRKeepThemesCheckBox.setEnabled(true);
+            }
+        }
+
         if (wpRandomRadioButton.isSelected()) {
             wpSimilarStrengthCheckBox.setEnabled(true);
             wpCatchEmAllModeCheckBox.setEnabled(true);
-            wpTypeThemeAreasCheckBox.setEnabled(true);
         } else if (wpArea1To1RadioButton.isSelected()) {
             wpSimilarStrengthCheckBox.setEnabled(true);
             wpCatchEmAllModeCheckBox.setEnabled(true);
-            wpTypeThemeAreasCheckBox.setEnabled(true);
+        } else if (wpLocation1To1RadioButton.isSelected()) {
+            wpSimilarStrengthCheckBox.setEnabled(true);
+            wpCatchEmAllModeCheckBox.setEnabled(true);
         } else if (wpGlobal1To1RadioButton.isSelected()) {
             wpSimilarStrengthCheckBox.setEnabled(true);
             wpCatchEmAllModeCheckBox.setEnabled(false);
             wpCatchEmAllModeCheckBox.setSelected(false);
-            wpTypeThemeAreasCheckBox.setEnabled(false);
-            wpTypeThemeAreasCheckBox.setSelected(false);
         } else {
             wpSimilarStrengthCheckBox.setEnabled(false);
             wpSimilarStrengthCheckBox.setSelected(false);
             wpCatchEmAllModeCheckBox.setEnabled(false);
             wpCatchEmAllModeCheckBox.setSelected(false);
-            wpTypeThemeAreasCheckBox.setEnabled(false);
-            wpTypeThemeAreasCheckBox.setSelected(false);
         }
 
         if (wpUnchangedRadioButton.isSelected()) {
@@ -3479,6 +3595,14 @@ public class NewRandomizerGUI {
             spComboBox3.setModel(new DefaultComboBoxModel<>(pokeNames));
             spComboBox3.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)));
         }
+
+        int numTypes = Type.getAllTypes(romHandler.generationOfPokemon()).size();
+        String[] typeNames = new String[numTypes + 1];
+        typeNames[0] = "Random";
+        for (int i = 1; i <= numTypes; i++) {
+            typeNames[i] = Type.fromInt(i-1).toString();
+        }
+        spTypeSingleComboBox.setModel(new DefaultComboBoxModel<>(typeNames));
 
         String[] baseStatGenerationNumbers = new String[Math.min(4, GlobalConstants.HIGHEST_POKEMON_GEN - romHandler.generationOfPokemon())];
         int j = Math.max(6, romHandler.generationOfPokemon() + 1);

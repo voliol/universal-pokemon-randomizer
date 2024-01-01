@@ -29,20 +29,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
+import java.util.*;
 
+// TODO: imports
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.graphics.packs.GBCPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -658,14 +652,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
         // Amount?
-        int starterAmount = 2;
-        if (!romEntry.isYellow()) {
-            starterAmount = 3;
-        }
+        int starterAmount = isYellow() ? 2 : 3;
 
         // Basic checks
         if (newStarters.size() != starterAmount) {
-            return false;
+            throw new RandomizationException("Unexpected amount of new starters. Should be " + starterAmount +
+                    ", was " + newStarters.size());
         }
 
         // Patch starter bytes
@@ -777,7 +769,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         return true;
+    }
 
+    @Override
+    public boolean hasStarterTypeTriangleSupport() {
+        return !isYellow();
     }
 
     @Override
@@ -834,7 +830,19 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         readNormalEncounters(encounterAreas);
         readFishingEncounters(encounterAreas);
 
+        tagEncounterAreas(encounterAreas);
+
         return encounterAreas;
+    }
+
+    private void tagEncounterAreas(List<EncounterArea> encounterAreas) {
+        if (romEntry.isYellow()) {
+            Gen1Constants.tagEncounterAreasYellow(encounterAreas);
+        } else if (romEntry.getName().equals("Blue (J)")) { // kind of ugly to refer to a specific ROM name
+            Gen1Constants.tagEncounterAreasJapaneseBlue(encounterAreas);
+        } else {
+            Gen1Constants.tagEncounterAreasRBG(encounterAreas);
+        }
     }
 
     private Pokemon getGhostMarowakPoke() {
@@ -975,6 +983,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> Gen1Constants.locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
+    }
+
+    @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounterAreas) {
         Iterator<EncounterArea> areaIterator = encounterAreas.iterator();
 
@@ -1075,6 +1090,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean hasEncounterLocations() {
+        return true;
     }
 
     @Override
@@ -2909,6 +2929,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             palette = GBCImage.DEFAULT_PALETTE;
         }
         return palette;
+    }
+
+    @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return Gen1Constants.postGameEncounterAreas;
     }
 
     @Override

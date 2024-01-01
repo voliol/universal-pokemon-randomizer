@@ -258,21 +258,9 @@ public class Randomizer {
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
-        switch (settings.getStartersMod()) {
-            case CUSTOM -> {
-                romHandler.customStarters(settings);
-                startersChanged = true;
-            }
-            case COMPLETELY_RANDOM -> {
-                romHandler.randomizeStarters(settings);
-                startersChanged = true;
-            }
-            case RANDOM_WITH_TWO_EVOLUTIONS -> {
-                romHandler.randomizeBasicTwoEvosStarters(settings);
-                startersChanged = true;
-            }
-            default -> {
-            }
+        if(settings.getStartersMod() != Settings.StartersMod.UNCHANGED) {
+            romHandler.randomizeStarters(settings);
+            startersChanged = true;
         }
         if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
             romHandler.randomizeStarterHeldItems(settings);
@@ -426,6 +414,14 @@ public class Randomizer {
 
         }
 
+        // do part of wild Pokemon early if needed
+        if (settings.isTrainersUseLocalPokemon() &&
+                (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
+                        settings.isWildLevelsModified())) {
+            romHandler.randomizeEncounters(settings);
+            wildsChanged = true;
+        }
+
         // Trainer Pokemon
         // 1. Add extra Trainer Pokemon
         // 2. Set trainers to be double battles and add extra Pokemon if necessary
@@ -451,6 +447,7 @@ public class Randomizer {
             case MAINPLAYTHROUGH:
             case TYPE_THEMED:
             case TYPE_THEMED_ELITE4_GYMS:
+            case KEEP_THEMED:
                 romHandler.randomizeTrainerPokes(settings);
                 trainersChanged = true;
                 break;
@@ -562,18 +559,19 @@ public class Randomizer {
         }
 
         // Wild Pokemon
-        // 1. Update catch rates
-        // 2. Randomize Wild Pokemon
 
         if (settings.isUseMinimumCatchRate()) {
             romHandler.changeCatchRates(settings);
         }
 
-        if (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
-                settings.isWildLevelsModified()) {
+        if (!settings.isTrainersUseLocalPokemon() &&
+                (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
+                settings.isWildLevelsModified())) {
             romHandler.randomizeEncounters(settings);
             wildsChanged = true;
         }
+
+        wildsChanged = true; // temp TODO: remove
 
         if (wildsChanged) {
             logWildPokemonChanges(log);
@@ -1042,12 +1040,13 @@ public class Randomizer {
         switch (settings.getStartersMod()) {
             case CUSTOM -> log.println("--Custom Starters--");
             case COMPLETELY_RANDOM -> log.println("--Random Starters--");
+            case RANDOM_BASIC -> log.println("--Random Basic Starters--");
             case RANDOM_WITH_TWO_EVOLUTIONS -> log.println("--Random 2-Evolution Starters--");
             default -> {
             }
         }
 
-        List<Pokemon> starters = romHandler.getPickedStarters();
+        List<Pokemon> starters = romHandler.getStarters();
         int i = 1;
         for (Pokemon starter: starters) {
             log.println("Set starter " + i + " to " + starter.fullName());
@@ -1061,7 +1060,7 @@ public class Randomizer {
         log.println("--Wild Pokemon--");
         boolean useTimeBasedEncounters = settings.isUseTimeBasedEncounters() ||
                 (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED && settings.isWildLevelsModified());
-        List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeBasedEncounters);
+        List<EncounterArea> encounterAreas = romHandler.getSortedEncounters(useTimeBasedEncounters);
         int idx = 0;
         for (EncounterArea area : encounterAreas) {
             idx++;

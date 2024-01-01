@@ -29,10 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen5Constants {
 
@@ -197,7 +194,7 @@ public class Gen5Constants {
     );
 
     public static final List<Integer> emptyPlaythroughTrainers = List.of();
-    
+
     public static final List<Integer> bw1MainPlaythroughTrainers = Arrays.asList(
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -263,7 +260,7 @@ public class Gen5Constants {
             71, 72, 73, 74, 75, 76, 77);
 
     public static final int normalTrainerNameLength = 813, normalTrainerClassLength = 236;
-    
+
 //    public static final Map<Integer, String> bw1ShopIndex = new HashMap<Integer, String>() {1:"Check"};
 
     public static final List<Integer> bw1MainGameShops = Arrays.asList(
@@ -301,7 +298,7 @@ public class Gen5Constants {
     public static final List<Integer> bw2MainGameShops = Arrays.asList(
             9, 11, 14, 15, 16, 18, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31
     );
-    
+
     public static final List<String> bw2ShopNames = Arrays.asList(
             "Primary 0 Badges",
             "Primary 1 Badges",
@@ -342,7 +339,7 @@ public class Gen5Constants {
             Items.ovalStone, Items.kingsRock, Items.deepSeaTooth, Items.deepSeaScale, Items.metalCoat, Items.dragonScale,
             Items.upgrade, Items.protector, Items.electirizer, Items.magmarizer, Items.dubiousDisc, Items.reaperCloth,
             Items.razorClaw, Items.razorFang, Items.prismScale);
-    
+
     public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(2, 3, 5, 6, 9, 12, 13, 19,
             22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47, 50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90,
             91, 92, 93);
@@ -1647,7 +1644,7 @@ public class Gen5Constants {
         12,
         54,
     };
-    
+
     private static final int[] bw2WildFileToAreaMap = {
         2,
         4,
@@ -1708,6 +1705,26 @@ public class Gen5Constants {
         12,
         52,
         68,
+    };
+
+    public static String[] bwPostGameEncounterAreas = new String[] {
+            "Fishing", //post-game techniques
+            "Challenger's Cave", "Abundant Shrine", "Giant Chasm", //caves, etc
+            "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",//routes
+            "Lacunosa Town", "Undella Town", //cities
+            "Village Bridge", "Undella Bay", "White Forest", "Marvelous Bridge" //other overworld locations
+            //swarms apparently aren't handled as wilds in this game,
+            //so no need to exclude them.
+            //TODO: relic castle bottom floor handling
+    };
+
+    public static String[] bw2PostGameEncounterAreas = new String[] {
+            "Fishing", //post-game techniques
+            "Moor of Icirrus", "Clay Tunnel", "Underground Ruins", "Pinwheel Forest", "P2 Laboratory", //caves, etc
+            "Route 1", "Route 2", "Route 3", "Route 8", "Route 15", "Route 17", "Route 18", //routes
+            "Icirrus City", "Striaton City", //cities
+            "White Forest", "Marvelous Bridge", "Dragonspiral Tower", "Twist Mountain", "Dreamyard", "Nature Preserve"//other overworld locations
+            //again, swarms aren't wilds
     };
 
     public static void tagTrainersBW(List<Trainer> trs) {
@@ -1945,5 +1962,293 @@ public class Gen5Constants {
             }
         }
     }
+
+    private static final List<String> locationTagsNoTimeBW = initLocationTagsNoTimeBW();
+
+    private static List<String> initLocationTagsNoTimeBW() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 4, "DRIFTVEIL CITY");
+        addCopies(tags, 5, "ICIRRUS CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 31, "RELIC CASTLE");
+        addCopies(tags, 3, "COLD STORAGE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 8, "TWIST MOUNTAIN");
+        addCopies(tags, 11, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 39, "VICTORY ROAD");
+        addCopies(tags, 18, "GIANT CHASM");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 4, "UNDELLA BAY");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 5, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 7, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 5, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 10, "CHALLENGER'S CAVE");
+        addCopies(tags, 6, "ROUTE 10");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeBW = initLocationTagsUseTimeBW();
+
+    private static List<String> initLocationTagsUseTimeBW() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 4, "DRIFTVEIL CITY");
+        addCopies(tags, 19, "ICIRRUS CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 31, "RELIC CASTLE");
+        addCopies(tags, 3, "COLD STORAGE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 32, "TWIST MOUNTAIN");
+        addCopies(tags, 39, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 39, "VICTORY ROAD");
+        addCopies(tags, 18, "GIANT CHASM");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 16, "UNDELLA BAY");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 5, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 28, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 12, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 19, "ROUTE 8");
+        addCopies(tags, 19, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 10, "CHALLENGER'S CAVE");
+        addCopies(tags, 6, "ROUTE 10");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsNoTimeBW2 = initLocationTagsNoTimeBW2();
+
+    private static List<String> initLocationTagsNoTimeBW2() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 3, "CASTELIA CITY");
+        addCopies(tags, 5, "ICIRRUS CITY");
+        addCopies(tags, 4, "ASPERTIA CITY");
+        addCopies(tags, 4, "VIRBANK CITY");
+        addCopies(tags, 4, "HUMILAU CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 8, "RELIC CASTLE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 8, "TWIST MOUNTAIN");
+        addCopies(tags, 11, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 2, "VICTORY ROAD");
+        addCopies(tags, 21, "GIANT CHASM");
+        addCopies(tags, 25, "CASTELIA SEWERS");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 4, "UNDELLA BAY");
+        addCopies(tags, 10, "FLOCCESY RANCH");
+        addCopies(tags, 9, "VIRBANK COMPLEX");
+        addCopies(tags, 27, "REVERSAL MOUNTAIN");
+        addCopies(tags, 10, "STRANGE HOUSE");
+        addCopies(tags, 42, "VICTORY ROAD");
+        addCopies(tags, 10, "RELIC PASSAGE");
+        addCopies(tags, 26, "CLAY TUNNEL");
+        addCopies(tags, 8, "SEASIDE CAVE");
+        addCopies(tags, 7, "NATURE PRESERVE");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 10, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 7, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 5, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 6, "ROUTE 19");
+        addCopies(tags, 7, "ROUTE 20");
+        addCopies(tags, 7, "ROUTE 22");
+        addCopies(tags, 7, "ROUTE 23");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        addCopies(tags, 4, "ROUTE 21");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeBW2 = initLocationTagsUseTimeBW2();
+
+    private static List<String> initLocationTagsUseTimeBW2() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 3, "CASTELIA CITY");
+        addCopies(tags, 19, "ICIRRUS CITY");
+        addCopies(tags, 4, "ASPERTIA CITY");
+        addCopies(tags, 4, "VIRBANK CITY");
+        addCopies(tags, 4, "HUMILAU CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 8, "RELIC CASTLE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 32, "TWIST MOUNTAIN");
+        addCopies(tags, 39, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 2, "VICTORY ROAD");
+        addCopies(tags, 21, "GIANT CHASM");
+        addCopies(tags, 25, "CASTELIA SEWERS");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 16, "UNDELLA BAY");
+        addCopies(tags, 10, "FLOCCESY RANCH");
+        addCopies(tags, 9, "VIRBANK COMPLEX");
+        addCopies(tags, 27, "REVERSAL MOUNTAIN");
+        addCopies(tags, 10, "STRANGE HOUSE");
+        addCopies(tags, 42, "VICTORY ROAD");
+        addCopies(tags, 10, "RELIC PASSAGE");
+        addCopies(tags, 26, "CLAY TUNNEL");
+        addCopies(tags, 8, "SEASIDE CAVE");
+        addCopies(tags, 7, "NATURE PRESERVE");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 10, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 28, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 12, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 19, "ROUTE 8");
+        addCopies(tags, 19, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 6, "ROUTE 19");
+        addCopies(tags, 28, "ROUTE 20");
+        addCopies(tags, 7, "ROUTE 22");
+        addCopies(tags, 7, "ROUTE 23");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        addCopies(tags, 4, "ROUTE 21");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static void addCopies(List<String> list, int n, String s) {
+        list.addAll(Collections.nCopies(n, s));
+    }
+
+    /**
+     * Based on
+     * <a href=https://bulbapedia.bulbagarden.net/wiki/Appendix:Black_and_White_walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrderBW = List.of(
+            "ROUTE 1", "ROUTE 2", "STRIATON CITY", "DREAMYARD", "ROUTE 3", "WELLSPRING CAVE",
+            "PINWHEEL FOREST", "CASTELIA CITY", "ROUTE 4", "DESERT RESORT", "ROUTE 5", "RELIC CASTLE", "ROUTE 5",
+            "DRIFTVEIL DRAWBRIDGE", "DRIFTVEIL CITY", "COLD STORAGE", "ROUTE 6", "CHARGESTONE CAVE", "ROUTE 7",
+            "CELESTIAL TOWER", "ROUTE 17", "ROUTE 18", "P2 LABORATORY", "MISTRALTON CAVE", "TWIST MOUNTAIN",
+            "ICIRRUS CITY", "DRAGONSPIRAL TOWER", "ROUTE 8", "MOOR OF ICIRRUS", "ROUTE 9", "ROUTE 10", "VICTORY ROAD",
+            "CHALLENGER'S CAVE", "ROUTE 11", "VILLAGE BRIDGE", "ROUTE 12", "ROUTE 13", "GIANT CHASM",
+            "UNDELLA TOWN", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 15", "MARVELOUS BRIDGE", "ROUTE 16",
+            "LOSTLORN FOREST"
+    );
+
+    /**
+     * Same order as the in-game Pokédex Habitat List.
+     */
+    public static final List<String> locationTagsTraverseOrderBW2 = List.of(
+            "ASPERTIA CITY", "ROUTE 19", "ROUTE 20", "FLOCCESY RANCH", "VIRBANK CITY", "VIRBANK COMPLEX",
+            "CASTELIA CITY", "CASTELIA SEWERS", "ROUTE 4", "DESERT RESORT", "RELIC CASTLE", "ROUTE 5", "ROUTE 16",
+            "LOSTLORN FOREST", "DRIFTVEIL DRAWBRIDGE", "ROUTE 6", "RELIC PASSAGE", "CLAY TUNNEL", "MISTRALTON CAVE",
+            "CHARGESTONE CAVE", "ROUTE 7", "CELESTIAL TOWER", "REVERSAL MOUNTAIN", "STRANGE HOUSE", "UNDELLA TOWN",
+            "ROUTE 13", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 12", "VILLAGE BRIDGE", "ROUTE 11",
+            "ROUTE 9", "SEASIDE CAVE", "ROUTE 21", "ROUTE 15", "MARVELOUS BRIDGE", "HUMILAU CITY", "ROUTE 22",
+            "GIANT CHASM", "ROUTE 23", "VICTORY ROAD", "ROUTE 8", "MOOR OF ICIRRUS", "ICIRRUS CITY",
+            "DRAGONSPIRAL TOWER", "TWIST MOUNTAIN", "PINWHEEL FOREST", "ROUTE 3", "WELLSPRING CAVE", "STRIATON CITY",
+            "DREAMYARD", "ROUTE 2", "ROUTE 1", "ROUTE 17", "ROUTE 18", "P2 LABORATORY",
+            "NATURE PRESERVE"
+    );
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
+        List<String> locationTags = switch (romType) {
+            case 0 -> (useTimeOfDay ? locationTagsUseTimeBW : locationTagsNoTimeBW);
+            case 1 -> (useTimeOfDay ? locationTagsUseTimeBW2 : locationTagsNoTimeBW2);
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, locationTags);
+    }
+
 
 }

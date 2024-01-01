@@ -18,6 +18,11 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
+    protected String[] getPostGameAreaIdentifiers() {
+        return new String[0];
+    }
+
+    @Override
     public PaletteHandler getPaletteHandler() {
         return null;
     }
