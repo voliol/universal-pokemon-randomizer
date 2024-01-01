@@ -462,6 +462,50 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void useLocalPokemonAndE4UniquePokesGivesE4NonLocalPokemon(String romName) {
+        // TODO: fix the randomization code so this works
+        loadROM(romName);
+        Settings s = new Settings();
+        s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
+        s.setTrainersUseLocalPokemon(true);
+        s.setEliteFourUniquePokemonNumber(1); // should be at least 4 non-local Pokemon in each game
+        romHandler.randomizeTrainerPokes(s);
+
+        PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
+        for (EncounterArea area : romHandler.getEncounters(true)) {
+            for (Pokemon pk : PokemonSet.inArea(area)) {
+                if (!localWithRelatives.contains(pk)) {
+                    localWithRelatives.addAll(PokemonSet.related(pk));
+                }
+            }
+        }
+
+        PokemonSet<Pokemon> all = romHandler.getPokemonSet();
+        PokemonSet<Pokemon> nonLocal = new PokemonSet<>(all);
+        nonLocal.removeAll(localWithRelatives);
+
+        List<Integer> eliteFourIndices = romHandler.getEliteFourTrainers(false);
+        for (Trainer tr : romHandler.getTrainers()) {
+            System.out.println("\n" + tr);
+
+            if (eliteFourIndices.contains(tr.index)) {
+                System.out.println("-E4 Member-");
+                System.out.println("Non-local: " + nonLocal.stream().map(Pokemon::getName).toList());
+                boolean hasNonLocal = false;
+                for (TrainerPokemon tp : tr.pokemon) {
+                    if (!localWithRelatives.contains(tp.pokemon)) {
+                        hasNonLocal = true;
+                        System.out.println(tp.pokemon.getName() + " is nonlocal");
+                        break;
+                    }
+                }
+                assertTrue(hasNonLocal);
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void trainerNamesAreNotEmpty(String romName) {
         loadROM(romName);
         assertFalse(romHandler.getTrainerNames().isEmpty());
