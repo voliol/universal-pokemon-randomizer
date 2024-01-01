@@ -715,11 +715,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         private final PokemonSet<Pokemon> allowed;
         private final PokemonSet<Pokemon> banned;
         private Map<Type, PokemonSet<Pokemon>> allowedByType;
-        private Map<Type, PokemonSet<Pokemon>> allowedByPrimaryType;
 
         private PokemonSet<Pokemon> remaining;
         private Map<Type, PokemonSet<Pokemon>> remainingByType;
-        private Map<Type, PokemonSet<Pokemon>> remainingByPrimaryType;
 
         private Type areaType;
         private PokemonSet<Pokemon> allowedForArea;
@@ -740,15 +738,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             this.balanceShakingGrass = balanceShakingGrass;
             this.allowed = allowed;
             this.banned = banned;
-            if (randomTypeThemes || keepTypeThemes) {
+            if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 this.allowedByType = new EnumMap<>(Type.class);
                 for (Type t : Type.values()) {
                     allowedByType.put(t, allowed.filterByType(t));
-                }
-            } else if (keepPrimaryType) {
-                this.allowedByPrimaryType = new EnumMap<>(Type.class);
-                for (Type t : Type.values()) {
-                    allowedByPrimaryType.put(t, allowed.filter(pk -> pk.getPrimaryType() == t));
                 }
             }
             if (catchEmAll) {
@@ -758,15 +751,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private void refillRemainingPokemon() {
             remaining = new PokemonSet<>(allowed);
-            if (randomTypeThemes || keepTypeThemes) {
+            if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 remainingByType = new EnumMap<>(Type.class);
                 for (Type t : Type.values()) {
                     remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
-                }
-            } else if (keepPrimaryType) {
-                remainingByPrimaryType = new EnumMap<>(Type.class);
-                for (Type t : Type.values()) {
-                    remainingByPrimaryType.put(t, new PokemonSet<>(allowedByPrimaryType.get(t)));
                 }
             }
         }
@@ -914,8 +902,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         private PokemonSet<Pokemon> getAllowedReplacementPreservePrimaryType(Encounter enc) {
             Pokemon current = enc.getPokemon();
             Type primaryType = current.getPrimaryType();
-            return catchEmAll && !remainingByPrimaryType.get(primaryType).isEmpty()
-                    ? remainingByPrimaryType.get(primaryType) : allowedByPrimaryType.get(primaryType);
+            return catchEmAll && !remainingByType.get(primaryType).isEmpty()
+                    ? remainingByType.get(primaryType) : allowedByType.get(primaryType);
         }
 
         private Pokemon pickReplacementInner(Encounter enc) {
@@ -959,13 +947,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private void removeFromRemaining(Pokemon replacement) {
             remaining.remove(replacement);
-            if (areaType != null) {
+            if (areaType != null || keepPrimaryType) {
                 remainingByType.get(replacement.getPrimaryType()).remove(replacement);
                 if (replacement.getSecondaryType() != null) {
                     remainingByType.get(replacement.getSecondaryType()).remove(replacement);
                 }
-            } else if (keepPrimaryType) {
-                remainingByPrimaryType.get(replacement.getPrimaryType()).remove(replacement);
             }
         }
 

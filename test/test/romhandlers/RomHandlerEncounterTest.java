@@ -866,7 +866,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 Pokemon pk = area.get(j).getPokemon();
                 Type primary = beforePrimaryTypes.get(i).get(j);
                 System.out.println("\t" + toNameAndTypesString(pk));
-                assertTrue(pk.getPrimaryType() == primary);
+                assertTrue(pk.getPrimaryType() == primary || pk.getSecondaryType() == primary);
             }
             System.out.println();
         }
