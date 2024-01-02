@@ -1421,6 +1421,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    protected String[] getPostGameStringList() {
+        return Gen1Constants.postGameEncounterAreas;
+    }
+
+    @Override
     public boolean isYellow() {
         return romEntry.isYellow;
     }

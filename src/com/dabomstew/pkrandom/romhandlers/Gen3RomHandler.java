@@ -4461,6 +4461,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    protected String[] getPostGameStringList() {
+        String[] postGameAreas;
+        if(romEntry.romType == Gen3Constants.RomType_FRLG) {
+            postGameAreas = Gen3Constants.frlgPostGameEncounterAreas;
+        } else {
+            postGameAreas = Gen3Constants.rsePostGameEncounterAreas;
+        }
+
+        return postGameAreas;
+    }
+
+    @Override
     public List<Integer> getAllConsumableHeldItems() {
         return Gen3Constants.consumableHeldItems;
     }

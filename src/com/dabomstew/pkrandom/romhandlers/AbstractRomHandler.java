@@ -7674,7 +7674,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if(postGameAreas.containsKey(name)) {
                 List<Integer> matchingAreas = postGameAreas.get(name);
                 for(Integer area : matchingAreas) {
-                    output.print("\"" + area.toString() + "\", ");
+                    output.print(area.toString() + ", ");
                 }
                 output.println("//" + name);
             } else {
@@ -7691,7 +7691,24 @@ public abstract class AbstractRomHandler implements RomHandler {
             output.println(area + " " + encInArea.displayName);
 
             Set<Pokemon> pokeInArea = pokemonInArea(encInArea);
-            output.println(pokeInArea);
+            output.print("     ");
+            for (Pokemon poke : pokeInArea) {
+                output.print(poke.name + ", ");
+            }
+
+            int minLevel = 100;
+            int maxLevel = 0;
+            for(Encounter enc : encInArea.encounters) {
+                if(enc.level < minLevel) {
+                    minLevel = enc.level;
+                }
+                if(enc.maxLevel > maxLevel) {
+                    maxLevel = enc.maxLevel;
+                } else if (enc.level > maxLevel) {
+                    maxLevel = enc.level;
+                }
+            }
+            output.println("levels " + minLevel + "-" + maxLevel);
         }
 
         output.println();

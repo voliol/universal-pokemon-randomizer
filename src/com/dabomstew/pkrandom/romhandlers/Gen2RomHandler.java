@@ -75,6 +75,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         String[] postGameAreas = Gen2Constants.postGameEncounterAreas;
 
+        //TODO: special case for Super Rod fishing
+
         for (EncounterSet area : areas) {
             boolean isPostGame = false;
             for (String nameFragment : postGameAreas) {
@@ -90,6 +92,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
         return wildPokemon;
+    }
+
+    @Override
+    protected String[] getPostGameStringList() {
+        return Gen2Constants.postGameEncounterAreas;
     }
 
     private static class RomEntry {

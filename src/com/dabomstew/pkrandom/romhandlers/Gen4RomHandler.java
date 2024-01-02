@@ -26,7 +26,6 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
@@ -73,9 +72,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         String[] postGameAreas;
         if(romEntry.romType == Gen4Constants.Type_HGSS) {
-            postGameAreas = Gen4Constants.hgssPostGameEncounterAreas;
+            postGameAreas = Gen4Constants.hgssPostGameEncounterNames;
+        } else if (romEntry.romType == Gen4Constants.Type_DP){
+            postGameAreas = Gen4Constants.dpPostGameEncounterNames;
         } else {
-            postGameAreas = Gen4Constants.dpptPostGameEncounterAreas;
+            postGameAreas = Gen4Constants.platPostGameEncounterNames;
         }
 
 
@@ -96,6 +97,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         return wildPokemon;
     }
 
+    @Override
+    protected String[] getPostGameStringList() {
+        String[] postGameAreas;
+        if(romEntry.romType == Gen4Constants.Type_HGSS) {
+            postGameAreas = Gen4Constants.hgssPostGameEncounterNames;
+        } else if (romEntry.romType == Gen4Constants.Type_DP){
+            postGameAreas = Gen4Constants.dpPostGameEncounterNames;
+        } else {
+            postGameAreas = Gen4Constants.platPostGameEncounterNames;
+        }
+
+        return postGameAreas;
+    }
 
 
     private static class RomFileEntry {
