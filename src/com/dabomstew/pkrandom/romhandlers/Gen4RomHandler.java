@@ -70,33 +70,66 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         Set<Pokemon> wildPokemon = new TreeSet<>();
         List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
 
-        String[] postGameAreas;
+        int[] postGameAreas;
+        int[] specialCases = null;
         if(romEntry.romType == Gen4Constants.Type_HGSS) {
-            postGameAreas = Gen4Constants.hgssPostGameEncounterNames;
-        } else if (romEntry.romType == Gen4Constants.Type_DP){
-            postGameAreas = Gen4Constants.dpPostGameEncounterNames;
+            if(useTimeOfDay) {
+                postGameAreas = Gen4Constants.hgssPostGameEncounterAreasTOD;
+                specialCases = Gen4Constants.hgssPostGameSpecialCasesTOD;
+            } else {
+                postGameAreas = Gen4Constants.hgssPostGameEncounterAreasNoTOD;
+                specialCases = Gen4Constants.hgssPostGameSpecialCasesNoTOD;
+            }
+        } else if (romEntry.romType == Gen4Constants.Type_DP) {
+            postGameAreas = Gen4Constants.dpPostGameEncounterAreas;
         } else {
-            postGameAreas = Gen4Constants.platPostGameEncounterNames;
+            postGameAreas = Gen4Constants.platPostGameEncounterAreas;
         }
 
+        Arrays.sort(postGameAreas);
+        if(specialCases != null) {
+            Arrays.sort(specialCases);
+        }
+        //this might sort the originals, but there's no harm in that.
 
+        int pgaIndex = 0;
+        int scIndex = 0;
+        int areaIndex = 0;
         for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+            if(areaIndex == postGameAreas[pgaIndex]) {
+                //don't add, but do advance to the next post-game area
+                pgaIndex++;
+                if(pgaIndex == postGameAreas.length) {
+                    pgaIndex = 0;
                 }
-            }
-            if (!isPostGame) {
+            } else if (specialCases != null && areaIndex == specialCases[scIndex]) {
+                //our only special case in this generation is HGSS headbutt trees
+                //and in each case they appear, the first 12 are local and the last 6 are not
+                int pokeIndex = 0;
+                for (Encounter enc : area.encounters) {
+                    pokeIndex++;
+                    if(pokeIndex > 12) {
+                        break;
+                    }
+                    wildPokemon.add(enc.pokemon);
+                }
+                scIndex++;
+                if(scIndex == specialCases.length) {
+                    scIndex = 0;
+                }
+            } else {
                 for (Encounter enc : area.encounters) {
                     wildPokemon.add(enc.pokemon);
                 }
             }
+
+            areaIndex++;
         }
+
         return wildPokemon;
     }
 
+    //TODO: remove when finished
     @Override
     protected String[] getPostGameStringList() {
         String[] postGameAreas;
