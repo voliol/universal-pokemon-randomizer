@@ -1964,7 +1964,7 @@ public class Gen4Constants {
     };
 
     public static int[] hgssPostGameSpecialCasesNoTOD = new int[] {
-            822, 837, 845 //headbutt trees - mixed
+            822, 837, 844 //headbutt trees - mixed
     };
 
     public static String[] hgssPostGameEncounterNames = new String[] {

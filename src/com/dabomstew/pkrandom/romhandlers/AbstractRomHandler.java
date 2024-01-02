@@ -7617,7 +7617,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
 
-    //TODO: remove these three after finished
+    //TODO: remove all following functions when finished
     @Override
     public void printPostGameEncounterAreas(PrintStream output) {
         String[] postGameNames = getPostGameStringList();
@@ -7640,6 +7640,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         printPostGameEncounterAreas(output, areasNoTOD, postGameNames);
+
+        output.println();
+
+        printPostGameEncounterAreaSpecialCases(output);
     }
 
     private void printPostGameEncounterAreas(PrintStream output, List<EncounterSet> areas, String[] postGameNames) {
@@ -7712,6 +7716,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         output.println();
+    }
+
+    protected void printPostGameEncounterAreaSpecialCases(PrintStream output) {
+
     }
 
     abstract protected String[] getPostGameStringList();
