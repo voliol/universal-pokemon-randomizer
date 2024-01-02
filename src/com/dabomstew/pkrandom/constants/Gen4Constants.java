@@ -1722,15 +1722,63 @@ public class Gen4Constants {
         return m;
     }
 
-    public static String[] dpptPostGameEncounterAreas = new String[] {
+    public static String[] dpPostGameEncounterNames = new String[] {
             "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway
-            "224", "225", "226", "227", "228", "229", "230", //routes
-            "Stark Mountain", "Seabreak Path", //named areas
+            "Route 224", "Route 225", "Route 226", "Route 227", "Route 228", "Route 229", "Route 230", //routes
+            "Stark Mountain", "Seabreak Path", "Sendoff Spring", "Turnback Cave", "Snowpoint Temple", //named areas
+            "? Unknown ?", //unknown - likely unused
+            "Super Rod", "Swarm/Radar/GBA", //post-game techniques
+            "Trophy Garden Rotating Pokemon", "Great Marsh Rotating Pokemon (Post-National Dex)"
+            //TODO: handling for Victory Road back
+    };
+
+    public static int[] dpPostGameEncounterAreas = new int[] {
+            530, 531, 532, 533, //Resort Area
+            492, 493, 494, 495, 496, 497, //Route 224
+            498, 499, 500, 501, 502, 503, //Route 225
+            542, 543, 544, 545, 546, 547, //Route 226
+            504, 505, 506, 507, 508, 509, //Route 227
+            510, 511, 512, 513, 514, 515, //Route 228
+            516, 517, 518, 519, 520, 521, //Route 229
+            548, 549, 550, 551, 552, 553, //Route 230
+            178, 179, 180, 181, 182, 183, //Stark Mountain
+            184, 185, 186, 187, 188, 189, //Sendoff Spring
+            196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+            208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+            220, 221, 222, 223, 224, 225, 226, 227, 228, 229, //Turnback Cave
+            282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, //Snowpoint Temple
+            190, 191, 192, 193, 194, 195, 230, 231, 232, 233, 234, 235,
+            236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247,
+            248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259,
+            260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271,
+            272, 273, 274, 275, 276, 277, 278, 279, 280, 281, //Unknown areas - likely unused
+            3, 7, 11, 15, 19, 29, 37, 43, 57, 75, 81, 87, 93, 99, 107,
+            153, 159, 169, 177, 309, 345, 351, 357, 363, 377, 383, 389,
+            395, 401, 411, 417, 435, 445, 451, 457, 463, 475, 479, 485,
+            491, 525, 529, 537, 541, //Super Rod
+            21, 23, 25, 31, 33, 39, 45, 47, 49, 51, 53, 59, 61, 63, 65,
+            67, 69, 71, 77, 83, 89, 95, 101, 103, 109, 111, 113, 115, 117,
+            119, 121, 123, 125, 127, 129, 131, 133, 135, 137, 139, 141,
+            143, 145, 147, 149, 155, 161, 163, 165, 171, 173, 295, 297,
+            299, 301, 303, 305, 311, 313, 315, 317, 319, 321, 323, 325,
+            327, 329, 331, 333, 335, 337, 339, 341, 347, 353, 359, 365,
+            367, 369, 371, 373, 379, 385, 391, 397, 403, 405, 407, 413,
+            419, 421, 423, 425, 427, 429, 431, 437, 439, 441, 447, 453,
+            459, 465, 467, 469, 471, 481, 487, //Swarm/Radar/GBA
+            558, //Trophy Garden Rotating Pokemon
+            559, //Great Marsh Rotating Pokemon (Post-National Dex)
+            154, 156, 157, 158, 160, 162 //Victory Road (back)
+    };
+
+    public static String[] platPostGameEncounterNames = new String[] {
+            "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway
+            "Route 224", "Route 225", "Route 226", "Route 227", "Route 228", "Route 229", "Route 230", //routes
+            "Stark Mountain", "Seabreak Path", "Turnback Cave", //named areas
             "Super Rod", "Radar", "Swarm" //post-game techniques
             //TODO: handling for Victory Road back
     };
 
-    public static String[] hgssPostGameEncounterAreas = new String[] {
+    public static String[] hgssPostGameEncounterNames = new String[] {
             "Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Vermilion City", "Lavender Town",
             "Celadon City", "Fuschia City", "Saffron City", //Kanto cities
             "Route 1", "Route 2", "Route 3", "Route 4", "Route 5",
