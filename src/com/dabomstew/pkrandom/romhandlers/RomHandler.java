@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,9 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public interface RomHandler {
+
+    //TODO: remove when finished
+    void printPostGameEncounterAreas(PrintStream output);
 
     abstract class Factory {
         public RomHandler create(Random random) {

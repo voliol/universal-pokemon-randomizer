@@ -28,6 +28,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -7614,4 +7615,87 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void setPickupItems(List<PickupItem> pickupItems) {
         // do nothing
     }
+
+
+    //TODO: remove these three after finished
+    @Override
+    public void printPostGameEncounterAreas(PrintStream output) {
+        String[] postGameNames = getPostGameStringList();
+        List<EncounterSet> areasUseTOD = getEncounters(true);
+        List<EncounterSet> areasNoTOD = getEncounters(false);
+
+        if(areasUseTOD.size() == areasNoTOD.size()) {
+            //assume same lists
+            areasUseTOD = null;
+        }
+
+        if(areasUseTOD != null) {
+            output.println("Time-of-day areas: ");
+
+            printPostGameEncounterAreas(output, areasUseTOD, postGameNames);
+
+            output.println("Non-time-of-day areas: ");
+        } else {
+            output.println("No time of day. Areas: ");
+        }
+
+        printPostGameEncounterAreas(output, areasNoTOD, postGameNames);
+    }
+
+    private void printPostGameEncounterAreas(PrintStream output, List<EncounterSet> areas, String[] postGameNames) {
+        Map<String, List<Integer>> postGameAreas = new HashMap<>();
+        Map<Integer, EncounterSet> nonPostGameAreas = new TreeMap<>();
+
+        int index = 0;
+        for (EncounterSet area : areas) {
+            boolean isPostGame = false;
+            for (String name : postGameNames) {
+                if(area.displayName.contains(name)) {
+                    if(!postGameAreas.containsKey(name)) {
+                        //create it
+                        postGameAreas.put(name, new ArrayList<>());
+                    }
+                    postGameAreas.get(name).add(index);
+                    isPostGame = true;
+                    break;
+                }
+            }
+
+            if(!isPostGame) {
+                nonPostGameAreas.put(index, area);
+            }
+
+            index++;
+        }
+
+        //categorized. now, we print.
+        output.println("Post game areas: ");
+        for (String name : postGameNames) {
+            if(postGameAreas.containsKey(name)) {
+                List<Integer> matchingAreas = postGameAreas.get(name);
+                for(Integer area : matchingAreas) {
+                    output.print("\"" + area.toString() + "\", ");
+                }
+                output.println("//" + name);
+            } else {
+                output.println("//No areas match " + name);
+            }
+        }
+
+        output.println();
+        output.println("Non post game areas: ");
+        Set<Integer> nonPostGameKeys = nonPostGameAreas.keySet();
+        for(Integer area : nonPostGameKeys)
+        {
+            EncounterSet encInArea = nonPostGameAreas.get(area);
+            output.println(area + " " + encInArea.displayName);
+
+            Set<Pokemon> pokeInArea = pokemonInArea(encInArea);
+            output.println(pokeInArea);
+        }
+
+        output.println();
+    }
+
+    abstract protected String[] getPostGameStringList();
 }

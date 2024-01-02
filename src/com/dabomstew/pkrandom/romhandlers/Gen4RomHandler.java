@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
@@ -94,6 +95,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
         return wildPokemon;
     }
+
+
 
     private static class RomFileEntry {
         public String path;
@@ -5701,6 +5704,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             this.actualFileCRC32s.put(fileKey, crc32);
         }
     }
+
+
 
     @Override
     public boolean isRomValid() {

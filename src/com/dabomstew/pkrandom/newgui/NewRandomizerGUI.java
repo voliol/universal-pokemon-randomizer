@@ -336,6 +336,9 @@ public class NewRandomizerGUI {
     private JMenuItem keepOrUnloadGameAfterRandomizingMenuItem;
     private JMenuItem batchRandomizationMenuItem;
 
+    //TODO: remove after finished
+    private JMenuItem postGameCodeCreatorMenuItem;
+
     private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
     private boolean haveCheckedCustomNames, unloadGameOnSuccess;
     private Map<String, String> gameUpdates = new TreeMap<>();
@@ -572,6 +575,8 @@ public class NewRandomizerGUI {
             }
         });
         batchRandomizationMenuItem.addActionListener(e -> batchRandomizationSettingsDialog());
+        //TODO: remove when finished
+        postGameCodeCreatorMenuItem.addActionListener(e -> outputPostGameNonPostGameEncounterAreas());
     }
 
     private void showInitialPopup() {
@@ -727,6 +732,11 @@ public class NewRandomizerGUI {
         batchRandomizationMenuItem = new JMenuItem();
         batchRandomizationMenuItem.setText(bundle.getString("GUI.batchRandomizationMenuItem.text"));
         settingsMenu.add(batchRandomizationMenuItem);
+
+        //TODO: remove after finished
+        postGameCodeCreatorMenuItem = new JMenuItem();
+        postGameCodeCreatorMenuItem.setText("Output post-game encounter area codes");
+        settingsMenu.add(postGameCodeCreatorMenuItem);
     }
 
     private void loadROM() {
@@ -803,6 +813,32 @@ public class NewRandomizerGUI {
             }
             JOptionPane.showMessageDialog(mainPanel,
                     String.format(bundle.getString("GUI.unsupportedRom"), fh.getName()));
+        }
+    }
+
+    //TODO: remove when finished
+    private void outputPostGameNonPostGameEncounterAreas() {
+        if (romHandler == null) {
+            return;
+        }
+
+        FileOutputStream output;
+        try {
+            output = new FileOutputStream(romHandler.loadedFilename() + ".log");
+        } catch (FileNotFoundException e) {
+            //...well, i don't know
+            return;
+        }
+
+        PrintStream usableOutput = new PrintStream(output);
+        romHandler.printPostGameEncounterAreas(usableOutput);
+        usableOutput.close();
+
+        try {
+            output.close();
+        } catch (IOException e) {
+            //???
+            //don't know what this would indicate
         }
     }
 

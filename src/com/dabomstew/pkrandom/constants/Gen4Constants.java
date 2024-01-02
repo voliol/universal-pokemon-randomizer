@@ -1723,15 +1723,14 @@ public class Gen4Constants {
     }
 
     public static String[] dpptPostGameEncounterAreas = new String[] {
-            "Super Rod", "Radar", "Swarm", //post-game techniques
             "Fight Area", "Survival Area", "Resort Area", //towns, but they might have pokemon anyway
             "224", "225", "226", "227", "228", "229", "230", //routes
-            "Stark Mountain", "Seabreak Path" //named areas
+            "Stark Mountain", "Seabreak Path", //named areas
+            "Super Rod", "Radar", "Swarm" //post-game techniques
             //TODO: handling for Victory Road back
     };
 
     public static String[] hgssPostGameEncounterAreas = new String[] {
-            "Super Rod", "Swarm", "Radio", //post-game techniques
             "Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Vermilion City", "Lavender Town",
             "Celadon City", "Fuschia City", "Saffron City", //Kanto cities
             "Route 1", "Route 2", "Route 3", "Route 4", "Route 5",
@@ -1741,8 +1740,11 @@ public class Gen4Constants {
             "Route 21", "Route 22", "Route 23", "Route 24", "Route 25", //Kanto routes
             "Cinnabar Island", "Cerulean Cave", "DIGLETT’s Cave", "Rock Tunnel",
             "Seafoam Islands", "Viridian Forest", //other Kanto locations
-            "Route 28", "Mount Silver" //Johto but post-game
+            "Route 28", "Mount Silver", //Johto but post-game
+            "Super Rod", "Swarm", "Radio" //post-game techniques
             //TODO: Bug-Catching contest (post-national dex) handling
+            //TODO: Rock Climb headbutt trees in National Park, Route 38
+            //TODO: Safari Zone?
     };
 
     public static void tagTrainersDP(List<Trainer> trs) {
