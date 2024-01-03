@@ -232,17 +232,196 @@ public class Gen2Constants {
     }
 
     public static String[] postGameEncounterAreas = new String[] {
-            "PALLET TOWN", "VIRIDIAN CITY", "PEWTER CITY", "CERULEAN CITY", "VERMILION CITY", "LAVENDER TOWN",
-            "CELADON CITY", "FUSCHIA CITY", "SAFFRON CITY", //Kanto cities
-            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5",
-            "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9", "ROUTE 10",
+            "PALLET TOWN", "VIRIDIAN CITY", "CERULEAN CITY", "VERMILION CITY",
+            "CELADON CITY", "FUCHSIA CITY", //Kanto cities
+            "ROUTE 1 ", "ROUTE 2 ", "ROUTE 3 ", "ROUTE 4 ", "ROUTE 5 ",
+            "ROUTE 6 ", "ROUTE 7 ", "ROUTE 8 ", "ROUTE 9 ", "ROUTE 10",
             "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15",
             "ROUTE 16", "ROUTE 17", "ROUTE 18", "ROUTE 19", "ROUTE 20",
-            "ROUTE 21", "ROUTE 22", "ROUTE 23", "ROUTE 24", "ROUTE 25", //Kanto routes
-            "CINNABAR ISLAND", "CERULEAN CAVE", "DIGLETT’S CAVE", "ROCK TUNNEL",
-            "SEAFOAM ISLANDS", "VIRIDIAN FOREST", //other Kanto locations
-            "ROUTE 28", "MOUNT SILVER", //Johto but post-game
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", //Kanto routes
+            "CINNABAR ISLAND", "DIGLETT", "ROCK TUNNEL",
+            "MT.MOON", //other Kanto locations
+            "ROUTE 28", "SILVER CAVE", //Johto but post-game
             //TODO: special case for Super Rod fish
+            "Fishing"
+    };
+
+    public static int[] gsPostGameEncounterAreasTOD = new int[] {
+            327, //PALLET TOWN
+            328, //VIRIDIAN CITY
+            329, //CERULEAN CITY
+            330, 334, //VERMILION CITY
+            331, //CELADON CITY
+            332, //FUCHSIA CITY
+            239, 240, 241, //ROUTE 1
+            242, 243, 244, //ROUTE 2
+            245, 246, 247, //ROUTE 3
+            248, 249, 250, 311, //ROUTE 4
+            251, 252, 253, //ROUTE 5
+            254, 255, 256, 312, //ROUTE 6
+            257, 258, 259, //ROUTE 7
+            260, 261, 262, //ROUTE 8
+            263, 264, 265, 313, //ROUTE 9
+            266, 267, 268, 314, //ROUTE 10
+            269, 270, 271, //ROUTE 11
+            315, //ROUTE 12
+            272, 273, 274, 316, //ROUTE 13
+            275, 276, 277, //ROUTE 14
+            278, 279, 280, //ROUTE 15
+            281, 282, 283, //ROUTE 16
+            284, 285, 286, //ROUTE 17
+            287, 288, 289, //ROUTE 18
+            317, //ROUTE 19
+            318, //ROUTE 20
+            290, 291, 292, 319, //ROUTE 21
+            293, 294, 295, 320, //ROUTE 22
+            296, 297, 298, 321, //ROUTE 24
+            299, 300, 301, 322, //ROUTE 25
+            333, //CINNABAR ISLAND
+            221, 222, 223, //DIGLETT's CAVE
+            227, 228, 229, 230, 231, 232, //ROCK TUNNEL
+            224, 225, 226, //MT.MOON
+            308, 309, 310, 326, //ROUTE 28
+            114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 180, 181, 182, 196, 219, //SILVER CAVE
+            371, 372 //unused headbutt trees
+    };
+
+    public static int[] gsPostGameSpecialCasesTOD = new int[] {
+            348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359,
+            360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, //Fishing
+    };
+
+    public static int[] gsPostGameEncounterAreasNoTOD = new int[] {
+            145, //PALLET TOWN
+            146, //VIRIDIAN CITY
+            147, //CERULEAN CITY
+            148, 152, //VERMILION CITY
+            149, //CELADON CITY
+            150, //FUCHSIA CITY
+            105, //ROUTE 1
+            106, //ROUTE 2
+            107, //ROUTE 3
+            108, 129, //ROUTE 4
+            109, //ROUTE 5
+            110, 130, //ROUTE 6
+            111, //ROUTE 7
+            112, //ROUTE 8
+            113, 131, //ROUTE 9
+            114, 132, //ROUTE 10
+            115, //ROUTE 11
+            133, //ROUTE 12
+            116, 134, //ROUTE 13
+            117, //ROUTE 14
+            118, //ROUTE 15
+            119, //ROUTE 16
+            120, //ROUTE 17
+            121, //ROUTE 18
+            135, //ROUTE 19
+            136, //ROUTE 20
+            122, 137, //ROUTE 21
+            123, 138, //ROUTE 22
+            124, 139, //ROUTE 24
+            125, 140, //ROUTE 25
+            151, //CINNABAR ISLAND
+            99, //DIGLETT's CAVE
+            101, 102, //ROCK TUNNEL
+            100, //MT.MOON
+            128, 144, //ROUTE 28
+            38, 39, 40, 41, 60, 74, 97, //SILVER CAVE
+            170, 171 //unused headbutt trees
+    };
+
+    public static int[] gsPostGameSpecialCasesNoTOD = new int[] {
+            158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, //Fishing
+    };
+
+    public static int[] crysPostGameEncounterAreasTOD = new int[] {
+            328, //PALLET TOWN
+            329, //VIRIDIAN CITY
+            330, //CERULEAN CITY
+            312, 331, //VERMILION CITY
+            332, //CELADON CITY
+            333, //FUCHSIA CITY
+            239, 240, 241, //ROUTE 1
+            242, 243, 244, //ROUTE 2
+            245, 246, 247, //ROUTE 3
+            248, 249, 250, 313, //ROUTE 4
+            251, 252, 253, //ROUTE 5
+            254, 255, 256, 314, //ROUTE 6
+            257, 258, 259, //ROUTE 7
+            260, 261, 262, //ROUTE 8
+            263, 264, 265, 315, //ROUTE 9
+            266, 267, 268, 316, //ROUTE 10
+            269, 270, 271, //ROUTE 11
+            317, //ROUTE 12
+            272, 273, 274, 318, //ROUTE 13
+            275, 276, 277, //ROUTE 14
+            278, 279, 280, //ROUTE 15
+            281, 282, 283, //ROUTE 16
+            284, 285, 286, //ROUTE 17
+            287, 288, 289, //ROUTE 18
+            319, //ROUTE 19
+            320, //ROUTE 20
+            290, 291, 292, 321, //ROUTE 21
+            293, 294, 295, 322, //ROUTE 22
+            296, 297, 298, 323, //ROUTE 24
+            299, 300, 301, 324, //ROUTE 25
+            334, //CINNABAR ISLAND
+            221, 222, 223, //DIGLETT
+            227, 228, 229, 230, 231, 232, //ROCK TUNNEL
+            224, 225, 226, //MT.MOON
+            308, 309, 310, 327, //ROUTE 28
+            114, 115, 116, 117, 118, 119, 120, 121, 122, 123,
+            124, 125, 180, 181, 182, 196, 220, //SILVER CAVE
+    };
+
+    public static int[] crysPostGameSpecialCasesTOD = new int[] {
+            341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352,
+            353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, //Fishing
+    };
+
+    public static int[] crysPostGameEncounterAreasNoTOD = new int[] {
+
+            146, //PALLET TOWN
+            147, //VIRIDIAN CITY
+            148, //CERULEAN CITY
+            130, 149, //VERMILION CITY
+            150, //CELADON CITY
+            151, //FUCHSIA CITY
+            105, //ROUTE 1
+            106, //ROUTE 2
+            107, //ROUTE 3
+            108, 131, //ROUTE 4
+            109, //ROUTE 5
+            110, 132, //ROUTE 6
+            111, //ROUTE 7
+            112, //ROUTE 8
+            113, 133, //ROUTE 9
+            114, 134, //ROUTE 10
+            115, //ROUTE 11
+            135, //ROUTE 12
+            116, 136, //ROUTE 13
+            117, //ROUTE 14
+            118, //ROUTE 15
+            119, //ROUTE 16
+            120, //ROUTE 17
+            121, //ROUTE 18
+            137, //ROUTE 19
+            138, //ROUTE 20
+            122, 139, //ROUTE 21
+            123, 140, //ROUTE 22
+            124, 141, //ROUTE 24
+            125, 142, //ROUTE 25
+            152, //CINNABAR ISLAND
+            99, //DIGLETT
+            101, 102, //ROCK TUNNEL
+            100, //MT.MOON
+            128, 145, //ROUTE 28
+            38, 39, 40, 41, 60, 74, 98, //SILVER CAVE
+    };
+
+    public static int[] crysPostGameSpecialCasesNoTOD = new int[] {
+            155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, //Fishing
     };
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
