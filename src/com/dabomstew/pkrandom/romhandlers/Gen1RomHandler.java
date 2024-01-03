@@ -1401,28 +1401,41 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         Set<Pokemon> wildPokemon = new TreeSet<>();
         List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
 
-        String[] postGameAreas = Gen1Constants.postGameEncounterAreas;
+        int[] postGameAreas;
+        if(isYellow()) {
+            postGameAreas = Gen1Constants.yelPostGameEncounterAreas;
+        } else {
+            postGameAreas = Gen1Constants.rbPostGameEncounterAreas;
+            //don't know how to detect green, don't know if it's supported anyway
+        }
 
+        Arrays.sort(postGameAreas);
+        //may or may not sort the original array, but it doesn't matter
+
+        int pgaIndex = 0;
+        int areaIndex = 0;
         for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+            if(areaIndex == postGameAreas[pgaIndex]) {
+                //don't add, but do advance to the next post-game area
+                pgaIndex++;
+                if(pgaIndex == postGameAreas.length) {
+                    pgaIndex = 0;
                 }
-            }
-            if (!isPostGame) {
+            } else {
                 for (Encounter enc : area.encounters) {
                     wildPokemon.add(enc.pokemon);
                 }
             }
+
+            areaIndex++;
         }
+
         return wildPokemon;
     }
 
     @Override
     protected String[] getPostGameStringList() {
-        return Gen1Constants.postGameEncounterAreas;
+        return Gen1Constants.postGameEncounterNames;
     }
 
     @Override

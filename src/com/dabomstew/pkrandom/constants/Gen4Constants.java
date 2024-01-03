@@ -1746,11 +1746,6 @@ public class Gen4Constants {
             208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
             220, 221, 222, 223, 224, 225, 226, 227, 228, 229, //Turnback Cave
             282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, //Snowpoint Temple
-            190, 191, 192, 193, 194, 195, 230, 231, 232, 233, 234, 235,
-            236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247,
-            248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259,
-            260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271,
-            272, 273, 274, 275, 276, 277, 278, 279, 280, 281, //Unknown areas - likely unused
             3, 7, 11, 15, 19, 29, 37, 43, 57, 75, 81, 87, 93, 99, 107,
             153, 159, 169, 177, 309, 345, 351, 357, 363, 377, 383, 389,
             395, 401, 411, 417, 435, 445, 451, 457, 463, 475, 479, 485,
@@ -1766,7 +1761,12 @@ public class Gen4Constants {
             459, 465, 467, 469, 471, 481, 487, //Swarm/Radar/GBA
             558, //Trophy Garden Rotating Pokemon
             559, //Great Marsh Rotating Pokemon (Post-National Dex)
-            154, 156, 157, 158, 160, 162 //Victory Road (back)
+            154, 156, 157, 158, 160, 162, //Victory Road (back)
+            190, 191, 192, 193, 194, 195, 230, 231, 232, 233, 234, 235,
+            236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247,
+            248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259,
+            260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271,
+            272, 273, 274, 275, 276, 277, 278, 279, 280, 281 //Unknown areas - likely unused
     };
 
     public static int[] platPostGameEncounterAreas = new int[] {
@@ -1783,11 +1783,6 @@ public class Gen4Constants {
             212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
             224, 225, 226, 227, 228, 229, 230, 231, 232, 233, //Turnback Cave
             286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, //Snowpoint Temple
-            194, 195, 196, 197, 198, 199, 234, 235, 236, 237, 238, 239,
-            240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251,
-            252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263,
-            264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
-            276, 277, 278, 279, 280, 281, 282, 283, 284, 285, //Unknown areas - probably unused
             3, 7, 11, 15, 19, 29, 37, 43, 57, 75, 81, 87, 93, 99, 105,
             111, 157, 163, 173, 181, 193, 313, 349, 355, 361, 367, 381,
             387, 393, 399, 405, 415, 421, 439, 449, 455, 461, 467, 479,
@@ -1803,7 +1798,12 @@ public class Gen4Constants {
             457, 463, 469, 471, 473, 475, 485, 491, //Swarm/Radar/GBA
             562, //Trophy Garden Rotating Pokemon
             563, //Great Marsh Rotating Pokemon (Post-National Dex)
-            158, 160, 161, 162, 164, 166 //back of Victory Road
+            158, 160, 161, 162, 164, 166, //back of Victory Road
+            194, 195, 196, 197, 198, 199, 234, 235, 236, 237, 238, 239,
+            240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251,
+            252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263,
+            264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
+            276, 277, 278, 279, 280, 281, 282, 283, 284, 285 //Unknown areas - probably unused
     };
 
     public static String[] platPostGameEncounterNames = new String[] {
@@ -1885,7 +1885,7 @@ public class Gen4Constants {
             356, 367, 372, 383, 394, 412, 423, 428, 433, 438, 457, 468, 473,
             485, 496, 592, 598, 646, 724, 729, 740, 783, 947, 963, 968, //Radio
             1076, 1077, 1078, //Post-National Dex Bug-Catching Contests
-            643, 644, 645, 647, 648, 649, 652, 1071 //Safari Zone (unused?)
+            643, 644, 645, 647, 648, 649, 652, 1071 //Safari Zone - unused?
     };
 
     public static int[] hgssPostGameSpecialCasesTOD = new int[] {
@@ -1960,7 +1960,7 @@ public class Gen4Constants {
             281, 284, 293, 302, 318, 327, 330, 333, 336, 353, 362, 365, 375,
             384, 462, 466, 502, 578, 581, 590, 621, 741, 753, 756, //Radio
             854, 855, 856, //Post-National Dex Bug-Catching Contests
-            501, 503, 504, 505, 508, 849, //Safari Zone (unused?)
+            501, 503, 504, 505, 508, 849, //Safari Zone - unused?
     };
 
     public static int[] hgssPostGameSpecialCasesNoTOD = new int[] {
@@ -1982,8 +1982,6 @@ public class Gen4Constants {
             "Super Rod", "Swarm", "Radio", //post-game techniques
             "Post-National Dex", //for bug-catching contest
             "Safari Zone" //seem to be unused? unclear
-            //TODO: Rock Climb headbutt trees in National Park, Route 38, Cherrygrove City
-            //ah. these special headbutt trees are not considered a separate area, apparently.
     };
 
     public static void tagTrainersDP(List<Trainer> trs) {

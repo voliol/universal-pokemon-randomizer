@@ -3735,29 +3735,49 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         Set<Pokemon> wildPokemon = new TreeSet<>();
         List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
 
-        String[] postGameAreas = Gen7Constants.postGameEncounterAreas;
 
-
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
-                }
+        int[] postGameAreas;
+        if(romEntry.romType == Gen7Constants.Type_SM) {
+            if(useTimeOfDay) {
+                postGameAreas = Gen7Constants.smPostGameEncounterAreasTOD;
+            } else {
+                postGameAreas = Gen7Constants.smPostGameEncounterAreasNoTOD;
             }
-            if (!isPostGame) {
+        } else {
+            if(useTimeOfDay) {
+                postGameAreas = Gen7Constants.usumPostGameEncounterAreasTOD;
+            } else {
+                postGameAreas = Gen7Constants.usumPostGameEncounterAreasNoTOD;
+            }
+        }
+
+        Arrays.sort(postGameAreas);
+        //may or may not sort the original array, but it doesn't matter
+
+        int pgaIndex = 0;
+        int areaIndex = 0;
+        for (EncounterSet area : areas) {
+            if(areaIndex == postGameAreas[pgaIndex]) {
+                //don't add, but do advance to the next post-game area
+                pgaIndex++;
+                if(pgaIndex == postGameAreas.length) {
+                    pgaIndex = 0;
+                }
+            } else {
                 for (Encounter enc : area.encounters) {
                     wildPokemon.add(enc.pokemon);
                 }
             }
+
+            areaIndex++;
         }
+
         return wildPokemon;
     }
 
     @Override
     protected String[] getPostGameStringList() {
-        return Gen7Constants.postGameEncounterAreas;
+        return Gen7Constants.postGameEncounterNames;
     }
 
     @Override
