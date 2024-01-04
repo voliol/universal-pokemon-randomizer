@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import com.dabomstew.pkrandom.Randomizer;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -172,11 +173,15 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 
 		Reader reader;
 		if (COMPILED) {
-			InputStream infi = getClass().getResourceAsStream(getResourceAdress(fileKey));
-			reader = new InputStreamReader(infi);
+			try {
+				InputStream infi = getClass().getResourceAsStream(getResourceAddress(fileKey));
+				reader = new InputStreamReader(infi);
+			} catch (NullPointerException e) {
+				throw new RandomizerIOException(new RuntimeException("Could not find resource " + getResourceAddress(fileKey), e));
+			}
 		} else {
 			try {
-				reader = new FileReader(getSourceFileAdress(fileKey));
+				reader = new FileReader(getSourceFileAddress(fileKey));
 			} catch (FileNotFoundException e) {
 				throw new RandomizerIOException(e);
 			}
@@ -191,7 +196,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		} catch (java.io.IOException ioe) {
 			// using RandomizerIOException because it is unchecked
 			throw new RandomizerIOException("Could not read palette description file "
-					+ (COMPILED ? getResourceAdress(fileKey) : getSourceFileAdress(fileKey)) + ".");
+					+ (COMPILED ? getResourceAddress(fileKey) : getSourceFileAddress(fileKey)) + ".");
 		}
 
 		System.out.println(paletteDescriptions);
@@ -199,7 +204,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 	}
 
 	public void savePaletteDescriptionSource(String fileKey, List<PaletteDescription> paletteDescriptions) {
-		String fileAdress = getSourceFileAdress(fileKey);
+		String fileAdress = getSourceFileAddress(fileKey);
 
 		try (PrintWriter writer = new PrintWriter(new FileWriter(fileAdress))) {
 
@@ -215,12 +220,16 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 		}
 	}
 
-	private String getResourceAdress(String fileKey) {
-		return "resources/" + fileKey + paletteFilesID + ".txt";
+	private String getFileName(String fileKey) {
+		return fileKey + paletteFilesID + ".txt";
 	}
 
-	private String getSourceFileAdress(String fileKey) {
-		return "src/com/dabomstew/pkrandom/graphics/" + getResourceAdress(fileKey);
+	private String getResourceAddress(String fileKey) {
+		return "/com/dabomstew/pkrandom/graphics/resources/" + getFileName(fileKey);
+	}
+
+	private String getSourceFileAddress(String fileKey) {
+		return "src/com/dabomstew/pkrandom/graphics/resources/" + getFileName(fileKey);
 	}
 
 	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {
