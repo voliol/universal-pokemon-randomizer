@@ -12,7 +12,7 @@ import com.sun.jna.Native;
  * The source documentation has not been included, but can be found in downloads of Lunar Compress (see link above).
  */
 public interface LunarCompressLibrary extends Library {
-    String LUNAR_COMPRESS_PATH = "util/Lunar_Compress_1.90_x64";
+    String LUNAR_COMPRESS_PATH = "Lunar_Compress_1.90_x64";
 
     int LC_LZ3_FORMAT = 2;
     int LC_LZ3_FORMAT2 = 0;
