@@ -4431,33 +4431,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        String[] postGameAreas;
-        if(romEntry.romType == Gen3Constants.RomType_FRLG) {
-            postGameAreas = Gen3Constants.frlgPostGameEncounterAreas;
-        } else {
-            postGameAreas = Gen3Constants.rsePostGameEncounterAreas;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen3Constants.RomType_FRLG:
+                return Gen3Constants.frlgPostGameEncounterAreas;
+            case Gen3Constants.RomType_Em:
+                return Gen3Constants.emPostGameEncounterAreas;
+            case Gen3Constants.RomType_Ruby:
+            case Gen3Constants.RomType_Sapp:
+                return Gen3Constants.rsPostGameEncounterAreas;
+            default:
+                //unrecognized game
+                return null;
         }
+    }
 
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
 
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
-                }
-            }
-            if (!isPostGame) {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
-            }
-        }
-        return wildPokemon;
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     @Override

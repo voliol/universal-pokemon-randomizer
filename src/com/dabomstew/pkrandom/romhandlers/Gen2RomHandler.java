@@ -69,27 +69,68 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        String[] postGameAreas = Gen2Constants.postGameEncounterAreas;
-
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
-                }
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        if(romEntry.isCrystal) {
+            if(useTimeOfDay) {
+                return Gen2Constants.crysPostGameEncounterAreasTOD;
+            } else {
+                return Gen2Constants.crysPostGameEncounterAreasNoTOD;
             }
-            if (!isPostGame) {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
+        } else {
+            if(useTimeOfDay) {
+                return Gen2Constants.gsPostGameEncounterAreasTOD;
+            } else {
+                return Gen2Constants.gsPostGameEncounterAreasNoTOD;
             }
         }
-        return wildPokemon;
+    }
+
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        if(romEntry.isCrystal) {
+            if(useTimeOfDay) {
+                return Gen2Constants.crysPostGameSpecialCasesTOD;
+            } else {
+                return Gen2Constants.crysPostGameSpecialCasesNoTOD;
+            }
+        } else {
+            if(useTimeOfDay) {
+                return Gen2Constants.gsPostGameSpecialCasesTOD;
+            } else {
+                return Gen2Constants.gsPostGameSpecialCasesNoTOD;
+            }
+        }
+    }
+
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //in this generation, the special case is fishing groups
+        //(because the Super Rod is obtained post-game)
+
+        //There are three cases here, each with different numbers of non-Super Rod fish:
+        //if not using TOD, 7 fish
+        //if using TOD and main group, 6 fish
+        //if using TOD and time-dependent group, 2 fish
+
+        int numMainGame;
+        if(useTimeOfDay) {
+            if(area.displayName.startsWith("Time")) {
+                numMainGame = 2;
+            } else {
+                numMainGame = 6;
+            }
+        } else {
+            numMainGame = 7;
+        }
+
+        int pokeIndex = 0;
+        for (Encounter enc : area.encounters) {
+            pokeIndex++;
+            if(pokeIndex > numMainGame) {
+                break;
+            }
+            addTo.add(enc.pokemon);
+        }
     }
 
     private static class RomEntry {

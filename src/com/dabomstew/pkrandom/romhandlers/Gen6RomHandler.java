@@ -62,33 +62,26 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        String[] postGameAreas;
-        if(romEntry.romType == Gen6Constants.Type_XY) {
-            postGameAreas = Gen6Constants.xyPostGameEncounterAreas;
-        } else {
-            postGameAreas = Gen6Constants.orasPostGameEncounterAreas;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen6Constants.Type_XY:
+                return Gen6Constants.xyPostGameEncounterAreas;
+            case Gen6Constants.Type_ORAS:
+                return Gen6Constants.orasPostGameEncounterAreas;
+            default:
+                //unrecognized game
+                return null;
         }
+    }
 
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
 
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
-                }
-            }
-            if (!isPostGame) {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
-            }
-        }
-        return wildPokemon;
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     private static class OffsetWithinEntry {

@@ -68,33 +68,34 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        String[] postGameAreas;
-        if(romEntry.romType == Gen5Constants.Type_BW) {
-            postGameAreas = Gen5Constants.bwPostGameEncounterAreas;
-        } else {
-            postGameAreas = Gen5Constants.bw2PostGameEncounterAreas;
-        }
-
-
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen5Constants.Type_BW:
+                if(useTimeOfDay) {
+                    return Gen5Constants.bwPostGameEncounterAreasTOD;
+                } else {
+                    return Gen5Constants.bwPostGameEncounterAreasNoTOD;
                 }
-            }
-            if (!isPostGame) {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
+            case Gen5Constants.Type_BW2:
+                if(useTimeOfDay) {
+                    return Gen5Constants.b2w2PostGameEncounterAreasTOD;
+                } else {
+                    return Gen5Constants.b2w2PostGameEncounterAreasNoTOD;
                 }
-            }
+            default:
+                //unrecognized game
+                return null;
         }
-        return wildPokemon;
+    }
+
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
+
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     private static class OffsetWithinEntry {

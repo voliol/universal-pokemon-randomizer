@@ -66,33 +66,53 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        String[] postGameAreas;
-        if(romEntry.romType == Gen4Constants.Type_HGSS) {
-            postGameAreas = Gen4Constants.hgssPostGameEncounterAreas;
-        } else {
-            postGameAreas = Gen4Constants.dpptPostGameEncounterAreas;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen4Constants.Type_HGSS:
+                if(useTimeOfDay) {
+                    return Gen4Constants.hgssPostGameEncounterAreasTOD;
+                } else {
+                    return Gen4Constants.hgssPostGameEncounterAreasNoTOD;
+                }
+            case Gen4Constants.Type_DP:
+                return Gen4Constants.dpPostGameEncounterAreas;
+            case Gen4Constants.Type_Plat:
+                return Gen4Constants.platPostGameEncounterAreas;
+            default:
+                //unrecognized game
+                return null;
         }
 
+    }
 
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen4Constants.Type_HGSS:
+                if(useTimeOfDay) {
+                    return Gen4Constants.hgssPostGameSpecialCasesTOD;
+                } else {
+                    return Gen4Constants.hgssPostGameSpecialCasesNoTOD;
                 }
-            }
-            if (!isPostGame) {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
-            }
+            case Gen4Constants.Type_DP:
+            case Gen4Constants.Type_Plat:
+            default:
+                return null;
         }
-        return wildPokemon;
+    }
+
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //our only special case in this generation is HGSS headbutt trees
+        //and in each case they appear, the first 12 are local and the last 6 are not
+        int pokeIndex = 0;
+        for (Encounter enc : area.encounters) {
+            pokeIndex++;
+            if(pokeIndex > 12) {
+                break;
+            }
+            addTo.add(enc.pokemon);
+        }
     }
 
     private static class RomFileEntry {
@@ -5701,6 +5721,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             this.actualFileCRC32s.put(fileKey, crc32);
         }
     }
+
+
 
     @Override
     public boolean isRomValid() {

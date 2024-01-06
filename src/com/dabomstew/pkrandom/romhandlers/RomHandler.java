@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;

@@ -147,8 +147,12 @@ public class Gen1Constants {
         return allowedItems;
     }
 
-    public static String[] postGameEncounterAreas = new String[] {
-            "CERULEAN CAVE"
+    public static int[] rbPostGameEncounterAreas = new int[] {
+            53, 54, 55, 67, //CERULEAN CAVE
+    };
+
+    public static int[] yelPostGameEncounterAreas = new int[] {
+            59, 60, 61, 94, 95, //CERULEAN CAVE
     };
 
     public static void tagTrainersUniversal(List<Trainer> trs) {

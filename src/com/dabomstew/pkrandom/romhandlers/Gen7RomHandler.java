@@ -3731,28 +3731,34 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        String[] postGameAreas = Gen7Constants.postGameEncounterAreas;
-
-
-        for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen7Constants.Type_SM:
+                if(useTimeOfDay) {
+                    return Gen7Constants.smPostGameEncounterAreasTOD;
+                } else {
+                    return Gen7Constants.smPostGameEncounterAreasNoTOD;
                 }
-            }
-            if (!isPostGame) {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
+            case Gen7Constants.Type_USUM:
+                if(useTimeOfDay) {
+                    return Gen7Constants.usumPostGameEncounterAreasTOD;
+                } else {
+                    return Gen7Constants.usumPostGameEncounterAreasNoTOD;
                 }
-            }
+            default:
+                //unrecognized game
+                return null;
         }
-        return wildPokemon;
+    }
+
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
+
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     @Override
