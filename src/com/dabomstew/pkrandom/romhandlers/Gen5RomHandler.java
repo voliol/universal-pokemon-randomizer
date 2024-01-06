@@ -72,27 +72,40 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         Set<Pokemon> wildPokemon = new TreeSet<>();
         List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
 
-        String[] postGameAreas;
+        int[] postGameAreas;
         if(romEntry.romType == Gen5Constants.Type_BW) {
-            postGameAreas = Gen5Constants.bwPostGameEncounterAreas;
+            if(useTimeOfDay) {
+                postGameAreas = Gen5Constants.bwPostGameEncounterAreasTOD;
+            } else {
+                postGameAreas = Gen5Constants.bwPostGameEncounterAreasNoTOD;
+            }
         } else {
-            postGameAreas = Gen5Constants.bw2PostGameEncounterAreas;
+            if(useTimeOfDay) {
+                postGameAreas = Gen5Constants.b2w2PostGameEncounterAreasTOD;
+            } else {
+                postGameAreas = Gen5Constants.b2w2PostGameEncounterAreasNoTOD;
+            }
         }
 
+        Arrays.sort(postGameAreas);
+        //may or may not sort the original array, but it doesn't matter
 
+        int pgaIndex = 0;
+        int areaIndex = 0;
         for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+            if(areaIndex == postGameAreas[pgaIndex]) {
+                //don't add, but do advance to the next post-game area
+                pgaIndex++;
+                if(pgaIndex == postGameAreas.length) {
+                    pgaIndex = 0;
                 }
-            }
-            if (!isPostGame) {
+            } else {
                 for (Encounter enc : area.encounters) {
                     wildPokemon.add(enc.pokemon);
                 }
             }
+
+            areaIndex++;
         }
         return wildPokemon;
     }
@@ -101,9 +114,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     protected String[] getPostGameStringList() {
         String[] postGameAreas;
         if(romEntry.romType == Gen5Constants.Type_BW) {
-            postGameAreas = Gen5Constants.bwPostGameEncounterAreas;
+            postGameAreas = Gen5Constants.bwPostGameEncounterNames;
         } else {
-            postGameAreas = Gen5Constants.bw2PostGameEncounterAreas;
+            postGameAreas = Gen5Constants.bw2PostGameEncounterNames;
         }
 
         return postGameAreas;

@@ -559,13 +559,56 @@ public class Gen3Constants {
         }
     }
 
-    public static String[] frlgPostGameEncounterAreas = new String[] {
-            "CERULEAN CAVE"
+    public static String[] frlgPostGameEncounterNames = new String[] {
+            "CERULEAN CAVE",
+            "THREE ISLE PORT",
+            "FOUR ISLAND", "ICEFALL CAVE",
+            "FIVE ISLAND", "RESORT GORGEOUS", "LOST CAVE", "WATER LABYRINTH", "FIVE ISLE MEADOW", "ROCKET WAREHOUSE", "MEMORIAL PILLAR",
+            "SIX ISLAND", "WATER PATH", "RUIN VALLEY", "DOTTED HOLE", "GREEN PATH", "PATTERN BUSH", "OUTCAST ISLAND", "ALTERING CAVE",
+            "SEVEN ISLAND", "TANOBY RUINS", "TANOBY CHAMBERS", "SEVAULT CANYON", "TANOBY KEY", "CANYON ENTRANCE", "TRAINER TOWER"
+            //also some of the Sevii Islands...
     };
 
-    public static String[] rsePostGameEncounterAreas = new String[] {
+    public static String[] rsePostGameEncounterNames = new String[] {
             "SKY PILLAR", "ALTERING CAVE", "DESERT UNDERPASS"
     };
+
+    public static int[] rsPostGameEncounterAreas = new int[] {
+            81, 82, 83, //SKY PILLAR
+            153 //Mirage Island - technically not post-game, but not exactly part of the game either
+    };
+
+    public static int[] emPostGameEncounterAreas = new int[] {
+            174, 177, 178, //SKY PILLAR
+            199, 200, 201, 202, 203, 204, 205, 206, 207, //ALTERING CAVE
+            196, //DESERT UNDERPASS
+            95, //Mirage Island - technically not post-game, but hardly "local" since it almost never exists
+    };
+
+    public static int[] frlgPostGameEncounterAreas = new int[] {
+            33, 34, 35, 36, 37, 38, 39, 40, 41, 42, //CERULEAN CAVE
+            118, //THREE ISLE PORT
+            214, 215, //FOUR ISLAND
+            82, 83, 84, 85, 86, 87, 88, 89, //ICEFALL CAVE
+            216, 217, //FIVE ISLAND
+            119, 120, //RESORT GORGEOUS
+            91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, //LOST CAVE
+            121, 122, //WATER LABYRINTH
+            123, 124, 125, //FIVE ISLE MEADOW
+            126, 127, 128, //MEMORIAL PILLAR
+            133, 134, 135, //WATER PATH
+            136, 137, 138, //RUIN VALLEY
+            131, 132, //GREEN PATH
+            90, //PATTERN BUSH
+            129, 130, //OUTCAST ISLAND
+            218, 219, 220, 221, 222, 223, 224, 225, 226, //ALTERING CAVE
+            144, 145, //TANOBY RUINS
+            0, 1, 2, 3, 4, 5, 6, //the Tanoby Chambers
+            142, 143, //SEVAULT CANYON
+            141, //CANYON ENTRANCE
+            139, 140, //TRAINER TOWER
+    };
+
 
     public static void trainerTagsRS(List<Trainer> trs, int romType) {
         // Gym Trainers

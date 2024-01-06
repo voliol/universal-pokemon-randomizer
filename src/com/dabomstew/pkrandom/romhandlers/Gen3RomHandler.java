@@ -4435,27 +4435,34 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         Set<Pokemon> wildPokemon = new TreeSet<>();
         List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
 
-        String[] postGameAreas;
+        int[] postGameAreas;
         if(romEntry.romType == Gen3Constants.RomType_FRLG) {
             postGameAreas = Gen3Constants.frlgPostGameEncounterAreas;
+        } else if(romEntry.romType == Gen3Constants.RomType_Em) {
+            postGameAreas = Gen3Constants.emPostGameEncounterAreas;
         } else {
-            postGameAreas = Gen3Constants.rsePostGameEncounterAreas;
+            postGameAreas = Gen3Constants.rsPostGameEncounterAreas;
         }
 
+        Arrays.sort(postGameAreas);
+        //may or may not sort the original array, but it doesn't matter
 
+        int pgaIndex = 0;
+        int areaIndex = 0;
         for (EncounterSet area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if(area.displayName.contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+            if(areaIndex == postGameAreas[pgaIndex]) {
+                //don't add, but do advance to the next post-game area
+                pgaIndex++;
+                if(pgaIndex == postGameAreas.length) {
+                    pgaIndex = 0;
                 }
-            }
-            if (!isPostGame) {
+            } else {
                 for (Encounter enc : area.encounters) {
                     wildPokemon.add(enc.pokemon);
                 }
             }
+
+            areaIndex++;
         }
         return wildPokemon;
     }
@@ -4464,9 +4471,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     protected String[] getPostGameStringList() {
         String[] postGameAreas;
         if(romEntry.romType == Gen3Constants.RomType_FRLG) {
-            postGameAreas = Gen3Constants.frlgPostGameEncounterAreas;
+            postGameAreas = Gen3Constants.frlgPostGameEncounterNames;
         } else {
-            postGameAreas = Gen3Constants.rsePostGameEncounterAreas;
+            postGameAreas = Gen3Constants.rsePostGameEncounterNames;
         }
 
         return postGameAreas;
