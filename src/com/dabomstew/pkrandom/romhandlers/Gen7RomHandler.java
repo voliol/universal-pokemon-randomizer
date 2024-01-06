@@ -3762,11 +3762,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected String[] getPostGameStringList() {
-        return Gen7Constants.postGameEncounterNames;
-    }
-
-    @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
         List<Integer> items = new ArrayList<>();
         items.addAll(Gen7Constants.generalPurposeConsumableItems);

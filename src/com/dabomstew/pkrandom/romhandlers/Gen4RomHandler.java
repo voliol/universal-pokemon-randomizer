@@ -115,60 +115,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    //TODO: remove when finished
-    @Override
-    protected String[] getPostGameStringList() {
-        String[] postGameAreas;
-        if(romEntry.romType == Gen4Constants.Type_HGSS) {
-            postGameAreas = Gen4Constants.hgssPostGameEncounterNames;
-        } else if (romEntry.romType == Gen4Constants.Type_DP){
-            postGameAreas = Gen4Constants.dpPostGameEncounterNames;
-        } else {
-            postGameAreas = Gen4Constants.platPostGameEncounterNames;
-        }
-
-        return postGameAreas;
-    }
-
-    //TODO: remove when finished
-    @Override
-    protected void printPostGameEncounterAreaSpecialCases(PrintStream output) {
-        if(romEntry.romType != Gen4Constants.Type_HGSS) {
-            return; //DPPt don't have special cases to print
-        }
-
-        output.println("With TOD:");
-        List<EncounterSet> allEncs = getEncounters(true);
-        for(int encNum : Gen4Constants.hgssPostGameSpecialCasesTOD) {
-            EncounterSet area = allEncs.get(encNum);
-
-            output.println(encNum + " " + area.displayName);
-            for (Encounter enc : area.encounters) {
-                if(enc.maxLevel != 0) {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + "-" + enc.maxLevel + ")");
-                } else {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + ")");
-                }
-            }
-        }
-
-        output.println("No TOD:");
-        allEncs = getEncounters(false);
-        for(int encNum : Gen4Constants.hgssPostGameSpecialCasesNoTOD) {
-            EncounterSet area = allEncs.get(encNum);
-
-            output.println(encNum + " " + area.displayName);
-            for (Encounter enc : area.encounters) {
-                if(enc.maxLevel != 0) {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + "-" + enc.maxLevel + ")");
-                } else {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + ")");
-                }
-            }
-        }
-
-    }
-
     private static class RomFileEntry {
         public String path;
         public long expectedCRC32;

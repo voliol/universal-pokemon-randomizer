@@ -147,10 +147,6 @@ public class Gen1Constants {
         return allowedItems;
     }
 
-    public static String[] postGameEncounterNames = new String[] {
-            "CERULEAN CAVE"
-    };
-
     public static int[] rbPostGameEncounterAreas = new int[] {
             53, 54, 55, 67, //CERULEAN CAVE
     };

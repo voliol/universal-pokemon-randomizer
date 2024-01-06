@@ -559,20 +559,6 @@ public class Gen3Constants {
         }
     }
 
-    public static String[] frlgPostGameEncounterNames = new String[] {
-            "CERULEAN CAVE",
-            "THREE ISLE PORT",
-            "FOUR ISLAND", "ICEFALL CAVE",
-            "FIVE ISLAND", "RESORT GORGEOUS", "LOST CAVE", "WATER LABYRINTH", "FIVE ISLE MEADOW", "ROCKET WAREHOUSE", "MEMORIAL PILLAR",
-            "SIX ISLAND", "WATER PATH", "RUIN VALLEY", "DOTTED HOLE", "GREEN PATH", "PATTERN BUSH", "OUTCAST ISLAND", "ALTERING CAVE",
-            "SEVEN ISLAND", "TANOBY RUINS", "TANOBY CHAMBERS", "SEVAULT CANYON", "TANOBY KEY", "CANYON ENTRANCE", "TRAINER TOWER"
-            //also some of the Sevii Islands...
-    };
-
-    public static String[] rsePostGameEncounterNames = new String[] {
-            "SKY PILLAR", "ALTERING CAVE", "DESERT UNDERPASS"
-    };
-
     public static int[] rsPostGameEncounterAreas = new int[] {
             81, 82, 83, //SKY PILLAR
             153 //Mirage Island - technically not post-game, but not exactly part of the game either

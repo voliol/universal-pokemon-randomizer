@@ -1710,28 +1710,6 @@ public class Gen5Constants {
         68,
     };
 
-    public static String[] bwPostGameEncounterNames = new String[] {
-            "Challenger's Cave", "Abundant Shrine", "Giant Chasm", //caves, etc
-            "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",//routes
-            "Lacunosa Town", "Undella Town", //cities
-            "Village Bridge", "Undella Bay", "White Forest", "Marvelous Bridge", //other overworld locations
-            "Dreamyard Doubles",
-            "Fishing", //post-game techniques
-            // swarms apparently aren't handled as wilds in this game,
-            //so no need to exclude them.
-            //TODO: relic castle bottom floor handling
-    };
-
-    public static String[] bw2PostGameEncounterNames = new String[] {
-            "Moor of Icirrus", "Clay Tunnel", "Underground Ruins", "Pinwheel Forest", "P2 Laboratory", "Wellspring Cave", //caves, etc
-            "Route 1 ", "Route 2 ", "Route 3 ", "Route 8 ", "Route 15", "Route 17", "Route 18", //routes
-            "Icirrus City", "Striaton City", //cities
-            "White Forest", "Marvelous Bridge", "Dragonspiral Tower", "Twist Mountain", "Dreamyard", "Nature Preserve", //other overworld locations
-            "Rock Peak Chamber", "Iceberg Chamber", "Iron Chamber",
-            "Fishing", //post-game techniques
-            // again, swarms aren't wilds
-    };
-
     public static int[] bwPostGameEncounterAreasTOD = new int[] {
             369, 370, 371, 372, 373, 374, 375, 376, 377, 378, //Challenger's Cave
             409, 410, 411, 412, 413, 414, 415, //Abundant Shrine

@@ -133,59 +133,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    @Override
-    protected void printPostGameEncounterAreaSpecialCases(PrintStream output) {
-
-        int[] specialCases;
-
-        output.println("With TOD:");
-        if(romEntry.isCrystal) {
-            specialCases = Gen2Constants.crysPostGameSpecialCasesTOD;
-        } else {
-            specialCases = Gen2Constants.gsPostGameSpecialCasesTOD;
-        }
-
-        List<EncounterSet> allEncs = getEncounters(true);
-        for(int encNum : specialCases) {
-            EncounterSet area = allEncs.get(encNum);
-
-            output.println(encNum + " " + area.displayName);
-            for (Encounter enc : area.encounters) {
-                if(enc.maxLevel != 0) {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + "-" + enc.maxLevel + ")");
-                } else {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + ")");
-                }
-            }
-        }
-
-        output.println("No TOD:");
-        if(romEntry.isCrystal) {
-            specialCases = Gen2Constants.crysPostGameSpecialCasesNoTOD;
-        } else {
-            specialCases = Gen2Constants.gsPostGameSpecialCasesNoTOD;
-        }
-        allEncs = getEncounters(false);
-        for(int encNum : specialCases) {
-            EncounterSet area = allEncs.get(encNum);
-
-            output.println(encNum + " " + area.displayName);
-            for (Encounter enc : area.encounters) {
-                if(enc.maxLevel != 0) {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + "-" + enc.maxLevel + ")");
-                } else {
-                    output.println("    " + enc.pokemon.name + " (" + enc.level + ")");
-                }
-            }
-        }
-
-    }
-
-    @Override
-    protected String[] getPostGameStringList() {
-        return Gen2Constants.postGameEncounterAreas;
-    }
-
     private static class RomEntry {
         private String name;
         private String romCode;

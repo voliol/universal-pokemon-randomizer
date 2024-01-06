@@ -84,17 +84,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         //no special cases
     }
 
-    protected String[] getPostGameStringList() {
-        String[] postGameAreas;
-        if(romEntry.romType == Gen6Constants.Type_XY) {
-            postGameAreas = Gen6Constants.xyPostGameEncounterNames;
-        } else {
-            postGameAreas = Gen6Constants.orasPostGameEncounterNames;
-        }
-
-        return postGameAreas;
-    }
-
     private static class OffsetWithinEntry {
         private int entry;
         private int offset;

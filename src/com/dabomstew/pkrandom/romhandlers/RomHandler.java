@@ -39,9 +39,6 @@ import com.dabomstew.pkrandom.pokemon.*;
 
 public interface RomHandler {
 
-    //TODO: remove when finished
-    void printPostGameEncounterAreas(PrintStream output);
-
     abstract class Factory {
         public RomHandler create(Random random) {
             return create(random, null);

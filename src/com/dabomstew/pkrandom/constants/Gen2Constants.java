@@ -231,21 +231,6 @@ public class Gen2Constants {
         nonBadItems.banRange(Gen2Items.surfMail, 9);
     }
 
-    public static String[] postGameEncounterAreas = new String[] {
-            "PALLET TOWN", "VIRIDIAN CITY", "CERULEAN CITY", "VERMILION CITY",
-            "CELADON CITY", "FUCHSIA CITY", //Kanto cities
-            "ROUTE 1 ", "ROUTE 2 ", "ROUTE 3 ", "ROUTE 4 ", "ROUTE 5 ",
-            "ROUTE 6 ", "ROUTE 7 ", "ROUTE 8 ", "ROUTE 9 ", "ROUTE 10",
-            "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15",
-            "ROUTE 16", "ROUTE 17", "ROUTE 18", "ROUTE 19", "ROUTE 20",
-            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", //Kanto routes
-            "CINNABAR ISLAND", "DIGLETT", "ROCK TUNNEL",
-            "MT.MOON", //other Kanto locations
-            "ROUTE 28", "SILVER CAVE", //Johto but post-game
-            //TODO: special case for Super Rod fish
-            "Fishing"
-    };
-
     public static int[] gsPostGameEncounterAreasTOD = new int[] {
             327, //PALLET TOWN
             328, //VIRIDIAN CITY

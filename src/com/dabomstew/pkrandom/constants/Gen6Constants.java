@@ -1076,16 +1076,6 @@ public class Gen6Constants {
         return map;
     }
 
-    public static String[] xyPostGameEncounterNames = new String[] {
-            //as far as I can tell, there are none??
-    };
-
-    public static String[] orasPostGameEncounterNames = new String[] {
-            "Sky Pillar", "Battle Resort", "Mirage",
-            "DexNav Foreign Encounter" //technically not post-game, but would certainly not qualify as "local"
-            //which is the use case for this
-    };
-
     public static int[] xyPostGameEncounterAreas = null; //there are none
 
     public static int[] orasPostGameEncounterAreas = new int[] {

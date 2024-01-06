@@ -1081,11 +1081,6 @@ public class Gen7Constants {
         }
     }
 
-    public static String[] postGameEncounterNames = new String[] {
-            "Poni Grove", "Poni Plains", "Poni Coast", "Poni Meadow", "Poni Gauntlet",
-            "Resolution Cave"
-    };
-
     public static int[] smPostGameEncounterAreasTOD = new int[] {
             664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, //Poni Grove
             678, 679, 680, 681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691,

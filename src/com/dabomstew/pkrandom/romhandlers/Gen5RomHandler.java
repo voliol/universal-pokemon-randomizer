@@ -98,18 +98,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         //no special cases
     }
 
-    @Override
-    protected String[] getPostGameStringList() {
-        String[] postGameAreas;
-        if(romEntry.romType == Gen5Constants.Type_BW) {
-            postGameAreas = Gen5Constants.bwPostGameEncounterNames;
-        } else {
-            postGameAreas = Gen5Constants.bw2PostGameEncounterNames;
-        }
-
-        return postGameAreas;
-    }
-
     private static class OffsetWithinEntry {
         private int entry;
         private int offset;
