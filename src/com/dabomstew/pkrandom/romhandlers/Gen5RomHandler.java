@@ -68,46 +68,34 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        int[] postGameAreas;
-        if(romEntry.romType == Gen5Constants.Type_BW) {
-            if(useTimeOfDay) {
-                postGameAreas = Gen5Constants.bwPostGameEncounterAreasTOD;
-            } else {
-                postGameAreas = Gen5Constants.bwPostGameEncounterAreasNoTOD;
-            }
-        } else {
-            if(useTimeOfDay) {
-                postGameAreas = Gen5Constants.b2w2PostGameEncounterAreasTOD;
-            } else {
-                postGameAreas = Gen5Constants.b2w2PostGameEncounterAreasNoTOD;
-            }
-        }
-
-        Arrays.sort(postGameAreas);
-        //may or may not sort the original array, but it doesn't matter
-
-        int pgaIndex = 0;
-        int areaIndex = 0;
-        for (EncounterSet area : areas) {
-            if(areaIndex == postGameAreas[pgaIndex]) {
-                //don't add, but do advance to the next post-game area
-                pgaIndex++;
-                if(pgaIndex == postGameAreas.length) {
-                    pgaIndex = 0;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen5Constants.Type_BW:
+                if(useTimeOfDay) {
+                    return Gen5Constants.bwPostGameEncounterAreasTOD;
+                } else {
+                    return Gen5Constants.bwPostGameEncounterAreasNoTOD;
                 }
-            } else {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
+            case Gen5Constants.Type_BW2:
+                if(useTimeOfDay) {
+                    return Gen5Constants.b2w2PostGameEncounterAreasTOD;
+                } else {
+                    return Gen5Constants.b2w2PostGameEncounterAreasNoTOD;
                 }
-            }
-
-            areaIndex++;
+            default:
+                //unrecognized game
+                return null;
         }
-        return wildPokemon;
+    }
+
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
+
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     @Override

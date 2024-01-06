@@ -4431,40 +4431,29 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        int[] postGameAreas;
-        if(romEntry.romType == Gen3Constants.RomType_FRLG) {
-            postGameAreas = Gen3Constants.frlgPostGameEncounterAreas;
-        } else if(romEntry.romType == Gen3Constants.RomType_Em) {
-            postGameAreas = Gen3Constants.emPostGameEncounterAreas;
-        } else {
-            postGameAreas = Gen3Constants.rsPostGameEncounterAreas;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen3Constants.RomType_FRLG:
+                return Gen3Constants.frlgPostGameEncounterAreas;
+            case Gen3Constants.RomType_Em:
+                return Gen3Constants.emPostGameEncounterAreas;
+            case Gen3Constants.RomType_Ruby:
+            case Gen3Constants.RomType_Sapp:
+                return Gen3Constants.rsPostGameEncounterAreas;
+            default:
+                //unrecognized game
+                return null;
         }
+    }
 
-        Arrays.sort(postGameAreas);
-        //may or may not sort the original array, but it doesn't matter
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
 
-        int pgaIndex = 0;
-        int areaIndex = 0;
-        for (EncounterSet area : areas) {
-            if(areaIndex == postGameAreas[pgaIndex]) {
-                //don't add, but do advance to the next post-game area
-                pgaIndex++;
-                if(pgaIndex == postGameAreas.length) {
-                    pgaIndex = 0;
-                }
-            } else {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
-            }
-
-            areaIndex++;
-        }
-        return wildPokemon;
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     @Override

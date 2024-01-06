@@ -28,7 +28,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +36,6 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
-import com.sun.corba.se.impl.encoding.EncapsOutputStream;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -6565,7 +6563,57 @@ public abstract class AbstractRomHandler implements RomHandler {
         return wildPokemon;
     }
 
-    protected abstract Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay);
+    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
+        Set<Pokemon> wildPokemon = new TreeSet<>();
+        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
+
+        int[] postGameAreas = getPostGameEncounterAreas(useTimeOfDay);
+        int[] specialCases = getPostGameEncounterSpecialCases(useTimeOfDay);
+
+        if(postGameAreas != null) {
+            Arrays.sort(postGameAreas);
+        }
+        if(specialCases != null) {
+            Arrays.sort(specialCases);
+        }
+        //this might sort the originals, but there's no harm in that.
+
+        int pgaIndex = 0;
+        int scIndex = 0;
+        int areaIndex = 0;
+        for (EncounterSet area : areas) {
+            if(postGameAreas != null && areaIndex == postGameAreas[pgaIndex]) {
+                //don't add, but do advance to the next post-game area
+                pgaIndex++;
+                if(pgaIndex == postGameAreas.length) {
+                    pgaIndex = 0;
+                }
+            } else if (specialCases != null && areaIndex == specialCases[scIndex]) {
+
+                //add some - determined by gen-specific method
+                handlePostGameEncounterSpecialCase(wildPokemon, area, useTimeOfDay);
+
+                //also, advance to next special case
+                scIndex++;
+                if(scIndex == specialCases.length) {
+                    scIndex = 0;
+                }
+            } else {
+                //add all
+                for (Encounter enc : area.encounters) {
+                    wildPokemon.add(enc.pokemon);
+                }
+            }
+
+            areaIndex++;
+        }
+
+        return wildPokemon;
+    }
+
+    protected abstract int[] getPostGameEncounterAreas(boolean useTimeOfDay);
+    protected abstract int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay);
+    protected abstract void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay);
 
     private Map<Type, Integer> typeWeightings;
     private int totalTypeWeighting;

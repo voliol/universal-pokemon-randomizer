@@ -1397,40 +1397,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
-
-        int[] postGameAreas;
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
         if(isYellow()) {
-            postGameAreas = Gen1Constants.yelPostGameEncounterAreas;
+            return Gen1Constants.yelPostGameEncounterAreas;
         } else {
-            postGameAreas = Gen1Constants.rbPostGameEncounterAreas;
-            //don't know how to detect green, don't know if it's supported anyway
+            return Gen1Constants.rbPostGameEncounterAreas;
         }
 
-        Arrays.sort(postGameAreas);
-        //may or may not sort the original array, but it doesn't matter
+        //don't know how to detect green, don't know if it's supported anyway
+    }
 
-        int pgaIndex = 0;
-        int areaIndex = 0;
-        for (EncounterSet area : areas) {
-            if(areaIndex == postGameAreas[pgaIndex]) {
-                //don't add, but do advance to the next post-game area
-                pgaIndex++;
-                if(pgaIndex == postGameAreas.length) {
-                    pgaIndex = 0;
-                }
-            } else {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
-            }
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        return null;
+    }
 
-            areaIndex++;
-        }
-
-        return wildPokemon;
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //no special cases
     }
 
     @Override

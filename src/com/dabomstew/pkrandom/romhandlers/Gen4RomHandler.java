@@ -66,67 +66,53 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected Set<Pokemon> mainGameWildPokemon(boolean useTimeOfDay) {
-        Set<Pokemon> wildPokemon = new TreeSet<>();
-        List<EncounterSet> areas = this.getEncounters(useTimeOfDay);
+    protected int[] getPostGameEncounterAreas(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen4Constants.Type_HGSS:
+                if(useTimeOfDay) {
+                    return Gen4Constants.hgssPostGameEncounterAreasTOD;
+                } else {
+                    return Gen4Constants.hgssPostGameEncounterAreasNoTOD;
+                }
+            case Gen4Constants.Type_DP:
+                return Gen4Constants.dpPostGameEncounterAreas;
+            case Gen4Constants.Type_Plat:
+                return Gen4Constants.platPostGameEncounterAreas;
+            default:
+                //unrecognized game
+                return null;
+        }
 
-        int[] postGameAreas;
-        int[] specialCases = null;
-        if(romEntry.romType == Gen4Constants.Type_HGSS) {
-            if(useTimeOfDay) {
-                postGameAreas = Gen4Constants.hgssPostGameEncounterAreasTOD;
-                specialCases = Gen4Constants.hgssPostGameSpecialCasesTOD;
-            } else {
-                postGameAreas = Gen4Constants.hgssPostGameEncounterAreasNoTOD;
-                specialCases = Gen4Constants.hgssPostGameSpecialCasesNoTOD;
+    }
+
+    @Override
+    protected int[] getPostGameEncounterSpecialCases(boolean useTimeOfDay) {
+        switch (romEntry.romType) {
+            case Gen4Constants.Type_HGSS:
+                if(useTimeOfDay) {
+                    return Gen4Constants.hgssPostGameSpecialCasesTOD;
+                } else {
+                    return Gen4Constants.hgssPostGameSpecialCasesNoTOD;
+                }
+            case Gen4Constants.Type_DP:
+            case Gen4Constants.Type_Plat:
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    protected void handlePostGameEncounterSpecialCase(Set<Pokemon> addTo, EncounterSet area, boolean useTimeOfDay) {
+        //our only special case in this generation is HGSS headbutt trees
+        //and in each case they appear, the first 12 are local and the last 6 are not
+        int pokeIndex = 0;
+        for (Encounter enc : area.encounters) {
+            pokeIndex++;
+            if(pokeIndex > 12) {
+                break;
             }
-        } else if (romEntry.romType == Gen4Constants.Type_DP) {
-            postGameAreas = Gen4Constants.dpPostGameEncounterAreas;
-        } else {
-            postGameAreas = Gen4Constants.platPostGameEncounterAreas;
+            addTo.add(enc.pokemon);
         }
-
-        Arrays.sort(postGameAreas);
-        if(specialCases != null) {
-            Arrays.sort(specialCases);
-        }
-        //this might sort the originals, but there's no harm in that.
-
-        int pgaIndex = 0;
-        int scIndex = 0;
-        int areaIndex = 0;
-        for (EncounterSet area : areas) {
-            if(areaIndex == postGameAreas[pgaIndex]) {
-                //don't add, but do advance to the next post-game area
-                pgaIndex++;
-                if(pgaIndex == postGameAreas.length) {
-                    pgaIndex = 0;
-                }
-            } else if (specialCases != null && areaIndex == specialCases[scIndex]) {
-                //our only special case in this generation is HGSS headbutt trees
-                //and in each case they appear, the first 12 are local and the last 6 are not
-                int pokeIndex = 0;
-                for (Encounter enc : area.encounters) {
-                    pokeIndex++;
-                    if(pokeIndex > 12) {
-                        break;
-                    }
-                    wildPokemon.add(enc.pokemon);
-                }
-                scIndex++;
-                if(scIndex == specialCases.length) {
-                    scIndex = 0;
-                }
-            } else {
-                for (Encounter enc : area.encounters) {
-                    wildPokemon.add(enc.pokemon);
-                }
-            }
-
-            areaIndex++;
-        }
-
-        return wildPokemon;
     }
 
     //TODO: remove when finished
