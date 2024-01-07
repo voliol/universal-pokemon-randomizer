@@ -2208,7 +2208,7 @@ public class NewRandomizerGUI {
         spComboBox3.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
         spTypeNoneRadioButton.setVisible(true);
         spTypeNoneRadioButton.setEnabled(false);
-        spTypeNoneRadioButton.setSelected(false);
+        spTypeNoneRadioButton.setSelected(true);
         spTypeFwgRadioButton.setVisible(true);
         spTypeFwgRadioButton.setEnabled(false);
         spTypeFwgRadioButton.setSelected(false);
