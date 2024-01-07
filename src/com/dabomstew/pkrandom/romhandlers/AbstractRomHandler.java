@@ -1679,7 +1679,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
 
         // Set up Pokemon pool
-        cachedReplacementLists = new TreeMap<>();
+        cachedTypeLists = new TreeMap<>();
         if (useLocalPokemon) {
             cachedAllList = new ArrayList<>(mainGameWildPokemon(settings.isUseTimeBasedEncounters()));
             addEvolutionaryRelatives(cachedAllList);
@@ -1839,8 +1839,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 eliteFourExceptionList.removeIf(pk -> pk.actuallyCosmetic);
-
-                nonEliteFourExceptionList = cachedAllList;
+                eliteFourExceptionList.removeAll(cachedAllList);
             }
         }
 
@@ -1905,6 +1904,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         eliteFourTrackPokemon && eliteFourUniquePokemonNumber > trainerPokemonList.indexOf(tp);
                 boolean willForceEvolve = forceFullyEvolved && tp.level >= forceFullyEvolvedLevel;
 
+                List<Pokemon> cacheReplacement = null;
+
                 Pokemon oldPK = tp.pokemon;
                 if (tp.forme > 0) {
                     oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
@@ -1917,10 +1918,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 if (eliteFourSetUniquePokemon) {
                     bannedList.addAll(bannedFromUniqueList);
-                    if(eliteFourExceptionList != null) {
-                        cachedAllList = eliteFourExceptionList;
-                        bannedList.addAll(nonEliteFourExceptionList);
-                    }
+                    cacheReplacement = eliteFourExceptionList;
                 }
                 if (willForceEvolve) {
                     bannedList.addAll(evolvesIntoTheWrongType);
@@ -1930,13 +1928,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 oldPK,
                                 usePowerLevels,
                                 typeForTrainer,
-                                noLegendaries,
                                 wgAllowed,
                                 distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
                                 swapThisMegaEvo,
-                                abilitiesAreRandomized,
-                                includeFormes,
-                                banIrregularAltFormes
+                                cacheReplacement
                         );
 
                 // Chosen Pokemon is locked in past here
@@ -1965,10 +1960,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                             }
                         }
 
-                        if(eliteFourExceptionList != null) {
-                            //return to normal list
-                            cachedAllList = nonEliteFourExceptionList;
-                        }
                     }
                     if (eliteFourTrackPokemon) {
                         bannedFromUniqueList.add(newPK);
@@ -6944,17 +6935,23 @@ public abstract class AbstractRomHandler implements RomHandler {
         return results;
     }
 
-    private Map<Type, List<Pokemon>> cachedReplacementLists;
+    private Map<Type, List<Pokemon>> cachedTypeLists;
     private List<Pokemon> cachedAllList;
     private List<Pokemon> bannedList = new ArrayList<>();
     private List<Pokemon> usedAsUniqueList = new ArrayList<>();
 
 
     private Pokemon pickTrainerPokeReplacement(Pokemon current, boolean usePowerLevels, Type type,
-                                               boolean noLegendaries, boolean wonderGuardAllowed,
-                                               boolean usePlacementHistory, boolean swapMegaEvos,
-                                               boolean abilitiesAreRandomized, boolean allowAltFormes,
-                                               boolean banIrregularAltFormes) {
+                                               boolean wonderGuardAllowed, boolean usePlacementHistory,
+                                               boolean swapMegaEvos, List<Pokemon> useInsteadOfCached ) {
+
+        List<Pokemon> cacheOrReplacement;
+        if(useInsteadOfCached == null) {
+            cacheOrReplacement = cachedAllList;
+        } else {
+            cacheOrReplacement = useInsteadOfCached;
+        }
+
         List<Pokemon> pickFrom;
         List<Pokemon> withoutBannedPokemon;
 
@@ -6965,8 +6962,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     .map(mega -> mega.from)
                     .distinct()
                     .collect(Collectors.toList());
+
+            pickFrom.removeIf(p -> !cacheOrReplacement.contains(p)); //ensure other restrictions still apply
         } else {
-            pickFrom = cachedAllList;
+            pickFrom = cacheOrReplacement;
         }
 
         if (usePlacementHistory) {
@@ -6977,39 +6976,83 @@ public abstract class AbstractRomHandler implements RomHandler {
                     .filter(pk -> getPlacementHistory(pk) < placementAverage * 2)
                     .collect(Collectors.toList());
             if (pickFrom.isEmpty()) {
-                pickFrom = cachedAllList;
+                pickFrom = cacheOrReplacement;
             }
-        } else if (type != null && cachedReplacementLists != null) {
+        } else if (type != null && cachedTypeLists != null) {
             // "Type Themed" settings
-            if (!cachedReplacementLists.containsKey(type)) {
-                List<Pokemon> pokemonOfType = allowAltFormes ? pokemonOfTypeInclFormes(type, noLegendaries) :
-                        pokemonOfType(type, noLegendaries);
-                pokemonOfType.removeAll(this.getBannedFormesForPlayerPokemon());
-                if (!abilitiesAreRandomized) {
-                    List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
-                    pokemonOfType.removeAll(abilityDependentFormes);
+
+            List<Pokemon> pokemonOfType;
+            if(useInsteadOfCached == null) {
+                if (!cachedTypeLists.containsKey(type)) {
+                    pokemonOfType = new ArrayList<>();
+                    for(Pokemon poke : cachedAllList) {
+                        if(poke.primaryType == type || poke.secondaryType == type) {
+                            pokemonOfType.add(poke);
+                        }
+                    }
+
+                    if(pokemonOfType.isEmpty()) {
+                        //no pokemon in the cached list of this type
+                        //(this is probably because of useLocalPokemon)
+
+                        throw new RandomizationException("No pokemon available for trainers of type " + type);
+
+                        //I may implement handling to skip such types instead of crashing
+                        //...but not yet
+                    }
+
+                    cachedTypeLists.put(type, pokemonOfType);
+                } else {
+                    pokemonOfType = cachedTypeLists.get(type);
                 }
-                if (banIrregularAltFormes) {
-                    pokemonOfType.removeAll(getIrregularFormes());
+            } else {
+                //we don't want to pull from the cached type lists when replacing the cache
+                pokemonOfType = new ArrayList<>();
+                for(Pokemon poke : useInsteadOfCached) {
+                    if(poke.primaryType == type || poke.secondaryType == type) {
+                        pokemonOfType.add(poke);
+                    }
                 }
-                cachedReplacementLists.put(type, pokemonOfType);
+
+                if(pokemonOfType.isEmpty()) {
+                    //no pokemon in the provided list of this type
+                    //default to using the cache
+                    return pickTrainerPokeReplacement(current, usePowerLevels, type,
+                            wonderGuardAllowed, usePlacementHistory, swapMegaEvos, null);
+                }
             }
             if (swapMegaEvos) {
-                pickFrom = cachedReplacementLists.get(type)
+                pickFrom = pokemonOfType
                         .stream()
                         .filter(pickFrom::contains)
                         .collect(Collectors.toList());
                 if (pickFrom.isEmpty()) {
-                    pickFrom = cachedReplacementLists.get(type);
+                    pickFrom = pokemonOfType;
                 }
             } else {
-                pickFrom = cachedReplacementLists.get(type);
+                pickFrom = pokemonOfType;
             }
+        }
+
+        if(pickFrom.isEmpty() && useInsteadOfCached != null) {
+            //turns out we have nothing to pick from
+            //default to using the cache
+            return pickTrainerPokeReplacement(current, usePowerLevels, type,
+                    wonderGuardAllowed, usePlacementHistory, swapMegaEvos, null);
         }
 
         withoutBannedPokemon = pickFrom.stream().filter(pk -> !bannedList.contains(pk)).collect(Collectors.toList());
         if (!withoutBannedPokemon.isEmpty()) {
             pickFrom = withoutBannedPokemon;
+        } else if(useInsteadOfCached != null) {
+            //rather than using banned pokemon from the provided list,
+            //see if we can get a non-banned pokemon from the cache
+            Pokemon cachePick = pickTrainerPokeReplacement(current, usePowerLevels, type,
+                    wonderGuardAllowed, usePlacementHistory, swapMegaEvos, null);
+            if(!bannedList.contains(cachePick)) {
+                return cachePick;
+            }
+            //if we didn't, then we might as well pick from the provided pool
         }
 
         if (usePowerLevels) {
