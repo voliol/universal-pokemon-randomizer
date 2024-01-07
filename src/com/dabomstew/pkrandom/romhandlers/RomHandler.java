@@ -120,12 +120,6 @@ public interface RomHandler {
 
     int starterCount();
 
-    void customStarters(Settings settings);
-
-    void randomizeStarters(Settings settings);
-
-    void randomizeBasicTwoEvosStarters(Settings settings);
-
     void generateStarters(Settings settings);
 
     List<Pokemon> getPickedStarters();
