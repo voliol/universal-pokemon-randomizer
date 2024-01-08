@@ -25,6 +25,8 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
  * "Local pokemon only" (fully implemented)  
      restricts trainers to only using pokemon that can be caught in the wild, or their evolutionary relatives  
      can be used together with type restrictions  
+          * Subfeature (not implemented): Allow post-game trainers to use post-game pokemon  
+          * sub-subfeature (not implemented): A special case for the Johto games, allowing Kanto trainers to use *only* Kanto pokemon  
 
  * Starter type restrictions: (fully implemented)  
      a new radio button set including the following restrictions:  
