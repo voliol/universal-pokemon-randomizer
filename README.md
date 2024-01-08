@@ -22,7 +22,7 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
      functions the same as "Preserve Type Themed Areas", except the "area" is a single trainer.  
      always triggers if the trainer has only one pokemon. (negotiable, but i think it's more positive than negative.)
 
- * "Local pokemon only" (implemented for english-language ROMs only)  
+ * "Local pokemon only" (fully implemented)  
      restricts trainers to only using pokemon that can be caught in the wild, or their evolutionary relatives  
      can be used together with type restrictions  
 
