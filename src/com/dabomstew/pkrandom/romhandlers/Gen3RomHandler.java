@@ -4562,12 +4562,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    protected String[] getPostGameAreaIdentifiers() {
-        return romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
-                Gen3Constants.frlgPostGameEncounterAreas : Gen3Constants.rsePostGameEncounterAreas;
-    }
-
-    @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;
     }

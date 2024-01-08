@@ -1171,6 +1171,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 }
             }
         }
+        Gen7Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType(), useTimeOfDay);
         return encounterAreas;
     }
 
@@ -3631,11 +3632,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             }
         }
         return items;
-    }
-
-    @Override
-    protected String[] getPostGameAreaIdentifiers() {
-        return Gen7Constants.postGameEncounterAreas;
     }
 
     @Override
