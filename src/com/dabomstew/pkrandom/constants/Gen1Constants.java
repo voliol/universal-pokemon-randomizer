@@ -155,10 +155,6 @@ public class Gen1Constants {
         return allowedItems;
     }
 
-    public static String[] postGameEncounterAreas = new String[] {
-            "CERULEAN CAVE"
-    };
-
     public static void tagTrainersUniversal(List<Trainer> trs) {
         // Gym Leaders
         tbc(trs, 34, 0, "GYM1-LEADER");
@@ -363,6 +359,18 @@ public class Gen1Constants {
         }
     }
 
+    private static final int[] postGameEncounterAreasRBG = new int[] {
+            53, 54, 55, 67, //CERULEAN CAVE
+    };
+
+    private static final int[] postGameEncounterAreasJapaneseBlue = new int[] {
+            54, 55, 56, 68, //CERULEAN CAVE
+    };
+
+    private static final int[] postGameEncounterAreasYellow = new int[] {
+            59, 60, 61, 94, 95, //CERULEAN CAVE
+    };
+
     // the ones tagged "SUPER ROD N" are super rod encounters shared between several locations
     private static final List<String> locationTagsRBG = List.of(
             "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
@@ -437,23 +445,28 @@ public class Gen1Constants {
             "SUPER ROD 9" // route 23, cerulean cave
     );
 
-    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
         if (encounterAreas.size() != locationTags.size()) {
             throw new IllegalArgumentException("Unexpected amount of encounter areas");
         }
         for (int i = 0; i < encounterAreas.size(); i++) {
             encounterAreas.get(i).setLocationTag(locationTags.get(i));
         }
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
     }
 
     public static void tagEncounterAreasRBG(List<EncounterArea> encounterAreas) {
-        tagEncounterAreas(encounterAreas, locationTagsRBG);
+        tagEncounterAreas(encounterAreas, locationTagsRBG, postGameEncounterAreasRBG);
+    }
+
+    public static void tagEncounterAreasJapaneseBlue(List<EncounterArea> encounterAreas) {
+        tagEncounterAreas(encounterAreas, locationTagsJapaneseBlue, postGameEncounterAreasJapaneseBlue);
     }
 
     public static void tagEncounterAreasYellow(List<EncounterArea> encounterAreas) {
-        tagEncounterAreas(encounterAreas, locationTagsYellow);
+        tagEncounterAreas(encounterAreas, locationTagsYellow, postGameEncounterAreasYellow);
     }
-    public static void tagEncounterAreasJapaneseBlue(List<EncounterArea> encounterAreas) {
-        tagEncounterAreas(encounterAreas, locationTagsJapaneseBlue);
-    }
+
 }

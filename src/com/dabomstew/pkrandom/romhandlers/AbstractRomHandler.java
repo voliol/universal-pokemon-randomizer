@@ -1554,23 +1554,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
-    // This method does not work in all games, since it depends on the display names of EncounterAreas,
-    // which vary between translations of the same game.
     protected PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay) {
         PokemonSet<Pokemon> wildPokemon = new PokemonSet<>();
         List<EncounterArea> areas = this.getEncounters(useTimeOfDay);
 
-        String[] postGameAreas = getPostGameAreaIdentifiers();
-
         for (EncounterArea area : areas) {
-            boolean isPostGame = false;
-            for (String nameFragment : postGameAreas) {
-                if (area.getDisplayName().contains(nameFragment)) {
-                    isPostGame = true;
-                    break;
+            if (area.isPartiallyPostGame()) {
+                for (int i = area.getPartiallyPostGameCutoff(); i < area.size(); i++) {
+                    wildPokemon.add(area.get(i).getPokemon());
                 }
-            }
-            if (!isPostGame) {
+            } else if (!area.isPostGame()) {
                 for (Encounter enc : area) {
                     wildPokemon.add(enc.getPokemon());
                 }
@@ -1578,8 +1571,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         return wildPokemon;
     }
-
-    protected abstract String[] getPostGameAreaIdentifiers();
 
     @Override
     public boolean canAddHeldItemsToBossTrainers() {

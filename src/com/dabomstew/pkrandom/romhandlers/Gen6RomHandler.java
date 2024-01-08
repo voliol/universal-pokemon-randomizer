@@ -1072,15 +1072,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (!loadedWildMapNames) {
             loadWildMapNames();
         }
+
+        List<EncounterArea> encounterAreas;
         try {
             if (romEntry.getRomType() == Gen6Constants.Type_ORAS) {
-                return getEncountersORAS();
+                encounterAreas = getEncountersORAS();
             } else {
-                return getEncountersXY();
+                encounterAreas = getEncountersXY();
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+
+        Gen6Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
+
+        return encounterAreas;
     }
 
     private List<EncounterArea> getEncountersXY() throws IOException {
@@ -4093,12 +4099,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
         }
         return items;
-    }
-
-    @Override
-    protected String[] getPostGameAreaIdentifiers() {
-        return romEntry.getRomType() == Gen6Constants.Type_ORAS ?
-                Gen6Constants.orasPostGameEncounterAreas : Gen6Constants.xyPostGameEncounterAreas;
     }
 
     @Override

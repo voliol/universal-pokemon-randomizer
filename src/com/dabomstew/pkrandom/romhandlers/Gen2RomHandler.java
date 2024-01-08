@@ -2864,11 +2864,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected String[] getPostGameAreaIdentifiers() {
-        return Gen2Constants.postGameEncounterAreas;
-    }
-
-    @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;
     }

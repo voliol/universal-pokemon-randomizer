@@ -568,14 +568,6 @@ public class Gen3Constants {
         }
     }
 
-    public static String[] frlgPostGameEncounterAreas = new String[] {
-            "CERULEAN CAVE"
-    };
-
-    public static String[] rsePostGameEncounterAreas = new String[] {
-            "SKY PILLAR", "ALTERING CAVE", "DESERT UNDERPASS"
-    };
-
     public static void trainerTagsRS(List<Trainer> trs, int romType) {
         // Gym Trainers
         tag(trs, "GYM1", 0x140, 0x141);
@@ -956,6 +948,42 @@ public class Gen3Constants {
         }
     }
 
+    private static final int[] rsPostGameEncounterAreas = new int[] {
+            81, 82, 83, //SKY PILLAR
+            153 //Mirage Island - technically not post-game, but not exactly part of the game either
+    };
+
+    private static final int[] emPostGameEncounterAreas = new int[] {
+            174, 177, 178, //SKY PILLAR
+            199, 200, 201, 202, 203, 204, 205, 206, 207, //ALTERING CAVE
+            196, //DESERT UNDERPASS
+            95, //Mirage Island - technically not post-game, but hardly "local" since it almost never exists
+    };
+
+    private static final int[] frlgPostGameEncounterAreas = new int[] {
+            33, 34, 35, 36, 37, 38, 39, 40, 41, 42, //CERULEAN CAVE
+            118, //THREE ISLE PORT
+            214, 215, //FOUR ISLAND
+            82, 83, 84, 85, 86, 87, 88, 89, //ICEFALL CAVE
+            216, 217, //FIVE ISLAND
+            119, 120, //RESORT GORGEOUS
+            91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, //LOST CAVE
+            121, 122, //WATER LABYRINTH
+            123, 124, 125, //FIVE ISLE MEADOW
+            126, 127, 128, //MEMORIAL PILLAR
+            133, 134, 135, //WATER PATH
+            136, 137, 138, //RUIN VALLEY
+            131, 132, //GREEN PATH
+            90, //PATTERN BUSH
+            129, 130, //OUTCAST ISLAND
+            218, 219, 220, 221, 222, 223, 224, 225, 226, //ALTERING CAVE
+            144, 145, //TANOBY RUINS
+            0, 1, 2, 3, 4, 5, 6, //the Tanoby Chambers
+            142, 143, //SEVAULT CANYON
+            141, //CANYON ENTRANCE
+            139, 140, //TRAINER TOWER
+    };
+
     public static final List<String> locationTagsRS = List.of(
             "PETALBURG CITY", "PETALBURG CITY",
             "SLATEPORT CITY", "SLATEPORT CITY",
@@ -1216,12 +1244,15 @@ public class Gen3Constants {
             "LOST CAVE", "TRAINER TOWER", "CANYON ENTRANCE", "SEVAULT CANYON", "TANOBY RUINS", "TANOBY CHAMBERS",
             "CERULEAN CAVE");
 
-    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags) {
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
         if (encounterAreas.size() != locationTags.size()) {
             throw new IllegalArgumentException("Unexpected amount of encounter areas");
         }
         for (int i = 0; i < encounterAreas.size(); i++) {
             encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
         }
     }
 
@@ -1232,7 +1263,13 @@ public class Gen3Constants {
             case 3 -> locationTagsFRLG;
             default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
         };
-        tagEncounterAreas(encounterAreas, locationTags);
+        int[] postGameAreas = switch (romType) {
+            case 0, 1 -> rsPostGameEncounterAreas;
+            case 2 -> emPostGameEncounterAreas;
+            case 3 -> frlgPostGameEncounterAreas;
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, locationTags, postGameAreas);
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
