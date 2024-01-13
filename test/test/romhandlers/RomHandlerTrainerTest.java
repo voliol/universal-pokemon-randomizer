@@ -509,6 +509,38 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setTrainersMod(false, true, false, false, false);
         romHandler.randomizeTrainerPokes(s);
 
+        elite4UniquePokemonCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void uniqueElite4PokemonGivesUniquePokemonToSaidTrainersWithUseLocal(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setTrainersUseLocalPokemon(true);
+        s.setEliteFourUniquePokemonNumber(1);
+        s.setTrainersMod(false, true, false, false, false);
+        romHandler.randomizeTrainerPokes(s);
+
+        elite4UniquePokemonCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void uniqueElite4PokemonGivesUniquePokemonToSaidTrainersWithTypeThemes(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setTrainersUseLocalPokemon(true);
+        s.setEliteFourUniquePokemonNumber(1);
+        s.setTrainersMod(false, false, false, false, true);
+        romHandler.randomizeTrainerPokes(s);
+
+        elite4UniquePokemonCheck();
+    }
+
+    private void elite4UniquePokemonCheck() {
         List<Trainer> trainers = romHandler.getTrainers();
         int[] pokeCount = new int[romHandler.getPokemon().size()];
         for (Trainer tr : trainers) {
