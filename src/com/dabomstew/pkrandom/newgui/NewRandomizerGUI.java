@@ -1880,6 +1880,7 @@ public class NewRandomizerGUI {
         settings.setWildPokemonTypeMod(wpTRNoneRadioButton.isSelected(), wpTRThemedAreasRadioButton.isSelected(),
                 wpTRKeepPrimaryRadioButton.isSelected());
         settings.setKeepWildTypeThemes(wpTRKeepThemesCheckBox.isSelected());
+        settings.setSimilarStrengthEncounters(wpSimilarStrengthCheckBox.isSelected());
         settings.setCatchEmAllEncounters(wpCatchEmAllModeCheckBox.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeBasedEncountersCheckBox.isSelected());
         settings.setUseMinimumCatchRate(wpSetMinimumCatchRateCheckBox.isSelected());
