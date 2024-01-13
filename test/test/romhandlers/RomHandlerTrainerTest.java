@@ -505,10 +505,39 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         loadROM(romName);
 
         Settings s = new Settings();
+        s.setEliteFourUniquePokemonNumber(1);
         s.setTrainersMod(false, true, false, false, false);
         romHandler.randomizeTrainerPokes(s);
 
-        // TODO
+        List<Trainer> trainers = romHandler.getTrainers();
+        int[] pokeCount = new int[romHandler.getPokemon().size()];
+        for (Trainer tr : trainers) {
+            System.out.println(tr);
+            for (TrainerPokemon tp : tr.pokemon) {
+                Pokemon pk = tp.pokemon;
+                pokeCount[pk.getNumber()]++;
+            }
+        }
+
+        List<Pokemon> allPokes = romHandler.getPokemon();
+        for (int i = 1; i < allPokes.size(); i++) {
+            System.out.println(allPokes.get(i).getName() + " : " + pokeCount[i]);
+        }
+
+        List<Integer> eliteFourIndices = romHandler.getEliteFourTrainers(false);
+        assumeTrue(!eliteFourIndices.isEmpty());
+        for (Trainer tr : romHandler.getTrainers()) {
+            if (eliteFourIndices.contains(tr.index)) {
+                System.out.println(tr);
+                int minCount = Integer.MAX_VALUE;
+                for (TrainerPokemon tp : tr.pokemon) {
+                    Pokemon pk = tp.pokemon;
+                    System.out.println(pk.getName() + ":" + pokeCount[pk.getNumber()]);
+                    minCount = Math.min(minCount, pokeCount[pk.getNumber()]);
+                }
+                assertEquals(1, minCount);
+            }
+        }
     }
 
     @ParameterizedTest
