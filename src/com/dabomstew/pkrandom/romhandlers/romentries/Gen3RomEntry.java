@@ -25,10 +25,6 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             putSpecialKeyMethod("StarterText[]", Gen3RomEntry::addStarterText);
             putSpecialKeyMethod("TMText[]", Gen3RomEntry::addTMText);
             putSpecialKeyMethod("MoveTutorText[]", Gen3RomEntry::addMoveTutorText);
-            // aliases for backwards compatibility with old .ini files
-            putIntAlias("IntroSpriteOffset", "IntroImageOffset");
-            putIntAlias("PokemonFrontSprites", "PokemonFrontImages");
-            putIntAlias("PokemonBackSprites", "PokemonBackImages");
         }
 
         /**

@@ -1902,6 +1902,7 @@ public class NewRandomizerGUI {
         settings.setWildPokemonTypeMod(wpTRNoneRadioButton.isSelected(), wpTRThemedAreasRadioButton.isSelected(),
                 wpTRKeepPrimaryRadioButton.isSelected());
         settings.setKeepWildTypeThemes(wpTRKeepThemesCheckBox.isSelected());
+        settings.setSimilarStrengthEncounters(wpSimilarStrengthCheckBox.isSelected());
         settings.setCatchEmAllEncounters(wpCatchEmAllModeCheckBox.isSelected());
         settings.setUseTimeBasedEncounters(wpUseTimeBasedEncountersCheckBox.isSelected());
         settings.setUseMinimumCatchRate(wpSetMinimumCatchRateCheckBox.isSelected());
@@ -2546,9 +2547,6 @@ public class NewRandomizerGUI {
             tpSensibleItemsCheckBox.setEnabled(false);
             tpHighestLevelGetsItemCheckBox.setVisible(heldItemsAvailable);
             tpHighestLevelGetsItemCheckBox.setEnabled(false);
-
-            tpEliteFourUniquePokemonCheckBox.setVisible(pokemonGeneration >= 3);
-            tpEliteFourUniquePokemonSpinner.setVisible(pokemonGeneration >= 3);
 
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
             tpRandomizeTrainerClassNamesCheckBox.setEnabled(true);
