@@ -1554,7 +1554,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setTrainers(currentTrainers);
     }
 
-    protected PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay) {
+    public PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay) {
         PokemonSet<Pokemon> wildPokemon = new PokemonSet<>();
         List<EncounterArea> areas = this.getEncounters(useTimeOfDay);
 

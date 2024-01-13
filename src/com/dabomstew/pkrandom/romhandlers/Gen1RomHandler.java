@@ -1163,7 +1163,18 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getEliteFourTrainers(boolean isChallengeMode) {
-        return new ArrayList<>();
+        List<Integer> eliteFourIndices = new ArrayList<>();
+        List<Trainer> allTrainers = getTrainers();
+        for (int i = 0; i < allTrainers.size(); i++) {
+            Trainer tr = allTrainers.get(i);
+            if (tr.tag != null &&
+                    (tr.tag.contains("ELITE") ||
+                    (!isYellow() && tr.tag.contains("RIVAL8")) || (isYellow() && tr.tag.contains("RIVAL7")))) {
+                eliteFourIndices.add(i + 1);
+            }
+        }
+
+        return eliteFourIndices;
     }
 
     @Override

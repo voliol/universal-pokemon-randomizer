@@ -7,10 +7,8 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -463,44 +461,81 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void useLocalPokemonAndE4UniquePokesGivesE4NonLocalPokemon(String romName) {
-        // TODO: fix the randomization code so this works
+        int wantedNonLocal = 1; // you can play around with this value between 1-6 but what's important is it works for 1
+
         loadROM(romName);
         Settings s = new Settings();
         s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
         s.setTrainersUseLocalPokemon(true);
-        s.setEliteFourUniquePokemonNumber(1); // should be at least 4 non-local Pokemon in each game
+        s.setEliteFourUniquePokemonNumber(wantedNonLocal); // should be at least 4 non-local Pokemon in each game
         romHandler.randomizeTrainerPokes(s);
 
         PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
-        for (EncounterArea area : romHandler.getEncounters(true)) {
-            for (Pokemon pk : PokemonSet.inArea(area)) {
-                if (!localWithRelatives.contains(pk)) {
-                    localWithRelatives.addAll(PokemonSet.related(pk));
-                }
-            }
-        }
+        romHandler.getMainGameWildPokemon(true)
+                .forEach(pk -> localWithRelatives.addAll(PokemonSet.related(pk)));
 
         PokemonSet<Pokemon> all = romHandler.getPokemonSet();
         PokemonSet<Pokemon> nonLocal = new PokemonSet<>(all);
         nonLocal.removeAll(localWithRelatives);
 
         List<Integer> eliteFourIndices = romHandler.getEliteFourTrainers(false);
+        assumeTrue(!eliteFourIndices.isEmpty());
         for (Trainer tr : romHandler.getTrainers()) {
             System.out.println("\n" + tr);
 
             if (eliteFourIndices.contains(tr.index)) {
                 System.out.println("-E4 Member-");
                 System.out.println("Non-local: " + nonLocal.stream().map(Pokemon::getName).toList());
-                boolean hasNonLocal = false;
+                System.out.println("Local: " + localWithRelatives.stream().map(Pokemon::getName).toList());
+                int nonLocalCount = 0;
                 for (TrainerPokemon tp : tr.pokemon) {
-                    if (!localWithRelatives.contains(tp.pokemon)) {
-                        hasNonLocal = true;
+                    if (nonLocal.contains(tp.pokemon)) {
+                        nonLocalCount++;
                         System.out.println(tp.pokemon.getName() + " is nonlocal");
-                        break;
                     }
                 }
-                assertTrue(hasNonLocal);
+                assertTrue(nonLocalCount == wantedNonLocal || nonLocalCount == tr.pokemon.size());
             }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void uniqueElite4PokemonGivesUniquePokemonToSaidTrainers(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setTrainersMod(false, true, false, false, false);
+        romHandler.randomizeTrainerPokes(s);
+
+        // TODO
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void elite4MembersWithMultipleBattlesGetSameTypeThemeForAll(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setTrainersMod(false, false, false, false, true);
+        romHandler.randomizeTrainerPokes(s);
+
+        Map<String, List<Type>> e4Types = new HashMap<>();
+        for (Trainer tr : romHandler.getTrainers()) {
+            if (tr.tag != null && tr.tag.contains("ELITE")) {
+                String memberTag = tr.tag.split("-")[0];
+                if (!e4Types.containsKey(memberTag)) {
+                    e4Types.put(memberTag, new ArrayList<>());
+                }
+                e4Types.get(memberTag).add(getThemedTrainerType(tr));
+            }
+        }
+
+        System.out.println(e4Types);
+        for (Map.Entry<String, List<Type>> entry : e4Types.entrySet()) {
+            Set<Type> uniques = new HashSet<>(entry.getValue());
+            System.out.println(entry.getKey() + " has " + uniques.size() + " type theme(s)");
+            assertEquals(1, uniques.size());
         }
     }
 

@@ -2514,9 +2514,6 @@ public class NewRandomizerGUI {
             tpHighestLevelGetsItemCheckBox.setVisible(heldItemsAvailable);
             tpHighestLevelGetsItemCheckBox.setEnabled(false);
 
-            tpEliteFourUniquePokemonCheckBox.setVisible(pokemonGeneration >= 3);
-            tpEliteFourUniquePokemonSpinner.setVisible(pokemonGeneration >= 3);
-
             tpRandomizeTrainerNamesCheckBox.setEnabled(true);
             tpRandomizeTrainerClassNamesCheckBox.setEnabled(true);
             tpNoEarlyWonderGuardCheckBox.setVisible(pokemonGeneration >= 3);

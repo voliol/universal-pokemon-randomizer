@@ -227,6 +227,8 @@ public interface RomHandler {
      */
     List<EncounterArea> getSortedEncounters(boolean useTimeOfDay);
 
+    PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay);
+
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
     void randomizeEncounters(Settings settings);
@@ -255,6 +257,11 @@ public interface RomHandler {
 
     List<Integer> getMainPlaythroughTrainers();
 
+    /**
+     * Returns a list of the indices (in the main trainer list via {@link #getTrainers()}) of the trainers
+     * consisting of the non-rematch Elite 4 challenge, including the Champion (or Ghetsis in BW1). <br>
+     * If isChallengeMode is true, it returns the indexes for the Challenge Mode e4+champion (only in BW2).
+     */
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
     void setTrainers(List<Trainer> trainerData);
