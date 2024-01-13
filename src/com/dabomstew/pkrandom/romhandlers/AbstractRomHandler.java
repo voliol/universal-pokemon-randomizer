@@ -1266,7 +1266,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             cachedAll.retainAll(localWithRelatives);
         }
 
-        PokemonSet<Pokemon> banned = this.getBannedFormesForTrainerPokemon();
+        banned = getBannedFormesForTrainerPokemon();
         if (!abilitiesAreRandomized) {
             PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
@@ -1463,7 +1463,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
                 }
 
-                // is this "banned" never used?????
                 banned = new PokemonSet<>(usedAsUnique);
                 if (illegalEvoChains && willForceEvolve) {
                     banned.addAll(illegalIfEvolved);
