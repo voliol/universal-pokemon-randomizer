@@ -1,11 +1,13 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Shop;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,6 +82,165 @@ public class RomHandlerShopTest extends RomHandlerTest {
     public void opShopItemsIsNotEmpty(String romName) {
         loadROM(romName);
         assertFalse(romHandler.getOPShopItems().isEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canBadBadItems(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setBanBadRandomShopItems(true);
+        romHandler.randomizeShopItems(s);
+
+        ItemList nonBad = romHandler.getNonBadItems();
+        Map<Integer, Shop> shopItems = romHandler.getShopItems();
+        for (Shop shop : shopItems.values()) {
+            System.out.println(shop);
+            for (int itemID : shop.items) {
+                assertTrue(nonBad.isAllowed(itemID));
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canBadRegularShopItems(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setBanRegularShopItems(true);
+        romHandler.randomizeShopItems(s);
+
+        List<Integer> regularShop = romHandler.getRegularShopItems();
+        Map<Integer, Shop> shopItems = romHandler.getShopItems();
+        for (Shop shop : shopItems.values()) {
+            System.out.println(shop);
+            for (int itemID : shop.items) {
+                assertFalse(regularShop.contains(itemID));
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canBanOverpoweredShopItems(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setBanOPShopItems(true);
+        romHandler.randomizeShopItems(s);
+
+        List<Integer> opShop = romHandler.getOPShopItems();
+        Map<Integer, Shop> shopItems = romHandler.getShopItems();
+        for (Shop shop : shopItems.values()) {
+            System.out.println(shop);
+            for (int itemID : shop.items) {
+                assertFalse(opShop.contains(itemID));
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canGuaranteeEvolutionItems(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setGuaranteeEvolutionItems(true);
+        romHandler.randomizeShopItems(s);
+
+        List<Integer> evoItems = romHandler.getEvolutionItems();
+        Map<Integer, Boolean> placed = new HashMap<>();
+        for (int evoItem : evoItems) {
+            placed.put(evoItem, false);
+        }
+
+        Map<Integer, Shop> shopItems = romHandler.getShopItems();
+        for (Shop shop : shopItems.values()) {
+            System.out.println(shop);
+            for (int itemID : shop.items) {
+                if (evoItems.contains(itemID)) {
+                    placed.put(itemID, true);
+                }
+            }
+        }
+
+        System.out.println(placed);
+        int placedCount = (int) placed.values().stream().filter(b -> b).count();
+        assertEquals(evoItems.size(), placedCount);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canGuaranteeXItems(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setGuaranteeXItems(true);
+        romHandler.randomizeShopItems(s);
+
+        List<Integer> xItems = romHandler.getXItems();
+        Map<Integer, Boolean> placed = new HashMap<>();
+        for (int xItem : xItems) {
+            placed.put(xItem, false);
+        }
+
+        Map<Integer, Shop> shopItems = romHandler.getShopItems();
+        for (Shop shop : shopItems.values()) {
+            System.out.println(shop);
+            for (int itemID : shop.items) {
+                if (xItems.contains(itemID)) {
+                    placed.put(itemID, true);
+                }
+            }
+        }
+
+        System.out.println(placed);
+        int placedCount = (int) placed.values().stream().filter(b -> b).count();
+        assertEquals(xItems.size(), placedCount);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canGuaranteeEvolutionAndXItems(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setGuaranteeEvolutionItems(true);
+        s.setGuaranteeXItems(true);
+        romHandler.randomizeShopItems(s);
+
+        List<Integer> evoItems = romHandler.getEvolutionItems();
+        Map<Integer, Boolean> placedEvo = new HashMap<>();
+        for (int evoItem : evoItems) {
+            placedEvo.put(evoItem, false);
+        }
+        List<Integer> xItems = romHandler.getXItems();
+        Map<Integer, Boolean> placedX = new HashMap<>();
+        for (int xItem : xItems) {
+            placedX.put(xItem, false);
+        }
+
+        Map<Integer, Shop> shopItems = romHandler.getShopItems();
+        for (Shop shop : shopItems.values()) {
+            System.out.println(shop);
+            for (int itemID : shop.items) {
+                if (evoItems.contains(itemID)) {
+                    placedEvo.put(itemID, true);
+                }
+                if (xItems.contains(itemID)) {
+                    placedX.put(itemID, true);
+                }
+            }
+        }
+
+        System.out.println("Evo: " + placedEvo);
+        System.out.println("X: " + placedX);
+        int placedEvoCount = (int) placedEvo.values().stream().filter(b -> b).count();
+        assertEquals(evoItems.size(), placedEvoCount);
+        int placedXCount = (int) placedX.values().stream().filter(b -> b).count();
+        assertEquals(xItems.size(), placedXCount);
     }
 
 }
