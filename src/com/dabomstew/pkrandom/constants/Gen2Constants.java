@@ -194,8 +194,9 @@ public class Gen2Constants {
 
     public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 33);
 
+    // Held-while-traded evo items (upgrade etc.) are not considered because players are not expected to trade. Same as in Gen3Constants.
     public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
-            Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone); // TODO: metalcoat and upgrade (and maybe more) are missing?
+            Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
 
     public static final List<Integer> xItems = List.of(Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
             Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial);

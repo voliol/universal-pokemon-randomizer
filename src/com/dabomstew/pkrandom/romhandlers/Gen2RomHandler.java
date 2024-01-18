@@ -1925,9 +1925,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        // shop reading/writing methods and all(?) the required constants are present,
-        // but the randomization logic in AbstractRomHandler does not allow it
-        return false;
+        return true;
     }
 
     @Override
@@ -2001,7 +1999,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setShopPrices() {
-        // Not implemented
+        // Not implemented TODO: add balanced prices list
     }
 
     @Override
