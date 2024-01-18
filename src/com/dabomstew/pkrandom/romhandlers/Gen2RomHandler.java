@@ -1934,10 +1934,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public Map<Integer, Shop> getShopItems() {
         List<Shop> shops = readShops();
 
-        // no notion of skip shops
         Map<Integer, Shop> shopMap = new HashMap<>();
         for (int i = 0; i < shops.size(); i++) {
-            shopMap.put(i, shops.get(i));
+            if (!Gen2Constants.skipShops.contains(i)) {
+                shopMap.put(i, shops.get(i));
+            }
         }
         return shopMap;
     }
