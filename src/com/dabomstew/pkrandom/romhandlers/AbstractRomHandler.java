@@ -5630,8 +5630,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setShopItems(currentItems);
     }
 
-    // Note: If you use this on a game where the amount of randomizable shop items is greater than the amount of
-    // possible items, you will get owned by the while loop
     @Override
     public void randomizeShopItems(Settings settings) {
         boolean banBadItems = settings.isBanBadRandomShopItems();
@@ -5642,12 +5640,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean placeXItems = settings.isGuaranteeXItems();
 
         if (this.getShopItems() == null) return;
-        ItemList possibleItems = banBadItems ? this.getNonBadItems() : this.getAllowedItems();
+        Set<Integer> possibleItems = banBadItems ? getNonBadItems().getNonTMSet() : getAllowedItems().getNonTMSet();
         if (banRegularShopItems) {
-            possibleItems.banSingles(this.getRegularShopItems().stream().mapToInt(Integer::intValue).toArray());
+            possibleItems.removeAll(getRegularShopItems());
         }
         if (banOPShopItems) {
-            possibleItems.banSingles(this.getOPShopItems().stream().mapToInt(Integer::intValue).toArray());
+            possibleItems.removeAll(getOPShopItems());
         }
         Map<Integer, Shop> currentItems = this.getShopItems();
 
@@ -5655,7 +5653,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Integer> newItems = new ArrayList<>();
         Map<Integer, Shop> newItemsMap = new TreeMap<>();
-        int newItem;
         List<Integer> guaranteedItems = new ArrayList<>();
         if (placeEvolutionItems) {
             guaranteedItems.addAll(getEvolutionItems());
@@ -5663,14 +5660,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (placeXItems) {
             guaranteedItems.addAll(getXItems());
         }
-        if (placeEvolutionItems || placeXItems) {
-            newItems.addAll(guaranteedItems);
-            shopItemCount = shopItemCount - newItems.size();
+        shopItemCount = shopItemCount - guaranteedItems.size();
+        newItems.addAll(guaranteedItems);
+        possibleItems.removeAll(guaranteedItems);
 
-            for (int i = 0; i < shopItemCount; i++) {
-                while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
-                newItems.add(newItem);
+        Stack<Integer> remaining = new Stack<>();
+        Collections.shuffle(remaining);
+        for (int i = 0; i < shopItemCount; i++) {
+            if (remaining.isEmpty()) {
+                remaining.addAll(possibleItems);
+                Collections.shuffle(remaining);
             }
+            newItems.add(remaining.pop());
+        }
+
+        if (placeEvolutionItems || placeXItems) {
 
             // Guarantee main-game
             List<Integer> mainGameShops = new ArrayList<>();
@@ -5718,10 +5722,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 newItemsMap.put(i, shop);
             }
         } else {
-            for (int i = 0; i < shopItemCount; i++) {
-                while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
-                newItems.add(newItem);
-            }
 
             Iterator<Integer> newItemsIter = newItems.iterator();
 
