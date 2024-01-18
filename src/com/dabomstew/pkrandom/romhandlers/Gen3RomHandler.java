@@ -1597,7 +1597,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int mossdeepStevenOffset = romEntry.getIntValue("MossdeepStevenTeamOffset");
 		Trainer mossdeepSteven = new Trainer();
 		mossdeepSteven.offset = mossdeepStevenOffset;
-		mossdeepSteven.index = trainers.size();
+		mossdeepSteven.index = trainers.size() + 1;
 		mossdeepSteven.poketype = 1; // Custom moves, but no held items
 
 		// This is literally how the game does it too, lol. Have to subtract one because

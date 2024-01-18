@@ -24,6 +24,30 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void trainersContainsNoDuplicates(String romName) {
+        loadROM(romName);
+        Map<Trainer, List<Integer>> trainerIndices = new HashMap<>();
+        List<Trainer> trainers = romHandler.getTrainers();
+        for (int i = 0; i < trainers.size(); i++) {
+            Trainer tr = trainers.get(i);
+            if (!trainerIndices.containsKey(tr)) {
+                trainerIndices.put(tr, new ArrayList<>());
+            }
+            trainerIndices.get(tr).add(i);
+        }
+
+        int duplicatedTrainers = 0;
+        for (Map.Entry<Trainer, List<Integer>> entry : trainerIndices.entrySet()) {
+            if (entry.getValue().size() != 1) {
+                System.out.println("duplicated trainer: " + entry);
+                duplicatedTrainers++;
+            }
+        }
+        assertEquals(0, duplicatedTrainers);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void trainersDoNotChangeWithGetAndSet(String romName) {
         // TODO: this comparison needs to be deeper
         loadROM(romName);
