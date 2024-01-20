@@ -2988,7 +2988,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
         int itemDataOffset = romEntry.getIntValue("ItemData");
         int entrySize = romEntry.getIntValue("ItemEntrySize");
         int itemCount = romEntry.getIntValue("ItemCount");

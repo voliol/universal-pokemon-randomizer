@@ -5739,7 +5739,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         this.setShopItems(newItemsMap);
         if (balancePrices) {
-            this.setShopPrices();
+            this.setBalancedShopPrices();
         }
     }
 

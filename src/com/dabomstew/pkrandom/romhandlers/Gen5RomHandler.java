@@ -3716,7 +3716,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
         try {
             NARCArchive itemPriceNarc = this.readNARC(romEntry.getFile("ItemData"));
             for (int i = 1; i < itemPriceNarc.files.size(); i++) {

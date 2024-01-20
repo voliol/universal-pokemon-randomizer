@@ -1782,7 +1782,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
         // Not implemented
     }
 
