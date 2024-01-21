@@ -1997,27 +1997,37 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return shopToBytes(readShop(offset)).length;
     }
 
-    // an int[] to mirror getShopNames returning a String[]
-    public int[] getShopPrices() {
-        int itemAttributesOffset = romEntry.getIntValue("ItemAttributes");
-        int entrySize = romEntry.getIntValue("ItemAttributesEntrySize");
-        int itemCount = romEntry.getIntValue("ItemCount");
-        int[] prices = new int[itemCount];
-        for (int i = 1; i < prices.length; i++) {
+    public List<Integer> getShopPrices() {
+        int itemAttributesOffset = romEntry.getIntValue("ItemAttributesOffset");
+        int entrySize = Gen2Constants.itemAttributesEntrySize;
+        int itemCount = Gen2Constants.itemCount;
+        List<Integer> prices = new ArrayList<>(itemCount);
+        prices.add(0);
+        for (int i = 1; i < itemCount; i++) {
             int offset = itemAttributesOffset + (i - 1) * entrySize;
-            prices[i] = readWord(offset);
+            prices.add(readWord(offset));
         }
         return prices;
     }
 
     @Override
     public void setBalancedShopPrices() {
-        // TODO: fill in these entries
-        int itemDataOffset = romEntry.getIntValue("ItemAttributes");
-        int entrySize = romEntry.getIntValue("ItemAttributesEntrySize");
-        int itemCount = romEntry.getIntValue("ItemCount");
+        List<Integer> prices = getShopPrices();
+        for (Map.Entry<Integer, Integer> entry : Gen2Constants.balancedItemPrices.entrySet()) {
+            prices.set(entry.getKey(), entry.getValue());
+        }
+        setShopPrices(prices);
+    }
+
+    public void setShopPrices(List<Integer> prices) {
+        int itemDataOffset = romEntry.getIntValue("ItemAttributesOffset");
+        int entrySize = Gen2Constants.itemAttributesEntrySize;
+        int itemCount = Gen2Constants.itemCount;
+        if (prices.size() != itemCount) {
+            throw new IllegalArgumentException("");
+        }
         for (int i = 1; i < itemCount; i++) {
-            int balancedPrice = Gen2Constants.balancedItemPrices.get(i);
+            int balancedPrice = prices.get(i);
             int offset = itemDataOffset + (i - 1) * entrySize;
             writeWord(offset, balancedPrice);
         }

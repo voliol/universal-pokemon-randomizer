@@ -3,6 +3,7 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Shop;
+import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerShopTest extends RomHandlerTest {
 
@@ -276,6 +278,21 @@ public class RomHandlerShopTest extends RomHandlerTest {
         sb.append("]");
         sb.append("]");
         return sb.toString();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canGetPricesWithoutThrowing(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) == 2);
+        loadROM(romName);
+        List<Integer> prices = ((Gen2RomHandler) romHandler).getShopPrices();
+        String[] names = romHandler.getItemNames();
+        if (prices.size() != names.length) {
+            throw new IllegalStateException();
+        }
+        for (int i = 0; i < prices.size(); i++) {
+            System.out.println(names[i] + ": " + prices.get(i) + "¥");
+        }
     }
 
 }

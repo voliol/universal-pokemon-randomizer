@@ -196,6 +196,8 @@ public class Gen2Constants {
 
     public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 33);
 
+    public static final int itemCount = 256, itemAttributesEntrySize = 7;
+
     // Held-while-traded evo items (upgrade etc.) are not considered because players are not expected to trade. Same as in Gen3Constants.
     public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
             Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
@@ -1041,261 +1043,82 @@ public class Gen2Constants {
     }
 
     public static final Map<Integer, Integer> balancedItemPrices = Stream.of(new Integer[][]{
-            // The items with non-vanilla prices have comments explaining where those prices came from.
-            // Skip item index 0
-            {Gen2Items.masterBall, 3000},
-            {Gen2Items.ultraBall, 1200},
+
+            // general held items
             {Gen2Items.brightPowder, 3000}, // same as in Gen3Constants
-            {Gen2Items.greatBall, 600},
-            {Gen2Items.pokeBall, 200},
-            {Gen2Items.terusama6, 0},
-            {Gen2Items.bicycle, 0},
-            {Gen2Items.moonStone, 2100}, // same as other stones
-            {Gen2Items.antidote, 100},
-            {Gen2Items.burnHeal, 250},
-            {Gen2Items.iceHeal, 250},
-            {Gen2Items.awakening, 250},
-            {Gen2Items.parlyzHeal, 200},
-            {Gen2Items.fullRestore, 3000},
-            {Gen2Items.maxPotion, 2500},
-            {Gen2Items.hyperPotion, 1200},
-            {Gen2Items.superPotion, 700},
-            {Gen2Items.potion, 300},
-            {Gen2Items.escapeRope, 550},
-            {Gen2Items.repel, 350},
-            {Gen2Items.maxElixer, 4500},
-            {Gen2Items.fireStone, 2100},
-            {Gen2Items.thunderstone, 2100},
-            {Gen2Items.waterStone, 2100},
-            {Gen2Items.terusama25, 0},
-            {Gen2Items.hpUp, 9800},
-            {Gen2Items.protein, 9800},
-            {Gen2Items.iron, 9800},
-            {Gen2Items.carbos, 9800},
-            {Gen2Items.luckyPunch, 1200}, // vanilla value of 10 felt too low
-            {Gen2Items.calcium, 9800},
-            {Gen2Items.rareCandy, 10000}, // same as in Gen3Constants
-            {Gen2Items.xAccuracy, 950},
-            {Gen2Items.leafStone, 2100},
-            {Gen2Items.metalPowder, 1200}, // vanilla value of 10 felt too low
-            {Gen2Items.nugget, 10000},
-            {Gen2Items.pokeDoll, 1000},
-            {Gen2Items.fullHeal, 600},
-            {Gen2Items.revive, 1500},
-            {Gen2Items.maxRevive, 4000},
-            {Gen2Items.guardSpec, 700},
-            {Gen2Items.superRepel, 500},
-            {Gen2Items.maxRepel, 700},
-            {Gen2Items.direHit, 650},
-            {Gen2Items.terusama45, 0},
-            {Gen2Items.freshWater, 200},
-            {Gen2Items.sodaPop, 300},
-            {Gen2Items.lemonade, 350},
-            {Gen2Items.xAttack, 500},
-            {Gen2Items.terusama50, 0},
-            {Gen2Items.xDefend, 550},
-            {Gen2Items.xSpeed, 350},
-            {Gen2Items.xSpecial, 350},
-            {Gen2Items.coinCase, 0},
-            {Gen2Items.itemfinder, 0},
-            {Gen2Items.terusama56, 0},
             {Gen2Items.expShare, 6000}, // same as in Gen3Constants
-            {Gen2Items.oldRod, 0},
-            {Gen2Items.goodRod, 0},
-            {Gen2Items.silverLeaf, 1000},
-            {Gen2Items.superRod, 0},
-            {Gen2Items.ppUp, 9800},
-            {Gen2Items.ether, 1200},
-            {Gen2Items.maxEther, 2000},
-            {Gen2Items.elixer, 3000},
-            {Gen2Items.redScale, 0},
-            {Gen2Items.secretPotion, 0},
-            {Gen2Items.ssTicket, 0},
-            {Gen2Items.mysteryEgg, 0},
-            {Gen2Items.clearBell, 0},
-            {Gen2Items.silverWing, 0},
-            {Gen2Items.moomooMilk, 500},
             {Gen2Items.quickClaw, 4500}, // sane as in Gen3Constants
-            {Gen2Items.psnCureBerry, 100}, // same as Gen3Constants Pecha Berry
-            {Gen2Items.goldLeaf, 1000},
+            {Gen2Items.kingsRock, 5000}, // same as in Gen3Constants
+            {Gen2Items.amuletCoin, 1500}, // same as in Gen3Constants, could be too low
+            {Gen2Items.smokeBall, 1200}, // vanilla value of 200 felt too low
+            {Gen2Items.everstone, 200}, // same as in Gen3Constants
+            {Gen2Items.focusBand, 3000}, // same as in Gen3Constants
+            {Gen2Items.leftovers, 10000}, // same as in Gen3Constants
+            {Gen2Items.cleanseTag, 1000}, // same as in Gen3Constants
+            {Gen2Items.luckyEgg, 10000}, // same as in Gen3Constants
+            {Gen2Items.scopeLens, 5000}, // same as in Gen3Constants
+            {Gen2Items.berserkGene, 800}, // probably not a very good item
+
+            // type boosting items
             {Gen2Items.softSand, 2000}, // same as in Gen3Constants
             {Gen2Items.sharpBeak, 2000}, // same as in Gen3Constants
+            {Gen2Items.poisonBarb, 2000}, // same as in Gen3Constants
+            {Gen2Items.silverPowder, 2000}, // same as in Gen3Constants
+            {Gen2Items.mysticWater, 2000}, // same as in Gen3Constants
+            {Gen2Items.twistedSpoon, 2000}, // same as in Gen3Constants
+            {Gen2Items.blackbelt, 2000}, // same as in Gen3Constants
+            {Gen2Items.blackGlasses, 2000}, // same as in Gen3Constants
+            {Gen2Items.pinkBow, 2000}, // same as other type-boosting items
+            {Gen2Items.polkadotBow, 2000}, // same as other type-boosting items
+            {Gen2Items.neverMeltIce, 2000}, // same as in Gen3Constants
+            {Gen2Items.magnet, 2000}, // same as in Gen3Constants
+            {Gen2Items.spellTag, 2000}, // same as in Gen3Constants
+            {Gen2Items.miracleSeed, 2000}, // same as in Gen3Constants
+            {Gen2Items.hardStone, 2000}, // same as in Gen3Constants
+            {Gen2Items.charcoal, 2000}, // same as other type-boosting items; the vanilla cost is way too high
+            {Gen2Items.metalCoat, 2000}, // same as other type-boosting items
+            {Gen2Items.dragonScale, 2000}, // same as in Gen3Constants
+
+            // specific poke boosting items
+            {Gen2Items.luckyPunch, 1200}, // vanilla value of 10 felt too low
+            {Gen2Items.metalPowder, 1200}, // vanilla value of 10 felt too low
+            {Gen2Items.stick, 1200}, // vanilla value of 200 felt too low
+            {Gen2Items.thickClub, 2300}, // vanilla value of 500 felt too low
+            {Gen2Items.lightBall, 2300}, // vanilla value of 100 felt too low
+
+            // berries
+            {Gen2Items.berry, 50}, // same as Gen3Constants Oran Berry
+            {Gen2Items.goldBerry, 500}, // same as Gen3Constants Sitrus Berry
+            {Gen2Items.psnCureBerry, 100}, // same as Gen3Constants Pecha Berry
             {Gen2Items.przCureBerry, 200}, // same as Gen3Constants Cheri Berry
             {Gen2Items.burntBerry, 250}, // same as Gen3Constants Aspear Berry
             {Gen2Items.iceBerry, 250}, // same as Gen3Constants Rawst Berry
-            {Gen2Items.poisonBarb, 2000}, // same as in Gen3Constants
-            {Gen2Items.kingsRock, 5000}, // same as in Gen3Constants
             {Gen2Items.bitterBerry, 200}, // same as Gen3Constants Persim Berry
             {Gen2Items.mintBerry, 250}, // same as Gen3Constants Chesto Berry
-            {Gen2Items.redApricorn, 200}, // 200 is the standard price for the apricorns, and also a good one; same as poke balls
-            {Gen2Items.tinyMushroom, 500},
-            {Gen2Items.bigMushroom, 5000},
-            {Gen2Items.silverPowder, 2000}, // same as in Gen3Constants
-            {Gen2Items.bluApricorn, 200},
-            {Gen2Items.terusama90, 0},
-            {Gen2Items.amuletCoin, 1500}, // same as in Gen3Constants, could be too low
-            {Gen2Items.ylwApricorn, 200},
-            {Gen2Items.grnApricorn, 200},
-            {Gen2Items.cleanseTag, 1000}, // same as in Gen3Constants
-            {Gen2Items.mysticWater, 2000}, // same as in Gen3Constants
-            {Gen2Items.twistedSpoon, 2000}, // same as in Gen3Constants
-            {Gen2Items.whtApricorn, 200},
-            {Gen2Items.blackbelt, 2000}, // same as in Gen3Constants
-            {Gen2Items.blkApricorn, 200},
-            {Gen2Items.terusama100, 0},
-            {Gen2Items.pnkApricorn, 200},
-            {Gen2Items.blackGlasses, 2000}, // same as in Gen3Constants
-            {Gen2Items.slowpokeTail, 9800},
-            {Gen2Items.pinkBow, 2000}, // same as other type-boosting items
-            {Gen2Items.stick, 1200}, // vanilla value of 200 felt too low
-            {Gen2Items.smokeBall, 1200}, // vanilla value of 200 felt too low
-            {Gen2Items.neverMeltIce, 2000}, // same as in Gen3Constants
-            {Gen2Items.magnet, 2000}, // same as in Gen3Constants
             {Gen2Items.miracleBerry, 500}, // same as Gen3Constants Lum Berry
-            {Gen2Items.pearl, 1400},
-            {Gen2Items.bigPearl, 7500},
-            {Gen2Items.everstone, 200}, // same as in Gen3Constants
-            {Gen2Items.spellTag, 2000}, // same as in Gen3Constants
-            {Gen2Items.rageCandyBar, 300},
-            {Gen2Items.gsBall, 0},
-            {Gen2Items.blueCard, 0},
-            {Gen2Items.miracleSeed, 2000}, // same as in Gen3Constants
-            {Gen2Items.thickClub, 2300}, // vanilla value of 500 felt too low
-            {Gen2Items.focusBand, 3000}, // same as in Gen3Constants
-            {Gen2Items.terusama120, 0},
-            {Gen2Items.energyPowder, 500},
-            {Gen2Items.energyRoot, 800},
-            {Gen2Items.healPowder, 450},
-            {Gen2Items.revivalHerb, 2800},
-            {Gen2Items.hardStone, 2000}, // same as in Gen3Constants
-            {Gen2Items.luckyEgg, 10000}, // same as in Gen3Constants
-            {Gen2Items.cardKey, 0},
-            {Gen2Items.machinePart, 0},
-            {Gen2Items.eggTicket, 0},
-            {Gen2Items.lostItem, 0},
-            {Gen2Items.stardust, 2000},
-            {Gen2Items.starPiece, 9800},
-            {Gen2Items.basementKey, 0},
-            {Gen2Items.pass, 0},
-            {Gen2Items.terusama135, 0},
-            {Gen2Items.terusama136, 0},
-            {Gen2Items.terusama137, 0},
-            {Gen2Items.charcoal, 2000}, // same as other type-boosting items; the vanilla cost is way too high
-            {Gen2Items.berryJuice, 300}, // same as potion (which also heals 20 HP)
-            {Gen2Items.scopeLens, 5000}, // same as in Gen3Constants
-            {Gen2Items.terusama141, 0},
-            {Gen2Items.terusama142, 0},
-            {Gen2Items.metalCoat, 2000}, // same as in Gen3Constants
-            {Gen2Items.dragonFang, 100}, // it does nothing in Gen2 due to a bug
-            {Gen2Items.terusama145, 0},
-            {Gen2Items.leftovers, 10000}, // same as in Gen3Constants
-            {Gen2Items.terusama147, 0},
-            {Gen2Items.terusama148, 0},
-            {Gen2Items.terusama149, 0},
             {Gen2Items.mysteryBerry, 3000}, // same as Gen3Constants Leppa Berry
-            {Gen2Items.dragonScale, 2000}, // same as in Gen3Constants
-            {Gen2Items.berserkGene, 800}, // probably not a very good item
-            {Gen2Items.terusama153, 0},
-            {Gen2Items.terusama154, 0},
-            {Gen2Items.terusama155, 0},
-            {Gen2Items.sacredAsh, 10000}, // same as in Gen3Constants
-            {Gen2Items.heavyBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.flowerMail, 50},
-            {Gen2Items.levelBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.lureBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.fastBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.terusama162, 0},
-            {Gen2Items.lightBall, 2300}, // vanilla value of 100 felt too low
-            {Gen2Items.friendBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.moonBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.loveBall, 300}, // all the Apricorn balls are worth 300, same as in Gen4Constants
-            {Gen2Items.normalBox, 1000}, // arbitrary. these boxes should be unobtainable
-            {Gen2Items.gorgeousBox, 1000},
-            {Gen2Items.sunStone, 2100},
-            {Gen2Items.polkadotBow, 2000}, // same as other type-boosting items
-            {Gen2Items.terusama171, 0},
-            {Gen2Items.upGrade, 2100},
-            {Gen2Items.berry, 50}, // same as Gen3Constants Oran Berry
-            {Gen2Items.goldBerry, 500}, // same as Gen3Constants Sitrus Berry
-            {Gen2Items.squirtBottle, 0},
-            {Gen2Items.terusama176, 0},
+            {Gen2Items.berryJuice, 300}, // same as potion (which also heals 20 HP)
+
+            // poke balls
+            {Gen2Items.masterBall, 3000},
             {Gen2Items.parkBall, 600}, // same as Great Ball
-            {Gen2Items.rainbowWing, 0},
-            {Gen2Items.terusama179, 0},
-            {Gen2Items.brickPiece, 50},
-            {Gen2Items.surfMail, 50},
-            {Gen2Items.litebluemail, 50},
-            {Gen2Items.portraitmail, 50},
-            {Gen2Items.lovelyMail, 50},
-            {Gen2Items.eonMail, 50},
-            {Gen2Items.morphMail, 50},
-            {Gen2Items.blueskyMail, 50},
-            {Gen2Items.musicMail, 50},
-            {Gen2Items.mirageMail, 50},
-            {Gen2Items.terusama190, 0},
-            {Gen2Items.tm01, 3000},
-            {Gen2Items.tm02, 2000},
-            {Gen2Items.tm03, 300},
-            {Gen2Items.tm04, 2000},
-            {Gen2Items.tm04Unused, 0},
-            {Gen2Items.tm05, 1000},
-            {Gen2Items.tm06, 3000},
-            {Gen2Items.tm07, 2000},
-            {Gen2Items.tm08, 1000},
-            {Gen2Items.tm09, 1000},
-            {Gen2Items.tm10, 3000},
-            {Gen2Items.tm11, 2000},
-            {Gen2Items.tm12, 1000},
-            {Gen2Items.tm13, 1000},
-            {Gen2Items.tm14, 3000},
-            {Gen2Items.tm15, 3000},
-            {Gen2Items.tm16, 3000},
-            {Gen2Items.tm17, 3000},
-            {Gen2Items.tm18, 2000},
-            {Gen2Items.tm19, 3000},
-            {Gen2Items.tm20, 3000},
-            {Gen2Items.tm21, 1000},
-            {Gen2Items.tm22, 3000},
-            {Gen2Items.tm23, 3000},
-            {Gen2Items.tm24, 3000},
-            {Gen2Items.tm25, 2000},
-            {Gen2Items.tm26, 3000},
-            {Gen2Items.tm27, 1000},
-            {Gen2Items.tm28, 2000},
-            {Gen2Items.tm28Unused, 0},
-            {Gen2Items.tm29, 2000},
-            {Gen2Items.tm30, 3000},
-            {Gen2Items.tm31, 3000},
-            {Gen2Items.tm32, 2000},
-            {Gen2Items.tm33, 3000},
-            {Gen2Items.tm34, 1000},
-            {Gen2Items.tm36, 1000},
-            {Gen2Items.tm37, 1000},
-            {Gen2Items.tm38, 2000},
-            {Gen2Items.tm39, 1000},
-            {Gen2Items.tm40, 3000},
-            {Gen2Items.tm41, 3000},
-            {Gen2Items.tm42, 3000},
-            {Gen2Items.tm43, 1000},
-            {Gen2Items.tm44, 3000},
-            {Gen2Items.tm46, 3000},
-            {Gen2Items.tm47, 3000},
-            {Gen2Items.tm48, 3000},
-            {Gen2Items.tm49, 3000},
-            {Gen2Items.tm50, 2000},
-            {Gen2Items.hm01, 0},
-            {Gen2Items.hm02, 0},
-            {Gen2Items.hm03, 0},
-            {Gen2Items.hm04, 0},
-            {Gen2Items.hm05, 0},
-            {Gen2Items.hm06, 0},
-            {Gen2Items.hm07, 0},
-            {Gen2Items.hm08, 0},
-            {Gen2Items.hm09, 0},
-            {Gen2Items.hm10, 0},
-            {Gen2Items.hm11, 0},
-            {Gen2Items.hm12, 0},
-            {Gen2Items.cancel, 0}
+            // all the Apricorn balls are worth 300, same as in Gen4Constants
+            {Gen2Items.heavyBall, 300},
+            {Gen2Items.levelBall, 300},
+            {Gen2Items.lureBall, 300},
+            {Gen2Items.fastBall, 300},
+            {Gen2Items.friendBall, 300},
+            {Gen2Items.moonBall, 300},
+            {Gen2Items.loveBall, 300},
+
+            // misc
+            {Gen2Items.moonStone, 2100}, // same as other stones
+            {Gen2Items.rareCandy, 10000}, // same as in Gen3Constants
+            {Gen2Items.sacredAsh, 10000}, // same as in Gen3Constants
+            {Gen2Items.dragonFang, 100}, // it does nothing in Gen2 due to a bug
+            {Gen2Items.normalBox, 1000}, // arbitrary. these boxes should be unobtainable, but I'm not sure
+            {Gen2Items.gorgeousBox, 1000},
+
     }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
 }
