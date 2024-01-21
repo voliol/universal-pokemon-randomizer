@@ -2000,9 +2000,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     // an int[] to mirror getShopNames returning a String[]
     public int[] getShopPrices() {
         int itemAttributesOffset = romEntry.getIntValue("ItemAttributes");
-        int[] prices = new int[256];
+        int entrySize = romEntry.getIntValue("ItemAttributesEntrySize");
+        int itemCount = romEntry.getIntValue("ItemCount");
+        int[] prices = new int[itemCount];
         for (int i = 1; i < prices.length; i++) {
-            int offset = itemAttributesOffset + (i - 1) * 7;
+            int offset = itemAttributesOffset + (i - 1) * entrySize;
             prices[i] = readWord(offset);
         }
         return prices;
@@ -2010,6 +2012,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setBalancedShopPrices() {
+        // TODO: fill in these entries
         int itemDataOffset = romEntry.getIntValue("ItemAttributes");
         int entrySize = romEntry.getIntValue("ItemAttributesEntrySize");
         int itemCount = romEntry.getIntValue("ItemCount");
@@ -2018,7 +2021,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int offset = itemDataOffset + (i - 1) * entrySize;
             writeWord(offset, balancedPrice);
         }
-        // Not implemented TODO: add balanced prices list
     }
 
     @Override
