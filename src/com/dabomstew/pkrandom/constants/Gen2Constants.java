@@ -192,7 +192,8 @@ public class Gen2Constants {
             "Goldenrod Tunnel Herb Shop"
     );
 
-    public static final List<Integer> skipShops = List.of(0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32); // i.e. normal pokemarts + shops that must be skipped for other reasons
+    public static final List<Integer> skipShops = List.of(0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16,
+            17, 18, 19, 20, 21, 22, 23, 24, 25, 29, 30, 32); // i.e. normal pokemarts + TM shops + shops that must be skipped for other reasons
 
     public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 33);
 
