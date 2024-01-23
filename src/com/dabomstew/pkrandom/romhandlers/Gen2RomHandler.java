@@ -149,6 +149,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     Gen2Constants.krisFrontImageOffset);
             addRelativeOffsetToRomEntry("KrisTrainerCardImage", "ChrisTrainerCardImage",
                     Gen2Constants.krisTrainerCardImageOffset);
+            addRelativeOffsetToRomEntry("KrisPalettePointer", "ChrisPalettePointer",
+                    Gen2Constants.krisPalettePointerOffset);
             addRelativeOffsetToRomEntry("KrisSpritePalette", "ChrisSpritePalette",
                     Gen2Constants.krisSpritePaletteOffset);
         }
@@ -2964,6 +2966,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (playerGraphics.hasFrontImage()) {
             rewritePlayerFrontImage(playerGraphics.getFrontImage(), toReplace);
             rewritePlayerTrainerCardImage(playerGraphics.getTrainerCardImage(), toReplace);
+            rewritePlayerPalette(playerGraphics.getFrontImage().getPalette(), toReplace);
         }
 
         if (playerGraphics.hasBackImage()) {
@@ -3005,6 +3008,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int trainerCardOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "TrainerCardImage");
         // the trainer card image has different column modes in GS / Crystal, for whatever reason
         writeImage(trainerCardOffset, new GBCImage.Builder(trainerCardImage).columnMode(romEntry.isCrystal()).build());
+    }
+
+    private void rewritePlayerPalette(Palette palette, Settings.PlayerCharacterMod toReplace) {
+        int pointerOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "PalettePointer");
+        int offset = findAndUnfreeSpaceInBank(2, bankOf(pointerOffset));
+        Palette twoColor = new Palette(new Color[] {palette.get(1), palette.get(2)});
+        writePalette(offset, twoColor);
+        writePointer(pointerOffset, offset);
     }
 
     public void rewriteKrisBackImage(GBCImage krisBack) {
