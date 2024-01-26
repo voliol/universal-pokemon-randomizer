@@ -2961,7 +2961,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (playerGraphics.hasFrontImage()) {
             rewritePlayerFrontImage(playerGraphics.getFrontImage(), toReplace);
             rewritePlayerTrainerCardImage(playerGraphics.getTrainerCardImage(), toReplace);
-            rewritePlayerPalette(playerGraphics.getFrontImage().getPalette(), toReplace);
         }
 
         if (playerGraphics.hasBackImage()) {
@@ -2970,6 +2969,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             } else {
                 rewriteKrisBackImage(playerGraphics.getBackImage());
             }
+        }
+
+        if (playerGraphics.hasImagePalette()) {
+            rewritePlayerImagePalette(playerGraphics.getImagePalette(), toReplace);
         }
 
         if (playerGraphics.hasWalkSprite()) {
@@ -2995,7 +2998,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int frontOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "FrontImage");
             writeImage(frontOffset, frontImage);
         } else {
-            rewriteTrainerImage(Gen2Constants.chrisTrainerClass, frontImage);
+            rewriteTrainerImage(Gen2Constants.chrisTrainerClassGS, frontImage);
         }
     }
 
@@ -3005,51 +3008,39 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeImage(trainerCardOffset, new GBCImage.Builder(trainerCardImage).columnMode(romEntry.isCrystal()).build());
     }
 
-    private void rewritePlayerPalette(Palette palette, Settings.PlayerCharacterMod toReplace) {
-        // Due to the games routines for drawing images, the players (and Oak) are assigned trainer classes.
-        // Chris has an unique trainer class at index 0, but Kris is just an alias for Falkner
-        // (they share the same palette).
-        // This means that to change Kris' palette, we must first move and expand the TrainerPalettes table,
-        // and then change all references to Chris' trainer class from "1" to "classAmount".
-
-        int trainerClass = 0;
-        if (toReplace == Settings.PlayerCharacterMod.PC2) {
-            int classAmount = romEntry.getIntValue("TrainerClassAmount");
-            movePlayerPalettes(classAmount + 1);
-            trainerClass = classAmount;
+    private void rewritePlayerImagePalette(Palette palette, Settings.PlayerCharacterMod toReplace) {
+        if (toReplace == Settings.PlayerCharacterMod.PC1) {
+            int trainerClass = romEntry.isCrystal() ? Gen2Constants.chrisTrainerClassCrystal : Gen2Constants.chrisTrainerClassGS;
+            writeTrainerPalette(trainerClass, palette);
+        } else if (toReplace == Settings.PlayerCharacterMod.PC2) {
+            rewriteKrisImagePalette(palette);
+        } else {
+            throw new IllegalArgumentException("Unexpected value for toReplace: " + toReplace);
         }
-        writeTrainerPalette(trainerClass, palette);
-
-        if (toReplace == Settings.PlayerCharacterMod.PC2) {
-            int[] classOffsets = romEntry.getArrayValue("KrisTrainerClassOffsets");
-            int origClassValue = rom[classOffsets[0]] & 0xFF;
-            rom[classOffsets[0]] = (byte) (trainerClass & 0xFF);
-            for (int i = 1; i < classOffsets.length; i++) {
-                int classValue = rom[classOffsets[i]];
-                if (classValue != origClassValue) {
-                    throw new RuntimeException("Value mismatch; expected " + origClassValue + ", was " + classValue);
-                }
-                rom[classOffsets[i]] = (byte) (trainerClass & 0xFF);
-            }
-        }
-
-        // One snippet of code also has direct pointers to the Chris and Kris/Falkner palettes
-        // TODO: look at this, how it works with the above, moving TrainerPalettes etc.
-        int pointerOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "PalettePointer");
-        int offset = findAndUnfreeSpaceInBank(2, bankOf(pointerOffset));
-        Palette twoColor = new Palette(new Color[] {palette.get(1), palette.get(2)});
-        writePalette(offset, twoColor);
-        writePointer(pointerOffset, offset);
     }
 
-    private void movePlayerPalettes(int newSize) {
+    private void rewriteKrisImagePalette(Palette palette) {
+        // Due to the games routines for drawing images, the players (and Oak) are assigned trainer classes.
+        // Kris doesn't have a unique palette/class though, but shares one with Falkner.
+        // This means if we want to give Kris a unique palette, we have to do extra operations.
+        int classAmount = romEntry.getIntValue("TrainerClassAmount");
+        resizeTrainerPalettes(classAmount + 1);
+
+        writeTrainerPalette(classAmount, palette);
+        writeChrisTrainerClass(classAmount);
+        repointDirectPlayerPalettePointers(classAmount);
+    }
+
+    private void resizeTrainerPalettes(int newSize) {
         byte[] data = readPlayerPalettesBeforeMove();
 
         int[] pointerOffsets = romEntry.getArrayValue("TrainerPalettesPointers");
         int primaryPointerOffset = pointerOffsets[0];
         int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
-        // uses a DataRewriter since it has checks to see if the pointers are valid, even though it just moves it
-        new SameBankDataRewriter<byte[]>().rewriteData(primaryPointerOffset, data, secondaryPointerOffsets,
+        // uses a DataRewriter since it has checks to see if the pointers are valid,
+        // even though it just moves/resizes the same chunk of data
+        DataRewriter<byte[]> dataRewriter = new SpecificBankDataRewriter<>(romEntry.getIntValue("TrainerPalettesBank"));
+        dataRewriter.rewriteData(primaryPointerOffset, data, secondaryPointerOffsets,
                 data1 -> resizeTrainerPalettes(data1, newSize), odo -> data.length);
     }
 
@@ -3066,6 +3057,30 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         byte[] after = new byte[2 * 2 * newSize];
         System.arraycopy(before, 0, after, 0, Math.min(before.length, after.length));
         return after;
+    }
+
+    private void writeChrisTrainerClass(int krisTrainerClass) {
+        int[] classOffsets = romEntry.getArrayValue("KrisTrainerClassOffsets");
+        int origClassValue = rom[classOffsets[0]] & 0xFF;
+        rom[classOffsets[0]] = (byte) (krisTrainerClass & 0xFF);
+        for (int i = 1; i < classOffsets.length; i++) {
+            int classValue = rom[classOffsets[i]];
+            if (classValue != origClassValue) {
+                throw new RuntimeException("Value mismatch; expected " + origClassValue + ", was " + classValue);
+            }
+            rom[classOffsets[i]] = (byte) (krisTrainerClass & 0xFF);
+        }
+    }
+
+    private void repointDirectPlayerPalettePointers(int krisTrainerClass) {
+        // One snippet of code also has direct pointers to the Chris and Kris/Falkner palettes.
+        // Since we resized/moved the TrainerPalettes table we need to
+        int trainerPalsOffset = readPointer(romEntry.getArrayValue("TrainerPalettesPointers")[0]);
+
+        int chrisPointerOffset = romEntry.getIntValue("ChrisPalettePointer");
+        writePointer(chrisPointerOffset, trainerPalsOffset);
+        int krisPointerOffset = romEntry.getIntValue("KrisPalettePointer");
+        writePointer(krisPointerOffset, trainerPalsOffset + 4 * krisTrainerClass);
     }
 
     public void rewriteKrisBackImage(GBCImage krisBack) {

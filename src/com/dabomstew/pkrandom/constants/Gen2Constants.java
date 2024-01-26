@@ -346,7 +346,7 @@ public class Gen2Constants {
                             chrisBackBankOffsetCrystal0 = -2, // battle script Crystal
                             chrisBackBankOffsetCrystal1 = 3; // hall of fame script Crystal
 
-    public static final int chrisTrainerClass = 11;
+    public static final int chrisTrainerClassGS = 11, chrisTrainerClassCrystal = 0;
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];

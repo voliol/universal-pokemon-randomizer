@@ -1,7 +1,9 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.graphics.palettes.Gen2SpritePaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ import java.util.List;
 
 public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
 
-    // TODO: palettes
+    // TODO: read image palette from palette file
 
     private static final int BACK_IMAGE_DIMENSIONS = 6;
     private static final int TRAINER_CARD_IMAGE_WIDTH = 5;
@@ -68,6 +70,22 @@ public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
 
     public GBCImage getTrainerCardImage() {
         return trainerCard;
+    }
+
+    public boolean hasImagePalette() {
+        return hasFrontImage() || hasBackImage();
+    }
+
+    public Palette getImagePalette() {
+        Palette fourColors;
+        if (hasFrontImage()) {
+            fourColors = getFrontImage().getPalette();
+        } else if (hasBackImage()) {
+            fourColors = getBackImage().getPalette();
+        } else {
+            throw new IllegalStateException("Has no image palette.");
+        }
+        return new Palette(new Color[] {fourColors.get(1), fourColors.get(2)});
     }
 
     public boolean hasSpritePaletteID() {

@@ -29,6 +29,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
@@ -287,6 +289,13 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         public GBCDataRewriter() {
             super();
             setLongAlignAdresses(false);
+        }
+    }
+
+    protected class SpecificBankDataRewriter<E> extends DataRewriter<E> {
+
+        public SpecificBankDataRewriter(int bank) {
+            this.pointerReader = offset -> readPointer(offset, bank);
         }
     }
 
