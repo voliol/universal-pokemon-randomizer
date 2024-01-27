@@ -472,7 +472,7 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
 
     }
 

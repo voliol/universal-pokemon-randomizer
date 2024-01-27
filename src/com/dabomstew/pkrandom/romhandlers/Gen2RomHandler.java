@@ -1961,19 +1961,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        // shop reading/writing methods and all(?) the required constants are present,
-        // but the randomization logic in AbstractRomHandler does not allow it
-        return false;
+        return true;
     }
 
     @Override
     public Map<Integer, Shop> getShopItems() {
         List<Shop> shops = readShops();
 
-        // no notion of skip shops
         Map<Integer, Shop> shopMap = new HashMap<>();
         for (int i = 0; i < shops.size(); i++) {
-            shopMap.put(i, shops.get(i));
+            if (!Gen2Constants.skipShops.contains(i)) {
+                shopMap.put(i, shops.get(i));
+            }
         }
         return shopMap;
     }
@@ -2034,9 +2033,40 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return shopToBytes(readShop(offset)).length;
     }
 
+    public List<Integer> getShopPrices() {
+        int itemAttributesOffset = romEntry.getIntValue("ItemAttributesOffset");
+        int entrySize = Gen2Constants.itemAttributesEntrySize;
+        int itemCount = Gen2Constants.itemCount;
+        List<Integer> prices = new ArrayList<>(itemCount);
+        prices.add(0);
+        for (int i = 1; i < itemCount; i++) {
+            int offset = itemAttributesOffset + (i - 1) * entrySize;
+            prices.add(readWord(offset));
+        }
+        return prices;
+    }
+
     @Override
-    public void setShopPrices() {
-        // Not implemented
+    public void setBalancedShopPrices() {
+        List<Integer> prices = getShopPrices();
+        for (Map.Entry<Integer, Integer> entry : Gen2Constants.balancedItemPrices.entrySet()) {
+            prices.set(entry.getKey(), entry.getValue());
+        }
+        setShopPrices(prices);
+    }
+
+    public void setShopPrices(List<Integer> prices) {
+        int itemDataOffset = romEntry.getIntValue("ItemAttributesOffset");
+        int entrySize = Gen2Constants.itemAttributesEntrySize;
+        int itemCount = Gen2Constants.itemCount;
+        if (prices.size() != itemCount) {
+            throw new IllegalArgumentException("");
+        }
+        for (int i = 1; i < itemCount; i++) {
+            int balancedPrice = prices.get(i);
+            int offset = itemDataOffset + (i - 1) * entrySize;
+            writeWord(offset, balancedPrice);
+        }
     }
 
     @Override

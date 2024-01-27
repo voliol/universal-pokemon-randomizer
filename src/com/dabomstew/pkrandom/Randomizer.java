@@ -571,8 +571,6 @@ public class Randomizer {
             wildsChanged = true;
         }
 
-        wildsChanged = true; // temp TODO: remove
-
         if (wildsChanged) {
             logWildPokemonChanges(log);
         } else {

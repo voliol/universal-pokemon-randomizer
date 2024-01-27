@@ -4230,7 +4230,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public void setShopPrices() {
+	public void setBalancedShopPrices() {
 		try {
 			// In Diamond and Pearl, item IDs 112 through 134 are unused. In Platinum and
 			// HGSS, item ID 112 is used for
