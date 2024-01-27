@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.*;
@@ -3059,6 +3060,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeTrainerPalette(classAmount, palette);
         writeChrisTrainerClass(classAmount);
         repointDirectPlayerPalettePointers(classAmount);
+        fixTrainerCardPalettes(classAmount);
     }
 
     private void resizeTrainerPalettes(int newSize) {
@@ -3111,6 +3113,24 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writePointer(chrisPointerOffset, trainerPalsOffset);
         int krisPointerOffset = romEntry.getIntValue("KrisPalettePointer");
         writePointer(krisPointerOffset, trainerPalsOffset + 4 * krisTrainerClass);
+    }
+
+    private void fixTrainerCardPalettes(int krisTrainerClass) {
+        int startOffset = romEntry.getIntValue("TrainerCardPalettesRoutine");
+        if (startOffset != 0) {
+            // palette #1: Falkner -> Kris
+            // palette #5: Chuck -> Falkner
+            rom[startOffset + Gen2Constants.tcPal1Offset] = (byte) (krisTrainerClass & 0xFF);
+            rom[startOffset + Gen2Constants.tcPal5Offset] = (byte) (Gen2Constants.falknerTrainerClass & 0xFF);
+            // Falkner icon: pal #1 -> #5
+            // Chuck icon: pal #5 -> #7 (i.e. makes him share Pryce's pal)
+            // Claire icon: pal #1 -> #5
+            rom[startOffset + Gen2Constants.tcFalknerPalOffset] = (byte) 5;
+            rom[startOffset + Gen2Constants.tcChuckPalOffset] = (byte) 7;
+            rom[startOffset + Gen2Constants.tcClairePalOffset] = (byte) 5;
+        } else {
+            System.out.println("No value for TrainerCardPalettesRoutine in ROM entry.");
+        }
     }
 
     public void rewriteKrisBackImage(GBCImage krisBack) {

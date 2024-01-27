@@ -294,8 +294,21 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     protected class SpecificBankDataRewriter<E> extends DataRewriter<E> {
 
+        int bank;
+
         public SpecificBankDataRewriter(int bank) {
+            this.bank = bank;
             this.pointerReader = offset -> readPointer(offset, bank);
+        }
+
+        @Override
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
+
+            pointerWriter.accept(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            return newOffset;
         }
     }
 
