@@ -2887,8 +2887,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (palette.size() != 2) {
             throw new IllegalArgumentException("Invalid Palette, must have exactly 2 colors.");
         }
-        int pointerOffset = romEntry.getArrayValue("TrainerPalettesPointers")[0];
-        int tableOffset = readPointer(pointerOffset);
+        int[] pointerOffsets = romEntry.getArrayValue("TrainerPalettesPointers");
+        int tableOffset = pointerOffsets.length == 0 ?
+                romEntry.getIntValue("TrainerPalettes") : readPointer(pointerOffsets[0]);
         int offset = tableOffset + trainerClass * 4;
         writePalette(offset, palette);
     }
