@@ -192,9 +192,11 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		if (pk == null) {
 			return false;
 		}
-		randomPickableFrom.add(pk);
-		recentlyRemoved.remove(pk);
-		return super.add(pk);
+        boolean added = super.add(pk);
+        if (added && !recentlyRemoved.remove(pk)) {
+            randomPickableFrom.add(pk);
+        }
+		return added;
 	}
 
 	@Override
