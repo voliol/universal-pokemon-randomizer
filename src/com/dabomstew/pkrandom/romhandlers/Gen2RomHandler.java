@@ -25,7 +25,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.*;
@@ -2915,14 +2914,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void rewriteTrainerImage(int trainerClass, GBCImage image) {
-        if (trainerClass < 0) {
-            throw new IllegalArgumentException("Invalid trainerClass; can't be negative");
+        if (trainerClass < 1) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't be less than 1");
         }
         int lastTrainerClass = romEntry.getIntValue("TrainerClassAmount") - 1;
         if (trainerClass > lastTrainerClass) {
             throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
         }
-        int pointerOffset = romEntry.getIntValue("TrainerImages") + trainerClass * 3;
+        int pointerOffset = romEntry.getIntValue("TrainerImages") + (trainerClass - 1) * 3;
         rewritePokemonOrTrainerImage(pointerOffset, image);
     }
 
@@ -3042,12 +3041,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void rewritePlayerImagePalette(Palette palette, Settings.PlayerCharacterMod toReplace) {
         if (toReplace == Settings.PlayerCharacterMod.PC1) {
-            int trainerClass = romEntry.isCrystal() ? Gen2Constants.chrisTrainerClassCrystal : Gen2Constants.chrisTrainerClassGS;
-            writeTrainerPalette(trainerClass, palette);
+            rewriteChrisImagePalette(palette);
         } else if (toReplace == Settings.PlayerCharacterMod.PC2) {
             rewriteKrisImagePalette(palette);
         } else {
             throw new IllegalArgumentException("Unexpected value for toReplace: " + toReplace);
+        }
+    }
+
+    private void rewriteChrisImagePalette(Palette palette) {
+        if (romEntry.isCrystal()) {
+            writeTrainerPalette(Gen2Constants.chrisTrainerClassCrystal, palette);
+        } else {
+            // GS Chris uses mostly the palette at index 0, like in Crystal.
+            // This one is identical to Cal's palette, but in some places like the Oak Speech Cal's actual palette
+            // is used instead. Thus both of them need to be overwritten.
+            writeTrainerPalette(Gen2Constants.chrisTrainerClassGS, palette);
+            writeTrainerPalette(Gen2Constants.chrisPaletteTrainerClassGS, palette);
         }
     }
 
@@ -3198,12 +3208,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void rewritePlayerSpritePalette(Gen2SpritePaletteID spritePaletteID,
                                             Settings.PlayerCharacterMod toReplace) {
-        int offset1 = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "SpritePalette");
-        byte value1 = (byte) ((spritePaletteID.ordinal() | 0b1000) << 4);
+        int offset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "SpritePalette");
+        byte value = (byte) ((spritePaletteID.ordinal() | 0b1000) << 4);
         System.out.println(spritePaletteID);
-        System.out.println("SpritePalette Offset: 0x" + Integer.toHexString(offset1));
-        System.out.println("SpritePalette Value: 0x" + Integer.toHexString(Byte.toUnsignedInt(value1)));
-        writeByte(offset1, value1);
+        System.out.println("SpritePalette Offset: 0x" + Integer.toHexString(offset));
+        System.out.println("SpritePalette Value: 0x" + Integer.toHexString(Byte.toUnsignedInt(value)));
+        writeByte(offset, value);
     }
 
     @Override

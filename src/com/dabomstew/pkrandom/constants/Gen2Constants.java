@@ -353,7 +353,8 @@ public class Gen2Constants {
                             chrisBackBankOffsetCrystal0 = -2, // battle script Crystal
                             chrisBackBankOffsetCrystal1 = 3; // hall of fame script Crystal
 
-    public static final int chrisTrainerClassGS = 11, chrisTrainerClassCrystal = 0, falknerTrainerClass = 1;
+    public static final int chrisTrainerClassGS = 12, chrisPaletteTrainerClassGS = 0, chrisTrainerClassCrystal = 0,
+            falknerTrainerClass = 1;
 
     public static final int tcPal1Offset = 0xB, tcPal5Offset = 0x2B,
                             tcFalknerPalOffset = 0x7C, tcChuckPalOffset = 0xA8, tcClairePalOffset = 0xD0;
