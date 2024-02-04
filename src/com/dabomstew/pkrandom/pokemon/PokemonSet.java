@@ -17,6 +17,14 @@ import java.util.function.Predicate;
  */
 public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
+	/**
+	 * How much of {@link #randomPickableFrom} must consist of removed elements before its recreated.<br>
+	 * This value was found through experimentation but is not very precise, anything from 0.25-0.5 seemed to give
+	 * about the same algorithm speeds. Feel free to do the maths to find the optimal, though in practice it should
+	 * not do much of a difference.
+	 */
+	private static final double LOAD_FACTOR = 0.5;
+
 	// has to be static (instead of a constructor) because EncounterArea is not
 	// generic, leading to bad type conversions
 	public static PokemonSet<Pokemon> inArea(EncounterArea area) {
@@ -50,6 +58,9 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		}
 		return results;
 	}
+
+	private ArrayList<T> randomPickableFrom = new ArrayList<>();
+	private Set<Object> recentlyRemoved = new HashSet<>();
 
 	public PokemonSet() {
 	}
@@ -181,7 +192,20 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		if (pk == null) {
 			return false;
 		}
-		return super.add(pk);
+        boolean added = super.add(pk);
+        if (added && !recentlyRemoved.remove(pk)) {
+            randomPickableFrom.add(pk);
+        }
+		return added;
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		boolean removed = super.remove(o);
+		if (removed) {
+			recentlyRemoved.add(o);
+		}
+		return removed;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -194,9 +218,20 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	}
 
 	public T getRandom(Random random) {
-		List<T> randomPickableFrom = new ArrayList<>(this);
-		return randomPickableFrom.size() == 0 ? null
-				: randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
+		if (size() == 0) {
+			return null;
+		}
+
+		if (1.0 - ((double) recentlyRemoved.size() / (double) randomPickableFrom.size()) < LOAD_FACTOR) {
+			randomPickableFrom = new ArrayList<>(this);
+			recentlyRemoved = new HashSet<>();
+		}
+
+		T picked;
+		do {
+			picked = randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
+		} while (recentlyRemoved.contains(picked));
+		return picked;
 	}
 
 }

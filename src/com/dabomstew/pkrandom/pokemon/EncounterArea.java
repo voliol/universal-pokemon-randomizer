@@ -33,6 +33,13 @@ public class EncounterArea extends ArrayList<Encounter> {
     private String displayName;
     private int offset;
 
+    private String locationTag;
+    private boolean postGame;
+    // In some games, areas have both main game and post game encounters, following each other,
+    // e.g. the fishing encounters in Gen 2. This attribute indicates the index for where the post game encounters
+    // start.
+    private int partiallyPostGameCutoff = -1;
+
     public EncounterArea() {
     }
 
@@ -79,8 +86,36 @@ public class EncounterArea extends ArrayList<Encounter> {
         this.offset = offset;
     }
 
+    public String getLocationTag() {
+        return locationTag;
+    }
+
+    public void setLocationTag(String locationTag) {
+        this.locationTag = locationTag;
+    }
+
+    public boolean isPostGame() {
+        return postGame;
+    }
+
+    public void setPostGame(boolean postGame) {
+        this.postGame = postGame;
+    }
+
+    public boolean isPartiallyPostGame() {
+        return partiallyPostGameCutoff != -1;
+    }
+
+    public int getPartiallyPostGameCutoff() {
+        return partiallyPostGameCutoff;
+    }
+
+    public void setPartiallyPostGameCutoff(int partiallyPostGameCutoff) {
+        this.partiallyPostGameCutoff = partiallyPostGameCutoff;
+    }
+
     @Override
     public String toString() {
-        return "Encounters [Rate = " + rate + ", Encounters = " + super.toString() + "]";
+        return "Encounters [Name = " + displayName + ", Rate = " + rate + ", Encounters = " + super.toString() + "]";
     }
 }

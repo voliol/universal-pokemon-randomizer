@@ -24,13 +24,14 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.pokemon.EncounterArea;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Gen2Constants {
 
@@ -56,10 +57,28 @@ public class Gen2Constants {
             bsCatchRateOffset = 9, bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12, bsPicDimensionsOffset = 17,
             bsGrowthCurveOffset = 22, bsTMHMCompatOffset = 24, bsMTCompatOffset = 31;
 
-    public static final String[] starterNames = new String[] { "CYNDAQUIL", "TOTODILE", "CHIKORITA" };
+    public static final int fishingAreaCount = 12, pokesPerFishingArea = 11, fishingAreaEntryLength = 3,
+            timeSpecificFishingAreaCount = 11, pokesPerTSFishingArea = 4;
 
-    public static final int fishingGroupCount = 12, pokesPerFishingGroup = 11, fishingGroupEntryLength = 3,
-            timeSpecificFishingGroupCount = 11, pokesPerTSFishingGroup = 4;
+    public static final String[] fishingAreaNames = new String[]{"Shore", "Ocean", "Lake", "Pond",
+            "Dratini 1 (Ice Path, Dragon's Den)", "Qwilfish Swarm (Route 32)", "Remoraid Swarm (Route 44)",
+            "Gyarados (Lake of Rage, Fuchsia City)", "Dratini 2 (Route 45)", "Whirl Islands",
+            "Qwilfish (Routes 32, 12, 13)", "Remoraid (Route 44)"};
+
+    public static final String[] headbuttAreaNamesGS = new String[]{
+            "Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common)",
+            "Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare)",
+            "Headbutt (Routes 29-33, 42-46) (common)", "Headbutt (Routes 29-33, 42-46) (rare)",
+            "Rock Smash"};
+
+    public static final String[] headbuttAreaNamesCrystal = new String[]{
+            "Headbutt (Routes 44, 45, 46) (common)", "Headbutt (Routes 44, 45, 46) (rare)",
+            "Headbutt (Azalea Town, Route 42) (common)", "Headbutt (Azalea Town, Route 42) (rare)",
+            "Headbutt (Routes 29-31, 34-39) (common)", "Headbutt (Routes 29-31, 34-39) (rare)",
+            "Headbutt (Routes 32, 26, 27) (common)", "Headbutt (Routes 32, 26, 27) (rare)",
+            "Headbutt (Route 43) (common)", "Headbutt (Route 43) (rare)",
+            "Headbutt (Ilex Forest) (common)", "Headbutt (Ilex Forest) (rare)",
+            "Rock Smash"};
 
     public static final int landEncounterSlots = 7, seaEncounterSlots = 3;
 
@@ -173,19 +192,88 @@ public class Gen2Constants {
             "Goldenrod Tunnel Herb Shop"
     );
 
-    public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 13, 14, 15, 16, 17, 18,
-            19, 20, 21, 22, 23, 24, 29, 30, 32);
+    public static final List<Integer> skipShops = List.of(0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16,
+            17, 18, 19, 20, 21, 22, 23, 24, 25, 29, 30, 32); // i.e. normal pokemarts + TM shops + shops that must be skipped for other reasons
 
+    public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 33);
+
+    public static final int itemCount = 256, itemAttributesEntrySize = 7;
+
+    // Held-while-traded evo items (upgrade etc.) are not considered because players are not expected to trade. Same as in Gen3Constants.
     public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
             Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
 
     public static final List<Integer> xItems = List.of(Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
             Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial);
 
-    public static final List<Integer> consumableHeldItems = List.of(Gen2Items.psnCureBerry, Gen2Items.przCureBerry,
-            Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry, Gen2Items.mintBerry,
-            Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
-            Gen2Items.berryJuice, Gen2Items.berserkGene);
+    public static final List<Integer> generalPurposeConsumableItems = List.of(Gen2Items.psnCureBerry,
+            Gen2Items.przCureBerry, Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry,
+            Gen2Items.mintBerry,Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
+            Gen2Items.berryJuice);
+
+    public static final List<Integer> consumableHeldItems = setupConsumableHeldItems();
+
+    private static List<Integer> setupConsumableHeldItems() {
+        List<Integer> consumableHeldItems = new ArrayList<>(generalPurposeConsumableItems);
+        consumableHeldItems.add(Gen2Items.berserkGene);
+        return Collections.unmodifiableList(consumableHeldItems);
+    }
+
+    public static final List<Integer> generalPurposeItems = List.of(Gen2Items.brightPowder, Gen2Items.quickClaw,
+            Gen2Items.kingsRock, Gen2Items.smokeBall);
+
+    public static final List<Integer> allHeldItems = setupAllHeldItems();
+
+    private static List<Integer> setupAllHeldItems() {
+        List<Integer> allHeldItems = new ArrayList<>(generalPurposeItems);
+        allHeldItems.addAll(List.of(
+                // type-boosting items
+                Gen2Items.blackbelt, Gen2Items.blackGlasses, Gen2Items.charcoal, Gen2Items.dragonScale,
+                Gen2Items.hardStone, Gen2Items.magnet, Gen2Items.metalCoat, Gen2Items.miracleSeed,
+                Gen2Items.mysticWater, Gen2Items.neverMeltIce, Gen2Items.pinkBow, Gen2Items.polkadotBow,
+                Gen2Items.sharpBeak, Gen2Items.silverPowder, Gen2Items.softSand, Gen2Items.spellTag,
+                Gen2Items.twistedSpoon));
+        allHeldItems.addAll(consumableHeldItems);
+        return Collections.unmodifiableList(allHeldItems);
+    }
+
+    public static final Map<Type, List<Integer>> typeBoostingItems = initializeTypeBoostingItems();
+
+    private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
+        Map<Type, List<Integer>> map = new HashMap<>();
+        map.put(Type.BUG, List.of(Gen2Items.silverPowder));
+        map.put(Type.DARK, List.of(Gen2Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Gen2Items.dragonScale)); // NOT Dragon Fang due to a bug in the game's code
+        map.put(Type.ELECTRIC, List.of(Gen2Items.magnet));
+        map.put(Type.FIGHTING, List.of(Gen2Items.blackbelt));
+        map.put(Type.FIRE, List.of(Gen2Items.charcoal));
+        map.put(Type.FLYING, List.of(Gen2Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Gen2Items.spellTag));
+        map.put(Type.GRASS, List.of(Gen2Items.miracleSeed));
+        map.put(Type.GROUND, List.of(Gen2Items.softSand));
+        map.put(Type.ICE, List.of(Gen2Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Gen2Items.pinkBow, Gen2Items.polkadotBow));
+        map.put(Type.POISON, List.of(Gen2Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Gen2Items.twistedSpoon));
+        map.put(Type.ROCK, List.of(Gen2Items.hardStone));
+        map.put(Type.STEEL, List.of(Gen2Items.metalCoat));
+        map.put(Type.WATER, List.of(Gen2Items.mysticWater));
+        map.put(null, Collections.emptyList()); // ??? type
+        return Collections.unmodifiableMap(map);
+    }
+
+    public static final Map<Integer, List<Integer>> speciesBoostingItems = initializeSpeciesBoostingItems();
+
+    private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        map.put(Species.pikachu, List.of(Gen2Items.lightBall));
+        map.put(Species.chansey, List.of(Gen2Items.luckyPunch));
+        map.put(Species.ditto, List.of(Gen2Items.metalPowder));
+        map.put(Species.cubone, List.of(Gen2Items.thickClub));
+        map.put(Species.marowak, List.of(Gen2Items.thickClub));
+        map.put(Species.farfetchd, List.of(Gen2Items.stick));
+        return Collections.unmodifiableMap(map);
+    }
 
     public static final List<Integer> regularShopItems = List.of(Gen2Items.pokeBall, Gen2Items.greatBall,
             Gen2Items.ultraBall, Gen2Items.potion, Gen2Items.superPotion, Gen2Items.hyperPotion, Gen2Items.maxPotion,
@@ -505,5 +593,533 @@ public class Gen2Constants {
             }
         }
     }
+
+    private static final int[] gsPostGameEncounterAreasTOD = new int[] {
+            327, //PALLET TOWN
+            328, //VIRIDIAN CITY
+            329, //CERULEAN CITY
+            330, 334, //VERMILION CITY
+            331, //CELADON CITY
+            332, //FUCHSIA CITY
+            239, 240, 241, //ROUTE 1
+            242, 243, 244, //ROUTE 2
+            245, 246, 247, //ROUTE 3
+            248, 249, 250, 311, //ROUTE 4
+            251, 252, 253, //ROUTE 5
+            254, 255, 256, 312, //ROUTE 6
+            257, 258, 259, //ROUTE 7
+            260, 261, 262, //ROUTE 8
+            263, 264, 265, 313, //ROUTE 9
+            266, 267, 268, 314, //ROUTE 10
+            269, 270, 271, //ROUTE 11
+            315, //ROUTE 12
+            272, 273, 274, 316, //ROUTE 13
+            275, 276, 277, //ROUTE 14
+            278, 279, 280, //ROUTE 15
+            281, 282, 283, //ROUTE 16
+            284, 285, 286, //ROUTE 17
+            287, 288, 289, //ROUTE 18
+            317, //ROUTE 19
+            318, //ROUTE 20
+            290, 291, 292, 319, //ROUTE 21
+            293, 294, 295, 320, //ROUTE 22
+            296, 297, 298, 321, //ROUTE 24
+            299, 300, 301, 322, //ROUTE 25
+            333, //CINNABAR ISLAND
+            221, 222, 223, //DIGLETT's CAVE
+            227, 228, 229, 230, 231, 232, //ROCK TUNNEL
+            224, 225, 226, //MT.MOON
+            308, 309, 310, 326, //ROUTE 28
+            114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 180, 181, 182, 196, 219, //SILVER CAVE
+    };
+
+    private static final int[] gsPartialPostGameTOD = new int[] {
+            348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359,
+            360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, //Fishing
+    };
+
+    private static final int[] partialPostGameCutoffsTOD = new int[] {
+            6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, // main fishing
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // time-specific
+    };
+
+    private static final int[] gsPostGameEncounterAreasNoTOD = new int[] {
+            145, //PALLET TOWN
+            146, //VIRIDIAN CITY
+            147, //CERULEAN CITY
+            148, 152, //VERMILION CITY
+            149, //CELADON CITY
+            150, //FUCHSIA CITY
+            105, //ROUTE 1
+            106, //ROUTE 2
+            107, //ROUTE 3
+            108, 129, //ROUTE 4
+            109, //ROUTE 5
+            110, 130, //ROUTE 6
+            111, //ROUTE 7
+            112, //ROUTE 8
+            113, 131, //ROUTE 9
+            114, 132, //ROUTE 10
+            115, //ROUTE 11
+            133, //ROUTE 12
+            116, 134, //ROUTE 13
+            117, //ROUTE 14
+            118, //ROUTE 15
+            119, //ROUTE 16
+            120, //ROUTE 17
+            121, //ROUTE 18
+            135, //ROUTE 19
+            136, //ROUTE 20
+            122, 137, //ROUTE 21
+            123, 138, //ROUTE 22
+            124, 139, //ROUTE 24
+            125, 140, //ROUTE 25
+            151, //CINNABAR ISLAND
+            99, //DIGLETT's CAVE
+            101, 102, //ROCK TUNNEL
+            100, //MT.MOON
+            128, 144, //ROUTE 28
+            38, 39, 40, 41, 60, 74, 97, //SILVER CAVE
+    };
+
+    private static final int[] gsPartialPostGameNoTOD = new int[] {
+            158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, //Fishing
+    };
+
+    private static final int[] partialPostGameCutoffsNoTOD = new int[] {
+            7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+    };
+
+    private static final int[] crysPostGameEncounterAreasTOD = new int[] {
+            328, //PALLET TOWN
+            329, //VIRIDIAN CITY
+            330, //CERULEAN CITY
+            312, 331, //VERMILION CITY
+            332, //CELADON CITY
+            333, //FUCHSIA CITY
+            239, 240, 241, //ROUTE 1
+            242, 243, 244, //ROUTE 2
+            245, 246, 247, //ROUTE 3
+            248, 249, 250, 313, //ROUTE 4
+            251, 252, 253, //ROUTE 5
+            254, 255, 256, 314, //ROUTE 6
+            257, 258, 259, //ROUTE 7
+            260, 261, 262, //ROUTE 8
+            263, 264, 265, 315, //ROUTE 9
+            266, 267, 268, 316, //ROUTE 10
+            269, 270, 271, //ROUTE 11
+            317, //ROUTE 12
+            272, 273, 274, 318, //ROUTE 13
+            275, 276, 277, //ROUTE 14
+            278, 279, 280, //ROUTE 15
+            281, 282, 283, //ROUTE 16
+            284, 285, 286, //ROUTE 17
+            287, 288, 289, //ROUTE 18
+            319, //ROUTE 19
+            320, //ROUTE 20
+            290, 291, 292, 321, //ROUTE 21
+            293, 294, 295, 322, //ROUTE 22
+            296, 297, 298, 323, //ROUTE 24
+            299, 300, 301, 324, //ROUTE 25
+            334, //CINNABAR ISLAND
+            221, 222, 223, //DIGLETT
+            227, 228, 229, 230, 231, 232, //ROCK TUNNEL
+            224, 225, 226, //MT.MOON
+            308, 309, 310, 327, //ROUTE 28
+            114, 115, 116, 117, 118, 119, 120, 121, 122, 123,
+            124, 125, 180, 181, 182, 196, 220, //SILVER CAVE
+    };
+
+    private static final int[] crysPartialPostGameTOD = new int[] {
+            341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352,
+            353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, //Fishing
+    };
+
+    private static final int[] crysPostGameEncounterAreasNoTOD = new int[] {
+            146, //PALLET TOWN
+            147, //VIRIDIAN CITY
+            148, //CERULEAN CITY
+            130, 149, //VERMILION CITY
+            150, //CELADON CITY
+            151, //FUCHSIA CITY
+            105, //ROUTE 1
+            106, //ROUTE 2
+            107, //ROUTE 3
+            108, 131, //ROUTE 4
+            109, //ROUTE 5
+            110, 132, //ROUTE 6
+            111, //ROUTE 7
+            112, //ROUTE 8
+            113, 133, //ROUTE 9
+            114, 134, //ROUTE 10
+            115, //ROUTE 11
+            135, //ROUTE 12
+            116, 136, //ROUTE 13
+            117, //ROUTE 14
+            118, //ROUTE 15
+            119, //ROUTE 16
+            120, //ROUTE 17
+            121, //ROUTE 18
+            137, //ROUTE 19
+            138, //ROUTE 20
+            122, 139, //ROUTE 21
+            123, 140, //ROUTE 22
+            124, 141, //ROUTE 24
+            125, 142, //ROUTE 25
+            152, //CINNABAR ISLAND
+            99, //DIGLETT
+            101, 102, //ROCK TUNNEL
+            100, //MT.MOON
+            128, 145, //ROUTE 28
+            38, 39, 40, 41, 60, 74, 98, //SILVER CAVE
+    };
+
+    private static final int[] crysPartialPostGameNoTOD = new int[] {
+            155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, //Fishing
+    };
+
+    private static final List<String> locationTagsNoTimeGS = List.of(
+            // Johto cave/grass
+            "SPROUT TOWER", "SPROUT TOWER",
+            "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER",
+            "BURNED TOWER", "BURNED TOWER",
+            "NATIONAL PARK",
+            "RUINS OF ALPH", "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE", "SILVER CAVE", "SILVER CAVE", "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37",
+            "ROUTE 38", "ROUTE 39", "ROUTE 42", "ROUTE 43", "ROUTE 44", "ROUTE 45", "ROUTE 46",
+            "SILVER CAVE",
+            // Johto surfing
+            "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "DRAGON'S DEN",
+            "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 34", "ROUTE 35", "ROUTE 40", "ROUTE 41", "ROUTE 42", "ROUTE 43",
+            "ROUTE 44", "ROUTE 45",
+            "NEW BARK TOWN",
+            "CHERRYGROVE CITY",
+            "VIOLET CITY",
+            "CIANWOOD CITY",
+            "OLIVINE CITY",
+            "ECRUTEAK CITY",
+            "LAKE OF RAGE",
+            "BLACKTHORN CITY",
+            "SILVER CAVE",
+            "OLIVINE CITY",
+            // Kanto cave/grass
+            "DIGLETT'S CAVE",
+            "MT.MOON",
+            "ROCK TUNNEL", "ROCK TUNNEL",
+            "VICTORY ROAD",
+            "TOHJO FALLS",
+            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
+            "ROUTE 10", "ROUTE 11", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28",
+            // Kanto surfing
+            "ROUTE 4", "ROUTE 6", "ROUTE 9", "ROUTE 10", "ROUTE 12", "ROUTE 13", "ROUTE 19", "ROUTE 20",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27",
+            "TOHJO FALLS",
+            "ROUTE 28",
+            "PALLET TOWN",
+            "VIRIDIAN CITY",
+            "CERULEAN CITY",
+            "VERMILION CITY",
+            "CELADON CITY",
+            "FUCHSIA CITY",
+            "CINNABAR ISLAND",
+            "VERMILION CITY",
+            // Swarms
+            "ROUTE 35",
+            "ROUTE 38",
+            "DARK CAVE",
+            "MT.MORTAR", "MT.MORTAR",
+            // Fishing, Headbutt, BCC
+            "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND", "FISHING DRATINI 1",
+            "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS", "FISHING DRATINI 2",
+            "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
+            "HEADBUTT FOREST GS", "HEADBUTT FOREST GS", "HEADBUTT CANYON GS", "HEADBUTT CANYON GS", "ROCK SMASH",
+            "BUG CATCHING CONTEST");
+
+    private static final List<String> locationTagsUseTimeGS = initLocationTagsUseTimeGS();
+
+    private static List<String> initLocationTagsUseTimeGS() {
+        List<String> locationTags = new ArrayList<>();
+        for (int areaNum = 0; areaNum < 61; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeGS.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeGS.subList(61, 99));
+        for (int areaNum = 99; areaNum < 129; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeGS.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeGS.subList(129, 153));
+        for (int areaNum = 153; areaNum < 157; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeGS.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeGS.subList(157, 170));
+        locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+                "FISHING DRATINI 1", "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS",
+                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
+        locationTags.addAll(locationTagsNoTimeGS.subList(170, 176));
+        return Collections.unmodifiableList(locationTags);
+    }
+
+    private static final List<String> locationTagsNoTimeCrystal = List.of(
+            // Johto cave/grass
+            "SPROUT TOWER", "SPROUT TOWER",
+            "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER",
+            "BURNED TOWER", "BURNED TOWER",
+            "NATIONAL PARK",
+            "RUINS OF ALPH", "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH", "ICE PATH",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE", "SILVER CAVE", "SILVER CAVE", "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37",
+            "ROUTE 38", "ROUTE 39", "ROUTE 42", "ROUTE 43", "ROUTE 44", "ROUTE 45", "ROUTE 46",
+            "SILVER CAVE",
+            // Johto surfing
+            "RUINS OF ALPH",
+            "UNION CAVE", "UNION CAVE", "UNION CAVE",
+            "SLOWPOKE WELL", "SLOWPOKE WELL",
+            "ILEX FOREST",
+            "MT.MORTAR", "MT.MORTAR", "MT.MORTAR",
+            "WHIRL ISLANDS", "WHIRL ISLANDS", "WHIRL ISLANDS",
+            "SILVER CAVE",
+            "DARK CAVE", "DARK CAVE",
+            "DRAGON'S DEN",
+            "OLIVINE CITY",
+            "ROUTE 30", "ROUTE 31", "ROUTE 32", "ROUTE 34", "ROUTE 35", "ROUTE 40", "ROUTE 41", "ROUTE 42", "ROUTE 43",
+            "ROUTE 44", "ROUTE 45",
+            "NEW BARK TOWN",
+            "CHERRYGROVE CITY",
+            "VIOLET CITY",
+            "CIANWOOD CITY",
+            "OLIVINE CITY",
+            "ECRUTEAK CITY",
+            "LAKE OF RAGE",
+            "BLACKTHORN CITY",
+            "SILVER CAVE",
+            // Kanto cave/grass
+            "DIGLETT'S CAVE",
+            "MT.MOON",
+            "ROCK TUNNEL", "ROCK TUNNEL",
+            "VICTORY ROAD",
+            "TOHJO FALLS",
+            "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
+            "ROUTE 10", "ROUTE 11", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28",
+            // Kanto surfing
+            "TOHJO FALLS",
+            "VERMILION CITY",
+            "ROUTE 4", "ROUTE 6", "ROUTE 9", "ROUTE 10", "ROUTE 12", "ROUTE 13", "ROUTE 19", "ROUTE 20",
+            "ROUTE 21", "ROUTE 22", "ROUTE 24", "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28",
+            "PALLET TOWN",
+            "VIRIDIAN CITY",
+            "CERULEAN CITY",
+            "VERMILION CITY",
+            "CELADON CITY",
+            "FUCHSIA CITY",
+            "CINNABAR ISLAND",
+            // Swarms
+            "DARK CAVE",
+            "ROUTE 35",
+            // Fishing, Headbutt, BCC
+            "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND", "FISHING DRATINI 1",
+            "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS", "FISHING DRATINI 2",
+            "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
+            "HEADBUTT CANYON C", "HEADBUTT CANYON C", "HEADBUTT TOWN", "HEADBUTT TOWN", "HEADBUTT ROUTE",
+            "HEADBUTT ROUTE", "HEADBUTT KANTO", "HEADBUTT KANTO", "HEADBUTT LAKE", "HEADBUTT LAKE", "HEADBUTT FOREST C",
+            "HEADBUTT FOREST C", "ROCK SMASH",
+            "BUG CATCHING CONTEST");
+
+    private static final List<String> locationTagsUseTimeCrystal = initLocationTagsUseTimeCrystal();
+
+    private static List<String> initLocationTagsUseTimeCrystal() {
+        List<String> locationTags = new ArrayList<>();
+        for (int areaNum = 0; areaNum < 61; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeCrystal.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(61, 99));
+        for (int areaNum = 99; areaNum < 129; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeCrystal.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(129, 153));
+        for (int areaNum = 153; areaNum < 155; areaNum++) {
+            for (int i = 0; i < 3; i++) {
+                locationTags.add(locationTagsNoTimeCrystal.get(areaNum));
+            }
+        }
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(155, 167));
+        locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+                "FISHING DRATINI 1", "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS",
+                "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
+        locationTags.addAll(locationTagsNoTimeCrystal.subList(167, 181));
+        return Collections.unmodifiableList(locationTags);
+    }
+
+    /**
+     * The order the player is "expected" to traverse locations. Based on
+     * <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Gold_and_Silver/Walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrder = List.of(
+            "NEW BARK TOWN", "ROUTE 29", "ROUTE 46", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
+            "VIOLET CITY", "SPROUT TOWER", "ROUTE 32", "RUINS OF ALPH", "UNION CAVE", "ROUTE 33",
+            "SLOWPOKE WELL", "ILEX FOREST", "ROUTE 34", "GOLDENROD CITY", "ROUTE 35", "NATIONAL PARK",
+            "ROUTE 36", "ROUTE 37", "ECRUTEAK CITY", "BURNED TOWER", "ROUTE 38", "ROUTE 39", "OLIVINE CITY",
+            "ROUTE 40", "ROUTE 41", "CIANWOOD CITY", "ROUTE 42", "MT.MORTAR", "ROUTE 43", "LAKE OF RAGE",
+            "ROUTE 44", "ICE PATH", "BLACKTHORN CITY", "DRAGON'S DEN", "ROUTE 45", "WHIRL ISLANDS",
+            "TIN TOWER", "ROUTE 27", "TOHJO FALLS", "ROUTE 26", "VICTORY ROAD",
+            "VERMILION CITY", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROCK TUNNEL", "ROUTE 10", "ROUTE 9",
+            "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "CELADON CITY", "ROUTE 16", "ROUTE 17",
+            "ROUTE 18", "FUCHSIA CITY", "ROUTE 15", "ROUTE 14", "ROUTE 13", "ROUTE 12", "ROUTE 11",
+            "DIGLETT'S CAVE", "ROUTE 2", "ROUTE 3", "MT.MOON", "ROUTE 4", "VIRIDIAN CITY", "ROUTE 1", "PALLET TOWN",
+            "ROUTE 21", "CINNABAR ISLAND", "ROUTE 20", "ROUTE 19", "ROUTE 22", "ROUTE 28", "SILVER CAVE",
+            "FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+            "FISHING QWILFISH", "FISHING REMORAID",
+            "FISHING GYARADOS", "FISHING DRATINI 1", "FISHING DRATINI 2", "FISHING WHIRL ISLANDS",
+            "HEADBUTT FOREST GS", "HEADBUTT CANYON GS",
+            "HEADBUTT ROUTE", "HEADBUTT TOWN", "HEADBUTT KANTO", "HEADBUTT FOREST C", "HEADBUTT LAKE",
+            "HEADBUTT CANYON C",
+            "ROCK SMASH", "BUG CATCHING CONTEST"
+    );
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags,
+                                          int[] postGameAreas, int[] partialPostGameAreas, int[] partialPostGameCutoffs) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
+        for (int i = 0; i < partialPostGameAreas.length; i++) {
+            int areaIndex = partialPostGameAreas[i];
+            int cutoff = partialPostGameCutoffs[i];
+            encounterAreas.get(areaIndex).setPartiallyPostGameCutoff(cutoff);
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, boolean useTimeOfDay, boolean isCrystal) {
+        List<String> locationTags = isCrystal ?
+                (useTimeOfDay ? locationTagsUseTimeCrystal : locationTagsNoTimeCrystal) :
+                (useTimeOfDay ? locationTagsUseTimeGS : locationTagsNoTimeGS);
+        int[] postGameAreas = isCrystal ?
+                (useTimeOfDay ? crysPostGameEncounterAreasTOD : crysPostGameEncounterAreasNoTOD) :
+                (useTimeOfDay ? gsPostGameEncounterAreasTOD : gsPostGameEncounterAreasNoTOD);
+        int[] partialPostGameAreas = isCrystal ?
+                (useTimeOfDay ? crysPartialPostGameTOD : crysPartialPostGameNoTOD) :
+                (useTimeOfDay ? gsPartialPostGameTOD : gsPartialPostGameNoTOD);
+        int[] partialPostGameCutoffs = useTimeOfDay ? partialPostGameCutoffsTOD : partialPostGameCutoffsNoTOD;
+        tagEncounterAreas(encounterAreas, locationTags, postGameAreas, partialPostGameAreas, partialPostGameCutoffs);
+    }
+
+    public static final Map<Integer, Integer> balancedItemPrices = Stream.of(new Integer[][]{
+
+            // general held items
+            {Gen2Items.brightPowder, 3000}, // same as in Gen3Constants
+            {Gen2Items.expShare, 6000}, // same as in Gen3Constants
+            {Gen2Items.quickClaw, 4500}, // sane as in Gen3Constants
+            {Gen2Items.kingsRock, 5000}, // same as in Gen3Constants
+            {Gen2Items.amuletCoin, 1500}, // same as in Gen3Constants, could be too low
+            {Gen2Items.smokeBall, 1200}, // vanilla value of 200 felt too low
+            {Gen2Items.everstone, 200}, // same as in Gen3Constants
+            {Gen2Items.focusBand, 3000}, // same as in Gen3Constants
+            {Gen2Items.leftovers, 10000}, // same as in Gen3Constants
+            {Gen2Items.cleanseTag, 1000}, // same as in Gen3Constants
+            {Gen2Items.luckyEgg, 10000}, // same as in Gen3Constants
+            {Gen2Items.scopeLens, 5000}, // same as in Gen3Constants
+            {Gen2Items.berserkGene, 800}, // probably not a very good item
+
+            // type boosting items
+            {Gen2Items.softSand, 2000}, // same as in Gen3Constants
+            {Gen2Items.sharpBeak, 2000}, // same as in Gen3Constants
+            {Gen2Items.poisonBarb, 2000}, // same as in Gen3Constants
+            {Gen2Items.silverPowder, 2000}, // same as in Gen3Constants
+            {Gen2Items.mysticWater, 2000}, // same as in Gen3Constants
+            {Gen2Items.twistedSpoon, 2000}, // same as in Gen3Constants
+            {Gen2Items.blackbelt, 2000}, // same as in Gen3Constants
+            {Gen2Items.blackGlasses, 2000}, // same as in Gen3Constants
+            {Gen2Items.pinkBow, 2000}, // same as other type-boosting items
+            {Gen2Items.polkadotBow, 2000}, // same as other type-boosting items
+            {Gen2Items.neverMeltIce, 2000}, // same as in Gen3Constants
+            {Gen2Items.magnet, 2000}, // same as in Gen3Constants
+            {Gen2Items.spellTag, 2000}, // same as in Gen3Constants
+            {Gen2Items.miracleSeed, 2000}, // same as in Gen3Constants
+            {Gen2Items.hardStone, 2000}, // same as in Gen3Constants
+            {Gen2Items.charcoal, 2000}, // same as other type-boosting items; the vanilla cost is way too high
+            {Gen2Items.metalCoat, 2000}, // same as other type-boosting items
+            {Gen2Items.dragonScale, 2000}, // same as in Gen3Constants
+
+            // specific poke boosting items
+            {Gen2Items.luckyPunch, 1200}, // vanilla value of 10 felt too low
+            {Gen2Items.metalPowder, 1200}, // vanilla value of 10 felt too low
+            {Gen2Items.stick, 1200}, // vanilla value of 200 felt too low
+            {Gen2Items.thickClub, 2300}, // vanilla value of 500 felt too low
+            {Gen2Items.lightBall, 2300}, // vanilla value of 100 felt too low
+
+            // berries
+            {Gen2Items.berry, 50}, // same as Gen3Constants Oran Berry
+            {Gen2Items.goldBerry, 500}, // same as Gen3Constants Sitrus Berry
+            {Gen2Items.psnCureBerry, 100}, // same as Gen3Constants Pecha Berry
+            {Gen2Items.przCureBerry, 200}, // same as Gen3Constants Cheri Berry
+            {Gen2Items.burntBerry, 250}, // same as Gen3Constants Aspear Berry
+            {Gen2Items.iceBerry, 250}, // same as Gen3Constants Rawst Berry
+            {Gen2Items.bitterBerry, 200}, // same as Gen3Constants Persim Berry
+            {Gen2Items.mintBerry, 250}, // same as Gen3Constants Chesto Berry
+            {Gen2Items.miracleBerry, 500}, // same as Gen3Constants Lum Berry
+            {Gen2Items.mysteryBerry, 3000}, // same as Gen3Constants Leppa Berry
+            {Gen2Items.berryJuice, 300}, // same as potion (which also heals 20 HP)
+
+            // poke balls
+            {Gen2Items.masterBall, 3000},
+            {Gen2Items.parkBall, 600}, // same as Great Ball
+            // all the Apricorn balls are worth 300, same as in Gen4Constants
+            {Gen2Items.heavyBall, 300},
+            {Gen2Items.levelBall, 300},
+            {Gen2Items.lureBall, 300},
+            {Gen2Items.fastBall, 300},
+            {Gen2Items.friendBall, 300},
+            {Gen2Items.moonBall, 300},
+            {Gen2Items.loveBall, 300},
+
+            // misc
+            {Gen2Items.moonStone, 2100}, // same as other stones
+            {Gen2Items.rareCandy, 10000}, // same as in Gen3Constants
+            {Gen2Items.sacredAsh, 10000}, // same as in Gen3Constants
+            {Gen2Items.dragonFang, 100}, // it does nothing in Gen2 due to a bug
+            {Gen2Items.normalBox, 1000}, // arbitrary. these boxes should be unobtainable, but I'm not sure
+            {Gen2Items.gorgeousBox, 1000},
+
+    }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
 }

@@ -973,6 +973,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasStarterTypeTriangleSupport() {
+        return false;
+    }
+
+    @Override
     public boolean hasStarterAltFormes() {
         return true;
     }
@@ -1067,15 +1072,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (!loadedWildMapNames) {
             loadWildMapNames();
         }
+
+        List<EncounterArea> encounterAreas;
         try {
             if (romEntry.getRomType() == Gen6Constants.Type_ORAS) {
-                return getEncountersORAS();
+                encounterAreas = getEncountersORAS();
             } else {
-                return getEncountersXY();
+                encounterAreas = getEncountersXY();
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+
+        Gen6Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
+
+        return encounterAreas;
     }
 
     private List<EncounterArea> getEncountersXY() throws IOException {
@@ -1717,12 +1728,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void randomizeEncounters(Settings.WildPokemonMod mode, boolean useTimeOfDay, boolean catchEmAll,
-                                    boolean typeThemed, boolean usePowerLevels, boolean noLegendaries,
+    public void randomizeEncounters(Settings.WildPokemonMod mode, Settings.WildPokemonTypeMod typeMode,
+                                    boolean useTimeOfDay, boolean catchEmAll,
+                                    boolean usePowerLevels, boolean noLegendaries,
                                     boolean balanceShakingGrass, int levelModifier, boolean allowAltFormes,
                                     boolean banIrregularAltFormes, boolean abilitiesAreRandomized) {
         // TODO: do some extra steps for ORAS. The code needed is found old commits.
-        super.randomizeEncounters(mode, useTimeOfDay, catchEmAll, typeThemed, usePowerLevels, noLegendaries,
+        super.randomizeEncounters(mode, typeMode, useTimeOfDay, catchEmAll, usePowerLevels, noLegendaries,
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
     }
 
@@ -3851,7 +3863,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
         try {
             GARCArchive itemPriceGarc = this.readGARC(romEntry.getFile("ItemData"),true);
             for (int i = 1; i < itemPriceGarc.files.size(); i++) {

@@ -753,6 +753,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     processEncounterEntry(encounterAreas, entry, 0, idx);
                 }
             }
+
+            Gen5Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType(), useTimeOfDay);
             return encounterAreas;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -807,6 +809,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             encounters.add(enc);
         }
         return encounters;
+    }
+
+    @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        List<String> locationTagsTraverseOrder = romEntry.getRomType() == Gen5Constants.Type_BW ?
+                Gen5Constants.locationTagsTraverseOrderBW : Gen5Constants.locationTagsTraverseOrderBW2;
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
     }
 
     @Override
@@ -1163,6 +1174,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     int currentFile = 1;
                     for (int trno = 0; trno < 17; trno++) {
                         Trainer tr = new Trainer();
+                        tr.index = allTrainers.size() + 1;
                         tr.poketype = 3; // have held items and custom moves
                         int nameAndClassIndex = Gen5Constants.bw2DriftveilTrainerOffsets.get(trno);
                         tr.fullDisplayName = tclasses.get(Gen5Constants.normalTrainerClassLength + nameAndClassIndex) + " " + tnames.get(Gen5Constants.normalTrainerNameLength + nameAndClassIndex);
@@ -2614,6 +2626,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean hasEncounterLocations() {
+        return true;
+    }
+
+    @Override
     public boolean hasTimeBasedEncounters() {
         return true; // All BW/BW2 do [seasons]
     }
@@ -3699,7 +3716,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
         try {
             NARCArchive itemPriceNarc = this.readNARC(romEntry.getFile("ItemData"));
             for (int i = 1; i < itemPriceNarc.files.size(); i++) {
@@ -3983,7 +4000,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             default -> null;
         };
     }
-    
+
     @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;

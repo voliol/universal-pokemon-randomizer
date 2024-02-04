@@ -127,13 +127,9 @@ public interface RomHandler {
 
     int starterCount();
 
-    void customStarters(Settings settings);
-
     void randomizeStarters(Settings settings);
 
-    void randomizeBasicTwoEvosStarters(Settings settings);
-
-    List<Pokemon> getPickedStarters();
+    boolean hasStarterTypeTriangleSupport();
 
     boolean supportsStarterHeldItems();
 
@@ -222,9 +218,22 @@ public interface RomHandler {
 
     List<EncounterArea> getEncounters(boolean useTimeOfDay);
 
+    /**
+     * Returns a list identical to {@link #getEncounters(boolean)}, except it is sorted according to when in the game
+     * the player is expected to go to the location of each {@link EncounterArea}.<br>
+     * E.g. {@link EncounterArea}s at early routes come early, and victory road and post-game locations ones are at
+     * the end.<br>
+     * (if the order has been implemented; the default implementation does not sort)
+     */
+    List<EncounterArea> getSortedEncounters(boolean useTimeOfDay);
+
+    PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay);
+
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
     void randomizeEncounters(Settings settings);
+
+    boolean hasEncounterLocations();
 
     boolean hasTimeBasedEncounters();
 
@@ -248,6 +257,11 @@ public interface RomHandler {
 
     List<Integer> getMainPlaythroughTrainers();
 
+    /**
+     * Returns a list of the indices (in the main trainer list via {@link #getTrainers()}) of the trainers
+     * consisting of the non-rematch Elite 4 challenge, including the Champion (or Ghetsis in BW1). <br>
+     * If isChallengeMode is true, it returns the indexes for the Challenge Mode e4+champion (only in BW2).
+     */
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
     void setTrainers(List<Trainer> trainerData);
@@ -260,7 +274,11 @@ public interface RomHandler {
 
     void randomizeTrainerPokes(Settings settings);
 
-    boolean supportsTrainerHeldItems();
+    boolean canAddHeldItemsToBossTrainers();
+
+    boolean canAddHeldItemsToImportantTrainers();
+
+    boolean canAddHeldItemsToRegularTrainers();
 
     void randomizeTrainerHeldItems(Settings settings);
 
@@ -546,7 +564,7 @@ public interface RomHandler {
 
     void setShopItems(Map<Integer, Shop> shopItems);
 
-    void setShopPrices();
+    void setBalancedShopPrices();
 
     // ============
     // Pickup Items

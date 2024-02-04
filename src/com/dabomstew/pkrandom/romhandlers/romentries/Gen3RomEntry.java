@@ -98,7 +98,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
     private final List<Gen3EventTextEntry> tmTexts = new ArrayList<>();
     private final List<Gen3EventTextEntry> moveTutorTexts = new ArrayList<>();
 
-    public Gen3RomEntry(String name) {
+    private Gen3RomEntry(String name) {
         super(name);
     }
 

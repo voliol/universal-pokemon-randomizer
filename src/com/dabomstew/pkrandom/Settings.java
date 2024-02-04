@@ -40,6 +40,7 @@ import java.util.zip.CRC32;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
@@ -50,7 +51,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 52;
+    public static final int LENGTH_OF_SETTINGS_DATA = 54;
 
     private CustomNamesSet customNames;
 
@@ -101,11 +102,20 @@ public class Settings {
     private boolean ensureTwoAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_BASIC
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
+
+    public enum StartersTypeMod {
+        NONE, FIRE_WATER_GRASS, TRIANGLE, UNIQUE, SINGLE_TYPE
+    }
+
+    private StartersTypeMod startersTypeMod = StartersTypeMod.NONE;
+    private Type startersSingleType = null;
+    private boolean startersNoDualTypes;
     private boolean allowStarterAltFormes;
+    private boolean startersNoLegendaries;
 
     // index in the rom's list of pokemon
     // offset from the dropdown index from RandomizerGUI by 1
@@ -159,7 +169,7 @@ public class Settings {
     private boolean evolutionMovesForAll;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED, TYPE_THEMED_ELITE4_GYMS
+        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED, TYPE_THEMED_ELITE4_GYMS, KEEP_THEMED
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -167,6 +177,7 @@ public class Settings {
     private boolean trainersUsePokemonOfSimilarStrength;
     private boolean trainersMatchTypingDistribution;
     private boolean trainersBlockLegendaries = true;
+    private boolean trainersUseLocalPokemon;
     private boolean trainersBlockEarlyWonderGuard = true;
     private boolean trainersEnforceDistribution;
     private boolean trainersEnforceMainPlaythrough;
@@ -193,17 +204,18 @@ public class Settings {
     private boolean betterTrainerMovesets;
 
     public enum WildPokemonMod {
-        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
+        UNCHANGED, RANDOM, AREA_MAPPING, LOCATION_MAPPING, GLOBAL_MAPPING
     }
-
-    public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL, TYPE_THEME_AREAS
+    
+    public enum WildPokemonTypeMod {
+        NONE, THEMED_AREAS, KEEP_PRIMARY
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
+    private boolean keepWildTypeThemes;
     private boolean similarStrengthEncounters;
     private boolean catchEmAllEncounters;
-    private boolean typeThemeEncounterAreas;
+    private WildPokemonTypeMod wildPokemonTypeMod = WildPokemonTypeMod.NONE;
     private boolean useTimeBasedEncounters;
     private boolean blockWildLegendaries = true;
     private boolean useMinimumCatchRate;
@@ -398,12 +410,13 @@ public class Settings {
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
                 startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes));
+                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes,
+                startersMod == StartersMod.RANDOM_BASIC));
 
         // 5 - 10: dropdowns
-        write2ByteInt(out, customStarters[0] - 1);
-        write2ByteInt(out, customStarters[1] - 1);
-        write2ByteInt(out, customStarters[2] - 1);
+        write2ByteInt(out, customStarters[0]);
+        write2ByteInt(out, customStarters[1]);
+        write2ByteInt(out, customStarters[2]);
 
         // 11 movesets
         out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
@@ -420,7 +433,8 @@ public class Settings {
                 trainersMod == TrainersMod.DISTRIBUTED,
                 trainersMod == TrainersMod.MAINPLAYTHROUGH,
                 trainersMod == TrainersMod.TYPE_THEMED,
-                trainersMod == TrainersMod.TYPE_THEMED_ELITE4_GYMS));
+                trainersMod == TrainersMod.TYPE_THEMED_ELITE4_GYMS,
+                trainersMod == TrainersMod.KEEP_THEMED));
         
         // 14 trainer pokemon force evolutions
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
@@ -428,15 +442,16 @@ public class Settings {
         // 15 wild pokemon
         out.write(makeByteSelected(catchEmAllEncounters,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
-                false, // remainder from when a "mod" was turned into multiple separately togglable options, can be reused
-                typeThemeEncounterAreas,
+                wildPokemonMod == WildPokemonMod.LOCATION_MAPPING,
+                wildPokemonTypeMod == WildPokemonTypeMod.THEMED_AREAS,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
 
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 similarStrengthEncounters, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass));
+                banBadRandomWildPokemonHeldItems, wildPokemonTypeMod == WildPokemonTypeMod.NONE,
+                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY, balanceShakingGrass));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -577,14 +592,15 @@ public class Settings {
         // 47 Static level modifier
         out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
 
-        // 48 trainer pokemon held items / pokemon ensure two abilities
+        // 48 trainer pokemon held items / pokemon ensure two abilities / trainers use local pokemon
         out.write(makeByteSelected(randomizeHeldItemsForBossTrainerPokemon,
                 randomizeHeldItemsForImportantTrainerPokemon,
                 randomizeHeldItemsForRegularTrainerPokemon,
                 consumableItemsOnlyForTrainerPokemon,
                 sensibleItemsOnlyForTrainerPokemon,
                 highestLevelOnlyGetsItemsForTrainerPokemon,
-                ensureTwoAbilities));
+                ensureTwoAbilities,
+                trainersUseLocalPokemon));
 
         // 49 pickup item randomization
         out.write(makeByteSelected(pickupItemsMod == PickupItemsMod.RANDOM,
@@ -600,6 +616,22 @@ public class Settings {
                 pokemonPalettesFollowTypes,
                 pokemonPalettesFollowEvolutions,
                 pokemonPalettesShinyFromNormal));
+
+        // 52 starter type mod / starter no legendaries / starter no dual type checkbox
+        out.write(makeByteSelected(startersTypeMod == StartersTypeMod.NONE,
+                startersTypeMod == StartersTypeMod.FIRE_WATER_GRASS, startersTypeMod == StartersTypeMod.TRIANGLE,
+                startersTypeMod == StartersTypeMod.UNIQUE, startersTypeMod == StartersTypeMod.SINGLE_TYPE,
+                false, startersNoLegendaries, startersNoDualTypes));
+
+        // 53 starter single-type type choice (5 bits)
+        if(startersSingleType != null) {
+            out.write(startersSingleType.toInt() + 1);
+        } else {
+            out.write(0);
+        }
+
+        // 54 Wild Pokemon 3
+        out.write(makeByteSelected(keepWildTypeThemes));
 
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
@@ -670,14 +702,15 @@ public class Settings {
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
                 1, // COMPLETELY_RANDOM
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
+                3, // RANDOM_WITH_TWO_EVOLUTIONS
+                7  // RANDOM_BASIC
         ));
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
         settings.setAllowStarterAltFormes(restoreState(data[4],6));
 
-        settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
-                FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
+        settings.setCustomStarters(new int[]{FileFunctions.read2ByteInt(data, 5),
+                FileFunctions.read2ByteInt(data, 7), FileFunctions.read2ByteInt(data, 9)});
 
         settings.setMovesetsMod(restoreEnum(MovesetsMod.class, data[11], 2, // UNCHANGED
                 1, // RANDOM_PREFER_SAME_TYPE
@@ -697,7 +730,8 @@ public class Settings {
                 2, // DISTRIBUTED
                 3, // MAINPLAYTHROUGH 
                 4, // TYPE_THEMED
-                5 // TYPE_THEMED_ELITE4_GYMS
+                5, // TYPE_THEMED_ELITE4_GYMS
+                6 // KEEP_THEMED
         ));
 
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
@@ -706,11 +740,16 @@ public class Settings {
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
                 5, // RANDOM
                 1, // AREA_MAPPING
+                2, // LOCATION_MAPPING
                 4 // GLOBAL_MAPPING
         ));
         settings.setSimilarStrengthEncounters(restoreState(data[16], 2));
         settings.setCatchEmAllEncounters(restoreState(data[15], 0));
-        settings.setTypeThemeEncounterAreas(restoreState(data[15], 3));
+        settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
+                restoreState(data[15], 3), // THEMED_AREAS
+                restoreState(data[16], 6) // KEEP_PRIMARY
+        ));
+        
         settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
 
         settings.setUseMinimumCatchRate(restoreState(data[16], 0));
@@ -878,6 +917,7 @@ public class Settings {
         settings.setSensibleItemsOnlyForTrainers(restoreState(data[48], 4));
         settings.setHighestLevelGetsItemsForTrainers(restoreState(data[48], 5));
         settings.setEnsureTwoAbilities(restoreState(data[48], 6));
+        settings.setTrainersUseLocalPokemon(restoreState(data[48], 7));
 
         settings.setPickupItemsMod(restoreEnum(PickupItemsMod.class, data[49],
                 1, // UNCHANGED
@@ -895,6 +935,24 @@ public class Settings {
         settings.setPokemonPalettesFollowTypes(restoreState(data[51], 2));
         settings.setPokemonPalettesFollowEvolutions(restoreState(data[51], 3));
         settings.setPokemonPalettesShinyFromNormal(restoreState(data[51], 4));
+
+        settings.setStartersTypeMod(restoreEnum(StartersTypeMod.class, data[52], 0, //NONE
+                1, //FIRE_WATER_GRASS
+                2, //TRIANGLE
+                3, //UNIQUE
+                4  //SINGLE_TYPE
+            ));
+
+        settings.setStartersNoLegendaries(restoreState(data[52], 6));
+        settings.setStartersNoDualTypes(restoreState(data[52], 7));
+
+        if(data[53] == 0) {
+            settings.setStartersSingleType(null);
+        } else {
+            settings.setStartersSingleType(Type.fromInt((data[53] | 0x1F) - 1));
+        }
+
+        settings.setKeepWildTypeThemes(restoreState(data[54], 0));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
@@ -1346,6 +1404,50 @@ public class Settings {
         this.startersMod = startersMod;
     }
 
+    public StartersTypeMod getStartersTypeMod() {
+        return startersTypeMod;
+    }
+
+    public void setStartersTypeMod(boolean... bools) {
+        setStartersTypeMod(getEnum(StartersTypeMod.class, bools));
+    }
+
+    private void setStartersTypeMod(StartersTypeMod startersTypeMod) {
+        this.startersTypeMod = startersTypeMod;
+    }
+
+    public boolean isStartersNoDualTypes() {
+        return startersNoDualTypes;
+    }
+
+    public void setStartersNoDualTypes(boolean startersNoDualTypes) {
+        this.startersNoDualTypes = startersNoDualTypes;
+    }
+
+    public boolean isStartersNoLegendaries() {
+        return startersNoLegendaries;
+    }
+
+    public void setStartersNoLegendaries(boolean startersNoLegendaries) {
+        this.startersNoLegendaries = startersNoLegendaries;
+    }
+
+    public Type getStartersSingleType() {
+        return startersSingleType;
+    }
+
+    private void setStartersSingleType(Type type) {
+        startersSingleType = type;
+    }
+
+    public void setStartersSingleType(int typeIndex) {
+        if(typeIndex == 0) {
+            startersSingleType = null;
+        } else {
+            startersSingleType = Type.fromInt(typeIndex - 1);
+        }
+    }
+
     public int[] getCustomStarters() {
         return customStarters;
     }
@@ -1595,6 +1697,14 @@ public class Settings {
         this.trainersBlockLegendaries = trainersBlockLegendaries;
     }
 
+    public boolean isTrainersUseLocalPokemon() {
+        return trainersUseLocalPokemon;
+    }
+
+    public void setTrainersUseLocalPokemon(boolean trainersUseLocalPokemon) {
+        this.trainersUseLocalPokemon = trainersUseLocalPokemon;
+    }
+
     public boolean isTrainersEnforceDistribution() {
         return trainersEnforceDistribution;
     }
@@ -1803,6 +1913,14 @@ public class Settings {
         this.wildPokemonMod = wildPokemonMod;
     }
 
+    public boolean isKeepWildTypeThemes() {
+        return keepWildTypeThemes;
+    }
+
+    public void setKeepWildTypeThemes(boolean keepWildTypeThemes) {
+        this.keepWildTypeThemes = keepWildTypeThemes;
+    }
+
     public boolean isSimilarStrengthEncounters() {
         return similarStrengthEncounters;
     }
@@ -1819,14 +1937,17 @@ public class Settings {
         this.catchEmAllEncounters = catchEmAllEncounters;
     }
 
-    public boolean isTypeThemeEncounterAreas() {
-        return typeThemeEncounterAreas;
+    public WildPokemonTypeMod getWildPokemonTypeMod() {
+        return wildPokemonTypeMod;
     }
 
-    public void setTypeThemeEncounterAreas(boolean typeThemeEncounterAreas) {
-        this.typeThemeEncounterAreas = typeThemeEncounterAreas;
+    public void setWildPokemonTypeMod(boolean... bools) {
+        setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, bools));
     }
 
+    private void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
+        this.wildPokemonTypeMod = wildPokemonTypeMod;
+    }
 
     public boolean isUseTimeBasedEncounters() {
         return useTimeBasedEncounters;

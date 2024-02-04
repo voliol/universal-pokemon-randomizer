@@ -1262,6 +1262,40 @@ public class Gen6Constants {
         return map;
     }
 
+    private static final int[] xyPostGameEncounterAreas = new int[0]; //there are none
+
+    private static final int[] orasPostGameEncounterAreas = new int[] {
+            585, 586, 587, 588, //Sky Pillar
+            609, 610, 611, 612, //Battle Resort
+            589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603,
+            604, 605, 606, 607, 608, 657, 658, 659, 660, 661, 662, 663, 664, 665, 666,
+            667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, //Mirage spots
+            34, 39, 48, 57, 66, 74, 79, 84, 89, 94, 100, 109, 119, 124, 129, 134, 144,
+            153, 158, 168, 210, 214, 227, 232, 237, 242, 247, 252, 257, 262, 267, 272,
+            277, 289, 298, 307, 316, 330, 335, 340, 346, 351, 356, 377, 382, 494, 499,
+            504, 510, 515, 524, 615, 625, 635, 645, 679, //DexNav Foreign Encounter
+            //Technically, neither mirage spots nor Dexnav foreign encounters are post-game.
+            //however, they don't really qualify as "local" either, which is the actual use case.
+    };
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, int[] postGameAreas) {
+        // since I'm not supporting Gen 6+ in the V branch, this lacks location tagging
+        // there's nothing stopping you from adding them like in earlier Gens, just hasn't been done already
+        // --voliol
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType) {
+        int[] postGameAreas = switch (romType) {
+            case Type_XY -> xyPostGameEncounterAreas;
+            case Type_ORAS -> orasPostGameEncounterAreas;
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, postGameAreas);
+    }
+
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
             // Skip item index 0. All prices divided by 10
             {Items.masterBall, 300},

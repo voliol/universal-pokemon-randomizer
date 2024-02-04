@@ -644,6 +644,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         readHeadbuttEncounters(encounterAreas);
         readBugCatchingContestEncounters(encounterAreas);
 
+        Gen2Constants.tagEncounterAreas(encounterAreas, useTimeOfDay, romEntry.isCrystal());
+
         return encounterAreas;
     }
 
@@ -718,20 +720,22 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void readFishingEncounters(List<EncounterArea> encounterAreas, boolean useTimeOfDay) {
+        // TODO: The Remoraid fishing group is not used in Crystal, nor the Remoraid swarm one;
+        //       they should thusly be skipped.
         int offset = romEntry.getIntValue("FishingWildsOffset");
         int rootOffset = offset;
-        for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
+        for (int k = 0; k < Gen2Constants.fishingAreaCount; k++) {
             EncounterArea area = new EncounterArea();
-            area.setDisplayName("Fishing Group " + (k + 1));
-            for (int i = 0; i < Gen2Constants.pokesPerFishingGroup; i++) {
+            area.setDisplayName("Fishing " + Gen2Constants.fishingAreaNames[k]);
+            for (int i = 0; i < Gen2Constants.pokesPerFishingArea; i++) {
                 offset++;
                 int pokeNum = rom[offset++] & 0xFF;
                 int level = rom[offset++] & 0xFF;
                 if (pokeNum == 0) {
                     if (!useTimeOfDay) {
                         // read the encounter they put here for DAY
-                        int specialOffset = rootOffset + Gen2Constants.fishingGroupEntryLength
-                                * Gen2Constants.pokesPerFishingGroup * Gen2Constants.fishingGroupCount + level * 4 + 2;
+                        int specialOffset = rootOffset + Gen2Constants.fishingAreaEntryLength
+                                * Gen2Constants.pokesPerFishingArea * Gen2Constants.fishingAreaCount + level * 4 + 2;
                         Encounter enc = new Encounter();
                         enc.setPokemon(pokes[rom[specialOffset] & 0xFF]);
                         enc.setLevel(rom[specialOffset + 1] & 0xFF);
@@ -748,10 +752,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             encounterAreas.add(area);
         }
         if (useTimeOfDay) {
-            for (int k = 0; k < Gen2Constants.timeSpecificFishingGroupCount; k++) {
+            for (int k = 0; k < Gen2Constants.timeSpecificFishingAreaCount; k++) {
                 EncounterArea area = new EncounterArea();
                 area.setDisplayName("Time-Specific Fishing " + (k + 1));
-                for (int i = 0; i < Gen2Constants.pokesPerTSFishingGroup; i++) {
+                for (int i = 0; i < Gen2Constants.pokesPerTSFishingArea; i++) {
                     int pokeNum = rom[offset++] & 0xFF;
                     int level = rom[offset++] & 0xFF;
                     Encounter enc = new Encounter();
@@ -767,9 +771,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void readHeadbuttEncounters(List<EncounterArea> encounterAreas) {
         int offset = romEntry.getIntValue("HeadbuttWildsOffset");
         int limit = romEntry.getIntValue("HeadbuttTableSize");
+        String[] names = romEntry.isCrystal() ? Gen2Constants.headbuttAreaNamesCrystal : Gen2Constants.headbuttAreaNamesGS;
         for (int i = 0; i < limit; i++) {
             EncounterArea area = new EncounterArea();
-            area.setDisplayName("Headbutt Trees Set " + (i + 1));
+            area.setDisplayName(names[i]);
             while ((rom[offset] & 0xFF) != 0xFF) {
                 offset++;
                 int pokeNum = rom[offset++] & 0xFF;
@@ -802,6 +807,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> Gen2Constants.locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
+    }
+
+    @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters) {
         if (!havePatchedFleeing) {
             patchFleeing();
@@ -830,10 +842,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int offset;
         // Fishing Data
         offset = romEntry.getIntValue("FishingWildsOffset");
-        for (int k = 0; k < Gen2Constants.fishingGroupCount; k++) {
+        for (int k = 0; k < Gen2Constants.fishingAreaCount; k++) {
             EncounterArea area = areaIterator.next();
             Iterator<Encounter> encounterIterator = area.iterator();
-            for (int i = 0; i < Gen2Constants.pokesPerFishingGroup; i++) {
+            for (int i = 0; i < Gen2Constants.pokesPerFishingArea; i++) {
                 offset++;
                 if (rom[offset] == 0) {
                     if (!useTimeOfDay) {
@@ -853,10 +865,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
         }
         if (useTimeOfDay) {
-            for (int k = 0; k < Gen2Constants.timeSpecificFishingGroupCount; k++) {
+            for (int k = 0; k < Gen2Constants.timeSpecificFishingAreaCount; k++) {
                 EncounterArea area = areaIterator.next();
                 Iterator<Encounter> encounterIterator = area.iterator();
-                for (int i = 0; i < Gen2Constants.pokesPerTSFishingGroup; i++) {
+                for (int i = 0; i < Gen2Constants.pokesPerTSFishingArea; i++) {
                     Encounter enc = encounterIterator.next();
                     rom[offset++] = (byte) enc.getPokemon().getNumber();
                     rom[offset++] = (byte) enc.getLevel();
@@ -1026,7 +1038,16 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public List<Integer> getEliteFourTrainers(boolean isChallengeMode) {
-        return new ArrayList<>(); // Not implemented
+        List<Integer> eliteFourIndices = new ArrayList<>();
+        List<Trainer> allTrainers = getTrainers();
+        for (int i = 0; i < allTrainers.size(); i++) {
+            Trainer tr = allTrainers.get(i);
+            if (tr.tag != null && ((tr.tag.contains("ELITE") || tr.tag.contains("CHAMPION")))) {
+                eliteFourIndices.add(i + 1);
+            }
+
+        }
+        return eliteFourIndices;
     }
 
     @Override
@@ -1152,10 +1173,55 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean supportsTrainerHeldItems() {
-        // Not a technical issue nor a space-based one, Gen II does support held items for trainers.
-        // Rather, getAllHeldItems() etc. needs to be filled. // TODO
-        return false;
+    public boolean canAddHeldItemsToBossTrainers() {
+        return romEntry.isNonJapanese();
+    }
+
+    @Override
+    public boolean canAddHeldItemsToImportantTrainers() {
+        return romEntry.isNonJapanese();
+    }
+
+    @Override
+    public boolean canAddHeldItemsToRegularTrainers() {
+        // there should be enough space in the trainer data bank for the international Crystal versions,
+        // but the randomizer needs better space allocation methods to use it
+        return romEntry.isNonJapanese() && !romEntry.isCrystal();
+    }
+
+    @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen2Constants.consumableHeldItems;
+    }
+
+    @Override
+    public List<Integer> getAllHeldItems() {
+        return Gen2Constants.allHeldItems;
+    }
+
+    @Override
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+        List<Integer> items = new ArrayList<>(Gen2Constants.generalPurposeConsumableItems);
+
+        if (!consumableOnly) {
+            items.addAll(Gen2Constants.generalPurposeItems);
+
+            for (int moveIdx : pokeMoves) {
+                Move move = moves.get(moveIdx);
+                if (move == null) {
+                    continue;
+                }
+                items.addAll(Gen2Constants.typeBoostingItems.get(move.type));
+            }
+
+            List<Integer> speciesItems = Gen2Constants.speciesBoostingItems.get(tp.pokemon.getNumber());
+            if (speciesItems != null) {
+                for (int i = 0; i < 6; i++) {  // Increase the likelihood of using species specific items.
+                    items.addAll(speciesItems);
+                }
+            }
+        }
+        return items;
     }
 
     @Override
@@ -1708,6 +1774,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean hasEncounterLocations() {
+        return true;
+    }
+
+    @Override
     public boolean hasTimeBasedEncounters() {
         return true; // All GSC do
     }
@@ -1854,19 +1925,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public boolean hasShopRandomization() {
-        // shop reading/writing methods and all(?) the required constants are present,
-        // but the randomization logic in AbstractRomHandler does not allow it
-        return false;
+        return true;
     }
 
     @Override
     public Map<Integer, Shop> getShopItems() {
         List<Shop> shops = readShops();
 
-        // no notion of skip shops
         Map<Integer, Shop> shopMap = new HashMap<>();
         for (int i = 0; i < shops.size(); i++) {
-            shopMap.put(i, shops.get(i));
+            if (!Gen2Constants.skipShops.contains(i)) {
+                shopMap.put(i, shops.get(i));
+            }
         }
         return shopMap;
     }
@@ -1927,9 +1997,40 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return shopToBytes(readShop(offset)).length;
     }
 
+    public List<Integer> getShopPrices() {
+        int itemAttributesOffset = romEntry.getIntValue("ItemAttributesOffset");
+        int entrySize = Gen2Constants.itemAttributesEntrySize;
+        int itemCount = Gen2Constants.itemCount;
+        List<Integer> prices = new ArrayList<>(itemCount);
+        prices.add(0);
+        for (int i = 1; i < itemCount; i++) {
+            int offset = itemAttributesOffset + (i - 1) * entrySize;
+            prices.add(readWord(offset));
+        }
+        return prices;
+    }
+
     @Override
-    public void setShopPrices() {
-        // Not implemented
+    public void setBalancedShopPrices() {
+        List<Integer> prices = getShopPrices();
+        for (Map.Entry<Integer, Integer> entry : Gen2Constants.balancedItemPrices.entrySet()) {
+            prices.set(entry.getKey(), entry.getValue());
+        }
+        setShopPrices(prices);
+    }
+
+    public void setShopPrices(List<Integer> prices) {
+        int itemDataOffset = romEntry.getIntValue("ItemAttributesOffset");
+        int entrySize = Gen2Constants.itemAttributesEntrySize;
+        int itemCount = Gen2Constants.itemCount;
+        if (prices.size() != itemCount) {
+            throw new IllegalArgumentException("");
+        }
+        for (int i = 1; i < itemCount; i++) {
+            int balancedPrice = prices.get(i);
+            int offset = itemDataOffset + (i - 1) * entrySize;
+            writeWord(offset, balancedPrice);
+        }
     }
 
     @Override

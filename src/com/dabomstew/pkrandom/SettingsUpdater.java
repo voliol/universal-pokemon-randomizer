@@ -316,6 +316,25 @@ public class SettingsUpdater {
             dataBlock[16] &= ~0x60;
             dataBlock[50] |= ((oldMinimumCatchRate - 1) << 3);
         }
+        
+        if (oldVersion < 322) {
+            //added new enum WildPokemonTypeMod and moved TypeThemed to it,
+            //so we need to select None on RestrictionMod if TypeThemed is selected,
+            //and select None on TypeMod otherwise
+            int typeThemed = dataBlock[15] & 0x08;
+            if (typeThemed != 0) {
+                dataBlock[15] |= 0x04;
+            } else {
+                dataBlock[16] |= 0x20;
+            }
+        }
+
+        if (oldVersion < 323) {
+            //add two new bytes, including new enum
+            dataBlock[52] = 0x01;
+            dataBlock[53] = 0;
+            actualDataLength += 2;
+        }
 
         // fix checksum
         CRC32 checksum = new CRC32();

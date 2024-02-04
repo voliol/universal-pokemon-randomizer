@@ -1355,6 +1355,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 encounterAreas.get(areaIdx).banAllPokemon(battleTrappers);
             }
         }
+
+        Gen3Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
+
         return encounterAreas;
     }
 
@@ -1380,6 +1383,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             area.add(enc);
         }
         return area;
+    }
+
+    @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        List<String> locationTagsTraverseOrder = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                Gen3Constants.locationTagsTraverseOrderFRLG : Gen3Constants.locationTagsTraverseOrderRSE;
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .toList();
     }
 
     @Override
@@ -1441,6 +1453,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writeWord(dataOffset + i * 4, levels);
             writeWord(dataOffset + i * 4 + 2, pokedexToInternal[enc.getPokemon().getNumber()]);
         }
+    }
+
+    @Override
+    public boolean hasEncounterLocations() {
+        return true;
     }
 
     @Override
@@ -1580,7 +1597,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		int mossdeepStevenOffset = romEntry.getIntValue("MossdeepStevenTeamOffset");
 		Trainer mossdeepSteven = new Trainer();
 		mossdeepSteven.offset = mossdeepStevenOffset;
-		mossdeepSteven.index = trainers.size();
+		mossdeepSteven.index = trainers.size() + 1;
 		mossdeepSteven.poketype = 1; // Custom moves, but no held items
 
 		// This is literally how the game does it too, lol. Have to subtract one because
@@ -2971,7 +2988,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void setShopPrices() {
+    public void setBalancedShopPrices() {
         int itemDataOffset = romEntry.getIntValue("ItemData");
         int entrySize = romEntry.getIntValue("ItemEntrySize");
         int itemCount = romEntry.getIntValue("ItemCount");
@@ -3990,11 +4007,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return romEntry.getRomType() == Gen3Constants.RomType_FRLG;
     }
 
-    @Override
-    public List<Integer> getAllConsumableHeldItems() {
-        return Gen3Constants.consumableHeldItems;
-    }
-
     public void enableGuaranteedPokemonCatching() {
         int offset = find(rom, Gen3Constants.perfectOddsBranchLocator);
         if (offset > 0) {
@@ -4192,6 +4204,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public List<Integer> getAllConsumableHeldItems() {
+        return Gen3Constants.consumableHeldItems;
+    }
+
+    @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
         List<Integer> items = new ArrayList<>(Gen3Constants.generalPurposeConsumableItems);
         if (!consumableOnly) {
@@ -4226,7 +4243,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         return items;
     }
-    
+
     @Override
     public PaletteHandler getPaletteHandler() {
         return paletteHandler;

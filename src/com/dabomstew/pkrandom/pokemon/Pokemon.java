@@ -52,6 +52,11 @@ public class Pokemon implements Comparable<Pokemon> {
     private Type primaryType;
     private Type secondaryType;
 
+    private Type originalPrimaryType;
+    private Type originalSecondaryType;
+    private boolean hasSetPrimaryType;
+    private boolean hasSetSecondaryType;
+
     private int hp;
     private int attack;
     private int defense;
@@ -416,16 +421,45 @@ public class Pokemon implements Comparable<Pokemon> {
         return primaryType;
     }
 
+    /**
+     * Sets the primary type.<br>
+     * The first time this method is called, it also sets the "original" primary type,
+     * which can be retrieved with {@link #getOriginalPrimaryType()}.
+     */
     public void setPrimaryType(Type primaryType) {
         this.primaryType = primaryType;
+        if (!hasSetPrimaryType) {
+            this.originalPrimaryType = primaryType;
+            hasSetPrimaryType = true;
+        }
     }
 
     public Type getSecondaryType() {
         return secondaryType;
     }
 
+    /**
+     * Sets the secondary type.<br>
+     * The first time this method is called, it also sets the "original" secondary type,
+     * which can be retrieved with {@link #getOriginalSecondaryType()}.
+     * For this reason, it is important to use this method when initializing a Pokemon's types,
+     * even if the "null" value used to represent no secondary type is technically the internal state of the
+     * secondaryType attribute before being set.
+     */
     public void setSecondaryType(Type secondaryType) {
         this.secondaryType = secondaryType;
+        if (!hasSetSecondaryType) {
+            this.originalSecondaryType = secondaryType;
+            hasSetSecondaryType = true;
+        }
+    }
+
+    public Type getOriginalPrimaryType() {
+        return originalPrimaryType;
+    }
+
+    public Type getOriginalSecondaryType() {
+        return originalSecondaryType;
     }
 
     public int getHp() {
