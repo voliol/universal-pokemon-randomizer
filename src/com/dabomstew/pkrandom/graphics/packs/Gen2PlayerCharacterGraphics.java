@@ -11,18 +11,18 @@ import java.util.List;
 
 public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
 
-    // TODO: read image palette from palette file
-
     private static final int BACK_IMAGE_DIMENSIONS = 6;
     private static final int TRAINER_CARD_IMAGE_WIDTH = 5;
     private static final int TRAINER_CARD_IMAGE_HEIGHT = 7;
 
     private final GBCImage trainerCard;
+    private final Palette imagePalette;
     private final Gen2SpritePaletteID spritePaletteID;
 
     public Gen2PlayerCharacterGraphics(GraphicsPackEntry entry) {
         super(entry);
         this.trainerCard = initTrainerCard();
+        this.imagePalette = initImagePalette();
         this.spritePaletteID = initSpritePaletteID();
     }
 
@@ -57,6 +57,26 @@ public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
         return getFrontImage().getSubimageFromTileRect(1, 0, TRAINER_CARD_IMAGE_WIDTH, TRAINER_CARD_IMAGE_HEIGHT);
     }
 
+    private Palette initImagePalette() {
+        Palette palette = readPalette("ImagePalette");
+        if (palette == null) {
+            Palette fourColors;
+            if (hasFrontImage()) {
+                fourColors = getFrontImage().getPalette();
+            } else if (hasBackImage()) {
+                fourColors = getBackImage().getPalette();
+            } else {
+                return null;
+            }
+            return new Palette(new Color[]{fourColors.get(1), fourColors.get(2)});
+        }
+        if (palette.size() != 2) {
+            System.out.println("Invalid ImagePalette; wrong amount of colors. Expected 2, was " + palette.size());
+            return null;
+        }
+        return palette;
+    }
+
     private Gen2SpritePaletteID initSpritePaletteID() {
         String paletteName = getEntry().getStringValue("SpritePalette");
         try {
@@ -73,19 +93,11 @@ public class Gen2PlayerCharacterGraphics extends GBCPlayerCharacterGraphics {
     }
 
     public boolean hasImagePalette() {
-        return hasFrontImage() || hasBackImage();
+        return imagePalette != null;
     }
 
     public Palette getImagePalette() {
-        Palette fourColors;
-        if (hasFrontImage()) {
-            fourColors = getFrontImage().getPalette();
-        } else if (hasBackImage()) {
-            fourColors = getBackImage().getPalette();
-        } else {
-            throw new IllegalStateException("Has no image palette.");
-        }
-        return new Palette(new Color[] {fourColors.get(1), fourColors.get(2)});
+        return imagePalette;
     }
 
     public boolean hasSpritePaletteID() {
