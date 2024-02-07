@@ -1,5 +1,5 @@
-Bulbasaur	[3,4,5,16,6/12,13,14,15]
-Ivysaur		[]
+Bulbasaur	[3,4,5,6/12,13,14,15/A-16-5,6]
+Ivysaur		[6,7,8,9/10,11,12,13/3,4,5,15]
 Venusaur	[]
 Charmander	[]
 Charmeleon	[]
@@ -638,12 +638,12 @@ Volcarona	[]
 Cobalion	[]
 Terrakion	[]
 Virizion	[]
-Tornadus	[]
-Thundurus	[]
-Reshiram	[]
-Zekrom		[]
-Landorus	[]
-Kyurem		[]
+Tornadus	[0,8,7,6/0,11,10,9/0,4,3-L/0,14,13,12/16]
+Thundurus	[0,8,7,6/0,11,10,9/0,4,3-L/0,14,13,12/16]
+Reshiram	[0,3,0,4,5-L/0,8,9,10-L/6,7-LN] how does this look animated?
+Zekrom		[3,4,5,6,7/8,9,10,11/0,14,15-LN] how does this look animated?
+Landorus	[0,8,7,6/0,11,10,9/0,4,3-L/0,14,13,12/16]
+Kyurem		[0,5,4,3/10,9,8,7,6/0,13,12,11-DN]
 Keldeo		[]
-Meloetta	[5,4,3-D/10,11,12,14;13,14-14]
-Genesect	[]
+Meloetta	[5,4,3-D/10,11,12,14;13,14-14] forme support?
+Genesect	[0,5,4,3-LN;0,7,6,4-4/0,10,9,8/0,15,14,13] forme support?
