@@ -25,27 +25,20 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.newgui.ROMFilter;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
 import java.util.List;
 import java.util.*;
-
-// TODO: show the name of the loaded ROM/desc file
 
 /**
  * A developer tool for filling in files with {@link PaletteDescription}s, and
@@ -65,8 +58,11 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
     private static final Random RND = new Random();
 
+    private static final String TITLE = "Palette Description Tool";
+
     private static final int DEFAULT_SCALE = 2;
     private static final String FILE_KEY = "pokePalettes";
+    private static final String ROMS_FOLDER = "test/roms";
 
     private static class PaletteImageLabel extends JLabel {
 
@@ -127,6 +123,22 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
         return gbc;
     }
 
+    private static class Gen3to5ROMFilter extends ROMFilter {
+        @Override
+        public boolean accept(File arg0) {
+            if (!super.accept(arg0)) {
+                return false;
+            }
+            String extension = arg0.getName().substring(arg0.getName().lastIndexOf('.') + 1).toLowerCase();
+            return extension.equals("gba") || extension.equals("nds");
+        }
+
+        @Override
+        public String getDescription() {
+            return "Gen 3-5 ROM file (.gba, .nds)";
+        }
+    }
+
     private RomHandler romHandler;
     private RomHandler.Factory[] checkHandlers = new RomHandler.Factory[]{new Gen3RomHandler.Factory(),
             new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory()};
@@ -134,6 +146,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
     private Map<Pokemon, Palette> originalPalettes = new HashMap<>();
 
+    private JScrollPane entryScrollPane;
     private JList<PaletteDescription> paletteDescriptions;
     private int lastIndex;
     private PaletteImageLabel originalImage;
@@ -157,6 +170,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
     }
 
     private PaletteDescriptionTool() {
+        this.setTitle(TITLE);
         this.setSize(new Dimension(800, 400));
         JPanel mainPanel = new JPanel();
         setContentPane(mainPanel);
@@ -183,11 +197,17 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
         nextButton.addActionListener(e -> nextPaletteDescription());
         leftPanel.add(nextButton, quickGBC(1, 1));
 
-        JScrollPane entryScrollPane = new JScrollPane();
+        JTextField entrySearchTextField = new JTextField(20);
+        entrySearchTextField.addActionListener(new PaletteDescriptionSearchListener());
+
+        leftPanel.add(entrySearchTextField, quickGBC(0, 2, 2, 1));
+
+
+        entryScrollPane = new JScrollPane();
         paletteDescriptions = new JList<>();
         paletteDescriptions.addListSelectionListener(new PaletteDescriptionSelectionListener());
         entryScrollPane.setViewportView(paletteDescriptions);
-        leftPanel.add(entryScrollPane, quickGBC(0, 2, 2, 1));
+        leftPanel.add(entryScrollPane, quickGBC(0, 3, 2, 1));
 
         // -----------
 
@@ -276,8 +296,9 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
     }
 
     private void loadBoth() {
-        JFileChooser romChooser = new JFileChooser();
-        //romChooser.setFileFilter(new ROMFilter()); // TODO: look at this
+
+        JFileChooser romChooser = new JFileChooser(new File(ROMS_FOLDER));
+        romChooser.setFileFilter(new Gen3to5ROMFilter());
         if (romChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -317,6 +338,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
                 }
             }
         }
+
+        this.setTitle(TITLE + " - " + romHandler.getROMName());
 
         romLoaded = true;
     }
@@ -431,6 +454,25 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
     private void autoNameDesc() {
         String autoName = getCurrentPokemon().getName();
         descNameField.setText(autoName);
+    }
+
+    private class PaletteDescriptionSearchListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String snippet = ((JTextField) e.getSource()).getText();
+            int found = lastIndex;
+            for (int i = 0; i < paletteDescriptions.getModel().getSize(); i++) {
+                String palDescString = paletteDescriptions.getModel().getElementAt(i).getName();
+                if (palDescString.toLowerCase().startsWith(snippet.toLowerCase())) {
+                    found = i;
+                    break;
+                }
+            }
+            if (found != lastIndex) {
+                paletteDescriptions.setSelectedIndex(found);
+            }
+        }
     }
 
     private class PaletteDescriptionSelectionListener implements ListSelectionListener {
