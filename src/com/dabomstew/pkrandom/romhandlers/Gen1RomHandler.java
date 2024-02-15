@@ -1981,7 +1981,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (romEntry.getIntValue("CatchingTutorialMonOffset") != 0) {
             available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
         }
-
+        if (romEntry.getIntValue("TMMovesReusableFunctionOffset") != 0) {
+            available |= MiscTweak.REUSABLE_TMS.getValue();
+        }
         return available;
     }
 
@@ -2005,6 +2007,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             updateTypeEffectiveness();
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
+        } else if (tweak == MiscTweak.REUSABLE_TMS) {
+            applyReusableTMsPatch();
         }
     }
 
@@ -2049,6 +2053,20 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             writeByte(romEntry.getIntValue("CatchingTutorialMonOffset"),
                     (byte) pokeNumToRBYTable[this.randomPokemon().getNumber()]);
         }
+    }
+
+    private void applyReusableTMsPatch() {
+        // Changes a conditional "Ret C" to an unconditional "Ret",
+        // and thus skips the consumption/removal of the TM.
+        int offset = romEntry.getIntValue("TMMovesReusableFunctionOffset");
+        if (offset == 0) {
+            return;
+        }
+        if (rom[offset] != GBConstants.gbZ80RetC) {
+            throw new RuntimeException("Unexpected byte found for the ROM's TM teaching function, " +
+                    "likely ROM entry value \"TMMovesReusableFunctionOffset\" is faulty.");
+        }
+        writeByte(offset, GBConstants.gbZ80Ret);
     }
 
     @Override
