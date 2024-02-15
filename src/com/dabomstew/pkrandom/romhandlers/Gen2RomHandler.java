@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -2168,6 +2169,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
         }
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
+        if (romEntry.getIntValue("TMMovesReusableFunctionOffset") != 0
+                && romEntry.getIntValue("TMMovesReusableFunctionJumpLength") != 0) {
+            available |= MiscTweak.REUSABLE_TMS.getValue();
+        }
         return available;
     }
 
@@ -2186,6 +2191,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             nonBadItems.banSingles(Gen2Items.luckyEgg);
         } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
             updateTypeEffectiveness();
+        } else if (tweak == MiscTweak.REUSABLE_TMS) {
+            applyReusableTMsPatch();
         }
     }
 
@@ -2227,6 +2234,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (romEntry.getIntValue("TextDelayFunctionOffset") != 0) {
             writeByte(romEntry.getIntValue("TextDelayFunctionOffset"), GBConstants.gbZ80Ret);
         }
+    }
+
+    private void applyReusableTMsPatch() {
+        // Overwrites the call to the code that consumes the TM, with a jump to the next part.
+        // Since the TM is not consumed, it becomes infinitely reusable.
+        int offset = romEntry.getIntValue("TMMovesReusableFunctionOffset");
+        int jumpLength = romEntry.getIntValue("TMMovesReusableFunctionJumpLength");
+        if (offset == 0 || jumpLength == 0) {
+            return;
+        }
+        if (rom[offset] != GBConstants.gbZ80Call
+                || rom[offset + GBConstants.gbZ80CallSize] != GBConstants.gbZ80Jump) {
+            throw new RuntimeException("Unexpected bytes found for the ROMs TM teaching function, " +
+                    "likely ROM entry value \"TMMovesReusableFunctionOffset\" is wrong.");
+        }
+        writeByte(offset++, GBConstants.gbZ80Jump);
+        writeByte(offset, (byte) jumpLength);
     }
 
     private void updateTypeEffectiveness() {
