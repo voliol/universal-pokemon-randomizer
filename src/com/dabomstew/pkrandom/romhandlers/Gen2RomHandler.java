@@ -2245,7 +2245,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             return;
         }
         if (rom[offset] != GBConstants.gbZ80Call
-                || rom[offset + GBConstants.gbZ80CallSize] != GBConstants.gbZ80Jump) {
+                || rom[offset + GBConstants.gbZ80CallSize] != GBConstants.gbZ80JumpRelative) {
             throw new RuntimeException("Unexpected bytes found for the ROM's TM teaching function, " +
                     "likely ROM entry value \"TMMovesReusableFunctionOffset\" is faulty.");
         }
