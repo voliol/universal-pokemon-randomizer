@@ -293,11 +293,4 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void findTMPatchLoc(String romName){
-        loadROM(romName);
-        ((Gen4RomHandler) romHandler).findTMPatchLoc();
-    }
-
 }

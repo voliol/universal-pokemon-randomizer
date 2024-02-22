@@ -5249,34 +5249,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		arm9[offset] = Gen4Constants.tmsReusableByteAfter;
 	}
 
-	public void findTMPatchLoc() {
-		if (romEntry.getRomType() == Gen4Constants.Type_DP && romEntry.getName().contains("(J")) {
-			findPossibleTMPatchLocs();
-		}
-		// thanks Mikelan98
-		String[] patchLocs = new String[] {"FD002807D10848", "FE002807D10848", "FD002807D10A48"};
-		String searchString = patchLocs[romEntry.getRomType()];
-		int offset = find(arm9, searchString);
-		if (offset == -1) {
-			System.out.println("Could not find");
-		} else if (offset == -2) {
-			System.out.println("Not unique");
-		} else {
-			System.out.println("TMMovesReusableFunctionOffset=0x" + Integer.toHexString(offset + 4));
-		}
-
-	}
-
-	private void findPossibleTMPatchLocs() {
-		byte[] middle = new byte[] {(byte) 0x00, (byte) 0x28, (byte) 0x07, (byte) 0xD1};
-		List<Integer> poses = RomFunctions.search(arm9, middle);
-		for (int pos : poses) {
-			if (arm9[pos + 5] != (byte) 0x48) continue;
-			System.out.println(RomFunctions.bytesToHex(Arrays.copyOfRange(arm9, pos - 1, pos + 6)));
-			System.out.println("0x" + Integer.toHexString(pos + 3));
-		}
-	}
-
 	@Override
     public void enableGuaranteedPokemonCatching() {
         try {
