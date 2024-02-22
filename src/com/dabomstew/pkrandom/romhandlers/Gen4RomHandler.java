@@ -4962,6 +4962,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (romEntry.getRomType() == Gen4Constants.Type_Plat || romEntry.getRomType() == Gen4Constants.Type_HGSS) {
             available |= MiscTweak.UPDATE_ROTOM_FORME_TYPING.getValue();
         }
+		if (romEntry.getIntValue("TMMovesReusableFunctionOffset") != 0) {
+			available |= MiscTweak.REUSABLE_TMS.getValue();
+		}
         return available;
     }
 
@@ -4988,7 +4991,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             applyFastDistortionWorld();
         } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
             updateRotomFormeTyping();
-        }
+        } else if (tweak == MiscTweak.REUSABLE_TMS) {
+			applyReusableTMsPatch();
+		}
     }
 
 	@Override
@@ -5230,7 +5235,49 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         pokes[Species.Gen4Formes.rotomM].setSecondaryType(Type.GRASS);
     }
 
-    @Override
+	private void applyReusableTMsPatch() {
+		// don't know exactly how this works, but it does
+		// credits to Mikelan98 for finding the method/locations to change
+		int offset = romEntry.getIntValue("TMMovesReusableFunctionOffset");
+		if (offset == 0) {
+			return;
+		}
+		if (arm9[offset] != Gen4Constants.tmsReusableByteBefore) {
+			throw new RuntimeException("Expected 0x" + Integer.toHexString(Gen4Constants.tmsReusableByteBefore)
+					+ ", was 0x" + Integer.toHexString(arm9[offset]) + ". Likely TMMovesReusableFunctionOffset is faulty.");
+		}
+		arm9[offset] = Gen4Constants.tmsReusableByteAfter;
+	}
+
+	public void findTMPatchLoc() {
+		if (romEntry.getRomType() == Gen4Constants.Type_DP && romEntry.getName().contains("(J")) {
+			findPossibleTMPatchLocs();
+		}
+		// thanks Mikelan98
+		String[] patchLocs = new String[] {"FD002807D10848", "FE002807D10848", "FD002807D10A48"};
+		String searchString = patchLocs[romEntry.getRomType()];
+		int offset = find(arm9, searchString);
+		if (offset == -1) {
+			System.out.println("Could not find");
+		} else if (offset == -2) {
+			System.out.println("Not unique");
+		} else {
+			System.out.println("TMMovesReusableFunctionOffset=0x" + Integer.toHexString(offset + 4));
+		}
+
+	}
+
+	private void findPossibleTMPatchLocs() {
+		byte[] middle = new byte[] {(byte) 0x00, (byte) 0x28, (byte) 0x07, (byte) 0xD1};
+		List<Integer> poses = RomFunctions.search(arm9, middle);
+		for (int pos : poses) {
+			if (arm9[pos + 5] != (byte) 0x48) continue;
+			System.out.println(RomFunctions.bytesToHex(Arrays.copyOfRange(arm9, pos - 1, pos + 6)));
+			System.out.println("0x" + Integer.toHexString(pos + 3));
+		}
+	}
+
+	@Override
     public void enableGuaranteedPokemonCatching() {
         try {
             byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));

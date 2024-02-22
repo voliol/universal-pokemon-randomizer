@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -290,6 +291,13 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         for (MiscTweak mt : tweaksToApply) {
             romHandler.applyMiscTweak(mt);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void findTMPatchLoc(String romName){
+        loadROM(romName);
+        ((Gen4RomHandler) romHandler).findTMPatchLoc();
     }
 
 }
