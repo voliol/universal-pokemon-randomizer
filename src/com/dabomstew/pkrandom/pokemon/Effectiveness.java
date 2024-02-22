@@ -33,10 +33,12 @@ import java.util.stream.Collectors;
 public enum Effectiveness {
     ZERO, HALF, NEUTRAL, DOUBLE, QUARTER, QUADRUPLE;
 
+    @Deprecated
     public static Map<Type, Effectiveness> against(Type primaryType, Type secondaryType, int gen) {
         return against(primaryType, secondaryType, gen, false);
     }
 
+    @Deprecated
     // Returns a map where the key is a type and the value is the effectiveness against
     // a pokemon with the two types in a given gen. It does not account for abilities.
     public static Map<Type, Effectiveness> against(Type primaryType, Type secondaryType, int gen, boolean effectivenessUpdated) {
@@ -53,6 +55,7 @@ public enum Effectiveness {
         return null;
     }
 
+    @Deprecated
     private static Map<Type, Effectiveness> against(Type primaryType, Type secondaryType, Effectiveness[][] effectivenesses, List<Type> allTypes) {
         Map<Type, Effectiveness> result = new HashMap<>();
         for(Type type : allTypes) {
@@ -65,6 +68,7 @@ public enum Effectiveness {
         return result;
     }
 
+    @Deprecated
     public static List<Type> notVeryEffective(Type attackingType, int generation, boolean effectivenessUpdated) {
         Effectiveness[][] effectivenesses;
         if (generation == 1) {
@@ -84,6 +88,7 @@ public enum Effectiveness {
                 .collect(Collectors.toList());
     }
 
+    @Deprecated
     public static List<Type> superEffective(Type attackingType, int generation, boolean effectivenessUpdated) {
         Effectiveness[][] effectivenesses;
         if (generation == 1) {
@@ -163,7 +168,7 @@ public enum Effectiveness {
         /*FAIRY  */ {NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL,    HALF, NEUTRAL,    HALF,  DOUBLE, NEUTRAL},
     };
 
-    private Effectiveness combine(Effectiveness other) {
+    public Effectiveness combine(Effectiveness other) {
         return combineTable[this.ordinal()][other.ordinal()];
     }
 

@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.pokemon;
 
 /*----------------------------------------------------------------------------*/
-/*--  TypeRelationship.java - represents the relationship between an        --*/
-/*--                          attacking and defending Type.                 --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2020.                                 --*/
@@ -24,12 +21,19 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+/**
+ * Represents the relationship between an attacking and defending type
+ */
 public class TypeRelationship {
     public Type attacker;
     public Type defender;
     public Effectiveness effectiveness;
 
     public TypeRelationship(Type attacker, Type defender, Effectiveness effectiveness) {
+        if (effectiveness == Effectiveness.QUARTER || effectiveness == Effectiveness.QUADRUPLE) {
+            throw new IllegalArgumentException("Invalid Effectiveness: " + effectiveness
+                    + " (must be ZERO, HALF, NEUTRAL, or DOUBLE)");
+        }
         this.attacker = attacker;
         this.defender = defender;
         this.effectiveness = effectiveness;
