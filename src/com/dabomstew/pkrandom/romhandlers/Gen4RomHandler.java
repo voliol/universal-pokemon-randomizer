@@ -5422,8 +5422,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				items.addAll(Gen4Constants.moveBoostingItems.get(moveIdx));
 			}
 		}
-		Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.getPrimaryType(),
-				tp.pokemon.getSecondaryType(), 4, effectivenessUpdated);
+		Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
 		for (Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
 			Integer berry = Gen4Constants.weaknessReducingBerries.get(entry.getKey());
 			if (entry.getValue() == Effectiveness.DOUBLE) {

@@ -1017,15 +1017,14 @@ public class MoveSynergy {
                 .toList();
     }
 
-    public static List<Move> getSoftMoveSynergy(Move mv1, List<Move> moveList, int generation,
-                                                boolean effectivenessUpdated) {
+    public static List<Move> getSoftMoveSynergy(Move mv1, List<Move> moveList, TypeTable typeTable) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
         if (mv1.category != MoveCategory.STATUS) {
-            List<Type> notVeryEffective = Effectiveness.notVeryEffective(mv1.type, generation, effectivenessUpdated);
+            List<Type> notVeryEffective = typeTable.notVeryEffective(mv1.type);
             for (Type nveType: notVeryEffective) {
                 List<Type> superEffectiveAgainstNVE =
-                        Effectiveness.against(nveType, null, generation, effectivenessUpdated)
+                        typeTable.against(nveType, null)
                                 .entrySet()
                                 .stream()
                                 .filter(entry -> entry.getValue() == Effectiveness.DOUBLE)

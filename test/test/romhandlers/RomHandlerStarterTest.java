@@ -257,8 +257,8 @@ public class RomHandlerStarterTest extends RomHandlerTest {
             return false;
         }
         System.out.println("Is " + attacker + " super-effective against " + defender + " ?");
-        System.out.println(Effectiveness.superEffective(attacker, generation, false));
-        boolean isSuperEffective = Effectiveness.superEffective(attacker, generation, false).contains(defender);
+        System.out.println(romHandler.getTypeTable().superEffective(attacker));
+        boolean isSuperEffective = romHandler.getTypeTable().superEffective(attacker).contains(defender);
         System.out.println(isSuperEffective);
         return isSuperEffective;
     }
@@ -338,6 +338,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void singleTypeWorksWithRandomWithTwoEvos(String romName) {
+        // fails on all vanilla games afaik, due to there being only Machop and Timburr that fulfill this for Fighting.
         loadROM(romName);
         Settings settings = new Settings();
         settings.setStartersMod(false, false, false, true, false);

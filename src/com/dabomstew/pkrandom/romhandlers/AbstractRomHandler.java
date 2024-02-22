@@ -381,12 +381,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean typeInGame(Type type) {
+        return getTypeTable().getTypes().contains(type);
+    }
+
+    @Override
     public Type randomType() {
-        Type t = Type.randomType(this.random);
-        while (!typeInGame(t)) {
-            t = Type.randomType(this.random);
-        }
-        return t;
+        List<Type> allTypes = getTypeTable().getTypes();
+        return allTypes.get(random.nextInt(allTypes.size()));
     }
 
     @Override
@@ -2188,8 +2190,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     List<Move> softMoveSynergyList = MoveSynergy.getSoftMoveSynergy(
                             move,
                             movesAtLevel,
-                            generationOfPokemon(),
-                            isEffectivenessUpdated());
+                            getTypeTable());
                     Collections.shuffle(softMoveSynergyList, this.random);
                     for (int j = 0; j < softMoveBias * softMoveSynergyList.size(); j++) {
                         int k = j % softMoveSynergyList.size();
@@ -3811,21 +3812,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Set<List<Type>> findTypeTriangles() {
-        int generation = this.generationOfPokemon();
-        boolean effectivenessUpdated = isEffectivenessUpdated();
+        TypeTable typeTable = getTypeTable();
         Set<List<Type>> typeTriangles;
         typeTriangles = new HashSet<>();
-        for(Type typeOne : Type.getAllTypes(generation)) {
-            List<Type> superEffectiveOne = Effectiveness.superEffective(typeOne, generation, effectivenessUpdated);
+        for(Type typeOne : typeTable.getTypes()) {
+            List<Type> superEffectiveOne = typeTable.superEffective(typeOne);
             superEffectiveOne.remove(typeOne);
             //don't want a Ghost-Ghost-Ghost "triangle"
             //(although it would be funny)
             for (Type typeTwo : superEffectiveOne) {
-                List<Type> superEffectiveTwo = Effectiveness.superEffective(typeTwo, generation, effectivenessUpdated);
+                List<Type> superEffectiveTwo = typeTable.superEffective(typeTwo);
                 superEffectiveTwo.remove(typeOne);
                 superEffectiveTwo.remove(typeTwo);
                 for (Type typeThree : superEffectiveTwo) {
-                    List<Type> superEffectiveThree = Effectiveness.superEffective(typeThree, generation, effectivenessUpdated);
+                    List<Type> superEffectiveThree = typeTable.superEffective(typeThree);
                     if (superEffectiveThree.contains(typeOne)) {
                         // The below is an ArrayList because the immutable list created by List.of throws a
                         // NullPointerException when you check whether it contains null.
@@ -6890,8 +6890,16 @@ public abstract class AbstractRomHandler implements RomHandler {
      * subclass.
      */
     @Override
-    public boolean typeInGame(Type type) {
-        return !type.isHackOnly && !(type == Type.FAIRY && generationOfPokemon() < 6);
+    public TypeTable getTypeTable() {
+        // just returns some hard-coded tables if the subclass doesn't implement actually reading from ROM
+        // obviously it is better if the type table can be actually read from ROM, so override this when possible
+        if (generationOfPokemon() == 1) {
+            return TypeTable.getVanillaGen1Table();
+        } else if (generationOfPokemon() <= 5) {
+            return TypeTable.getVanillaGen2To5Table();
+        } else {
+            return TypeTable.getVanillaGen6PlusTable();
+        }
     }
 
     @Override

@@ -22,7 +22,7 @@ public class TypeTable {
         if (types.stream().distinct().toList().size() != types.size()) {
             throw new IllegalArgumentException("Types must be unique");
         }
-        this.types = new ArrayList<>(types);
+        this.types = Collections.unmodifiableList(types);
         this.effectivenesses = new Effectiveness[types.size()][types.size()];
         this.typeIndexMap = new EnumMap<>(Type.class);
         for (int i = 0; i < types.size(); i++) {
@@ -63,6 +63,13 @@ public class TypeTable {
                         types.size() + "x" + types.size());
             }
         }
+    }
+
+    /**
+     * Returns an unmodifiable {@link List} of the types used by the TypeTable.
+     */
+    public List<Type> getTypes() {
+        return types;
     }
 
     public void setEffectiveness(Type attacker, Type defender, Effectiveness effectiveness) {
