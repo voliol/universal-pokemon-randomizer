@@ -224,7 +224,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 
 		if (1.0 - ((double) recentlyRemoved.size() / (double) randomPickableFrom.size()) < LOAD_FACTOR) {
 			randomPickableFrom = new ArrayList<>(this);
-			recentlyRemoved = new HashSet<>();
+			recentlyRemoved.clear();
 		}
 
 		T picked;
@@ -232,6 +232,37 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 			picked = randomPickableFrom.get(random.nextInt(randomPickableFrom.size()));
 		} while (recentlyRemoved.contains(picked));
 		return picked;
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return new PokemonSetIterator();
+	}
+
+	/**
+	 * A custom {@link Iterator} which makes sure to add an element to {@link #recentlyRemoved} when {@link #remove()}
+	 * is called.
+	 */
+	private class PokemonSetIterator implements Iterator<T> {
+		private final Iterator<T> innerIterator = PokemonSet.super.iterator();
+		private T current;
+
+		@Override
+		public boolean hasNext() {
+			return innerIterator.hasNext();
+		}
+
+		@Override
+		public T next() {
+			current = innerIterator.next();
+			return current;
+		}
+
+		@Override
+		public void remove() {
+			innerIterator.remove();
+			recentlyRemoved.add(current);
+		}
 	}
 
 }
