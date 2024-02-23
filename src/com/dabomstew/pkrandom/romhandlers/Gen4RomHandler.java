@@ -4962,6 +4962,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (romEntry.getRomType() == Gen4Constants.Type_Plat || romEntry.getRomType() == Gen4Constants.Type_HGSS) {
             available |= MiscTweak.UPDATE_ROTOM_FORME_TYPING.getValue();
         }
+		if (romEntry.getIntValue("TMMovesReusableFunctionOffset") != 0) {
+			available |= MiscTweak.REUSABLE_TMS.getValue();
+		}
         return available;
     }
 
@@ -4988,7 +4991,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             applyFastDistortionWorld();
         } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
             updateRotomFormeTyping();
-        }
+        } else if (tweak == MiscTweak.REUSABLE_TMS) {
+			applyReusableTMsPatch();
+		}
     }
 
 	@Override
@@ -5230,7 +5235,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         pokes[Species.Gen4Formes.rotomM].setSecondaryType(Type.GRASS);
     }
 
-    @Override
+	private void applyReusableTMsPatch() {
+		// don't know exactly how this works, but it does
+		// credits to Mikelan98 for finding the method/locations to change
+		int offset = romEntry.getIntValue("TMMovesReusableFunctionOffset");
+		if (offset == 0) {
+			return;
+		}
+		if (arm9[offset] != Gen4Constants.tmsReusableByteBefore) {
+			throw new RuntimeException("Expected 0x" + Integer.toHexString(Gen4Constants.tmsReusableByteBefore)
+					+ ", was 0x" + Integer.toHexString(arm9[offset]) + ". Likely TMMovesReusableFunctionOffset is faulty.");
+		}
+		arm9[offset] = Gen4Constants.tmsReusableByteAfter;
+	}
+
+	@Override
     public void enableGuaranteedPokemonCatching() {
         try {
             byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));

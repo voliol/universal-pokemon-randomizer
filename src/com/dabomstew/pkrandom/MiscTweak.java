@@ -62,6 +62,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak FAST_DISTORTION_WORLD = new MiscTweak(1 << 20, "fastDistortionWorld", 0);
     public static final MiscTweak UPDATE_ROTOM_FORME_TYPING = new MiscTweak(1 << 21, "updateRotomFormeTyping", 0);
     public static final MiscTweak DISABLE_LOW_HP_MUSIC = new MiscTweak(1 << 22, "disableLowHpMusic", 0);
+    public static final MiscTweak REUSABLE_TMS = new MiscTweak(1 << 23, "reusableTMs", 0);
     /* @formatter:on */
 
     private final int value;

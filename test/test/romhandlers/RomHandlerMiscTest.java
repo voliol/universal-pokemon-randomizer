@@ -1,16 +1,19 @@
 package test.romhandlers;
 
+import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -266,6 +269,28 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         }
         state += relativesAllowed ? 1 << HIGHEST_GENERATION : 0;
         return new GenRestrictions(state);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void canApplyAllLegalTweaksWithoutThrowing(String romName){
+        loadROM(romName);
+
+        int codeTweaksAvailable = romHandler.miscTweaksAvailable();
+        List<MiscTweak> tweaksToApply = new ArrayList<>();
+        for (MiscTweak mt : MiscTweak.allTweaks) {
+            if ((codeTweaksAvailable & mt.getValue()) > 0) {
+                tweaksToApply.add(mt);
+            }
+        }
+
+        // Sort so priority is respected in tweak ordering.
+        Collections.sort(tweaksToApply);
+
+        // Now apply in order.
+        for (MiscTweak mt : tweaksToApply) {
+            romHandler.applyMiscTweak(mt);
+        }
     }
 
 }
