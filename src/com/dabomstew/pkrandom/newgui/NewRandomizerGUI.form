@@ -4128,6 +4128,9 @@
           <gridbag top="0" left="0" bottom="10" right="0" weightx="0.3" weighty="0.0"/>
         </constraints>
         <properties>
+          <maximumSize width="128" height="50"/>
+          <minimumSize width="128" height="50"/>
+          <preferredSize width="128" height="50"/>
           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.randomizeSaveButton.text"/>
         </properties>
       </component>
