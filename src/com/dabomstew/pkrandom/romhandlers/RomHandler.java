@@ -699,4 +699,6 @@ public interface RomHandler {
 
     TypeTable getTypeTable();
 
+    void setTypeTable(TypeTable typeTable);
+
 }

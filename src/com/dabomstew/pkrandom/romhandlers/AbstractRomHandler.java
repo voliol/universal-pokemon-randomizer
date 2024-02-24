@@ -6901,6 +6901,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void setTypeTable(TypeTable typeTable) {
+        // do nothing
+    }
+
+    @Override
     public String abilityName(int number) {
         return "";
     }

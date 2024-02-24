@@ -70,11 +70,11 @@ public enum Type {
     public static final List<Type> GEN6PLUS = Collections.unmodifiableList(Arrays.asList(values()).subList(0, FAIRY.ordinal()+1));
 
     /**
-     * Deprecated for {@link TypeTable#getTypes()}
+     * Gets all types of a given generation. This method is not formally deprecated, but please use
+     * {@link TypeTable#getTypes()} instead with possible. That way, your code will have better longevity.
+     * TypeTable#getTypes() will eventually support custom types, this will not.
      */
-    @Deprecated
     public static List<Type> getAllTypes(int generation) {
-        System.out.println("Type.getAllTypes() is deprecated. Please use TypeTable#getTypes() instead.");
         return switch (generation) {
             case 1 -> GEN1;
             case 2, 3, 4, 5 -> GEN2THROUGH5;

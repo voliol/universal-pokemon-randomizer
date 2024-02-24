@@ -1309,39 +1309,33 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void updateTypeEffectiveness() {
-        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+        TypeTable typeTable = getTypeTable();
         log("--Updating Type Effectiveness--");
-        for (TypeRelationship relationship : typeEffectivenessTable) {
-            // Change Poison 2x against bug (should be neutral) to Ice 0.5x against Fire (is currently neutral)
-            if (relationship.attacker == Type.POISON && relationship.defender == Type.BUG) {
-                relationship.attacker = Type.ICE;
-                relationship.defender = Type.FIRE;
-                relationship.effectiveness = Effectiveness.HALF;
-                log("Replaced: Poison super effective vs Bug => Ice not very effective vs Fire");
-            }
 
-            // Change Bug 2x against Poison to Bug 0.5x against Poison
-            else if (relationship.attacker == Type.BUG && relationship.defender == Type.POISON) {
-                relationship.effectiveness = Effectiveness.HALF;
-                log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
-            }
+        typeTable.setEffectiveness(Type.POISON, Type.BUG, Effectiveness.NEUTRAL);
+        log("Changed: Poison super effective vs Bug => Poison neutral vs Bug");
+        typeTable.setEffectiveness(Type.BUG, Type.POISON, Effectiveness.HALF);
+        log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
+        typeTable.setEffectiveness(Type.GHOST, Type.PSYCHIC, Effectiveness.DOUBLE);
+        log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
+        typeTable.setEffectiveness(Type.ICE, Type.FIRE, Effectiveness.HALF);
+        log("Changed: Ice neutral vs Fire => Ice not very effective vs Fire");
 
-            // Change Ghost 0x against Psychic to Ghost 2x against Psychic
-            else if (relationship.attacker == Type.GHOST && relationship.defender == Type.PSYCHIC) {
-                relationship.effectiveness = Effectiveness.DOUBLE;
-                log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
-            }
-        }
         logBlankLine();
-        writeTypeEffectivenessTable(typeEffectivenessTable);
+        writeTypeTable(typeTable);
         effectivenessUpdated = true;
     }
 
-    private List<TypeRelationship> readTypeEffectivenessTable() {
-        List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
+    @Override
+    public TypeTable getTypeTable() {
+        return readTypeTable();
+    }
+
+    private TypeTable readTypeTable() {
+        TypeTable typeTable = new TypeTable(Type.getAllTypes(1));
         int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
         int attackingType = rom[currentOffset];
-        while (attackingType != (byte) 0xFF) {
+        while (attackingType != GBConstants.typeTableTerminator) {
             int defendingType = rom[currentOffset + 1];
             int effectivenessInternal = rom[currentOffset + 2];
             Type attacking = Gen1Constants.typeTable[attackingType];
@@ -1354,29 +1348,43 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 default -> null;
             };
             if (effectiveness != null) {
-                TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
-                typeEffectivenessTable.add(relationship);
+                typeTable.setEffectiveness(attacking, defending, effectiveness);
             }
             currentOffset += 3;
             attackingType = rom[currentOffset];
         }
-        return typeEffectivenessTable;
+        return typeTable;
     }
 
-    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
-        int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
-        for (TypeRelationship relationship : typeEffectivenessTable) {
-            byte effectivenessInternal = switch (relationship.effectiveness) {
-                case DOUBLE -> 20;
-                case NEUTRAL -> 10;
-                case HALF -> 5;
-                case ZERO -> 0;
-                default -> 0;
-            };
-            writeBytes(currentOffset, new byte[]{Gen1Constants.typeToByte(relationship.attacker),
-                    Gen1Constants.typeToByte(relationship.defender), effectivenessInternal});
-            currentOffset += 3;
+    @Override
+    public void setTypeTable(TypeTable typeTable) {
+        writeTypeTable(typeTable);
+    }
+
+    private void writeTypeTable(TypeTable typeTable) {
+        if (typeTable.nonNeutralEffectivenessCount() > Gen1Constants.nonNeutralEffectivenessCount) {
+            throw new IllegalArgumentException("Too many non-neutral Effectiveness-es. Was "
+                    + typeTable.nonNeutralEffectivenessCount() + ", has to be at most " +
+                    Gen1Constants.nonNeutralEffectivenessCount);
         }
+        int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
+        for (Type attacker : typeTable.getTypes()) {
+            for (Type defender : typeTable.getTypes()) {
+                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                if (eff != Effectiveness.NEUTRAL) {
+                    byte effectivenessInternal = switch (eff) {
+                        case DOUBLE -> 20;
+                        case HALF -> 5;
+                        case ZERO -> 0;
+                        default -> 0;
+                    };
+                    writeBytes(currentOffset, new byte[]{Gen1Constants.typeToByte(attacker),
+                            Gen1Constants.typeToByte(defender), effectivenessInternal});
+                    currentOffset += 3;
+                }
+            }
+        }
+        rom[currentOffset] = GBConstants.typeTableTerminator;
     }
 
     @Override
