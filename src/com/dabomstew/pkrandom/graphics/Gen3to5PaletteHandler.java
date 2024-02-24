@@ -190,7 +190,6 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 					+ (useWhenCompiled ? getResourceAdress(fileKey) : getSourceFileAdress(fileKey)) + ".");
 		}
 
-		System.out.println(paletteDescriptions);
 		return paletteDescriptions;
 	}
 

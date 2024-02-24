@@ -1078,9 +1078,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
                 baos.writeBytes(trainerToBytes(tr));
-                System.out.print(tr + " ");
             }
-            System.out.print("\n");
 
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
@@ -1330,7 +1328,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int tableOffset = romEntry.getIntValue("EggMovesTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             if (eggMoves.containsKey(i)) {
-                System.out.println("\n" + getPokemon().get(i));
                 int pointerOffset = tableOffset + (i - 1) * 2;
                 new GBDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
                         oldDataOffset -> lengthOfDataWithTerminatorAt(oldDataOffset, Gen2Constants.eggMovesTerminator));
@@ -1694,7 +1691,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             baos.writeBytes(translateString(option));
             baos.write(GBConstants.stringTerminator);
         }
-        System.out.println(RomFunctions.bytesToHex(baos.toByteArray()));
+//        System.out.println(RomFunctions.bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
     }
 
