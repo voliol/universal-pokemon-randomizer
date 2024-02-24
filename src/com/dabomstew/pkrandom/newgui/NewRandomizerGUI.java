@@ -3484,7 +3484,7 @@ public class NewRandomizerGUI {
             spComboBox3.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)));
         }
 
-        int numTypes = Type.getAllTypes(romHandler.generationOfPokemon()).size();
+        int numTypes = romHandler.getTypeTable().getTypes().size();
         String[] typeNames = new String[numTypes + 1];
         typeNames[0] = "Random";
         for (int i = 1; i <= numTypes; i++) {

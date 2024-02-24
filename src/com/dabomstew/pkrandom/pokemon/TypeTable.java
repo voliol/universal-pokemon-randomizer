@@ -4,12 +4,17 @@ import java.util.*;
 
 import static com.dabomstew.pkrandom.pokemon.Effectiveness.*;
 
+/**
+ * Keeps track of all relevant {@link Type}s and the {@link Effectiveness}-es between them.
+ */
 public class TypeTable {
 
     private static final List<Effectiveness> VALID_EFFECTIVENESSES = List.of(Effectiveness.ZERO, HALF,
             NEUTRAL, DOUBLE);
 
-    // Each TypeTable
+    // Each TypeTable has its own mapping of Types to indexes in the map.
+    // This is both so the actual table only has to be types.length^2, instead of [AllTypes]^2,
+    // but also to make this class less dependent on the internal structure of the Type class.
     private final List<Type> types;
     private final Effectiveness[][] effectivenesses;
     private final Map<Type, Integer> typeIndexMap;
@@ -133,7 +138,7 @@ public class TypeTable {
     }
 
     public static TypeTable getVanillaGen6PlusTable() {
-        return new TypeTable(gen2To5Types, gen2To5Table);
+        return new TypeTable(gen6PlusTypes, gen6PlusTable);
     }
 
     private static final List<Type> gen1Types = List.of(

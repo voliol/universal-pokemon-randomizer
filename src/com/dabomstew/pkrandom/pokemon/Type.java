@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 
 public enum Type {
 
@@ -68,7 +69,12 @@ public enum Type {
     public static final List<Type> GEN2THROUGH5 = Collections.unmodifiableList(Arrays.asList(values()).subList(0, DARK.ordinal()+1));
     public static final List<Type> GEN6PLUS = Collections.unmodifiableList(Arrays.asList(values()).subList(0, FAIRY.ordinal()+1));
 
+    /**
+     * Deprecated for {@link TypeTable#getTypes()}
+     */
+    @Deprecated
     public static List<Type> getAllTypes(int generation) {
+        System.out.println("Type.getAllTypes() is deprecated. Please use TypeTable#getTypes() instead.");
         return switch (generation) {
             case 1 -> GEN1;
             case 2, 3, 4, 5 -> GEN2THROUGH5;
@@ -76,7 +82,12 @@ public enum Type {
         };
     }
 
+    /**
+     * Deprecated for {@link AbstractRomHandler#randomType()}
+     */
+    @Deprecated
     public static Type randomType(Random random) {
+        System.out.println("Type.getAllTypes() is deprecated. Please use AbstractRomHandler#randomType() instead.");
         return VALUES.get(random.nextInt(SIZE));
     }
 

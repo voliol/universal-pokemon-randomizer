@@ -742,7 +742,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             this.banned = banned;
             if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 this.allowedByType = new EnumMap<>(Type.class);
-                for (Type t : Type.values()) {
+                for (Type t : getTypeTable().getTypes()) {
                     allowedByType.put(t, allowed.filterByType(t));
                 }
             }
@@ -755,7 +755,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             remaining = new PokemonSet<>(allowed);
             if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 remainingByType = new EnumMap<>(Type.class);
-                for (Type t : Type.values()) {
+                for (Type t : getTypeTable().getTypes()) {
                     remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
                 }
             }
@@ -874,7 +874,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Map<Type, PokemonSet<Pokemon>> byType = catchEmAll ? remainingByType : allowedByType;
             Type areaType;
             do {
-                areaType = Type.randomType(random);
+                areaType = randomType();
             } while (byType.get(areaType).isEmpty());
             return areaType;
         }
@@ -3655,7 +3655,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             //build type map
             Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
-            for(Type type : Type.getAllTypes(generation)) {
+            for(Type type : getTypeTable().getTypes()) {
                 typeListMap.put(type, new ArrayList<>());
             }
             for (Pokemon poke : choosable) {
@@ -6055,14 +6055,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void initTypeWeightings(boolean noLegendaries, boolean allowAltFormes) {
         // Determine weightings
-        for (Type t : Type.values()) {
-            if (typeInGame(t)) {
-                PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
-                        .filterByType(t);
-                int pkWithTyping = pokemonOfType.size();
-                typeWeightings.put(t, pkWithTyping);
-                totalTypeWeighting += pkWithTyping;
-            }
+        for (Type t : getTypeTable().getTypes()) {
+            PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
+                    .filterByType(t);
+            int pkWithTyping = pokemonOfType.size();
+            typeWeightings.put(t, pkWithTyping);
+            totalTypeWeighting += pkWithTyping;
         }
     }
 
