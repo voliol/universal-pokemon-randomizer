@@ -25,6 +25,7 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
             putSpecialKeyMethod("StarterText[]", Gen3RomEntry::addStarterText);
             putSpecialKeyMethod("TMText[]", Gen3RomEntry::addTMText);
             putSpecialKeyMethod("MoveTutorText[]", Gen3RomEntry::addMoveTutorText);
+            putSpecialKeyMethod("TMMovesReusableFunctionOffset", Gen3RomEntry::setTMMovesReusableFunctionOffset);
         }
 
         /**
@@ -187,6 +188,10 @@ public class Gen3RomEntry extends AbstractGBRomEntry {
         if (ete != null) {
             moveTutorTexts.add(ete);
         }
+    }
+
+    private void setTMMovesReusableFunctionOffset(String s) {
+        putArrayValue("TMMovesReusableFunctionOffsets", new int[]{RomEntryReader.parseInt(s)});
     }
 
     @Override

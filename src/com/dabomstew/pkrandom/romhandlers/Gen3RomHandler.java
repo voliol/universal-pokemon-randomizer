@@ -3851,6 +3851,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             available |= MiscTweak.BALANCE_STATIC_LEVELS.getValue();
         }
+        if (romEntry.getArrayValue("TMMovesReusableFunctionOffsets").length != 0) {
+            available |= MiscTweak.REUSABLE_TMS.getValue();
+        }
         return available;
     }
 
@@ -3880,6 +3883,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
             updateTypeEffectiveness();
+        } else if (tweak == MiscTweak.REUSABLE_TMS) {
+            applyReusableTMsPatch();
         }
     }
 
@@ -3980,6 +3985,24 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // code to make you walk instead. This simply nops out this jump so the
             // game stops caring about the FLAG_SYS_B_DASH flag entirely.
             writeWord(offset + 0x12, 0);
+        }
+    }
+
+    private void applyReusableTMsPatch() {
+        // When a TM/HM has just been used, the game compares its item ID to HM01_Cut's,
+        // and only removes the item if the ID is smaller.
+        // To make all TMs reusable, change this from HM01_Cut => 0.
+        // FRLG has multiple comparisons like this to change, so we deal with offsets instead of singular offset.
+        int[] offsets = romEntry.getArrayValue("TMMovesReusableFunctionOffsets");
+        if (offsets.length == 0) {
+            return;
+        }
+        for (int offset : offsets) {
+            if (rom[offset] != (byte) (Gen3Items.hm01 / 2)) {
+                throw new RuntimeException("Expected 0x" + Integer.toHexString(Gen3Items.hm01 / 2) + ", was 0x"
+                        + Integer.toHexString(rom[offset]) + ". Likely TMMovesReusableFunctionOffsets is faulty.");
+            }
+            writeByte(offset, (byte) 0);
         }
     }
 

@@ -84,6 +84,8 @@ public class Gen4Constants {
 
     public static final int tmItemOffset = Items.tm01;
 
+    public static final byte tmsReusableByteBefore = (byte) 0xD1, tmsReusableByteAfter = (byte) 0xE0;
+
     private static final int dpptTextCharsPerLine = 38, hgssTextCharsPerLine = 36;
 
     public static final String dpItemPalettesPrefix = "8D018E01210132018D018F0122013301",
