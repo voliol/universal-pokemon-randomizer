@@ -1367,7 +1367,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int tableOffset = romEntry.getIntValue("EggMovesTableOffset");
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             if (eggMoves.containsKey(i)) {
-                System.out.println("\n" + getPokemon().get(i));
                 int pointerOffset = tableOffset + (i - 1) * 2;
                 new SameBankDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
                         oldDataOffset -> lengthOfDataWithTerminatorAt(oldDataOffset, Gen2Constants.eggMovesTerminator));

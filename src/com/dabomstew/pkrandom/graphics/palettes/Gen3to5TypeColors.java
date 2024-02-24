@@ -33,7 +33,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
 public class Gen3to5TypeColors {
 
 	private static final Map<Type, TypeColor[]> TYPE_COLORS = TypeColor
-			.readTypeColorMapFromFile("Gen3to5TypeColors.txt");
+			.readTypeColorMapFromFile("data/Gen3to5TypeColors.txt");
 	private static final Color DEFAULT_COLOR = new Color(0xC0C0C0);
 
 	public static TypeColor getRandomTypeColor(Type type, Random random) {
