@@ -375,11 +375,12 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
 	@Override
 	public final BufferedImage getMascotImage() {
-		try {
-			dumpAllPokemonImages();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// uncomment to dump all Pokemon images to a folder
+//		try {
+//			dumpAllPokemonImages();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		try {
 			Pokemon pk = randomPokemon();
 			String GARCPath = getGARCPath("PokemonGraphics");

@@ -477,11 +477,12 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
 	@Override
 	public final BufferedImage getMascotImage() {
-		try {
-			dumpAllPokemonImages();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        // uncomment to dump all Pokemon images to a folder, helps when making changes to the palette randomization
+//		try {
+//			dumpAllPokemonImages();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		Pokemon pk = randomPokemon();
 		boolean shiny = random.nextInt(10) == 0;
 		boolean gen1 = generationOfPokemon() == 1;
