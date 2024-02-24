@@ -39,9 +39,9 @@ public class Gen2TypeColors {
 	}
 
 	private static final Map<Type, TypeColor[]> BRIGHT_TYPE_COLORS = TypeColor
-			.readTypeColorMapFromFile("Gen2BrightTypeColors.txt");
+			.readTypeColorMapFromFile("data/Gen2BrightTypeColors.txt");
 	private static final Map<Type, TypeColor[]> DARK_TYPE_COLORS = TypeColor
-			.readTypeColorMapFromFile("Gen2DarkTypeColors.txt");
+			.readTypeColorMapFromFile("data/Gen2DarkTypeColors.txt");
 	private static final Color DEFAULT_BRIGHT_COLOR = new Color(0xC0C0C0);
 	private static final Color DEFAULT_DARK_COLOR = new Color(0x808080);
 
