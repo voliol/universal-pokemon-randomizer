@@ -161,7 +161,7 @@ public class TypeTable {
         for (Type attacker : types) {
             for (Type defender : types) {
                 Effectiveness eff = getEffectiveness(attacker, defender);
-                Effectiveness otherEff = getEffectiveness(attacker, defender);
+                Effectiveness otherEff = other.getEffectiveness(attacker, defender);
                 if (eff != otherEff) return false;
             }
         }
@@ -177,6 +177,53 @@ public class TypeTable {
     public String toString() {
         return "TypeTable(#types=" + types.size() + " , #nonNeutral=" + nonNeutralEffectivenessCount() + ", types="
                 + types + ")";
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getVanillaGen6PlusTable().toBigString());
+    }
+
+    private static final String[] effectivenessSymbols = new String[] {"Imm", "nve", "---", "SE!"};
+
+    public String toBigString() {
+        StringBuilder sb = new StringBuilder();
+        int maxNameLength = 0;
+        for (Type t : getTypes()) {
+            maxNameLength = Math.max(maxNameLength, t.name().length());
+        }
+
+        for (int i = 0; i < 3; i+= 3) {
+            sb.append(" ".repeat(maxNameLength + 1));
+            for (Type defender : types) {
+                sb.append(defender.name().length() > i ? defender.name().charAt(i) : " ");
+                sb.append(defender.name().length() > i + 1 ? defender.name().charAt(i + 1) : " ");
+                sb.append(defender.name().length() > i + 2 ? defender.name().charAt(i + 2) : " ");
+                sb.append(" ");
+            }
+            sb.append("\n");
+        }
+
+        for (Type attacker : getTypes()) {
+            sb.append(attacker.name());
+            sb.append(" ".repeat(maxNameLength - attacker.name().length()));
+            for (Type defender : getTypes()) {
+                sb.append("|");
+                Effectiveness eff = getEffectiveness(attacker, defender);
+                sb.append(effectivenessSymbols[eff.ordinal()]);
+            }
+            sb.append("|");
+            sb.append("\n");
+        }
+
+        sb.append(effectivenessSymbols[NEUTRAL.ordinal()]);
+        sb.append(" = Neutral\n");
+        sb.append(effectivenessSymbols[DOUBLE.ordinal()]);
+        sb.append(" = Super Effective\n");
+        sb.append(effectivenessSymbols[HALF.ordinal()]);
+        sb.append(" = Not Very Effective\n");
+        sb.append(effectivenessSymbols[ZERO.ordinal()]);
+        sb.append(" = Immune\n");
+        return sb.toString();
     }
 
     public static TypeTable getVanillaGen1Table() {
