@@ -52,6 +52,8 @@ public class GBConstants {
             Type.NORMAL, Type.FIGHTING, Type.POISON, Type.GROUND, Type.FLYING, Type.BUG,
             Type.ROCK, Type.GHOST, Type.STEEL)));
 
+    // TODO: these are used in Gen 4 (and probably 5) as well. Should they be copied to Gen4/5Constants, or moved
+    //  to GlobalConstants?
     public static final byte typeTableTerminator = (byte) 0xFF, typeTableForesightTerminator = (byte) 0xFE;
 
     public static final byte evosAndMovesTerminator = 0x00;

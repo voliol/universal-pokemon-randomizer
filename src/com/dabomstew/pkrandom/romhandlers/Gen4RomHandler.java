@@ -5158,7 +5158,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			TypeTable typeTable = new TypeTable(Type.getAllTypes(4));
 
 			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-			int currentOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator); // TODO: remove this "find"
+			int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
 
 			int attackingType = battleOverlay[currentOffset];
 			while (attackingType != GBConstants.typeTableTerminator) {
@@ -5202,7 +5202,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		try {
 			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-			int tableOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator); // TODO: remove this "find"
+			int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
 
 			ByteArrayOutputStream mainPart = new ByteArrayOutputStream();
 			ByteArrayOutputStream ghostImmunities = new ByteArrayOutputStream();
