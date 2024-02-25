@@ -39,6 +39,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
         assertEquals(new HashSet<>(hardCoded.getTypes()), new HashSet<>(read.getTypes()));
         for (Type attacker : read.getTypes()) {
             for (Type defender : read.getTypes()) {
+                System.out.println("\n" + attacker + " vs " + defender);
                 Effectiveness hardCodedEff = hardCoded.getEffectiveness(attacker, defender);
                 Effectiveness readEff = read.getEffectiveness(attacker, defender);
                 System.out.println("hardCoded:\t" + hardCodedEff);

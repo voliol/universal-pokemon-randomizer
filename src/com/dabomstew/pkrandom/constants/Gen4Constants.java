@@ -1589,6 +1589,8 @@ public class Gen4Constants {
         }
     }
 
+    public static final int nonNeutralEffectivenessCount = 110;
+
     public static int getFormeCount(int romType) {
         if (romType == Type_DP) {
             return dpFormeCount;

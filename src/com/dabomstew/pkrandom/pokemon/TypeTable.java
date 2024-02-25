@@ -173,6 +173,12 @@ public class TypeTable {
         return Objects.hashCode(types);
     }
 
+    @Override
+    public String toString() {
+        return "TypeTable(#types=" + types.size() + " , #nonNeutral=" + nonNeutralEffectivenessCount() + ", types="
+                + types + ")";
+    }
+
     public static TypeTable getVanillaGen1Table() {
         return new TypeTable(gen1Types, gen1Table);
     }

@@ -1322,7 +1322,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         log("Changed: Ice neutral vs Fire => Ice not very effective vs Fire");
 
         logBlankLine();
-        writeTypeTable(typeTable);
+        setTypeTable(typeTable);
         effectivenessUpdated = true;
     }
 

@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
@@ -5134,82 +5135,119 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private void updateTypeEffectiveness() {
-		try {
-			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-			int typeEffectivenessTableOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator);
-			if (typeEffectivenessTableOffset > 0) {
-				List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay,
-						typeEffectivenessTableOffset);
-				log("--Updating Type Effectiveness--");
-				for (TypeRelationship relationship : typeEffectivenessTable) {
-					// Change Ghost 0.5x against Steel to Ghost 1x to Steel
-					if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
-						relationship.effectiveness = Effectiveness.NEUTRAL;
-						log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-					}
+		TypeTable typeTable = getTypeTable();
+		log("--Updating Type Effectiveness--");
 
-					// Change Dark 0.5x against Steel to Dark 1x to Steel
-					else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
-						relationship.effectiveness = Effectiveness.NEUTRAL;
-						log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
+		typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
+		log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
+		typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
+		log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
+
+		logBlankLine();
+		setTypeTable(typeTable);
+		effectivenessUpdated = true;
+	}
+
+	@Override
+	public TypeTable getTypeTable() {
+		return readTypeTable();
+	}
+
+	private TypeTable readTypeTable() {
+		try {
+			TypeTable typeTable = new TypeTable(Type.getAllTypes(4));
+
+			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
+			int currentOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator); // TODO: remove this "find"
+
+			int attackingType = battleOverlay[currentOffset];
+			while (attackingType != GBConstants.typeTableTerminator) {
+				if (battleOverlay[currentOffset] != GBConstants.typeTableForesightTerminator) {
+					int defendingType = battleOverlay[currentOffset + 1];
+					int effectivenessInternal = battleOverlay[currentOffset + 2];
+					Type attacking = Gen4Constants.typeTable[attackingType];
+					Type defending = Gen4Constants.typeTable[defendingType];
+					Effectiveness effectiveness = switch (effectivenessInternal) {
+						case 20 -> Effectiveness.DOUBLE;
+						case 10 -> Effectiveness.NEUTRAL;
+						case 5 -> Effectiveness.HALF;
+						case 0 -> Effectiveness.ZERO;
+						default -> null;
+					};
+					if (effectiveness != null) {
+						typeTable.setEffectiveness(attacking, defending, effectiveness);
 					}
 				}
-				logBlankLine();
-				writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
-				writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
-				effectivenessUpdated = true;
+				currentOffset += 3;
+				attackingType = battleOverlay[currentOffset];
 			}
+
+			return typeTable;
+
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 	}
 
-	private List<TypeRelationship> readTypeEffectivenessTable(byte[] battleOverlay, int typeEffectivenessTableOffset) {
-		List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
-		int currentOffset = typeEffectivenessTableOffset;
-		int attackingType = battleOverlay[currentOffset];
-		// 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
-		// the actual end of the table. Since we don't care about Ghost immunities at
-		// all,
-		// just stop once we reach the Foresight section.
-		while (attackingType != (byte) 0xFE) {
-			int defendingType = battleOverlay[currentOffset + 1];
-			int effectivenessInternal = battleOverlay[currentOffset + 2];
-			Type attacking = Gen4Constants.typeTable[attackingType];
-			Type defending = Gen4Constants.typeTable[defendingType];
-			Effectiveness effectiveness = switch (effectivenessInternal) {
-				case 20 -> Effectiveness.DOUBLE;
-				case 10 -> Effectiveness.NEUTRAL;
-				case 5 -> Effectiveness.HALF;
-				case 0 -> Effectiveness.ZERO;
-				default -> null;
-			};
-			if (effectiveness != null) {
-				TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
-				typeEffectivenessTable.add(relationship);
-			}
-			currentOffset += 3;
-			attackingType = battleOverlay[currentOffset];
-		}
-		return typeEffectivenessTable;
+	@Override
+	public void setTypeTable(TypeTable typeTable) {
+		writeTypeTable(typeTable);
 	}
 
-	private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable, byte[] battleOverlay,
-			int typeEffectivenessTableOffset) {
-		int currentOffset = typeEffectivenessTableOffset;
-		for (TypeRelationship relationship : typeEffectivenessTable) {
-			battleOverlay[currentOffset] = Gen4Constants.typeToByte(relationship.attacker);
-			battleOverlay[currentOffset + 1] = Gen4Constants.typeToByte(relationship.defender);
-			byte effectivenessInternal = switch (relationship.effectiveness) {
-				case DOUBLE -> 20;
-				case NEUTRAL -> 10;
-				case HALF -> 5;
-				case ZERO -> 0;
-				default -> 0;
-			};
-			battleOverlay[currentOffset + 2] = effectivenessInternal;
-			currentOffset += 3;
+	private void writeTypeTable(TypeTable typeTable) {
+		if (typeTable.nonNeutralEffectivenessCount() > Gen4Constants.nonNeutralEffectivenessCount) {
+			throw new IllegalArgumentException("Too many non-neutral Effectiveness-es. Was "
+					+ typeTable.nonNeutralEffectivenessCount() + ", has to be at most " +
+					Gen4Constants.nonNeutralEffectivenessCount);
 		}
+		try {
+			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
+			int tableOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator); // TODO: remove this "find"
+
+			ByteArrayOutputStream mainPart = new ByteArrayOutputStream();
+			ByteArrayOutputStream ghostImmunities = new ByteArrayOutputStream();
+
+			prepareTypeTableParts(typeTable, mainPart, ghostImmunities);
+			writeTypeTableParts(battleOverlay, tableOffset, mainPart, ghostImmunities);
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+	}
+
+	private void prepareTypeTableParts(TypeTable typeTable, ByteArrayOutputStream mainPart, ByteArrayOutputStream ghostImmunities) {
+		for (Type attacker : typeTable.getTypes()) {
+			for (Type defender : typeTable.getTypes()) {
+				Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+				if (eff != Effectiveness.NEUTRAL) {
+					ByteArrayOutputStream part = (defender == Type.GHOST && eff == Effectiveness.ZERO)
+							? ghostImmunities : mainPart;
+					byte effectivenessInternal = switch (eff) {
+						case DOUBLE -> 20;
+						case HALF -> 5;
+						case ZERO -> 0;
+						default -> 0;
+					};
+					part.writeBytes(new byte[]{Gen4Constants.typeToByte(attacker),
+							Gen4Constants.typeToByte(defender), effectivenessInternal});
+				}
+			}
+		}
+	}
+
+	private void writeTypeTableParts(byte[] battleOverlay, int tableOffset, ByteArrayOutputStream mainPart,
+									 ByteArrayOutputStream ghostImmunities) {
+		writeBytes(battleOverlay, tableOffset, mainPart.toByteArray());
+		tableOffset += mainPart.size();
+
+		writeBytes(battleOverlay, tableOffset, new byte[] {GBConstants.typeTableForesightTerminator,
+				GBConstants.typeTableForesightTerminator, (byte) 0x00});
+		tableOffset += 3;
+
+		writeBytes(battleOverlay, tableOffset, ghostImmunities.toByteArray());
+		tableOffset += ghostImmunities.size();
+
+		writeBytes(battleOverlay, tableOffset, new byte[] {GBConstants.typeTableTerminator,
+				GBConstants.typeTableTerminator, (byte) 0x00});
 	}
 
 	private void applyFastDistortionWorld() {

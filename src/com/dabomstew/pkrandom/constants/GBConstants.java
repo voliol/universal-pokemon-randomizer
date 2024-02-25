@@ -52,7 +52,7 @@ public class GBConstants {
             Type.NORMAL, Type.FIGHTING, Type.POISON, Type.GROUND, Type.FLYING, Type.BUG,
             Type.ROCK, Type.GHOST, Type.STEEL)));
 
-    public static final byte typeTableTerminator = (byte) 0xFF;
+    public static final byte typeTableTerminator = (byte) 0xFF, typeTableForesightTerminator = (byte) 0xFE;
 
     public static final byte evosAndMovesTerminator = 0x00;
 }

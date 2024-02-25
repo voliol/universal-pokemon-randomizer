@@ -398,8 +398,6 @@ public class Gen2Constants {
 
     public static final int nonNeutralEffectivenessCount = 110;
 
-    public static final byte typeTableForesightTerminator = (byte) 0xFE;
-
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders
         tbc(allTrainers, 1, 0, "GYM1-LEADER");

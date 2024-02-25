@@ -2239,7 +2239,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
 
         logBlankLine();
-        writeTypeTable(typeTable);
+        setTypeTable(typeTable);
         effectivenessUpdated = true;
     }
 
@@ -2253,7 +2253,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
         int attackingType = rom[currentOffset];
         while (attackingType != GBConstants.typeTableTerminator) {
-            if (rom[currentOffset] == Gen2Constants.typeTableForesightTerminator) {
+            if (rom[currentOffset] == GBConstants.typeTableForesightTerminator) {
                 currentOffset++;
             } else {
                 int defendingType = rom[currentOffset + 1];
@@ -2294,6 +2294,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         ByteArrayOutputStream mainPart = new ByteArrayOutputStream();
         ByteArrayOutputStream ghostImmunities = new ByteArrayOutputStream();
 
+        prepareTypeTableParts(typeTable, mainPart, ghostImmunities);
+        writeTypeTableParts(tableOffset, mainPart, ghostImmunities);
+    }
+
+    private void prepareTypeTableParts(TypeTable typeTable, ByteArrayOutputStream mainPart, ByteArrayOutputStream ghostImmunities) {
         for (Type attacker : typeTable.getTypes()) {
             for (Type defender : typeTable.getTypes()) {
                 Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
@@ -2311,9 +2316,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 }
             }
         }
+    }
+
+    private void writeTypeTableParts(int tableOffset, ByteArrayOutputStream mainPart, ByteArrayOutputStream ghostImmunities) {
         writeBytes(tableOffset, mainPart.toByteArray());
         tableOffset += mainPart.size();
-        rom[tableOffset++] = Gen2Constants.typeTableForesightTerminator;
+        rom[tableOffset++] = GBConstants.typeTableForesightTerminator;
         writeBytes(tableOffset, ghostImmunities.toByteArray());
         tableOffset += ghostImmunities.size();
         rom[tableOffset] = GBConstants.typeTableTerminator;
