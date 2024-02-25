@@ -2210,7 +2210,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             TypeTable typeTable = new TypeTable(Type.getAllTypes(5));
             byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-            int tableOffset = find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
+            int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
             int tableWidth = typeTable.getTypes().size();
 
             for (Type attacker : typeTable.getTypes()) {
@@ -2242,7 +2242,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private void writeTypeTable(TypeTable typeTable) {
         try {
             byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-            int tableOffset = find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
+            int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
             int tableWidth = typeTable.getTypes().size();
 
             for (Type attacker : typeTable.getTypes()) {
@@ -2261,24 +2261,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
-        }
-    }
-
-    private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable, byte[] battleOverlay,
-                                             int typeEffectivenessTableOffset) {
-        for (int attacker = Type.NORMAL.ordinal(); attacker <= Type.DARK.ordinal(); attacker++) {
-            for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
-                Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
-                int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
-                byte effectivenessInternal = switch (effectiveness) {
-                    case DOUBLE -> 8;
-                    case NEUTRAL -> 4;
-                    case HALF -> 2;
-                    case ZERO -> 0;
-                    default -> 0;
-                };
-                battleOverlay[offset] = effectivenessInternal;
-            }
         }
     }
 
