@@ -38,6 +38,15 @@ public class TypeTable {
         }
     }
 
+    public TypeTable(TypeTable original) {
+        this.types = new ArrayList<>(original.types);
+        this.typeIndexMap = new HashMap<>(original.typeIndexMap);
+        this.effectivenesses = new Effectiveness[types.size()][types.size()];
+        for (int row = 0; row < types.size(); row++) {
+            effectivenesses[row] = Arrays.copyOf(original.effectivenesses[row], types.size());
+        }
+    }
+
     /**
      * Creates a new TypeTable using a pre-made Effectiveness[][] table.
      *

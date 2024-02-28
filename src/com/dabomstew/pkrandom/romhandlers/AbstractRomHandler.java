@@ -6893,7 +6893,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void reverseTypeEffectiveness(boolean randomImmunities) {
-        // TODO
+        TypeTable typeTable = getTypeTable();
+        for (Type attacker : typeTable.getTypes()) {
+            for (Type defender : typeTable.getTypes()) {
+                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                if (eff == Effectiveness.DOUBLE) {
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.HALF);
+                } else if (eff == Effectiveness.HALF || eff == Effectiveness.ZERO) {
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                }
+            }
+        }
+        setTypeTable(typeTable);
     }
 
     /* Default Implementations */

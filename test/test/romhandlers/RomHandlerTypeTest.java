@@ -63,10 +63,35 @@ public class RomHandlerTypeTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void typeTableDoesNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
-        TypeTable before = romHandler.getTypeTable();
+        TypeTable before = new TypeTable(romHandler.getTypeTable());
         romHandler.setTypeTable(before);
         assertEquals(before, romHandler.getTypeTable());
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void reverseTypeEffectivenessWorks(String romName) {
+        loadROM(romName);
+        TypeTable before = new TypeTable(romHandler.getTypeTable());
+        romHandler.reverseTypeEffectiveness(false);
+        TypeTable after = romHandler.getTypeTable();
+
+        for (Type attacker : after.getTypes()) {
+            for (Type defender : after.getTypes()) {
+
+                System.out.println(attacker + " vs. " + defender);
+                Effectiveness beforeEff = before.getEffectiveness(attacker, defender);
+                System.out.println("before: " + beforeEff);
+                Effectiveness afterEff = after.getEffectiveness(attacker, defender);
+                System.out.println("after: " + afterEff);
+
+                if (beforeEff == Effectiveness.HALF || beforeEff == Effectiveness.ZERO) {
+                    assertEquals(Effectiveness.DOUBLE, afterEff);
+                } else if (beforeEff == Effectiveness.DOUBLE) {
+                    assertEquals(Effectiveness.HALF, afterEff);
+                }
+            }
+        }
+    }
 
 }
