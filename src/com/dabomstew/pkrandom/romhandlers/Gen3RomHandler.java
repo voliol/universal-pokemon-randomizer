@@ -134,7 +134,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private String[] pokeNames;
     private ItemList allowedItems, nonBadItems;
     private int pickupItemsTableOffset;
-    private boolean effectivenessUpdated;
 
     // Misc.
     private final FreedSpace freedSpace = new FreedSpace();
@@ -3822,11 +3821,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
-    }
-
     private void randomizeCatchingTutorial() {
         if (romEntry.getIntValue("CatchingTutorialOpponentMonOffset") > 0) {
             int oppOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
@@ -3920,20 +3914,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // game stops caring about the FLAG_SYS_B_DASH flag entirely.
             writeWord(offset + 0x12, 0);
         }
-    }
-
-    private void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-        effectivenessUpdated = true;
     }
 
     @Override

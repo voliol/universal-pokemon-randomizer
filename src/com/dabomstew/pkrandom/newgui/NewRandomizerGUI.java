@@ -1944,6 +1944,8 @@ public class NewRandomizerGUI {
 
         settings.setPickupItemsMod(puUnchangedRadioButton.isSelected(), puRandomRadioButton.isSelected());
         settings.setBanBadRandomPickupItems(puBanBadItemsCheckBox.isSelected());
+        
+        // TODO: connect Type Effectiveness UI elements to settings
 
         settings.setPokemonPalettesMod(ppalUnchangedRadioButton.isSelected(), ppalRandomRadioButton.isSelected());
         settings.setPokemonPalettesFollowTypes(ppalFollowTypesCheckBox.isSelected());

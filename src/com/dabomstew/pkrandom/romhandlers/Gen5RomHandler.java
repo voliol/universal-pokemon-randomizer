@@ -105,7 +105,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private int hiddenHollowCount = 0;
     private boolean hiddenHollowCounted = false;
     private List<Integer> originalDoubleTrainers = new ArrayList<>();
-    private boolean effectivenessUpdated;
     private int pickupItemsTableOffset;
     private long actualArm9CRC32;
     private Map<Integer, Long> actualOverlayCRC32s;
@@ -2106,11 +2105,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
-    }
-
     // Removes the free lucky egg you receive from Professor Juniper and replaces it with a gooey mulch.
     private void removeFreeLuckyEgg() {
         int scriptFileGifts = romEntry.getIntValue("LuckyEggScriptOffset");
@@ -2185,20 +2179,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
-    }
-
-    private void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-        effectivenessUpdated = true;
     }
 
     @Override

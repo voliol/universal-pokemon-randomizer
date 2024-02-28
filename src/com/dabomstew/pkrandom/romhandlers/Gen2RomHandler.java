@@ -98,7 +98,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private String[] landmarkNames;
     private boolean isVietCrystal;
     private ItemList allowedItems, nonBadItems;
-    private boolean effectivenessUpdated;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -2189,11 +2188,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
-    }
-
     private void randomizeCatchingTutorial() {
         if (romEntry.getArrayValue("CatchingTutorialOffsets").length != 0) {
             // Pick a pokemon
@@ -2227,20 +2221,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         if (romEntry.getIntValue("TextDelayFunctionOffset") != 0) {
             writeByte(romEntry.getIntValue("TextDelayFunctionOffset"), GBConstants.gbZ80Ret);
         }
-    }
-
-    private void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-        effectivenessUpdated = true;
     }
 
     @Override

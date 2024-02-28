@@ -51,7 +51,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 54;
+    public static final int LENGTH_OF_SETTINGS_DATA = 55;
 
     private CustomNamesSet customNames;
 
@@ -331,7 +331,15 @@ public class Settings {
 
     private PickupItemsMod pickupItemsMod = PickupItemsMod.UNCHANGED;
     private boolean banBadRandomPickupItems;
-    
+
+    public enum TypeEffectivenessMod {
+        UNCHANGED, RANDOM, RANDOM_BALANCED, KEEP_IDENTITIES, REVERSE
+    }
+
+    private TypeEffectivenessMod typeEffectivenessMod = TypeEffectivenessMod.UNCHANGED;
+    private boolean reverseTypesRandomImmunities;
+    private boolean updateTypeEffectiveness;
+
     public enum PokemonPalettesMod {
         UNCHANGED, RANDOM
     }
@@ -632,6 +640,14 @@ public class Settings {
 
         // 54 Wild Pokemon 3
         out.write(makeByteSelected(keepWildTypeThemes));
+
+        // 55 Type effectiveness
+        out.write(makeByteSelected(typeEffectivenessMod == TypeEffectivenessMod.UNCHANGED,
+                typeEffectivenessMod == TypeEffectivenessMod.RANDOM,
+                typeEffectivenessMod == TypeEffectivenessMod.RANDOM_BALANCED,
+                typeEffectivenessMod == TypeEffectivenessMod.KEEP_IDENTITIES,
+                typeEffectivenessMod == TypeEffectivenessMod.REVERSE,
+                reverseTypesRandomImmunities, updateTypeEffectiveness));
 
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
@@ -953,6 +969,15 @@ public class Settings {
         }
 
         settings.setKeepWildTypeThemes(restoreState(data[54], 0));
+
+        settings.setTypeEffectivenessMod(restoreEnum(TypeEffectivenessMod.class, data[55], 0, // UNCHANGED
+                1, // RANDOM
+                2, // RANDOM_BALANCED
+                3, // KEEP_IDENTITIES
+                4  // REVERSE
+        ));
+        settings.setReverseTypesRandomImmunities(restoreState(data[55], 5));
+        settings.setUpdateTypeEffectiveness(restoreState(data[55], 6));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
@@ -2462,7 +2487,35 @@ public class Settings {
     public void setBanBadRandomPickupItems(boolean banBadRandomPickupItems) {
         this.banBadRandomPickupItems = banBadRandomPickupItems;
     }
-    
+
+    public TypeEffectivenessMod getTypeEffectivenessMod() {
+        return typeEffectivenessMod;
+    }
+
+    public void setTypeEffectivenessMod(boolean... bools) {
+        setTypeEffectivenessMod(getEnum(TypeEffectivenessMod.class, bools));
+    }
+
+    private void setTypeEffectivenessMod(TypeEffectivenessMod typeEffectivenessMod) {
+        this.typeEffectivenessMod = typeEffectivenessMod;
+    }
+
+    public boolean isReverseTypesRandomImmunities() {
+        return reverseTypesRandomImmunities;
+    }
+
+    public void setReverseTypesRandomImmunities(boolean reverseTypesRandomImmunities) {
+        this.reverseTypesRandomImmunities = reverseTypesRandomImmunities;
+    }
+
+    public boolean isUpdateTypeEffectiveness() {
+        return updateTypeEffectiveness;
+    }
+
+    public void setUpdateTypeEffectiveness(boolean updateTypeEffectiveness) {
+        this.updateTypeEffectiveness = updateTypeEffectiveness;
+    }
+
     public PokemonPalettesMod getPokemonPalettesMod() {
     	return pokemonPalettesMod;
     }

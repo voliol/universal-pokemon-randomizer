@@ -128,7 +128,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private String[] mapNames;
     private SubMap[] maps;
     private boolean xAccNerfed;
-    private boolean effectivenessUpdated;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -1308,7 +1307,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return Gen1Constants.bannedLevelupMoves;
     }
 
-    private void updateTypeEffectiveness() {
+    @Override
+    public void updateTypeEffectiveness() {
         TypeTable typeTable = getTypeTable();
         log("--Updating Type Effectiveness--");
 
@@ -1323,7 +1323,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         logBlankLine();
         setTypeTable(typeTable);
-        effectivenessUpdated = true;
     }
 
     @Override
@@ -2006,11 +2005,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
         }
-    }
-
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
     }
 
     private void applyBWEXPPatch() {

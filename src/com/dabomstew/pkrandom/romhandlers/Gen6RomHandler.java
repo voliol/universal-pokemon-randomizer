@@ -2491,11 +2491,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return false;
-    }
-
     private void applyFastestText() {
         int offset = find(code, Gen6Constants.fastestTextPrefixes[0]);
         if (offset > 0) {

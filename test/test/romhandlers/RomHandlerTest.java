@@ -28,7 +28,7 @@ public class RomHandlerTest {
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{4}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {

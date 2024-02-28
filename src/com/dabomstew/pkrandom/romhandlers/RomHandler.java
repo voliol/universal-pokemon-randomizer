@@ -664,8 +664,6 @@ public interface RomHandler {
 
     void applyMiscTweak(MiscTweak tweak);
 
-    boolean isEffectivenessUpdated();
-
     void renderPlacementHistory();
 
     // ==========================
@@ -700,5 +698,13 @@ public interface RomHandler {
     TypeTable getTypeTable();
 
     void setTypeTable(TypeTable typeTable);
+
+    void updateTypeEffectiveness();
+
+    void randomizeTypeEffectiveness(boolean balanced);
+
+    void randomizeTypeEffectivenessKeepIdentities();
+
+    void reverseTypeEffectiveness(boolean randomImmunities);
 
 }

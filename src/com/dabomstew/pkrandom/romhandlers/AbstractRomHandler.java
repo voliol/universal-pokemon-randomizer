@@ -6881,6 +6881,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    @Override
+    public void randomizeTypeEffectiveness(boolean balanced) {
+        // TODO
+    }
+
+    @Override
+    public void randomizeTypeEffectivenessKeepIdentities() {
+        // TODO
+    }
+
+    @Override
+    public void reverseTypeEffectiveness(boolean randomImmunities) {
+        // TODO
+    }
+
     /* Default Implementations */
     /* Used when a subclass doesn't override */
     /*
@@ -6902,6 +6917,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void setTypeTable(TypeTable typeTable) {
+        // do nothing
+    }
+
+    @Override
+    public void updateTypeEffectiveness() {
         // do nothing
     }
 

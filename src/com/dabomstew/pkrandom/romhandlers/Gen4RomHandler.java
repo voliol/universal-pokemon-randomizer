@@ -101,7 +101,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	private Map<Integer, String> wildMapNames, headbuttMapNames;
 	private ItemList allowedItems, nonBadItems;
 	private boolean roamerRandomizationEnabled;
-	private boolean effectivenessUpdated;
 	private int pickupItemsTableOffset, rarePickupItemsTableOffset;
 	private long actualArm9CRC32;
 	private Map<Integer, Long> actualOverlayCRC32s;
@@ -4992,11 +4991,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         }
     }
 
-	@Override
-	public boolean isEffectivenessUpdated() {
-		return effectivenessUpdated;
-	}
-
 	private void randomizeCatchingTutorial() {
 		int opponentOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
 
@@ -5132,20 +5126,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
-	}
-
-	private void updateTypeEffectiveness() {
-		TypeTable typeTable = getTypeTable();
-		log("--Updating Type Effectiveness--");
-
-		typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-		log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-		typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-		log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-		logBlankLine();
-		setTypeTable(typeTable);
-		effectivenessUpdated = true;
 	}
 
 	@Override
