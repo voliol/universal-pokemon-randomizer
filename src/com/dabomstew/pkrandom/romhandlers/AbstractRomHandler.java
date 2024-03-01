@@ -6888,22 +6888,83 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTypeEffectivenessKeepIdentities() {
-        // TODO
+        // TODO: this works... mostly.
+        //  Shuffling the imm/nve/se separately from each other gives them a chance of overwriting each other,
+        //  some other method will be needed.
+        List<Type> immAttackers = new LinkedList<>();
+        List<Type> immDefenders = new LinkedList<>();
+        List<Type> nveAttackers = new LinkedList<>();
+        List<Type> nveDefenders = new LinkedList<>();
+        List<Type> seAttackers = new LinkedList<>();
+        List<Type> seDefenders = new LinkedList<>();
+
+        TypeTable typeTable = getTypeTable();
+        for (Type attacker : typeTable.getTypes()) {
+            for (Type defender : typeTable.getTypes()) {
+                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                if (eff == Effectiveness.ZERO) {
+                    immAttackers.add(attacker);
+                    immDefenders.add(defender);
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.NEUTRAL);
+                } else if (eff == Effectiveness.HALF) {
+                    nveAttackers.add(attacker);
+                    nveDefenders.add(defender);
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.NEUTRAL);
+                } else if (eff == Effectiveness.DOUBLE) {
+                    seAttackers.add(attacker);
+                    seDefenders.add(defender);
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.NEUTRAL);
+                }
+            }
+        }
+
+        Collections.shuffle(immAttackers, random);
+        Collections.shuffle(nveAttackers, random);
+        Collections.shuffle(seAttackers, random);
+
+        for (int i = 0; i < immAttackers.size(); i++) {
+            typeTable.setEffectiveness(immAttackers.get(i), immDefenders.get(i), Effectiveness.ZERO);
+        }
+        for (int i = 0; i < nveAttackers.size(); i++) {
+            typeTable.setEffectiveness(nveAttackers.get(i), nveDefenders.get(i), Effectiveness.HALF);
+        }
+        for (int i = 0; i < seAttackers.size(); i++) {
+            typeTable.setEffectiveness(seAttackers.get(i), seDefenders.get(i), Effectiveness.DOUBLE);
+        }
+
+        setTypeTable(typeTable);
     }
 
     @Override
     public void reverseTypeEffectiveness(boolean randomImmunities) {
         TypeTable typeTable = getTypeTable();
+        int immCount = 0;
+        LinkedList<Type[]> sePairs = new LinkedList<>();
         for (Type attacker : typeTable.getTypes()) {
             for (Type defender : typeTable.getTypes()) {
+
                 Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
-                if (eff == Effectiveness.DOUBLE) {
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.HALF);
-                } else if (eff == Effectiveness.HALF || eff == Effectiveness.ZERO) {
+                if (eff == Effectiveness.ZERO) {
                     typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                    immCount++;
+                } else if (eff == Effectiveness.HALF) {
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                } else if (eff == Effectiveness.DOUBLE) {
+                    typeTable.setEffectiveness(attacker, defender, Effectiveness.HALF);
+                    sePairs.add(new Type[]{attacker, defender});
                 }
             }
         }
+        if (randomImmunities) {
+            if (sePairs.size() < immCount) {
+                throw new RuntimeException("Too few super-effectives to turn into immunities...");
+            }
+            for (int i = 0; i < immCount; i++) {
+                Type[] sePair = sePairs.remove(random.nextInt(sePairs.size()));
+                typeTable.setEffectiveness(sePair[0], sePair[1], Effectiveness.ZERO);
+            }
+        }
+
         setTypeTable(typeTable);
     }
 

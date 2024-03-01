@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static com.dabomstew.pkrandom.pokemon.Effectiveness.*;
 
@@ -119,6 +120,17 @@ public class TypeTable {
         return results;
     }
 
+    public List<Type> immune(Type attacker) {
+        List<Type> results = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            Effectiveness eff = effectivenesses[typeIndexMap.get(attacker)][i];
+            if (eff == Effectiveness.ZERO) {
+                results.add(types.get(i));
+            }
+        }
+        return results;
+    }
+
     public List<Type> notVeryEffective(Type attacker) {
         List<Type> results = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
@@ -134,6 +146,40 @@ public class TypeTable {
         List<Type> results = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
             Effectiveness eff = effectivenesses[typeIndexMap.get(attacker)][i];
+            if (eff == DOUBLE) {
+                results.add(types.get(i));
+            }
+        }
+        return results;
+    }
+
+    // TODO: give these (and maybe the three above) better names
+    public List<Type> immuneDef(Type defender) {
+        List<Type> results = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            Effectiveness eff = effectivenesses[i][typeIndexMap.get(defender)];
+            if (eff == Effectiveness.ZERO) {
+                results.add(types.get(i));
+            }
+        }
+        return results;
+    }
+
+    public List<Type> notVeryEffectiveDef(Type defender) {
+        List<Type> results = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            Effectiveness eff = effectivenesses[i][typeIndexMap.get(defender)];
+            if (eff == Effectiveness.ZERO || eff == HALF) {
+                results.add(types.get(i));
+            }
+        }
+        return results;
+    }
+
+    public List<Type> superEffectiveDef(Type defender) {
+        List<Type> results = new ArrayList<>();
+        for (int i = 0; i < types.size(); i++) {
+            Effectiveness eff = effectivenesses[i][typeIndexMap.get(defender)];
             if (eff == DOUBLE) {
                 results.add(types.get(i));
             }

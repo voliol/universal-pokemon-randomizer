@@ -70,6 +70,31 @@ public class RomHandlerTypeTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
+    public void randomizeTypeEffectivenessKeepIdentitiesWorks(String romName) {
+        loadROM(romName);
+        TypeTable before = new TypeTable(romHandler.getTypeTable());
+        romHandler.randomizeTypeEffectivenessKeepIdentities();
+        TypeTable after = romHandler.getTypeTable();
+
+        System.out.println("Before:");
+        System.out.println(before.toBigString());
+        System.out.println(before.nonNeutralEffectivenessCount());
+        System.out.println("After:");
+        System.out.println(after.toBigString());
+        System.out.println(after.nonNeutralEffectivenessCount());
+        for (Type t : before.getTypes()) {
+            System.out.println(t);
+            assertEquals(before.immune(t).size(), after.immune(t).size());
+            assertEquals(before.notVeryEffective(t).size(), after.notVeryEffective(t).size());
+            assertEquals(before.superEffective(t).size(), after.superEffective(t).size());
+            assertEquals(before.immuneDef(t).size(), after.immuneDef(t).size());
+            assertEquals(before.notVeryEffectiveDef(t).size(), after.notVeryEffectiveDef(t).size());
+            assertEquals(before.superEffectiveDef(t).size(), after.superEffectiveDef(t).size());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
     public void reverseTypeEffectivenessWorks(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
@@ -89,6 +114,43 @@ public class RomHandlerTypeTest extends RomHandlerTest {
                     assertEquals(Effectiveness.DOUBLE, afterEff);
                 } else if (beforeEff == Effectiveness.DOUBLE) {
                     assertEquals(Effectiveness.HALF, afterEff);
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void reverseTypeEffectivenessWithRandomImmsDoesNotChangeImmCount(String romName) {
+        loadROM(romName);
+        TypeTable before = new TypeTable(romHandler.getTypeTable());
+        romHandler.reverseTypeEffectiveness(true);
+        TypeTable after = romHandler.getTypeTable();
+        int immCountBefore = 0;
+        int immCountAfter = 0;
+        for (Type attacker : before.getTypes()) {
+            for (Type defender : before.getTypes()) {
+                if (before.getEffectiveness(attacker, defender) == Effectiveness.ZERO)
+                    immCountBefore++;
+                if (after.getEffectiveness(attacker, defender) == Effectiveness.ZERO)
+                    immCountAfter++;
+            }
+        }
+        System.out.println(after.toBigString());
+        assertEquals(immCountBefore, immCountAfter);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void reverseTypeEffectivenessWithRandomImmsChangesSEToImms(String romName) {
+        loadROM(romName);
+        TypeTable before = new TypeTable(romHandler.getTypeTable());
+        romHandler.reverseTypeEffectiveness(true);
+        TypeTable after = romHandler.getTypeTable();
+        for (Type attacker : before.getTypes()) {
+            for (Type defender : before.getTypes()) {
+                if (after.getEffectiveness(attacker, defender) == Effectiveness.ZERO) {
+                    assertEquals(Effectiveness.DOUBLE, before.getEffectiveness(attacker, defender));
                 }
             }
         }
