@@ -89,6 +89,78 @@ public class RomHandlerTypeTest extends RomHandlerTest {
         assertArrayEquals(effCountsBefore, effCountsAfter);
     }
 
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomizeTypeEffectivenessBalancedWorks(String romName) {
+        loadROM(romName);
+
+        TypeTable before = romHandler.getTypeTable();
+        int maxImmWhenAttacking = 0;
+        int maxNVEWhenAttacking = 0;
+        int maxSEWhenAttacking = 0;
+        int maxImmWhenDefending = 0;
+        int maxNVEWhenDefending = 0;
+        int maxSEWhenDefending = 0;
+        for (Type t : before.getTypes()) {
+            maxImmWhenAttacking = Math.max(maxImmWhenAttacking, before.immuneWhenAttacking(t).size());
+            maxNVEWhenAttacking = Math.max(maxNVEWhenAttacking, before.notVeryEffectiveWhenAttacking(t).size());
+            maxSEWhenAttacking = Math.max(maxSEWhenAttacking, before.superEffectiveWhenAttacking(t).size());
+            maxImmWhenDefending = Math.max(maxImmWhenDefending, before.immuneWhenDefending(t).size());
+            maxNVEWhenDefending = Math.max(maxNVEWhenDefending, before.notVeryEffectiveWhenDefending(t).size());
+            maxSEWhenDefending = Math.max(maxSEWhenDefending, before.superEffectiveWhenDefending(t).size());
+        }
+
+        romHandler.randomizeTypeEffectiveness(true);
+        TypeTable after = romHandler.getTypeTable();
+        System.out.println(after.toBigString());
+
+        System.out.println("MAX");
+        System.out.println("imm att: " + maxImmWhenAttacking);
+        System.out.println("NVE att: " + maxNVEWhenAttacking);
+        System.out.println("SE att:  " + maxSEWhenAttacking);
+        System.out.println("imm def: " + maxImmWhenDefending);
+        System.out.println("NVE def: " + maxNVEWhenDefending);
+        System.out.println("SE def:  " + maxSEWhenDefending);
+
+        int faults = 0;
+        for (Type t : after.getTypes()) {
+            System.out.print("\n" + t);
+            System.out.print("\nimm att: " + after.immuneWhenAttacking(t).size());
+            if (after.immuneWhenAttacking(t).size() > maxImmWhenAttacking) {
+                faults++;
+                System.out.print(" - fault");
+            }
+            System.out.print("\nNVE att: " + after.notVeryEffectiveWhenAttacking(t).size());
+            if (after.notVeryEffectiveWhenAttacking(t).size() > maxNVEWhenAttacking) {
+                faults++;
+                System.out.print(" - fault");
+            }
+            System.out.print("\nSE att:  " + after.superEffectiveWhenAttacking(t).size());
+            if (after.superEffectiveWhenAttacking(t).size() > maxSEWhenAttacking) {
+                faults++;
+                System.out.print(" - fault");
+            }
+            System.out.print("\nimm def: " + after.immuneWhenDefending(t).size());
+            if (after.immuneWhenDefending(t).size() > maxImmWhenDefending) {
+                faults++;
+                System.out.print(" - fault");
+            }
+            System.out.print("\nNVE def: " + after.notVeryEffectiveWhenDefending(t).size());
+            if (after.notVeryEffectiveWhenDefending(t).size() > maxNVEWhenDefending) {
+                faults++;
+                System.out.print(" - fault");
+            }
+            System.out.print("\nSE def:  " + after.superEffectiveWhenDefending(t).size());
+            if (after.superEffectiveWhenDefending(t).size() > maxSEWhenDefending) {
+                faults++;
+                System.out.print(" - fault");
+            }
+            System.out.println("");
+        }
+        System.out.println("\nFaults: " + faults);
+        assertEquals(0, faults);
+    }
+
     private int[] getEffCounts(TypeTable typeTable) {
         int[] effCounts = new int[Effectiveness.values().length];
         for (Type attacker : typeTable.getTypes()) {

@@ -6888,12 +6888,16 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private class TypeEffectivenessRandomizer {
 
+        private static final Effectiveness[] TO_BALANCE_FOR = new Effectiveness[]
+                {Effectiveness.ZERO, Effectiveness.HALF, Effectiveness.DOUBLE};
         private static final int MAX_PLACEMENT_TRIES = 10000;
 
         boolean balanced;
 
         private TypeTable typeTable;
-        int[] effCounts = new int[Effectiveness.values().length];;
+        private int[] effCounts = new int[Effectiveness.values().length];
+        private Map<Effectiveness, Integer> maxWhenAttacking;
+        private Map<Effectiveness, Integer> maxWhenDefending;
 
         private int placementTries;
 
@@ -6903,6 +6907,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             typeTable = new TypeTable(oldTable.getTypes());
 
             fillEffCounts(oldTable);
+            if (balanced) {
+                initMaxForBalanced(oldTable);
+            }
 
             placementTries = 0;
             placeEffectiveness(Effectiveness.ZERO);
@@ -6910,6 +6917,19 @@ public abstract class AbstractRomHandler implements RomHandler {
             placeEffectiveness(Effectiveness.DOUBLE);
 
             setTypeTable(typeTable);
+        }
+
+        private void initMaxForBalanced(TypeTable oldTable) {
+            maxWhenAttacking = new EnumMap<>(Effectiveness.class);
+            maxWhenDefending = new EnumMap<>(Effectiveness.class);
+            for (Effectiveness eff : TO_BALANCE_FOR) {
+                maxWhenAttacking.put(eff, 0);
+                maxWhenDefending.put(eff, 0);
+                for (Type t : oldTable.getTypes()) {
+                    maxWhenAttacking.put(eff, Math.max(maxWhenAttacking.get(eff), oldTable.whenAttacking(t, eff).size()));
+                    maxWhenDefending.put(eff, Math.max(maxWhenDefending.get(eff), oldTable.whenDefending(t, eff).size()));
+                }
+            }
         }
 
         private void fillEffCounts(TypeTable oldTable) {
@@ -6941,7 +6961,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         private boolean isValidPlacement(Type attacker, Type defender, Effectiveness eff) {
             if (typeTable.getEffectiveness(attacker, defender) != Effectiveness.NEUTRAL)
                 return false;
-            // TODO if (balanced)...
+            if (balanced) {
+                if (typeTable.whenAttacking(attacker, eff).size() == maxWhenAttacking.get(eff))
+                    return false;
+                if (typeTable.whenDefending(defender, eff).size() == maxWhenDefending.get(eff))
+                    return false;
+            }
             return true;
         }
     }
