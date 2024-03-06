@@ -116,12 +116,12 @@ public class RomHandlerTypeTest extends RomHandlerTest {
         System.out.println(after.nonNeutralEffectivenessCount());
         for (Type t : before.getTypes()) {
             System.out.println(t);
-            assertEquals(before.immune(t).size(), after.immune(t).size());
-            assertEquals(before.notVeryEffective(t).size(), after.notVeryEffective(t).size());
-            assertEquals(before.superEffective(t).size(), after.superEffective(t).size());
-            assertEquals(before.immuneDef(t).size(), after.immuneDef(t).size());
-            assertEquals(before.notVeryEffectiveDef(t).size(), after.notVeryEffectiveDef(t).size());
-            assertEquals(before.superEffectiveDef(t).size(), after.superEffectiveDef(t).size());
+            assertEquals(before.immuneWhenAttacking(t).size(), after.immuneWhenAttacking(t).size());
+            assertEquals(before.notVeryEffectiveWhenAttacking(t).size(), after.notVeryEffectiveWhenAttacking(t).size());
+            assertEquals(before.superEffectiveWhenAttacking(t).size(), after.superEffectiveWhenAttacking(t).size());
+            assertEquals(before.immuneWhenDefending(t).size(), after.immuneWhenDefending(t).size());
+            assertEquals(before.notVeryEffectiveWhenDefending(t).size(), after.notVeryEffectiveWhenDefending(t).size());
+            assertEquals(before.superEffectiveWhenDefending(t).size(), after.superEffectiveWhenDefending(t).size());
         }
     }
 

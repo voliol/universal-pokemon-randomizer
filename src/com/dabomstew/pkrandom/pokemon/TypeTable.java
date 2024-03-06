@@ -90,25 +90,35 @@ public class TypeTable {
         return types;
     }
 
-    public void setEffectiveness(Type attacker, Type defender, Effectiveness effectiveness) {
-        if (!typeIndexMap.containsKey(attacker)) {
-            throw new IllegalArgumentException("Type " + attacker + " not supported by this TypeTable.");
+    private void validTypeCheck(Type t) {
+        if (!typeIndexMap.containsKey(t)) {
+            throw new IllegalArgumentException("Type " + t + " not supported by this TypeTable.");
         }
-        if (!typeIndexMap.containsKey(defender)) {
-            throw new IllegalArgumentException("Type " + defender + " not supported by this TypeTable.");
-        }
-        if (!VALID_EFFECTIVENESSES.contains(effectiveness)) {
-            throw new IllegalArgumentException("Invalid Effectiveness: " + effectiveness
+    }
+
+    private void validEffectivenessCheck(Effectiveness eff) {
+        if (!VALID_EFFECTIVENESSES.contains(eff)) {
+            throw new IllegalArgumentException("Invalid Effectiveness: " + eff
                     + " (must be ZERO, HALF, NEUTRAL, or DOUBLE)");
         }
+    }
+
+    public void setEffectiveness(Type attacker, Type defender, Effectiveness effectiveness) {
+        validTypeCheck(attacker);
+        validTypeCheck(defender);
+        validEffectivenessCheck(effectiveness);
         effectivenesses[typeIndexMap.get(attacker)][typeIndexMap.get(defender)] = effectiveness;
     }
 
     public Effectiveness getEffectiveness(Type attacker, Type defender) {
+        validTypeCheck(attacker);
+        validTypeCheck(defender);
         return effectivenesses[typeIndexMap.get(attacker)][typeIndexMap.get(defender)];
     }
 
     public Map<Type, Effectiveness> against(Type defenderPrimary, Type defenderSecondary) {
+        validTypeCheck(defenderPrimary);
+        validTypeCheck(defenderSecondary);
         Map<Type, Effectiveness> results = new HashMap<>();
         for (int i = 0; i < types.size(); i++) {
             Effectiveness eff = effectivenesses[i][typeIndexMap.get(defenderPrimary)];
@@ -120,71 +130,88 @@ public class TypeTable {
         return results;
     }
 
-    public List<Type> immune(Type attacker) {
+    /**
+     * Returns a {@link List} of all {@link Type}s where the effectiveness lines up for the attacker. A more general
+     * method encompassing {@link #immuneWhenAttacking(Type)}, {@link #notVeryEffectiveWhenAttacking(Type)},
+     * {@link #superEffectiveWhenAttacking(Type)}.
+     */
+    public List<Type> whenAttacking(Type attacker, Effectiveness effectiveness) {
+        validTypeCheck(attacker);
+        validEffectivenessCheck(effectiveness);
         List<Type> results = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
             Effectiveness eff = effectivenesses[typeIndexMap.get(attacker)][i];
-            if (eff == Effectiveness.ZERO) {
+            if (eff == effectiveness) {
                 results.add(types.get(i));
             }
         }
         return results;
     }
 
-    public List<Type> notVeryEffective(Type attacker) {
-        List<Type> results = new ArrayList<>();
-        for (int i = 0; i < types.size(); i++) {
-            Effectiveness eff = effectivenesses[typeIndexMap.get(attacker)][i];
-            if (eff == Effectiveness.ZERO || eff == HALF) {
-                results.add(types.get(i));
-            }
-        }
-        return results;
-    }
-
-    public List<Type> superEffective(Type attacker) {
-        List<Type> results = new ArrayList<>();
-        for (int i = 0; i < types.size(); i++) {
-            Effectiveness eff = effectivenesses[typeIndexMap.get(attacker)][i];
-            if (eff == DOUBLE) {
-                results.add(types.get(i));
-            }
-        }
-        return results;
-    }
-
-    // TODO: give these (and maybe the three above) better names
-    public List<Type> immuneDef(Type defender) {
+    /**
+     * Returns a {@link List} of all {@link Type}s where the effectiveness lines up for the defender. A more general
+     * method encompassing {@link #immuneWhenDefending(Type)}, {@link #notVeryEffectiveWhenDefending(Type)},
+     * {@link #superEffectiveWhenDefending(Type)}.
+     */
+    public List<Type> whenDefending(Type defender, Effectiveness effectiveness) {
+        validTypeCheck(defender);
+        validEffectivenessCheck(effectiveness);
         List<Type> results = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
             Effectiveness eff = effectivenesses[i][typeIndexMap.get(defender)];
-            if (eff == Effectiveness.ZERO) {
+            if (eff == effectiveness) {
                 results.add(types.get(i));
             }
         }
         return results;
     }
 
-    public List<Type> notVeryEffectiveDef(Type defender) {
-        List<Type> results = new ArrayList<>();
-        for (int i = 0; i < types.size(); i++) {
-            Effectiveness eff = effectivenesses[i][typeIndexMap.get(defender)];
-            if (eff == Effectiveness.ZERO || eff == HALF) {
-                results.add(types.get(i));
-            }
-        }
-        return results;
+    /**
+     * Returns a {@link List} of all {@link Type}s that are immune to the attacker.<br>
+     * E.g. calling this on a vanilla (Gen 2+) type table with attacker==GHOST, would give you (NORMAL).
+     */
+    public List<Type> immuneWhenAttacking(Type attacker) {
+        return whenAttacking(attacker, ZERO);
     }
 
-    public List<Type> superEffectiveDef(Type defender) {
-        List<Type> results = new ArrayList<>();
-        for (int i = 0; i < types.size(); i++) {
-            Effectiveness eff = effectivenesses[i][typeIndexMap.get(defender)];
-            if (eff == DOUBLE) {
-                results.add(types.get(i));
-            }
-        }
-        return results;
+    /**
+     * Returns a {@link List} of all {@link Type}s the attacker is not very effective against.<br>
+     * E.g. calling this on a vanilla type table with attacker==FIRE, would give you (WATER, FIRE, ROCK, DRAGON).
+     */
+    public List<Type> notVeryEffectiveWhenAttacking(Type attacker) {
+        return whenAttacking(attacker, HALF);
+    }
+
+    /**
+     * Returns a {@link List} of all {@link Type}s the attacker is super effective against.<br>
+     * E.g. calling this on a vanilla (Gen 2+) type table with attacker==FIRE, would give you (GRASS, BUG, ICE, STEEL).
+     */
+    public List<Type> superEffectiveWhenAttacking(Type attacker) {
+        return whenAttacking(attacker, DOUBLE);
+    }
+
+    /**
+     * Returns a {@link List} of all {@link Type}s that the defender is immune to.<br>
+     * E.g. calling this on a vanilla type table with defender==GHOST, would give you (NORMAL, FIGHTING).
+     */
+    public List<Type> immuneWhenDefending(Type defender) {
+        return whenDefending(defender, ZERO);
+    }
+
+    /**
+     * Returns a {@link List} of all {@link Type}s that are not very effective against the defender.<br>
+     * E.g. calling this on a vanilla (Gen 6+) type table with defender==FIRE, would give you (GRASS, FIRE, ICE, STEEL, FAIRY).
+     */
+    public List<Type> notVeryEffectiveWhenDefending(Type defender) {
+        return whenDefending(defender, HALF);
+    }
+
+    /**
+     * Returns a {@link List} of all {@link Type}s that are super effective against the defender.<br>
+     * E.g. calling this on a vanilla type table with defender==FIRE, would give you (WATER, ROCK, GROUND).
+     */
+    public List<Type> superEffectiveWhenDefending(Type defender) {
+        return whenDefending(defender, DOUBLE);
     }
 
     /**

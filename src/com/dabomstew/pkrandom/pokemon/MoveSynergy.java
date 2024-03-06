@@ -1021,7 +1021,9 @@ public class MoveSynergy {
         List<Integer> synergisticMoves = new ArrayList<>();
 
         if (mv1.category != MoveCategory.STATUS) {
-            List<Type> notVeryEffective = typeTable.notVeryEffective(mv1.type);
+            List<Type> notVeryEffective = new ArrayList<>();
+            notVeryEffective.addAll(typeTable.notVeryEffectiveWhenAttacking(mv1.type));
+            notVeryEffective.addAll(typeTable.immuneWhenAttacking(mv1.type));
             for (Type nveType: notVeryEffective) {
                 List<Type> superEffectiveAgainstNVE =
                         typeTable.against(nveType, null)

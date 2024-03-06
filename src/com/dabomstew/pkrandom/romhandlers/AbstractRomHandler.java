@@ -3816,16 +3816,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<List<Type>> typeTriangles;
         typeTriangles = new HashSet<>();
         for(Type typeOne : typeTable.getTypes()) {
-            List<Type> superEffectiveOne = typeTable.superEffective(typeOne);
+            List<Type> superEffectiveOne = typeTable.superEffectiveWhenAttacking(typeOne);
             superEffectiveOne.remove(typeOne);
             //don't want a Ghost-Ghost-Ghost "triangle"
             //(although it would be funny)
             for (Type typeTwo : superEffectiveOne) {
-                List<Type> superEffectiveTwo = typeTable.superEffective(typeTwo);
+                List<Type> superEffectiveTwo = typeTable.superEffectiveWhenAttacking(typeTwo);
                 superEffectiveTwo.remove(typeOne);
                 superEffectiveTwo.remove(typeTwo);
                 for (Type typeThree : superEffectiveTwo) {
-                    List<Type> superEffectiveThree = typeTable.superEffective(typeThree);
+                    List<Type> superEffectiveThree = typeTable.superEffectiveWhenAttacking(typeThree);
                     if (superEffectiveThree.contains(typeOne)) {
                         // The below is an ArrayList because the immutable list created by List.of throws a
                         // NullPointerException when you check whether it contains null.
