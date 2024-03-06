@@ -6883,7 +6883,67 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTypeEffectiveness(boolean balanced) {
-        // TODO
+        new TypeEffectivenessRandomizer().randomizeTypeEffectiveness(balanced);
+    }
+
+    private class TypeEffectivenessRandomizer {
+
+        private static final int MAX_PLACEMENT_TRIES = 10000;
+
+        boolean balanced;
+
+        private TypeTable typeTable;
+        int[] effCounts = new int[Effectiveness.values().length];;
+
+        private int placementTries;
+
+        public void randomizeTypeEffectiveness(boolean balanced) {
+            this.balanced = balanced;
+            TypeTable oldTable = getTypeTable();
+            typeTable = new TypeTable(oldTable.getTypes());
+
+            fillEffCounts(oldTable);
+
+            placementTries = 0;
+            placeEffectiveness(Effectiveness.ZERO);
+            placeEffectiveness(Effectiveness.HALF);
+            placeEffectiveness(Effectiveness.DOUBLE);
+
+            setTypeTable(typeTable);
+        }
+
+        private void fillEffCounts(TypeTable oldTable) {
+            Arrays.fill(effCounts, 0);
+            for (Type attacker : oldTable.getTypes()) {
+                for (Type defender : oldTable.getTypes()) {
+                    Effectiveness eff = oldTable.getEffectiveness(attacker, defender);
+
+                    effCounts[eff.ordinal()]++;
+                }
+            }
+        }
+
+        private void placeEffectiveness(Effectiveness eff) {
+            while (effCounts[eff.ordinal()] > 0 && placementTries <= MAX_PLACEMENT_TRIES) {
+                Type attacker = randomType();
+                Type defender = randomType();
+                if (isValidPlacement(attacker, defender, eff)) {
+                    typeTable.setEffectiveness(attacker, defender, eff);
+                    effCounts[eff.ordinal()]--;
+                }
+                placementTries++;
+            }
+            if (placementTries == MAX_PLACEMENT_TRIES) {
+                throw new RandomizationException("Could not randomize Type Effectiveness");
+            }
+        }
+
+        private boolean isValidPlacement(Type attacker, Type defender, Effectiveness eff) {
+            if (typeTable.getEffectiveness(attacker, defender) != Effectiveness.NEUTRAL)
+                return false;
+            // TODO if (balanced)...
+            return true;
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.pokemon.TypeTable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,6 +67,37 @@ public class RomHandlerTypeTest extends RomHandlerTest {
         TypeTable before = new TypeTable(romHandler.getTypeTable());
         romHandler.setTypeTable(before);
         assertEquals(before, romHandler.getTypeTable());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomizeTypeEffectivenessPreservesEffectivenessCounts(String romName) {
+        loadROM(romName);
+
+        TypeTable before = romHandler.getTypeTable();
+        int[] effCountsBefore = getEffCounts(before);
+        System.out.println(before.toBigString());
+        System.out.println(Arrays.toString(effCountsBefore));
+
+        romHandler.randomizeTypeEffectiveness(false);
+
+        TypeTable after = romHandler.getTypeTable();
+        int[] effCountsAfter = getEffCounts(after);
+        System.out.println(after.toBigString());
+        System.out.println(Arrays.toString(effCountsAfter));
+
+        assertArrayEquals(effCountsBefore, effCountsAfter);
+    }
+
+    private int[] getEffCounts(TypeTable typeTable) {
+        int[] effCounts = new int[Effectiveness.values().length];
+        for (Type attacker : typeTable.getTypes()) {
+            for (Type defender : typeTable.getTypes()) {
+                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                effCounts[eff.ordinal()]++;
+            }
+        }
+        return effCounts;
     }
 
     @ParameterizedTest
