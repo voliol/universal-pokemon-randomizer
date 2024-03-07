@@ -80,26 +80,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private int[] moveRomToNumTable;
     private int pokedexCount;
 
-    private Type idToType(int value) {
-        if (Gen1Constants.typeTable[value] != null) {
-            return Gen1Constants.typeTable[value];
-        }
-        if (romEntry.getExtraTypeLookup().containsKey(value)) {
-            return romEntry.getExtraTypeLookup().get(value);
-        }
-        return null;
-    }
-
-    private byte typeToByte(Type type) {
-        if (type == null) {
-            return 0x00; // revert to normal
-        }
-        if (romEntry.getExtraTypeReverse().containsKey(type)) {
-            return romEntry.getExtraTypeReverse().get(type).byteValue();
-        }
-        return Gen1Constants.typeToByte(type);
-    }
-
     private static List<Gen1RomEntry> roms;
 
     static {
@@ -230,7 +210,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 moves[trueMoveIndex].hitratio = ((rom[movesOffset + (i - 1) * 6 + 4] & 0xFF)) / 255.0 * 100;
                 moves[trueMoveIndex].power = rom[movesOffset + (i - 1) * 6 + 2] & 0xFF;
                 moves[trueMoveIndex].pp = rom[movesOffset + (i - 1) * 6 + 5] & 0xFF;
-                moves[trueMoveIndex].type = idToType(rom[movesOffset + (i - 1) * 6 + 3] & 0xFF);
+                moves[trueMoveIndex].type = Gen1Constants.typeTable[rom[movesOffset + (i - 1) * 6 + 3] & 0xFF];
                 moves[trueMoveIndex].category = GBConstants.physicalTypes.contains(moves[trueMoveIndex].type) ? MoveCategory.PHYSICAL : MoveCategory.SPECIAL;
                 if (moves[trueMoveIndex].power == 0 && !GlobalConstants.noPowerNonStatusMoves.contains(trueMoveIndex)) {
                     moves[trueMoveIndex].category = MoveCategory.STATUS;
@@ -445,7 +425,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 hitratio = Math.min(255, hitratio);
                 writeBytes(movesOffset + (i - 1) * 6 + 1, new byte[]{
                         (byte) m.effectIndex, (byte) m.power,
-                        typeToByte(m.type), (byte) hitratio, (byte) m.pp
+                        Gen1Constants.typeToByte(m.type), (byte) hitratio, (byte) m.pp
                 });
             }
         }
@@ -529,8 +509,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         pkmn.setSpeed(rom[offset + Gen1Constants.bsSpeedOffset] & 0xFF);
         pkmn.setSpecial(rom[offset + Gen1Constants.bsSpecialOffset] & 0xFF);
         // Type
-        pkmn.setPrimaryType(idToType(rom[offset + Gen1Constants.bsPrimaryTypeOffset] & 0xFF));
-        pkmn.setSecondaryType(idToType(rom[offset + Gen1Constants.bsSecondaryTypeOffset] & 0xFF));
+        pkmn.setPrimaryType(Gen1Constants.typeTable[rom[offset + Gen1Constants.bsPrimaryTypeOffset] & 0xFF]);
+        pkmn.setSecondaryType(Gen1Constants.typeTable[rom[offset + Gen1Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
         if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
             pkmn.setSecondaryType(null);
@@ -554,9 +534,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         writeByte(offset + Gen1Constants.bsDefenseOffset, (byte) pkmn.getDefense());
         writeByte(offset + Gen1Constants.bsSpeedOffset, (byte) pkmn.getSpeed());
         writeByte(offset + Gen1Constants.bsSpecialOffset, (byte) pkmn.getSpecial());
-        writeByte(offset + Gen1Constants.bsPrimaryTypeOffset, typeToByte(pkmn.getPrimaryType()));
+        writeByte(offset + Gen1Constants.bsPrimaryTypeOffset, Gen1Constants.typeToByte(pkmn.getPrimaryType()));
         byte secondaryTypeByte = pkmn.getSecondaryType() == null ? rom[offset + Gen1Constants.bsPrimaryTypeOffset]
-                : typeToByte(pkmn.getSecondaryType());
+                : Gen1Constants.typeToByte(pkmn.getSecondaryType());
         writeByte(offset + Gen1Constants.bsSecondaryTypeOffset, secondaryTypeByte);
         writeByte(offset + Gen1Constants.bsCatchRateOffset, (byte) pkmn.getCatchRate());
         writeByte(offset + Gen1Constants.bsGrowthCurveOffset, pkmn.getGrowthCurve().toByte());

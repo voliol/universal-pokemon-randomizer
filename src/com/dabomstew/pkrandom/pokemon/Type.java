@@ -34,20 +34,7 @@ import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 
 public enum Type {
 
-    // TODO: what's up with these hack-only types? Do they even work correctly? What rom hacks are they meant to work with? Prism?
-
-    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY,
-    GAS(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true), TRI(true);
-
-    public final boolean isHackOnly;
-
-    Type() {
-        this.isHackOnly = false;
-    }
-
-    Type(boolean isHackOnly) {
-        this.isHackOnly = isHackOnly;
-    }
+    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY;
 
     public int toInt() {
         return this.ordinal();
