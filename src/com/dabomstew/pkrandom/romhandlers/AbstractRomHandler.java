@@ -6890,11 +6890,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private static final Effectiveness[] TO_BALANCE_FOR = new Effectiveness[]
                 {Effectiveness.ZERO, Effectiveness.HALF, Effectiveness.DOUBLE};
-        private static final int MAX_OUTER_TRIES = 10000;
         private static final int MAX_PLACEMENT_TRIES = 10000;
 
         boolean balanced;
-        boolean keepIdentities;
 
         private TypeTable oldTable;
         private TypeTable typeTable;
@@ -6906,29 +6904,18 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         public void randomizeTypeEffectiveness(boolean balanced, boolean keepIdentities) {
             this.balanced = balanced;
-            this.keepIdentities = keepIdentities;
             oldTable = getTypeTable();
+            typeTable = new TypeTable(oldTable.getTypes());
 
+            fillEffCounts();
             if (balanced) {
                 initMaxForBalanced();
             }
 
-            boolean placementSucceeded = false;
-            int outerTries = 0;
-            while (!placementSucceeded && outerTries <= MAX_OUTER_TRIES) {
-                placementTries = 0;
-                fillEffCounts();
-                typeTable = new TypeTable(oldTable.getTypes());
-                placementSucceeded = (
-                        placeEffectiveness(Effectiveness.ZERO) &&
-                        placeEffectiveness(Effectiveness.HALF) &&
-                        placeEffectiveness(Effectiveness.DOUBLE));
-                outerTries++;
-            }
-            if (outerTries > MAX_OUTER_TRIES) {
-                System.out.println(outerTries);
-                throw new RandomizationException("Could not randomize Type Effectiveness");
-            }
+            placementTries = 0;
+            placeEffectiveness(Effectiveness.ZERO);
+            placeEffectiveness(Effectiveness.HALF);
+            placeEffectiveness(Effectiveness.DOUBLE);
 
             setTypeTable(typeTable);
         }
@@ -6956,7 +6943,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        private boolean placeEffectiveness(Effectiveness eff) {
+        private void placeEffectiveness(Effectiveness eff) {
             while (effCounts[eff.ordinal()] > 0 && placementTries <= MAX_PLACEMENT_TRIES) {
                 Type attacker = randomType();
                 Type defender = randomType();
@@ -6966,8 +6953,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 placementTries++;
             }
-            System.out.println(placementTries);
-            return placementTries <= MAX_PLACEMENT_TRIES;
+            if (placementTries > MAX_PLACEMENT_TRIES) {
+                throw new RandomizationException("Couldn't randomize Type Effectiveness");
+            }
         }
 
         private boolean isValidPlacement(Type attacker, Type defender, Effectiveness eff) {
@@ -6978,19 +6966,53 @@ public abstract class AbstractRomHandler implements RomHandler {
                     return false;
                 if (typeTable.whenDefending(defender, eff).size() == maxWhenDefending.get(eff))
                     return false;
-            } else if (keepIdentities) {
-                if (typeTable.whenAttacking(attacker, eff).size() == oldTable.whenAttacking(attacker, eff).size())
-                    return false;
-                if (typeTable.whenDefending(defender, eff).size() == oldTable.whenDefending(defender, eff).size())
-                    return false;
             }
             return true;
         }
     }
 
+    private static final int TYPES_KEEP_IDENTITIES_SWAPS = 10000;
+
     @Override
     public void randomizeTypeEffectivenessKeepIdentities() {
-        new TypeEffectivenessRandomizer().randomizeTypeEffectiveness(false, true);
+        TypeTable typeTable = new TypeTable(getTypeTable());
+
+        int swapsDone = 0;
+        while (swapsDone < TYPES_KEEP_IDENTITIES_SWAPS) {
+            Type colA = randomType();
+            Type colB = randomType();
+
+            int chunkSize = random.nextInt(typeTable.getTypes().size());
+            Set<Type> chunk = new HashSet<>(chunkSize);
+            while (chunk.size() < chunkSize) {
+                chunk.add(randomType());
+            }
+
+            if (typeTableChunkCanBeSwapped(typeTable, colA, colB, chunk)) {
+                swapTypeTableChunk(typeTable, colA, colB, chunk);
+                swapsDone++;
+            }
+        }
+
+        setTypeTable(typeTable);
+    }
+
+    private boolean typeTableChunkCanBeSwapped(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
+        int[] effCountsA = new int[Effectiveness.values().length];
+        int[] effCountsB = new int[Effectiveness.values().length];
+        for (Type t : chunk) {
+            effCountsA[typeTable.getEffectiveness(t, colA).ordinal()]++;
+            effCountsB[typeTable.getEffectiveness(t, colB).ordinal()]++;
+        }
+        return Arrays.equals(effCountsA, effCountsB);
+    }
+
+    private void swapTypeTableChunk(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
+        for (Type t : chunk) {
+            Effectiveness storage = typeTable.getEffectiveness(t, colA);
+            typeTable.setEffectiveness(t, colA, typeTable.getEffectiveness(t, colB));
+            typeTable.setEffectiveness(t, colB, storage);
+        }
     }
 
     @Override
