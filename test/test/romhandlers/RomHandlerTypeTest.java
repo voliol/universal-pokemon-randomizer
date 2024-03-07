@@ -183,9 +183,11 @@ public class RomHandlerTypeTest extends RomHandlerTest {
         System.out.println("Before:");
         System.out.println(before.toBigString());
         System.out.println(before.nonNeutralEffectivenessCount());
+        System.out.println(Arrays.toString(getEffCounts(before)));
         System.out.println("After:");
         System.out.println(after.toBigString());
         System.out.println(after.nonNeutralEffectivenessCount());
+        System.out.println(Arrays.toString(getEffCounts(after)));
         for (Type t : before.getTypes()) {
             System.out.println(t);
             assertEquals(before.immuneWhenAttacking(t).size(), after.immuneWhenAttacking(t).size());

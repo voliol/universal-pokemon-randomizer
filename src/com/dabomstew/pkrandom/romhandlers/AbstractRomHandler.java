@@ -6883,43 +6883,67 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTypeEffectiveness(boolean balanced) {
-        new TypeEffectivenessRandomizer().randomizeTypeEffectiveness(balanced);
+        new TypeEffectivenessRandomizer().randomizeTypeEffectiveness(balanced, false);
     }
 
     private class TypeEffectivenessRandomizer {
 
         private static final Effectiveness[] TO_BALANCE_FOR = new Effectiveness[]
                 {Effectiveness.ZERO, Effectiveness.HALF, Effectiveness.DOUBLE};
+        private static final int MAX_OUTER_TRIES = 10000;
         private static final int MAX_PLACEMENT_TRIES = 10000;
 
         boolean balanced;
+        boolean keepIdentities;
 
+        private TypeTable oldTable;
         private TypeTable typeTable;
-        private int[] effCounts = new int[Effectiveness.values().length];
+        private final int[] effCounts = new int[Effectiveness.values().length];
         private Map<Effectiveness, Integer> maxWhenAttacking;
         private Map<Effectiveness, Integer> maxWhenDefending;
 
         private int placementTries;
 
-        public void randomizeTypeEffectiveness(boolean balanced) {
+        public void randomizeTypeEffectiveness(boolean balanced, boolean keepIdentities) {
             this.balanced = balanced;
-            TypeTable oldTable = getTypeTable();
-            typeTable = new TypeTable(oldTable.getTypes());
+            this.keepIdentities = keepIdentities;
+            oldTable = getTypeTable();
 
-            fillEffCounts(oldTable);
             if (balanced) {
-                initMaxForBalanced(oldTable);
+                initMaxForBalanced();
             }
 
-            placementTries = 0;
-            placeEffectiveness(Effectiveness.ZERO);
-            placeEffectiveness(Effectiveness.HALF);
-            placeEffectiveness(Effectiveness.DOUBLE);
+            boolean placementSucceeded = false;
+            int outerTries = 0;
+            while (!placementSucceeded && outerTries <= MAX_OUTER_TRIES) {
+                placementTries = 0;
+                fillEffCounts();
+                typeTable = new TypeTable(oldTable.getTypes());
+                placementSucceeded = (
+                        placeEffectiveness(Effectiveness.ZERO) &&
+                        placeEffectiveness(Effectiveness.HALF) &&
+                        placeEffectiveness(Effectiveness.DOUBLE));
+                outerTries++;
+            }
+            if (outerTries > MAX_OUTER_TRIES) {
+                System.out.println(outerTries);
+                throw new RandomizationException("Could not randomize Type Effectiveness");
+            }
 
             setTypeTable(typeTable);
         }
 
-        private void initMaxForBalanced(TypeTable oldTable) {
+        private void fillEffCounts() {
+            Arrays.fill(effCounts, 0);
+            for (Type attacker : oldTable.getTypes()) {
+                for (Type defender : oldTable.getTypes()) {
+                    Effectiveness eff = oldTable.getEffectiveness(attacker, defender);
+                    effCounts[eff.ordinal()]++;
+                }
+            }
+        }
+
+        private void initMaxForBalanced() {
             maxWhenAttacking = new EnumMap<>(Effectiveness.class);
             maxWhenDefending = new EnumMap<>(Effectiveness.class);
             for (Effectiveness eff : TO_BALANCE_FOR) {
@@ -6932,18 +6956,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        private void fillEffCounts(TypeTable oldTable) {
-            Arrays.fill(effCounts, 0);
-            for (Type attacker : oldTable.getTypes()) {
-                for (Type defender : oldTable.getTypes()) {
-                    Effectiveness eff = oldTable.getEffectiveness(attacker, defender);
-
-                    effCounts[eff.ordinal()]++;
-                }
-            }
-        }
-
-        private void placeEffectiveness(Effectiveness eff) {
+        private boolean placeEffectiveness(Effectiveness eff) {
             while (effCounts[eff.ordinal()] > 0 && placementTries <= MAX_PLACEMENT_TRIES) {
                 Type attacker = randomType();
                 Type defender = randomType();
@@ -6953,9 +6966,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 placementTries++;
             }
-            if (placementTries == MAX_PLACEMENT_TRIES) {
-                throw new RandomizationException("Could not randomize Type Effectiveness");
-            }
+            System.out.println(placementTries);
+            return placementTries <= MAX_PLACEMENT_TRIES;
         }
 
         private boolean isValidPlacement(Type attacker, Type defender, Effectiveness eff) {
@@ -6966,6 +6978,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     return false;
                 if (typeTable.whenDefending(defender, eff).size() == maxWhenDefending.get(eff))
                     return false;
+            } else if (keepIdentities) {
+                if (typeTable.whenAttacking(attacker, eff).size() == oldTable.whenAttacking(attacker, eff).size())
+                    return false;
+                if (typeTable.whenDefending(defender, eff).size() == oldTable.whenDefending(defender, eff).size())
+                    return false;
             }
             return true;
         }
@@ -6973,51 +6990,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeTypeEffectivenessKeepIdentities() {
-        // TODO: this works... mostly.
-        //  Shuffling the imm/nve/se separately from each other gives them a chance of overwriting each other,
-        //  some other method will be needed.
-        List<Type> immAttackers = new LinkedList<>();
-        List<Type> immDefenders = new LinkedList<>();
-        List<Type> nveAttackers = new LinkedList<>();
-        List<Type> nveDefenders = new LinkedList<>();
-        List<Type> seAttackers = new LinkedList<>();
-        List<Type> seDefenders = new LinkedList<>();
-
-        TypeTable typeTable = getTypeTable();
-        for (Type attacker : typeTable.getTypes()) {
-            for (Type defender : typeTable.getTypes()) {
-                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
-                if (eff == Effectiveness.ZERO) {
-                    immAttackers.add(attacker);
-                    immDefenders.add(defender);
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.NEUTRAL);
-                } else if (eff == Effectiveness.HALF) {
-                    nveAttackers.add(attacker);
-                    nveDefenders.add(defender);
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.NEUTRAL);
-                } else if (eff == Effectiveness.DOUBLE) {
-                    seAttackers.add(attacker);
-                    seDefenders.add(defender);
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.NEUTRAL);
-                }
-            }
-        }
-
-        Collections.shuffle(immAttackers, random);
-        Collections.shuffle(nveAttackers, random);
-        Collections.shuffle(seAttackers, random);
-
-        for (int i = 0; i < immAttackers.size(); i++) {
-            typeTable.setEffectiveness(immAttackers.get(i), immDefenders.get(i), Effectiveness.ZERO);
-        }
-        for (int i = 0; i < nveAttackers.size(); i++) {
-            typeTable.setEffectiveness(nveAttackers.get(i), nveDefenders.get(i), Effectiveness.HALF);
-        }
-        for (int i = 0; i < seAttackers.size(); i++) {
-            typeTable.setEffectiveness(seAttackers.get(i), seDefenders.get(i), Effectiveness.DOUBLE);
-        }
-
-        setTypeTable(typeTable);
+        new TypeEffectivenessRandomizer().randomizeTypeEffectiveness(false, true);
     }
 
     @Override
