@@ -6971,6 +6971,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    // Due to how the algorithm below works the final TypeTable will be weighted unevenly towards TypeTables
+    // that are more similar to the original one. If this constant is large enough though, that unevenness
+    // will be negligible. It's basically a sort of random walk, where we are more likely to be near the starting
+    // point the fewer steps we take. The tradeoff for better randomness being the algorithm taking more time.
     private static final int TYPES_KEEP_IDENTITIES_SWAPS = 10000;
 
     @Override
