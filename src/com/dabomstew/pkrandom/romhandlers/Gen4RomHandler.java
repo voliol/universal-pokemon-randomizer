@@ -5142,8 +5142,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
 
 			int attackingType = battleOverlay[currentOffset];
-			while (attackingType != GBConstants.typeTableTerminator) {
-				if (battleOverlay[currentOffset] != GBConstants.typeTableForesightTerminator) {
+			while (attackingType != Gen4Constants.typeTableTerminator) {
+				if (battleOverlay[currentOffset] != Gen4Constants.typeTableForesightTerminator) {
 					int defendingType = battleOverlay[currentOffset + 1];
 					int effectivenessInternal = battleOverlay[currentOffset + 2];
 					Type attacking = Gen4Constants.typeTable[attackingType];
@@ -5223,15 +5223,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		writeBytes(battleOverlay, tableOffset, mainPart.toByteArray());
 		tableOffset += mainPart.size();
 
-		writeBytes(battleOverlay, tableOffset, new byte[] {GBConstants.typeTableForesightTerminator,
-				GBConstants.typeTableForesightTerminator, (byte) 0x00});
+		writeBytes(battleOverlay, tableOffset, new byte[] {Gen4Constants.typeTableForesightTerminator,
+				Gen4Constants.typeTableForesightTerminator, (byte) 0x00});
 		tableOffset += 3;
 
 		writeBytes(battleOverlay, tableOffset, ghostImmunities.toByteArray());
 		tableOffset += ghostImmunities.size();
 
-		writeBytes(battleOverlay, tableOffset, new byte[] {GBConstants.typeTableTerminator,
-				GBConstants.typeTableTerminator, (byte) 0x00});
+		writeBytes(battleOverlay, tableOffset, new byte[] {Gen4Constants.typeTableTerminator,
+				Gen4Constants.typeTableTerminator, (byte) 0x00});
 	}
 
 	private void applyFastDistortionWorld() {
