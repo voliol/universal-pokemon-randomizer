@@ -2291,9 +2291,10 @@ public class NewRandomizerGUI {
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox).forEach(this::setInitialButtonState);
 
+        // TODO: why do these checkboxes exist? can't they just be generated from the MiscTweak objects?
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
 				miscFastestTextCheckBox, miscRunningShoesIndoorsCheckBox, miscRandomizePCPotionCheckBox,
-				miscAllowPikachuEvolutionCheckBox, miscGiveNationalDexAtCheckBox, miscUpdateTypeEffectivenessCheckBox,
+				miscAllowPikachuEvolutionCheckBox, miscGiveNationalDexAtCheckBox,
 				miscLowerCasePokemonNamesCheckBox, miscRandomizeCatchingTutorialCheckBox, miscBanLuckyEggCheckBox,
 				miscNoFreeLuckyEggCheckBox, miscBanBigMoneyManiacCheckBox)
                 .forEach(this::setInitialButtonState);

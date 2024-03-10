@@ -3917,20 +3917,29 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscGiveNationalDexAtCheckBox.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="f8bbd" class="javax.swing.JCheckBox" binding="miscUpdateTypeEffectivenessCheckBox">
+                  <component id="3e84b" class="javax.swing.JLabel" binding="mtNoneAvailableLabel">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscNoneAvailableLabel.text"/>
+                    </properties>
+                  </component>
+                  <component id="531ae" class="javax.swing.JCheckBox" binding="miscForceChallengeModeCheckBox">
                     <constraints>
                       <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
                       <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscUpdateTypeEffectivenessCheckBox.text"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscUpdateTypeEffectivenessCheckBox.toolTipText"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.forceChallengeMode.name"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.forceChallengeMode.toolTipText"/>
                     </properties>
                   </component>
                   <component id="b7d7c" class="javax.swing.JCheckBox" binding="miscLowerCasePokemonNamesCheckBox">
                     <constraints>
-                      <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -3941,7 +3950,7 @@
                   </component>
                   <component id="7fe16" class="javax.swing.JCheckBox" binding="miscRandomizeCatchingTutorialCheckBox">
                     <constraints>
-                      <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -3952,7 +3961,7 @@
                   </component>
                   <component id="d8e23" class="javax.swing.JCheckBox" binding="miscBanLuckyEggCheckBox">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -3963,7 +3972,7 @@
                   </component>
                   <component id="9cf5c" class="javax.swing.JCheckBox" binding="miscNoFreeLuckyEggCheckBox">
                     <constraints>
-                      <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -3974,7 +3983,7 @@
                   </component>
                   <component id="68538" class="javax.swing.JCheckBox" binding="miscBanBigMoneyManiacCheckBox">
                     <constraints>
-                      <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -3983,18 +3992,9 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscBanBigMoneyManiacCheckBox.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="3e84b" class="javax.swing.JLabel" binding="mtNoneAvailableLabel">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.miscNoneAvailableLabel.text"/>
-                    </properties>
-                  </component>
                   <component id="27c9" class="javax.swing.JCheckBox" binding="miscSOSBattlesCheckBox">
                     <constraints>
-                      <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4005,7 +4005,7 @@
                   </component>
                   <component id="5cd10" class="javax.swing.JCheckBox" binding="miscBalanceStaticLevelsCheckBox">
                     <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4016,7 +4016,7 @@
                   </component>
                   <component id="1d98d" class="javax.swing.JCheckBox" binding="miscRetainAltFormesCheckBox">
                     <constraints>
-                      <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4027,7 +4027,7 @@
                   </component>
                   <component id="baacf" class="javax.swing.JCheckBox" binding="miscRunWithoutRunningShoesCheckBox">
                     <constraints>
-                      <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4038,7 +4038,7 @@
                   </component>
                   <component id="52a" class="javax.swing.JCheckBox" binding="miscFasterHPAndEXPBarsCheckBox">
                     <constraints>
-                      <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4047,20 +4047,9 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.fasterHpAndExpBars.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="531ae" class="javax.swing.JCheckBox" binding="miscForceChallengeModeCheckBox">
-                    <constraints>
-                      <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.forceChallengeMode.name"/>
-                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="CodeTweaks.forceChallengeMode.toolTipText"/>
-                    </properties>
-                  </component>
                   <component id="d472a" class="javax.swing.JCheckBox" binding="miscFastDistortionWorldCheckBox">
                     <constraints>
-                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4071,7 +4060,7 @@
                   </component>
                   <component id="720c8" class="javax.swing.JCheckBox" binding="miscUpdateRotomFormeTypingCheckBox">
                     <constraints>
-                      <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -4082,7 +4071,7 @@
                   </component>
                   <component id="1f079" class="javax.swing.JCheckBox" binding="miscDisableLowHPMusicCheckBox">
                     <constraints>
-                      <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
