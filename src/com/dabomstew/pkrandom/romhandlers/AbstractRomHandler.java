@@ -7058,6 +7058,13 @@ public abstract class AbstractRomHandler implements RomHandler {
      * The implication here is that these WILL be overridden by at least one
      * subclass.
      */
+
+    @Override
+    public boolean hasTypeEffectivenessSupport() {
+        // DEFAULT: no
+        return false;
+    }
+
     @Override
     public TypeTable getTypeTable() {
         // just returns some hard-coded tables if the subclass doesn't implement actually reading from ROM

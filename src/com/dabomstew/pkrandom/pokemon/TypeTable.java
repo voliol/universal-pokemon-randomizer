@@ -297,6 +297,7 @@ public class TypeTable {
             sb.append("\n");
         }
 
+        sb.append("Attacker (left), Defender (top)\n");
         sb.append(effectivenessSymbols[NEUTRAL.ordinal()]);
         sb.append(" = Neutral\n");
         sb.append(effectivenessSymbols[DOUBLE.ordinal()]);

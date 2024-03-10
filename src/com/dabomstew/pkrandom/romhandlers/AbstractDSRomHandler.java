@@ -410,6 +410,11 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	}
 
     @Override
+    public boolean hasTypeEffectivenessSupport() {
+        return true;
+    }
+
+    @Override
     public void updateTypeEffectiveness() {
         TypeTable typeTable = getTypeTable();
         log("--Updating Type Effectiveness--");

@@ -323,6 +323,14 @@ public class NewRandomizerGUI {
     private JRadioButton spTypeUniqueRadioButton;
     private JCheckBox spNoLegendariesCheckBox;
     private JCheckBox wpTRKeepThemesCheckBox;
+    private JPanel typesPanel;
+    private JRadioButton teUnchangedRadioButton;
+    private JRadioButton teRandomRadioButton;
+    private JRadioButton teRandomBalancedRadioButton;
+    private JRadioButton teKeepTypeIdentitiesRadioButton;
+    private JRadioButton teInverseRadioButton;
+    private JCheckBox teAddRandomImmunitiesCheckBox;
+    private JCheckBox teUpdateTypeEffectivenessCheckbox;
 
     private static JFrame frame;
 
@@ -598,6 +606,11 @@ public class NewRandomizerGUI {
         mtLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
         noIrregularAltFormesCheckBox.addActionListener(e -> enableOrDisableSubControls());
         ptIsDualTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        teUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teRandomBalancedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teKeepTypeIdentitiesRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teInverseRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tpComboBox.addItemListener(e -> {
@@ -1944,8 +1957,11 @@ public class NewRandomizerGUI {
 
         settings.setPickupItemsMod(puUnchangedRadioButton.isSelected(), puRandomRadioButton.isSelected());
         settings.setBanBadRandomPickupItems(puBanBadItemsCheckBox.isSelected());
-        
-        // TODO: connect Type Effectiveness UI elements to settings
+
+        settings.setTypeEffectivenessMod(teUnchangedRadioButton.isSelected(), teRandomRadioButton.isSelected(),
+                teRandomBalancedRadioButton.isSelected(), teKeepTypeIdentitiesRadioButton.isSelected(), teInverseRadioButton.isSelected());
+        settings.setReverseTypesRandomImmunities(teAddRandomImmunitiesCheckBox.isSelected());
+        settings.setUpdateTypeEffectiveness(teUpdateTypeEffectivenessCheckbox.isSelected());
 
         settings.setPokemonPalettesMod(ppalUnchangedRadioButton.isSelected(), ppalRandomRadioButton.isSelected());
         settings.setPokemonPalettesFollowTypes(ppalFollowTypesCheckBox.isSelected());
@@ -2267,6 +2283,10 @@ public class NewRandomizerGUI {
 				shBanRegularShopItemsCheckBox, shBalanceShopItemPricesCheckBox, shGuaranteeEvolutionItemsCheckBox,
 				shGuaranteeXItemsCheckBox, puUnchangedRadioButton, puRandomRadioButton, puBanBadItemsCheckBox)
 				.forEach(this::setInitialButtonState);
+
+        Arrays.asList(teUnchangedRadioButton, teRandomRadioButton, teRandomBalancedRadioButton,
+                teKeepTypeIdentitiesRadioButton, teInverseRadioButton, teAddRandomImmunitiesCheckBox,
+                teUpdateTypeEffectivenessCheckbox).forEach(this::setInitialButtonState);
 
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox).forEach(this::setInitialButtonState);
@@ -2615,6 +2635,20 @@ public class NewRandomizerGUI {
             puUnchangedRadioButton.setEnabled(true);
             puUnchangedRadioButton.setSelected(true);
             puRandomRadioButton.setEnabled(true);
+
+            // Types
+            boolean typeSupport = romHandler.hasTypeEffectivenessSupport();
+            typesPanel.setVisible(typeSupport);
+            teUnchangedRadioButton.setEnabled(typeSupport);
+            teUnchangedRadioButton.setSelected(typeSupport);
+            teRandomRadioButton.setEnabled(typeSupport);
+            teRandomBalancedRadioButton.setEnabled(typeSupport);
+            teKeepTypeIdentitiesRadioButton.setEnabled(typeSupport);
+            teInverseRadioButton.setEnabled(typeSupport);
+            teAddRandomImmunitiesCheckBox.setEnabled(false);
+            teAddRandomImmunitiesCheckBox.setSelected(false);
+            teUpdateTypeEffectivenessCheckbox.setEnabled(typeSupport);
+            teUpdateTypeEffectivenessCheckbox.setSelected(false);
 
             // Graphics
             boolean ppalSupport = romHandler.generationOfPokemon() < 6; // TODO: is this the RomHandler's job?
@@ -3391,6 +3425,13 @@ public class NewRandomizerGUI {
         } else {
             puBanBadItemsCheckBox.setEnabled(false);
             puBanBadItemsCheckBox.setSelected(false);
+        }
+
+        if (teInverseRadioButton.isSelected()) {
+            teAddRandomImmunitiesCheckBox.setEnabled(true);
+        } else {
+            teAddRandomImmunitiesCheckBox.setEnabled(false);
+            teAddRandomImmunitiesCheckBox.setSelected(false);
         }
 
         if (ppalRandomRadioButton.isSelected() && ppalRandomRadioButton.isVisible() &&

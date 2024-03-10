@@ -434,6 +434,11 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	protected abstract byte getFreeSpaceByte();
 
     @Override
+    public boolean hasTypeEffectivenessSupport() {
+        return true;
+    }
+
+    @Override
     public void updateTypeEffectiveness() {
         TypeTable typeTable = getTypeTable();
         log("--Updating Type Effectiveness--");

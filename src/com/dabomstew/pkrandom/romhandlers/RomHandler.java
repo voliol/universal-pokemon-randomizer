@@ -690,7 +690,9 @@ public interface RomHandler {
     // Types
     // ======
 
-    // return a random type valid in this game.
+    /**
+     * return a random type valid in this game.
+     */
     Type randomType();
 
     boolean typeInGame(Type type);
@@ -706,5 +708,7 @@ public interface RomHandler {
     void randomizeTypeEffectivenessKeepIdentities();
 
     void reverseTypeEffectiveness(boolean randomImmunities);
+
+    boolean hasTypeEffectivenessSupport();
 
 }

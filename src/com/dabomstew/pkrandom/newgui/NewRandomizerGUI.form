@@ -3492,7 +3492,7 @@
               </grid>
             </children>
           </grid>
-          <grid id="653db" layout-manager="GridBagLayout">
+          <grid id="653db" binding="typesPanel" layout-manager="GridBagLayout">
             <constraints>
               <tabbedpane title="Types"/>
             </constraints>
@@ -3511,7 +3511,7 @@
                   <font style="1"/>
                 </border>
                 <children>
-                  <component id="dcb07" class="javax.swing.JRadioButton" default-binding="true">
+                  <component id="dcb07" class="javax.swing.JRadioButton" binding="teUnchangedRadioButton">
                     <constraints>
                       <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag top="0" left="0" bottom="0" right="140" weightx="0.0" weighty="0.0"/>
@@ -3546,7 +3546,7 @@
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
-                  <component id="3a90e" class="javax.swing.JRadioButton" default-binding="true">
+                  <component id="3a90e" class="javax.swing.JRadioButton" binding="teRandomRadioButton">
                     <constraints>
                       <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
@@ -3557,7 +3557,7 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.teRandomRadioButton.ToolTipText"/>
                     </properties>
                   </component>
-                  <component id="1f742" class="javax.swing.JRadioButton" default-binding="true">
+                  <component id="1f742" class="javax.swing.JRadioButton" binding="teRandomBalancedRadioButton">
                     <constraints>
                       <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
@@ -3568,7 +3568,7 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.teRandomBalancedRadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="47afe" class="javax.swing.JRadioButton" default-binding="true">
+                  <component id="47afe" class="javax.swing.JRadioButton" binding="teKeepTypeIdentitiesRadioButton">
                     <constraints>
                       <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
@@ -3579,7 +3579,7 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.teKeepTypeIdentitiesRadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="40a2d" class="javax.swing.JCheckBox" default-binding="true">
+                  <component id="40a2d" class="javax.swing.JCheckBox" binding="teAddRandomImmunitiesCheckBox">
                     <constraints>
                       <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.9" weighty="0.0"/>
@@ -3590,7 +3590,7 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.teAddRandomImmunitiesCheckBox.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="b8e88" class="javax.swing.JRadioButton" default-binding="true">
+                  <component id="b8e88" class="javax.swing.JRadioButton" binding="teInverseRadioButton">
                     <constraints>
                       <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
@@ -3601,7 +3601,7 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.teInverseRadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="56b39" class="javax.swing.JCheckBox" default-binding="true">
+                  <component id="56b39" class="javax.swing.JCheckBox" binding="teUpdateTypeEffectivenessCheckbox">
                     <constraints>
                       <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
@@ -4399,6 +4399,14 @@
       <member id="85fd7"/>
       <member id="76f59"/>
       <member id="7222b"/>
+    </group>
+    <group name="typeEffectivenessButtonGroup">
+      <member id="b8e88"/>
+      <member id="b8e88"/>
+      <member id="1f742"/>
+      <member id="dcb07"/>
+      <member id="47afe"/>
+      <member id="3a90e"/>
     </group>
   </buttonGroups>
   <inspectionSuppressions>
