@@ -381,12 +381,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean typeInGame(Type type) {
+        return getTypeTable().getTypes().contains(type);
+    }
+
+    @Override
     public Type randomType() {
-        Type t = Type.randomType(this.random);
-        while (!typeInGame(t)) {
-            t = Type.randomType(this.random);
-        }
-        return t;
+        List<Type> allTypes = getTypeTable().getTypes();
+        return allTypes.get(random.nextInt(allTypes.size()));
     }
 
     @Override
@@ -740,7 +742,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             this.banned = banned;
             if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 this.allowedByType = new EnumMap<>(Type.class);
-                for (Type t : Type.values()) {
+                for (Type t : getTypeTable().getTypes()) {
                     allowedByType.put(t, allowed.filterByType(t));
                 }
             }
@@ -753,7 +755,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             remaining = new PokemonSet<>(allowed);
             if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 remainingByType = new EnumMap<>(Type.class);
-                for (Type t : Type.values()) {
+                for (Type t : getTypeTable().getTypes()) {
                     remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
                 }
             }
@@ -872,7 +874,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Map<Type, PokemonSet<Pokemon>> byType = catchEmAll ? remainingByType : allowedByType;
             Type areaType;
             do {
-                areaType = Type.randomType(random);
+                areaType = randomType();
             } while (byType.get(areaType).isEmpty());
             return areaType;
         }
@@ -2188,8 +2190,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     List<Move> softMoveSynergyList = MoveSynergy.getSoftMoveSynergy(
                             move,
                             movesAtLevel,
-                            generationOfPokemon(),
-                            isEffectivenessUpdated());
+                            getTypeTable());
                     Collections.shuffle(softMoveSynergyList, this.random);
                     for (int j = 0; j < softMoveBias * softMoveSynergyList.size(); j++) {
                         int k = j % softMoveSynergyList.size();
@@ -3654,7 +3655,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             //build type map
             Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
-            for(Type type : Type.getAllTypes(generation)) {
+            for(Type type : getTypeTable().getTypes()) {
                 typeListMap.put(type, new ArrayList<>());
             }
             for (Pokemon poke : choosable) {
@@ -3811,21 +3812,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Set<List<Type>> findTypeTriangles() {
-        int generation = this.generationOfPokemon();
-        boolean effectivenessUpdated = isEffectivenessUpdated();
+        TypeTable typeTable = getTypeTable();
         Set<List<Type>> typeTriangles;
         typeTriangles = new HashSet<>();
-        for(Type typeOne : Type.getAllTypes(generation)) {
-            List<Type> superEffectiveOne = Effectiveness.superEffective(typeOne, generation, effectivenessUpdated);
+        for(Type typeOne : typeTable.getTypes()) {
+            List<Type> superEffectiveOne = typeTable.superEffectiveWhenAttacking(typeOne);
             superEffectiveOne.remove(typeOne);
             //don't want a Ghost-Ghost-Ghost "triangle"
             //(although it would be funny)
             for (Type typeTwo : superEffectiveOne) {
-                List<Type> superEffectiveTwo = Effectiveness.superEffective(typeTwo, generation, effectivenessUpdated);
+                List<Type> superEffectiveTwo = typeTable.superEffectiveWhenAttacking(typeTwo);
                 superEffectiveTwo.remove(typeOne);
                 superEffectiveTwo.remove(typeTwo);
                 for (Type typeThree : superEffectiveTwo) {
-                    List<Type> superEffectiveThree = Effectiveness.superEffective(typeThree, generation, effectivenessUpdated);
+                    List<Type> superEffectiveThree = typeTable.superEffectiveWhenAttacking(typeThree);
                     if (superEffectiveThree.contains(typeOne)) {
                         // The below is an ArrayList because the immutable list created by List.of throws a
                         // NullPointerException when you check whether it contains null.
@@ -6055,14 +6055,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void initTypeWeightings(boolean noLegendaries, boolean allowAltFormes) {
         // Determine weightings
-        for (Type t : Type.values()) {
-            if (typeInGame(t)) {
-                PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
-                        .filterByType(t);
-                int pkWithTyping = pokemonOfType.size();
-                typeWeightings.put(t, pkWithTyping);
-                totalTypeWeighting += pkWithTyping;
-            }
+        for (Type t : getTypeTable().getTypes()) {
+            PokemonSet<Pokemon> pokemonOfType = getRestrictedPokemon(noLegendaries, allowAltFormes, true)
+                    .filterByType(t);
+            int pkWithTyping = pokemonOfType.size();
+            typeWeightings.put(t, pkWithTyping);
+            totalTypeWeighting += pkWithTyping;
         }
     }
 
@@ -6883,15 +6881,221 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    @Override
+    public void randomizeTypeEffectiveness(Settings settings) {
+        Settings.TypeEffectivenessMod mod = settings.getTypeEffectivenessMod();
+        boolean randomImmunities = settings.isInverseTypesRandomImmunities();
+    }
+
+    public void randomizeTypeEffectiveness(Settings.TypeEffectivenessMod mod, boolean randomImmunities) {
+        TypeEffectivenessRandomizer ter = new TypeEffectivenessRandomizer();
+        switch (mod) {
+            case UNCHANGED -> {}
+            case RANDOM -> ter.randomizeTypeEffectiveness(false);
+            case RANDOM_BALANCED -> ter.randomizeTypeEffectiveness(true);
+            case KEEP_IDENTITIES -> ter.randomizeTypeEffectivenessKeepIdentities();
+            case INVERSE -> ter.invertTypeEffectiveness(randomImmunities);
+        }
+    }
+
+    private class TypeEffectivenessRandomizer {
+
+        private static final Effectiveness[] TO_BALANCE_FOR = new Effectiveness[]
+                {Effectiveness.ZERO, Effectiveness.HALF, Effectiveness.DOUBLE};
+        private static final int MAX_PLACEMENT_TRIES = 10000;
+
+        boolean balanced;
+
+        private TypeTable oldTable;
+        private TypeTable typeTable;
+        private final int[] effCounts = new int[Effectiveness.values().length];
+        private Map<Effectiveness, Integer> maxWhenAttacking;
+        private Map<Effectiveness, Integer> maxWhenDefending;
+
+        private int placementTries;
+
+        public void randomizeTypeEffectiveness(boolean balanced) {
+            this.balanced = balanced;
+            oldTable = getTypeTable();
+            typeTable = new TypeTable(oldTable.getTypes());
+
+            fillEffCounts();
+            if (balanced) {
+                initMaxForBalanced();
+            }
+
+            placementTries = 0;
+            placeEffectiveness(Effectiveness.ZERO);
+            placeEffectiveness(Effectiveness.HALF);
+            placeEffectiveness(Effectiveness.DOUBLE);
+
+            setTypeTable(typeTable);
+        }
+
+        private void fillEffCounts() {
+            Arrays.fill(effCounts, 0);
+            for (Type attacker : oldTable.getTypes()) {
+                for (Type defender : oldTable.getTypes()) {
+                    Effectiveness eff = oldTable.getEffectiveness(attacker, defender);
+                    effCounts[eff.ordinal()]++;
+                }
+            }
+        }
+
+        private void initMaxForBalanced() {
+            maxWhenAttacking = new EnumMap<>(Effectiveness.class);
+            maxWhenDefending = new EnumMap<>(Effectiveness.class);
+            for (Effectiveness eff : TO_BALANCE_FOR) {
+                maxWhenAttacking.put(eff, 0);
+                maxWhenDefending.put(eff, 0);
+                for (Type t : oldTable.getTypes()) {
+                    maxWhenAttacking.put(eff, Math.max(maxWhenAttacking.get(eff), oldTable.whenAttacking(t, eff).size()));
+                    maxWhenDefending.put(eff, Math.max(maxWhenDefending.get(eff), oldTable.whenDefending(t, eff).size()));
+                }
+            }
+        }
+
+        private void placeEffectiveness(Effectiveness eff) {
+            while (effCounts[eff.ordinal()] > 0 && placementTries <= MAX_PLACEMENT_TRIES) {
+                Type attacker = randomType();
+                Type defender = randomType();
+                if (isValidPlacement(attacker, defender, eff)) {
+                    typeTable.setEffectiveness(attacker, defender, eff);
+                    effCounts[eff.ordinal()]--;
+                }
+                placementTries++;
+            }
+            if (placementTries > MAX_PLACEMENT_TRIES) {
+                throw new RandomizationException("Couldn't randomize Type Effectiveness");
+            }
+        }
+
+        private boolean isValidPlacement(Type attacker, Type defender, Effectiveness eff) {
+            if (typeTable.getEffectiveness(attacker, defender) != Effectiveness.NEUTRAL)
+                return false;
+            if (balanced) {
+                if (typeTable.whenAttacking(attacker, eff).size() == maxWhenAttacking.get(eff))
+                    return false;
+                if (typeTable.whenDefending(defender, eff).size() == maxWhenDefending.get(eff))
+                    return false;
+            }
+            return true;
+        }
+
+        // Due to how the algorithm below works the final TypeTable will be weighted unevenly towards TypeTables
+        // that are more similar to the original one. If this constant is large enough though, that unevenness
+        // will be negligible. It's basically a sort of random walk, where we are more likely to be near the starting
+        // point the fewer steps we take. The tradeoff for better randomness being the algorithm taking more time.
+        private static final int TYPES_KEEP_IDENTITIES_SWAPS = 10000;
+
+        public void randomizeTypeEffectivenessKeepIdentities() {
+            TypeTable typeTable = new TypeTable(getTypeTable());
+
+            int swapsDone = 0;
+            while (swapsDone < TYPES_KEEP_IDENTITIES_SWAPS) {
+                Type colA = randomType();
+                Type colB = randomType();
+
+                int chunkSize = random.nextInt(typeTable.getTypes().size());
+                Set<Type> chunk = new HashSet<>(chunkSize);
+                while (chunk.size() < chunkSize) {
+                    chunk.add(randomType());
+                }
+
+                if (typeTableChunkCanBeSwapped(typeTable, colA, colB, chunk)) {
+                    swapTypeTableChunk(typeTable, colA, colB, chunk);
+                    swapsDone++;
+                }
+            }
+
+            setTypeTable(typeTable);
+        }
+
+        private boolean typeTableChunkCanBeSwapped(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
+            int[] effCountsA = new int[Effectiveness.values().length];
+            int[] effCountsB = new int[Effectiveness.values().length];
+            for (Type t : chunk) {
+                effCountsA[typeTable.getEffectiveness(t, colA).ordinal()]++;
+                effCountsB[typeTable.getEffectiveness(t, colB).ordinal()]++;
+            }
+            return Arrays.equals(effCountsA, effCountsB);
+        }
+
+        private void swapTypeTableChunk(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
+            for (Type t : chunk) {
+                Effectiveness storage = typeTable.getEffectiveness(t, colA);
+                typeTable.setEffectiveness(t, colA, typeTable.getEffectiveness(t, colB));
+                typeTable.setEffectiveness(t, colB, storage);
+            }
+        }
+
+        public void invertTypeEffectiveness(boolean randomImmunities) {
+            TypeTable typeTable = getTypeTable();
+            int immCount = 0;
+            LinkedList<Type[]> sePairs = new LinkedList<>();
+            for (Type attacker : typeTable.getTypes()) {
+                for (Type defender : typeTable.getTypes()) {
+
+                    Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                    if (eff == Effectiveness.ZERO) {
+                        typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                        immCount++;
+                    } else if (eff == Effectiveness.HALF) {
+                        typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                    } else if (eff == Effectiveness.DOUBLE) {
+                        typeTable.setEffectiveness(attacker, defender, Effectiveness.HALF);
+                        sePairs.add(new Type[]{attacker, defender});
+                    }
+                }
+            }
+            if (randomImmunities) {
+                if (sePairs.size() < immCount) {
+                    throw new RuntimeException("Too few super-effectives to turn into immunities...");
+                }
+                for (int i = 0; i < immCount; i++) {
+                    Type[] sePair = sePairs.remove(random.nextInt(sePairs.size()));
+                    typeTable.setEffectiveness(sePair[0], sePair[1], Effectiveness.ZERO);
+                }
+            }
+
+            setTypeTable(typeTable);
+        }
+    }
+
     /* Default Implementations */
     /* Used when a subclass doesn't override */
     /*
      * The implication here is that these WILL be overridden by at least one
      * subclass.
      */
+
     @Override
-    public boolean typeInGame(Type type) {
-        return !type.isHackOnly && !(type == Type.FAIRY && generationOfPokemon() < 6);
+    public boolean hasTypeEffectivenessSupport() {
+        // DEFAULT: no
+        return false;
+    }
+
+    @Override
+    public TypeTable getTypeTable() {
+        // just returns some hard-coded tables if the subclass doesn't implement actually reading from ROM
+        // obviously it is better if the type table can be actually read from ROM, so override this when possible
+        if (generationOfPokemon() == 1) {
+            return TypeTable.getVanillaGen1Table();
+        } else if (generationOfPokemon() <= 5) {
+            return TypeTable.getVanillaGen2To5Table();
+        } else {
+            return TypeTable.getVanillaGen6PlusTable();
+        }
+    }
+
+    @Override
+    public void setTypeTable(TypeTable typeTable) {
+        // do nothing
+    }
+
+    @Override
+    public void updateTypeEffectiveness() {
+        // do nothing
     }
 
     @Override

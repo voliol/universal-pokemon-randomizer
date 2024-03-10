@@ -99,7 +99,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private String[] landmarkNames;
     private boolean isVietCrystal;
     private ItemList allowedItems, nonBadItems;
-    private boolean effectivenessUpdated;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -2155,7 +2154,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
-        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (romEntry.hasTweakFile("BWXPTweak")) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
         }
@@ -2186,16 +2184,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen2Items.luckyEgg);
             nonBadItems.banSingles(Gen2Items.luckyEgg);
-        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-            updateTypeEffectiveness();
         } else if (tweak == MiscTweak.REUSABLE_TMS) {
             applyReusableTMsPatch();
         }
-    }
-
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
     }
 
     private void randomizeCatchingTutorial() {
@@ -2250,74 +2241,88 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeByte(offset, (byte) jumpLength);
     }
 
-    private void updateTypeEffectiveness() {
-        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
-        log("--Updating Type Effectiveness--");
-        for (TypeRelationship relationship : typeEffectivenessTable) {
-            // Change Ghost 0.5x against Steel to Ghost 1x to Steel
-            if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
-                relationship.effectiveness = Effectiveness.NEUTRAL;
-                log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-            }
-
-            // Change Dark 0.5x against Steel to Dark 1x to Steel
-            else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
-                relationship.effectiveness = Effectiveness.NEUTRAL;
-                log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-            }
-        }
-        logBlankLine();
-        writeTypeEffectivenessTable(typeEffectivenessTable);
-        effectivenessUpdated = true;
+    @Override
+    public TypeTable getTypeTable() {
+        return readTypeTable();
     }
 
-    private List<TypeRelationship> readTypeEffectivenessTable() {
-        List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
+    private TypeTable readTypeTable() {
+        TypeTable typeTable = new TypeTable(Type.getAllTypes(2));
         int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
         int attackingType = rom[currentOffset];
-        // 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
-        // the actual end of the table. Since we don't care about Ghost immunities at all,
-        // just stop once we reach the Foresight section.
-        while (attackingType != (byte) 0xFE) {
-            int defendingType = rom[currentOffset + 1];
-            int effectivenessInternal = rom[currentOffset + 2];
-            Type attacking = Gen2Constants.typeTable[attackingType];
-            Type defending = Gen2Constants.typeTable[defendingType];
-            Effectiveness effectiveness = switch (effectivenessInternal) {
-                case 20 -> Effectiveness.DOUBLE;
-                case 10 -> Effectiveness.NEUTRAL;
-                case 5 -> Effectiveness.HALF;
-                case 0 -> Effectiveness.ZERO;
-                default -> null;
-            };
-            if (effectiveness != null) {
-                TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
-                typeEffectivenessTable.add(relationship);
+        while (attackingType != GBConstants.typeTableTerminator) {
+            if (rom[currentOffset] == GBConstants.typeTableForesightTerminator) {
+                currentOffset++;
+            } else {
+                int defendingType = rom[currentOffset + 1];
+                int effectivenessInternal = rom[currentOffset + 2];
+                Type attacking = Gen2Constants.typeTable[attackingType];
+                Type defending = Gen2Constants.typeTable[defendingType];
+                Effectiveness effectiveness = switch (effectivenessInternal) {
+                    case 20 -> Effectiveness.DOUBLE;
+                    case 10 -> Effectiveness.NEUTRAL;
+                    case 5 -> Effectiveness.HALF;
+                    case 0 -> Effectiveness.ZERO;
+                    default -> null;
+                };
+                if (effectiveness != null) {
+                    typeTable.setEffectiveness(attacking, defending, effectiveness);
+                }
+                currentOffset += 3;
             }
-            currentOffset += 3;
             attackingType = rom[currentOffset];
         }
-        return typeEffectivenessTable;
+        return typeTable;
     }
 
-    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
+    @Override
+    public void setTypeTable(TypeTable typeTable) {
+        writeTypeTable(typeTable);
+    }
+
+    private void writeTypeTable(TypeTable typeTable) {
+        if (typeTable.nonNeutralEffectivenessCount() > Gen2Constants.nonNeutralEffectivenessCount) {
+            throw new IllegalArgumentException("Too many non-neutral Effectiveness-es. Was "
+                    + typeTable.nonNeutralEffectivenessCount() + ", has to be at most " +
+                    Gen2Constants.nonNeutralEffectivenessCount);
+        }
+
         int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
-        for (int i = 0; i < typeEffectivenessTable.size(); i++) {
-            byte[] relationshipBytes = typeRelationShipToBytes(typeEffectivenessTable.get(i));
-            int relationshipOffset = tableOffset + i * 3; // this "3" could be a constant
-            writeBytes(relationshipOffset, relationshipBytes);
+
+        ByteArrayOutputStream mainPart = new ByteArrayOutputStream();
+        ByteArrayOutputStream ghostImmunities = new ByteArrayOutputStream();
+
+        prepareTypeTableParts(typeTable, mainPart, ghostImmunities);
+        writeTypeTableParts(tableOffset, mainPart, ghostImmunities);
+    }
+
+    private void prepareTypeTableParts(TypeTable typeTable, ByteArrayOutputStream mainPart, ByteArrayOutputStream ghostImmunities) {
+        for (Type attacker : typeTable.getTypes()) {
+            for (Type defender : typeTable.getTypes()) {
+                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                if (eff != Effectiveness.NEUTRAL) {
+                    ByteArrayOutputStream part = (defender == Type.GHOST && eff == Effectiveness.ZERO)
+                            ? ghostImmunities : mainPart;
+                    byte effectivenessInternal = switch (eff) {
+                        case DOUBLE -> 20;
+                        case HALF -> 5;
+                        case ZERO -> 0;
+                        default -> 0;
+                    };
+                    part.writeBytes(new byte[]{Gen2Constants.typeToByte(attacker),
+                            Gen2Constants.typeToByte(defender), effectivenessInternal});
+                }
+            }
         }
     }
 
-    private byte[] typeRelationShipToBytes(TypeRelationship relationship) {
-        byte effectivenessInternal = switch (relationship.effectiveness) {
-            case DOUBLE -> 20;
-            case NEUTRAL -> 10;
-            case HALF -> 5;
-            default -> 0;
-        };
-        return new byte[]{Gen2Constants.typeToByte(relationship.attacker), Gen2Constants.typeToByte(relationship.defender),
-                effectivenessInternal};
+    private void writeTypeTableParts(int tableOffset, ByteArrayOutputStream mainPart, ByteArrayOutputStream ghostImmunities) {
+        writeBytes(tableOffset, mainPart.toByteArray());
+        tableOffset += mainPart.size();
+        rom[tableOffset++] = GBConstants.typeTableForesightTerminator;
+        writeBytes(tableOffset, ghostImmunities.toByteArray());
+        tableOffset += ghostImmunities.size();
+        rom[tableOffset] = GBConstants.typeTableTerminator;
     }
 
     @Override

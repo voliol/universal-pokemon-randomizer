@@ -464,7 +464,7 @@ public class Gen5Constants {
     public static final Map<Type, Integer> weaknessReducingBerries = Gen4Constants.weaknessReducingBerries;
 
     private static Type[] constructTypeTable() {
-        Type[] table = new Type[256];
+        Type[] table = new Type[0x11];
         table[0x00] = Type.NORMAL;
         table[0x01] = Type.FIGHTING;
         table[0x02] = Type.FLYING;

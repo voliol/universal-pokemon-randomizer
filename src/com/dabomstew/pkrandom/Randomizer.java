@@ -77,6 +77,7 @@ public class Randomizer {
         log.println();
 
         // All possible changes that can be logged
+        boolean typeEffectivenessChanged = false;
         boolean movesUpdated = false;
         boolean movesChanged = false;
         boolean movesetsChanged = false;
@@ -94,6 +95,19 @@ public class Randomizer {
         boolean tmsHmsCompatChanged = false;
         boolean tutorCompatChanged = false;
         boolean shopsChanged = false;
+
+        if (settings.isUpdateTypeEffectiveness()) {
+            romHandler.updateTypeEffectiveness();
+            typeEffectivenessChanged = true;
+        }
+        if (settings.getTypeEffectivenessMod() != Settings.TypeEffectivenessMod.UNCHANGED) {
+            romHandler.randomizeTypeEffectiveness(settings);
+            typeEffectivenessChanged = true;
+        }
+        if (typeEffectivenessChanged) {
+            log.println("--Type Effectiveness--");
+            log.println(romHandler.getTypeTable().toBigString() + NEWLINE);
+        }
 
         // Limit Pokemon
         // 1. Set Pokemon pool according to limits (or lack thereof)

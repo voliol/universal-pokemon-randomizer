@@ -105,8 +105,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private int hiddenHollowCount = 0;
     private boolean hiddenHollowCounted = false;
     private List<Integer> originalDoubleTrainers = new ArrayList<>();
-    private boolean effectivenessUpdated;
     private int pickupItemsTableOffset;
+    private TypeTable typeTable;
     private long actualArm9CRC32;
     private Map<Integer, Long> actualOverlayCRC32s;
     private Map<String, Long> actualFileCRC32s;
@@ -2054,7 +2054,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.NO_FREE_LUCKY_EGG.getValue();
         available |= MiscTweak.BAN_BIG_MANIAC_ITEMS.getValue();
-        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (romEntry.getRomType() == Gen5Constants.Type_BW) {
             available |= MiscTweak.BALANCE_STATIC_LEVELS.getValue();
         }
@@ -2097,18 +2096,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             patchForNationalDex();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
             applyRunWithoutRunningShoesPatch();
-        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-            updateTypeEffectiveness();
         } else if (tweak == MiscTweak.FORCE_CHALLENGE_MODE) {
             forceChallengeMode();
         } else if (tweak == MiscTweak.DISABLE_LOW_HP_MUSIC) {
             disableLowHpMusic();
         }
-    }
-
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
     }
 
     // Removes the free lucky egg you receive from Professor Juniper and replaces it with a gooey mulch.
@@ -2187,64 +2179,71 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void updateTypeEffectiveness() {
+    @Override
+    public TypeTable getTypeTable() {
+        if (typeTable == null) {
+            typeTable = readTypeTable();
+        }
+        return typeTable;
+    }
+
+    private TypeTable readTypeTable() {
         try {
+            TypeTable typeTable = new TypeTable(Type.getAllTypes(5));
             byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-            int typeEffectivenessTableOffset = find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
-            if (typeEffectivenessTableOffset > 0) {
-                Effectiveness[][] typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
-                log("--Updating Type Effectiveness--");
-                int steel = Gen5Constants.typeToByte(Type.STEEL);
-                int dark = Gen5Constants.typeToByte(Type.DARK);
-                int ghost = Gen5Constants.typeToByte(Type.GHOST);
-                typeEffectivenessTable[ghost][steel] = Effectiveness.NEUTRAL;
-                log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-                typeEffectivenessTable[dark][steel] = Effectiveness.NEUTRAL;
-                log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-                logBlankLine();
-                writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
-                writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
-                effectivenessUpdated = true;
+            int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
+            int tableWidth = typeTable.getTypes().size();
+
+            for (Type attacker : typeTable.getTypes()) {
+                for (Type defender : typeTable.getTypes()) {
+                    int offset = tableOffset + (Gen5Constants.typeToByte(attacker) * tableWidth) + Gen5Constants.typeToByte(defender);
+                    int effectivenessInternal = battleOverlay[offset];
+                    Effectiveness effectiveness = switch (effectivenessInternal) {
+                        case 8 -> Effectiveness.DOUBLE;
+                        case 4 -> Effectiveness.NEUTRAL;
+                        case 2 -> Effectiveness.HALF;
+                        case 0 -> Effectiveness.ZERO;
+                        default -> null;
+                    };
+                    typeTable.setEffectiveness(attacker, defender, effectiveness);
+                }
             }
+
+            return typeTable;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
-    private Effectiveness[][] readTypeEffectivenessTable(byte[] battleOverlay, int typeEffectivenessTableOffset) {
-        Effectiveness[][] effectivenessTable = new Effectiveness[Type.DARK.ordinal() + 1][Type.DARK.ordinal() + 1];
-        for (int attacker = Type.NORMAL.ordinal(); attacker <= Type.DARK.ordinal(); attacker++) {
-            for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
-                int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
-                int effectivenessInternal = battleOverlay[offset];
-                Effectiveness effectiveness = switch (effectivenessInternal) {
-                    case 8 -> Effectiveness.DOUBLE;
-                    case 4 -> Effectiveness.NEUTRAL;
-                    case 2 -> Effectiveness.HALF;
-                    case 0 -> Effectiveness.ZERO;
-                    default -> null;
-                };
-                effectivenessTable[attacker][defender] = effectiveness;
-            }
-        }
-        return effectivenessTable;
+    @Override
+    public void setTypeTable(TypeTable typeTable) {
+        this.typeTable = typeTable;
+        writeTypeTable(typeTable);
     }
 
-    private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable, byte[] battleOverlay,
-                                             int typeEffectivenessTableOffset) {
-        for (int attacker = Type.NORMAL.ordinal(); attacker <= Type.DARK.ordinal(); attacker++) {
-            for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
-                Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
-                int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
-                byte effectivenessInternal = switch (effectiveness) {
-                    case DOUBLE -> 8;
-                    case NEUTRAL -> 4;
-                    case HALF -> 2;
-                    case ZERO -> 0;
-                    default -> 0;
-                };
-                battleOverlay[offset] = effectivenessInternal;
+    private void writeTypeTable(TypeTable typeTable) {
+        try {
+            byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
+            int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
+            int tableWidth = typeTable.getTypes().size();
+
+            for (Type attacker : typeTable.getTypes()) {
+                for (Type defender : typeTable.getTypes()) {
+                    int offset = tableOffset + (Gen5Constants.typeToByte(attacker) * tableWidth) + Gen5Constants.typeToByte(defender);
+                    Effectiveness effectiveness = typeTable.getEffectiveness(attacker, defender);
+                    byte effectivenessInternal = switch (effectiveness) {
+                        case DOUBLE -> 8;
+                        case NEUTRAL -> 4;
+                        case HALF -> 2;
+                        case ZERO -> 0;
+                        default -> 0;
+                    };
+                    battleOverlay[offset] = effectivenessInternal;
+                }
             }
+            writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 
@@ -3876,7 +3875,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 items.addAll(Gen5Constants.moveBoostingItems.get(moveIdx));
             }
         }
-        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType(), 5, effectivenessUpdated);
+        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen5Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {

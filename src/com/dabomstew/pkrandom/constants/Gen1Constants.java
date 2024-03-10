@@ -134,6 +134,8 @@ public class Gen1Constants {
         return (byte) 0;
     }
 
+    public static final int nonNeutralEffectivenessCount = 82;
+
     public static final ItemList allowedItems = setupAllowedItems();
 
     private static ItemList setupAllowedItems() {

@@ -2491,11 +2491,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
     }
 
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return false;
-    }
-
     private void applyFastestText() {
         int offset = find(code, Gen6Constants.fastestTextPrefixes[0]);
         if (offset > 0) {
@@ -4057,7 +4052,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (numDamagingMoves >= 2) {
             items.add(Items.assaultVest);
         }
-        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType(), 6);
+        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen6Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {

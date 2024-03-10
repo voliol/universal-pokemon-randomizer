@@ -557,11 +557,6 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean isEffectivenessUpdated() {
-        return false;
-    }
-
-    @Override
     public boolean hasFunctionalFormes() {
         return false;
     }

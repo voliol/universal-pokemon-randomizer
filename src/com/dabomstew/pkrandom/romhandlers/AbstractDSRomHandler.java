@@ -43,8 +43,10 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
+import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.TypeTable;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractDSRomEntry;
 
 import javax.imageio.ImageIO;
@@ -191,6 +193,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
+
+    protected final void writeBytes(byte[] data, int offset, byte[] values) {
+        System.arraycopy(values, 0, data, offset, values.length);
+    }
 
     public int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
@@ -402,6 +408,25 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	    System.arraycopy(b, 0, sum, a.length, b.length);
 	    return sum;
 	}
+
+    @Override
+    public boolean hasTypeEffectivenessSupport() {
+        return true;
+    }
+
+    @Override
+    public void updateTypeEffectiveness() {
+        TypeTable typeTable = getTypeTable();
+        log("--Updating Type Effectiveness--");
+
+        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
+        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
+        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
+        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
+
+        logBlankLine();
+        setTypeTable(typeTable);
+    }
 
 	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
 	// is separate methods called in loadROM()/loadedRom() methods. Even though

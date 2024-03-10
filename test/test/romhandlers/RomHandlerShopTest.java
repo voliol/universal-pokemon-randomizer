@@ -89,6 +89,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void canBadBadItems(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 2);
         loadROM(romName);
 
         Settings s = new Settings();
@@ -108,6 +109,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void canBadRegularShopItems(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 2);
         loadROM(romName);
 
         Settings s = new Settings();
@@ -127,6 +129,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void canBanOverpoweredShopItems(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 2);
         loadROM(romName);
 
         Settings s = new Settings();
@@ -146,6 +149,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void canGuaranteeEvolutionItems(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 2);
         loadROM(romName);
 
         Settings s = new Settings();
@@ -176,6 +180,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void canGuaranteeXItems(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 2);
         loadROM(romName);
 
         Settings s = new Settings();
@@ -206,6 +211,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void canGuaranteeEvolutionAndXItems(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 2);
         loadROM(romName);
 
         Settings s = new Settings();

@@ -182,11 +182,6 @@ public interface RomHandler {
     // Pokemon Types
     // =============
 
-    // return a random type valid in this game.
-    Type randomType();
-
-    boolean typeInGame(Type type);
-
     // randomize Pokemon types, with a switch on whether evolutions
     // should follow the same types or not.
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
@@ -669,8 +664,6 @@ public interface RomHandler {
 
     void applyMiscTweak(MiscTweak tweak);
 
-    boolean isEffectivenessUpdated();
-
     void renderPlacementHistory();
 
     // ==========================
@@ -692,5 +685,26 @@ public interface RomHandler {
     void randomizePokemonPalettes(Settings settings);
 
     PaletteHandler getPaletteHandler();
+
+    // ======
+    // Types
+    // ======
+
+    /**
+     * return a random type valid in this game.
+     */
+    Type randomType();
+
+    boolean typeInGame(Type type);
+
+    TypeTable getTypeTable();
+
+    void setTypeTable(TypeTable typeTable);
+
+    void updateTypeEffectiveness();
+
+    void randomizeTypeEffectiveness(Settings settings);
+
+    boolean hasTypeEffectivenessSupport();
 
 }
