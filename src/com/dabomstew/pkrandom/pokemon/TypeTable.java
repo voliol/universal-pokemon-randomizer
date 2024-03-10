@@ -1,7 +1,6 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 import static com.dabomstew.pkrandom.pokemon.Effectiveness.*;
 

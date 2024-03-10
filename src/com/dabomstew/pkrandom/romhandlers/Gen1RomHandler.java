@@ -1937,7 +1937,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
-        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
 
         if (romEntry.getTweakFile("BWXPTweak") != null) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
@@ -1980,8 +1979,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             applyPikachuEvoPatch();
         } else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-            updateTypeEffectiveness();
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
         }

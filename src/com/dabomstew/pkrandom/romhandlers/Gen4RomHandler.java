@@ -4946,7 +4946,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
-        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (romEntry.hasTweakFile("FastestTextTweak")) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
@@ -4982,8 +4981,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             applyRunWithoutRunningShoesPatch();
         } else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
             patchFasterBars();
-        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-            updateTypeEffectiveness();
         } else if (tweak == MiscTweak.FAST_DISTORTION_WORLD) {
             applyFastDistortionWorld();
         } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
