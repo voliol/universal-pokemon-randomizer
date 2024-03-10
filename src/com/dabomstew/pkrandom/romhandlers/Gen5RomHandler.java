@@ -106,6 +106,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private boolean hiddenHollowCounted = false;
     private List<Integer> originalDoubleTrainers = new ArrayList<>();
     private int pickupItemsTableOffset;
+    private TypeTable typeTable;
     private long actualArm9CRC32;
     private Map<Integer, Long> actualOverlayCRC32s;
     private Map<String, Long> actualFileCRC32s;
@@ -2180,7 +2181,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public TypeTable getTypeTable() {
-        return readTypeTable();
+        if (typeTable == null) {
+            typeTable = readTypeTable();
+        }
+        return typeTable;
     }
 
     private TypeTable readTypeTable() {
@@ -2213,6 +2217,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void setTypeTable(TypeTable typeTable) {
+        this.typeTable = typeTable;
         writeTypeTable(typeTable);
     }
 
@@ -2236,6 +2241,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     battleOverlay[offset] = effectivenessInternal;
                 }
             }
+            writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }

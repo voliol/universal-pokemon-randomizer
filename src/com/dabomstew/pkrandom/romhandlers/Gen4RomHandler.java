@@ -102,6 +102,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	private ItemList allowedItems, nonBadItems;
 	private boolean roamerRandomizationEnabled;
 	private int pickupItemsTableOffset, rarePickupItemsTableOffset;
+	private TypeTable typeTable;
 	private long actualArm9CRC32;
 	private Map<Integer, Long> actualOverlayCRC32s;
 	private Map<String, Long> actualFileCRC32s;
@@ -5127,7 +5128,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public TypeTable getTypeTable() {
-		return readTypeTable();
+		if (typeTable == null) {
+			typeTable = readTypeTable();
+		}
+		return typeTable;
 	}
 
 	private TypeTable readTypeTable() {
@@ -5168,6 +5172,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public void setTypeTable(TypeTable typeTable) {
+		this.typeTable = typeTable;
 		writeTypeTable(typeTable);
 	}
 
@@ -5186,6 +5191,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 			prepareTypeTableParts(typeTable, mainPart, ghostImmunities);
 			writeTypeTableParts(battleOverlay, tableOffset, mainPart, ghostImmunities);
+
+			writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}

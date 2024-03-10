@@ -203,7 +203,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void reverseTypeEffectivenessWorks(String romName) {
+    public void invertTypeEffectivenessWorks(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
         ((AbstractRomHandler) romHandler).randomizeTypeEffectiveness(Settings.TypeEffectivenessMod.INVERSE, false);
@@ -229,7 +229,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void reverseTypeEffectivenessWithRandomImmsDoesNotChangeImmCount(String romName) {
+    public void invertTypeEffectivenessWithRandomImmsDoesNotChangeImmCount(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
         ((AbstractRomHandler) romHandler).randomizeTypeEffectiveness(Settings.TypeEffectivenessMod.INVERSE, true);
@@ -250,7 +250,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void reverseTypeEffectivenessWithRandomImmsChangesSEToImms(String romName) {
+    public void invertTypeEffectivenessWithRandomImmsChangesSEToImms(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
         ((AbstractRomHandler) romHandler).randomizeTypeEffectiveness(Settings.TypeEffectivenessMod.INVERSE, true);
