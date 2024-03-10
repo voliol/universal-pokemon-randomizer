@@ -488,6 +488,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
 
+    public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        throw new UnsupportedOperationException(); // TODO: for now
+    }
+
     @Override
     public abstract AbstractGBRomEntry getRomEntry();
 

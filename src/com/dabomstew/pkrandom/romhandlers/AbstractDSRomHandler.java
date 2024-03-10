@@ -486,7 +486,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     
 	@Override
 	protected List<BufferedImage> getAllPokemonImages() {
-        ripAllOtherPokes();
+//        ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
 		String NARCPath = getRomEntry().getFile("PokemonGraphics");
@@ -498,13 +498,29 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		}
 
 		for (Pokemon pk : getPokemonSet()) {
-			BufferedImage frontNormal = getPokemonImage(pk, pokeGraphicsNARC, false, false, false, true);
-			BufferedImage backNormal = getPokemonImage(pk, pokeGraphicsNARC, true, false, false, false);
-			BufferedImage frontShiny = getPokemonImage(pk, pokeGraphicsNARC, false, true, false, true);
-			BufferedImage backShiny = getPokemonImage(pk, pokeGraphicsNARC, true, true, false, false);
+            DSPokemonImageGetter pig = createPokemonImageGetter(pk);
+            pig.setPokeGraphicsNARC(pokeGraphicsNARC)
+                    .setGender(DSPokemonImageGetter.Gender.MALE)
+                    .setIncludePalette(true);
 
-			BufferedImage combined = GFXFunctions
-					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+			BufferedImage frontNormalM = pig.get();
+            BufferedImage backNormalM = pig.setBack(true).get();
+            BufferedImage backShinyM = pig.setShiny(true).get();
+            BufferedImage frontShinyM = pig.setBack(false).get();
+
+            BufferedImage combined;
+            if (pig.hasGenderedImages()) {
+                BufferedImage frontShinyF = pig.setGender(DSPokemonImageGetter.Gender.FEMALE).get();
+                BufferedImage backShinyF = pig.setBack(true).get();
+                BufferedImage backNormalF = pig.setShiny(false).get();
+                BufferedImage frontNormalF = pig.setBack(false).get();
+                combined = GFXFunctions
+                        .stitchToGrid(new BufferedImage[][] { { frontNormalM, backNormalM }, { frontNormalF, backNormalF },
+                                { frontShinyM, backShinyM }, { frontShinyF, backShinyF } });
+            } else {
+                combined = GFXFunctions
+                        .stitchToGrid(new BufferedImage[][] { { frontNormalM, backNormalM }, { frontShinyM, backShinyM }});
+            }
 			bims.add(combined);
 		}
 		return bims;
@@ -529,7 +545,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
     private void ripAndDumpOtherPokemon(NARCArchive pokeGraphicsNARC, int i) {
         BufferedImage bim = ripOtherPoke(i, pokeGraphicsNARC);
-        String fileAdress = "Pokemon_sprite_dump/gen" + generationOfPokemon() + "/"
+        String fileAdress = "Pokemon_image_dump/gen" + generationOfPokemon() + "/"
                 + String.format("a_%03d.png", i);
         File outputfile = new File(fileAdress);
         try {
@@ -548,26 +564,61 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		try {
-			Pokemon pk = randomPokemon();
-			String NARCpath = getRomEntry().getFile("PokemonGraphics");
-			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
-			boolean shiny = random.nextInt(10) == 0;
-
-			return getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
-		} catch (IOException e) {
-			throw new RandomizerIOException(e);
-		}
+        NARCArchive pokeGraphicsNARC;
+        try {
+            String NARCpath = getRomEntry().getFile("PokemonGraphics");
+            pokeGraphicsNARC = readNARC(NARCpath);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+        return createPokemonImageGetter(randomPokemon())
+                .setGender(DSPokemonImageGetter.Gender.values()[random.nextInt(2)])
+                .setPokeGraphicsNARC(pokeGraphicsNARC)
+                .setShiny(random.nextInt(10) == 0)
+                .get();
 	}
-    
-    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-	public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette);
 
-    // TODO: remove when done testing
-    public abstract BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-                                         boolean transparentBackground, boolean includePalette);
+    protected abstract DSPokemonImageGetter createPokemonImageGetter(Pokemon pk);
 
+    protected abstract class DSPokemonImageGetter extends PokemonImageGetter {
+        public enum Gender {MALE, FEMALE}
+
+        protected NARCArchive pokeGraphicsNARC;
+        protected Gender gender = Gender.FEMALE;
+        protected int forme;
+
+        public DSPokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        public DSPokemonImageGetter setPokeGraphicsNARC(NARCArchive pokeGraphicsNARC) {
+            this.pokeGraphicsNARC = pokeGraphicsNARC;
+            return this;
+        }
+
+        public DSPokemonImageGetter setForme(int forme) {
+            this.forme = forme;
+            return this;
+        }
+
+        public DSPokemonImageGetter setGender(Gender gender) {
+            this.gender = gender;
+            return this;
+        }
+
+        protected void beforeGet() {
+            if (pokeGraphicsNARC == null) {
+                try {
+                    String NARCpath = getRomEntry().getFile("PokemonGraphics");
+                    pokeGraphicsNARC = readNARC(NARCpath);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        public abstract boolean hasGenderedImages();
+    }
 
     @Override
     protected abstract AbstractDSRomEntry getRomEntry();

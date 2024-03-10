@@ -394,6 +394,10 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 	public abstract BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
 			boolean transparentBackground, boolean includePalette);
 
+	public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+		throw new UnsupportedOperationException(); // TODO: for now
+	}
+
 	// because RomEntry is an inner class it can't be accessed here 
 	// (or can it in ZX?), so an abstract method is needed.
 	// a refactoring might be better, but is outside of the scope for the changes

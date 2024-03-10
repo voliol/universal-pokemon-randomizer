@@ -5508,85 +5508,95 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return calculatePokemonNormalPaletteIndex(i) + 1;
 	}
 
-	@Override
-	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
-
-		int spriteIndex = pk.getNumber() * 6 + 2 + random.nextInt(2);
-		if (back) {
-			spriteIndex -= 2;
-		}
-		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
-
-		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
-		}
-
-		// Deliberately chop off the right half of the image while still
-		// correctly indexing the array.
-		int bpp = 4;
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
-		for (int y = 0; y < 80; y++) {
-			for (int x = 0; x < 80; x++) {
-				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-				bim.setRGB(x, y, convPalette[value]);
-			}
-		}
-
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
-			}
-		}
-
-		return bim;
+	protected Gen4PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+		return new Gen4PokemonImageGetter(pk);
 	}
 
-	// Temporary
-	@Override
-	public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-										 boolean transparentBackground, boolean includePalette) {
+	protected class Gen4PokemonImageGetter extends DSPokemonImageGetter {
 
-		int spriteIndex = number * 6 + 2 + random.nextInt(2);
-		if (back) {
-			spriteIndex -= 2;
-		}
-		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
-
-
-		int normalPaletteIndex = calculatePokemonNormalPaletteIndex(number);
-		Palette normalPalette = readPalette(pokeGraphicsNARC, normalPaletteIndex);
-		int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(number);
-		Palette shinyPalette = readPalette(pokeGraphicsNARC, shinyPaletteIndex);
-
-		Palette palette = shiny ? shinyPalette : normalPalette;
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
+		public Gen4PokemonImageGetter(Pokemon pk) {
+			super(pk);
 		}
 
-		// Deliberately chop off the right half of the image while still
-		// correctly indexing the array.
-		int bpp = 4;
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
-		for (int y = 0; y < 80; y++) {
-			for (int x = 0; x < 80; x++) {
-				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-				bim.setRGB(x, y, convPalette[value]);
+		@Override
+		public BufferedImage get() {
+			beforeGet();
+
+			int imageIndex = pk.getNumber() * 6 + 2;
+			if (gender == Gender.MALE) {
+				imageIndex++;
 			}
-		}
-
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
+			if (back) {
+				imageIndex -= 2;
 			}
+			int[] imageData = readImageData(pokeGraphicsNARC, imageIndex);
+
+			Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+			int[] convPalette = palette.toARGB();
+			if (transparentBackground) {
+				convPalette[0] = 0;
+			}
+
+			// Deliberately chop off the right half of the image while still
+			// correctly indexing the array.
+			int bpp = 4;
+			BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+					GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+			for (int y = 0; y < 80; y++) {
+				for (int x = 0; x < 80; x++) {
+					int value = ((imageData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+					bim.setRGB(x, y, convPalette[value]);
+				}
+			}
+
+			if (includePalette) {
+				for (int j = 0; j < 16; j++) {
+					bim.setRGB(j, 0, convPalette[j]);
+				}
+			}
+
+			return bim;
 		}
 
-		return bim;
+		private int[] readImageData(NARCArchive graphicsNARC, int imageIndex) {
+			// read sprite
+			byte[] rawImage = graphicsNARC.files.get(imageIndex);
+			if (rawImage.length == 0) {
+				// Must use other gender form
+				rawImage = graphicsNARC.files.get(imageIndex ^ 1);
+			}
+			int[] imageData = new int[3200];
+			for (int i = 0; i < 3200; i++) {
+				imageData[i] = readWord(rawImage, i * 2 + 48);
+			}
+
+			// Decrypt image (why does EVERYTHING use the RNG formula geez)
+			if (romEntry.getRomType() != Gen4Constants.Type_DP) {
+				int key = imageData[0];
+				for (int i = 0; i < 3200; i++) {
+					imageData[i] ^= (key & 0xFFFF);
+					key = key * 0x41C64E6D + 0x6073;
+				}
+			} else {
+				// D/P images are encrypted *backwards*. Wut.
+				int key = imageData[3199];
+				for (int i = 3199; i >= 0; i--) {
+					imageData[i] ^= (key & 0xFFFF);
+					key = key * 0x41C64E6D + 0x6073;
+				}
+			}
+			return imageData;
+		}
+
+		@Override
+		public boolean hasGenderedImages() {
+			beforeGet();
+			int imageIndex = pk.getNumber() * 6 + 2;
+			byte[] rawImageFemale = pokeGraphicsNARC.files.get(imageIndex);
+			byte[] rawImageMale = pokeGraphicsNARC.files.get(imageIndex + 1);
+			return rawImageFemale.length != 0 && rawImageMale.length != 0
+					&& !Arrays.equals(rawImageFemale, rawImageMale);
+		}
 	}
 
 	//TODO: remove
@@ -5650,12 +5660,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return bim;
 	}
 
-	private int[] readSpriteData(NARCArchive pokespritesNARC, int spriteIndex) {
+	// TODO: remove
+	private int[] readSpriteData(NARCArchive graphicsNARC, int spriteIndex) {
 		// read sprite
-		byte[] rawSprite = pokespritesNARC.files.get(spriteIndex);
+		byte[] rawSprite = graphicsNARC.files.get(spriteIndex);
 		if (rawSprite.length == 0) {
 			// Must use other gender form
-			rawSprite = pokespritesNARC.files.get(spriteIndex ^ 1);
+			rawSprite = graphicsNARC.files.get(spriteIndex ^ 1);
 		}
 		int[] spriteData = new int[3200];
 		for (int i = 0; i < 3200; i++) {

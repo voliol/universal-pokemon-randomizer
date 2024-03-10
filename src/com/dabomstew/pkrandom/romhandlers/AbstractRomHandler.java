@@ -7298,7 +7298,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<BufferedImage> bims = getAllPokemonImages();
 
         for (int i = 0; i < bims.size(); i++) {
-            String fileAdress = "Pokemon_sprite_dump/gen" + generationOfPokemon() + "/"
+            String fileAdress = "Pokemon_image_dump/gen" + generationOfPokemon() + "/"
                     + String.format("%03d_d.png", i + 1);
             File outputfile = new File(fileAdress);
             try {
@@ -7311,6 +7311,42 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     protected abstract List<BufferedImage> getAllPokemonImages();
+
+    protected abstract static class PokemonImageGetter {
+        protected Pokemon pk;
+        protected boolean back;
+        protected boolean shiny;
+        protected boolean transparentBackground;
+        protected boolean includePalette;
+
+        public PokemonImageGetter(Pokemon pk) {
+            this.pk = pk;
+        }
+
+        public PokemonImageGetter setBack(boolean back) {
+            this.back = back;
+            return this;
+        }
+
+        public PokemonImageGetter setShiny(boolean shiny) {
+            this.shiny = shiny;
+            return this;
+        }
+
+        public PokemonImageGetter setTransparentBackground(boolean transparentBackground) {
+            this.transparentBackground = transparentBackground;
+            return this;
+        }
+
+        public PokemonImageGetter setIncludePalette(boolean includePalette) {
+            this.includePalette = includePalette;
+            return this;
+        }
+
+        public abstract BufferedImage get();
+    }
+
+    protected abstract PokemonImageGetter createPokemonImageGetter(Pokemon pk);
 
     public abstract void savePokemonPalettes();
 
