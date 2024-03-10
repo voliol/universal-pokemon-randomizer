@@ -333,11 +333,11 @@ public class Settings {
     private boolean banBadRandomPickupItems;
 
     public enum TypeEffectivenessMod {
-        UNCHANGED, RANDOM, RANDOM_BALANCED, KEEP_IDENTITIES, REVERSE
+        UNCHANGED, RANDOM, RANDOM_BALANCED, KEEP_IDENTITIES, INVERSE
     }
 
     private TypeEffectivenessMod typeEffectivenessMod = TypeEffectivenessMod.UNCHANGED;
-    private boolean reverseTypesRandomImmunities;
+    private boolean inverseTypesRandomImmunities;
     private boolean updateTypeEffectiveness;
 
     public enum PokemonPalettesMod {
@@ -646,8 +646,8 @@ public class Settings {
                 typeEffectivenessMod == TypeEffectivenessMod.RANDOM,
                 typeEffectivenessMod == TypeEffectivenessMod.RANDOM_BALANCED,
                 typeEffectivenessMod == TypeEffectivenessMod.KEEP_IDENTITIES,
-                typeEffectivenessMod == TypeEffectivenessMod.REVERSE,
-                reverseTypesRandomImmunities, updateTypeEffectiveness));
+                typeEffectivenessMod == TypeEffectivenessMod.INVERSE,
+                inverseTypesRandomImmunities, updateTypeEffectiveness));
 
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
@@ -976,7 +976,7 @@ public class Settings {
                 3, // KEEP_IDENTITIES
                 4  // REVERSE
         ));
-        settings.setReverseTypesRandomImmunities(restoreState(data[55], 5));
+        settings.setInverseTypesRandomImmunities(restoreState(data[55], 5));
         settings.setUpdateTypeEffectiveness(restoreState(data[55], 6));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
@@ -2500,12 +2500,12 @@ public class Settings {
         this.typeEffectivenessMod = typeEffectivenessMod;
     }
 
-    public boolean isReverseTypesRandomImmunities() {
-        return reverseTypesRandomImmunities;
+    public boolean isInverseTypesRandomImmunities() {
+        return inverseTypesRandomImmunities;
     }
 
-    public void setReverseTypesRandomImmunities(boolean reverseTypesRandomImmunities) {
-        this.reverseTypesRandomImmunities = reverseTypesRandomImmunities;
+    public void setInverseTypesRandomImmunities(boolean inverseTypesRandomImmunities) {
+        this.inverseTypesRandomImmunities = inverseTypesRandomImmunities;
     }
 
     public boolean isUpdateTypeEffectiveness() {

@@ -100,17 +100,11 @@ public class Randomizer {
             romHandler.updateTypeEffectiveness();
             typeEffectivenessChanged = true;
         }
-        switch (settings.getTypeEffectivenessMod()) {
-            case RANDOM -> romHandler.randomizeTypeEffectiveness(false);
-            case RANDOM_BALANCED -> romHandler.randomizeTypeEffectiveness(true);
-            case KEEP_IDENTITIES -> romHandler.randomizeTypeEffectivenessKeepIdentities();
-            case REVERSE -> romHandler.reverseTypeEffectiveness(settings.isReverseTypesRandomImmunities());
-        }
         if (settings.getTypeEffectivenessMod() != Settings.TypeEffectivenessMod.UNCHANGED) {
+            romHandler.randomizeTypeEffectiveness(settings);
             typeEffectivenessChanged = true;
         }
         if (typeEffectivenessChanged) {
-            // TODO: is this logging good?
             log.println("--Type Effectiveness--");
             log.println(romHandler.getTypeTable().toBigString() + NEWLINE);
         }

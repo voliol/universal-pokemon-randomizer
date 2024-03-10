@@ -1960,7 +1960,7 @@ public class NewRandomizerGUI {
 
         settings.setTypeEffectivenessMod(teUnchangedRadioButton.isSelected(), teRandomRadioButton.isSelected(),
                 teRandomBalancedRadioButton.isSelected(), teKeepTypeIdentitiesRadioButton.isSelected(), teInverseRadioButton.isSelected());
-        settings.setReverseTypesRandomImmunities(teAddRandomImmunitiesCheckBox.isSelected());
+        settings.setInverseTypesRandomImmunities(teAddRandomImmunitiesCheckBox.isSelected());
         settings.setUpdateTypeEffectiveness(teUpdateTypeEffectivenessCheckbox.isSelected());
 
         settings.setPokemonPalettesMod(ppalUnchangedRadioButton.isSelected(), ppalRandomRadioButton.isSelected());

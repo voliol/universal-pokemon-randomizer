@@ -703,11 +703,7 @@ public interface RomHandler {
 
     void updateTypeEffectiveness();
 
-    void randomizeTypeEffectiveness(boolean balanced);
-
-    void randomizeTypeEffectivenessKeepIdentities();
-
-    void reverseTypeEffectiveness(boolean randomImmunities);
+    void randomizeTypeEffectiveness(Settings settings);
 
     boolean hasTypeEffectivenessSupport();
 

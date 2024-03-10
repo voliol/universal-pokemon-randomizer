@@ -6882,8 +6882,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeTypeEffectiveness(boolean balanced) {
-        new TypeEffectivenessRandomizer().randomizeTypeEffectiveness(balanced, false);
+    public void randomizeTypeEffectiveness(Settings settings) {
+        Settings.TypeEffectivenessMod mod = settings.getTypeEffectivenessMod();
+        boolean randomImmunities = settings.isInverseTypesRandomImmunities();
+    }
+
+    public void randomizeTypeEffectiveness(Settings.TypeEffectivenessMod mod, boolean randomImmunities) {
+        TypeEffectivenessRandomizer ter = new TypeEffectivenessRandomizer();
+        switch (mod) {
+            case UNCHANGED -> {}
+            case RANDOM -> ter.randomizeTypeEffectiveness(false);
+            case RANDOM_BALANCED -> ter.randomizeTypeEffectiveness(true);
+            case KEEP_IDENTITIES -> ter.randomizeTypeEffectivenessKeepIdentities();
+            case INVERSE -> ter.invertTypeEffectiveness(randomImmunities);
+        }
     }
 
     private class TypeEffectivenessRandomizer {
@@ -6902,7 +6914,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         private int placementTries;
 
-        public void randomizeTypeEffectiveness(boolean balanced, boolean keepIdentities) {
+        public void randomizeTypeEffectiveness(boolean balanced) {
             this.balanced = balanced;
             oldTable = getTypeTable();
             typeTable = new TypeTable(oldTable.getTypes());
@@ -6969,87 +6981,85 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             return true;
         }
-    }
 
-    // Due to how the algorithm below works the final TypeTable will be weighted unevenly towards TypeTables
-    // that are more similar to the original one. If this constant is large enough though, that unevenness
-    // will be negligible. It's basically a sort of random walk, where we are more likely to be near the starting
-    // point the fewer steps we take. The tradeoff for better randomness being the algorithm taking more time.
-    private static final int TYPES_KEEP_IDENTITIES_SWAPS = 10000;
+        // Due to how the algorithm below works the final TypeTable will be weighted unevenly towards TypeTables
+        // that are more similar to the original one. If this constant is large enough though, that unevenness
+        // will be negligible. It's basically a sort of random walk, where we are more likely to be near the starting
+        // point the fewer steps we take. The tradeoff for better randomness being the algorithm taking more time.
+        private static final int TYPES_KEEP_IDENTITIES_SWAPS = 10000;
 
-    @Override
-    public void randomizeTypeEffectivenessKeepIdentities() {
-        TypeTable typeTable = new TypeTable(getTypeTable());
+        public void randomizeTypeEffectivenessKeepIdentities() {
+            TypeTable typeTable = new TypeTable(getTypeTable());
 
-        int swapsDone = 0;
-        while (swapsDone < TYPES_KEEP_IDENTITIES_SWAPS) {
-            Type colA = randomType();
-            Type colB = randomType();
+            int swapsDone = 0;
+            while (swapsDone < TYPES_KEEP_IDENTITIES_SWAPS) {
+                Type colA = randomType();
+                Type colB = randomType();
 
-            int chunkSize = random.nextInt(typeTable.getTypes().size());
-            Set<Type> chunk = new HashSet<>(chunkSize);
-            while (chunk.size() < chunkSize) {
-                chunk.add(randomType());
-            }
+                int chunkSize = random.nextInt(typeTable.getTypes().size());
+                Set<Type> chunk = new HashSet<>(chunkSize);
+                while (chunk.size() < chunkSize) {
+                    chunk.add(randomType());
+                }
 
-            if (typeTableChunkCanBeSwapped(typeTable, colA, colB, chunk)) {
-                swapTypeTableChunk(typeTable, colA, colB, chunk);
-                swapsDone++;
-            }
-        }
-
-        setTypeTable(typeTable);
-    }
-
-    private boolean typeTableChunkCanBeSwapped(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
-        int[] effCountsA = new int[Effectiveness.values().length];
-        int[] effCountsB = new int[Effectiveness.values().length];
-        for (Type t : chunk) {
-            effCountsA[typeTable.getEffectiveness(t, colA).ordinal()]++;
-            effCountsB[typeTable.getEffectiveness(t, colB).ordinal()]++;
-        }
-        return Arrays.equals(effCountsA, effCountsB);
-    }
-
-    private void swapTypeTableChunk(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
-        for (Type t : chunk) {
-            Effectiveness storage = typeTable.getEffectiveness(t, colA);
-            typeTable.setEffectiveness(t, colA, typeTable.getEffectiveness(t, colB));
-            typeTable.setEffectiveness(t, colB, storage);
-        }
-    }
-
-    @Override
-    public void reverseTypeEffectiveness(boolean randomImmunities) {
-        TypeTable typeTable = getTypeTable();
-        int immCount = 0;
-        LinkedList<Type[]> sePairs = new LinkedList<>();
-        for (Type attacker : typeTable.getTypes()) {
-            for (Type defender : typeTable.getTypes()) {
-
-                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
-                if (eff == Effectiveness.ZERO) {
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
-                    immCount++;
-                } else if (eff == Effectiveness.HALF) {
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
-                } else if (eff == Effectiveness.DOUBLE) {
-                    typeTable.setEffectiveness(attacker, defender, Effectiveness.HALF);
-                    sePairs.add(new Type[]{attacker, defender});
+                if (typeTableChunkCanBeSwapped(typeTable, colA, colB, chunk)) {
+                    swapTypeTableChunk(typeTable, colA, colB, chunk);
+                    swapsDone++;
                 }
             }
+
+            setTypeTable(typeTable);
         }
-        if (randomImmunities) {
-            if (sePairs.size() < immCount) {
-                throw new RuntimeException("Too few super-effectives to turn into immunities...");
+
+        private boolean typeTableChunkCanBeSwapped(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
+            int[] effCountsA = new int[Effectiveness.values().length];
+            int[] effCountsB = new int[Effectiveness.values().length];
+            for (Type t : chunk) {
+                effCountsA[typeTable.getEffectiveness(t, colA).ordinal()]++;
+                effCountsB[typeTable.getEffectiveness(t, colB).ordinal()]++;
             }
-            for (int i = 0; i < immCount; i++) {
-                Type[] sePair = sePairs.remove(random.nextInt(sePairs.size()));
-                typeTable.setEffectiveness(sePair[0], sePair[1], Effectiveness.ZERO);
+            return Arrays.equals(effCountsA, effCountsB);
+        }
+
+        private void swapTypeTableChunk(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
+            for (Type t : chunk) {
+                Effectiveness storage = typeTable.getEffectiveness(t, colA);
+                typeTable.setEffectiveness(t, colA, typeTable.getEffectiveness(t, colB));
+                typeTable.setEffectiveness(t, colB, storage);
             }
         }
 
-        setTypeTable(typeTable);
+        public void invertTypeEffectiveness(boolean randomImmunities) {
+            TypeTable typeTable = getTypeTable();
+            int immCount = 0;
+            LinkedList<Type[]> sePairs = new LinkedList<>();
+            for (Type attacker : typeTable.getTypes()) {
+                for (Type defender : typeTable.getTypes()) {
+
+                    Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                    if (eff == Effectiveness.ZERO) {
+                        typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                        immCount++;
+                    } else if (eff == Effectiveness.HALF) {
+                        typeTable.setEffectiveness(attacker, defender, Effectiveness.DOUBLE);
+                    } else if (eff == Effectiveness.DOUBLE) {
+                        typeTable.setEffectiveness(attacker, defender, Effectiveness.HALF);
+                        sePairs.add(new Type[]{attacker, defender});
+                    }
+                }
+            }
+            if (randomImmunities) {
+                if (sePairs.size() < immCount) {
+                    throw new RuntimeException("Too few super-effectives to turn into immunities...");
+                }
+                for (int i = 0; i < immCount; i++) {
+                    Type[] sePair = sePairs.remove(random.nextInt(sePairs.size()));
+                    typeTable.setEffectiveness(sePair[0], sePair[1], Effectiveness.ZERO);
+                }
+            }
+
+            setTypeTable(typeTable);
+        }
     }
 
     /* Default Implementations */
