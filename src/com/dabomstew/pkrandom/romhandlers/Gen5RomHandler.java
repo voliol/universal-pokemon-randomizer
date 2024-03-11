@@ -3949,10 +3949,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             beforeGet();
 
             int spriteIndex = pk.getNumber() * 20;
+
+            List<Integer> valid = new ArrayList<>();
+            for (int i = 0; i < 20; i++) {
+                byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex + i);
+                if (compressedPic.length != 0) {
+                    valid.add(i);
+                }
+            }
+            System.out.println(pk.getName() + "\t" + valid);
+
+            if (hasGenderedImages() && gender == Gender.FEMALE) {
+                spriteIndex++;
+            }
             if (back) {
                 spriteIndex += 9;
             }
-            // TODO: gender
             // TODO: full sheets
             byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
             byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
@@ -3999,7 +4011,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         @Override
         public boolean hasGenderedImages() {
-            return false; // TODO
+            int imageIndex = pk.getNumber() * 20 + 1;
+            byte[] imageData = pokeGraphicsNARC.files.get(imageIndex);
+            return imageData.length != 0;
         }
     }
     

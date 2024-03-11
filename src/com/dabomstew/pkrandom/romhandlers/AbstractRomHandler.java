@@ -7294,7 +7294,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public abstract PaletteHandler getPaletteHandler();
 
     // just for testing
-    protected final void dumpAllPokemonSprites() {
+    public final void dumpAllPokemonSprites() {
         List<BufferedImage> bims = getAllPokemonImages();
 
         for (int i = 0; i < bims.size(); i++) {

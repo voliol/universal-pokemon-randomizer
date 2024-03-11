@@ -572,9 +572,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             throw new RandomizerIOException(e);
         }
         return createPokemonImageGetter(randomPokemon())
-                .setGender(DSPokemonImageGetter.Gender.values()[random.nextInt(2)])
                 .setPokeGraphicsNARC(pokeGraphicsNARC)
+                .setGender(DSPokemonImageGetter.Gender.values()[random.nextInt(2)])
                 .setShiny(random.nextInt(10) == 0)
+                .setTransparentBackground(true)
                 .get();
 	}
 
