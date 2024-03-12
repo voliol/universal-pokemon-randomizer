@@ -366,8 +366,8 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			throw new RandomizerIOException(e);
 		}
 
-		for (Pokemon pk : getPokemonSet()) {
-			BufferedImage icon = getPokemonIcon(pk, pokeGraphicsGARC, false, true);
+		for (int i = 1; i < pokeGraphicsGARC.files.size(); i++) {
+			BufferedImage icon = getPokemonIcon(i, pokeGraphicsGARC, false, true);
 			bims.add(icon);
 		}
 		return bims;
@@ -391,11 +391,16 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		}
 	}
 
+	public abstract BufferedImage getPokemonIcon(int pkIndex, GARCArchive pokeGraphicsGARC,
+												 boolean transparentBackground, boolean includePalette);
+
 	public abstract BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
 			boolean transparentBackground, boolean includePalette);
 
 	public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
-		throw new UnsupportedOperationException(); // TODO: for now
+		// No PokemonImageGetter for the 3DS games for now, in part because they can only get icons,
+		// and in part because there's no code to get the icon(s) of a specific Pokemon.
+		throw new UnsupportedOperationException();
 	}
 
 	// because RomEntry is an inner class it can't be accessed here 

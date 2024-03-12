@@ -3482,6 +3482,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public BufferedImage getPokemonIcon(int pkIndex, GARCArchive pokeGraphicsGARC,
+                                        boolean transparentBackground, boolean includePalette) {
+        byte[] iconBytes = pokeGraphicsGARC.files.get(pkIndex).get(0);
+        BFLIM icon = new BFLIM(iconBytes);
+        return icon.getImage();
+    }
+
+    @Override
 	public BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
 			boolean transparentBackground, boolean includePalette) {
 

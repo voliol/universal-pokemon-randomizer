@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
+import com.dabomstew.pkrandom.romhandlers.PokemonImageGetter;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
 import java.awt.image.BufferedImage;
@@ -24,6 +25,11 @@ public class TestRomHandler extends AbstractRomHandler {
 
     @Override
     protected List<BufferedImage> getAllPokemonImages() {
+        return null;
+    }
+
+    @Override
+    public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
         return null;
     }
 
