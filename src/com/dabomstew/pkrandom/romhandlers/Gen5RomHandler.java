@@ -3934,11 +3934,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected Gen5PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+    public Gen5PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
         return new Gen5PokemonImageGetter(pk);
     }
 
-    protected class Gen5PokemonImageGetter extends DSPokemonImageGetter {
+    public class Gen5PokemonImageGetter extends DSPokemonImageGetter {
+
+        // TODO: getting the full animation sheets
+        // These are 64x144 pixel images, stored 2 files after their respective non-animated image.
+        // They are LZ11-compressed, and has what Tinke calls a "lineal" image pattern, as opposed to
+        // the common "horizontal" one.
+        // Methods for reading the "lineal" images are needed.
 
         public Gen5PokemonImageGetter(Pokemon pk) {
             super(pk);
@@ -3950,22 +3956,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             int spriteIndex = pk.getNumber() * 20;
 
-            List<Integer> valid = new ArrayList<>();
-            for (int i = 0; i < 20; i++) {
-                byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex + i);
-                if (compressedPic.length != 0) {
-                    valid.add(i);
-                }
-            }
-            System.out.println(pk.getName() + "\t" + valid);
-
             if (hasGenderedImages() && gender == Gender.FEMALE) {
                 spriteIndex++;
             }
             if (back) {
                 spriteIndex += 9;
             }
-            // TODO: full sheets
             byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
             byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
 

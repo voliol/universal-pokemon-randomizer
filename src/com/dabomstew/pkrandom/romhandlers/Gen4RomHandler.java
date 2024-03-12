@@ -5508,11 +5508,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return calculatePokemonNormalPaletteIndex(i) + 1;
 	}
 
-	protected Gen4PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+	public Gen4PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
 		return new Gen4PokemonImageGetter(pk);
 	}
 
-	protected class Gen4PokemonImageGetter extends DSPokemonImageGetter {
+	public class Gen4PokemonImageGetter extends DSPokemonImageGetter {
 
 		public Gen4PokemonImageGetter(Pokemon pk) {
 			super(pk);

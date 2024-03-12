@@ -4178,43 +4178,53 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 	}
-    
+
     @Override
-    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
-            boolean includePalette) {
+    public Gen3PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen3PokemonImageGetter(pk);
+    }
 
-        int num = pokedexToInternal[pk.getNumber()];
-        int sprites = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");
+    public class Gen3PokemonImageGetter extends PokemonImageGetter {
 
-        int spriteOffset = readPointer(sprites + num * 8);
-        byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
-        // Uses the 0-index missingno sprite if the data failed to read, for debugging
-        // purposes
-        if (trueSprite == null) {
-            spriteOffset = readPointer(sprites);
-            trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+        public Gen3PokemonImageGetter(Pokemon pk) {
+            super(pk);
         }
 
-        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        int[] convPalette = palette.toARGB();
-        if (transparentBackground) {
-            convPalette[0] = 0;
-        }
-        // Castform has a 64-color palette, 16 colors for each form.
-        if (pk.getNumber() == Species.castform) {
-        	convPalette = Arrays.copyOfRange(convPalette, 0, 16);
-        }
+        @Override
+        public BufferedImage get() {
+            int num = pokedexToInternal[pk.getNumber()];
+            int sprites = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");
 
-        // Make image, 4bpp
-        BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
-
-        if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
+            int spriteOffset = readPointer(sprites + num * 8);
+            byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging
+            // purposes
+            if (trueSprite == null) {
+                spriteOffset = readPointer(sprites);
+                trueSprite = DSDecmp.Decompress(rom, spriteOffset);
             }
-        }
 
-        return bim;
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            int[] convPalette = palette.toARGB();
+            if (transparentBackground) {
+                convPalette[0] = 0;
+            }
+            // Castform has a 64-color palette, 16 colors for each form.
+            if (pk.getNumber() == Species.castform) {
+                convPalette = Arrays.copyOfRange(convPalette, 0, 16);
+            }
+
+            // Make image, 4bpp
+            BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
+
+            if (includePalette) {
+                for (int j = 0; j < convPalette.length; j++) {
+                    bim.setRGB(j, 0, convPalette[j]);
+                }
+            }
+
+            return bim;
+        }
     }
 
     private String getPaletteFilesID() {

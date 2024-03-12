@@ -2862,49 +2862,61 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
-        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
-        // There is no zero-entry.
-        int picPointer;
-        if (pk.getNumber() == Species.unown) {
-            int unownLetter = random.nextInt(Gen2Constants.unownFormeCount);
-            picPointer = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
-        } else {
-            picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
-        }
-        if (back) {
-            picPointer += 3;
+    public Gen2PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen2PokemonImageGetter(pk);
+    }
+
+    public class Gen2PokemonImageGetter extends PokemonImageGetter {
+
+        public Gen2PokemonImageGetter(Pokemon pk) {
+            super(pk);
         }
 
-        int picWidth = back ? 6 : pk.getPicDimensions() & 0x0F;
-        int picHeight = back ? 6 : (pk.getPicDimensions() >> 4) & 0x0F;
-
-        byte[] data;
-        try {
-            data = readSpriteData(picPointer, picWidth, picHeight);
-        } catch (Exception e) {
-            return null;
-        }
-        int w = picWidth * 8;
-        int h = picHeight * 8;
-
-        // White and black are always in the palettes at positions 0 and 3, 
-        // so only the middle colors are stored and need to be read.
-        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
-
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
-
-        if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
-        }
-        if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
+        @Override
+        public BufferedImage get() {
+            // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
+            // There is no zero-entry.
+            int picPointer;
+            if (pk.getNumber() == Species.unown) {
+                int unownLetter = random.nextInt(Gen2Constants.unownFormeCount);
+                picPointer = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
+            } else {
+                picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
             }
-        }
+            if (back) {
+                picPointer += 3;
+            }
 
-        return bim;
+            int picWidth = back ? 6 : pk.getPicDimensions() & 0x0F;
+            int picHeight = back ? 6 : (pk.getPicDimensions() >> 4) & 0x0F;
+
+            byte[] data;
+            try {
+                data = readSpriteData(picPointer, picWidth, picHeight);
+            } catch (Exception e) {
+                return null;
+            }
+            int w = picWidth * 8;
+            int h = picHeight * 8;
+
+            // White and black are always in the palettes at positions 0 and 3,
+            // so only the middle colors are stored and need to be read.
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
+
+            BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
+
+            if (transparentBackground) {
+                bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
+            }
+            if (includePalette) {
+                for (int j = 0; j < convPalette.length; j++) {
+                    bim.setRGB(j, 0, convPalette[j]);
+                }
+            }
+
+            return bim;
+        }
     }
 
     private byte[] readSpriteData(int picPointer, int picWidth, int picHeight) {

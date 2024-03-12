@@ -7312,42 +7312,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     protected abstract List<BufferedImage> getAllPokemonImages();
 
-    protected abstract static class PokemonImageGetter {
-        protected Pokemon pk;
-        protected boolean back;
-        protected boolean shiny;
-        protected boolean transparentBackground;
-        protected boolean includePalette;
-
-        public PokemonImageGetter(Pokemon pk) {
-            this.pk = pk;
-        }
-
-        public PokemonImageGetter setBack(boolean back) {
-            this.back = back;
-            return this;
-        }
-
-        public PokemonImageGetter setShiny(boolean shiny) {
-            this.shiny = shiny;
-            return this;
-        }
-
-        public PokemonImageGetter setTransparentBackground(boolean transparentBackground) {
-            this.transparentBackground = transparentBackground;
-            return this;
-        }
-
-        public PokemonImageGetter setIncludePalette(boolean includePalette) {
-            this.includePalette = includePalette;
-            return this;
-        }
-
-        public abstract BufferedImage get();
-    }
-
-    protected abstract PokemonImageGetter createPokemonImageGetter(Pokemon pk);
-
     public abstract void savePokemonPalettes();
 
     @Override

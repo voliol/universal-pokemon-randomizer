@@ -485,25 +485,25 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
     
 	@Override
-	protected List<BufferedImage> getAllPokemonImages() {
+    protected List<BufferedImage> getAllPokemonImages() {
 //        ripAllOtherPokes();
-		List<BufferedImage> bims = new ArrayList<>();
+        List<BufferedImage> bims = new ArrayList<>();
 
-		String NARCPath = getRomEntry().getFile("PokemonGraphics");
-		NARCArchive pokeGraphicsNARC;
-		try {
-			pokeGraphicsNARC = readNARC(NARCPath);
-		} catch (IOException e) {
-			throw new RandomizerIOException(e);
-		}
+        String NARCPath = getRomEntry().getFile("PokemonGraphics");
+        NARCArchive pokeGraphicsNARC;
+        try {
+            pokeGraphicsNARC = readNARC(NARCPath);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
 
-		for (Pokemon pk : getPokemonSet()) {
+        for (Pokemon pk : getPokemonSet()) {
             DSPokemonImageGetter pig = createPokemonImageGetter(pk);
             pig.setPokeGraphicsNARC(pokeGraphicsNARC)
                     .setGender(DSPokemonImageGetter.Gender.MALE)
                     .setIncludePalette(true);
 
-			BufferedImage frontNormalM = pig.get();
+            BufferedImage frontNormalM = pig.get();
             BufferedImage backNormalM = pig.setBack(true).get();
             BufferedImage backShinyM = pig.setShiny(true).get();
             BufferedImage frontShinyM = pig.setBack(false).get();
@@ -515,16 +515,16 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
                 BufferedImage backNormalF = pig.setShiny(false).get();
                 BufferedImage frontNormalF = pig.setBack(false).get();
                 combined = GFXFunctions
-                        .stitchToGrid(new BufferedImage[][] { { frontNormalM, backNormalM }, { frontNormalF, backNormalF },
-                                { frontShinyM, backShinyM }, { frontShinyF, backShinyF } });
+                        .stitchToGrid(new BufferedImage[][]{{frontNormalM, backNormalM}, {frontNormalF, backNormalF},
+                                {frontShinyM, backShinyM}, {frontShinyF, backShinyF}});
             } else {
                 combined = GFXFunctions
-                        .stitchToGrid(new BufferedImage[][] { { frontNormalM, backNormalM }, { frontShinyM, backShinyM }});
+                        .stitchToGrid(new BufferedImage[][]{{frontNormalM, backNormalM}, {frontShinyM, backShinyM}});
             }
-			bims.add(combined);
-		}
-		return bims;
-	}
+            bims.add(combined);
+        }
+        return bims;
+    }
 
     private void ripAllOtherPokes() {
         String NARCPath = getRomEntry().getFile("OtherPokemonGraphics");
@@ -558,12 +558,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     protected abstract BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC);
 
     @Override
-	public final BufferedImage getMascotImage() {
-		try {
-			dumpAllPokemonSprites();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    public final BufferedImage getMascotImage() {
+        try {
+            dumpAllPokemonSprites();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         NARCArchive pokeGraphicsNARC;
         try {
             String NARCpath = getRomEntry().getFile("PokemonGraphics");
@@ -577,11 +577,11 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
                 .setShiny(random.nextInt(10) == 0)
                 .setTransparentBackground(true)
                 .get();
-	}
+    }
 
-    protected abstract DSPokemonImageGetter createPokemonImageGetter(Pokemon pk);
+    public abstract DSPokemonImageGetter createPokemonImageGetter(Pokemon pk);
 
-    protected abstract class DSPokemonImageGetter extends PokemonImageGetter {
+    public abstract class DSPokemonImageGetter extends PokemonImageGetter {
         public enum Gender {MALE, FEMALE}
 
         protected NARCArchive pokeGraphicsNARC;

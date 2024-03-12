@@ -61,12 +61,7 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 //import com.dabomstew.pkrandom.gui.ROMFilter;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
-import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
-import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.romhandlers.*;
 
 // TODO: show the name of the loaded ROM/desc file
 
@@ -435,23 +430,10 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	}
 
 	private BufferedImage getPokemonImage(Pokemon pk, boolean shiny) {
-		BufferedImage front = null;
-		BufferedImage back = null;
-		if (romHandler instanceof AbstractGBRomHandler gbRomHandler) {
-			front = gbRomHandler.getPokemonImage(pk, false, shiny, false, false);
-			back = gbRomHandler.getPokemonImage(pk, true, shiny, false, false);
-		} else if (romHandler instanceof AbstractDSRomHandler dsRomHandler) {
-//			String NARCpath = dsRomHandler.getNARCPath("PokemonGraphics"); //TODO: getNARCPath does not exist any more
-//			NARCArchive pokeGraphicsNARC = null;
-//			try {
-//				pokeGraphicsNARC = dsRomHandler.readNARC(NARCpath);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			front = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, false, shiny, false, false);
-//			back = dsRomHandler.getPokemonImage(pk, pokeGraphicsNARC, true, shiny, false, false);
-		}
+		PokemonImageGetter pig = romHandler.createPokemonImageGetter(pk);
+		pig.setShiny(shiny);
+		BufferedImage front = pig.get();
+		BufferedImage back = pig.setBack(true).get();
 		return GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back}});
 	}
 

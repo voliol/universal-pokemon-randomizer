@@ -681,6 +681,8 @@ public interface RomHandler {
     // ========
     // Graphics
     // ========
+
+    PokemonImageGetter createPokemonImageGetter(Pokemon pk);
     
     void randomizePokemonPalettes(Settings settings);
 

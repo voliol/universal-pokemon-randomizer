@@ -2657,56 +2657,69 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new Palette(paletteBytes);
     }
 
-	@Override
-	public BufferedImage getPokemonImage(Pokemon uncheckedPk, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
-		if (!(uncheckedPk instanceof Gen1Pokemon pk)) {
-			throw new IllegalArgumentException("Argument \"uncheckedPk\" is not a Gen1Pokemon");
-		}
-		if (shiny) {
-			return null;
-		}
-    	
-		// assumes the backsprites are in the same bank as the frontSprites
-		int spriteBank = calculateFrontSpriteBank(pk);
-		int spriteOffset = calculateOffset(back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer(), spriteBank);
+    @Override
+    public Gen1PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen1PokemonImageGetter(pk);
+    }
 
-		Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
-		sprite.decompress();
-		sprite.transpose();
-		int w = sprite.getWidth();
-		int h = sprite.getHeight();
+    public class Gen1PokemonImageGetter extends PokemonImageGetter {
+        private final Gen1Pokemon pk;
 
-		byte[] data = sprite.getFlattenedData();
-
-        // Palette?
-        int[] convPalette;
-        if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
-            int palIndex = pk.getPaletteID().ordinal();
-            int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
-            if (romEntry.isYellow() && romEntry.isNonJapanese()) {
-                // Non-japanese Yellow can use GBC palettes instead.
-                // Stored directly after regular SGB palettes.
-                palOffset += 320;
+        public Gen1PokemonImageGetter(Pokemon pk) {
+            super(pk);
+            if (!(pk instanceof Gen1Pokemon gen1Pk)) {
+                throw new IllegalArgumentException("Argument \"pk\" is not a Gen1Pokemon");
             }
-            Palette palette = read4ColorPalette(palOffset);
-            convPalette = palette.toARGB();
-        } else {
-            convPalette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
+            this.pk = gen1Pk;
         }
 
-        BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
-        
-        if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
-        }
-        if (includePalette) {
-            for (int j = 0; j < convPalette.length; j++) {
-                bim.setRGB(j, 0, convPalette[j]);
+        @Override
+        public BufferedImage get() {
+            if (shiny) {
+                return null;
             }
+
+            // assumes the backsprites are in the same bank as the frontSprites
+            int spriteBank = calculateFrontSpriteBank(pk);
+            int spriteOffset = calculateOffset(back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer(), spriteBank);
+
+            Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
+            sprite.decompress();
+            sprite.transpose();
+            int w = sprite.getWidth();
+            int h = sprite.getHeight();
+
+            byte[] data = sprite.getFlattenedData();
+
+            // Palette?
+            int[] convPalette;
+            if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
+                int palIndex = pk.getPaletteID().ordinal();
+                int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
+                if (romEntry.isYellow() && romEntry.isNonJapanese()) {
+                    // Non-japanese Yellow can use GBC palettes instead.
+                    // Stored directly after regular SGB palettes.
+                    palOffset += 320;
+                }
+                Palette palette = read4ColorPalette(palOffset);
+                convPalette = palette.toARGB();
+            } else {
+                convPalette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
+            }
+
+            BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
+
+            if (transparentBackground) {
+                bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
+            }
+            if (includePalette) {
+                for (int j = 0; j < convPalette.length; j++) {
+                    bim.setRGB(j, 0, convPalette[j]);
+                }
+            }
+
+            return bim;
         }
-        
-        return bim;
     }
 
     @Override

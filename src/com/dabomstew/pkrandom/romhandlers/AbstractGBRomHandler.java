@@ -455,13 +455,14 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     @Override
 	protected List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
-		for (int i = 1; i < getPokemon().size(); i++) {
-			Pokemon pk = getPokemon().get(i);
+		for (Pokemon pk : getPokemonSet()) {
+            PokemonImageGetter pig = createPokemonImageGetter(pk);
+            pig.setIncludePalette(true);
 
-			BufferedImage frontNormal = getPokemonImage(pk, false, false, false, true);
-			BufferedImage backNormal = getPokemonImage(pk, true, false, false, false);
-			BufferedImage frontShiny = getPokemonImage(pk, false, true, false, true);
-			BufferedImage backShiny = getPokemonImage(pk, true, true, false, false);
+			BufferedImage frontNormal = pig.get();
+			BufferedImage backNormal = pig.setBack(true).get();
+			BufferedImage backShiny = pig.setShiny(true).get();
+			BufferedImage frontShiny = pig.setBack(false).get();
 
 			BufferedImage combined = GFXFunctions
 					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
@@ -477,20 +478,11 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Pokemon pk = randomPokemon();
-		boolean shiny = random.nextInt(10) == 0;
-		boolean gen1 = generationOfPokemon() == 1;
-
-		return getPokemonImage(pk, false, !gen1 && shiny, true, false);
+        return createPokemonImageGetter(randomPokemon())
+                .setShiny(random.nextInt(10) == 0 && generationOfPokemon() != 1)
+                .setTransparentBackground(true)
+                .get();
 	}
-
-	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette);
-
-    public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
-        throw new UnsupportedOperationException(); // TODO: for now
-    }
 
     @Override
     public abstract AbstractGBRomEntry getRomEntry();
