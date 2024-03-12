@@ -456,20 +456,29 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	protected List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (Pokemon pk : getPokemonSet()) {
-            PokemonImageGetter pig = createPokemonImageGetter(pk);
-            pig.setIncludePalette(true);
-
-			BufferedImage frontNormal = pig.get();
-			BufferedImage backNormal = pig.setBack(true).get();
-			BufferedImage backShiny = pig.setShiny(true).get();
-			BufferedImage frontShiny = pig.setBack(false).get();
-
-			BufferedImage combined = GFXFunctions
-					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
-			bims.add(combined);
+			bims.add(createPokemonImageGetter(pk).getFull());
 		}
 		return bims;
 	}
+
+    public abstract static class GBPokemonImageGetter extends PokemonImageGetter {
+
+        public GBPokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            setIncludePalette(true);
+
+            BufferedImage frontNormal = get();
+            BufferedImage backNormal = setBack(true).get();
+            BufferedImage backShiny = setShiny(true).get();
+            BufferedImage frontShiny = setBack(false).get();
+
+            return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+        }
+    }
 
 	@Override
 	public final BufferedImage getMascotImage() {

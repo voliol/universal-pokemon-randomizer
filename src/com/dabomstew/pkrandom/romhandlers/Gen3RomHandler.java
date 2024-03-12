@@ -4184,7 +4184,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         return new Gen3PokemonImageGetter(pk);
     }
 
-    public class Gen3PokemonImageGetter extends PokemonImageGetter {
+    public class Gen3PokemonImageGetter extends GBPokemonImageGetter {
+        // No support for Unown/Castform formes (nor Deoxys, but kind of unsure if that's even possible)
 
         public Gen3PokemonImageGetter(Pokemon pk) {
             super(pk);

@@ -10,6 +10,7 @@ public abstract class PokemonImageGetter {
     protected boolean shiny;
     protected boolean transparentBackground;
     protected boolean includePalette;
+    protected int forme;
 
     public PokemonImageGetter(Pokemon pk) {
         this.pk = pk;
@@ -25,6 +26,14 @@ public abstract class PokemonImageGetter {
         return this;
     }
 
+    public PokemonImageGetter setForme(int forme) {
+        if (forme < 0) {
+            throw new IllegalArgumentException("forme can't be negative");
+        }
+        this.forme = forme;
+        return this;
+    }
+
     public PokemonImageGetter setTransparentBackground(boolean transparentBackground) {
         this.transparentBackground = transparentBackground;
         return this;
@@ -36,4 +45,9 @@ public abstract class PokemonImageGetter {
     }
 
     public abstract BufferedImage get();
+
+    /**
+     * Returns a stitched together image of all the Pokemon's gettable images.
+     */
+    public abstract BufferedImage getFull();
 }

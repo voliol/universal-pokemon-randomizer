@@ -498,30 +498,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
 
         for (Pokemon pk : getPokemonSet()) {
-            DSPokemonImageGetter pig = createPokemonImageGetter(pk);
-            pig.setPokeGraphicsNARC(pokeGraphicsNARC)
-                    .setGender(DSPokemonImageGetter.Gender.MALE)
-                    .setIncludePalette(true);
-
-            BufferedImage frontNormalM = pig.get();
-            BufferedImage backNormalM = pig.setBack(true).get();
-            BufferedImage backShinyM = pig.setShiny(true).get();
-            BufferedImage frontShinyM = pig.setBack(false).get();
-
-            BufferedImage combined;
-            if (pig.hasGenderedImages()) {
-                BufferedImage frontShinyF = pig.setGender(DSPokemonImageGetter.Gender.FEMALE).get();
-                BufferedImage backShinyF = pig.setBack(true).get();
-                BufferedImage backNormalF = pig.setShiny(false).get();
-                BufferedImage frontNormalF = pig.setBack(false).get();
-                combined = GFXFunctions
-                        .stitchToGrid(new BufferedImage[][]{{frontNormalM, backNormalM}, {frontNormalF, backNormalF},
-                                {frontShinyM, backShinyM}, {frontShinyF, backShinyF}});
-            } else {
-                combined = GFXFunctions
-                        .stitchToGrid(new BufferedImage[][]{{frontNormalM, backNormalM}, {frontShinyM, backShinyM}});
-            }
-            bims.add(combined);
+            DSPokemonImageGetter pig = createPokemonImageGetter(pk).setPokeGraphicsNARC(pokeGraphicsNARC);
+            bims.add(pig.getFull());
         }
         return bims;
     }
@@ -586,7 +564,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
         protected NARCArchive pokeGraphicsNARC;
         protected Gender gender = Gender.FEMALE;
-        protected int forme;
 
         public DSPokemonImageGetter(Pokemon pk) {
             super(pk);
@@ -594,11 +571,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
         public DSPokemonImageGetter setPokeGraphicsNARC(NARCArchive pokeGraphicsNARC) {
             this.pokeGraphicsNARC = pokeGraphicsNARC;
-            return this;
-        }
-
-        public DSPokemonImageGetter setForme(int forme) {
-            this.forme = forme;
             return this;
         }
 
@@ -619,6 +591,31 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
 
         public abstract boolean hasGenderedImages();
+
+        public BufferedImage getFull() {
+            setGender(DSPokemonImageGetter.Gender.MALE)
+                    .setIncludePalette(true);
+
+            BufferedImage frontNormalM = get();
+            BufferedImage backNormalM = setBack(true).get();
+            BufferedImage backShinyM = setShiny(true).get();
+            BufferedImage frontShinyM = setBack(false).get();
+
+            BufferedImage combined;
+            if (hasGenderedImages()) {
+                BufferedImage frontShinyF = setGender(DSPokemonImageGetter.Gender.FEMALE).get();
+                BufferedImage backShinyF = setBack(true).get();
+                BufferedImage backNormalF = setShiny(false).get();
+                BufferedImage frontNormalF = setBack(false).get();
+                combined = GFXFunctions
+                        .stitchToGrid(new BufferedImage[][]{{frontNormalM, backNormalM, frontNormalF, backNormalF},
+                                {frontShinyM, backShinyM, frontShinyF, backShinyF}});
+            } else {
+                combined = GFXFunctions
+                        .stitchToGrid(new BufferedImage[][]{{frontNormalM, backNormalM}, {frontShinyM, backShinyM}});
+            }
+            return combined;
+        }
     }
 
     @Override

@@ -2866,7 +2866,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         return new Gen2PokemonImageGetter(pk);
     }
 
-    public class Gen2PokemonImageGetter extends PokemonImageGetter {
+    public class Gen2PokemonImageGetter extends GBPokemonImageGetter {
 
         public Gen2PokemonImageGetter(Pokemon pk) {
             super(pk);
@@ -2878,7 +2878,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // There is no zero-entry.
             int picPointer;
             if (pk.getNumber() == Species.unown) {
-                int unownLetter = random.nextInt(Gen2Constants.unownFormeCount);
+                int unownLetter = forme;
+                if (unownLetter >= Gen2Constants.unownFormeCount) {
+                    throw new IllegalStateException("Invalid Unown forme: " + unownLetter);
+                }
                 picPointer = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
             } else {
                 picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
@@ -2916,6 +2919,29 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             }
 
             return bim;
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            if (pk.getNumber() == Species.unown) {
+                setIncludePalette(true);
+
+                BufferedImage[] normal = new BufferedImage[Gen2Constants.unownFormeCount*2];
+                BufferedImage[] shiny = new BufferedImage[Gen2Constants.unownFormeCount*2];
+                for (int i = 0; i < Gen2Constants.unownFormeCount; i++) {
+                    setForme(i);
+
+                    normal[i*2] = get();
+                    normal[i*2 + 1] = setBack(true).get();
+                    shiny[i*2 + 1] = setShiny(true).get();
+                    shiny[i*2] = setBack(false).get();
+                    setShiny(false);
+                }
+                return GFXFunctions.stitchToGrid(new BufferedImage[][] { normal, shiny });
+
+            } else {
+                return super.getFull();
+            }
         }
     }
 

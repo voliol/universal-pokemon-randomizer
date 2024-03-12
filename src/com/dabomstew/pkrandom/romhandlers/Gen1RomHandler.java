@@ -2662,7 +2662,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new Gen1PokemonImageGetter(pk);
     }
 
-    public class Gen1PokemonImageGetter extends PokemonImageGetter {
+    public class Gen1PokemonImageGetter extends GBPokemonImageGetter {
         private final Gen1Pokemon pk;
 
         public Gen1PokemonImageGetter(Pokemon pk) {
@@ -2674,11 +2674,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         @Override
-        public BufferedImage get() {
-            if (shiny) {
-                return null;
-            }
+        public Gen1PokemonImageGetter setShiny(boolean shiny) {
+            throw new UnsupportedOperationException("No shinies in Generation 1");
+        }
 
+        @Override
+        public BufferedImage get() {
             // assumes the backsprites are in the same bank as the frontSprites
             int spriteBank = calculateFrontSpriteBank(pk);
             int spriteOffset = calculateOffset(back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer(), spriteBank);
@@ -2719,6 +2720,16 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             }
 
             return bim;
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            setIncludePalette(true);
+
+            BufferedImage frontNormal = get();
+            BufferedImage backNormal = setBack(true).get();
+
+            return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal } });
         }
     }
 
