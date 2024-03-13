@@ -1710,7 +1710,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 // split evos don't carry stats
                 if (pkmn.getEvolutionsFrom().size() > 1) {
                     for (Evolution e : pkmn.getEvolutionsFrom()) {
-                        e.carryStats = false;
+                        e.setCarryStats(false);
                     }
                 }
             }
@@ -1724,10 +1724,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.getEvolutionsFrom()) {
-                    if (evo.type == EvolutionType.TRADE) {
+                    if (evo.getType() == EvolutionType.TRADE) {
                         // change
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 37;
+                        evo.setType(EvolutionType.LEVEL);
+                        evo.setExtraInfo(37);
                         addEvoUpdateLevel(impossibleEvolutionUpdates,evo);
                     }
                 }
@@ -2590,18 +2590,18 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.type.toIndex(1));
+        baos.write(evo.getType().toIndex(1));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
-        baos.write(pokeNumToRBYTable[evo.to.getNumber()]);
+        baos.write(pokeNumToRBYTable[evo.getTo().getNumber()]);
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.type) {
-            case LEVEL -> new byte[]{(byte) evo.extraInfo};
-            case STONE -> new byte[]{(byte) evo.extraInfo, 0x01}; // minimum level
+        return switch (evo.getType()) {
+            case LEVEL -> new byte[]{(byte) evo.getExtraInfo()};
+            case STONE -> new byte[]{(byte) evo.getExtraInfo(), 0x01}; // minimum level
             case TRADE -> new byte[]{(byte) 0x01}; // minimum level
-            default -> throw new IllegalStateException("EvolutionType " + evo.type + " is not supported " +
+            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
                     "by Gen 1 games.");
         };
     }

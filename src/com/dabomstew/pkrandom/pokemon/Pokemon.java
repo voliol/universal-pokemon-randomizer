@@ -656,10 +656,6 @@ public class Pokemon implements Comparable<Pokemon> {
         return evolutionsFrom;
     }
 
-    public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {
-        this.evolutionsFrom = evolutionsFrom;
-    }
-
     /**
      * Returns a (modifiable!) {@link List} of {@link Evolution}s where this Pokémon species is what the evolution is
      * "to".<br>
@@ -670,10 +666,6 @@ public class Pokemon implements Comparable<Pokemon> {
      */
     public List<Evolution> getEvolutionsTo() {
         return evolutionsTo;
-    }
-
-    public void setEvolutionsTo(List<Evolution> evolutionsTo) {
-        this.evolutionsTo = evolutionsTo;
     }
 
     public List<MegaEvolution> getMegaEvolutionsFrom() {

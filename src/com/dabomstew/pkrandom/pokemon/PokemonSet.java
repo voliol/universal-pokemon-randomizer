@@ -44,15 +44,15 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		while (!toCheck.isEmpty()) {
 			Pokemon check = toCheck.poll();
 			for (Evolution ev : check.getEvolutionsFrom()) {
-				if (!results.contains(ev.to)) {
-					results.add(ev.to);
-					toCheck.add(ev.to);
+				if (!results.contains(ev.getTo())) {
+					results.add(ev.getTo());
+					toCheck.add(ev.getTo());
 				}
 			}
 			for (Evolution ev : check.getEvolutionsTo()) {
-				if (!results.contains(ev.from)) {
-					results.add(ev.from);
-					toCheck.add(ev.from);
+				if (!results.contains(ev.getFrom())) {
+					results.add(ev.getFrom());
+					toCheck.add(ev.getFrom());
 				}
 			}
 		}
@@ -122,7 +122,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		return filter(pk -> {
 			if (pk.getEvolutionsTo().size() > 0) {
 				Evolution onlyEvo = pk.getEvolutionsTo().get(0);
-				return !onlyEvo.carryStats;
+				return !onlyEvo.isCarryStats();
 			}
 			return false;
 		});
@@ -134,7 +134,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		return filter(pk -> {
 			if (pk.getEvolutionsTo().size() == 1 && pk.getEvolutionsFrom().size() > 0) {
 				Evolution onlyEvo = pk.getEvolutionsTo().get(0);
-				return (onlyEvo.carryStats || includeSplitEvos);
+				return (onlyEvo.isCarryStats() || includeSplitEvos);
 			}
 			return false;
 		});
@@ -146,7 +146,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		return filter(pk -> {
 			if (pk.getEvolutionsTo().size() == 1 && pk.getEvolutionsFrom().size() == 0) {
 				Evolution onlyEvo = pk.getEvolutionsTo().get(0);
-				return onlyEvo.carryStats || includeSplitEvos;
+				return onlyEvo.isCarryStats() || includeSplitEvos;
 			}
 			return false;
 		});

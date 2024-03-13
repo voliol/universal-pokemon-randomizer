@@ -370,7 +370,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // If any of the targets here evolve, the original
                 // Pokemon has 2+ stages.
                 for (Evolution ev : pk.getEvolutionsFrom()) {
-                    if (ev.to.getEvolutionsFrom().size() > 0) {
+                    if (ev.getTo().getEvolutionsFrom().size() > 0) {
                         return true;
                     }
                 }
@@ -405,7 +405,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // otherwise
             pk.setPrimaryType(randomType());
             pk.setSecondaryType(null);
-            if (pk.getEvolutionsFrom().size() == 1 && pk.getEvolutionsFrom().get(0).carryStats) {
+            if (pk.getEvolutionsFrom().size() == 1 && pk.getEvolutionsFrom().get(0).isCarryStats()) {
                 assignRandomSecondaryType(pk, 0.35, dualTypeOnly);
             } else {
                 assignRandomSecondaryType(pk, 0.5, dualTypeOnly);
@@ -1157,7 +1157,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void setIllegalPreEvos(Pokemon pk, PokemonSet<Pokemon> illegalList) {
         for (Evolution evo: pk.getEvolutionsTo()) {
-            pk = evo.from;
+            pk = evo.getFrom();
             illegalList.add(pk);
             setIllegalPreEvos(pk, illegalList);
         }
@@ -1165,7 +1165,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void setIllegalEvos(Pokemon pk, PokemonSet<Pokemon> illegalList) {
         for (Evolution evo: pk.getEvolutionsFrom()) {
-            pk = evo.to;
+            pk = evo.getTo();
             illegalList.add(pk);
             setIllegalEvos(pk, illegalList);
         }
@@ -1180,7 +1180,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void traverseEvolutions(Pokemon pk, PokemonSet<Pokemon> finalEvos) {
         if (!pk.getEvolutionsFrom().isEmpty()) {
             for (Evolution evo: pk.getEvolutionsFrom()) {
-                pk = evo.to;
+                pk = evo.getTo();
                 traverseEvolutions(pk, finalEvos);
             }
         } else {
@@ -1850,7 +1850,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 preEvo = tp.pokemon;
             }
             while (!preEvo.getEvolutionsTo().isEmpty()) {
-                preEvo = preEvo.getEvolutionsTo().get(0).from;
+                preEvo = preEvo.getEvolutionsTo().get(0).getFrom();
                 moveSelectionPoolAtLevel.addAll(allLevelUpMoves.get(preEvo.getNumber())
                         .stream()
                         .filter(ml -> ml.level <= tp.level)
@@ -1901,7 +1901,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 firstEvo = tp.pokemon;
             }
             while (!firstEvo.getEvolutionsTo().isEmpty()) {
-                firstEvo = firstEvo.getEvolutionsTo().get(0).from;
+                firstEvo = firstEvo.getEvolutionsTo().get(0).getFrom();
             }
             if (allEggMoves.get(firstEvo.getNumber()) != null) {
                 moveSelectionPoolAtLevel.addAll(allEggMoves.get(firstEvo.getNumber())
@@ -3614,7 +3614,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for(Pokemon poke : choosable) {
                 boolean isTriStage = false;
                 for(Evolution evo : poke.getEvolutionsFrom()) {
-                    if (!evo.to.getEvolutionsFrom().isEmpty()) {
+                    if (!evo.getTo().getEvolutionsFrom().isEmpty()) {
                         isTriStage = true;
                         break;
                     }
@@ -5182,19 +5182,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon pk : getPokemonSet()) {
             if (pk != null) {
                 for (Evolution checkEvo : pk.getEvolutionsFrom()) {
-                    if (checkEvo.type.usesLevel()) {
+                    if (checkEvo.getType().usesLevel()) {
                         // If evo is intermediate and too high, bring it down
                         // Else if it's just too high, bring it down
-                        if (checkEvo.extraInfo > maxIntermediateLevel && checkEvo.to.getEvolutionsFrom().size() > 0) {
-                            checkEvo.extraInfo = maxIntermediateLevel;
+                        if (checkEvo.getExtraInfo() > maxIntermediateLevel && checkEvo.getTo().getEvolutionsFrom().size() > 0) {
+                            checkEvo.setExtraInfo(maxIntermediateLevel);
                             addEvoUpdateCondensed(easierEvolutionUpdates, checkEvo, false);
-                        } else if (checkEvo.extraInfo > maxLevel) {
-                            checkEvo.extraInfo = maxLevel;
+                        } else if (checkEvo.getExtraInfo() > maxLevel) {
+                            checkEvo.setExtraInfo(maxLevel);
                             addEvoUpdateCondensed(easierEvolutionUpdates, checkEvo, false);
                         }
                     }
-                    if (checkEvo.type == EvolutionType.LEVEL_UPSIDE_DOWN) {
-                        checkEvo.type = EvolutionType.LEVEL;
+                    if (checkEvo.getType() == EvolutionType.LEVEL_UPSIDE_DOWN) {
+                        checkEvo.setType(EvolutionType.LEVEL);
                         addEvoUpdateCondensed(easierEvolutionUpdates, checkEvo, false);
                     }
                 }
@@ -5253,12 +5253,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (forceChange) {
             for (Pokemon pk : pokemonPool) {
                 for (Evolution ev : pk.getEvolutionsFrom()) {
-                    oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
-                    if (generationOfPokemon() >= 7 && ev.from.getNumber() == Species.cosmoem) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
-                        int oppositeVersionLegendary = ev.to.getNumber() == Species.solgaleo ? Species.lunala : Species.solgaleo;
+                    oldEvoPairs.add(new EvolutionPair(ev.getFrom(), ev.getTo()));
+                    if (generationOfPokemon() >= 7 && ev.getFrom().getNumber() == Species.cosmoem) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
+                        int oppositeVersionLegendary = ev.getTo().getNumber() == Species.solgaleo ? Species.lunala : Species.solgaleo;
                         Pokemon toPkmn = findPokemonInPoolWithSpeciesID(pokemonPool, oppositeVersionLegendary);
                         if (toPkmn != null) {
-                            oldEvoPairs.add(new EvolutionPair(ev.from, toPkmn));
+                            oldEvoPairs.add(new EvolutionPair(ev.getFrom(), toPkmn));
                         }
                     }
                 }
@@ -5367,8 +5367,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         for (Pokemon pk : replacements) {
                             // Special case for Eevee
                             if (fromPK.getNumber() == Species.eevee) {
-                                if (pk.getPrimaryType() == ev.to.getPrimaryType()
-                                        || (pk.getSecondaryType() != null) && pk.getSecondaryType() == ev.to.getPrimaryType()) {
+                                if (pk.getPrimaryType() == ev.getTo().getPrimaryType()
+                                        || (pk.getSecondaryType() != null) && pk.getSecondaryType() == ev.getTo().getPrimaryType()) {
                                     includeType.add(pk);
                                 }
                             } else if (pk.getPrimaryType() == fromPK.getPrimaryType()
@@ -5392,7 +5392,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     Pokemon picked;
 
                     if (similarStrength) {
-                        picked = pickEvoPowerLvlReplacement(replacements, ev.to);
+                        picked = pickEvoPowerLvlReplacement(replacements, ev.getTo());
                         alreadyPicked.add(picked);
                     } else {
                         picked = replacements.getRandom(random);
@@ -5400,20 +5400,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Step 4: add it to the new evos pool
-                    Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
+                    Evolution newEvo = new Evolution(fromPK, picked, ev.isCarryStats(), ev.getType(), ev.getExtraInfo());
                     boolean checkCosmetics = true;
                     if (picked.getFormeNumber() > 0) {
-                        newEvo.forme = picked.getFormeNumber();
-                        newEvo.formeSuffix = picked.getFormeSuffix();
+                        newEvo.setForme(picked.getFormeNumber());
                         checkCosmetics = false;
                     }
-                    if (checkCosmetics && newEvo.to.getCosmeticForms() > 0) {
-                        newEvo.forme = newEvo.to.getCosmeticFormNumber(this.random.nextInt(newEvo.to.getCosmeticForms()));
+                    if (checkCosmetics && newEvo.getTo().getCosmeticForms() > 0) {
+                        newEvo.setForme(newEvo.getTo().getCosmeticFormNumber(this.random.nextInt(newEvo.getTo().getCosmeticForms())));
                     } else if (!checkCosmetics && picked.getCosmeticForms() > 0) {
-                        newEvo.forme += picked.getCosmeticFormNumber(this.random.nextInt(picked.getCosmeticForms()));
+                        newEvo.setForme(newEvo.getForme() + picked.getCosmeticFormNumber(this.random.nextInt(picked.getCosmeticForms())));
                     }
-                    if (newEvo.type == EvolutionType.LEVEL_FEMALE_ESPURR) {
-                        newEvo.type = EvolutionType.LEVEL_FEMALE_ONLY;
+                    if (newEvo.getType() == EvolutionType.LEVEL_FEMALE_ESPURR) {
+                        newEvo.setType(EvolutionType.LEVEL_FEMALE_ONLY);
                     }
                     fromPK.getEvolutionsFrom().add(newEvo);
                     picked.getEvolutionsTo().add(newEvo);
@@ -5461,12 +5460,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (forceChange) {
             for (Pokemon pk : pokemonPool) {
                 for (Evolution ev : pk.getEvolutionsFrom()) {
-                    oldEvoPairs.add(new EvolutionPair(ev.from, ev.to));
-                    if (generationOfPokemon() >= 7 && ev.from.getNumber() == Species.cosmoem) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
-                        int oppositeVersionLegendary = ev.to.getNumber() == Species.solgaleo ? Species.lunala : Species.solgaleo;
+                    oldEvoPairs.add(new EvolutionPair(ev.getFrom(), ev.getTo()));
+                    if (generationOfPokemon() >= 7 && ev.getFrom().getNumber() == Species.cosmoem) { // Special case for Cosmoem to add Lunala/Solgaleo since we remove the split evo
+                        int oppositeVersionLegendary = ev.getTo().getNumber() == Species.solgaleo ? Species.lunala : Species.solgaleo;
                         Pokemon toPkmn = findPokemonInPoolWithSpeciesID(pokemonPool, oppositeVersionLegendary);
                         if (toPkmn != null) {
-                            oldEvoPairs.add(new EvolutionPair(ev.from, toPkmn));
+                            oldEvoPairs.add(new EvolutionPair(ev.getFrom(), toPkmn));
                         }
                     }
                 }
@@ -5547,17 +5546,16 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 // Step 4: create new level 1 evo and add it to the new evos pool
                 Evolution newEvo = new Evolution(fromPK, picked, false, EvolutionType.LEVEL, 1);
-                newEvo.level = 1;
+                newEvo.setLevel(1);
                 boolean checkCosmetics = true;
                 if (picked.getFormeNumber() > 0) {
-                    newEvo.forme = picked.getFormeNumber();
-                    newEvo.formeSuffix = picked.getFormeSuffix();
+                    newEvo.setForme(picked.getFormeNumber());
                     checkCosmetics = false;
                 }
-                if (checkCosmetics && newEvo.to.getCosmeticForms() > 0) {
-                    newEvo.forme = newEvo.to.getCosmeticFormNumber(this.random.nextInt(newEvo.to.getCosmeticForms()));
+                if (checkCosmetics && newEvo.getTo().getCosmeticForms() > 0) {
+                    newEvo.setForme(newEvo.getTo().getCosmeticFormNumber(this.random.nextInt(newEvo.getTo().getCosmeticForms())));
                 } else if (!checkCosmetics && picked.getCosmeticForms() > 0) {
-                    newEvo.forme += picked.getCosmeticFormNumber(this.random.nextInt(picked.getCosmeticForms()));
+                    newEvo.setForme(newEvo.getForme() + picked.getCosmeticFormNumber(this.random.nextInt(picked.getCosmeticForms())));
                 }
                 fromPK.getEvolutionsFrom().add(newEvo);
                 picked.getEvolutionsTo().add(newEvo);
@@ -5857,45 +5855,45 @@ public abstract class AbstractRomHandler implements RomHandler {
     protected Set<EvolutionUpdate> easierEvolutionUpdates = new TreeSet<>();
 
     protected void addEvoUpdateLevel(Set<EvolutionUpdate> evolutionUpdates, Evolution evo) {
-        Pokemon pkFrom = evo.from;
-        Pokemon pkTo = evo.to;
-        int level = evo.extraInfo;
+        Pokemon pkFrom = evo.getFrom();
+        Pokemon pkTo = evo.getTo();
+        int level = evo.getExtraInfo();
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL, String.valueOf(level),
                 false, false));
     }
 
     protected void addEvoUpdateStone(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
-        Pokemon pkFrom = evo.from;
-        Pokemon pkTo = evo.to;
+        Pokemon pkFrom = evo.getFrom();
+        Pokemon pkTo = evo.getTo();
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.STONE, item,
                 false, false));
     }
 
     protected void addEvoUpdateHappiness(Set<EvolutionUpdate> evolutionUpdates, Evolution evo) {
-        Pokemon pkFrom = evo.from;
-        Pokemon pkTo = evo.to;
+        Pokemon pkFrom = evo.getFrom();
+        Pokemon pkTo = evo.getTo();
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.HAPPINESS, "",
                 false, false));
     }
 
     protected void addEvoUpdateHeldItem(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, String item) {
-        Pokemon pkFrom = evo.from;
-        Pokemon pkTo = evo.to;
+        Pokemon pkFrom = evo.getFrom();
+        Pokemon pkTo = evo.getTo();
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_ITEM_DAY, item,
                 false, false));
     }
 
     protected void addEvoUpdateParty(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, String otherPk) {
-        Pokemon pkFrom = evo.from;
-        Pokemon pkTo = evo.to;
+        Pokemon pkFrom = evo.getFrom();
+        Pokemon pkTo = evo.getTo();
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL_WITH_OTHER, otherPk,
                 false, false));
     }
 
     protected void addEvoUpdateCondensed(Set<EvolutionUpdate> evolutionUpdates, Evolution evo, boolean additional) {
-        Pokemon pkFrom = evo.from;
-        Pokemon pkTo = evo.to;
-        int level = evo.extraInfo;
+        Pokemon pkFrom = evo.getFrom();
+        Pokemon pkTo = evo.getTo();
+        int level = evo.getExtraInfo();
         evolutionUpdates.add(new EvolutionUpdate(pkFrom, pkTo, EvolutionType.LEVEL, String.valueOf(level),
                 true, additional));
     }
@@ -6000,9 +5998,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             visited.add(pk);
             recStack.add(pk);
             for (Evolution ev : pk.getEvolutionsFrom()) {
-                if (!visited.contains(ev.to) && isCyclic(ev.to, visited, recStack)) {
+                if (!visited.contains(ev.getTo()) && isCyclic(ev.getTo(), visited, recStack)) {
                     return true;
-                } else if (recStack.contains(ev.to)) {
+                } else if (recStack.contains(ev.getTo())) {
                     return true;
                 }
             }
@@ -6191,8 +6189,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         // "must evolve itself" if appropriate.
         PokemonSet<Pokemon> candidates = new PokemonSet<>();
         for (Evolution ev : base.getEvolutionsFrom()) {
-            if (!mustEvolveItself || ev.to.getEvolutionsFrom().size() > 0) {
-                candidates.add(ev.to);
+            if (!mustEvolveItself || ev.getTo().getEvolutionsFrom().size() > 0) {
+                candidates.add(ev.getTo());
             }
         }
 
@@ -6270,7 +6268,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             } else {
                 int maxPreEvos = 0;
                 for (Evolution ev : pk.getEvolutionsTo()) {
-                    maxPreEvos = Math.max(maxPreEvos, numPreEvolutions(ev.from, depth + 1, maxInterested) + 1);
+                    maxPreEvos = Math.max(maxPreEvos, numPreEvolutions(ev.getFrom(), depth + 1, maxInterested) + 1);
                 }
                 return maxPreEvos;
             }
@@ -6290,7 +6288,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             } else {
                 int maxEvos = 0;
                 for (Evolution ev : pk.getEvolutionsFrom()) {
-                    maxEvos = Math.max(maxEvos, numEvolutions(ev.to, depth + 1, maxInterested) + 1);
+                    maxEvos = Math.max(maxEvos, numEvolutions(ev.getTo(), depth + 1, maxInterested) + 1);
                 }
                 return maxEvos;
             }
@@ -6315,7 +6313,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // check for cyclic evolutions from what we've already seen
             boolean cyclic = false;
             for (Evolution ev : pokemon.getEvolutionsFrom()) {
-                if (seenMons.contains(ev.to)) {
+                if (seenMons.contains(ev.getTo())) {
                     // cyclic evolution detected - bail now
                     cyclic = true;
                     break;
@@ -6330,7 +6328,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Therefore, we take a random value (which is generated once per seed) and add it to the trainer's
             // index to get a pseudorandom number that can be used to decide which split to take.
             int evolutionIndex = (this.fullyEvolvedRandomSeed + trainerIndex) % pokemon.getEvolutionsFrom().size();
-            pokemon = pokemon.getEvolutionsFrom().get(evolutionIndex).to;
+            pokemon = pokemon.getEvolutionsFrom().get(evolutionIndex).getTo();
             seenMons.add(pokemon);
         }
 

@@ -743,7 +743,7 @@ public class Randomizer {
             }
             StringBuilder evoStr = new StringBuilder();
             try {
-                evoStr.append(" -> ").append(pkmn.getEvolutionsFrom().get(0).to.fullName());
+                evoStr.append(" -> ").append(pkmn.getEvolutionsFrom().get(0).getTo().fullName());
             } catch (Exception e) {
                 evoStr.append(" (no evolution)");
             }
@@ -860,12 +860,12 @@ public class Randomizer {
             if (pk != null && !pk.isActuallyCosmetic()) {
                 int numEvos = pk.getEvolutionsFrom().size();
                 if (numEvos > 0) {
-                    StringBuilder evoStr = new StringBuilder(pk.getEvolutionsFrom().get(0).toFullName());
+                    StringBuilder evoStr = new StringBuilder(pk.getEvolutionsFrom().get(0).getTo().fullName());
                     for (int i = 1; i < numEvos; i++) {
                         if (i == numEvos - 1) {
-                            evoStr.append(" and ").append(pk.getEvolutionsFrom().get(i).toFullName());
+                            evoStr.append(" and ").append(pk.getEvolutionsFrom().get(i).getTo().fullName());
                         } else {
-                            evoStr.append(", ").append(pk.getEvolutionsFrom().get(i).toFullName());
+                            evoStr.append(", ").append(pk.getEvolutionsFrom().get(i).getTo().fullName());
                         }
                     }
                     log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr);

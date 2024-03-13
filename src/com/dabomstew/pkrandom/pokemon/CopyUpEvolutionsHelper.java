@@ -114,29 +114,29 @@ public class CopyUpEvolutionsHelper<T extends Pokemon> {
                 // a randomized poke.
                 Stack<Evolution> currentStack = new Stack<>();
                 Evolution ev = pk.getEvolutionsTo().get(0);
-                while (!ev.from.temporaryFlag) {
+                while (!ev.getFrom().temporaryFlag) {
                     currentStack.push(ev);
-                    ev = ev.from.getEvolutionsTo().get(0);
+                    ev = ev.getFrom().getEvolutionsTo().get(0);
                 }
 
                 // Now "ev" is set to an evolution from a Pokemon that has had
                 // the base action done on it to one that hasn't.
                 // Do the evolution action for everything left on the stack.
 
-                if (copySplitEvos && splitAction != null && splitEvos.contains((T) ev.to)) {
-                    splitAction.applyTo((T) ev.from, (T) ev.to, !middleEvos.contains((T) ev.to));
+                if (copySplitEvos && splitAction != null && splitEvos.contains((T) ev.getTo())) {
+                    splitAction.applyTo((T) ev.getFrom(), (T) ev.getTo(), !middleEvos.contains((T) ev.getTo()));
                 } else {
-                    epAction.applyTo((T) ev.from, (T) ev.to, !middleEvos.contains((T) ev.to));
+                    epAction.applyTo((T) ev.getFrom(), (T) ev.getTo(), !middleEvos.contains((T) ev.getTo()));
                 }
-                ev.to.temporaryFlag = true;
+                ev.getTo().temporaryFlag = true;
                 while (!currentStack.isEmpty()) {
                     ev = currentStack.pop();
                     if (copySplitEvos && splitAction != null && splitEvos.contains(pk)) {
-                        splitAction.applyTo((T) ev.from, (T) ev.to, !middleEvos.contains((T) ev.to));
+                        splitAction.applyTo((T) ev.getFrom(), (T) ev.getTo(), !middleEvos.contains((T) ev.getTo()));
                     } else {
-                        epAction.applyTo((T) ev.from, (T) ev.to, !middleEvos.contains((T) ev.to));
+                        epAction.applyTo((T) ev.getFrom(), (T) ev.getTo(), !middleEvos.contains((T) ev.getTo()));
                     }
-                    ev.to.temporaryFlag = true;
+                    ev.getTo().temporaryFlag = true;
                 }
 
             }

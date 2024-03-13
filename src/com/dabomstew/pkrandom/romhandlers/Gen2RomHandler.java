@@ -25,7 +25,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -1837,7 +1836,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // split evos don't carry stats
             if (pkmn.getEvolutionsFrom().size() > 1) {
                 for (Evolution e : pkmn.getEvolutionsFrom()) {
-                    e.carryStats = false;
+                    e.setCarryStats(false);
                 }
             }
         }
@@ -1849,29 +1848,29 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.getEvolutionsFrom()) {
-                    if (evol.type == EvolutionType.TRADE || evol.type == EvolutionType.TRADE_ITEM) {
+                    if (evol.getType() == EvolutionType.TRADE || evol.getType() == EvolutionType.TRADE_ITEM) {
                         // change
-                        if (evol.from.getNumber() == Species.slowpoke) {
+                        if (evol.getFrom().getNumber() == Species.slowpoke) {
                             // Slowpoke: Make water stone => Slowking
-                            evol.type = EvolutionType.STONE;
-                            evol.extraInfo = Gen2Items.waterStone;
+                            evol.setType(EvolutionType.STONE);
+                            evol.setExtraInfo(Gen2Items.waterStone);
                             addEvoUpdateStone(impossibleEvolutionUpdates, evol, itemNames[24]);
-                        } else if (evol.from.getNumber() == Species.seadra) {
+                        } else if (evol.getFrom().getNumber() == Species.seadra) {
                             // Seadra: level 40
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 40; // level
+                            evol.setType(EvolutionType.LEVEL);
+                            evol.setExtraInfo(40); // level
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
-                        } else if (evol.from.getNumber() == Species.poliwhirl || evol.type == EvolutionType.TRADE) {
+                        } else if (evol.getFrom().getNumber() == Species.poliwhirl || evol.getType() == EvolutionType.TRADE) {
                             // Poliwhirl or any of the original 4 trade evos
                             // Level 37
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 37; // level
+                            evol.setType(EvolutionType.LEVEL);
+                            evol.setExtraInfo(37); // level
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         } else {
                             // A new trade evo of a single stage Pokemon
                             // level 30
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 30; // level
+                            evol.setType(EvolutionType.LEVEL);
+                            evol.setExtraInfo(30); // level
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         }
                     }
@@ -1903,15 +1902,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.getEvolutionsFrom()) {
                     // In Gen 2, only Eevee has a time-based evolution.
-                    if (evol.type == EvolutionType.HAPPINESS_DAY) {
+                    if (evol.getType() == EvolutionType.HAPPINESS_DAY) {
                         // Eevee: Make sun stone => Espeon
-                        evol.type = EvolutionType.STONE;
-                        evol.extraInfo = Gen2Items.sunStone;
+                        evol.setType(EvolutionType.STONE);
+                        evol.setExtraInfo(Gen2Items.sunStone);
                         addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[169]);
-                    } else if (evol.type == EvolutionType.HAPPINESS_NIGHT) {
+                    } else if (evol.getType() == EvolutionType.HAPPINESS_NIGHT) {
                         // Eevee: Make moon stone => Umbreon
-                        evol.type = EvolutionType.STONE;
-                        evol.extraInfo = Gen2Items.moonStone;
+                        evol.setType(EvolutionType.STONE);
+                        evol.setExtraInfo(Gen2Items.moonStone);
                         addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[8]);
                     }
                 }
@@ -2726,10 +2725,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pk != null) {
                 keepEvos.clear();
                 for (Evolution evol : pk.getEvolutionsFrom()) {
-                    if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+                    if (pokemonIncluded.contains(evol.getFrom()) && pokemonIncluded.contains(evol.getTo())) {
                         keepEvos.add(evol);
                     } else {
-                        evol.to.getEvolutionsTo().remove(evol);
+                        evol.getTo().getEvolutionsTo().remove(evol);
                     }
                 }
                 pk.getEvolutionsFrom().retainAll(keepEvos);
@@ -2765,23 +2764,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.type.toIndex(2));
+        baos.write(evo.getType().toIndex(2));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
-        baos.write(evo.to.getNumber());
+        baos.write(evo.getTo().getNumber());
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.type) {
-            case LEVEL, STONE, TRADE_ITEM -> new byte[]{(byte) evo.extraInfo};
+        return switch (evo.getType()) {
+            case LEVEL, STONE, TRADE_ITEM -> new byte[]{(byte) evo.getExtraInfo()};
             case TRADE -> new byte[]{(byte) 0xFF};
             case HAPPINESS -> new byte[]{(byte) 0x01};
             case HAPPINESS_DAY -> new byte[]{(byte) 0x02};
             case HAPPINESS_NIGHT -> new byte[]{(byte) 0x03};
-            case LEVEL_ATTACK_HIGHER -> new byte[]{(byte) evo.extraInfo, (byte) 0x01};
-            case LEVEL_DEFENSE_HIGHER -> new byte[]{(byte) evo.extraInfo, (byte) 0x02};
-            case LEVEL_ATK_DEF_SAME -> new byte[]{(byte) evo.extraInfo, (byte) 0x03};
-            default -> throw new IllegalStateException("EvolutionType " + evo.type + " is not supported " +
+            case LEVEL_ATTACK_HIGHER -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x01};
+            case LEVEL_DEFENSE_HIGHER -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x02};
+            case LEVEL_ATK_DEF_SAME -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x03};
+            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
                     "by Gen 2 games.");
         };
     }
