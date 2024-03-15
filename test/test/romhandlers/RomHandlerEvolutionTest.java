@@ -11,8 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RomHandlerEvolutionTest extends RomHandlerTest {
 
@@ -31,6 +30,90 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         }
         assertTrue(hasEvolutions);
     }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomNoPokemonEvolvesIntoItself(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName());
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println("\t" + evo.getTo().getName());
+                assertNotEquals(pk, evo.getTo());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEvosShareEXPCurveWithPrevo(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName() + " " + pk.getGrowthCurve());
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println("\t" + evo.getTo().getName() + " " + evo.getTo().getGrowthCurve());
+                assertEquals(pk.getGrowthCurve(), evo.getTo().getGrowthCurve());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomSplitEvosDoNotChooseTheSamePokemon(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName());
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println("\t" + evo.getTo().getName());
+            }
+            for (int i = 0; i < pk.getEvolutionsFrom().size(); i++) {
+                for (int j = i + 1; j < pk.getEvolutionsFrom().size(); j++) {
+                    Pokemon evoI = pk.getEvolutionsFrom().get(i).getTo();
+                    Pokemon evoJ = pk.getEvolutionsFrom().get(j).getTo();
+                    assertNotEquals(evoI, evoJ);
+                }
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomNoEvoCyclesExist(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName());
+            checkForNoCycles(pk, pk, 1);
+        }
+    }
+
+    private void checkForNoCycles(Pokemon curr, Pokemon start, int depth) {
+        for (Evolution evo : curr.getEvolutionsFrom()) {
+            System.out.println(" ".repeat(depth) + evo.getTo().getName());
+            assertNotEquals(start, evo.getTo());
+            checkForNoCycles(evo.getTo(), start, depth + 1);
+        }
+    }
+
 
     @ParameterizedTest
     @MethodSource("getRomNames")
