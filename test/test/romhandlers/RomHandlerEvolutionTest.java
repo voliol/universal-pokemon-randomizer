@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RomHandlerEvolutionTest extends RomHandlerTest {
+
+    private static final double MAX_AVERAGE_POWER_LEVEL_DIFF = 0.065;
 
     @ParameterizedTest
     @MethodSource("getRomNames")
@@ -138,6 +141,41 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
                 assertFalse(evosBefore.contains(evo.getTo()));
             }
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void similarStrengthWorks(String romName) {
+        loadROM(romName);
+
+        Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).toList());
+        }
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        s.setEvosSimilarStrength(true);
+        romHandler.randomizeEvolutions(s);
+
+        List<Double> diffs = new ArrayList<>();
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            for (int i = 0; i < pk.getEvolutionsFrom().size(); i++) {
+                Pokemon before = allEvosBefore.get(pk).get(i);
+                Pokemon after = pk.getEvolutionsFrom().get(i).getTo();
+                diffs.add(calcPowerLevelDiff(before, after));
+            }
+        }
+
+        double averageDiff = diffs.stream().mapToDouble(d -> d).average().getAsDouble();
+        System.out.println(diffs);
+        System.out.println(averageDiff);
+        assertTrue(averageDiff <= MAX_AVERAGE_POWER_LEVEL_DIFF);
+    }
+
+    private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
+        return Math.abs((double) a.bstForPowerLevels() /
+                b.bstForPowerLevels() - 1);
     }
 
 }
