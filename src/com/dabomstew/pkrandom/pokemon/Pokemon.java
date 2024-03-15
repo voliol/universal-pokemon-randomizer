@@ -462,6 +462,15 @@ public class Pokemon implements Comparable<Pokemon> {
         return originalSecondaryType;
     }
 
+    /**
+     * Returns true if this shares any {@link Type} with the given Pokemon.
+     */
+    public boolean hasSharedType(Pokemon other) {
+        return getPrimaryType().equals(other.getPrimaryType()) || getPrimaryType().equals(other.getSecondaryType())
+                || (getSecondaryType() != null &&
+                (getSecondaryType().equals(other.getPrimaryType()) || getSecondaryType().equals(other.getSecondaryType())));
+    }
+
     public int getHp() {
         return hp;
     }

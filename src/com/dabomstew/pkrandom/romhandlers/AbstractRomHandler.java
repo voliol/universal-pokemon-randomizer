@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -5220,6 +5221,162 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(Settings settings) {
+        boolean similarStrength = settings.isEvosSimilarStrength();
+        boolean sameType = settings.isEvosSameTyping();
+        boolean limitToThreeStages = settings.isEvosMaxThreeStages();
+        boolean forceChange = settings.isEvosForceChange();
+
+        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
+        boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
+
+        checkPokemonRestrictions();
+
+        PokemonSet<Pokemon> pokemonPool = getRestrictedPokemon(false, altFormesCanHaveDifferentEvolutions(), false);
+        PokemonSet<Pokemon> banned = this.getBannedFormesForPlayerPokemon();
+        if (!abilitiesAreRandomized) {
+            PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
+        if (banIrregularAltFormes) {
+            banned.addAll(getIrregularFormes());
+        }
+
+        new EvolutionRandomizer(pokemonPool, banned, similarStrength, sameType, limitToThreeStages, forceChange)
+                .randomizeEvolutions();
+    }
+
+    private class EvolutionRandomizer {
+        private static final int DEFAULT_STAGE_LIMIT = 10;
+
+        private final boolean similarStrength;
+        private final boolean sameType;
+        private final int stageLimit;
+        private final boolean forceChange;
+
+        private final PokemonSet<Pokemon> pokemonPool;
+        private final PokemonSet<Pokemon> banned;
+
+        private Map<Pokemon, List<Evolution>> originalEvos;
+
+        public EvolutionRandomizer(PokemonSet<Pokemon> pokemonPool, PokemonSet<Pokemon> banned,
+                                   boolean similarStrength, boolean sameType,
+                                   boolean limitToThreeStages, boolean forceChange) {
+            this.pokemonPool = pokemonPool;
+            this.banned = banned;
+            this.similarStrength = similarStrength;
+            this.sameType = sameType;
+            this.stageLimit = limitToThreeStages ? 3 : DEFAULT_STAGE_LIMIT;
+            this.forceChange = forceChange;
+        }
+
+        public void randomizeEvolutions() {
+            originalEvos = cacheOriginalEvolutions();
+            clearOldEvolutions();
+
+            for (Pokemon from : pokemonPool) {
+                for (Evolution evo : originalEvos.get(from)) {
+                    PokemonSet<Pokemon> possible = findPossibleReplacements(from);
+                    Pokemon picked = similarStrength ? pickEvoPowerLvlReplacement(possible, evo.getTo())
+                            : possible.getRandom(random);
+
+                    Evolution newEvo = new Evolution(from, picked, evo.isCarryStats(), evo.getType(), evo.getExtraInfo());
+                    from.getEvolutionsFrom().add(newEvo);
+                    picked.getEvolutionsTo().add(newEvo);
+                }
+            }
+        }
+
+        private Map<Pokemon, List<Evolution>> cacheOriginalEvolutions() {
+            Map<Pokemon, List<Evolution>> originalEvos = new HashMap<>();
+            for (Pokemon pk : pokemonPool) {
+                originalEvos.put(pk, new ArrayList<>(pk.getEvolutionsFrom()));
+            }
+            return originalEvos;
+        }
+
+        private void clearOldEvolutions() {
+            for (Pokemon pk : pokemonPool) {
+                pk.getEvolutionsFrom().clear();
+                pk.getEvolutionsTo().clear();
+            }
+        }
+
+        private PokemonSet<Pokemon> findPossibleReplacements(Pokemon from) {
+            List<Predicate<Pokemon>> filters = new ArrayList<>();
+            filters.add(to -> !banned.contains(to));
+            filters.add(to -> !to.equals(from));
+            filters.add(to -> to.getGrowthCurve().equals(from.getGrowthCurve()));
+            filters.add(to -> !isAlreadyChosenAsOtherSplitEvo(from, to));
+            filters.add(to -> !createsCycle(from, to));
+            filters.add(to -> !breaksStageLimit(from, to));
+
+            if (forceChange) {
+                filters.add(to -> !isAnOriginalEvo(from, to));
+            }
+            if (sameType) {
+                filters.add(to -> to.hasSharedType(from));
+            }
+
+            Predicate<Pokemon> combinedFilter = to -> {
+                for (Predicate<Pokemon> filter : filters) {
+                    if (!filter.test(to)) return false;
+                }
+                return true;
+            };
+            return pokemonPool.filter(combinedFilter);
+        }
+
+        private boolean isAlreadyChosenAsOtherSplitEvo(Pokemon from, Pokemon to) {
+            return from.getEvolutionsFrom().stream().map(Evolution::getTo).toList().contains(to);
+        }
+
+        /**
+         * Check whether adding an evolution from one Pokemon to another will cause
+         * an evolution cycle.
+         *
+         * @param from Pokemon that is evolving
+         * @param to   Pokemon to evolve to
+         * @return True if there is an evolution cycle, else false
+         */
+        private boolean createsCycle(Pokemon from, Pokemon to) {
+            Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
+            from.getEvolutionsFrom().add(tempEvo);
+            Set<Pokemon> visited = new HashSet<>();
+            Set<Pokemon> recStack = new HashSet<>();
+            boolean recur = isCyclic(from, visited, recStack);
+            from.getEvolutionsFrom().remove(tempEvo);
+            return recur;
+        }
+
+        private boolean isCyclic(Pokemon pk, Set<Pokemon> visited, Set<Pokemon> recStack) {
+            if (!visited.contains(pk)) {
+                visited.add(pk);
+                recStack.add(pk);
+                for (Evolution ev : pk.getEvolutionsFrom()) {
+                    if (!visited.contains(ev.getTo()) && isCyclic(ev.getTo(), visited, recStack)) {
+                        return true;
+                    } else if (recStack.contains(ev.getTo())) {
+                        return true;
+                    }
+                }
+            }
+            recStack.remove(pk);
+            return false;
+        }
+
+        private boolean breaksStageLimit(Pokemon from, Pokemon to) {
+            int maxFrom = 1;
+            int maxTo = 1;
+            return maxFrom + maxTo > stageLimit; // TODO
+        }
+
+        private boolean isAnOriginalEvo(Pokemon from, Pokemon to) {
+            return originalEvos.get(from).stream().map(Evolution::getTo).toList().contains(to);
+        }
+
+    }
+
+    public void randomizeEvolutions2(Settings settings) {
         boolean similarStrength = settings.isEvosSimilarStrength();
         boolean sameType = settings.isEvosSameTyping();
         boolean limitToThreeStages = settings.isEvosMaxThreeStages();

@@ -1,6 +1,7 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class RomHandlerEvolutionTest extends RomHandlerTest {
 
@@ -223,6 +225,28 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
                 System.out.println(evo);
                 assertFalse(evosBefore.contains(evo.getTo()));
             }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void forceChangeWorksForCosmoem(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) >= 7);
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        s.setEvosSimilarStrength(true); // just to increase the likelihood of a failure
+        s.setEvosSameTyping(true); // just to increase the likelihood of a failure
+        s.setEvosForceChange(true);
+        romHandler.randomizeEvolutions(s);
+
+        Pokemon cosmoem = romHandler.getPokemon().get(Species.cosmoem);
+        System.out.println(cosmoem.getName());
+        for (Evolution evo : cosmoem.getEvolutionsFrom()) {
+            System.out.println(evo.getTo().getName());
+            assertNotEquals(Species.solgaleo, evo.getTo().getNumber());
+            assertNotEquals(Species.lunala, evo.getTo().getNumber());
         }
     }
 
