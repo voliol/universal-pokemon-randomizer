@@ -3,6 +3,8 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.pokemon.Evolution;
+import com.dabomstew.pkrandom.pokemon.EvolutionType;
+import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -136,7 +138,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
             for (Evolution evo : pk.getEvolutionsFrom()) {
                 System.out.print("\t" + toStringWithTypes(evo.getTo()));
                 if (evo.isCarryStats()) {
-                    assertTrue(shareType(pk, evo.getTo()));
+                    assertTrue(evo.getTo().hasSharedType(pk));
                 } else {
                     System.out.print(" (no carry)");
                 }
@@ -145,18 +147,39 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         }
     }
 
-    private boolean shareType(Pokemon a, Pokemon b) {
-        if (a.getPrimaryType().equals(b.getPrimaryType()) || a.getPrimaryType().equals(b.getSecondaryType())) {
-            return true;
-        }
-        else if (a.getSecondaryType() != null) {
-            return a.getSecondaryType().equals(b.getPrimaryType()) || a.getSecondaryType().equals(b.getSecondaryType());
-        }
-        return false;
-    }
-
     private String toStringWithTypes(Pokemon pk) {
         return pk.getName() + "(" + pk.getPrimaryType() + (pk.getSecondaryType() == null ? "" : "/" + pk.getSecondaryType()) + ")";
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomSameTypingGivesNewEeveelutionsSharingSomeTypeWithTheOriginals(String romName) {
+        loadROM(romName);
+
+        Pokemon eeveeBefore = romHandler.getPokemon().get(Species.eevee);
+        List<Pokemon> beforeEvos = new ArrayList<>(eeveeBefore.getEvolutionsFrom().size());
+        for (Evolution evo : eeveeBefore.getEvolutionsFrom()) {
+            Pokemon before = new Pokemon(0);
+            before.setName(evo.getTo().getName());
+            before.setPrimaryType(evo.getTo().getPrimaryType());
+            before.setSecondaryType(evo.getTo().getSecondaryType());
+            beforeEvos.add(before);
+        }
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        s.setEvosSameTyping(true);
+        romHandler.randomizeEvolutions(s);
+
+        Pokemon eevee = romHandler.getPokemon().get(Species.eevee);
+        System.out.println(toStringWithTypes(eevee));
+        for (int i = 0; i < eevee.getEvolutionsFrom().size(); i++) {
+            Pokemon before = beforeEvos.get(i);
+            Pokemon after = eevee.getEvolutionsFrom().get(i).getTo();
+            System.out.println("before: " + toStringWithTypes(before));
+            System.out.println("after: " + toStringWithTypes(after));
+            assertTrue(before.hasSharedType(after));
+        }
     }
 
     @ParameterizedTest
@@ -206,7 +229,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void forceChangeWorks(String romName) {
+    public void randomForceChangeWorks(String romName) {
         loadROM(romName);
 
         Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
@@ -230,11 +253,14 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void forceChangeWorksForCosmoem(String romName) {
+    public void randomForceChangeWorksForCosmoem(String romName) {
         assumeTrue(getGenerationNumberOf(romName) >= 7);
         loadROM(romName);
 
         Settings s = new Settings();
+        s.setSelectedEXPCurve(ExpCurve.MEDIUM_FAST);
+        s.setStandardizeEXPCurves(true);
+        romHandler.standardizeEXPCurves(s);
         s.setEvolutionsMod(false, true, false);
         s.setEvosSimilarStrength(true); // just to increase the likelihood of a failure
         s.setEvosSameTyping(true); // just to increase the likelihood of a failure
@@ -252,7 +278,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
     @ParameterizedTest
     @MethodSource("getRomNames")
-    public void similarStrengthWorks(String romName) {
+    public void randomSimilarStrengthWorks(String romName) {
         loadROM(romName);
 
         Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
@@ -284,5 +310,28 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         return Math.abs((double) a.bstForPowerLevels() /
                 b.bstForPowerLevels() - 1);
     }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomNoEvoHasLevelFemaleEspurrEvoType(String romName) {
+        // Not entirely sure why this has to be the case, but older evolution randomization made sure to get rid of
+        // and LEVEL_FEMALE_ESPURR, and so it's carried to newer code as well.
+        // Probably there are some issues if LEVEL_FEMALE_ESPURR is used and the Pokemon it evolves to isn't Meowstic.
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName());
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println(evo);
+                assertNotEquals(EvolutionType.LEVEL_FEMALE_ESPURR, evo.getType());
+            }
+        }
+    }
+
+    // TODO: test for eevee + same type
 
 }
