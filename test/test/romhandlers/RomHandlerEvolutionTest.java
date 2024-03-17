@@ -130,6 +130,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         romHandler.randomizeEvolutions(s);
 
         evosHaveSharedTypeCheck();
+        System.out.println(evoGraph());
     }
 
     private void evosHaveSharedTypeCheck() {
@@ -291,6 +292,10 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         s.setEvosSimilarStrength(true);
         romHandler.randomizeEvolutions(s);
 
+        similarStrengthCheck(allEvosBefore);
+    }
+
+    private void similarStrengthCheck(Map<Pokemon, List<Pokemon>> allEvosBefore) {
         List<Double> diffs = new ArrayList<>();
         for (Pokemon pk : romHandler.getPokemonSet()) {
             for (int i = 0; i < pk.getEvolutionsFrom().size(); i++) {
@@ -332,6 +337,132 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         }
     }
 
-    // TODO: test for eevee + same type
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEveryLevelGivesEveryPokemonExactlyOneEvolutionAtLevelOne(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, false, true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName());
+            System.out.println(pk.getEvolutionsFrom());
+            assertEquals(1, pk.getEvolutionsFrom().size());
+            Evolution evo = pk.getEvolutionsFrom().get(0);
+            assertEquals(EvolutionType.LEVEL, evo.getType());
+            if (evo.getExtraInfo() == 0) {
+                assertEquals(1, evo.getLevel());
+            } else {
+                assertEquals(1, evo.getExtraInfo());
+            }
+        }
+
+        System.out.println(evoGraph());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEveryLevelNoPokemonEvolvesIntoItself(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, false, true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName());
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println("\t" + evo.getTo().getName());
+                assertNotEquals(pk, evo.getTo());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEveryLevelEvosShareEXPCurveWithPrevo(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, false, true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.getName() + " " + pk.getGrowthCurve());
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println("\t" + evo.getTo().getName() + " " + evo.getTo().getGrowthCurve());
+                assertEquals(pk.getGrowthCurve(), evo.getTo().getGrowthCurve());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEveryLevelForceChangeWorks(String romName) {
+        loadROM(romName);
+
+        Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).toList());
+        }
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, false, true);
+        s.setEvosForceChange(true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            List<Pokemon> evosBefore = allEvosBefore.get(pk);
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println(evo);
+                assertFalse(evosBefore.contains(evo.getTo()));
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEveryLevelSameTypingGivesEvosWithSomeSharedType(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setExpCurveMod(false, false, true);
+        s.setSelectedEXPCurve(ExpCurve.MEDIUM_FAST);
+        s.setStandardizeEXPCurves(true);
+        romHandler.standardizeEXPCurves(s);
+        s.setEvolutionsMod(false, false, true);
+        s.setEvosSameTyping(true);
+        romHandler.randomizeEvolutions(s);
+
+        evosHaveSharedTypeCheck();
+    }
+
+    /**
+     * Returns a graph in the dot format, which can be seen using e.g.
+     * <a href="https://dreampuf.github.io/GraphvizOnline">GraphvizOnline</a>
+     */
+    private String evoGraph() {
+        StringBuilder sb = new StringBuilder("digraph G {\n");
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            sb.append(evoGraphFriendly(pk.getName()));
+            sb.append(";\n");
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                sb.append(evoGraphFriendly(pk.getName()));
+                sb.append("->");
+                sb.append(evoGraphFriendly(evo.getTo().getName()));
+                sb.append(";\n");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private String evoGraphFriendly(String s) {
+        return s.replace('♂', 'M')
+                .replace('♀', 'F')
+                .replaceAll("\\W", "");
+    }
 
 }

@@ -189,11 +189,8 @@ public class Randomizer {
         // Random Evos
         // Applied after type to pick new evos based on new types.
 
-        if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
+        if (settings.getEvolutionsMod() != Settings.EvolutionsMod.UNCHANGED) {
             romHandler.randomizeEvolutions(settings);
-            evolutionsChanged = true;
-        } else if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL) {
-            romHandler.randomizeEvolutionsEveryLevel(settings);
             evolutionsChanged = true;
         }
 

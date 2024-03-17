@@ -147,6 +147,10 @@ public class Evolution implements Comparable<Evolution> {
 
     @Override
     public String toString() {
-        return "(" + from.getName() + "->" + to.fullName() + ", " + type + ")";
+        return forme == 0 && level == 0 ?
+                String.format("(%s->%s, %s, extraInfo:%d, carryStats:%b)", from.fullName(), to.fullName(),
+                        type, extraInfo, carryStats) :
+                String.format("(%s->%s, %s, extraInfo:%d, carryStats:%b, forme:%d, level:%d)", from.fullName(), to.fullName(),
+                        type, extraInfo, carryStats, forme, level);
     }
 }
