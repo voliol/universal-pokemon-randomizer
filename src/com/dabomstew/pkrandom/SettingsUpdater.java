@@ -338,6 +338,7 @@ public class SettingsUpdater {
 
         // TODO: add a dataBlock for Type Effectiveness
         // TODO: move the update type effectiveness misctweak to a proper setting
+        // TODO: add a dataBlock for Evolutions 2
 
         // fix checksum
         CRC32 checksum = new CRC32();

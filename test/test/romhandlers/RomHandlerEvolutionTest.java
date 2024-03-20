@@ -259,9 +259,9 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         loadROM(romName);
 
         Settings s = new Settings();
-        s.setSelectedEXPCurve(ExpCurve.MEDIUM_FAST);
-        s.setStandardizeEXPCurves(true);
-        romHandler.standardizeEXPCurves(s);
+//        s.setSelectedEXPCurve(ExpCurve.MEDIUM_FAST);
+//        s.setStandardizeEXPCurves(true);
+//        romHandler.standardizeEXPCurves(s);
         s.setEvolutionsMod(false, true, false);
         s.setEvosSimilarStrength(true); // just to increase the likelihood of a failure
         s.setEvosSameTyping(true); // just to increase the likelihood of a failure
@@ -314,6 +314,42 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
     private double calcPowerLevelDiff(Pokemon a, Pokemon b) {
         return Math.abs((double) a.bstForPowerLevels() /
                 b.bstForPowerLevels() - 1);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomForceGrowthWorks(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        s.setEvosForceGrowth(true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.fullName() + " BST=" + pk.bstForPowerLevels() + " ->");
+            for (Evolution evo : pk.getEvolutionsFrom()) {
+                System.out.println("\t" + evo.getTo().fullName() + " BST=" + evo.getTo().bstForPowerLevels());
+                assertTrue(evo.getTo().bstForPowerLevels() > pk.bstForPowerLevels());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomNoConvergenceWorks(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, true, false);
+        s.setEvosNoConvergence(true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.fullName());
+            System.out.println(pk.getEvolutionsTo());
+            assertTrue(pk.getEvolutionsTo().size() <= 1);
+        }
     }
 
     @ParameterizedTest
@@ -437,6 +473,23 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         romHandler.randomizeEvolutions(s);
 
         evosHaveSharedTypeCheck();
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomEveryLevelNoConvergenceWorks(String romName) {
+        loadROM(romName);
+
+        Settings s = new Settings();
+        s.setEvolutionsMod(false, false, true);
+        s.setEvosNoConvergence(true);
+        romHandler.randomizeEvolutions(s);
+
+        for (Pokemon pk : romHandler.getPokemonSet()) {
+            System.out.println(pk.fullName());
+            System.out.println(pk.getEvolutionsTo());
+            assertTrue(pk.getEvolutionsTo().size() <= 1);
+        }
     }
 
     /**

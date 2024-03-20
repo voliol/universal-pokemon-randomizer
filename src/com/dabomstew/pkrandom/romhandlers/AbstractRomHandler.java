@@ -5221,10 +5221,19 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void randomizeEvolutions(Settings settings) {
+        // this code structure of one public method in RomHandler taking a Settings object,
+        // which then gives it to an inner FooRandomizer class which wants boolean arguments,
+        // is really not something set in stone. It's a quick sketch which is better than letting
+        // all of FooRandomizer live in RomHandler without anything around them,
+        // but optimally FooRandomizer might be better as an external class? Or something.
+        // Leaving the exact structure for who does that refactoring.
+        // IronHideElvan seems to have the right idea though.
         boolean similarStrength = settings.isEvosSimilarStrength();
         boolean sameType = settings.isEvosSameTyping();
         boolean limitToThreeStages = settings.isEvosMaxThreeStages();
         boolean forceChange = settings.isEvosForceChange();
+        boolean forceGrowth = settings.isEvosForceGrowth();
+        boolean noConvergence = settings.isEvosNoConvergence();
 
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
@@ -5243,15 +5252,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(getIrregularFormes());
         }
 
-        new EvolutionRandomizer(pokemonPool, banned, similarStrength, sameType, limitToThreeStages, false,
-                forceChange, false, evolveEveryLevel)
+        new EvolutionRandomizer(pokemonPool, banned, similarStrength, sameType, limitToThreeStages, noConvergence,
+                forceChange, forceGrowth, evolveEveryLevel)
                 .randomizeEvolutions();
     }
 
     private class EvolutionRandomizer {
-
-        // TODO: do something about sameType + forceChange not working,
-        //  due to having no possible evos for e.g. Shroomish, Pokemon in rare EXP Growth groups
 
         private static final int MAX_TRIES = 1000;
         private static final int DEFAULT_STAGE_LIMIT = 10;
@@ -5297,11 +5303,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         public void randomizeEvolutions() {
             allOriginalEvos = cacheOriginalEvolutions();
 
-            Map<ExpCurve, PokemonSet<Pokemon>> byGrowthRate = new HashMap<>();
-            for (ExpCurve growthRate : ExpCurve.values()) {
-                byGrowthRate.put(growthRate, pokemonPool.filter(pk -> pk.getGrowthCurve().equals(growthRate)));
-            }
-
             boolean succeeded = false;
             int tries = 0;
             while (!succeeded && tries < MAX_TRIES) {
@@ -5316,7 +5317,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         private boolean randomizeEvolutionsInner() {
             clearEvolutions();
 
-            // TODO: iterate through this in a random order
+            // TODO: iterating through this in a random order would be better
             for (Pokemon from : pokemonPool) {
                 List<Evolution> originalEvos = getOriginalEvos(from);
                 for (Evolution evo : originalEvos) {

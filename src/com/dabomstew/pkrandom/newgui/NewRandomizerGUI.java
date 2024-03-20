@@ -92,6 +92,8 @@ public class NewRandomizerGUI {
     private JCheckBox peForceChangeCheckBox;
     private JCheckBox peChangeImpossibleEvosCheckBox;
     private JCheckBox peMakeEvolutionsEasierCheckBox;
+    private JCheckBox peForceGrowthCheckBox;
+    private JCheckBox peNoConvergenceCheckBox;
     private JRadioButton spUnchangedRadioButton;
     private JRadioButton spCustomRadioButton;
     private JRadioButton spRandomCompletelyRadioButton;
@@ -1578,6 +1580,8 @@ public class NewRandomizerGUI {
         peLimitEvolutionsToThreeCheckBox.setSelected(settings.isEvosMaxThreeStages());
         peForceChangeCheckBox.setSelected(settings.isEvosForceChange());
         peAllowAltFormesCheckBox.setSelected(settings.isEvosAllowAltFormes());
+        peForceGrowthCheckBox.setSelected(settings.isEvosForceGrowth());
+        peNoConvergenceCheckBox.setSelected(settings.isEvosNoConvergence());
 
         mdRandomizeMoveAccuracyCheckBox.setSelected(settings.isRandomizeMoveAccuracies());
         mdRandomizeMoveCategoryCheckBox.setSelected(settings.isRandomizeMoveCategory());
@@ -1831,6 +1835,8 @@ public class NewRandomizerGUI {
         settings.setEvosMaxThreeStages(peLimitEvolutionsToThreeCheckBox.isSelected());
         settings.setEvosForceChange(peForceChangeCheckBox.isSelected());
         settings.setEvosAllowAltFormes(peAllowAltFormesCheckBox.isSelected() && peAllowAltFormesCheckBox.isVisible());
+        settings.setEvosForceGrowth(peForceGrowthCheckBox.isSelected());
+        settings.setEvosNoConvergence(peNoConvergenceCheckBox.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomizeMoveAccuracyCheckBox.isSelected());
         settings.setRandomizeMoveCategory(mdRandomizeMoveCategoryCheckBox.isSelected());
@@ -2148,7 +2154,8 @@ public class NewRandomizerGUI {
 		Arrays.asList(peUnchangedRadioButton, peRandomRadioButton, peRandomEveryLevelRadioButton,
 				peSimilarStrengthCheckBox, peSameTypingCheckBox, peLimitEvolutionsToThreeCheckBox,
 				peForceChangeCheckBox, peChangeImpossibleEvosCheckBox, peMakeEvolutionsEasierCheckBox,
-				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox).forEach(this::setInitialButtonState);
+				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox, peForceGrowthCheckBox,
+                peNoConvergenceCheckBox).forEach(this::setInitialButtonState);
 
 		Arrays.asList(spUnchangedRadioButton, spCustomRadioButton, spRandomCompletelyRadioButton,
 				spRandomTwoEvosRadioButton, spTypeNoneRadioButton, spTypeFwgRadioButton, spTypeTriangleRadioButton,
@@ -2902,6 +2909,8 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setEnabled(true);
             peForceChangeCheckBox.setEnabled(true);
             peAllowAltFormesCheckBox.setEnabled(true);
+            peForceGrowthCheckBox.setEnabled(true);
+            peNoConvergenceCheckBox.setEnabled(true);
         } else if (peRandomEveryLevelRadioButton.isSelected()) {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2910,6 +2919,9 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setSelected(false);
             peForceChangeCheckBox.setEnabled(true);
             peAllowAltFormesCheckBox.setEnabled(true);
+            peForceGrowthCheckBox.setEnabled(false);
+            peForceGrowthCheckBox.setSelected(false);
+            peNoConvergenceCheckBox.setEnabled(true);
         } else {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2921,6 +2933,10 @@ public class NewRandomizerGUI {
             peForceChangeCheckBox.setSelected(false);
             peAllowAltFormesCheckBox.setEnabled(false);
             peAllowAltFormesCheckBox.setSelected(false);
+            peForceGrowthCheckBox.setEnabled(false);
+            peForceGrowthCheckBox.setSelected(false);
+            peNoConvergenceCheckBox.setEnabled(false);
+            peNoConvergenceCheckBox.setSelected(false);
         }
 
         boolean spCustomStatus = spCustomRadioButton.isSelected();
