@@ -5552,24 +5552,41 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	public class Gen4PokemonImageGetter extends DSPokemonImageGetter {
 
+		protected NARCArchive otherPokeGraphicsNARC;
+
 		public Gen4PokemonImageGetter(Pokemon pk) {
 			super(pk);
+		}
+
+		public DSPokemonImageGetter setOtherPokeGraphicsNARC(NARCArchive otherPokeGraphicsNARC) {
+			this.otherPokeGraphicsNARC = otherPokeGraphicsNARC;
+			return this;
+		}
+
+		protected void beforeGet() {
+			super.beforeGet();
+			if (otherPokeGraphicsNARC == null) {
+				try {
+					String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+					otherPokeGraphicsNARC = readNARC(NARCpath);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		protected boolean hasFormes(Pokemon pk) {
+			return Gen4Constants.otherPokemonGraphicsImages.containsKey(pk.getNumber());
 		}
 
 		@Override
 		public BufferedImage get() {
 			beforeGet();
 
-			int imageIndex = pk.getNumber() * 6 + 2;
-			if (gender == Gender.MALE) {
-				imageIndex++;
-			}
-			if (back) {
-				imageIndex -= 2;
-			}
-			int[] imageData = readImageData(pokeGraphicsNARC, imageIndex);
+			int imageIndex = getImageIndex();
+			int[] imageData = readImageData(hasFormes(pk) ? otherPokeGraphicsNARC : pokeGraphicsNARC, imageIndex);
 
-			Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+			Palette palette = getPalette();
 			int[] convPalette = palette.toARGB();
 			if (transparentBackground) {
 				convPalette[0] = 0;
@@ -5594,6 +5611,62 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 
 			return bim;
+		}
+
+		private int getImageIndex() {
+			int imageIndex;
+			if (hasFormes(pk)) {
+				imageIndex = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber())[back ? 1 : 0][forme];
+			} else {
+				imageIndex = pk.getNumber() * 6 + 2;
+				if (gender == Gender.MALE) {
+					imageIndex++;
+				}
+				if (back) {
+					imageIndex -= 2;
+				}
+			}
+			return imageIndex;
+		}
+
+		private Palette getPalette() {
+			Palette palette;
+			// unown and deoxys have the same palette(s) for all their formes
+			if (hasFormes(pk) && pk.getNumber() != Species.unown && pk.getNumber() != Species.deoxys) {
+				palette = shiny ? pk.getShinyPalette(forme) : pk.getNormalPalette(forme);
+			} else {
+				palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+			}
+			return palette;
+		}
+
+
+		@Override
+		public BufferedImage getFull() {
+			System.out.println(pk);
+			if (hasFormes(pk)) {
+				return withFormesGetFull();
+			} else {
+				return super.getFull();
+			}
+		}
+
+		private BufferedImage withFormesGetFull() {
+			setIncludePalette(true);
+
+			int formeCount = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber())[0].length;
+			BufferedImage[] normal = new BufferedImage[formeCount*2];
+			BufferedImage[] shiny = new BufferedImage[formeCount*2];
+			for (int i = 0; i < formeCount; i++) {
+				setForme(i);
+
+				normal[i*2] = get();
+				normal[i*2 + 1] = setBack(true).get();
+				shiny[i*2 + 1] = setShiny(true).get();
+				shiny[i*2] = setBack(false).get();
+				setShiny(false);
+			}
+			return GFXFunctions.stitchToGrid(new BufferedImage[][] { normal, shiny });
 		}
 
 		private int[] readImageData(NARCArchive graphicsNARC, int imageIndex) {
