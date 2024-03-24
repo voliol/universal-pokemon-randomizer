@@ -5508,6 +5508,44 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return calculatePokemonNormalPaletteIndex(i) + 1;
 	}
 
+    protected Collection<Integer> getGraphicalFormePokes() {
+        return Gen4Constants.otherPokemonGraphicsPalettes.keySet();
+    }
+
+    protected void loadGraphicalFormePokemonPalettes(Pokemon pk) {
+        String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+        NARCArchive NARC;
+        try {
+            NARC = readNARC(NARCpath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+		int[][] palettes = Gen4Constants.otherPokemonGraphicsPalettes.get(pk.getNumber());
+		for (int palID = 0; palID < palettes[0].length; palID++) {
+			// assumes there are as many normal and shiny palettes
+			pk.setNormalPalette(palID, readPalette(NARC, palettes[0][palID]));
+			pk.setShinyPalette(palID, readPalette(NARC, palettes[1][palID]));
+		}
+    }
+
+    protected void saveGraphicalFormePokemonPalettes(Pokemon pk) {
+		String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+		NARCArchive NARC;
+		try {
+			NARC = readNARC(NARCpath);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		int[][] palettes = Gen4Constants.otherPokemonGraphicsPalettes.get(pk.getNumber());
+		for (int palID = 0; palID < palettes[0].length; palID++) {
+			// assumes there are as many normal and shiny palettes
+			writePalette(NARC, palettes[0][palID], pk.getNormalPalette(palID));
+			writePalette(NARC, palettes[1][palID], pk.getShinyPalette(palID));
+		}
+    }
+
 	public Gen4PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
 		return new Gen4PokemonImageGetter(pk);
 	}

@@ -631,27 +631,41 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     public Palette getNormalPalette() {
-        return normalPalettes.isEmpty() ? null : normalPalettes.get(0);
+        return getNormalPalette(0);
+    }
+
+    public Palette getNormalPalette(int index) {
+        return normalPalettes.size() <= index ? null : normalPalettes.get(index);
     }
 
     public void setNormalPalette(Palette normalPalette) {
-        if (normalPalettes.isEmpty()) {
-            normalPalettes.add(normalPalette);
-        } else {
-            normalPalettes.set(0, normalPalette);
+        setNormalPalette(0, normalPalette);
+    }
+
+    public void setNormalPalette(int index, Palette normalPalette) {
+        while (normalPalettes.size() <= index) {
+            normalPalettes.add(index, null);
         }
+        normalPalettes.set(index, normalPalette);
     }
 
     public Palette getShinyPalette() {
-        return shinyPalettes.isEmpty() ? null : shinyPalettes.get(0);
+        return getShinyPalette(0);
+    }
+
+    public Palette getShinyPalette(int index) {
+        return shinyPalettes.size() <= index ? null : shinyPalettes.get(index);
     }
 
     public void setShinyPalette(Palette shinyPalette) {
-        if (shinyPalettes.isEmpty()) {
-            shinyPalettes.add(shinyPalette);
-        } else {
-            shinyPalettes.set(0, shinyPalette);
+        setShinyPalette(0, shinyPalette);
+    }
+
+    public void setShinyPalette(int index, Palette shinyPalette) {
+        while (shinyPalettes.size() <= index) {
+            shinyPalettes.add(index, null);
         }
+        shinyPalettes.set(index, shinyPalette);
     }
 
     /**

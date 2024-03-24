@@ -30,10 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
@@ -436,18 +433,22 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             String NARCpath = getRomEntry().getFile("PokemonGraphics");
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
             for (Pokemon pk : getPokemonSet()) {
-                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
-                pk.setNormalPalette(readPalette(pokeGraphicsNARC, normalPaletteIndex));
-                
-                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
-                pk.setShinyPalette(readPalette(pokeGraphicsNARC, shinyPaletteIndex));
+                if (getGraphicalFormePokes().contains(pk.getNumber())) {
+                    loadGraphicalFormePokemonPalettes(pk);
+                } else {
+                    int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
+                    pk.setNormalPalette(readPalette(pokeGraphicsNARC, normalPaletteIndex));
+
+                    int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
+                    pk.setShinyPalette(readPalette(pokeGraphicsNARC, shinyPaletteIndex));
+                }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
+
     protected abstract int calculatePokemonNormalPaletteIndex(int i);
     
     protected abstract int calculatePokemonShinyPaletteIndex(int i);
@@ -465,17 +466,15 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 
             for (Pokemon pk : getPokemonSet()) {
+                if (getGraphicalFormePokes().contains(pk.getNumber())) {
+                    saveGraphicalFormePokemonPalettes(pk);
+                } else {
+                    int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
+                    writePalette(pokeGraphicsNARC, normalPaletteIndex, pk.getNormalPalette());
 
-                int normalPaletteIndex = calculatePokemonNormalPaletteIndex(pk.getNumber());
-                byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
-                normalPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, normalPaletteBytes);
-                pokeGraphicsNARC.files.set(normalPaletteIndex, normalPaletteBytes);
-                
-                int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
-                byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
-                shinyPaletteBytes = concatenate(PALETTE_PREFIX_BYTES, shinyPaletteBytes);
-                pokeGraphicsNARC.files.set(shinyPaletteIndex, shinyPaletteBytes);
-
+                    int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(pk.getNumber());
+                    writePalette(pokeGraphicsNARC, shinyPaletteIndex, pk.getShinyPalette());
+                }
             }
             writeNARC(NARCpath, pokeGraphicsNARC);
 
@@ -483,8 +482,20 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             throw new RandomizerIOException(e);
         }
     }
-    
-	@Override
+
+    protected final void writePalette(NARCArchive NARC, int index, Palette palette) {
+        byte[] paletteBytes = palette.toBytes();
+        paletteBytes = concatenate(PALETTE_PREFIX_BYTES, paletteBytes);
+        NARC.files.set(index, paletteBytes);
+    }
+
+    protected abstract Collection<Integer> getGraphicalFormePokes();
+
+    protected abstract void loadGraphicalFormePokemonPalettes(Pokemon pk);
+
+    protected abstract void saveGraphicalFormePokemonPalettes(Pokemon pk);
+
+    @Override
     protected List<BufferedImage> getAllPokemonImages() {
 //        ripAllOtherPokes();
         List<BufferedImage> bims = new ArrayList<>();

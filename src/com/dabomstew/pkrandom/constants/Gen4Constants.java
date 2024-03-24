@@ -672,6 +672,25 @@ public class Gen4Constants {
         return speciesID;
     }
 
+    public static final Map<Integer, int[][]> otherPokemonGraphicsPalettes = initOtherPokemonGraphicsPalettes();
+
+    private static Map<Integer,int[][]> initOtherPokemonGraphicsPalettes() {
+        Map<Integer, int[][]> palettes = new HashMap<>();
+        palettes.put(Species.unown, new int[][]{{136}, {137}});
+        palettes.put(Species.castform, new int[][]{{138,139,140,141}, {142,143,144,145}}); // normal, sunny, rainy, snowy
+        palettes.put(Species.deoxys, new int[][]{{134}, {135}});
+        palettes.put(Species.burmy, new int[][]{{146,148,150}, {147,149,151}}); // plant, sandy, trash
+        palettes.put(Species.wormadam, new int[][]{{152,154,156}, {153,155,157}}); // plant, sandy, trash
+        palettes.put(Species.cherrim, new int[][]{{166,168}, {167,169}}); // normal, sunny
+        palettes.put(Species.shellos, new int[][]{{158,160}, {159,161}}); // west, east
+        palettes.put(Species.gastrodon, new int[][]{{162,164}, {163,165}}); // west, east
+        palettes.put(Species.arceus, new int[][]{
+                // same order as types internally, see typeToByte()
+                {170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202},
+                {171, 173, 175, 177, 179, 181, 183, 185, 187, 189, 191, 193, 195, 197, 199, 201, 203}});
+        return Collections.unmodifiableMap(palettes);
+    }
+
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
     // NOTE: in the game data there are 6 fillers between pokeradar and GBA

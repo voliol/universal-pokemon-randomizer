@@ -3927,6 +3927,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return calculatePokemonNormalPaletteIndex(i) + 1; 
     }
 
+    @Override
+    protected Collection<Integer> getGraphicalFormePokes() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    protected void loadGraphicalFormePokemonPalettes(Pokemon pk) {
+        // TODO
+    }
+
+    @Override
+    protected void saveGraphicalFormePokemonPalettes(Pokemon pk) {
+        // TODO
+    }
+
     // TODO: remove
     @Override
     protected BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC) {
