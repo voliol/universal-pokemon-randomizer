@@ -2679,6 +2679,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         @Override
+        public Gen1PokemonImageGetter setForme(int forme) {
+            throw new UnsupportedOperationException("No graphical formes in Generation 1");
+        }
+
+        @Override
         public BufferedImage get() {
             // assumes the backsprites are in the same bank as the frontSprites
             int spriteBank = calculateFrontSpriteBank(pk);

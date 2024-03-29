@@ -4192,6 +4192,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         @Override
+        public Gen3PokemonImageGetter setForme(int forme) {
+            throw new UnsupportedOperationException("Graphical forme support not implemented");
+        }
+
+        @Override
         public BufferedImage get() {
             int num = pokedexToInternal[pk.getNumber()];
             int sprites = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");

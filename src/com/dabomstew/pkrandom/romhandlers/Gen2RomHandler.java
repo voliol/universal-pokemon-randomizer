@@ -2873,6 +2873,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         @Override
+        public int getFormeAmount() {
+            return pk.getNumber() == Species.unown ? Gen2Constants.unownFormeCount : 1;
+        }
+
+        @Override
         public BufferedImage get() {
             // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
             // There is no zero-entry.

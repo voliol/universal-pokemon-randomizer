@@ -28,7 +28,10 @@ public abstract class PokemonImageGetter {
 
     public PokemonImageGetter setForme(int forme) {
         if (forme < 0) {
-            throw new IllegalArgumentException("forme can't be negative");
+            throw new IllegalArgumentException("forme must be positive");
+        }
+        if (forme >= getFormeAmount()) {
+            throw new IllegalArgumentException("invalid/too high forme for this Pokemon, " + forme + " for " + pk.fullName());
         }
         this.forme = forme;
         return this;
@@ -42,6 +45,14 @@ public abstract class PokemonImageGetter {
     public PokemonImageGetter setIncludePalette(boolean includePalette) {
         this.includePalette = includePalette;
         return this;
+    }
+
+    /**
+     * Returns the amount of graphical formes for the {@link Pokemon} this PokemonImageGetter is set to work with.
+     * I.e. returns the highest valid value for {@link #setForme(int)}+1.
+     */
+    public int getFormeAmount() {
+        return 1;
     }
 
     public abstract BufferedImage get();
