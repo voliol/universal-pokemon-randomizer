@@ -140,25 +140,25 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
     }
 
     private RomHandler romHandler;
-    private RomHandler.Factory[] checkHandlers = new RomHandler.Factory[]{new Gen3RomHandler.Factory(),
+    private final RomHandler.Factory[] checkHandlers = new RomHandler.Factory[]{new Gen3RomHandler.Factory(),
             new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory()};
     private boolean romLoaded;
 
-    private Map<Pokemon, Palette> originalPalettes = new HashMap<>();
+    private final Map<Pokemon, Palette> originalPalettes = new HashMap<>();
 
     private JScrollPane entryScrollPane;
-    private JList<PaletteDescription> paletteDescriptions;
+    private final JList<PaletteDescription> paletteDescriptions;
     private int lastIndex;
-    private PaletteImageLabel originalImage;
-    private PaletteImageLabel shinyImage;
-    private PaletteImageLabel exampleImage;
-    private JTextField descNameField;
-    private JTextField descBodyField;
-    private JTextField descNoteField;
+    private final PaletteImageLabel originalImage;
+    private final PaletteImageLabel shinyImage;
+    private final PaletteImageLabel exampleImage;
+    private final JTextField descNameField;
+    private final JTextField descBodyField;
+    private final JTextField descNoteField;
 
     private boolean autoName;
 
-    private JButton saveDescButton;
+    private final JButton saveDescButton;
     private boolean autoSave;
 
     private String unchangedName;
@@ -235,23 +235,27 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
         rightPanel.add(imagePanel, BorderLayout.CENTER);
         imagePanel.setLayout(new GridBagLayout());
 
+        MouseHelperListener mouseHelperListener = new MouseHelperListener();
         ShowPaletteListener showPaletteListener = new ShowPaletteListener();
 
         JLabel originalImageLabel = new JLabel("Original:");
         imagePanel.add(originalImageLabel, quickGBC(0, 0));
         originalImage = new PaletteImageLabel(null);
+        originalImage.addMouseListener(mouseHelperListener);
         originalImage.addMouseMotionListener(showPaletteListener);
         imagePanel.add(originalImage, quickGBC(0, 1));
 
         JLabel shinyImageLabel = new JLabel("Orig. shiny:");
         imagePanel.add(shinyImageLabel, quickGBC(1, 0));
         shinyImage = new PaletteImageLabel(null);
+        shinyImage.addMouseListener(mouseHelperListener);
         shinyImage.addMouseMotionListener(showPaletteListener);
         imagePanel.add(shinyImage, quickGBC(1, 1));
 
         JLabel exampleImageLabel = new JLabel("Randomized example:");
         imagePanel.add(exampleImageLabel, quickGBC(2, 0));
         exampleImage = new PaletteImageLabel(null);
+        exampleImage.addMouseListener(mouseHelperListener);
         exampleImage.addMouseMotionListener(showPaletteListener);
         imagePanel.add(exampleImage, quickGBC(2, 1));
 
@@ -501,6 +505,52 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
             exampleImage.setScale(scale);
         }
 
+    }
+
+    private class MouseHelperListener implements MouseListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        private void addIndexAtCoordToDescBody(MouseEvent e) {
+            PaletteImageLabel source = (PaletteImageLabel) e.getSource();
+            int paletteIndex = source.getPaletteIndexAtCoord(e.getX(), e.getY());
+
+            String oldText = descBodyField.getText();
+            StringBuilder sb = new StringBuilder(oldText);
+            if (!oldText.isEmpty() && !oldText.endsWith("/")) {
+                sb.append(",");
+            }
+            sb.append(paletteIndex);
+
+            descBodyField.setText(sb.toString());
+        }
+
+        private void addSlashToDescBody() {
+            descBodyField.setText(descBodyField.getText() + "/");
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                addIndexAtCoordToDescBody(e);
+            } else if (e.getButton() == MouseEvent.BUTTON3) {
+                addSlashToDescBody();
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
     }
 
     private static class ShowPaletteListener implements MouseMotionListener {
