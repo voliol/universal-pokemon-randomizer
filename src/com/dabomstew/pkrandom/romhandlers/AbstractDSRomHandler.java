@@ -486,7 +486,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     
 	@Override
 	protected List<BufferedImage> getAllPokemonImages() {
-        ripAllOtherPokes();
+        //ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
 		String NARCPath = getRomEntry().getFile("PokemonGraphics");
@@ -550,17 +550,40 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		}
 		try {
 			Pokemon pk = randomPokemon();
-			String NARCpath = getRomEntry().getFile("PokemonGraphics");
-			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 			boolean shiny = random.nextInt(10) == 0;
 
-			return getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
+			return getPokemonImage(pk, false, shiny, true, false);
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 	}
-    
-    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
+
+    /**
+     * Gets the image of a certain {@link Pokemon}. This reads the NARC each time it is called, use
+     * {@link #getPokemonImage(Pokemon, NARCArchive, boolean, boolean, boolean, boolean)} if you want to get
+     * multiple Pokemon images at once.
+     * Also throws an IOException for that reason.
+     * @param pk The Pokemon
+     * @param back If true, returns the back image
+     * @param shiny If true, returns the image with the shiny palette
+     * @param transparentBackground If true, makes the first color in the palette transparent
+     * @param includePalette If true, draws a pixel for each of the palette's colors in the top left corner.
+     */
+    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
+                                         boolean includePalette) throws IOException {
+        String NARCpath = getRomEntry().getFile("PokemonGraphics");
+        NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
+        return getPokemonImage(pk, pokeGraphicsNARC, back, shiny, transparentBackground, includePalette);
+    }
+
+    /**
+     * Gets the image of a certain {@link Pokemon}.
+     * @param pk The Pokemon
+     * @param back If true, returns the back image
+     * @param shiny If true, returns the image with the shiny palette
+     * @param transparentBackground If true, makes the first color in the palette transparent
+     * @param includePalette If true, draws a pixel for each of the palette's colors in the top left corner.
+     */
 	public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
 
