@@ -178,7 +178,7 @@ public class SettingsUpdater {
                 oldTweaks |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
             }
             if ((dataBlock[0] & (1 << 5)) != 0) {
-                oldTweaks |= MiscTweak.UNUSED8.getValue(); // UPDATE_TYPE_EFFECTIVENESS at the time, that misc tweak was later made an ordinary option
+                oldTweaks |= MiscTweak.OLD_UPDATE_TYPE_EFFECTIVENESS.getValue();
             }
             if ((dataBlock[2] & (1 << 5)) != 0) {
                 oldTweaks |= MiscTweak.FORCE_CHALLENGE_MODE.getValue();
@@ -340,9 +340,20 @@ public class SettingsUpdater {
             insertExtraByte(54, (byte) 0);
         }
 
-        // TODO: add a dataBlock for Type Effectiveness
-        // TODO: move the update type effectiveness misctweak to a proper setting
-        // TODO: add a dataBlock for Evolutions 2
+        if (oldVersion < 330) {
+            // type effectiveness
+            insertExtraByte(55, (byte) 0x1);
+            // move the former Update Type Effectiveness misctweak to a proper setting
+            int miscTweaks = FileFunctions.readFullIntBigEndian(dataBlock, 32);
+            boolean updateTypeEffectiveness = (MiscTweak.OLD_UPDATE_TYPE_EFFECTIVENESS.getValue() | miscTweaks) != 0;
+            if (updateTypeEffectiveness) {
+                dataBlock[55] &= 0x40;
+            }
+
+            // new evolutions byte
+            insertExtraByte(56, (byte) 0);
+
+        }
 
         // fix checksum
         CRC32 checksum = new CRC32();
