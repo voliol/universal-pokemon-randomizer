@@ -1762,7 +1762,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 Pokemon pkmn = pokes[thisPoke];
                 while (rom[pointer] != 0) {
                     int method = rom[pointer];
-                    EvolutionType type = EvolutionType.fromIndex(1, method);
+                    EvolutionType type = Gen1Constants.evolutionTypeFromIndex(method);
                     int otherPoke = pokeRBYToNumTable[rom[pointer + 2 + (type == EvolutionType.STONE ? 1 : 0)] & 0xFF];
                     int extraInfo = rom[pointer + 1] & 0xFF;
                     Evolution evo = new Evolution(pkmn, pokes[otherPoke], true, type, extraInfo);
@@ -2657,7 +2657,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.getType().toIndex(1));
+        baos.write(Gen1Constants.evolutionTypeToIndex(evo.getType()));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
         baos.write(pokeNumToRBYTable[evo.getTo().getNumber()]);
         return baos.toByteArray();

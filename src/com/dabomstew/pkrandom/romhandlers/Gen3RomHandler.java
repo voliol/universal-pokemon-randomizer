@@ -2829,7 +2829,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 if (method >= 1 && method <= Gen3Constants.evolutionMethodCount && evolvingTo >= 1
                         && evolvingTo <= numInternalPokes) {
                     int extraInfo = readWord(evoOffset + j * 8 + 2);
-                    EvolutionType et = EvolutionType.fromIndex(3, method);
+                    EvolutionType et = Gen3Constants.evolutionTypeFromIndex(method);
                     Evolution evo = new Evolution(pk, pokesInternal[evolvingTo], true, et, extraInfo);
                     if (!pk.getEvolutionsFrom().contains(evo)) {
                         pk.getEvolutionsFrom().add(evo);
@@ -2857,7 +2857,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int evoOffset = baseOffset + (idx) * 0x28;
             int evosWritten = 0;
             for (Evolution evo : pk.getEvolutionsFrom()) {
-                writeWord(evoOffset, evo.getType().toIndex(3));
+                writeWord(evoOffset, Gen3Constants.evolutionTypeToIndex(evo.getType()));
                 writeWord(evoOffset + 2, evo.getExtraInfo());
                 writeWord(evoOffset + 4, pokedexToInternal[evo.getTo().getNumber()]);
                 writeWord(evoOffset + 6, 0);

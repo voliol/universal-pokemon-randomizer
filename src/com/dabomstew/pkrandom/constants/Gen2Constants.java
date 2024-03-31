@@ -25,10 +25,7 @@ package com.dabomstew.pkrandom.constants;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.EncounterArea;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -426,6 +423,28 @@ public class Gen2Constants {
     }
 
     public static final int nonNeutralEffectivenessCount = 110;
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        return switch (evolutionType) {
+            case LEVEL -> 1;
+            case STONE -> 2;
+            case TRADE, TRADE_ITEM -> 3;
+            case HAPPINESS, HAPPINESS_DAY, HAPPINESS_NIGHT -> 4;
+            case LEVEL_ATTACK_HIGHER, LEVEL_DEFENSE_HIGHER, LEVEL_ATK_DEF_SAME -> 5;
+            default -> -1;
+        };
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        return switch (index) {
+            case 1 -> EvolutionType.LEVEL;
+            case 2 -> EvolutionType.STONE;
+            case 3 -> EvolutionType.TRADE;
+            case 4 -> EvolutionType.HAPPINESS;
+            case 5 -> EvolutionType.LEVEL_ATTACK_HIGHER;
+            default -> EvolutionType.NONE;
+        };
+    }
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders

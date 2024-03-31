@@ -28,10 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.dabomstew.pkrandom.pokemon.EncounterArea;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen1Constants {
 
@@ -144,6 +141,24 @@ public class Gen1Constants {
     }
 
     public static final int nonNeutralEffectivenessCount = 82;
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        return switch (evolutionType) {
+            case LEVEL -> 1;
+            case STONE -> 2;
+            case TRADE -> 3;
+            default -> -1;
+        };
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        return switch (index) {
+            case 1 -> EvolutionType.LEVEL;
+            case 2 -> EvolutionType.STONE;
+            case 3 -> EvolutionType.TRADE;
+            default -> EvolutionType.NONE;
+        };
+    }
 
     public static final ItemList allowedItems = setupAllowedItems();
 

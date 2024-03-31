@@ -3849,7 +3849,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					int method = readWord(evoEntry, evo * 6);
 					int species = readWord(evoEntry, evo * 6 + 4);
 					if (method >= 1 && method <= Gen4Constants.evolutionMethodCount && species >= 1) {
-						EvolutionType et = EvolutionType.fromIndex(4, method);
+						EvolutionType et = Gen4Constants.evolutionTypeFromIndex(method);
 						int extraInfo = readWord(evoEntry, evo * 6 + 2);
 						Evolution evol = new Evolution(pokes[i], pokes[species], true, et, extraInfo);
 						if (!pk.getEvolutionsFrom().contains(evol)) {
@@ -3884,7 +3884,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				int evosWritten = 0;
 				for (Evolution evo : pk.getEvolutionsFrom()) {
-					writeWord(evoEntry, evosWritten * 6, evo.getType().toIndex(4));
+					writeWord(evoEntry, evosWritten * 6, Gen4Constants.evolutionTypeToIndex(evo.getType()));
 					writeWord(evoEntry, evosWritten * 6 + 2, evo.getExtraInfo());
 					writeWord(evoEntry, evosWritten * 6 + 4, evo.getTo().getNumber());
 					evosWritten++;
