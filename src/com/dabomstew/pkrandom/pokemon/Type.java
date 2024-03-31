@@ -30,21 +30,11 @@ import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 
 public enum Type {
 
-    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY,
-    GAS(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true), TRI(true);
-
-    public final boolean isHackOnly;
-
-    Type() {
-        this.isHackOnly = false;
-    }
-
-    Type(boolean isHackOnly) {
-        this.isHackOnly = isHackOnly;
-    }
+    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY;
 
     public int toInt() {
         return this.ordinal();
@@ -66,6 +56,11 @@ public enum Type {
     public static final List<Type> GEN2THROUGH5 = Collections.unmodifiableList(Arrays.asList(values()).subList(0, DARK.ordinal()+1));
     public static final List<Type> GEN6PLUS = Collections.unmodifiableList(Arrays.asList(values()).subList(0, FAIRY.ordinal()+1));
 
+    /**
+     * Gets all types of a given generation. This method is not formally deprecated, but please use
+     * {@link TypeTable#getTypes()} instead with possible. That way, your code will have better longevity.
+     * TypeTable#getTypes() will eventually support custom types, this will not.
+     */
     public static List<Type> getAllTypes(int generation) {
         return switch (generation) {
             case 1 -> GEN1;
@@ -74,7 +69,12 @@ public enum Type {
         };
     }
 
+    /**
+     * Deprecated for {@link AbstractRomHandler#randomType()}
+     */
+    @Deprecated
     public static Type randomType(Random random) {
+        System.out.println("Type.getAllTypes() is deprecated. Please use AbstractRomHandler#randomType() instead.");
         return VALUES.get(random.nextInt(SIZE));
     }
 

@@ -43,8 +43,10 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
+import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.TypeTable;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractDSRomEntry;
 
 import javax.imageio.ImageIO;
@@ -191,6 +193,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     }
 
     protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
+
+    protected final void writeBytes(byte[] data, int offset, byte[] values) {
+        System.arraycopy(values, 0, data, offset, values.length);
+    }
 
     public int readWord(byte[] data, int offset) {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
@@ -403,6 +409,25 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	    return sum;
 	}
 
+    @Override
+    public boolean hasTypeEffectivenessSupport() {
+        return true;
+    }
+
+    @Override
+    public void updateTypeEffectiveness() {
+        TypeTable typeTable = getTypeTable();
+        log("--Updating Type Effectiveness--");
+
+        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
+        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
+        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
+        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
+
+        logBlankLine();
+        setTypeTable(typeTable);
+    }
+
 	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
 	// is separate methods called in loadROM()/loadedRom() methods. Even though
 	// one call in AbstractRomHandler should suffice.
@@ -461,7 +486,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     
 	@Override
 	public List<BufferedImage> getAllPokemonImages() {
-        ripAllOtherPokes();
+        //ripAllOtherPokes();
 		List<BufferedImage> bims = new ArrayList<>();
 
 		String NARCPath = getRomEntry().getFile("PokemonGraphics");
@@ -526,17 +551,40 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 //		}
 		try {
 			Pokemon pk = randomPokemon();
-			String NARCpath = getRomEntry().getFile("PokemonGraphics");
-			NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
 			boolean shiny = random.nextInt(10) == 0;
 
-			return getPokemonImage(pk, pokeGraphicsNARC, false, shiny, true, false);
+			return getPokemonImage(pk, false, shiny, true, false);
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 	}
-    
-    // TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
+
+    /**
+     * Gets the image of a certain {@link Pokemon}. This reads the NARC each time it is called, use
+     * {@link #getPokemonImage(Pokemon, NARCArchive, boolean, boolean, boolean, boolean)} if you want to get
+     * multiple Pokemon images at once.
+     * Also throws an IOException for that reason.
+     * @param pk The Pokemon
+     * @param back If true, returns the back image
+     * @param shiny If true, returns the image with the shiny palette
+     * @param transparentBackground If true, makes the first color in the palette transparent
+     * @param includePalette If true, draws a pixel for each of the palette's colors in the top left corner.
+     */
+    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
+                                         boolean includePalette) throws IOException {
+        String NARCpath = getRomEntry().getFile("PokemonGraphics");
+        NARCArchive pokeGraphicsNARC = readNARC(NARCpath);
+        return getPokemonImage(pk, pokeGraphicsNARC, back, shiny, transparentBackground, includePalette);
+    }
+
+    /**
+     * Gets the image of a certain {@link Pokemon}.
+     * @param pk The Pokemon
+     * @param back If true, returns the back image
+     * @param shiny If true, returns the image with the shiny palette
+     * @param transparentBackground If true, makes the first color in the palette transparent
+     * @param includePalette If true, draws a pixel for each of the palette's colors in the top left corner.
+     */
 	public abstract BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
 			boolean transparentBackground, boolean includePalette);
 

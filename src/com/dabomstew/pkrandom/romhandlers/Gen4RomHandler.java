@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
@@ -100,8 +101,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	private Map<Integer, String> wildMapNames, headbuttMapNames;
 	private ItemList allowedItems, nonBadItems;
 	private boolean roamerRandomizationEnabled;
-	private boolean effectivenessUpdated;
 	private int pickupItemsTableOffset, rarePickupItemsTableOffset;
+	private TypeTable typeTable;
 	private long actualArm9CRC32;
 	private Map<Integer, Long> actualOverlayCRC32s;
 	private Map<String, Long> actualFileCRC32s;
@@ -3861,8 +3862,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// In that case, we should have Ninjask carry stats
 				if (pk.getEvolutionsFrom().size() > 1) {
 					for (Evolution e : pk.getEvolutionsFrom()) {
-						if (e.type != EvolutionType.LEVEL_CREATE_EXTRA) {
-							e.carryStats = false;
+						if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
+							e.setCarryStats(false);
 						}
 					}
 				}
@@ -3883,9 +3884,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				int evosWritten = 0;
 				for (Evolution evo : pk.getEvolutionsFrom()) {
-					writeWord(evoEntry, evosWritten * 6, evo.type.toIndex(4));
-					writeWord(evoEntry, evosWritten * 6 + 2, evo.extraInfo);
-					writeWord(evoEntry, evosWritten * 6 + 4, evo.to.getNumber());
+					writeWord(evoEntry, evosWritten * 6, evo.getType().toIndex(4));
+					writeWord(evoEntry, evosWritten * 6 + 2, evo.getExtraInfo());
+					writeWord(evoEntry, evosWritten * 6 + 4, evo.getTo().getNumber());
 					evosWritten++;
 					if (evosWritten == 7) {
 						break;
@@ -3915,7 +3916,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		if (nincada.getEvolutionsFrom().size() < 2) {
 			return;
 		}
-		Pokemon extraEvolution = nincada.getEvolutionsFrom().get(1).to;
+		Pokemon extraEvolution = nincada.getEvolutionsFrom().get(1).getTo();
 
 		// In all the Gen 4 games, the game is hardcoded to check for
 		// the LEVEL_IS_EXTRA evolution method; if it the Pokemon has it,
@@ -3959,39 +3960,39 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					// new 160 other impossible evolutions:
 					if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
 						// beauty milotic
-						if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY) {
+						if (evo.getType() == EvolutionType.LEVEL_HIGH_BEAUTY) {
 							// Replace w/ level 35
-							evo.type = EvolutionType.LEVEL;
-							evo.extraInfo = 35;
+							evo.setType(EvolutionType.LEVEL);
+							evo.setExtraInfo(35);
 							addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
 						}
 						// mt.coronet (magnezone/probopass)
-						if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
+						if (evo.getType() == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
 							// Replace w/ level 40
-							evo.type = EvolutionType.LEVEL;
-							evo.extraInfo = 40;
+							evo.setType(EvolutionType.LEVEL);
+							evo.setExtraInfo(40);
 							addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
 						}
 						// moss rock (leafeon)
-						if (evo.type == EvolutionType.LEVEL_MOSS_ROCK) {
+						if (evo.getType() == EvolutionType.LEVEL_MOSS_ROCK) {
 							// Replace w/ leaf stone
-							evo.type = EvolutionType.STONE;
-							evo.extraInfo = Items.leafStone;
-							addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+							evo.setType(EvolutionType.STONE);
+							evo.setExtraInfo(Items.leafStone);
+							addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.getExtraInfo()));
 						}
 						// icy rock (glaceon)
-						if (evo.type == EvolutionType.LEVEL_ICY_ROCK) {
+						if (evo.getType() == EvolutionType.LEVEL_ICY_ROCK) {
 							// Replace w/ dawn stone
-							evo.type = EvolutionType.STONE;
-							evo.extraInfo = Items.dawnStone;
-							addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+							evo.setType(EvolutionType.STONE);
+							evo.setExtraInfo(Items.dawnStone);
+							addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.getExtraInfo()));
 						}
 					}
-					if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
+					if (changeMoveEvos && evo.getType() == EvolutionType.LEVEL_WITH_MOVE) {
 						// read move
-						int move = evo.extraInfo;
+						int move = evo.getExtraInfo();
 						int levelLearntAt = 1;
-						for (MoveLearnt ml : movesets.get(evo.from.getNumber())) {
+						for (MoveLearnt ml : movesets.get(evo.getFrom().getNumber())) {
 							if (ml.move == move) {
 								levelLearntAt = ml.level;
 								break;
@@ -4002,36 +4003,36 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							levelLearntAt = 45;
 						}
 						// change to pure level evo
-						evo.type = EvolutionType.LEVEL;
-						evo.extraInfo = levelLearntAt;
+						evo.setType(EvolutionType.LEVEL);
+						evo.setExtraInfo(levelLearntAt);
 						addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
 					}
 					// Pure Trade
-					if (evo.type == EvolutionType.TRADE) {
+					if (evo.getType() == EvolutionType.TRADE) {
 						// Replace w/ level 37
-						evo.type = EvolutionType.LEVEL;
-						evo.extraInfo = 37;
+						evo.setType(EvolutionType.LEVEL);
+						evo.setExtraInfo(37);
 						addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
 					}
 					// Trade w/ Item
-					if (evo.type == EvolutionType.TRADE_ITEM) {
+					if (evo.getType() == EvolutionType.TRADE_ITEM) {
 						// Get the current item & evolution
-						int item = evo.extraInfo;
-						if (evo.from.getNumber() == Species.slowpoke) {
+						int item = evo.getExtraInfo();
+						if (evo.getFrom().getNumber() == Species.slowpoke) {
 							// Slowpoke is awkward - he already has a level evo
 							// So we can't do Level up w/ Held Item for him
 							// Put Water Stone instead
-							evo.type = EvolutionType.STONE;
-							evo.extraInfo = Items.waterStone;
-							addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+							evo.setType(EvolutionType.STONE);
+							evo.setExtraInfo(Items.waterStone);
+							addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.getExtraInfo()));
 						} else {
 							addEvoUpdateHeldItem(impossibleEvolutionUpdates, evo, itemNames.get(item));
 							// Replace, for this entry, w/
 							// Level up w/ Held Item at Day
-							evo.type = EvolutionType.LEVEL_ITEM_DAY;
+							evo.setType(EvolutionType.LEVEL_ITEM_DAY);
 							// now add an extra evo for
 							// Level up w/ Held Item at Night
-							Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.LEVEL_ITEM_NIGHT,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.LEVEL_ITEM_NIGHT,
 									item);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4039,7 +4040,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				pkmn.getEvolutionsFrom().addAll(extraEvolutions);
 				for (Evolution ev : extraEvolutions) {
-					ev.to.getEvolutionsTo().add(ev);
+					ev.getTo().getEvolutionsTo().add(ev);
 				}
 			}
 		}
@@ -4071,10 +4072,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			for (Pokemon pkmn : pokes) {
 				if (pkmn != null) {
 					for (Evolution evo : pkmn.getEvolutionsFrom()) {
-						if (evo.type == EvolutionType.LEVEL_WITH_OTHER) {
+						if (evo.getType() == EvolutionType.LEVEL_WITH_OTHER) {
 							// Replace w/ level 35
-							evo.type = EvolutionType.LEVEL;
-							evo.extraInfo = 35;
+							evo.setType(EvolutionType.LEVEL);
+							evo.setExtraInfo(35);
 							addEvoUpdateCondensed(easierEvolutionUpdates, evo, false);
 						}
 					}
@@ -4090,59 +4091,59 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (pkmn != null) {
 				extraEvolutions.clear();
 				for (Evolution evo : pkmn.getEvolutionsFrom()) {
-					if (evo.type == EvolutionType.HAPPINESS_DAY) {
-						if (evo.from.getNumber() == Species.eevee) {
+					if (evo.getType() == EvolutionType.HAPPINESS_DAY) {
+						if (evo.getFrom().getNumber() == Species.eevee) {
 							// We can't set Eevee to evolve into Espeon with happiness at night because
 							// that's how
 							// Umbreon works in the original game. Instead, make Eevee: == sun stone =>
 							// Espeon
-							evo.type = EvolutionType.STONE;
-							evo.extraInfo = Items.sunStone;
-							addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+							evo.setType(EvolutionType.STONE);
+							evo.setExtraInfo(Items.sunStone);
+							addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.getExtraInfo()));
 						} else {
 							// Add an extra evo for Happiness at Night
 							addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-							Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.HAPPINESS_NIGHT,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.HAPPINESS_NIGHT,
 									0);
 							extraEvolutions.add(extraEntry);
 						}
-					} else if (evo.type == EvolutionType.HAPPINESS_NIGHT) {
-						if (evo.from.getNumber() == Species.eevee) {
+					} else if (evo.getType() == EvolutionType.HAPPINESS_NIGHT) {
+						if (evo.getFrom().getNumber() == Species.eevee) {
 							// We can't set Eevee to evolve into Umbreon with happiness at day because
 							// that's how
 							// Espeon works in the original game. Instead, make Eevee: == moon stone =>
 							// Umbreon
-							evo.type = EvolutionType.STONE;
-							evo.extraInfo = Items.moonStone;
-							addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+							evo.setType(EvolutionType.STONE);
+							evo.setExtraInfo(Items.moonStone);
+							addEvoUpdateStone(timeBasedEvolutionUpdates, evo, itemNames.get(evo.getExtraInfo()));
 						} else {
 							// Add an extra evo for Happiness at Day
 							addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-							Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.HAPPINESS_DAY,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.HAPPINESS_DAY,
 									0);
 							extraEvolutions.add(extraEntry);
 						}
-					} else if (evo.type == EvolutionType.LEVEL_ITEM_DAY) {
-						int item = evo.extraInfo;
+					} else if (evo.getType() == EvolutionType.LEVEL_ITEM_DAY) {
+						int item = evo.getExtraInfo();
 						// Make sure we don't already have an evo for the same item at night (e.g., when
 						// using Change Impossible Evos)
-						if (evo.from.getEvolutionsFrom().stream()
-								.noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_NIGHT && e.extraInfo == item)) {
+						if (evo.getFrom().getEvolutionsFrom().stream()
+								.noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_NIGHT && e.getExtraInfo() == item)) {
 							// Add an extra evo for Level w/ Item During Night
 							addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-							Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.LEVEL_ITEM_NIGHT,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.LEVEL_ITEM_NIGHT,
 									item);
 							extraEvolutions.add(extraEntry);
 						}
-					} else if (evo.type == EvolutionType.LEVEL_ITEM_NIGHT) {
-						int item = evo.extraInfo;
+					} else if (evo.getType() == EvolutionType.LEVEL_ITEM_NIGHT) {
+						int item = evo.getExtraInfo();
 						// Make sure we don't already have an evo for the same item at day (e.g., when
 						// using Change Impossible Evos)
-						if (evo.from.getEvolutionsFrom().stream()
-								.noneMatch(e -> e.type == EvolutionType.LEVEL_ITEM_DAY && e.extraInfo == item)) {
+						if (evo.getFrom().getEvolutionsFrom().stream()
+								.noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_DAY && e.getExtraInfo() == item)) {
 							// Add an extra evo for Level w/ Item During Day
 							addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-							Evolution extraEntry = new Evolution(evo.from, evo.to, true, EvolutionType.LEVEL_ITEM_DAY,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.LEVEL_ITEM_DAY,
 									item);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4150,7 +4151,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				pkmn.getEvolutionsFrom().addAll(extraEvolutions);
 				for (Evolution ev : extraEvolutions) {
-					ev.to.getEvolutionsTo().add(ev);
+					ev.getTo().getEvolutionsTo().add(ev);
 				}
 			}
 		}
@@ -4891,10 +4892,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (pk != null) {
 				keepEvos.clear();
 				for (Evolution evol : pk.getEvolutionsFrom()) {
-					if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+					if (pokemonIncluded.contains(evol.getFrom()) && pokemonIncluded.contains(evol.getTo())) {
 						keepEvos.add(evol);
 					} else {
-						evol.to.getEvolutionsTo().remove(evol);
+						evol.getTo().getEvolutionsTo().remove(evol);
 					}
 				}
 				pk.getEvolutionsFrom().retainAll(keepEvos);
@@ -4908,7 +4909,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				Pokemon baby = pokes[i];
 				while (baby.getEvolutionsTo().size() > 0) {
 					// Grab the first "to evolution" even if there are multiple
-					baby = baby.getEvolutionsTo().get(0).from;
+					baby = baby.getEvolutionsTo().get(0).getFrom();
 				}
 				writeWord(babyPokes, i * 2, baby.getNumber());
 			}
@@ -4946,7 +4947,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.RANDOMIZE_CATCHING_TUTORIAL.getValue();
-        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (romEntry.hasTweakFile("FastestTextTweak")) {
             available |= MiscTweak.FASTEST_TEXT.getValue();
         }
@@ -4985,8 +4985,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             applyRunWithoutRunningShoesPatch();
         } else if (tweak == MiscTweak.FASTER_HP_AND_EXP_BARS) {
             patchFasterBars();
-        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-            updateTypeEffectiveness();
         } else if (tweak == MiscTweak.FAST_DISTORTION_WORLD) {
             applyFastDistortionWorld();
         } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
@@ -4995,11 +4993,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			applyReusableTMsPatch();
 		}
     }
-
-	@Override
-	public boolean isEffectivenessUpdated() {
-		return effectivenessUpdated;
-	}
 
 	private void randomizeCatchingTutorial() {
 		int opponentOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
@@ -5138,83 +5131,112 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private void updateTypeEffectiveness() {
-		try {
-			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
-			int typeEffectivenessTableOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator);
-			if (typeEffectivenessTableOffset > 0) {
-				List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay,
-						typeEffectivenessTableOffset);
-				log("--Updating Type Effectiveness--");
-				for (TypeRelationship relationship : typeEffectivenessTable) {
-					// Change Ghost 0.5x against Steel to Ghost 1x to Steel
-					if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
-						relationship.effectiveness = Effectiveness.NEUTRAL;
-						log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-					}
+	@Override
+	public TypeTable getTypeTable() {
+		if (typeTable == null) {
+			typeTable = readTypeTable();
+		}
+		return typeTable;
+	}
 
-					// Change Dark 0.5x against Steel to Dark 1x to Steel
-					else if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
-						relationship.effectiveness = Effectiveness.NEUTRAL;
-						log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
+	private TypeTable readTypeTable() {
+		try {
+			TypeTable typeTable = new TypeTable(Type.getAllTypes(4));
+
+			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
+			int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
+
+			int attackingType = battleOverlay[currentOffset];
+			while (attackingType != Gen4Constants.typeTableTerminator) {
+				if (battleOverlay[currentOffset] != Gen4Constants.typeTableForesightTerminator) {
+					int defendingType = battleOverlay[currentOffset + 1];
+					int effectivenessInternal = battleOverlay[currentOffset + 2];
+					Type attacking = Gen4Constants.typeTable[attackingType];
+					Type defending = Gen4Constants.typeTable[defendingType];
+					Effectiveness effectiveness = switch (effectivenessInternal) {
+						case 20 -> Effectiveness.DOUBLE;
+						case 10 -> Effectiveness.NEUTRAL;
+						case 5 -> Effectiveness.HALF;
+						case 0 -> Effectiveness.ZERO;
+						default -> null;
+					};
+					if (effectiveness != null) {
+						typeTable.setEffectiveness(attacking, defending, effectiveness);
 					}
 				}
-				logBlankLine();
-				writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
-				writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
-				effectivenessUpdated = true;
+				currentOffset += 3;
+				attackingType = battleOverlay[currentOffset];
 			}
+
+			return typeTable;
+
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
 	}
 
-	private List<TypeRelationship> readTypeEffectivenessTable(byte[] battleOverlay, int typeEffectivenessTableOffset) {
-		List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
-		int currentOffset = typeEffectivenessTableOffset;
-		int attackingType = battleOverlay[currentOffset];
-		// 0xFE marks the end of the table *not* affected by Foresight, while 0xFF marks
-		// the actual end of the table. Since we don't care about Ghost immunities at
-		// all,
-		// just stop once we reach the Foresight section.
-		while (attackingType != (byte) 0xFE) {
-			int defendingType = battleOverlay[currentOffset + 1];
-			int effectivenessInternal = battleOverlay[currentOffset + 2];
-			Type attacking = Gen4Constants.typeTable[attackingType];
-			Type defending = Gen4Constants.typeTable[defendingType];
-			Effectiveness effectiveness = switch (effectivenessInternal) {
-				case 20 -> Effectiveness.DOUBLE;
-				case 10 -> Effectiveness.NEUTRAL;
-				case 5 -> Effectiveness.HALF;
-				case 0 -> Effectiveness.ZERO;
-				default -> null;
-			};
-			if (effectiveness != null) {
-				TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
-				typeEffectivenessTable.add(relationship);
-			}
-			currentOffset += 3;
-			attackingType = battleOverlay[currentOffset];
-		}
-		return typeEffectivenessTable;
+	@Override
+	public void setTypeTable(TypeTable typeTable) {
+		this.typeTable = typeTable;
+		writeTypeTable(typeTable);
 	}
 
-	private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable, byte[] battleOverlay,
-			int typeEffectivenessTableOffset) {
-		int currentOffset = typeEffectivenessTableOffset;
-		for (TypeRelationship relationship : typeEffectivenessTable) {
-			battleOverlay[currentOffset] = Gen4Constants.typeToByte(relationship.attacker);
-			battleOverlay[currentOffset + 1] = Gen4Constants.typeToByte(relationship.defender);
-			byte effectivenessInternal = switch (relationship.effectiveness) {
-				case DOUBLE -> 20;
-				case NEUTRAL -> 10;
-				case HALF -> 5;
-				case ZERO -> 0;
-				default -> 0;
-			};
-			battleOverlay[currentOffset + 2] = effectivenessInternal;
-			currentOffset += 3;
+	private void writeTypeTable(TypeTable typeTable) {
+		if (typeTable.nonNeutralEffectivenessCount() > Gen4Constants.nonNeutralEffectivenessCount) {
+			throw new IllegalArgumentException("Too many non-neutral Effectiveness-es. Was "
+					+ typeTable.nonNeutralEffectivenessCount() + ", has to be at most " +
+					Gen4Constants.nonNeutralEffectivenessCount);
 		}
+		try {
+			byte[] battleOverlay = readOverlay(romEntry.getIntValue("BattleOvlNumber"));
+			int tableOffset = romEntry.getIntValue("TypeEffectivenessOffset");
+
+			ByteArrayOutputStream mainPart = new ByteArrayOutputStream();
+			ByteArrayOutputStream ghostImmunities = new ByteArrayOutputStream();
+
+			prepareTypeTableParts(typeTable, mainPart, ghostImmunities);
+			writeTypeTableParts(battleOverlay, tableOffset, mainPart, ghostImmunities);
+
+			writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
+		} catch (IOException e) {
+			throw new RandomizerIOException(e);
+		}
+	}
+
+	private void prepareTypeTableParts(TypeTable typeTable, ByteArrayOutputStream mainPart, ByteArrayOutputStream ghostImmunities) {
+		for (Type attacker : typeTable.getTypes()) {
+			for (Type defender : typeTable.getTypes()) {
+				Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+				if (eff != Effectiveness.NEUTRAL) {
+					ByteArrayOutputStream part = (defender == Type.GHOST && eff == Effectiveness.ZERO)
+							? ghostImmunities : mainPart;
+					byte effectivenessInternal = switch (eff) {
+						case DOUBLE -> 20;
+						case HALF -> 5;
+						case ZERO -> 0;
+						default -> 0;
+					};
+					part.writeBytes(new byte[]{Gen4Constants.typeToByte(attacker),
+							Gen4Constants.typeToByte(defender), effectivenessInternal});
+				}
+			}
+		}
+	}
+
+	private void writeTypeTableParts(byte[] battleOverlay, int tableOffset, ByteArrayOutputStream mainPart,
+									 ByteArrayOutputStream ghostImmunities) {
+		writeBytes(battleOverlay, tableOffset, mainPart.toByteArray());
+		tableOffset += mainPart.size();
+
+		writeBytes(battleOverlay, tableOffset, new byte[] {Gen4Constants.typeTableForesightTerminator,
+				Gen4Constants.typeTableForesightTerminator, (byte) 0x00});
+		tableOffset += 3;
+
+		writeBytes(battleOverlay, tableOffset, ghostImmunities.toByteArray());
+		tableOffset += ghostImmunities.size();
+
+		writeBytes(battleOverlay, tableOffset, new byte[] {Gen4Constants.typeTableTerminator,
+				Gen4Constants.typeTableTerminator, (byte) 0x00});
 	}
 
 	private void applyFastDistortionWorld() {
@@ -5441,8 +5463,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				items.addAll(Gen4Constants.moveBoostingItems.get(moveIdx));
 			}
 		}
-		Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.getPrimaryType(),
-				tp.pokemon.getSecondaryType(), 4, effectivenessUpdated);
+		Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
 		for (Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
 			Integer berry = Gen4Constants.weaknessReducingBerries.get(entry.getKey());
 			if (entry.getValue() == Effectiveness.DOUBLE) {

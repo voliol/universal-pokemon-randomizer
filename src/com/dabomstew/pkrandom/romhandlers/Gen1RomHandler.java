@@ -85,26 +85,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private int[] moveRomToNumTable;
     private int pokedexCount;
 
-    private Type idToType(int value) {
-        if (Gen1Constants.typeTable[value] != null) {
-            return Gen1Constants.typeTable[value];
-        }
-        if (romEntry.getExtraTypeLookup().containsKey(value)) {
-            return romEntry.getExtraTypeLookup().get(value);
-        }
-        return null;
-    }
-
-    private byte typeToByte(Type type) {
-        if (type == null) {
-            return 0x00; // revert to normal
-        }
-        if (romEntry.getExtraTypeReverse().containsKey(type)) {
-            return romEntry.getExtraTypeReverse().get(type).byteValue();
-        }
-        return Gen1Constants.typeToByte(type);
-    }
-
     private static List<Gen1RomEntry> roms;
 
     static {
@@ -133,7 +113,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private String[] mapNames;
     private SubMap[] maps;
     private boolean xAccNerfed;
-    private boolean effectivenessUpdated;
 
     @Override
     public boolean detectRom(byte[] rom) {
@@ -292,7 +271,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 moves[trueMoveIndex].hitratio = ((rom[movesOffset + (i - 1) * 6 + 4] & 0xFF)) / 255.0 * 100;
                 moves[trueMoveIndex].power = rom[movesOffset + (i - 1) * 6 + 2] & 0xFF;
                 moves[trueMoveIndex].pp = rom[movesOffset + (i - 1) * 6 + 5] & 0xFF;
-                moves[trueMoveIndex].type = idToType(rom[movesOffset + (i - 1) * 6 + 3] & 0xFF);
+                moves[trueMoveIndex].type = Gen1Constants.typeTable[rom[movesOffset + (i - 1) * 6 + 3] & 0xFF];
                 moves[trueMoveIndex].category = GBConstants.physicalTypes.contains(moves[trueMoveIndex].type) ? MoveCategory.PHYSICAL : MoveCategory.SPECIAL;
                 if (moves[trueMoveIndex].power == 0 && !GlobalConstants.noPowerNonStatusMoves.contains(trueMoveIndex)) {
                     moves[trueMoveIndex].category = MoveCategory.STATUS;
@@ -507,7 +486,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 hitratio = Math.min(255, hitratio);
                 writeBytes(movesOffset + (i - 1) * 6 + 1, new byte[]{
                         (byte) m.effectIndex, (byte) m.power,
-                        typeToByte(m.type), (byte) hitratio, (byte) m.pp
+                        Gen1Constants.typeToByte(m.type), (byte) hitratio, (byte) m.pp
                 });
             }
         }
@@ -591,8 +570,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         pkmn.setSpeed(rom[offset + Gen1Constants.bsSpeedOffset] & 0xFF);
         pkmn.setSpecial(rom[offset + Gen1Constants.bsSpecialOffset] & 0xFF);
         // Type
-        pkmn.setPrimaryType(idToType(rom[offset + Gen1Constants.bsPrimaryTypeOffset] & 0xFF));
-        pkmn.setSecondaryType(idToType(rom[offset + Gen1Constants.bsSecondaryTypeOffset] & 0xFF));
+        pkmn.setPrimaryType(Gen1Constants.typeTable[rom[offset + Gen1Constants.bsPrimaryTypeOffset] & 0xFF]);
+        pkmn.setSecondaryType(Gen1Constants.typeTable[rom[offset + Gen1Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
         if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
             pkmn.setSecondaryType(null);
@@ -617,9 +596,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         writeByte(offset + Gen1Constants.bsDefenseOffset, (byte) pkmn.getDefense());
         writeByte(offset + Gen1Constants.bsSpeedOffset, (byte) pkmn.getSpeed());
         writeByte(offset + Gen1Constants.bsSpecialOffset, (byte) pkmn.getSpecial());
-        writeByte(offset + Gen1Constants.bsPrimaryTypeOffset, typeToByte(pkmn.getPrimaryType()));
+        writeByte(offset + Gen1Constants.bsPrimaryTypeOffset, Gen1Constants.typeToByte(pkmn.getPrimaryType()));
         byte secondaryTypeByte = pkmn.getSecondaryType() == null ? rom[offset + Gen1Constants.bsPrimaryTypeOffset]
-                : typeToByte(pkmn.getSecondaryType());
+                : Gen1Constants.typeToByte(pkmn.getSecondaryType());
         writeByte(offset + Gen1Constants.bsSecondaryTypeOffset, secondaryTypeByte);
         writeByte(offset + Gen1Constants.bsCatchRateOffset, (byte) pkmn.getCatchRate());
         writeByte(offset + Gen1Constants.bsGrowthCurveOffset, pkmn.getGrowthCurve().toByte());
@@ -1371,52 +1350,38 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean typeInGame(Type type) {
-        if (!type.isHackOnly && (type != Type.DARK && type != Type.STEEL && type != Type.FAIRY)) {
-            return true;
-        }
-        return romEntry.getExtraTypeReverse().containsKey(type);
-    }
-
-    @Override
     public List<Integer> getMovesBannedFromLevelup() {
         return Gen1Constants.bannedLevelupMoves;
     }
 
-    private void updateTypeEffectiveness() {
-        List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable();
+    @Override
+    public void updateTypeEffectiveness() {
+        TypeTable typeTable = getTypeTable();
         log("--Updating Type Effectiveness--");
-        for (TypeRelationship relationship : typeEffectivenessTable) {
-            // Change Poison 2x against bug (should be neutral) to Ice 0.5x against Fire (is currently neutral)
-            if (relationship.attacker == Type.POISON && relationship.defender == Type.BUG) {
-                relationship.attacker = Type.ICE;
-                relationship.defender = Type.FIRE;
-                relationship.effectiveness = Effectiveness.HALF;
-                log("Replaced: Poison super effective vs Bug => Ice not very effective vs Fire");
-            }
 
-            // Change Bug 2x against Poison to Bug 0.5x against Poison
-            else if (relationship.attacker == Type.BUG && relationship.defender == Type.POISON) {
-                relationship.effectiveness = Effectiveness.HALF;
-                log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
-            }
+        typeTable.setEffectiveness(Type.POISON, Type.BUG, Effectiveness.NEUTRAL);
+        log("Changed: Poison super effective vs Bug => Poison neutral vs Bug");
+        typeTable.setEffectiveness(Type.BUG, Type.POISON, Effectiveness.HALF);
+        log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
+        typeTable.setEffectiveness(Type.GHOST, Type.PSYCHIC, Effectiveness.DOUBLE);
+        log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
+        typeTable.setEffectiveness(Type.ICE, Type.FIRE, Effectiveness.HALF);
+        log("Changed: Ice neutral vs Fire => Ice not very effective vs Fire");
 
-            // Change Ghost 0x against Psychic to Ghost 2x against Psychic
-            else if (relationship.attacker == Type.GHOST && relationship.defender == Type.PSYCHIC) {
-                relationship.effectiveness = Effectiveness.DOUBLE;
-                log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
-            }
-        }
         logBlankLine();
-        writeTypeEffectivenessTable(typeEffectivenessTable);
-        effectivenessUpdated = true;
+        setTypeTable(typeTable);
     }
 
-    private List<TypeRelationship> readTypeEffectivenessTable() {
-        List<TypeRelationship> typeEffectivenessTable = new ArrayList<>();
+    @Override
+    public TypeTable getTypeTable() {
+        return readTypeTable();
+    }
+
+    private TypeTable readTypeTable() {
+        TypeTable typeTable = new TypeTable(Type.getAllTypes(1));
         int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
         int attackingType = rom[currentOffset];
-        while (attackingType != (byte) 0xFF) {
+        while (attackingType != GBConstants.typeTableTerminator) {
             int defendingType = rom[currentOffset + 1];
             int effectivenessInternal = rom[currentOffset + 2];
             Type attacking = Gen1Constants.typeTable[attackingType];
@@ -1429,29 +1394,43 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 default -> null;
             };
             if (effectiveness != null) {
-                TypeRelationship relationship = new TypeRelationship(attacking, defending, effectiveness);
-                typeEffectivenessTable.add(relationship);
+                typeTable.setEffectiveness(attacking, defending, effectiveness);
             }
             currentOffset += 3;
             attackingType = rom[currentOffset];
         }
-        return typeEffectivenessTable;
+        return typeTable;
     }
 
-    private void writeTypeEffectivenessTable(List<TypeRelationship> typeEffectivenessTable) {
-        int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
-        for (TypeRelationship relationship : typeEffectivenessTable) {
-            byte effectivenessInternal = switch (relationship.effectiveness) {
-                case DOUBLE -> 20;
-                case NEUTRAL -> 10;
-                case HALF -> 5;
-                case ZERO -> 0;
-                default -> 0;
-            };
-            writeBytes(currentOffset, new byte[]{Gen1Constants.typeToByte(relationship.attacker),
-                    Gen1Constants.typeToByte(relationship.defender), effectivenessInternal});
-            currentOffset += 3;
+    @Override
+    public void setTypeTable(TypeTable typeTable) {
+        writeTypeTable(typeTable);
+    }
+
+    private void writeTypeTable(TypeTable typeTable) {
+        if (typeTable.nonNeutralEffectivenessCount() > Gen1Constants.nonNeutralEffectivenessCount) {
+            throw new IllegalArgumentException("Too many non-neutral Effectiveness-es. Was "
+                    + typeTable.nonNeutralEffectivenessCount() + ", has to be at most " +
+                    Gen1Constants.nonNeutralEffectivenessCount);
         }
+        int currentOffset = romEntry.getIntValue("TypeEffectivenessOffset");
+        for (Type attacker : typeTable.getTypes()) {
+            for (Type defender : typeTable.getTypes()) {
+                Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
+                if (eff != Effectiveness.NEUTRAL) {
+                    byte effectivenessInternal = switch (eff) {
+                        case DOUBLE -> 20;
+                        case HALF -> 5;
+                        case ZERO -> 0;
+                        default -> 0;
+                    };
+                    writeBytes(currentOffset, new byte[]{Gen1Constants.typeToByte(attacker),
+                            Gen1Constants.typeToByte(defender), effectivenessInternal});
+                    currentOffset += 3;
+                }
+            }
+        }
+        rom[currentOffset] = GBConstants.typeTableTerminator;
     }
 
     @Override
@@ -1798,7 +1777,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 // split evos don't carry stats
                 if (pkmn.getEvolutionsFrom().size() > 1) {
                     for (Evolution e : pkmn.getEvolutionsFrom()) {
-                        e.carryStats = false;
+                        e.setCarryStats(false);
                     }
                 }
             }
@@ -1812,10 +1791,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.getEvolutionsFrom()) {
-                    if (evo.type == EvolutionType.TRADE) {
+                    if (evo.getType() == EvolutionType.TRADE) {
                         // change
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 37;
+                        evo.setType(EvolutionType.LEVEL);
+                        evo.setExtraInfo(37);
                         addEvoUpdateLevel(impossibleEvolutionUpdates,evo);
                     }
                 }
@@ -2025,7 +2004,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public int miscTweaksAvailable() {
         int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
-        available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
 
         if (romEntry.getTweakFile("BWXPTweak") != null) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();
@@ -2070,18 +2048,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             applyPikachuEvoPatch();
         } else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.UPDATE_TYPE_EFFECTIVENESS) {
-            updateTypeEffectiveness();
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
             randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.REUSABLE_TMS) {
             applyReusableTMsPatch();
         }
-    }
-
-    @Override
-    public boolean isEffectivenessUpdated() {
-        return effectivenessUpdated;
     }
 
     private void applyBWEXPPatch() {
@@ -2686,18 +2657,18 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.type.toIndex(1));
+        baos.write(evo.getType().toIndex(1));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
-        baos.write(pokeNumToRBYTable[evo.to.getNumber()]);
+        baos.write(pokeNumToRBYTable[evo.getTo().getNumber()]);
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.type) {
-            case LEVEL -> new byte[]{(byte) evo.extraInfo};
-            case STONE -> new byte[]{(byte) evo.extraInfo, 0x01}; // minimum level
+        return switch (evo.getType()) {
+            case LEVEL -> new byte[]{(byte) evo.getExtraInfo()};
+            case STONE -> new byte[]{(byte) evo.getExtraInfo(), 0x01}; // minimum level
             case TRADE -> new byte[]{(byte) 0x01}; // minimum level
-            default -> throw new IllegalStateException("EvolutionType " + evo.type + " is not supported " +
+            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
                     "by Gen 1 games.");
         };
     }

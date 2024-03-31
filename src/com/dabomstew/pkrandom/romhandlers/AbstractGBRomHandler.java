@@ -44,9 +44,7 @@ import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBRomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
@@ -456,6 +454,25 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected abstract FreedSpace getFreedSpace();
 
 	protected abstract byte getFreeSpaceByte();
+
+    @Override
+    public boolean hasTypeEffectivenessSupport() {
+        return true;
+    }
+
+    @Override
+    public void updateTypeEffectiveness() {
+        TypeTable typeTable = getTypeTable();
+        log("--Updating Type Effectiveness--");
+
+        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
+        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
+        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
+        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
+
+        logBlankLine();
+        setTypeTable(typeTable);
+    }
 
     @Override
 	public List<BufferedImage> getAllPokemonImages() {

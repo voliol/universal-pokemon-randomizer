@@ -94,6 +94,8 @@ public class NewRandomizerGUI {
     private JCheckBox peForceChangeCheckBox;
     private JCheckBox peChangeImpossibleEvosCheckBox;
     private JCheckBox peMakeEvolutionsEasierCheckBox;
+    private JCheckBox peForceGrowthCheckBox;
+    private JCheckBox peNoConvergenceCheckBox;
     private JRadioButton spUnchangedRadioButton;
     private JRadioButton spCustomRadioButton;
     private JRadioButton spRandomCompletelyRadioButton;
@@ -334,6 +336,14 @@ public class NewRandomizerGUI {
     private JRadioButton spTypeUniqueRadioButton;
     private JCheckBox spNoLegendariesCheckBox;
     private JCheckBox wpTRKeepThemesCheckBox;
+    private JPanel typesPanel;
+    private JRadioButton teUnchangedRadioButton;
+    private JRadioButton teRandomRadioButton;
+    private JRadioButton teRandomBalancedRadioButton;
+    private JRadioButton teKeepTypeIdentitiesRadioButton;
+    private JRadioButton teInverseRadioButton;
+    private JCheckBox teAddRandomImmunitiesCheckBox;
+    private JCheckBox teUpdateTypeEffectivenessCheckbox;
 
     private static final Random RND = new Random();
 
@@ -612,6 +622,11 @@ public class NewRandomizerGUI {
         mtLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
         noIrregularAltFormesCheckBox.addActionListener(e -> enableOrDisableSubControls());
         ptIsDualTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        teUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teRandomBalancedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teKeepTypeIdentitiesRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        teInverseRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         cpgUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -1587,6 +1602,8 @@ public class NewRandomizerGUI {
         peLimitEvolutionsToThreeCheckBox.setSelected(settings.isEvosMaxThreeStages());
         peForceChangeCheckBox.setSelected(settings.isEvosForceChange());
         peAllowAltFormesCheckBox.setSelected(settings.isEvosAllowAltFormes());
+        peForceGrowthCheckBox.setSelected(settings.isEvosForceGrowth());
+        peNoConvergenceCheckBox.setSelected(settings.isEvosNoConvergence());
 
         mdRandomizeMoveAccuracyCheckBox.setSelected(settings.isRandomizeMoveAccuracies());
         mdRandomizeMoveCategoryCheckBox.setSelected(settings.isRandomizeMoveCategory());
@@ -1840,6 +1857,8 @@ public class NewRandomizerGUI {
         settings.setEvosMaxThreeStages(peLimitEvolutionsToThreeCheckBox.isSelected());
         settings.setEvosForceChange(peForceChangeCheckBox.isSelected());
         settings.setEvosAllowAltFormes(peAllowAltFormesCheckBox.isSelected() && peAllowAltFormesCheckBox.isVisible());
+        settings.setEvosForceGrowth(peForceGrowthCheckBox.isSelected());
+        settings.setEvosNoConvergence(peNoConvergenceCheckBox.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomizeMoveAccuracyCheckBox.isSelected());
         settings.setRandomizeMoveCategory(mdRandomizeMoveCategoryCheckBox.isSelected());
@@ -1966,6 +1985,11 @@ public class NewRandomizerGUI {
 
         settings.setPickupItemsMod(puUnchangedRadioButton.isSelected(), puRandomRadioButton.isSelected());
         settings.setBanBadRandomPickupItems(puBanBadItemsCheckBox.isSelected());
+
+        settings.setTypeEffectivenessMod(teUnchangedRadioButton.isSelected(), teRandomRadioButton.isSelected(),
+                teRandomBalancedRadioButton.isSelected(), teKeepTypeIdentitiesRadioButton.isSelected(), teInverseRadioButton.isSelected());
+        settings.setInverseTypesRandomImmunities(teAddRandomImmunitiesCheckBox.isSelected());
+        settings.setUpdateTypeEffectiveness(teUpdateTypeEffectivenessCheckbox.isSelected());
 
         settings.setPokemonPalettesMod(ppalUnchangedRadioButton.isSelected(), ppalRandomRadioButton.isSelected());
         settings.setPokemonPalettesFollowTypes(ppalFollowTypesCheckBox.isSelected());
@@ -2156,7 +2180,8 @@ public class NewRandomizerGUI {
 		Arrays.asList(peUnchangedRadioButton, peRandomRadioButton, peRandomEveryLevelRadioButton,
 				peSimilarStrengthCheckBox, peSameTypingCheckBox, peLimitEvolutionsToThreeCheckBox,
 				peForceChangeCheckBox, peChangeImpossibleEvosCheckBox, peMakeEvolutionsEasierCheckBox,
-				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox).forEach(this::setInitialButtonState);
+				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox, peForceGrowthCheckBox,
+                peNoConvergenceCheckBox).forEach(this::setInitialButtonState);
 
 		Arrays.asList(spUnchangedRadioButton, spCustomRadioButton, spRandomCompletelyRadioButton,
 				spRandomTwoEvosRadioButton, spTypeNoneRadioButton, spTypeFwgRadioButton, spTypeTriangleRadioButton,
@@ -2292,6 +2317,10 @@ public class NewRandomizerGUI {
 				shGuaranteeXItemsCheckBox, puUnchangedRadioButton, puRandomRadioButton, puBanBadItemsCheckBox)
 				.forEach(this::setInitialButtonState);
 
+        Arrays.asList(teUnchangedRadioButton, teRandomRadioButton, teRandomBalancedRadioButton,
+                teKeepTypeIdentitiesRadioButton, teInverseRadioButton, teAddRandomImmunitiesCheckBox,
+                teUpdateTypeEffectivenessCheckbox).forEach(this::setInitialButtonState);
+
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
                 ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
                         cpgUnchangedRadioButton, cpgCustomRadioButton, cpgRandomButton,
@@ -2302,9 +2331,10 @@ public class NewRandomizerGUI {
         cpgCustomInfo.setVisible(true);
         cpgCustomInfo.setEnabled(false);
 
+        // TODO: why do these checkboxes exist? can't they just be generated from the MiscTweak objects?
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
 				miscFastestTextCheckBox, miscRunningShoesIndoorsCheckBox, miscRandomizePCPotionCheckBox,
-				miscAllowPikachuEvolutionCheckBox, miscGiveNationalDexAtCheckBox, miscUpdateTypeEffectivenessCheckBox,
+				miscAllowPikachuEvolutionCheckBox, miscGiveNationalDexAtCheckBox,
 				miscLowerCasePokemonNamesCheckBox, miscRandomizeCatchingTutorialCheckBox, miscBanLuckyEggCheckBox,
 				miscNoFreeLuckyEggCheckBox, miscBanBigMoneyManiacCheckBox)
                 .forEach(this::setInitialButtonState);
@@ -2647,6 +2677,20 @@ public class NewRandomizerGUI {
             puUnchangedRadioButton.setSelected(true);
             puRandomRadioButton.setEnabled(true);
 
+            // Types
+            boolean typeSupport = romHandler.hasTypeEffectivenessSupport();
+            typesPanel.setVisible(typeSupport);
+            teUnchangedRadioButton.setEnabled(typeSupport);
+            teUnchangedRadioButton.setSelected(typeSupport);
+            teRandomRadioButton.setEnabled(typeSupport);
+            teRandomBalancedRadioButton.setEnabled(typeSupport);
+            teKeepTypeIdentitiesRadioButton.setEnabled(typeSupport);
+            teInverseRadioButton.setEnabled(typeSupport);
+            teAddRandomImmunitiesCheckBox.setEnabled(false);
+            teAddRandomImmunitiesCheckBox.setSelected(false);
+            teUpdateTypeEffectivenessCheckbox.setEnabled(typeSupport);
+            teUpdateTypeEffectivenessCheckbox.setSelected(false);
+
             // Graphics
             boolean ppalSupport = romHandler.generationOfPokemon() < 6; // TODO: is this the RomHandler's job?
             ppalNotExistLabel.setVisible(!ppalSupport);
@@ -2959,6 +3003,8 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setEnabled(true);
             peForceChangeCheckBox.setEnabled(true);
             peAllowAltFormesCheckBox.setEnabled(true);
+            peForceGrowthCheckBox.setEnabled(true);
+            peNoConvergenceCheckBox.setEnabled(true);
         } else if (peRandomEveryLevelRadioButton.isSelected()) {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2967,6 +3013,9 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setSelected(false);
             peForceChangeCheckBox.setEnabled(true);
             peAllowAltFormesCheckBox.setEnabled(true);
+            peForceGrowthCheckBox.setEnabled(false);
+            peForceGrowthCheckBox.setSelected(false);
+            peNoConvergenceCheckBox.setEnabled(true);
         } else {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2978,6 +3027,10 @@ public class NewRandomizerGUI {
             peForceChangeCheckBox.setSelected(false);
             peAllowAltFormesCheckBox.setEnabled(false);
             peAllowAltFormesCheckBox.setSelected(false);
+            peForceGrowthCheckBox.setEnabled(false);
+            peForceGrowthCheckBox.setSelected(false);
+            peNoConvergenceCheckBox.setEnabled(false);
+            peNoConvergenceCheckBox.setSelected(false);
         }
 
         boolean spCustomStatus = spCustomRadioButton.isSelected();
@@ -3485,6 +3538,13 @@ public class NewRandomizerGUI {
             puBanBadItemsCheckBox.setSelected(false);
         }
 
+        if (teInverseRadioButton.isSelected()) {
+            teAddRandomImmunitiesCheckBox.setEnabled(true);
+        } else {
+            teAddRandomImmunitiesCheckBox.setEnabled(false);
+            teAddRandomImmunitiesCheckBox.setSelected(false);
+        }
+
         if (ppalRandomRadioButton.isSelected() && ppalRandomRadioButton.isVisible() &&
                 ppalRandomRadioButton.isEnabled()) {
             ppalFollowTypesCheckBox.setEnabled(true);
@@ -3594,7 +3654,7 @@ public class NewRandomizerGUI {
             spComboBox3.setSelectedIndex(allPokes.indexOf(currentStarters.get(2)));
         }
 
-        int numTypes = Type.getAllTypes(romHandler.generationOfPokemon()).size();
+        int numTypes = romHandler.getTypeTable().getTypes().size();
         String[] typeNames = new String[numTypes + 1];
         typeNames[0] = "Random";
         for (int i = 1; i <= numTypes; i++) {

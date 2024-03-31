@@ -85,7 +85,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 										 boolean shinyFromNormal) {
 
 		// TODO: Figure out what to do with forms, with different palettes and with the same.
-		// TODO: figure out genders in gen IV and V, if anything needs to be done at all
+		// TODO: figure out genders in gen V, if anything needs to be done at all
 
 		this.typeSanity = typeSanity;
 		this.shinyFromNormal = shinyFromNormal;

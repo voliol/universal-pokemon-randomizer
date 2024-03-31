@@ -183,11 +183,6 @@ public interface RomHandler {
     // Pokemon Types
     // =============
 
-    // return a random type valid in this game.
-    Type randomType();
-
-    boolean typeInGame(Type type);
-
     // randomize Pokemon types, with a switch on whether evolutions
     // should follow the same types or not.
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
@@ -613,8 +608,6 @@ public interface RomHandler {
 
     void randomizeEvolutions(Settings settings);
 
-    void randomizeEvolutionsEveryLevel(Settings settings);
-
     // In the earlier games, alt formes use the same evolutions as the base forme.
     // In later games, this was changed so that alt formes can have unique evolutions
     // compared to the base forme.
@@ -674,8 +667,6 @@ public interface RomHandler {
 
     void applyMiscTweak(MiscTweak tweak);
 
-    boolean isEffectivenessUpdated();
-
     void renderPlacementHistory();
 
     // ==========================
@@ -705,5 +696,26 @@ public interface RomHandler {
     void dumpAllPokemonImages();
 
     List<BufferedImage> getAllPokemonImages();
+
+    // ======
+    // Types
+    // ======
+
+    /**
+     * return a random type valid in this game.
+     */
+    Type randomType();
+
+    boolean typeInGame(Type type);
+
+    TypeTable getTypeTable();
+
+    void setTypeTable(TypeTable typeTable);
+
+    void updateTypeEffectiveness();
+
+    void randomizeTypeEffectiveness(Settings settings);
+
+    boolean hasTypeEffectivenessSupport();
 
 }

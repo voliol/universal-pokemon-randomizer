@@ -461,6 +461,15 @@ public class Pokemon implements Comparable<Pokemon> {
         return originalSecondaryType;
     }
 
+    /**
+     * Returns true if this shares any {@link Type} with the given Pokemon.
+     */
+    public boolean hasSharedType(Pokemon other) {
+        return getPrimaryType().equals(other.getPrimaryType()) || getPrimaryType().equals(other.getSecondaryType())
+                || (getSecondaryType() != null &&
+                (getSecondaryType().equals(other.getPrimaryType()) || getSecondaryType().equals(other.getSecondaryType())));
+    }
+
     public int getHp() {
         return hp;
     }
@@ -647,10 +656,6 @@ public class Pokemon implements Comparable<Pokemon> {
         return evolutionsFrom;
     }
 
-    public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {
-        this.evolutionsFrom = evolutionsFrom;
-    }
-
     /**
      * Returns a (modifiable!) {@link List} of {@link Evolution}s where this Pokémon species is what the evolution is
      * "to".<br>
@@ -661,10 +666,6 @@ public class Pokemon implements Comparable<Pokemon> {
      */
     public List<Evolution> getEvolutionsTo() {
         return evolutionsTo;
-    }
-
-    public void setEvolutionsTo(List<Evolution> evolutionsTo) {
-        this.evolutionsTo = evolutionsTo;
     }
 
     public List<MegaEvolution> getMegaEvolutionsFrom() {

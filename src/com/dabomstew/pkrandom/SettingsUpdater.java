@@ -178,7 +178,7 @@ public class SettingsUpdater {
                 oldTweaks |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
             }
             if ((dataBlock[0] & (1 << 5)) != 0) {
-                oldTweaks |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
+                oldTweaks |= MiscTweak.UNUSED8.getValue(); // UPDATE_TYPE_EFFECTIVENESS at the time, that misc tweak was later made an ordinary option
             }
             if ((dataBlock[2] & (1 << 5)) != 0) {
                 oldTweaks |= MiscTweak.FORCE_CHALLENGE_MODE.getValue();
@@ -339,6 +339,10 @@ public class SettingsUpdater {
             // new wild pokes byte
             insertExtraByte(54, (byte) 0);
         }
+
+        // TODO: add a dataBlock for Type Effectiveness
+        // TODO: move the update type effectiveness misctweak to a proper setting
+        // TODO: add a dataBlock for Evolutions 2
 
         // fix checksum
         CRC32 checksum = new CRC32();

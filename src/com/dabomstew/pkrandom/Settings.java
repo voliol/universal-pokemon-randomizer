@@ -52,7 +52,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 54;
+    public static final int LENGTH_OF_SETTINGS_DATA = 55;
 
     private CustomNamesSet customNames;
 
@@ -145,6 +145,8 @@ public class Settings {
     private boolean evosMaxThreeStages;
     private boolean evosForceChange;
     private boolean evosAllowAltFormes;
+    private boolean evosForceGrowth;
+    private boolean evosNoConvergence;
 
     // Move data
     private boolean randomizeMovePowers;
@@ -332,7 +334,15 @@ public class Settings {
 
     private PickupItemsMod pickupItemsMod = PickupItemsMod.UNCHANGED;
     private boolean banBadRandomPickupItems;
-    
+
+    public enum TypeEffectivenessMod {
+        UNCHANGED, RANDOM, RANDOM_BALANCED, KEEP_IDENTITIES, INVERSE
+    }
+
+    private TypeEffectivenessMod typeEffectivenessMod = TypeEffectivenessMod.UNCHANGED;
+    private boolean inverseTypesRandomImmunities;
+    private boolean updateTypeEffectiveness;
+
     public enum PokemonPalettesMod {
         UNCHANGED, RANDOM
     }
@@ -512,7 +522,7 @@ public class Settings {
         out.write(makeByteSelected(randomizeMovePowers, randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
                 randomizeMoveCategory, correctStaticMusic));
 
-        // 26 evolutions
+        // 26 evolutions 1
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
                 evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosAllowAltFormes,
                 evolutionsMod == EvolutionsMod.RANDOM_EVERY_LEVEL));
@@ -645,6 +655,17 @@ public class Settings {
 
         // 54 Wild Pokemon 3
         out.write(makeByteSelected(keepWildTypeThemes));
+
+        // 55 Type effectiveness
+        out.write(makeByteSelected(typeEffectivenessMod == TypeEffectivenessMod.UNCHANGED,
+                typeEffectivenessMod == TypeEffectivenessMod.RANDOM,
+                typeEffectivenessMod == TypeEffectivenessMod.RANDOM_BALANCED,
+                typeEffectivenessMod == TypeEffectivenessMod.KEEP_IDENTITIES,
+                typeEffectivenessMod == TypeEffectivenessMod.INVERSE,
+                inverseTypesRandomImmunities, updateTypeEffectiveness));
+
+        // 56 evolutions 2
+        out.write(makeByteSelected(evosForceGrowth, evosNoConvergence));
 
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
@@ -967,6 +988,18 @@ public class Settings {
 
         settings.setKeepWildTypeThemes(restoreState(data[54], 0));
 
+        settings.setTypeEffectivenessMod(restoreEnum(TypeEffectivenessMod.class, data[55], 0, // UNCHANGED
+                1, // RANDOM
+                2, // RANDOM_BALANCED
+                3, // KEEP_IDENTITIES
+                4  // REVERSE
+        ));
+        settings.setInverseTypesRandomImmunities(restoreState(data[55], 5));
+        settings.setUpdateTypeEffectiveness(restoreState(data[55], 6));
+
+        settings.setEvosForceGrowth(restoreState(data[56], 0));
+        settings.setEvosNoConvergence(restoreState(data[56], 1));
+
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
         settings.setRomName(romName);
@@ -1206,14 +1239,6 @@ public class Settings {
 
     public void setRemoveTimeBasedEvolutions(boolean removeTimeBasedEvolutions) {
         this.removeTimeBasedEvolutions = removeTimeBasedEvolutions;
-    }
-
-    public boolean isEvosAllowAltFormes() {
-        return evosAllowAltFormes;
-    }
-
-    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
-        this.evosAllowAltFormes = evosAllowAltFormes;
     }
 
     public boolean isRaceMode() {
@@ -1556,6 +1581,30 @@ public class Settings {
 
     public void setEvosForceChange(boolean evosForceChange) {
         this.evosForceChange = evosForceChange;
+    }
+
+    public boolean isEvosAllowAltFormes() {
+        return evosAllowAltFormes;
+    }
+
+    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
+        this.evosAllowAltFormes = evosAllowAltFormes;
+    }
+
+    public boolean isEvosForceGrowth() {
+        return evosForceGrowth;
+    }
+
+    public void setEvosForceGrowth(boolean evosForceGrowth) {
+        this.evosForceGrowth = evosForceGrowth;
+    }
+
+    public boolean isEvosNoConvergence() {
+        return evosNoConvergence;
+    }
+
+    public void setEvosNoConvergence(boolean evosNoConvergence) {
+        this.evosNoConvergence = evosNoConvergence;
     }
 
     public boolean isRandomizeMovePowers() {
@@ -2475,7 +2524,35 @@ public class Settings {
     public void setBanBadRandomPickupItems(boolean banBadRandomPickupItems) {
         this.banBadRandomPickupItems = banBadRandomPickupItems;
     }
-    
+
+    public TypeEffectivenessMod getTypeEffectivenessMod() {
+        return typeEffectivenessMod;
+    }
+
+    public void setTypeEffectivenessMod(boolean... bools) {
+        setTypeEffectivenessMod(getEnum(TypeEffectivenessMod.class, bools));
+    }
+
+    private void setTypeEffectivenessMod(TypeEffectivenessMod typeEffectivenessMod) {
+        this.typeEffectivenessMod = typeEffectivenessMod;
+    }
+
+    public boolean isInverseTypesRandomImmunities() {
+        return inverseTypesRandomImmunities;
+    }
+
+    public void setInverseTypesRandomImmunities(boolean inverseTypesRandomImmunities) {
+        this.inverseTypesRandomImmunities = inverseTypesRandomImmunities;
+    }
+
+    public boolean isUpdateTypeEffectiveness() {
+        return updateTypeEffectiveness;
+    }
+
+    public void setUpdateTypeEffectiveness(boolean updateTypeEffectiveness) {
+        this.updateTypeEffectiveness = updateTypeEffectiveness;
+    }
+
     public PokemonPalettesMod getPokemonPalettesMod() {
     	return pokemonPalettesMod;
     }

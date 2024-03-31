@@ -540,6 +540,8 @@ public class Gen3Constants {
         }
     }
 
+    public static final int nonNeutralEffectivenessCount = 110;
+
     public static ItemList allowedItems, nonBadItemsRSE, nonBadItemsFRLG;
     public static List<Integer> regularShopItems, opShopItems;
 

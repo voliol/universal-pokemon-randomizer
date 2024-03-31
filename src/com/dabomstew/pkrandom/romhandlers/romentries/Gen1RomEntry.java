@@ -19,7 +19,6 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
             super();
             putSpecialKeyMethod("StaticPokemon{}", Gen1RomEntry::addStaticPokemon);
             putSpecialKeyMethod("StaticPokemonGhostMarowak{}", Gen1RomEntry::addStaticPokemonGhostMarowak);
-            putSpecialKeyMethod("ExtraTypes", Gen1RomEntry::addExtraTypes);
         }
 
         /**
@@ -60,8 +59,6 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
 
     private final List<Gen1RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
     private int[] ghostMarowakOffsets = new int[0];
-    private final Map<Integer, Type> extraTypeLookup = new HashMap<>();
-    private final Map<Type, Integer> extraTypeReverse = new HashMap<>();
 
     private Gen1RomEntry(String name) {
         super(name);
@@ -71,8 +68,6 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
         super(original);
         staticPokemon.addAll(original.staticPokemon);
         ghostMarowakOffsets = original.ghostMarowakOffsets;
-        extraTypeLookup.putAll(original.extraTypeLookup);
-        extraTypeReverse.putAll(original.extraTypeReverse);
     }
 
     public boolean isYellow() {
@@ -106,28 +101,6 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
         Gen1RomHandler.StaticPokemon ghostMarowak = Gen1RomEntryReader.parseStaticPokemon(s);
         staticPokemon.add(ghostMarowak);
         ghostMarowakOffsets = ghostMarowak.getSpeciesOffsets();
-    }
-
-    public Map<Integer, Type> getExtraTypeLookup() {
-        return extraTypeLookup;
-    }
-
-    public Map<Type, Integer> getExtraTypeReverse() {
-        return extraTypeReverse;
-    }
-
-    private void addExtraTypes(String s) {
-        // remove the containers
-        s = s.substring(1, s.length() - 1);
-        String[] parts = s.split(",");
-        for (String part : parts) {
-            String[] iParts = part.split("=");
-            int typeId = Integer.parseInt(iParts[0], 16);
-            String typeName = iParts[1].trim();
-            Type theType = Type.valueOf(typeName);
-            extraTypeLookup.put(typeId, theType);
-            extraTypeReverse.put(theType, typeId);
-        }
     }
 
     @Override
