@@ -32,7 +32,6 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.BasicPokemonAction;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.EvolvedPokemonAction;
@@ -7278,21 +7277,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         // do nothing
     }
 
-    @Override
-    public void randomizePokemonPalettes(Settings settings) {
-        // I personally don't think it should be the responsibility of the RomHandlers to
-        // communicate with the Settings - isn't that the role of the Randomizer class?
-        // This (overloading the method) is a compromise. // voliol 2022-08-28
-        randomizePokemonPalettes(settings.isPokemonPalettesFollowTypes(), settings.isPokemonPalettesFollowEvolutions(),
-                settings.isPokemonPalettesShinyFromNormal());
-    }
-
-    public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
-        getPaletteHandler().randomizePokemonPalettes(getPokemonSet(), typeSanity, evolutionSanity, shinyFromNormal);
-    }
-
-    public abstract PaletteHandler getPaletteHandler();
-
     // just for testing
     public final void dumpAllPokemonSprites() {
         List<BufferedImage> bims = getAllPokemonImages();
@@ -7308,6 +7292,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+    }
+
+    public String getPaletteFilesID() {
+        throw new UnsupportedOperationException(); // default: assumes no resource files are needed
     }
 
     protected abstract List<BufferedImage> getAllPokemonImages();

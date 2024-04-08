@@ -40,9 +40,8 @@ import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
 import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
@@ -81,9 +80,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			throw new RuntimeException("Could not read Rom Entries.", e);
 		}
 	}
-
-	// Sub-handlers
-	private PaletteHandler paletteHandler;
 
 	// This rom
 	private Pokemon[] pokes;
@@ -188,10 +184,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			arm9 = extendARM9(arm9, extendBy, romEntry.getStringValue("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
 			genericIPSPatch(arm9, "NewCatchingTutorialSubroutineTweak");
 		}
-
-		// Having this in the constructor would be preferred,
-		// but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-		this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 	}
 
 	private void loadMoves() {
@@ -5807,7 +5799,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return spriteData;
 	}
 
-	private String getPaletteFilesID() {
+	public String getPaletteFilesID() {
 		return switch (romEntry.getRomType()) {
 			case Gen4Constants.Type_DP -> "DP";
 			case Gen4Constants.Type_Plat, Gen4Constants.Type_HGSS ->
@@ -5815,11 +5807,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					"DP";
 			default -> null;
 		};
-	}
-
-	@Override
-	public PaletteHandler getPaletteHandler() {
-		return paletteHandler;
 	}
 
 	@Override

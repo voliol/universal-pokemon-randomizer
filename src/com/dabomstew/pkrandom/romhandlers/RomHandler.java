@@ -34,7 +34,6 @@ import java.util.Set;
 
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public interface RomHandler {
@@ -683,10 +682,13 @@ public interface RomHandler {
     // ========
 
     PokemonImageGetter createPokemonImageGetter(Pokemon pk);
-    
-    void randomizePokemonPalettes(Settings settings);
 
-    PaletteHandler getPaletteHandler();
+    // Kind of strange this is a responsibility for the romHandler, when the resources are so specific to the
+    // randomizer parts, and the goal is to keep those separate. Still, it works for now.
+    /**
+     * Returns an identifier for resource files related to this ROM, used when randomizing palettes.
+     */
+    String getPaletteFilesID();
 
     // ======
     // Types

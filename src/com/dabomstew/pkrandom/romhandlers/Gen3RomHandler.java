@@ -37,9 +37,8 @@ import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
-import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
 import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
@@ -109,9 +108,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
-
     // This ROM's data
     private Gen3RomEntry romEntry;
     private Pokemon[] pokes, pokesInternal;
@@ -179,10 +175,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         mapLoadingDone = true;
 
         freeAllUnusedSpace();
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     @Override
@@ -4233,7 +4225,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private String getPaletteFilesID() {
+    public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
                 // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
@@ -4284,11 +4276,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         }
         return items;
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

@@ -25,13 +25,11 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Gen2PaletteHandler;
+import com.dabomstew.pkrandom.randomizers.Gen2PaletteRandomizer;
 import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen2Decmp;
 
@@ -65,7 +63,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     public Gen2RomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
-        this.paletteHandler = new Gen2PaletteHandler(random);
     }
 
     private static List<Gen2RomEntry> roms;
@@ -81,9 +78,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Gen2RomEntry romEntry;
@@ -2969,11 +2963,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
         return mscSprite.getFlattenedData();
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

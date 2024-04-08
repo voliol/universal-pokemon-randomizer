@@ -37,8 +37,6 @@ import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
-import com.dabomstew.pkrandom.graphics.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.PaletteID;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Decmp;
@@ -69,7 +67,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public Gen1RomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
-        this.paletteHandler = new Gen1PaletteHandler(random);
     }
 
     // Important RBY Data Structures
@@ -93,9 +90,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-    
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Gen1RomEntry romEntry;
@@ -2737,11 +2731,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal } });
         }
     }
-
-    @Override
-	public PaletteHandler getPaletteHandler() {
-	    return paletteHandler;
-	}
 
     @Override
     public Gen1RomEntry getRomEntry() {

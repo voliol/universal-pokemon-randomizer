@@ -30,6 +30,10 @@ import java.io.PrintStream;
 import java.util.*;
 
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.randomizers.Gen1PaletteRandomizer;
+import com.dabomstew.pkrandom.randomizers.Gen2PaletteRandomizer;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
+import com.dabomstew.pkrandom.randomizers.PaletteRandomizer;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -39,12 +43,15 @@ public class Randomizer {
     private static final String NEWLINE = System.getProperty("line.separator");
 
     private final Settings settings;
+    private final Random random;
     private final RomHandler romHandler;
     private final ResourceBundle bundle;
     private final boolean saveAsDirectory;
 
-    public Randomizer(Settings settings, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
+    public Randomizer(Settings settings, Random random, RomHandler romHandler, ResourceBundle bundle,
+                      boolean saveAsDirectory) {
         this.settings = settings;
+        this.random = random;
         this.romHandler = romHandler;
         this.bundle = bundle;
         this.saveAsDirectory = saveAsDirectory;
@@ -272,7 +279,7 @@ public class Randomizer {
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
-        if(settings.getStartersMod() != Settings.StartersMod.UNCHANGED) {
+        if (settings.getStartersMod() != Settings.StartersMod.UNCHANGED) {
             romHandler.randomizeStarters(settings);
             startersChanged = true;
         }
@@ -449,13 +456,13 @@ public class Randomizer {
             romHandler.addTrainerPokemon(settings);
             trainersChanged = true;
         }
-        
+
         if (settings.isDoubleBattleMode()) {
             romHandler.setDoubleBattleMode();
             trainersChanged = true;
         }
 
-        switch(settings.getTrainersMod()) {
+        switch (settings.getTrainersMod()) {
             case RANDOM:
             case DISTRIBUTED:
             case MAINPLAYTHROUGH:
@@ -580,7 +587,7 @@ public class Randomizer {
 
         if (!settings.isTrainersUseLocalPokemon() &&
                 (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
-                settings.isWildLevelsModified())) {
+                        settings.isWildLevelsModified())) {
             romHandler.randomizeEncounters(settings);
             wildsChanged = true;
         }
@@ -652,9 +659,17 @@ public class Randomizer {
 
         // Test output for placement history
         // romHandler.renderPlacementHistory();
-        
+
         if (settings.getPokemonPalettesMod() == Settings.PokemonPalettesMod.RANDOM) {
-        	romHandler.randomizePokemonPalettes(settings);
+            PaletteRandomizer paletteRandomizer =
+                    switch (romHandler.generationOfPokemon()) {
+                        case 1 -> new Gen1PaletteRandomizer(romHandler, settings, random);
+                        case 2 -> new Gen2PaletteRandomizer(romHandler, settings, random);
+                        case 3, 4, 5 -> new Gen3to5PaletteRandomizer(romHandler, settings, random);
+                        default -> throw new IllegalStateException(
+                                "Tried to create paletteRandomizer for romHandler without randomizable palettes");
+                    };
+            paletteRandomizer.randomizePokemonPalettes();
         }
 
         // Intro Pokemon...
@@ -1012,16 +1027,16 @@ public class Randomizer {
                         if (i <= tmCount) {
                             log.printf("|TM%02d %" + moveNameLength + "s ", i, moveName);
                         } else {
-                            log.printf("|HM%02d %" + moveNameLength + "s ", i-tmCount, moveName);
+                            log.printf("|HM%02d %" + moveNameLength + "s ", i - tmCount, moveName);
                         }
                     } else {
                         log.printf("|%" + moveNameLength + "s ", moveName);
                     }
                 } else {
                     if (includeTMNumber) {
-                        log.printf("| %" + (moveNameLength+4) + "s ", "-");
+                        log.printf("| %" + (moveNameLength + 4) + "s ", "-");
                     } else {
-                        log.printf("| %" + (moveNameLength-1) + "s ", "-");
+                        log.printf("| %" + (moveNameLength - 1) + "s ", "-");
                     }
                 }
             }
@@ -1032,7 +1047,7 @@ public class Randomizer {
 
     private void logUpdatedEvolutions(final PrintStream log, Set<EvolutionUpdate> updatedEvolutions,
                                       Set<EvolutionUpdate> otherUpdatedEvolutions) {
-        for (EvolutionUpdate evo: updatedEvolutions) {
+        for (EvolutionUpdate evo : updatedEvolutions) {
             if (otherUpdatedEvolutions != null && otherUpdatedEvolutions.contains(evo)) {
                 log.println(evo.toString() + " (Overwritten by \"Make Evolutions Easier\", see below)");
             } else {
@@ -1055,7 +1070,7 @@ public class Randomizer {
 
         List<Pokemon> starters = romHandler.getStarters();
         int i = 1;
-        for (Pokemon starter: starters) {
+        for (Pokemon starter : starters) {
             log.println("Set starter " + i + " to " + starter.fullName());
             i++;
         }
@@ -1206,7 +1221,7 @@ public class Randomizer {
             TotemPokemon newP = newTotems.get(i);
             checkValue = addToCV(checkValue, newP.pkmn.getNumber());
             log.println(oldP.pkmn.fullName() + " =>");
-            log.printf(newP.toString(),itemNames[newP.heldItem]);
+            log.printf(newP.toString(), itemNames[newP.heldItem]);
         }
         log.println();
 
@@ -1249,7 +1264,7 @@ public class Randomizer {
                 log.printf("- %5s", itemNames[shopItemID]);
                 log.println();
             }
-            
+
             log.println();
         }
         log.println();
@@ -1303,7 +1318,7 @@ public class Randomizer {
         return trainerNames;
     }
 
-    
+
     private static int addToCV(int checkValue, int... values) {
         for (int value : values) {
             checkValue = Integer.rotateLeft(checkValue, 3);

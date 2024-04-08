@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.graphics;
+package com.dabomstew.pkrandom.randomizers;
 
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
@@ -21,15 +21,19 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.util.Random;
-
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.Color;
+import com.dabomstew.pkrandom.graphics.Gen2TypeColors;
+import com.dabomstew.pkrandom.graphics.Palette;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.romhandlers.RomHandler;
+
+import java.util.Random;
 
 /**
- * A {@link PaletteHandler} for Gen 2 games (G/S/C).
+ * A {@link PaletteRandomizer} for Gen 2 games (G/S/C).
  * <p>
  * Pokémon palettes in Gen 2 do de facto only have two colors, as their sprites can
  * only have four, and two color slots are always occupied by white respectively
@@ -37,25 +41,24 @@ import com.dabomstew.pkrandom.pokemon.Type;
  * "dark colors", as those descriptors generally correspond to each of the color
  * slots.
  */
-public class Gen2PaletteHandler extends PaletteHandler {
+public class Gen2PaletteRandomizer extends PaletteRandomizer {
 
 	private boolean typeSanity;
 	private boolean shinyFromNormal;
 
-	public Gen2PaletteHandler(Random random) {
-		super(random);
+	public Gen2PaletteRandomizer(RomHandler romHandler, Settings settings, Random random) {
+		super(romHandler, settings, random);
 	}
 
 	@Override
-	public void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet, boolean typeSanity,
-										 boolean evolutionSanity, boolean shinyFromNormal) {
+	public void randomizePokemonPalettes() {
+		this.typeSanity = settings.isPokemonPalettesFollowTypes();
+		this.shinyFromNormal = settings.isPokemonPalettesShinyFromNormal();
+		boolean evolutionSanity = settings.isPokemonPalettesFollowEvolutions();
 
-		this.typeSanity = typeSanity;
-		this.shinyFromNormal = shinyFromNormal;
-		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
+		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler.getPokemonSet());
 		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
-
 	}
 
 	private Palette getRandom2ColorPalette() {

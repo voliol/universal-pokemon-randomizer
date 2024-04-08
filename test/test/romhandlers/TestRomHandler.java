@@ -1,7 +1,6 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 import com.dabomstew.pkrandom.romhandlers.PokemonImageGetter;
@@ -16,11 +15,6 @@ import java.util.Random;
 public class TestRomHandler extends AbstractRomHandler {
     public TestRomHandler(Random random, PrintStream logStream) {
         super(random, logStream);
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return null;
     }
 
     @Override

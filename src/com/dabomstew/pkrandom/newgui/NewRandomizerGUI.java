@@ -1066,7 +1066,7 @@ public class NewRandomizerGUI {
                 boolean succeededSave = false;
                 try {
                     romHandler.setLog(verboseLog);
-                    finishedCV.set(new Randomizer(settings, romHandler, bundle, saveAsDirectory).randomize(filename,
+                    finishedCV.set(new Randomizer(settings, RandomSource.instance(), romHandler, bundle, saveAsDirectory).randomize(filename,
                             verboseLog, seed));
                     succeededSave = true;
                 } catch (RandomizationException ex) {

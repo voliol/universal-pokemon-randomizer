@@ -41,9 +41,8 @@ import com.dabomstew.pkrandom.pokemon.*;
 import pptxt.PPTxtHandler;
 
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
 import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import compressors.DSDecmp;
 
@@ -82,9 +81,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-    
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM
     private Pokemon[] pokes;
@@ -189,10 +185,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 
         // If there are tweaks for expanding the ARM9, do it here to keep it simple.
         boolean shouldExtendARM9 = romEntry.hasTweakFile("ShedinjaEvolutionTweak") || romEntry.hasTweakFile("NewIndexToMusicTweak");
@@ -4029,7 +4021,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
     
-    private String getPaletteFilesID() {
+    public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen5Constants.Type_BW -> "BW";
             case Gen5Constants.Type_BW2 ->
@@ -4037,11 +4029,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     "BW";
             default -> null;
         };
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

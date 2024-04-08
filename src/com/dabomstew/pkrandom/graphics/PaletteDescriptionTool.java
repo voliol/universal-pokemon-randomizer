@@ -32,7 +32,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,11 +55,12 @@ import javax.swing.event.ListSelectionListener;
 
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RandomSource;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 //import com.dabomstew.pkrandom.gui.ROMFilter;
-import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 // TODO: show the name of the loaded ROM/desc file
@@ -70,7 +70,7 @@ import com.dabomstew.pkrandom.romhandlers.*;
  * see how each related image looks with accordingly randomized palettes.
  * <p>
  * Which file to fill is decided automatically, depending on the
- * {@link Gen3to5PaletteHandler#paletteFilesID} assigned.
+ * {@link Gen3to5PaletteRandomizer#paletteFilesID} assigned.
  * <p>
  * Currently only works for Pokémon palettes.
  */
@@ -81,6 +81,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 	 */
 	private static final long serialVersionUID = 7741836888133659367L;
 
+	private static final Settings SETTINGS = new Settings();
 	private static final Random RND = new Random();
 
 	private static final int DEFAULT_SCALE = 2;
@@ -307,12 +308,12 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 			return;
 		}
 
-		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
+		Gen3to5PaletteRandomizer paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, SETTINGS, RND);
 		for (Pokemon pk : romHandler.getPokemonSet()) {
 			originalPalettes.put(pk, pk.getNormalPalette());
 		}
 		paletteDescriptions
-				.setListData(paletteHandler.getPaletteDescriptions(FILE_KEY, false).toArray(new PaletteDescription[0]));
+				.setListData(paletteRandomizer.getPaletteDescriptions(FILE_KEY, false).toArray(new PaletteDescription[0]));
 		paletteDescriptions.setSelectedIndex(0);
 
 	}
@@ -343,8 +344,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		if (autoSave) {
 			savePaletteDescription();
 		}
-		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
-		paletteHandler.savePaletteDescriptionSource(FILE_KEY, jlistToList(paletteDescriptions));
+		Gen3to5PaletteRandomizer paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, SETTINGS, RND);
+		paletteRandomizer.savePaletteDescriptionSource(FILE_KEY, jlistToList(paletteDescriptions));
 	}
 
 	private List<PaletteDescription> jlistToList(JList<? extends PaletteDescription> jlist) {
@@ -401,8 +402,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 		TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, false, RND);
 		PalettePartDescription[] palettePartDescriptions = PalettePartDescription.allFrom(paletteDescriptionBody);
 
-		Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
-		paletteHandler.populatePalette(palette, pp, typeBaseColorList, palettePartDescriptions);
+		Gen3to5PaletteRandomizer paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, SETTINGS, RND);
+		paletteRandomizer.populatePalette(palette, pp, typeBaseColorList, palettePartDescriptions);
 	}
 
 	private void updateImagesAndText() {

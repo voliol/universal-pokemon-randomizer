@@ -30,7 +30,6 @@ import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen6RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.ThreeDSLinkedEncounter;
@@ -3953,11 +3952,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public String getGARCPath(String fileName) {
         return romEntry.getFile(fileName);
-    }
-    
-    @Override
-    public PaletteHandler getPaletteHandler() {
-    	return null; // N/A (?)
     }
 
     @Override
