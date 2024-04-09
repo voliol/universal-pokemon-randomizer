@@ -6739,6 +6739,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void randomizeTypeEffectiveness(Settings settings) {
         Settings.TypeEffectivenessMod mod = settings.getTypeEffectivenessMod();
         boolean randomImmunities = settings.isInverseTypesRandomImmunities();
+        randomizeTypeEffectiveness(mod, randomImmunities);
     }
 
     public void randomizeTypeEffectiveness(Settings.TypeEffectivenessMod mod, boolean randomImmunities) {
