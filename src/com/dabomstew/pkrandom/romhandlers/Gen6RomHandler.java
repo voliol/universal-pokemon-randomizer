@@ -318,7 +318,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     int method = readWord(evoEntry, evo * 6);
                     int species = readWord(evoEntry, evo * 6 + 4);
                     if (method >= 1 && method <= Gen6Constants.evolutionMethodCount && species >= 1) {
-                        EvolutionType et = EvolutionType.fromIndex(6, method);
+                        EvolutionType et = Gen6Constants.evolutionTypeFromIndex(method);
                         if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
                         int extraInfo = readWord(evoEntry, evo * 6 + 2);
                         Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
@@ -649,7 +649,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 int evosWritten = 0;
                 for (Evolution evo : pk.getEvolutionsFrom()) {
-                    writeWord(evoEntry, evosWritten * 6, evo.getType().toIndex(6));
+                    writeWord(evoEntry, evosWritten * 6, Gen6Constants.evolutionTypeToIndex(evo.getType()));
                     writeWord(evoEntry, evosWritten * 6 + 2, evo.getExtraInfo());
                     writeWord(evoEntry, evosWritten * 6 + 4, evo.getTo().getNumber());
                     evosWritten++;

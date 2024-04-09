@@ -377,7 +377,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     int method = readWord(evoEntry, evo * 8);
                     int species = readWord(evoEntry, evo * 8 + 4);
                     if (method >= 1 && method <= Gen7Constants.evolutionMethodCount && species >= 1) {
-                        EvolutionType et = EvolutionType.fromIndex(7, method);
+                        EvolutionType et = Gen7Constants.evolutionTypeFromIndex(method);
                         if (et.skipSplitEvo()) continue; // Remove Feebas "split" evolution
                         if (skipNext) {
                             skipNext = false;
@@ -715,7 +715,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int evosWritten = 0;
                 for (Evolution evo : pk.getEvolutionsFrom()) {
                     Pokemon toPK = evo.getTo();
-                    writeWord(evoEntry, evosWritten * 8, evo.getType().toIndex(7));
+                    writeWord(evoEntry, evosWritten * 8, Gen7Constants.evolutionTypeToIndex(evo.getType()));
                     writeWord(evoEntry, evosWritten * 8 + 2, evo.getType().usesLevel() ? 0 : evo.getExtraInfo());
                     writeWord(evoEntry, evosWritten * 8 + 4, toPK.getBaseNumber());
                     evoEntry[evosWritten * 8 + 6] = (byte) evo.getForme();

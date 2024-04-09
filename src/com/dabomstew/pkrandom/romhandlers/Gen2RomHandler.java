@@ -1839,7 +1839,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             while (rom[pointer] != 0) {
                 int method = rom[pointer] & 0xFF;
                 int otherPoke = rom[pointer + 2 + (method == 5 ? 1 : 0)] & 0xFF;
-                EvolutionType type = EvolutionType.fromIndex(2, method);
+                EvolutionType type = Gen2Constants.evolutionTypeFromIndex(method);
                 int extraInfo = 0;
                 if (type == EvolutionType.TRADE) {
                     int itemNeeded = rom[pointer + 1] & 0xFF;
@@ -2803,7 +2803,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.getType().toIndex(2));
+        baos.write(Gen2Constants.evolutionTypeToIndex(evo.getType()));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
         baos.write(evo.getTo().getNumber());
         return baos.toByteArray();

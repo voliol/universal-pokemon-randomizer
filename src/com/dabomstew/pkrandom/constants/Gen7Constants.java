@@ -903,6 +903,38 @@ public class Gen7Constants {
         }
     }
 
+    private static final EvolutionType[] evolutionTypeTable = new EvolutionType[] {
+            EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT, EvolutionType.LEVEL,
+            EvolutionType.TRADE, EvolutionType.TRADE_ITEM, EvolutionType.TRADE_SPECIAL, EvolutionType.STONE,
+            EvolutionType.LEVEL_ATTACK_HIGHER, EvolutionType.LEVEL_ATK_DEF_SAME, EvolutionType.LEVEL_DEFENSE_HIGHER,
+            EvolutionType.LEVEL_LOW_PV, EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_CREATE_EXTRA,
+            EvolutionType.LEVEL_IS_EXTRA, EvolutionType.LEVEL_HIGH_BEAUTY, EvolutionType.STONE_MALE_ONLY,
+            EvolutionType.STONE_FEMALE_ONLY, EvolutionType.LEVEL_ITEM_DAY, EvolutionType.LEVEL_ITEM_NIGHT,
+            EvolutionType.LEVEL_WITH_MOVE, EvolutionType.LEVEL_WITH_OTHER, EvolutionType.LEVEL_MALE_ONLY,
+            EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_ELECTRIFIED_AREA, EvolutionType.LEVEL_MOSS_ROCK,
+            EvolutionType.LEVEL_ICY_ROCK, EvolutionType.LEVEL_UPSIDE_DOWN, EvolutionType.FAIRY_AFFECTION,
+            EvolutionType.LEVEL_WITH_DARK, EvolutionType.LEVEL_RAIN, EvolutionType.LEVEL_DAY, EvolutionType.LEVEL_NIGHT,
+            EvolutionType.LEVEL_FEMALE_ESPURR, EvolutionType.NONE, EvolutionType.LEVEL_GAME,
+            EvolutionType.LEVEL_DAY_GAME, EvolutionType.LEVEL_NIGHT_GAME, EvolutionType.LEVEL_SNOWY,
+            EvolutionType.LEVEL_DUSK, EvolutionType.LEVEL_NIGHT_ULTRA, EvolutionType.STONE_ULTRA
+    };
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        for (int i = 0; i < evolutionTypeTable.length; i++) {
+            if (evolutionType == evolutionTypeTable[i]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        if (index == -1) {
+            return EvolutionType.NONE;
+        }
+        return evolutionTypeTable[index - 1];
+    }
+
     private static List<Boolean> setupRelevantEncounterFiles(int romType) {
         int fileCount = romType == Type_SM ? 2761 : 3696;
         List<Boolean> list = new ArrayList<>();
