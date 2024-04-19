@@ -1,21 +1,15 @@
-Universal Pokemon Randomizer ZX - V branch/images
+Universal Pokemon Randomizer ZX - V branch
 
 Continuously based on the UPR ZX, by Ajarmar, with significant contributions from darkeye, cleartonic,
 in turn based on the Universal Pokemon Randomizer by Dabomstew
 
 Palette randomization based off work by Artemis251, contains several features from [foxoftheasterisk/UPR-ZX-closer-to-vanilla](https://github.com/foxoftheasterisk/UPR-ZX-closer-to-vanilla).
 
-V branch/images maintained by voliol
-
-# Images branch info
-
-This is an experimental branch for various image-related operations, such as changing the playable character's graphics. 
-
-**The rest of the readme is from the version of the UPR ZX V branch:**
-
 # Branch Info
 
-This is an alternate branch of the [UPR ZX](https://github.com/Ajarmar/universal-pokemon-randomizer-zx). Its goal is to be kept up with the main branch of ZX, while adding features such as palette randomization, and a bunch of refactoring for ease-of-development.
+This is an alternate branch of the [UPR ZX](https://github.com/Ajarmar/universal-pokemon-randomizer-zx). 
+Its goal is to be kept up with the main branch of ZX, while adding features such as palette randomization, 
+and a bunch of refactoring for ease-of-development. 
 
 I do not have the tools/computer to be able to handle games past Gen V. For this reason, while later generation support will be merged in from the main branch, I cannot guarantee V branch features will mesh with those generations un-buggily. And features that need generation-specific implementations simply won't make it past Gen V.  
 
