@@ -31,6 +31,7 @@ import java.util.*;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.EncounterRandomizer;
+import com.dabomstew.pkrandom.randomizers.TypeEffectivenessRandomizer;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -104,6 +105,14 @@ public class Randomizer {
             typeEffectivenessChanged = true;
         }
         if (settings.getTypeEffectivenessMod() != Settings.TypeEffectivenessMod.UNCHANGED) {
+            TypeEffectivenessRandomizer ter = new TypeEffectivenessRandomizer(romHandler, random);
+            switch (settings.getTypeEffectivenessMod()) {
+                case UNCHANGED -> {}
+                case RANDOM -> ter.randomizeTypeEffectiveness(false);
+                case RANDOM_BALANCED -> ter.randomizeTypeEffectiveness(true);
+                case KEEP_IDENTITIES -> ter.randomizeTypeEffectivenessKeepIdentities();
+                case INVERSE -> ter.invertTypeEffectiveness(settings.isInverseTypesRandomImmunities());
+            }
             romHandler.randomizeTypeEffectiveness(settings);
             typeEffectivenessChanged = true;
         }
