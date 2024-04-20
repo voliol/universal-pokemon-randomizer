@@ -265,4 +265,96 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		}
 	}
 
+	/**
+	 * Returns the type theme of this PokemonSet, using their original (pre-randomization) types.
+	 * Compare with {@link #getTypeTheme()}<br>
+	 * Returns null if there is no shared type/theme, or this is empty.<br>
+	 * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal
+	 * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
+	 */
+	public Type getOriginalTypeTheme() {
+		if (this.isEmpty()) {
+			return null;
+		}
+
+		Type theme = null;
+
+		Iterator<T> iter = iterator();
+		Pokemon pk = iter.next();
+		Type primary = pk.getOriginalPrimaryType();
+		Type secondary = pk.getOriginalSecondaryType();
+		while (iter.hasNext()) {
+			pk = iter.next();
+			if(secondary != null) {
+				if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
+					secondary = null;
+				}
+			}
+			if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+				primary = secondary;
+				secondary = null;
+			}
+			if (primary == null) {
+				break; //no type is shared, no need to look at the remaining pokemon
+			}
+		}
+		if (primary != null) {
+			//we have a type theme!
+			if(primary == Type.NORMAL && secondary != null) {
+				//Bird override
+				//(Normal is less significant than other types, for example, Flying)
+				theme = secondary;
+			} else {
+				theme = primary;
+			}
+		}
+		return theme;
+	}
+
+	/**
+	 * Returns the type theme of this PokemonSet, using their types current (possible post-randomization) types.
+	 * Compare with {@link #getOriginalTypeTheme()}<br>
+	 * Returns null if there is no shared type/theme, or this is empty.<br>
+	 * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal
+	 * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
+	 */
+	public Type getTypeTheme() {
+		if (this.isEmpty()) {
+			return null;
+		}
+
+		Type theme = null;
+
+		Iterator<T> iter =this.iterator();
+		Pokemon pk = iter.next();
+		Type primary = pk.getPrimaryType();
+		Type secondary = pk.getSecondaryType();
+		while (iter.hasNext()) {
+			pk = iter.next();
+			if(secondary != null) {
+				if (secondary != pk.getPrimaryType() && secondary != pk.getSecondaryType()) {
+					secondary = null;
+				}
+			}
+			if (primary != pk.getPrimaryType() && primary != pk.getSecondaryType()) {
+				primary = secondary;
+				secondary = null;
+			}
+			if (primary == null) {
+				break; //no type is shared, no need to look at the remaining pokemon
+			}
+		}
+		if (primary != null) {
+			//we have a type theme!
+			if(primary == Type.NORMAL && secondary != null) {
+				//Bird override
+				//(Normal is less significant than other types, for example, Flying)
+				theme = secondary;
+			} else {
+				theme = primary;
+			}
+		}
+		return theme;
+	}
+
 }

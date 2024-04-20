@@ -227,8 +227,6 @@ public interface RomHandler {
 
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
-    void randomizeEncounters(Settings settings);
-
     boolean hasEncounterLocations();
 
     boolean hasTimeBasedEncounters();

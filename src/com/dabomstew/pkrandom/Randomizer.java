@@ -39,12 +39,14 @@ public class Randomizer {
     private static final String NEWLINE = System.getProperty("line.separator");
 
     private final Settings settings;
+    private final Random random;
     private final RomHandler romHandler;
     private final ResourceBundle bundle;
     private final boolean saveAsDirectory;
 
-    public Randomizer(Settings settings, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
+    public Randomizer(Settings settings, Random random, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
         this.settings = settings;
+        this.random = random;
         this.romHandler = romHandler;
         this.bundle = bundle;
         this.saveAsDirectory = saveAsDirectory;
