@@ -48,7 +48,7 @@ public class EncounterRandomizer {
         // - prep settings
         // - get encounters
         // - setup banned + allowed
-        // TODO: - do something special in ORAS
+        // TODO: - do something special in ORAS, the code needed is found in old commits of AbstractRomHandler
         // - randomize inner
         // - apply level modifier
         // - set encounters

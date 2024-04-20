@@ -1283,7 +1283,7 @@ public class Settings {
         setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
     }
 
-    private void setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
+    public void setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
         this.baseStatisticsMod = baseStatisticsMod;
     }
 
@@ -1328,7 +1328,7 @@ public class Settings {
         setExpCurveMod(getEnum(ExpCurveMod.class, bools));
     }
 
-    private void setExpCurveMod(ExpCurveMod expCurveMod) {
+    public void setExpCurveMod(ExpCurveMod expCurveMod) {
         this.expCurveMod = expCurveMod;
     }
 
@@ -1364,7 +1364,7 @@ public class Settings {
         setAbilitiesMod(getEnum(AbilitiesMod.class, bools));
     }
 
-    private void setAbilitiesMod(AbilitiesMod abilitiesMod) {
+    public void setAbilitiesMod(AbilitiesMod abilitiesMod) {
         this.abilitiesMod = abilitiesMod;
     }
 
@@ -1438,7 +1438,7 @@ public class Settings {
         setStartersMod(getEnum(StartersMod.class, bools));
     }
 
-    private void setStartersMod(StartersMod startersMod) {
+    public void setStartersMod(StartersMod startersMod) {
         this.startersMod = startersMod;
     }
 
@@ -1450,7 +1450,7 @@ public class Settings {
         setStartersTypeMod(getEnum(StartersTypeMod.class, bools));
     }
 
-    private void setStartersTypeMod(StartersTypeMod startersTypeMod) {
+    public void setStartersTypeMod(StartersTypeMod startersTypeMod) {
         this.startersTypeMod = startersTypeMod;
     }
 
@@ -1527,7 +1527,7 @@ public class Settings {
         setTypesMod(getEnum(TypesMod.class, bools));
     }
 
-    private void setTypesMod(TypesMod typesMod) {
+    public void setTypesMod(TypesMod typesMod) {
         this.typesMod = typesMod;
     }
 
@@ -1547,7 +1547,7 @@ public class Settings {
         setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
     }
 
-    private void setEvolutionsMod(EvolutionsMod evolutionsMod) {
+    public void setEvolutionsMod(EvolutionsMod evolutionsMod) {
         this.evolutionsMod = evolutionsMod;
     }
 
@@ -1655,7 +1655,7 @@ public class Settings {
         setMovesetsMod(getEnum(MovesetsMod.class, bools));
     }
 
-    private void setMovesetsMod(MovesetsMod movesetsMod) {
+    public void setMovesetsMod(MovesetsMod movesetsMod) {
         this.movesetsMod = movesetsMod;
     }
 
@@ -1723,7 +1723,7 @@ public class Settings {
         setTrainersMod(getEnum(TrainersMod.class, bools));
     }
 
-    private void setTrainersMod(TrainersMod trainersMod) {
+    public void setTrainersMod(TrainersMod trainersMod) {
         this.trainersMod = trainersMod;
     }
 
@@ -1971,7 +1971,7 @@ public class Settings {
         setWildPokemonMod(getEnum(WildPokemonMod.class, bools));
     }
 
-    private void setWildPokemonMod(WildPokemonMod wildPokemonMod) {
+    public void setWildPokemonMod(WildPokemonMod wildPokemonMod) {
         this.wildPokemonMod = wildPokemonMod;
     }
 
@@ -2007,7 +2007,7 @@ public class Settings {
         setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, bools));
     }
 
-    private void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
+    public void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
         this.wildPokemonTypeMod = wildPokemonTypeMod;
     }
 
@@ -2099,7 +2099,7 @@ public class Settings {
         setStaticPokemonMod(getEnum(StaticPokemonMod.class, bools));
     }
 
-    private void setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
+    public void setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
         this.staticPokemonMod = staticPokemonMod;
     }
 
@@ -2168,7 +2168,7 @@ public class Settings {
         setTotemPokemonMod(getEnum(TotemPokemonMod.class, bools));
     }
 
-    private void setTotemPokemonMod(TotemPokemonMod totemPokemonMod) {
+    public void setTotemPokemonMod(TotemPokemonMod totemPokemonMod) {
         this.totemPokemonMod = totemPokemonMod;
     }
 
@@ -2180,7 +2180,7 @@ public class Settings {
         setAllyPokemonMod(getEnum(AllyPokemonMod.class, bools));
     }
 
-    private void setAllyPokemonMod(AllyPokemonMod allyPokemonMod) {
+    public void setAllyPokemonMod(AllyPokemonMod allyPokemonMod) {
         this.allyPokemonMod = allyPokemonMod;
     }
 
@@ -2192,7 +2192,7 @@ public class Settings {
         setAuraMod(getEnum(AuraMod.class, bools));
     }
 
-    private void setAuraMod(AuraMod auraMod) {
+    public void setAuraMod(AuraMod auraMod) {
         this.auraMod = auraMod;
     }
 
@@ -2236,7 +2236,7 @@ public class Settings {
         setTmsMod(getEnum(TMsMod.class, bools));
     }
 
-    private void setTmsMod(TMsMod tmsMod) {
+    public void setTmsMod(TMsMod tmsMod) {
         this.tmsMod = tmsMod;
     }
 
@@ -2296,7 +2296,7 @@ public class Settings {
         setTmsHmsCompatibilityMod(getEnum(TMsHMsCompatibilityMod.class, bools));
     }
 
-    private void setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
+    public void setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
         this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
@@ -2316,7 +2316,7 @@ public class Settings {
         setMoveTutorMovesMod(getEnum(MoveTutorMovesMod.class, bools));
     }
 
-    private void setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
+    public void setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
         this.moveTutorMovesMod = moveTutorMovesMod;
     }
 
@@ -2368,7 +2368,7 @@ public class Settings {
         setMoveTutorsCompatibilityMod(getEnum(MoveTutorsCompatibilityMod.class, bools));
     }
 
-    private void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
+    public void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
         this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
     }
 
@@ -2388,7 +2388,7 @@ public class Settings {
         setInGameTradesMod(getEnum(InGameTradesMod.class, bools));
     }
 
-    private void setInGameTradesMod(InGameTradesMod inGameTradesMod) {
+    public void setInGameTradesMod(InGameTradesMod inGameTradesMod) {
         this.inGameTradesMod = inGameTradesMod;
     }
 
@@ -2432,7 +2432,7 @@ public class Settings {
         setFieldItemsMod(getEnum(FieldItemsMod.class, bools));
     }
 
-    private void setFieldItemsMod(FieldItemsMod fieldItemsMod) {
+    public void setFieldItemsMod(FieldItemsMod fieldItemsMod) {
         this.fieldItemsMod = fieldItemsMod;
     }
 
@@ -2453,7 +2453,7 @@ public class Settings {
         setShopItemsMod(getEnum(ShopItemsMod.class, bools));
     }
 
-    private void setShopItemsMod(ShopItemsMod shopItemsMod) {
+    public void setShopItemsMod(ShopItemsMod shopItemsMod) {
         this.shopItemsMod = shopItemsMod;
     }
 
@@ -2513,7 +2513,7 @@ public class Settings {
         setPickupItemsMod(getEnum(PickupItemsMod.class, bools));
     }
 
-    private void setPickupItemsMod(PickupItemsMod pickupItemsMod) {
+    public void setPickupItemsMod(PickupItemsMod pickupItemsMod) {
         this.pickupItemsMod = pickupItemsMod;
     }
 
@@ -2533,7 +2533,7 @@ public class Settings {
         setTypeEffectivenessMod(getEnum(TypeEffectivenessMod.class, bools));
     }
 
-    private void setTypeEffectivenessMod(TypeEffectivenessMod typeEffectivenessMod) {
+    public void setTypeEffectivenessMod(TypeEffectivenessMod typeEffectivenessMod) {
         this.typeEffectivenessMod = typeEffectivenessMod;
     }
 

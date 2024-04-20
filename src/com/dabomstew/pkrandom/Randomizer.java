@@ -30,6 +30,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.randomizers.EncounterRandomizer;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -431,7 +432,8 @@ public class Randomizer {
         if (settings.isTrainersUseLocalPokemon() &&
                 (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
                         settings.isWildLevelsModified())) {
-            romHandler.randomizeEncounters(settings);
+            EncounterRandomizer er = new EncounterRandomizer(romHandler, settings, random);
+            er.randomizeEncounters();
             wildsChanged = true;
         }
 
@@ -580,7 +582,8 @@ public class Randomizer {
         if (!settings.isTrainersUseLocalPokemon() &&
                 (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
                 settings.isWildLevelsModified())) {
-            romHandler.randomizeEncounters(settings);
+            EncounterRandomizer er = new EncounterRandomizer(romHandler, settings, random);
+            er.randomizeEncounters();
             wildsChanged = true;
         }
 
