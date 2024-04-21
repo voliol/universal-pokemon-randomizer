@@ -154,10 +154,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         allowedItems = Gen7Constants.getAllowedItems(romEntry.getRomType()).copy();
         nonBadItems = Gen7Constants.nonBadItems.copy();
 
-        if (romEntry.getRomType() == Gen7Constants.Type_SM) {
-            isSM = true;
-        }
-
         try {
             computeCRC32sForRom();
         } catch (IOException e) {
@@ -2117,7 +2113,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 // Since we haven't modified the code yet, this is Zygarde. For SM, use 10%,
                 // since you can get it fairly early. For USUM, use 50%, since it's only
                 // obtainable in the postgame.
-                forme = isSM ? 1 : 0;
+                forme = romEntry.getRomType() == Gen7Constants.Type_SM ? 1 : 0;
             } else {
                 // We have modified the code, so just read the constant forme number we wrote.
                 forme = code[formeOffset];

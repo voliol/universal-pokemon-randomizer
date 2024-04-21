@@ -62,7 +62,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     private int fullyEvolvedRandomSeed;
 
     protected boolean isORAS = false;
-    protected boolean isSM = false;
 
     protected int perfectAccuracy = 100;
 
