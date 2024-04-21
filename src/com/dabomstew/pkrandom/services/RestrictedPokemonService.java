@@ -1,14 +1,15 @@
 package com.dabomstew.pkrandom.services;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.MegaEvolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -80,7 +81,7 @@ public class RestrictedPokemonService {
         if (!restrictionsSet) {
             throw new IllegalStateException("Restrictions not set.");
         }
-        return null;
+        return megaEvolutions;
     }
 
     public void setRestrictions(Settings settings) {
@@ -112,6 +113,7 @@ public class RestrictedPokemonService {
         ultraBeastsInclAltFormes = allInclAltFormes.filter(Pokemon::isUltraBeast);
         PokemonSet<Pokemon> altFormes = romHandler.getAltFormes();
         all = allInclAltFormes.filter(pk -> !altFormes.contains(pk));
+        nonLegendaries = nonLegendariesInclAltFormes.filter(pk -> !altFormes.contains(pk));
         legendaries = legendariesInclAltFormes.filter(pk -> !altFormes.contains(pk));
         ultraBeasts = ultraBeastsInclAltFormes.filter(pk -> !altFormes.contains(pk));
     }
@@ -119,39 +121,28 @@ public class RestrictedPokemonService {
     private PokemonSet<Pokemon> allInclAltFormesFromRestrictions(GenRestrictions restrictions) {
         PokemonSet<Pokemon> allInclAltFormes = new PokemonSet<>();
         PokemonSet<Pokemon> allNonRestricted = romHandler.getPokemonSetInclFormes();
-        int pokemonCount = romHandler.getPokemon().size();
-
-        // TODO: instead of having the generations be hard-coded here, let each RomHandler assign a
-        //  generation to each of the Pokemon
 
         if (restrictions.allow_gen1) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.bulbasaur, Species.mew));
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 1));
         }
-
-        if (restrictions.allow_gen2 && pokemonCount > Gen2Constants.pokemonCount) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.chikorita, Species.celebi));
+        if (restrictions.allow_gen2) {
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 2));
         }
-
-        if (restrictions.allow_gen3 && pokemonCount > Gen3Constants.pokemonCount) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.treecko, Species.deoxys));
+        if (restrictions.allow_gen3) {
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 3));
         }
-
-        if (restrictions.allow_gen4 && pokemonCount > Gen4Constants.pokemonCount) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.turtwig, Species.arceus));
+        if (restrictions.allow_gen4) {
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 4));
         }
-
-        if (restrictions.allow_gen5 && pokemonCount > Gen5Constants.pokemonCount) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.victini, Species.genesect));
+        if (restrictions.allow_gen5) {
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 5));
         }
-
-        if (restrictions.allow_gen6 && pokemonCount > Gen6Constants.pokemonCount) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.chespin, Species.volcanion));
+        if (restrictions.allow_gen6) {
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 6));
         }
-
-//        int maxGen7SpeciesID = romHandler.isSM ? Species.marshadow : Species.zeraora;
-//        if (restrictions.allow_gen7 && pokemonCount > maxGen7SpeciesID) {
-//            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.rowlet, maxGen7SpeciesID));
-//        }
+        if (restrictions.allow_gen7) {
+            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 7));
+        }
 
         // If the user specified it, add all the evolutionary relatives for everything in the mainPokemonList
         if (restrictions.allow_evolutionary_relatives) {

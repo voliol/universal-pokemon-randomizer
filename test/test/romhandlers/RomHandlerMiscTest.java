@@ -293,4 +293,18 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         }
     }
 
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void allPokemonHaveAGeneration(String romName){
+        loadROM(romName);
+
+        for (Pokemon pk : romHandler.getPokemonSetInclFormes()) {
+            System.out.println(pk);
+            System.out.println(pk.fullName());
+            System.out.println(pk.getGeneration());
+            assertNotEquals(-1, pk.getGeneration());
+        }
+    }
+
 }
