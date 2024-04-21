@@ -31,13 +31,14 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.BasicPokemonAction;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper.EvolvedPokemonAction;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
+import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -45,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -64,13 +64,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     private PokemonSet<Pokemon> nonlegendaryAltFormes = new PokemonSet<>();
     private PokemonSet<Pokemon> legendaryAltFormes = new PokemonSet<>();
 
+    private final RestrictedPokemonService restrictedPokemonService = new RestrictedPokemonService(this);
     private final CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(this::getPokemonSet);
 
     private List<MegaEvolution> megaEvolutionsList;
     private PokemonSet<Pokemon> altFormes;
 
     private final Random cosmeticRandom;
-    private List<Pokemon> alreadyPicked = new ArrayList<>();
     private Map<Pokemon, Integer> placementHistory = new HashMap<>();
     private Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
     private int fullyEvolvedRandomSeed;
@@ -95,6 +95,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     public void setLog(PrintStream logStream) {
         this.logStream = logStream;
+    }
+
+    public RestrictedPokemonService getRestrictedPokemonService() {
+        return restrictedPokemonService;
     }
 
     public void setPokemonPool(Settings settings) {
@@ -4701,340 +4705,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public Set<EvolutionUpdate> getTimeBasedEvoUpdates() {
         return timeBasedEvolutionUpdates;
-    }
-
-    @Override
-    public void randomizeEvolutions(Settings settings) {
-        // this code structure of one public method in RomHandler taking a Settings object,
-        // which then gives it to an inner FooRandomizer class which wants boolean arguments,
-        // is really not something set in stone. It's a quick sketch which is better than letting
-        // all of FooRandomizer live in RomHandler without anything around them,
-        // but optimally FooRandomizer might be better as an external class? Or something.
-        // Leaving the exact structure for who does that refactoring.
-        // IronHideElvan seems to have the right idea though.
-        boolean similarStrength = settings.isEvosSimilarStrength();
-        boolean sameType = settings.isEvosSameTyping();
-        boolean limitToThreeStages = settings.isEvosMaxThreeStages();
-        boolean forceChange = settings.isEvosForceChange();
-        boolean forceGrowth = settings.isEvosForceGrowth();
-        boolean noConvergence = settings.isEvosNoConvergence();
-
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-        boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
-
-        boolean evolveEveryLevel = settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL;
-
-        checkPokemonRestrictions();
-
-        PokemonSet<Pokemon> pokemonPool = getRestrictedPokemon(false, altFormesCanHaveDifferentEvolutions(), false);
-        PokemonSet<Pokemon> banned = this.getBannedFormesForPlayerPokemon();
-        if (!abilitiesAreRandomized) {
-            PokemonSet<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
-            banned.addAll(abilityDependentFormes);
-        }
-        if (banIrregularAltFormes) {
-            banned.addAll(getIrregularFormes());
-        }
-
-        new EvolutionRandomizer(pokemonPool, banned, similarStrength, sameType, limitToThreeStages, noConvergence,
-                forceChange, forceGrowth, evolveEveryLevel)
-                .randomizeEvolutions();
-    }
-
-    private class EvolutionRandomizer {
-
-        private static final int MAX_TRIES = 1000;
-        private static final int DEFAULT_STAGE_LIMIT = 10;
-
-        private final boolean similarStrength;
-        private final boolean sameType;
-        private final int stageLimit;
-        private final boolean noConvergence;
-        private final boolean forceChange;
-        private final boolean forceGrowth;
-        private final boolean evolveEveryLevel;
-
-        private final PokemonSet<Pokemon> pokemonPool;
-        private final PokemonSet<Pokemon> banned;
-
-        private Map<Pokemon, List<Evolution>> allOriginalEvos;
-
-        public EvolutionRandomizer(PokemonSet<Pokemon> pokemonPool, PokemonSet<Pokemon> banned,
-                                   boolean similarStrength, boolean sameType,
-                                   boolean limitToThreeStages, boolean noConvergence,
-                                   boolean forceChange, boolean forceGrowth,
-                                   boolean evolveEveryLevel) {
-            this.pokemonPool = pokemonPool;
-            this.banned = banned;
-            this.similarStrength = similarStrength;
-            this.sameType = sameType;
-            this.stageLimit = limitToThreeStages ? 3 : DEFAULT_STAGE_LIMIT;
-            this.noConvergence = noConvergence;
-            this.forceChange = forceChange;
-            this.forceGrowth = forceGrowth;
-            this.evolveEveryLevel = evolveEveryLevel;
-            if (evolveEveryLevel && similarStrength) {
-                throw new IllegalArgumentException("Can't use evolveEveryLevel and similarStrength together.");
-            }
-            if (evolveEveryLevel && limitToThreeStages) {
-                throw new IllegalArgumentException("Can't use evolveEveryLevel and limitToThreeStages together.");
-            }
-            if (evolveEveryLevel && forceGrowth) {
-                throw new IllegalArgumentException("Can't use evolveEveryLevel and forceGrowth together.");
-            }
-        }
-
-        public void randomizeEvolutions() {
-            allOriginalEvos = cacheOriginalEvolutions();
-
-            boolean succeeded = false;
-            int tries = 0;
-            while (!succeeded && tries < MAX_TRIES) {
-                succeeded = randomizeEvolutionsInner();
-                tries++;
-            }
-            if (tries == MAX_TRIES) {
-                throw new RandomizationException("Could not randomize Evolutions in " + MAX_TRIES + " tries.");
-            }
-        }
-
-        private boolean randomizeEvolutionsInner() {
-            clearEvolutions();
-
-            // TODO: iterating through this in a random order would be better
-            for (Pokemon from : pokemonPool) {
-                List<Evolution> originalEvos = getOriginalEvos(from);
-                for (Evolution evo : originalEvos) {
-                    PokemonSet<Pokemon> possible = findPossibleReplacements(from, evo);
-                    if (possible.isEmpty()) {
-                        return false;
-                    }
-                    Pokemon picked = similarStrength ? pickEvoPowerLvlReplacement(possible, evo.getTo())
-                            : possible.getRandom(random);
-
-                    Evolution newEvo = prepareNewEvolution(from, evo, picked);
-                    from.getEvolutionsFrom().add(newEvo);
-                    picked.getEvolutionsTo().add(newEvo);
-                }
-            }
-            return true;
-        }
-
-        private Map<Pokemon, List<Evolution>> cacheOriginalEvolutions() {
-            Map<Pokemon, List<Evolution>> originalEvos = new HashMap<>();
-            for (Pokemon pk : pokemonPool) {
-                originalEvos.put(pk, new ArrayList<>(pk.getEvolutionsFrom()));
-            }
-            return originalEvos;
-        }
-
-        private void clearEvolutions() {
-            for (Pokemon pk : pokemonPool) {
-                pk.getEvolutionsFrom().clear();
-                pk.getEvolutionsTo().clear();
-            }
-        }
-
-        private List<Evolution> getOriginalEvos(Pokemon from) {
-            if (evolveEveryLevel) {
-                // A list containing a single dummy object; ensures we always go through all Pokemon exactly once.
-                // "originalEvos" of course becomes a misnomer here, and because it is but a dummy object,
-                // it should NEVER be used except for iteration.
-                return List.of(new Evolution(from, from, false, EvolutionType.LEVEL, 0));
-            } else {
-                return allOriginalEvos.get(from);
-            }
-        }
-
-        private Pokemon pickEvoPowerLvlReplacement(PokemonSet<Pokemon> pokemonPool, Pokemon current) {
-            if (pokemonPool.isEmpty()) {
-                throw new IllegalArgumentException("empty pokemonPool");
-            }
-            // start with within 10% and add 5% either direction till we find
-            // something
-            int currentBST = current.bstForPowerLevels();
-            int minTarget = currentBST - currentBST / 10;
-            int maxTarget = currentBST + currentBST / 10;
-            List<Pokemon> canPick = new ArrayList<>();
-            List<Pokemon> emergencyPick = new ArrayList<>();
-            int expandRounds = 0;
-            while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
-                for (Pokemon pk : pokemonPool) {
-                    if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget && !canPick.contains(pk) && !emergencyPick.contains(pk)) {
-                        if (alreadyPicked.contains(pk)) {
-                            emergencyPick.add(pk);
-                        } else {
-                            canPick.add(pk);
-                        }
-                    }
-                }
-                if (expandRounds >= 2 && canPick.isEmpty()) {
-                    canPick.addAll(emergencyPick);
-                }
-                minTarget -= currentBST / 20;
-                maxTarget += currentBST / 20;
-                expandRounds++;
-            }
-            return canPick.get(random.nextInt(canPick.size()));
-        }
-
-        private Evolution prepareNewEvolution(Pokemon from, Evolution evo, Pokemon picked) {
-            Evolution newEvo;
-            if (evolveEveryLevel) {
-                newEvo = new Evolution(from, picked, false, EvolutionType.LEVEL, 1);
-                newEvo.setLevel(1);
-            } else {
-                newEvo = new Evolution(from, picked, evo.isCarryStats(), evo.getType(), evo.getExtraInfo());
-            }
-            if (newEvo.getType() == EvolutionType.LEVEL_FEMALE_ESPURR) {
-                newEvo.setType(EvolutionType.LEVEL_FEMALE_ONLY);
-            }
-            pickCosmeticForme(picked, newEvo);
-            return newEvo;
-        }
-
-        private void pickCosmeticForme(Pokemon picked, Evolution newEvo) {
-            boolean checkCosmetics = true;
-            if (picked.getFormeNumber() > 0) {
-                newEvo.setForme(picked.getFormeNumber());
-                checkCosmetics = false;
-            }
-            if (checkCosmetics && newEvo.getTo().getCosmeticForms() > 0) {
-                newEvo.setForme(newEvo.getTo().getCosmeticFormNumber(random.nextInt(newEvo.getTo().getCosmeticForms())));
-            } else if (!checkCosmetics && picked.getCosmeticForms() > 0) {
-                newEvo.setForme(newEvo.getForme() + picked.getCosmeticFormNumber(random.nextInt(picked.getCosmeticForms())));
-            }
-        }
-
-        private PokemonSet<Pokemon> findPossibleReplacements(Pokemon from, Evolution evo) {
-            List<Predicate<Pokemon>> filters = new ArrayList<>();
-            filters.add(to -> !banned.contains(to));
-            filters.add(to -> !to.equals(from));
-            filters.add(to -> to.getGrowthCurve().equals(from.getGrowthCurve()));
-            filters.add(to -> !isAlreadyChosenAsOtherSplitEvo(from, to));
-
-            if (!evolveEveryLevel) {
-                filters.add(to -> !createsCycle(from, to));
-                filters.add(to -> !breaksStageLimit(from, to));
-            }
-            if (noConvergence) {
-                filters.add(to -> to.getEvolutionsTo().isEmpty());
-            }
-            if (forceChange) {
-                filters.add(to -> !isAnOriginalEvo(from, to));
-            }
-            if (forceGrowth) {
-                filters.add(to -> to.bstForPowerLevels() > from.bstForPowerLevels());
-            }
-            if (sameType) {
-                if (from.getNumber() == Species.eevee && !evolveEveryLevel) {
-                    filters.add(to -> to.hasSharedType(evo.getTo()));
-                } else {
-                    filters.add(to -> to.hasSharedType(from));
-                }
-            }
-
-            Predicate<Pokemon> combinedFilter = to -> {
-                for (Predicate<Pokemon> filter : filters) {
-                    if (!filter.test(to)) return false;
-                }
-                return true;
-            };
-            return pokemonPool.filter(combinedFilter);
-        }
-
-        private boolean isAlreadyChosenAsOtherSplitEvo(Pokemon from, Pokemon to) {
-            return from.getEvolutionsFrom().stream().map(Evolution::getTo).toList().contains(to);
-        }
-
-        /**
-         * Check whether adding an evolution from one Pokemon to another will cause
-         * an evolution cycle.
-         *
-         * @param from Pokemon that is evolving
-         * @param to   Pokemon to evolve to
-         * @return True if there is an evolution cycle, else false
-         */
-        private boolean createsCycle(Pokemon from, Pokemon to) {
-            Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
-            from.getEvolutionsFrom().add(tempEvo);
-            Set<Pokemon> visited = new HashSet<>();
-            Set<Pokemon> recStack = new HashSet<>();
-            boolean recur = isCyclic(from, visited, recStack);
-            from.getEvolutionsFrom().remove(tempEvo);
-            return recur;
-        }
-
-        private boolean isCyclic(Pokemon pk, Set<Pokemon> visited, Set<Pokemon> recStack) {
-            if (!visited.contains(pk)) {
-                visited.add(pk);
-                recStack.add(pk);
-                for (Evolution ev : pk.getEvolutionsFrom()) {
-                    if (!visited.contains(ev.getTo()) && isCyclic(ev.getTo(), visited, recStack)) {
-                        return true;
-                    } else if (recStack.contains(ev.getTo())) {
-                        return true;
-                    }
-                }
-            }
-            recStack.remove(pk);
-            return false;
-        }
-
-        private boolean breaksStageLimit(Pokemon from, Pokemon to) {
-            int maxFrom = numPreEvolutions(from, stageLimit);
-            int maxTo = numEvolutions(to, stageLimit);
-            return maxFrom + maxTo + 2 > stageLimit;
-        }
-
-        // Return the max depth of pre-evolutions a Pokemon has
-        private int numPreEvolutions(Pokemon pk, int maxInterested) {
-            return numPreEvolutions(pk, 0, maxInterested);
-        }
-
-        private int numPreEvolutions(Pokemon pk, int depth, int maxInterested) {
-            if (pk.getEvolutionsTo().size() == 0) {
-                return 0;
-            }
-            if (depth == maxInterested - 1) {
-                return 1;
-            }
-            int maxPreEvos = 0;
-            for (Evolution ev : pk.getEvolutionsTo()) {
-                maxPreEvos = Math.max(maxPreEvos, numPreEvolutions(ev.getFrom(), depth + 1, maxInterested) + 1);
-            }
-            return maxPreEvos;
-        }
-
-        private int numEvolutions(Pokemon pk, int maxInterested) {
-            return numEvolutions(pk, 0, maxInterested);
-        }
-
-        private int numEvolutions(Pokemon pk, int depth, int maxInterested) {
-            if (pk.getEvolutionsFrom().size() == 0) {
-                // looks ahead to see if an evo MUST be given to this Pokemon in the future
-                return allOriginalEvos.get(pk).isEmpty() ? 0 : 1;
-            }
-            if (depth == maxInterested - 1) {
-                return 1;
-            }
-            int maxEvos = 0;
-            for (Evolution ev : pk.getEvolutionsFrom()) {
-                maxEvos = Math.max(maxEvos, numEvolutions(ev.getTo(), depth + 1, maxInterested) + 1);
-            }
-            return maxEvos;
-        }
-
-        private boolean isAnOriginalEvo(Pokemon from, Pokemon to) {
-            boolean isAnOriginalEvo = allOriginalEvos.get(from).stream().map(Evolution::getTo).toList().contains(to);
-            // Hard-coded Cosmoem case, since the other-version evolution doesn't actually
-            // exist within the game's data, but we don't want Cosmoem to evolve into Lunala in Sun, still.
-            if (from.getNumber() == Species.cosmoem) {
-                isAnOriginalEvo |= to.getNumber() == Species.solgaleo || to.getNumber() == Species.lunala;
-            }
-            return isAnOriginalEvo;
-        }
-
     }
 
     @Override

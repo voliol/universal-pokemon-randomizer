@@ -31,6 +31,7 @@ import java.util.*;
 
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.EncounterRandomizer;
+import com.dabomstew.pkrandom.randomizers.EvolutionRandomizer;
 import com.dabomstew.pkrandom.randomizers.TypeEffectivenessRandomizer;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -201,7 +202,8 @@ public class Randomizer {
         // Applied after type to pick new evos based on new types.
 
         if (settings.getEvolutionsMod() != Settings.EvolutionsMod.UNCHANGED) {
-            romHandler.randomizeEvolutions(settings);
+            EvolutionRandomizer er = new EvolutionRandomizer(romHandler, settings, random);
+            er.randomizeEvolutions();
             evolutionsChanged = true;
         }
 

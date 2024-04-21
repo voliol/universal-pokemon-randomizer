@@ -3,17 +3,20 @@ package com.dabomstew.pkrandom.randomizers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 
 import java.util.*;
 
 public class EncounterRandomizer {
 
     private final RomHandler romHandler;
+    private final RestrictedPokemonService rPokeService;
     private final Settings settings;
     private final Random random;
 
     public EncounterRandomizer(RomHandler romHandler, Settings settings, Random random) {
         this.romHandler = romHandler;
+        this.rPokeService = romHandler.getRestrictedPokemonService();
         this.settings = settings;
         this.random = random;
     }
@@ -53,12 +56,13 @@ public class EncounterRandomizer {
         // - apply level modifier
         // - set encounters
 
-//        romHandler.checkPokemonRestrictions(); // TODO: break out into PokemonService
+        rPokeService.setRestrictions(settings);
 
         List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeOfDay);
 
         PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
-        PokemonSet<Pokemon> allowed = setupAllowedPokemon(noLegendaries, allowAltFormes, false, banned);
+        PokemonSet<Pokemon> allowed = new PokemonSet<>(rPokeService.getPokemon(noLegendaries, allowAltFormes, false));
+        allowed.removeAll(banned);
 
         InnerRandomizer ir = new InnerRandomizer(allowed, banned,
                 randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, balanceShakingGrass);
@@ -71,23 +75,6 @@ public class EncounterRandomizer {
 
         applyLevelModifier(levelModifier, encounterAreas);
         romHandler.setEncounters(useTimeOfDay, encounterAreas);
-    }
-
-    /**
-     * Returns a new, modifiable {@link PokemonSet} with the given boolean properties,
-     * and the banned {@link Pokemon} exluded.
-     *
-     * @param noLegendaries       Exclude legendary Pokemon?
-     * @param allowAltFormes      Include alternate formes?
-     * @param allowCosmeticFormes If allowAltFormes == true, include cosmetic alternate formes?
-     * @param banned              PokemonSet of Pokemon to exclude.
-     */
-    private PokemonSet<Pokemon> setupAllowedPokemon(boolean noLegendaries, boolean allowAltFormes,
-                                                    boolean allowCosmeticFormes, PokemonSet<Pokemon> banned) {
-        PokemonSet<Pokemon> allowedPokemon = new PokemonSet<>();
-//        allowedPokemon.addAll(romHandler.getRestrictedPokemon(noLegendaries, allowAltFormes, allowCosmeticFormes)); // TODO: break out into PokemonService
-        allowedPokemon.removeAll(banned);
-        return allowedPokemon;
     }
 
     private PokemonSet<Pokemon> getBannedForWildEncounters(boolean banIrregularAltFormes,
@@ -441,37 +428,6 @@ public class EncounterRandomizer {
                 expandRounds++;
             }
             return canPick.getRandom(random);
-        }
-
-        private Pokemon pickWildPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, int minimumPool, boolean banSamePokemon,
-                                                    List<Pokemon> usedUp, int bstBalanceLevel) {
-
-            Set<Pokemon> realPool = new TreeSet<>(pokemonPool);
-            //so we don't have to worry about duplicates causing infinite loop
-
-            if (minimumPool >= realPool.size()) {
-                //minimum pool is whole pool
-                List<Pokemon> finalPool = new ArrayList<>(realPool);
-                //I don't like the back-and-forth conversion, but it's needed to randomize the culled list
-                return finalPool.get(random.nextInt(finalPool.size()));
-            }
-            // start with within 10% and add 5% either direction until the pool is big enough
-            int balancedBST = bstBalanceLevel * 10 + 250;
-            int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
-            int minTarget = currentBST - currentBST / 10;
-            int maxTarget = currentBST + currentBST / 10;
-            List<Pokemon> canPick = new ArrayList<>();
-            while (canPick.size() < minimumPool) {
-                for (Pokemon pk : realPool) {
-                    if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
-                            && (!banSamePokemon || pk != current) && (usedUp == null || !usedUp.contains(pk))) {
-                        canPick.add(pk);
-                    }
-                }
-                minTarget -= currentBST / 20;
-                maxTarget += currentBST / 20;
-            }
-            return canPick.get(random.nextInt(canPick.size()));
         }
     }
 

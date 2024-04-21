@@ -37,6 +37,7 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 
 public interface RomHandler {
 
@@ -97,6 +98,8 @@ public interface RomHandler {
     PokemonSet<Pokemon> getPokemonSet();
     
     PokemonSet<Pokemon> getPokemonSetInclFormes();
+
+    RestrictedPokemonService getRestrictedPokemonService();
 
     PokemonSet<Pokemon> getRestrictedPokemon();
 
@@ -603,8 +606,6 @@ public interface RomHandler {
     Set<EvolutionUpdate> getEasierEvoUpdates();
 
     Set<EvolutionUpdate> getTimeBasedEvoUpdates();
-
-    void randomizeEvolutions(Settings settings);
 
     // In the earlier games, alt formes use the same evolutions as the base forme.
     // In later games, this was changed so that alt formes can have unique evolutions
