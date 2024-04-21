@@ -3097,7 +3097,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public void randomizeIntroPokemon() {
         try {
-            int introPokemon = randomPokemon().getNumber();
+            int introPokemon = rPokeService.randomPokemon(random).getNumber();
             byte[] introGraphicOverlay = readOverlay(romEntry.getIntValue("IntroGraphicOvlNumber"));
             int offset = find(introGraphicOverlay, Gen5Constants.introGraphicPrefix);
             if (offset > 0) {
@@ -3575,7 +3575,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

@@ -382,7 +382,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 //			e.printStackTrace();
 //		}
 		try {
-			Pokemon pk = randomPokemon();
+			Pokemon pk = getPokemonSet().getRandom(random);
 			String GARCPath = getGARCPath("PokemonGraphics");
 			GARCArchive pokeGraphicsGARC = readGARC(GARCPath, false);
 

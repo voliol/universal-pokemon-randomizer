@@ -125,7 +125,7 @@ public class Randomizer {
         // 1. Set Pokemon pool according to limits (or lack thereof)
         // 2. If limited, remove evolutions that are outside of the pool
 
-        romHandler.setPokemonPool(settings);
+        romHandler.getRestrictedPokemonService().setRestrictions(settings);
 
         if (settings.isLimitPokemon()) {
             romHandler.removeEvosForPokemonPool();

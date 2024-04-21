@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.services;
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.MegaEvolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -13,7 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * To get a random Pokemon from these sets, use {@link PokemonSet#getRandom(Random)}.
+ * The class also provides {@link #randomPokemon(Random)}, to get a random Pokemon from all allowed ones.
+ * To get a random Pokemon from the other sets, use {@link PokemonSet#getRandom(Random)}.
  */
 public class RestrictedPokemonService {
 
@@ -42,6 +44,13 @@ public class RestrictedPokemonService {
             allowedPokes.removeIf(Pokemon::isActuallyCosmetic);
         }
         return allowedPokes;
+    }
+
+    /**
+     * Returns a random non-alt forme Pokemon.
+     */
+    public Pokemon randomPokemon(Random random) {
+        return getAll(false).getRandom(random);
     }
 
     /**
@@ -92,6 +101,47 @@ public class RestrictedPokemonService {
         return megaEvolutions;
     }
 
+    public PokemonSet<Pokemon> getAbilityDependentFormes() {
+        PokemonSet<Pokemon> abilityDependentFormes = new PokemonSet<>();
+        for (Pokemon pk : allInclAltFormes) {
+            if (pk.getBaseForme() != null) {
+                if (pk.getBaseNumber() == Species.castform) {
+                    // All alternate Castform formes
+                    abilityDependentFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.darmanitan && pk.getFormeNumber() == 1) {
+                    // Darmanitan-Z
+                    abilityDependentFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.aegislash) {
+                    // Aegislash-B
+                    abilityDependentFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.wishiwashi) {
+                    // Wishiwashi-S
+                    abilityDependentFormes.add(pk);
+                }
+            }
+        }
+        return abilityDependentFormes;
+    }
+
+    public PokemonSet<Pokemon> getBannedFormesForPlayerPokemon() {
+        PokemonSet<Pokemon> bannedFormes = new PokemonSet<>();
+        for (Pokemon pk : allInclAltFormes) {
+            if (pk.getBaseForme() != null) {
+                if (pk.getBaseNumber() == Species.giratina) {
+                    // Giratina-O is banned because it reverts back to Altered Forme if
+                    // equipped with any item that isn't the Griseous Orb.
+                    bannedFormes.add(pk);
+                } else if (pk.getBaseNumber() == Species.shaymin) {
+                    // Shaymin-S is banned because it reverts back to its original forme
+                    // under a variety of circumstances, and can only be changed back
+                    // with the Gracidea.
+                    bannedFormes.add(pk);
+                }
+            }
+        }
+        return bannedFormes;
+    }
+
     public void setRestrictions(Settings settings) {
         GenRestrictions restrictions = null;
         if (settings != null) {
@@ -115,7 +165,6 @@ public class RestrictedPokemonService {
             megaEvolutions = new HashSet<>(romHandler.getMegaEvolutions());
         }
 
-
         nonLegendariesInclAltFormes = allInclAltFormes.filter(pk -> !pk.isLegendary());
         legendariesInclAltFormes = allInclAltFormes.filter(Pokemon::isLegendary);
         ultraBeastsInclAltFormes = allInclAltFormes.filter(Pokemon::isUltraBeast);
@@ -131,25 +180,25 @@ public class RestrictedPokemonService {
         PokemonSet<Pokemon> allNonRestricted = romHandler.getPokemonSetInclFormes();
 
         if (restrictions.allow_gen1) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 1));
+            addFromGen(allInclAltFormes, allNonRestricted, 1);
         }
         if (restrictions.allow_gen2) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 2));
+            addFromGen(allInclAltFormes, allNonRestricted, 2);
         }
         if (restrictions.allow_gen3) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 3));
+            addFromGen(allInclAltFormes, allNonRestricted, 3);
         }
         if (restrictions.allow_gen4) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 4));
+            addFromGen(allInclAltFormes, allNonRestricted, 4);
         }
         if (restrictions.allow_gen5) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 5));
+            addFromGen(allInclAltFormes, allNonRestricted, 5);
         }
         if (restrictions.allow_gen6) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 6));
+            addFromGen(allInclAltFormes, allNonRestricted, 6);
         }
         if (restrictions.allow_gen7) {
-            allInclAltFormes.addAll(allNonRestricted.filter(pk -> pk.getBaseForme().getGeneration() == 7));
+            addFromGen(allInclAltFormes, allNonRestricted, 7);
         }
 
         // If the user specified it, add all the evolutionary relatives for everything in the mainPokemonList
@@ -158,5 +207,12 @@ public class RestrictedPokemonService {
         }
 
         return allInclAltFormes;
+    }
+
+    private static void addFromGen(PokemonSet<Pokemon> allInclAltFormes, PokemonSet<Pokemon> allNonRestricted, int gen) {
+        allInclAltFormes.addAll(allNonRestricted.filter(pk -> {
+            Pokemon baseForme = pk.getBaseForme() == null ? pk : pk.getBaseForme();
+            return baseForme.getGeneration() == gen;
+        }));
     }
 }

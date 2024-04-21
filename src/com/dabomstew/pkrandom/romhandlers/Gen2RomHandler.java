@@ -2758,7 +2758,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

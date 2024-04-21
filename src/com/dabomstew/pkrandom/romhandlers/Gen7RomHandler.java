@@ -3276,11 +3276,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    // TODO: identical to Gen 6 implementation (and very similar to Gen 4/5) => merge (?)
+    // TODO: almost identical to Gen 6 implementation (and very similar to Gen 4/5) => merge (?)
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemonInclAltFormes;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(true);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

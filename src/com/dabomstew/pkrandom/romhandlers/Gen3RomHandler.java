@@ -3360,9 +3360,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(imageOffset + 4, paletteTableOffset + introPokemon * 8);
         } else if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
             // intro sprites : any pokemon in the range 0-510 except bulbasaur
-            int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
+            int introPokemon = pokedexToInternal[rPokeService.randomPokemon(random).getNumber()];
             while (introPokemon == 1 || introPokemon > 510) {
-                introPokemon = pokedexToInternal[randomPokemon().getNumber()];
+                introPokemon = pokedexToInternal[rPokeService.randomPokemon(random).getNumber()];
             }
 
             if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
@@ -3393,7 +3393,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(paletteOffset, paletteTableOffset + introPokemon * 8);
         } else {
             // Emerald, intro sprite: any Pokemon.
-            int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
+            int introPokemon = pokedexToInternal[rPokeService.randomPokemon(random).getNumber()];
             writeWord(imageOffset, introPokemon);
             writeWord(cryOffset, introPokemon);
         }
@@ -3401,18 +3401,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
-        checkPokemonRestrictions();
-        List<Pokemon> validPokemon = new ArrayList<>();
-        for (Pokemon pk : this.restrictedPokemon) {
-            if (pokedexToInternal[pk.getNumber()] <= maxValue && (!blockNonMales || pk.getGenderRatio() <= 0xFD)) {
-                validPokemon.add(pk);
-            }
-        }
-        if (validPokemon.size() == 0) {
-            return null;
-        } else {
-            return validPokemon.get(random.nextInt(validPokemon.size()));
-        }
+        PokemonSet<Pokemon> validPokemon = rPokeService.getAll(false)
+                .filter(pk -> (pokedexToInternal[pk.getNumber()] <= maxValue
+                        && (!blockNonMales || pk.getGenderRatio() <= 0xFD)));
+        return validPokemon.getRandom(random);
     }
 
     private void determineMapBankSizes() {
@@ -3790,7 +3782,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     //TODO: this is identical to the Gen 2 implementation => merge (?)
     public void removeEvosForPokemonPool() {
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

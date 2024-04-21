@@ -8,6 +8,7 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.Gen4RomHandler;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
+import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -146,8 +147,9 @@ public class RomHandlerMiscTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void restrictedPokemonAreSameAsPokemonSetWithNoRestrictionsSet(String romName) {
         loadROM(romName);
-        romHandler.setPokemonPool(null);
-        assertEquals(romHandler.getPokemonSet(), romHandler.getRestrictedPokemon());
+        RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
+        rPokeService.setRestrictions(null);
+        assertEquals(romHandler.getPokemonSet(), rPokeService.getAll(false));
     }
 
     @ParameterizedTest
@@ -160,8 +162,9 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         settings.setLimitPokemon(true);
         settings.setCurrentRestrictions(genRestrictionsFromBools(false, new int[]{1}));
 
-        romHandler.setPokemonPool(settings);
-        for (Pokemon pk : romHandler.getRestrictedPokemon()) {
+        RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
+        rPokeService.setRestrictions(settings);
+        for (Pokemon pk : rPokeService.getAll(false)) {
             PokemonSet<Pokemon> related = PokemonSet.related(pk);
             boolean anyFromRightGen = false;
             for (Pokemon relative : related) {
@@ -185,8 +188,9 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         settings.setLimitPokemon(true);
         settings.setCurrentRestrictions(genRestrictionsFromBools(false, new int[]{1}));
 
-        romHandler.setPokemonPool(settings);
-        PokemonSet<Pokemon> restrictedPokemon = romHandler.getRestrictedPokemon();
+        RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
+        rPokeService.setRestrictions(settings);
+        PokemonSet<Pokemon> restrictedPokemon = rPokeService.getAll(false);
         for (Pokemon pk : restrictedPokemon) {
             PokemonSet<Pokemon> related = PokemonSet.related(pk);
             String fromRightGen = null;
@@ -216,8 +220,9 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[]{1}));
         // except for the above line's "relativesAllowed: true", identical to the "WithNoRelatives" method...
 
-        romHandler.setPokemonPool(settings);
-        for (Pokemon pk : romHandler.getRestrictedPokemon()) {
+        RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
+        rPokeService.setRestrictions(settings);
+        for (Pokemon pk : rPokeService.getAll(false)) {
             PokemonSet<Pokemon> related = PokemonSet.related(pk);
             boolean anyFromRightGen = false;
             for (Pokemon relative : related) {
@@ -241,8 +246,9 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         settings.setLimitPokemon(true);
         settings.setCurrentRestrictions(genRestrictionsFromBools(true, new int[]{1}));
 
-        romHandler.setPokemonPool(settings);
-        PokemonSet<Pokemon> restrictedPokemon = romHandler.getRestrictedPokemon();
+        RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
+        rPokeService.setRestrictions(settings);
+        PokemonSet<Pokemon> restrictedPokemon = rPokeService.getAll(false);
         for (Pokemon pk : restrictedPokemon) {
             PokemonSet<Pokemon> related = PokemonSet.related(pk);
             Pokemon fromRightGen = null;

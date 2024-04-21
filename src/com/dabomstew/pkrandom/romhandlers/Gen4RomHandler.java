@@ -1966,7 +1966,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// happens. This is very unlikely to happen in practice, even with very
 		// restrictive settings, so it should be okay that we're breaking logic here.
 		while (trophyGardenArea.stream().distinct().count() == 1) {
-			trophyGardenArea.get(0).setPokemon(randomPokemon());
+			trophyGardenArea.get(0).setPokemon(rPokeService.randomPokemon(random));
 		}
 		writeExtraEncountersDPPt(trophyGardenData, 0, trophyGardenArea);
 	}
@@ -4451,18 +4451,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public void randomizeIntroPokemon() {
 		try {
 			if (romEntry.getRomType() == Gen4Constants.Type_DP || romEntry.getRomType() == Gen4Constants.Type_Plat) {
-				Pokemon introPokemon = randomPokemon();
+				Pokemon introPokemon = rPokeService.randomPokemon(random);
 				while (introPokemon.getGenderRatio() == 0xFE) {
-					// This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only
-					// Pokemon *need*
-					// to pass a special parameter into the function that loads Pokemon sprites; the
-					// game will
-					// softlock on native hardware otherwise. The way the compiler has optimized the
-					// intro Pokemon
-					// code makes it very hard to modify, so passing in this special parameter is
-					// difficult. Rather
+					// This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only Pokemon *need*
+					// to pass a special parameter into the function that loads Pokemon sprites; the game will
+					// softlock on native hardware otherwise. The way the compiler has optimized the intro Pokemon
+					// code makes it very hard to modify, so passing in this special parameter is difficult. Rather
 					// than attempt to patch this code, just reroll until it isn't female-only.
-					introPokemon = randomPokemon();
+					introPokemon = rPokeService.randomPokemon(random);
 				}
 				byte[] introOverlay = readOverlay(romEntry.getIntValue("IntroOvlNumber"));
 				for (String prefix : Gen4Constants.dpptIntroPrefixes) {
@@ -4901,7 +4897,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public void removeEvosForPokemonPool() {
 		// slightly more complicated than gen2/3
 		// we have to update a "baby table" too
-		PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+		PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
 		Set<Evolution> keepEvos = new HashSet<>();
 		for (Pokemon pk : pokes) {
 			if (pk != null) {
@@ -5378,18 +5374,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
-		checkPokemonRestrictions();
-		List<Pokemon> validPokemon = new ArrayList<>();
-		for (Pokemon pk : this.restrictedPokemon) {
-			if (pk.getNumber() <= maxValue && (!blockNonMales || pk.getGenderRatio() <= 0xFD)) {
-				validPokemon.add(pk);
-			}
-		}
-		if (validPokemon.size() == 0) {
-			return null;
-		} else {
-			return validPokemon.get(random.nextInt(validPokemon.size()));
-		}
+		PokemonSet<Pokemon> validPokemon = rPokeService.getAll(false)
+				.filter(pk -> (pk.getNumber() <= maxValue
+						&& (!blockNonMales || pk.getGenderRatio() <= 0xFD)));
+		return validPokemon.getRandom(random);
 	}
 
 	private void computeCRC32sForRom() throws IOException {

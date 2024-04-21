@@ -25,13 +25,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
@@ -41,6 +34,10 @@ import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 

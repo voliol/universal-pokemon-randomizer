@@ -550,7 +550,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 //			e.printStackTrace();
 //		}
 		try {
-			Pokemon pk = randomPokemon();
+			Pokemon pk = getPokemonSet().getRandom(random);
 			boolean shiny = random.nextInt(10) == 0;
 
 			return getPokemonImage(pk, false, shiny, true, false);

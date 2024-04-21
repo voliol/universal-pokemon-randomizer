@@ -500,7 +500,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-		Pokemon pk = randomPokemon();
+		Pokemon pk = getPokemonSet().getRandom(random);
 		boolean shiny = random.nextInt(10) == 0;
 		boolean gen1 = generationOfPokemon() == 1;
 

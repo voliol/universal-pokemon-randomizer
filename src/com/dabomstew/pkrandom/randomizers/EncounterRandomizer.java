@@ -81,9 +81,9 @@ public class EncounterRandomizer {
                                                            boolean abilitiesAreRandomized) {
         PokemonSet<Pokemon> banned = new PokemonSet<>();
         banned.addAll(romHandler.getBannedForWildEncounters());
-        banned.addAll(romHandler.getBannedFormesForPlayerPokemon());
+        banned.addAll(rPokeService.getBannedFormesForPlayerPokemon());
         if (!abilitiesAreRandomized) {
-            PokemonSet<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
+            PokemonSet<Pokemon> abilityDependentFormes = rPokeService.getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
         }
         if (banIrregularAltFormes) {

@@ -217,6 +217,9 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		return addAll((Collection<? extends T>) relatives);
 	}
 
+	/**
+	 * Returns a random element, or null if the PokemonSet is empty.
+	 */
 	public T getRandom(Random random) {
 		if (size() == 0) {
 			return null;

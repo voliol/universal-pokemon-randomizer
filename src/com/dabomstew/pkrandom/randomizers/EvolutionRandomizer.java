@@ -52,10 +52,9 @@ public class EvolutionRandomizer {
 
         PokemonSet<Pokemon> pokemonPool = rPokeService.getPokemon(false,
                 romHandler.altFormesCanHaveDifferentEvolutions(), false);
-        PokemonSet<Pokemon> banned = romHandler.getBannedFormesForPlayerPokemon();
+        PokemonSet<Pokemon> banned = new PokemonSet<>(rPokeService.getBannedFormesForPlayerPokemon());
         if (!abilitiesAreRandomized) {
-            PokemonSet<Pokemon> abilityDependentFormes = romHandler.getAbilityDependentFormes();
-            banned.addAll(abilityDependentFormes);
+            banned.addAll(rPokeService.getAbilityDependentFormes());
         }
         if (banIrregularAltFormes) {
             banned.addAll(romHandler.getIrregularFormes());
