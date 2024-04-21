@@ -74,7 +74,7 @@ public class Gen7Constants {
     }
 
     public static final List<Integer> irregularFormesSM = Arrays.asList(
-            Species.SMFormes.castformF, Species.SMFormes.castformW, Species.SMFormes.castformI,
+            Species.SMFormes.castformSu, Species.SMFormes.castformR, Species.SMFormes.castformSn,
             Species.SMFormes.darmanitanZ,
             Species.SMFormes.meloettaP,
             Species.SMFormes.kyuremW,
@@ -135,7 +135,7 @@ public class Gen7Constants {
     );
 
     public static final List<Integer> irregularFormesUSUM = Arrays.asList(
-            Species.USUMFormes.castformF, Species.USUMFormes.castformW, Species.USUMFormes.castformI,
+            Species.USUMFormes.castformSu, Species.USUMFormes.castformR, Species.USUMFormes.castformSn,
             Species.USUMFormes.darmanitanZ,
             Species.USUMFormes.meloettaP,
             Species.USUMFormes.kyuremW,
@@ -525,65 +525,65 @@ public class Gen7Constants {
         Map<Integer,Map<Integer,String>> map = new HashMap<>();
 
         Map<Integer,String> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,"-A");
-        deoxysMap.put(2,"-D");
-        deoxysMap.put(3,"-S");
+        deoxysMap.put(1,"-Attack");
+        deoxysMap.put(2,"-Defense");
+        deoxysMap.put(3,"-Speed");
         map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,String> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,"-S");
-        wormadamMap.put(2,"-T");
+        wormadamMap.put(1,"-Sandy");
+        wormadamMap.put(2,"-Trash");
         map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,String> shayminMap = new HashMap<>();
-        shayminMap.put(1,"-S");
+        shayminMap.put(1,"-Sky");
         map.put(Species.shaymin, shayminMap);
 
         Map<Integer,String> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,"-O");
+        giratinaMap.put(1,"-Origin");
         map.put(Species.giratina, giratinaMap);
 
         Map<Integer,String> rotomMap = new HashMap<>();
-        rotomMap.put(1,"-H");
-        rotomMap.put(2,"-W");
-        rotomMap.put(3,"-Fr");
-        rotomMap.put(4,"-Fa");
-        rotomMap.put(5,"-M");
+        rotomMap.put(1,"-Heat");
+        rotomMap.put(2,"-Wash");
+        rotomMap.put(3,"-Frost");
+        rotomMap.put(4,"-Fan");
+        rotomMap.put(5,"-Mow");
         map.put(Species.rotom, rotomMap);
 
         Map<Integer,String> castformMap = new HashMap<>();
-        castformMap.put(1,"-F");
-        castformMap.put(2,"-W");
-        castformMap.put(3,"-I");
+        castformMap.put(1,"-Sunny");
+        castformMap.put(2,"-Rainy");
+        castformMap.put(3,"-Snowy");
         map.put(Species.castform, castformMap);
 
         Map<Integer,String> basculinMap = new HashMap<>();
-        basculinMap.put(1,"-B");
+        basculinMap.put(1,"-Blue");
         map.put(Species.basculin, basculinMap);
 
         Map<Integer,String> darmanitanMap = new HashMap<>();
-        darmanitanMap.put(1,"-Z");
+        darmanitanMap.put(1,"-Zen");
         map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,String> meloettaMap = new HashMap<>();
-        meloettaMap.put(1,"-P");
+        meloettaMap.put(1,"-Pirouette");
         map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,String> kyuremMap = new HashMap<>();
-        kyuremMap.put(1,"-W");
-        kyuremMap.put(2,"-B");
+        kyuremMap.put(1,"-White");
+        kyuremMap.put(2,"-Black");
         map.put(Species.kyurem, kyuremMap);
 
         Map<Integer,String> tornadusMap = new HashMap<>();
-        tornadusMap.put(1,"-T");
+        tornadusMap.put(1,"-Therian");
         map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,String> thundurusMap = new HashMap<>();
-        thundurusMap.put(1,"-T");
+        thundurusMap.put(1,"-Therian");
         map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,String> landorusMap = new HashMap<>();
-        landorusMap.put(1,"-T");
+        landorusMap.put(1,"-Therian");
         map.put(Species.landorus, landorusMap);
 
         Map<Integer,String> meowsticMap = new HashMap<>();
@@ -591,7 +591,7 @@ public class Gen7Constants {
         map.put(Species.meowstic, meowsticMap);
 
         Map<Integer,String> aegislashMap = new HashMap<>();
-        aegislashMap.put(1,"-B");
+        aegislashMap.put(1,"-Blade");
         map.put(Species.aegislash, aegislashMap);
 
         Map<Integer,String> pumpkabooMap = new HashMap<>();
@@ -607,15 +607,15 @@ public class Gen7Constants {
         map.put(Species.gourgeist, gourgeistMap);
 
         Map<Integer,String> floetteMap = new HashMap<>();
-        floetteMap.put(5,"-E");
+        floetteMap.put(5,"-Eternal");
         map.put(Species.floette, floetteMap);
 
         Map<Integer,String> kyogreMap = new HashMap<>();
-        kyogreMap.put(1,"-P");
+        kyogreMap.put(1,"-Primal");
         map.put(Species.kyogre, kyogreMap);
 
         Map<Integer,String> groudonMap = new HashMap<>();
-        groudonMap.put(1,"-P");
+        groudonMap.put(1,"-Primal");
         map.put(Species.groudon, groudonMap);
 
         Map<Integer,String> rayquazaMap = new HashMap<>();
@@ -623,7 +623,7 @@ public class Gen7Constants {
         map.put(Species.rayquaza, rayquazaMap);
 
         Map<Integer,String> hoopaMap = new HashMap<>();
-        hoopaMap.put(1,"-U");
+        hoopaMap.put(1,"-Unbound");
         map.put(Species.hoopa, hoopaMap);
 
         for (Integer species: Gen6Constants.speciesToMegaStoneORAS.keySet()) {
@@ -638,43 +638,43 @@ public class Gen7Constants {
         }
 
         Map<Integer,String> wishiwashiMap = new HashMap<>();
-        wishiwashiMap.put(1,"-S");
+        wishiwashiMap.put(1,"-School");
         map.put(Species.wishiwashi, wishiwashiMap);
 
         Map<Integer,String> oricorioMap = new HashMap<>();
-        oricorioMap.put(1,"-E");
-        oricorioMap.put(2,"-P");
-        oricorioMap.put(3,"-G");
+        oricorioMap.put(1,"-Pom-Pom");
+        oricorioMap.put(2,"-Pa'u");
+        oricorioMap.put(3,"-Sensu");
         map.put(Species.oricorio, oricorioMap);
 
         Map<Integer,String> lycanrocMap = new HashMap<>();
-        lycanrocMap.put(1,"-M");
-        lycanrocMap.put(2,"-D");
+        lycanrocMap.put(1,"-Midnight");
+        lycanrocMap.put(2,"-Dusk");
         map.put(Species.lycanroc, lycanrocMap);
 
         for (int species: speciesWithAlolanForms) {
             Map<Integer,String> alolanMap = new HashMap<>();
-            alolanMap.put(1,"-A");
+            alolanMap.put(1,"-Alolan");
             map.put(species, alolanMap);
         }
 
         Map<Integer,String> greninjaMap = new HashMap<>();
-        greninjaMap.put(2,"-A");
+        greninjaMap.put(2,"-Ash");
         map.put(Species.greninja, greninjaMap);
 
         Map<Integer,String> zygardeMap = new HashMap<>();
-        zygardeMap.put(1,"-10");
-        zygardeMap.put(4,"-C");
+        zygardeMap.put(1,"-10%");
+        zygardeMap.put(4,"-Complete");
         map.put(Species.zygarde, zygardeMap);
 
         Map<Integer,String> miniorMap = new HashMap<>();
-        miniorMap.put(7,"-C");
+        miniorMap.put(7,"-Core");
         map.put(Species.minior, miniorMap);
 
         Map<Integer,String> necrozmaMap = new HashMap<>();
-        necrozmaMap.put(1,"-DM");
-        necrozmaMap.put(2,"-DW");
-        necrozmaMap.put(3,"-U");
+        necrozmaMap.put(1,"-DuskMane");
+        necrozmaMap.put(2,"-DawnWings");
+        necrozmaMap.put(3,"-Ultra");
         map.put(Species.necrozma, necrozmaMap);
 
         return map;

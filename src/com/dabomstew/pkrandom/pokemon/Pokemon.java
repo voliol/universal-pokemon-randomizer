@@ -49,6 +49,8 @@ public class Pokemon implements Comparable<Pokemon> {
     private boolean actuallyCosmetic = false;
     private List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
+    private int generation = -1;
+
     private Type primaryType;
     private Type secondaryType;
 
@@ -414,6 +416,17 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public void setRealCosmeticFormNumbers(List<Integer> realCosmeticFormNumbers) {
         this.realCosmeticFormNumbers = realCosmeticFormNumbers;
+    }
+
+    /**
+     * Returns the Generation this Pokemon (or forme) first appeared in.
+     */
+    public int getGeneration() {
+        return generation;
+    }
+
+    public void setGeneration(int generation) {
+        this.generation = generation;
     }
 
     public Type getPrimaryType() {

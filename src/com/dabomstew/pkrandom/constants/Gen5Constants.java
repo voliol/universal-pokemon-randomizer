@@ -180,13 +180,13 @@ public class Gen5Constants {
     }
 
     private static final List<Integer> bw1IrregularFormes = Arrays.asList(
-            Species.Gen5Formes.castformF, Species.Gen5Formes.castformW, Species.Gen5Formes.castformI,
+            Species.Gen5Formes.castformSu, Species.Gen5Formes.castformR, Species.Gen5Formes.castformSn,
             Species.Gen5Formes.darmanitanZ,
             Species.Gen5Formes.meloettaP
     );
 
     private static final List<Integer> bw2IrregularFormes = Arrays.asList(
-            Species.Gen5Formes.castformF, Species.Gen5Formes.castformW, Species.Gen5Formes.castformI,
+            Species.Gen5Formes.castformSu, Species.Gen5Formes.castformR, Species.Gen5Formes.castformSn,
             Species.Gen5Formes.darmanitanZ,
             Species.Gen5Formes.meloettaP,
             Species.Gen5Formes.kyuremW,
@@ -642,48 +642,48 @@ public class Gen5Constants {
     private static Map<Integer,String> setupFormeSuffixes(int gameVersion) {
         Map<Integer,String> formeSuffixes = new HashMap<>();
         if (gameVersion == Gen5Constants.Type_BW) {
-            formeSuffixes.put(Species.Gen5Formes.deoxysA,"-A");
-            formeSuffixes.put(Species.Gen5Formes.deoxysD,"-D");
-            formeSuffixes.put(Species.Gen5Formes.deoxysS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamT,"-T");
-            formeSuffixes.put(Species.Gen5Formes.shayminS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.giratinaO,"-O");
-            formeSuffixes.put(Species.Gen5Formes.rotomH,"-H");
-            formeSuffixes.put(Species.Gen5Formes.rotomW,"-W");
-            formeSuffixes.put(Species.Gen5Formes.rotomFr,"-Fr");
-            formeSuffixes.put(Species.Gen5Formes.rotomFa,"-Fa");
-            formeSuffixes.put(Species.Gen5Formes.rotomM,"-M");
-            formeSuffixes.put(Species.Gen5Formes.castformF,"-F");
-            formeSuffixes.put(Species.Gen5Formes.castformW,"-W");
-            formeSuffixes.put(Species.Gen5Formes.castformI,"-I");
-            formeSuffixes.put(Species.Gen5Formes.basculinB,"-B");
-            formeSuffixes.put(Species.Gen5Formes.darmanitanZ,"-Z");
-            formeSuffixes.put(Species.Gen5Formes.meloettaP,"-P");
+            formeSuffixes.put(Species.Gen5Formes.deoxysA,"-Attack");
+            formeSuffixes.put(Species.Gen5Formes.deoxysD,"-Defense");
+            formeSuffixes.put(Species.Gen5Formes.deoxysS,"-Speed");
+            formeSuffixes.put(Species.Gen5Formes.wormadamS,"-Sandy");
+            formeSuffixes.put(Species.Gen5Formes.wormadamT,"-Trash");
+            formeSuffixes.put(Species.Gen5Formes.shayminS,"-Sky");
+            formeSuffixes.put(Species.Gen5Formes.giratinaO,"-Origin");
+            formeSuffixes.put(Species.Gen5Formes.rotomH,"-Heat");
+            formeSuffixes.put(Species.Gen5Formes.rotomW,"-Wash");
+            formeSuffixes.put(Species.Gen5Formes.rotomFr,"-Frost");
+            formeSuffixes.put(Species.Gen5Formes.rotomFa,"-Fan");
+            formeSuffixes.put(Species.Gen5Formes.rotomM,"-Mow");
+            formeSuffixes.put(Species.Gen5Formes.castformSu,"-Sunny");
+            formeSuffixes.put(Species.Gen5Formes.castformR,"-Rainy");
+            formeSuffixes.put(Species.Gen5Formes.castformSn,"-Snowy");
+            formeSuffixes.put(Species.Gen5Formes.basculinB,"-Blue");
+            formeSuffixes.put(Species.Gen5Formes.darmanitanZ,"-Zen");
+            formeSuffixes.put(Species.Gen5Formes.meloettaP,"-Pirouette");
         } else if (gameVersion == Gen5Constants.Type_BW2) {
-            formeSuffixes.put(Species.Gen5Formes.deoxysA + bw2formeOffset,"-A");
-            formeSuffixes.put(Species.Gen5Formes.deoxysD + bw2formeOffset,"-D");
-            formeSuffixes.put(Species.Gen5Formes.deoxysS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.shayminS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.giratinaO + bw2formeOffset,"-O");
-            formeSuffixes.put(Species.Gen5Formes.rotomH + bw2formeOffset,"-H");
-            formeSuffixes.put(Species.Gen5Formes.rotomW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.rotomFr + bw2formeOffset,"-Fr");
-            formeSuffixes.put(Species.Gen5Formes.rotomFa + bw2formeOffset,"-Fa");
-            formeSuffixes.put(Species.Gen5Formes.rotomM + bw2formeOffset,"-M");
-            formeSuffixes.put(Species.Gen5Formes.castformF + bw2formeOffset,"-F");
-            formeSuffixes.put(Species.Gen5Formes.castformW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.castformI + bw2formeOffset,"-I");
-            formeSuffixes.put(Species.Gen5Formes.basculinB + bw2formeOffset,"-B");
-            formeSuffixes.put(Species.Gen5Formes.darmanitanZ + bw2formeOffset,"-Z");
-            formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset,"-P");
-            formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset,"-B");
-            formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset,"-T");
+            formeSuffixes.put(Species.Gen5Formes.deoxysA + bw2formeOffset,"-Attack");
+            formeSuffixes.put(Species.Gen5Formes.deoxysD + bw2formeOffset,"-Defense");
+            formeSuffixes.put(Species.Gen5Formes.deoxysS + bw2formeOffset,"-Speed");
+            formeSuffixes.put(Species.Gen5Formes.wormadamS + bw2formeOffset,"-Sandy");
+            formeSuffixes.put(Species.Gen5Formes.wormadamT + bw2formeOffset,"-Trash");
+            formeSuffixes.put(Species.Gen5Formes.shayminS + bw2formeOffset,"-Sky");
+            formeSuffixes.put(Species.Gen5Formes.giratinaO + bw2formeOffset,"-Origin");
+            formeSuffixes.put(Species.Gen5Formes.rotomH + bw2formeOffset,"-Heat");
+            formeSuffixes.put(Species.Gen5Formes.rotomW + bw2formeOffset,"-Wash");
+            formeSuffixes.put(Species.Gen5Formes.rotomFr + bw2formeOffset,"-Frost");
+            formeSuffixes.put(Species.Gen5Formes.rotomFa + bw2formeOffset,"-Fan");
+            formeSuffixes.put(Species.Gen5Formes.rotomM + bw2formeOffset,"-Mow");
+            formeSuffixes.put(Species.Gen5Formes.castformSu + bw2formeOffset,"-Sunny");
+            formeSuffixes.put(Species.Gen5Formes.castformR + bw2formeOffset,"-Rainy");
+            formeSuffixes.put(Species.Gen5Formes.castformSn + bw2formeOffset,"-Snowy");
+            formeSuffixes.put(Species.Gen5Formes.basculinB + bw2formeOffset,"-Blue");
+            formeSuffixes.put(Species.Gen5Formes.darmanitanZ + bw2formeOffset,"-Zen");
+            formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset,"-Pirouette");
+            formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset,"-White");
+            formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset,"-Black");
+            formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset,"-Therian");
+            formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset,"-Therian");
+            formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset,"-Therian");
         }
 
         return formeSuffixes;
@@ -799,9 +799,9 @@ public class Gen5Constants {
         map.put(Species.rotom, rotomMap);
 
         Map<Integer,Integer> castformMap = new HashMap<>();
-        castformMap.put(1,Species.Gen5Formes.castformF);
-        castformMap.put(2,Species.Gen5Formes.castformW);
-        castformMap.put(3,Species.Gen5Formes.castformI);
+        castformMap.put(1,Species.Gen5Formes.castformSu);
+        castformMap.put(2,Species.Gen5Formes.castformR);
+        castformMap.put(3,Species.Gen5Formes.castformSn);
         map.put(Species.castform, castformMap);
 
         Map<Integer,Integer> basculinMap = new HashMap<>();

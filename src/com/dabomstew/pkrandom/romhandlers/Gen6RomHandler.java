@@ -179,6 +179,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
                 pokes[i].setName(pokeNames[i]);
+                pokes[i].setGeneration(generationOf(pokes[i]));
             }
 
             absolutePokeNumByBaseForme = new HashMap<>();
@@ -209,6 +210,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     currentMap = new HashMap<>();
                     currentMap.put(formNum,i);
                 }
+                pokes[i].setGeneration(generationOf(pokes[i]));
                 i++;
             }
             if (prevSpecies != 0) {
@@ -219,6 +221,30 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
         populateEvolutions();
         populateMegaEvolutions();
+    }
+
+    private int generationOf(Pokemon pk) {
+        if (pk.getFormeSuffix().startsWith("-Mega") || pk.getFormeSuffix().equals("-Primal")) {
+            return 6;
+        }
+        if (pk.getBaseForme() != null) {
+            if (pk.getBaseNumber() == Species.pikachu) {
+                return 6; // contest pikachu
+            }
+            return pk.getBaseForme().getGeneration();
+        }
+        if (pk.getNumber() >= Species.chespin) {
+            return 6;
+        } else if (pk.getNumber() >= Species.victini) {
+            return 5;
+        } else if (pk.getNumber() >= Species.turtwig) {
+            return 4;
+        } else if (pk.getNumber() >= Species.treecko) {
+            return 3;
+        } else if (pk.getNumber() >= Species.chikorita) {
+            return 2;
+        }
+        return 1;
     }
 
     private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {

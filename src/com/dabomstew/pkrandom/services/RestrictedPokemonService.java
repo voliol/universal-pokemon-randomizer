@@ -148,10 +148,10 @@ public class RestrictedPokemonService {
             allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.chespin, Species.volcanion));
         }
 
-        int maxGen7SpeciesID = romHandler.isSM ? Species.marshadow : Species.zeraora;
-        if (restrictions.allow_gen7 && pokemonCount > maxGen7SpeciesID) {
-            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.rowlet, maxGen7SpeciesID));
-        }
+//        int maxGen7SpeciesID = romHandler.isSM ? Species.marshadow : Species.zeraora;
+//        if (restrictions.allow_gen7 && pokemonCount > maxGen7SpeciesID) {
+//            allInclAltFormes.addAll(allNonRestricted.filterFromBaseNumberRange(Species.rowlet, maxGen7SpeciesID));
+//        }
 
         // If the user specified it, add all the evolutionary relatives for everything in the mainPokemonList
         if (restrictions.allow_evolutionary_relatives) {

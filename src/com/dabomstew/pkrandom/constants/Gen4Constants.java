@@ -1633,18 +1633,18 @@ public class Gen4Constants {
 
     private static Map<Integer,String> setupFormeSuffixes() {
         Map<Integer,String> formeSuffixes = new HashMap<>();
-        formeSuffixes.put(Species.Gen4Formes.deoxysA + formeOffset,"-A");
-        formeSuffixes.put(Species.Gen4Formes.deoxysD + formeOffset,"-D");
-        formeSuffixes.put(Species.Gen4Formes.deoxysS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.wormadamS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.wormadamT + formeOffset,"-T");
-        formeSuffixes.put(Species.Gen4Formes.giratinaO + formeOffset,"-O");
-        formeSuffixes.put(Species.Gen4Formes.shayminS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.rotomH + formeOffset,"-H");
-        formeSuffixes.put(Species.Gen4Formes.rotomW + formeOffset,"-W");
-        formeSuffixes.put(Species.Gen4Formes.rotomFr + formeOffset,"-Fr");
-        formeSuffixes.put(Species.Gen4Formes.rotomFa + formeOffset,"-Fa");
-        formeSuffixes.put(Species.Gen4Formes.rotomM + formeOffset,"-M");
+        formeSuffixes.put(Species.Gen4Formes.deoxysA + formeOffset,"-Attack");
+        formeSuffixes.put(Species.Gen4Formes.deoxysD + formeOffset,"-Defense");
+        formeSuffixes.put(Species.Gen4Formes.deoxysS + formeOffset,"-Speed");
+        formeSuffixes.put(Species.Gen4Formes.wormadamS + formeOffset,"-Sandy");
+        formeSuffixes.put(Species.Gen4Formes.wormadamT + formeOffset,"-Trash");
+        formeSuffixes.put(Species.Gen4Formes.giratinaO + formeOffset,"-Origin");
+        formeSuffixes.put(Species.Gen4Formes.shayminS + formeOffset,"-Sky");
+        formeSuffixes.put(Species.Gen4Formes.rotomH + formeOffset,"-Heat");
+        formeSuffixes.put(Species.Gen4Formes.rotomW + formeOffset,"-Wash");
+        formeSuffixes.put(Species.Gen4Formes.rotomFr + formeOffset,"-Frost");
+        formeSuffixes.put(Species.Gen4Formes.rotomFa + formeOffset,"-Fan");
+        formeSuffixes.put(Species.Gen4Formes.rotomM + formeOffset,"-Mow");
         return formeSuffixes;
     }
 

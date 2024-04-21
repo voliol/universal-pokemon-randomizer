@@ -524,7 +524,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             if (i != Species.mew || romEntry.isYellow()) {
                 loadBasicPokeStats((Gen1Pokemon) pokes[i], pokeStatsOffset + (i - 1) * Gen1Constants.baseStatsEntrySize);
             }
-            // Name?
             pokes[i].setName(pokeNames[pokeNumToRBYTable[i]]);
         }
 

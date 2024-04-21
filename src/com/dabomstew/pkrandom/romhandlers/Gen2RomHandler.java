@@ -217,8 +217,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             pokes[i] = new Pokemon(i);
             loadBasicPokeStats(pokes[i], offs + (i - 1) * Gen2Constants.baseStatsEntrySize);
-            // Name?
             pokes[i].setName(pokeNames[i]);
+            pokes[i].setGeneration(pokes[i].getNumber() >= Species.chikorita ? 2 : 1);
         }
         this.pokemonList = Arrays.asList(pokes);
     }

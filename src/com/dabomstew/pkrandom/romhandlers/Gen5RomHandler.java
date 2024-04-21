@@ -211,8 +211,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(i), formeMappings);
-                // Name?
                 pokes[i].setName(pokeNames[i]);
+                pokes[i].setGeneration(generationOf(pokes[i]));
             }
 
             int i = Gen5Constants.pokemonCount + 1;
@@ -225,13 +225,29 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 pokes[i].setFormeNumber(fi.formeNumber);
                 pokes[i].setFormeSpriteIndex(fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.getRomType()));
                 pokes[i].setFormeSuffix(Gen5Constants.getFormeSuffix(k,romEntry.getRomType()));
+                pokes[i].setGeneration(generationOf(pokes[i]));
                 i = i + 1;
             }
             populateEvolutions();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
 
+    private int generationOf(Pokemon pk) {
+        if (pk.getBaseForme() != null) {
+            return pk.getBaseForme().getGeneration();
+        }
+        if (pk.getNumber() >= Species.victini) {
+            return 5;
+        } else if (pk.getNumber() >= Species.turtwig) {
+            return 4;
+        } else if (pk.getNumber() >= Species.treecko) {
+            return 3;
+        } else if (pk.getNumber() >= Species.chikorita) {
+            return 2;
+        }
+        return 1;
     }
 
     private void loadMoves() {

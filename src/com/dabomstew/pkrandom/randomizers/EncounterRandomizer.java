@@ -53,7 +53,7 @@ public class EncounterRandomizer {
         // - apply level modifier
         // - set encounters
 
-        romHandler.checkPokemonRestrictions(); // TODO: break out into PokemonService
+//        romHandler.checkPokemonRestrictions(); // TODO: break out into PokemonService
 
         List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeOfDay);
 
@@ -85,7 +85,7 @@ public class EncounterRandomizer {
     private PokemonSet<Pokemon> setupAllowedPokemon(boolean noLegendaries, boolean allowAltFormes,
                                                     boolean allowCosmeticFormes, PokemonSet<Pokemon> banned) {
         PokemonSet<Pokemon> allowedPokemon = new PokemonSet<>();
-        allowedPokemon.addAll(romHandler.getRestrictedPokemon(noLegendaries, allowAltFormes, allowCosmeticFormes)); // TODO: break out into PokemonService
+//        allowedPokemon.addAll(romHandler.getRestrictedPokemon(noLegendaries, allowAltFormes, allowCosmeticFormes)); // TODO: break out into PokemonService
         allowedPokemon.removeAll(banned);
         return allowedPokemon;
     }

@@ -78,7 +78,7 @@ public class Gen6Constants {
     }
 
     private static final List<Integer> xyIrregularFormes = Arrays.asList(
-            Species.Gen6Formes.castformF, Species.Gen6Formes.castformW, Species.Gen6Formes.castformI,
+            Species.Gen6Formes.castformSu, Species.Gen6Formes.castformR, Species.Gen6Formes.castformSn,
             Species.Gen6Formes.darmanitanZ,
             Species.Gen6Formes.meloettaP,
             Species.Gen6Formes.kyuremW,
@@ -115,7 +115,7 @@ public class Gen6Constants {
     );
 
     private static final List<Integer> orasIrregularFormes = Arrays.asList(
-            Species.Gen6Formes.castformF, Species.Gen6Formes.castformW, Species.Gen6Formes.castformI,
+            Species.Gen6Formes.castformSu, Species.Gen6Formes.castformR, Species.Gen6Formes.castformSn,
             Species.Gen6Formes.darmanitanZ,
             Species.Gen6Formes.meloettaP,
             Species.Gen6Formes.kyuremW,
@@ -712,30 +712,30 @@ public class Gen6Constants {
 
     private static Map<Integer,String> setupFormeSuffixes() {
         Map<Integer,String> formeSuffixes = new HashMap<>();
-        formeSuffixes.put(Species.Gen6Formes.deoxysA,"-A");
-        formeSuffixes.put(Species.Gen6Formes.deoxysD,"-D");
-        formeSuffixes.put(Species.Gen6Formes.deoxysS,"-S");
-        formeSuffixes.put(Species.Gen6Formes.wormadamS,"-S");
-        formeSuffixes.put(Species.Gen6Formes.wormadamT,"-T");
-        formeSuffixes.put(Species.Gen6Formes.shayminS,"-S");
-        formeSuffixes.put(Species.Gen6Formes.giratinaO,"-O");
-        formeSuffixes.put(Species.Gen6Formes.rotomH,"-H");
-        formeSuffixes.put(Species.Gen6Formes.rotomW,"-W");
-        formeSuffixes.put(Species.Gen6Formes.rotomFr,"-Fr");
-        formeSuffixes.put(Species.Gen6Formes.rotomFa,"-Fa");
-        formeSuffixes.put(Species.Gen6Formes.rotomM,"-M");
-        formeSuffixes.put(Species.Gen6Formes.castformF,"-F");
-        formeSuffixes.put(Species.Gen6Formes.castformW,"-W");
-        formeSuffixes.put(Species.Gen6Formes.castformI,"-I");
-        formeSuffixes.put(Species.Gen6Formes.basculinB,"-B");
-        formeSuffixes.put(Species.Gen6Formes.darmanitanZ,"-Z");
-        formeSuffixes.put(Species.Gen6Formes.meloettaP,"-P");
-        formeSuffixes.put(Species.Gen6Formes.kyuremW,"-W");
-        formeSuffixes.put(Species.Gen6Formes.kyuremB,"-B");
+        formeSuffixes.put(Species.Gen6Formes.deoxysA,"-Attack");
+        formeSuffixes.put(Species.Gen6Formes.deoxysD,"-Defense");
+        formeSuffixes.put(Species.Gen6Formes.deoxysS,"-Speed");
+        formeSuffixes.put(Species.Gen6Formes.wormadamS,"-Sandy");
+        formeSuffixes.put(Species.Gen6Formes.wormadamT,"-Trash");
+        formeSuffixes.put(Species.Gen6Formes.shayminS,"-Sky");
+        formeSuffixes.put(Species.Gen6Formes.giratinaO,"-Origin");
+        formeSuffixes.put(Species.Gen6Formes.rotomH,"-Heat");
+        formeSuffixes.put(Species.Gen6Formes.rotomW,"-Wash");
+        formeSuffixes.put(Species.Gen6Formes.rotomFr,"-Frost");
+        formeSuffixes.put(Species.Gen6Formes.rotomFa,"-Fan");
+        formeSuffixes.put(Species.Gen6Formes.rotomM,"-Mow");
+        formeSuffixes.put(Species.Gen6Formes.castformSu,"-Sunny");
+        formeSuffixes.put(Species.Gen6Formes.castformR,"-Rainy");
+        formeSuffixes.put(Species.Gen6Formes.castformSn,"-Snowy");
+        formeSuffixes.put(Species.Gen6Formes.basculinB,"-Blue");
+        formeSuffixes.put(Species.Gen6Formes.darmanitanZ,"-Zen");
+        formeSuffixes.put(Species.Gen6Formes.meloettaP,"-Pirouette");
+        formeSuffixes.put(Species.Gen6Formes.kyuremW,"-White");
+        formeSuffixes.put(Species.Gen6Formes.kyuremB,"-Black");
         formeSuffixes.put(Species.Gen6Formes.keldeoCosmetic1,"-R");
-        formeSuffixes.put(Species.Gen6Formes.tornadusT,"-T");
-        formeSuffixes.put(Species.Gen6Formes.thundurusT,"-T");
-        formeSuffixes.put(Species.Gen6Formes.landorusT,"-T");
+        formeSuffixes.put(Species.Gen6Formes.tornadusT,"-Therian");
+        formeSuffixes.put(Species.Gen6Formes.thundurusT,"-Therian");
+        formeSuffixes.put(Species.Gen6Formes.landorusT,"-Therian");
         formeSuffixes.put(Species.Gen6Formes.gengarMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.meowsticF,"-F");
         // 749 - 757 Furfrou
@@ -757,7 +757,7 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.aerodactylMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.lucarioMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.abomasnowMega,"-Mega");
-        formeSuffixes.put(Species.Gen6Formes.aegislashB,"-B");
+        formeSuffixes.put(Species.Gen6Formes.aegislashB,"-Blade");
         formeSuffixes.put(Species.Gen6Formes.blastoiseMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.kangaskhanMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.gyaradosMega,"-Mega");
@@ -776,7 +776,7 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.gourgeistCosmetic2,"-L");
         formeSuffixes.put(Species.Gen6Formes.gourgeistCosmetic3,"-XL");
         // 794 - 797 Floette
-        formeSuffixes.put(Species.Gen6Formes.floetteE,"-E");
+        formeSuffixes.put(Species.Gen6Formes.floetteE,"-Eternal");
         formeSuffixes.put(Species.Gen6Formes.swampertMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.sceptileMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.sableyeMega,"-Mega");
@@ -790,11 +790,11 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.glalieMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.diancieMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.metagrossMega,"-Mega");
-        formeSuffixes.put(Species.Gen6Formes.kyogreP,"-P");
-        formeSuffixes.put(Species.Gen6Formes.groudonP,"-P");
+        formeSuffixes.put(Species.Gen6Formes.kyogreP,"-Primal");
+        formeSuffixes.put(Species.Gen6Formes.groudonP,"-Primal");
         formeSuffixes.put(Species.Gen6Formes.rayquazaMega,"-Mega");
-        // 815 - 820 contest Pikachu
-        formeSuffixes.put(Species.Gen6Formes.hoopaU,"-U");
+        // 815 - 820 Cosplay Pikachu
+        formeSuffixes.put(Species.Gen6Formes.hoopaU,"-Unbound");
         formeSuffixes.put(Species.Gen6Formes.cameruptMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.lopunnyMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.salamenceMega,"-Mega");

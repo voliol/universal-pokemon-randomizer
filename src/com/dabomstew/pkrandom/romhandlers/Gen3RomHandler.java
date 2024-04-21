@@ -544,6 +544,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             pokesInternal[i] = pk;
             int pkoffs = offs + i * Gen3Constants.baseStatsEntrySize;
             loadBasicPokeStats(pk, pkoffs);
+            pk.setGeneration(generationOf(pk));
         }
 
         // In these games, the alternate formes of Deoxys have hardcoded stats that are used 99% of the time;
@@ -565,6 +566,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         constructPokemonList();
+    }
+
+    private int generationOf(Pokemon pk) {
+        if (pk.getNumber() >= Species.treecko) {
+            return 3;
+        } else if (pk.getNumber() >= Species.chikorita) {
+            return 2;
+        }
+        return 1;
     }
 
     @Override
