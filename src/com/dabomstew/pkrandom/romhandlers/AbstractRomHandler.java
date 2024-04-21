@@ -64,7 +64,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private PokemonSet<Pokemon> nonlegendaryAltFormes = new PokemonSet<>();
     private PokemonSet<Pokemon> legendaryAltFormes = new PokemonSet<>();
 
-    private CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(this::getPokemonSet);
+    private final CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(this::getPokemonSet);
 
     private List<MegaEvolution> megaEvolutionsList;
     private PokemonSet<Pokemon> altFormes;

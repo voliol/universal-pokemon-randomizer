@@ -712,8 +712,6 @@ public interface RomHandler {
 
     void updateTypeEffectiveness();
 
-    void randomizeTypeEffectiveness(Settings settings);
-
     boolean hasTypeEffectivenessSupport();
 
 }

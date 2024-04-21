@@ -113,7 +113,6 @@ public class Randomizer {
                 case KEEP_IDENTITIES -> ter.randomizeTypeEffectivenessKeepIdentities();
                 case INVERSE -> ter.invertTypeEffectiveness(settings.isInverseTypesRandomImmunities());
             }
-            romHandler.randomizeTypeEffectiveness(settings);
             typeEffectivenessChanged = true;
         }
         if (typeEffectivenessChanged) {
