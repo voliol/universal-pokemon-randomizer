@@ -41,7 +41,26 @@ public class EncounterRandomizer {
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
     }
 
-    private void randomizeEncounters(Settings.WildPokemonMod mode,
+    // only exists for some old test cases, please don't use
+    public void randomizeEncounters(Settings.WildPokemonMod mode, Settings.WildPokemonTypeMod typeMode,
+                                    boolean useTimeOfDay,
+                                    boolean catchEmAll, boolean similarStrength,
+                                    boolean noLegendaries, boolean balanceShakingGrass, int levelModifier,
+                                    boolean allowAltFormes, boolean banIrregularAltFormes,
+                                    boolean abilitiesAreRandomized) {
+        randomizeEncounters(mode,
+                useTimeOfDay,
+                typeMode == Settings.WildPokemonTypeMod.THEMED_AREAS,
+                false,
+                typeMode == Settings.WildPokemonTypeMod.KEEP_PRIMARY,
+                catchEmAll, similarStrength,
+                noLegendaries, balanceShakingGrass, levelModifier,
+                allowAltFormes, banIrregularAltFormes,
+                abilitiesAreRandomized);
+    }
+
+    // only public for some old test cases, please don't use
+    public void randomizeEncounters(Settings.WildPokemonMod mode,
                                      boolean useTimeOfDay,
                                      boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
                                      boolean catchEmAll, boolean similarStrength,

@@ -39,7 +39,7 @@ public class RestrictedPokemonService {
 
     public PokemonSet<Pokemon> getPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
         PokemonSet<Pokemon> allowedPokes = new PokemonSet<>();
-        allowedPokes.addAll(noLegendaries ? getLegendaries(allowAltFormes) : getAll(allowAltFormes));
+        allowedPokes.addAll(noLegendaries ? getNonLegendaries(allowAltFormes) : getAll(allowAltFormes));
         if (allowAltFormes && !allowCosmeticFormes) {
             allowedPokes.removeIf(Pokemon::isActuallyCosmetic);
         }

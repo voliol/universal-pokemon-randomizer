@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.randomizers.EvolutionRandomizer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -72,7 +73,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName());
@@ -90,7 +91,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName() + " " + pk.getGrowthCurve());
@@ -108,7 +109,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName());
@@ -132,7 +133,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName());
@@ -157,7 +158,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosSameTyping(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         evosHaveSharedTypeCheck();
         System.out.println(evoGraph());
@@ -200,7 +201,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosSameTyping(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         Pokemon eevee = romHandler.getPokemon().get(Species.eevee);
         System.out.println(toStringWithTypes(eevee));
@@ -221,7 +222,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosMaxThreeStages(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         maxThreeEvoStagesCheck();
     }
@@ -252,7 +253,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         s.setEvolutionsMod(false, true, false);
         s.setEvosSameTyping(true);
         s.setEvosMaxThreeStages(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         evosHaveSharedTypeCheck();
         maxThreeEvoStagesCheck();
@@ -271,7 +272,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosForceChange(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             List<Pokemon> evosBefore = allEvosBefore.get(pk);
@@ -296,7 +297,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         s.setEvosSimilarStrength(true); // just to increase the likelihood of a failure
         s.setEvosSameTyping(true); // just to increase the likelihood of a failure
         s.setEvosForceChange(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         Pokemon cosmoem = romHandler.getPokemon().get(Species.cosmoem);
         System.out.println(cosmoem.getName());
@@ -320,7 +321,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosSimilarStrength(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         similarStrengthCheck(allEvosBefore);
     }
@@ -354,7 +355,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosForceGrowth(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.fullName() + " BST=" + pk.bstForPowerLevels() + " ->");
@@ -373,7 +374,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
         s.setEvosNoConvergence(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.fullName());
@@ -392,7 +393,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, true, false);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName());
@@ -410,7 +411,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, false, true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName());
@@ -435,7 +436,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, false, true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName());
@@ -453,7 +454,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setEvolutionsMod(false, false, true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.getName() + " " + pk.getGrowthCurve());
@@ -477,7 +478,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, false, true);
         s.setEvosForceChange(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             List<Pokemon> evosBefore = allEvosBefore.get(pk);
@@ -500,7 +501,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         romHandler.standardizeEXPCurves(s);
         s.setEvolutionsMod(false, false, true);
         s.setEvosSameTyping(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         evosHaveSharedTypeCheck();
     }
@@ -513,7 +514,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEvolutionsMod(false, false, true);
         s.setEvosNoConvergence(true);
-        romHandler.randomizeEvolutions(s);
+        new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();
 
         for (Pokemon pk : romHandler.getPokemonSet()) {
             System.out.println(pk.fullName());
