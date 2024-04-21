@@ -316,43 +316,39 @@ useTimeOfDay=false
 		Encounters = [MARILL Lv13, NOSFERAPTI Lv15, MACHOC Lv14, MARILL Lv15, RACAILLOU Lv14, RATTATA Lv16, RATTATA Lv16]]
 	[Name = MONT CREUSET Surfing, Rate = 10, Offset = 0,
 		Encounters = [POISSIRENE Lv20, MARILL Lv20, POISSOROY Lv20]]
-	[Name = Fishing Group 1, Rate = 0, Offset = 0,
+	[Name = Fishing Shore, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, KRABBY Lv10, MAGICARPE Lv20, KRABBY Lv20, KRABBY Lv20, STARI Lv20, KRABBY Lv40, STARI Lv40, KRABBY Lv40, KRABBOSS Lv40]]
-	[Name = Fishing Group 2, Rate = 0, Offset = 0,
+	[Name = Fishing Ocean, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, TENTACOOL Lv10, MAGICARPE Lv20, TENTACOOL Lv20, LOUPIO Lv20, KOKIYAS Lv20, LOUPIO Lv40, KOKIYAS Lv40, TENTACRUEL Lv40, LANTURN Lv40]]
-	[Name = Fishing Group 3, Rate = 0, Offset = 0,
+	[Name = Fishing Lake, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, POISSIRENE Lv10, MAGICARPE Lv20, POISSIRENE Lv20, POISSIRENE Lv20, POISSIRENE Lv20, POISSIRENE Lv40, POISSIRENE Lv40, MAGICARPE Lv40, POISSOROY Lv40]]
-	[Name = Fishing Group 4, Rate = 0, Offset = 0,
+	[Name = Fishing Pond, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, PTITARD Lv10, MAGICARPE Lv20, PTITARD Lv20, PTITARD Lv20, PTITARD Lv20, PTITARD Lv40, PTITARD Lv40, MAGICARPE Lv40, PTITARD Lv40]]
-	[Name = Fishing Group 5, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 1 (Ice Path, Dragon's Den), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv20, MAGICARPE Lv20, MAGICARPE Lv20, MINIDRACO Lv20, MAGICARPE Lv40, MINIDRACO Lv40, MAGICARPE Lv40, DRACO Lv40]]
-	[Name = Fishing Group 6, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish Swarm (Route 32), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv5, MAGICARPE Lv5, QWILFISH Lv5, MAGICARPE Lv20, QWILFISH Lv20, QWILFISH Lv20, QWILFISH Lv20, QWILFISH Lv40, QWILFISH Lv40, QWILFISH Lv40, QWILFISH Lv40]]
-	[Name = Fishing Group 7, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid Swarm (Route 44), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, REMORAID Lv10, MAGICARPE Lv20, REMORAID Lv20, REMORAID Lv20, REMORAID Lv20, REMORAID Lv40, REMORAID Lv40, REMORAID Lv40, REMORAID Lv40]]
-	[Name = Fishing Group 8, Rate = 0, Offset = 0,
+	[Name = Fishing Gyarados (Lake of Rage, Fuchsia City), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv20, MAGICARPE Lv20, MAGICARPE Lv20, LEVIATOR Lv20, MAGICARPE Lv40, LEVIATOR Lv40, MAGICARPE Lv40, MAGICARPE Lv40]]
-	[Name = Fishing Group 9, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 2 (Route 45), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MINIDRACO Lv10, MAGICARPE Lv10, MINIDRACO Lv10, MAGICARPE Lv10, DRACO Lv10]]
-	[Name = Fishing Group 10, Rate = 0, Offset = 0,
+	[Name = Fishing Whirl Islands, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, KRABBY Lv10, MAGICARPE Lv20, KRABBY Lv20, KRABBY Lv20, HYPOTREMPE Lv20, KRABBY Lv40, HYPOTREMPE Lv40, KRABBOSS Lv40, HYPOCEAN Lv40]]
-	[Name = Fishing Group 11, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish (Routes 32, 12, 13), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, TENTACOOL Lv10, MAGICARPE Lv20, TENTACOOL Lv20, TENTACOOL Lv20, TENTACOOL Lv20, TENTACOOL Lv40, TENTACOOL Lv40, MAGICARPE Lv40, QWILFISH Lv40]]
-	[Name = Fishing Group 12, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid (Route 44), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, PTITARD Lv10, MAGICARPE Lv20, PTITARD Lv20, PTITARD Lv20, PTITARD Lv20, PTITARD Lv40, PTITARD Lv40, MAGICARPE Lv40, REMORAID Lv40]]
-	[Name = Headbutt Trees Set 1, Rate = 0, Offset = 0,
-		Encounters = [MIMITOSS Lv15, MIMITOSS Lv15, ABRA Lv15, ABRA Lv15, AEROMITE Lv15]]
-	[Name = Headbutt Trees Set 2, Rate = 0, Offset = 0,
-		Encounters = [MIMITOSS Lv15, MAGNETI Lv15, ABRA Lv15, ABRA Lv15, AEROMITE Lv15]]
-	[Name = Headbutt Trees Set 3, Rate = 0, Offset = 0,
-		Encounters = [ASPICOT Lv10, ASPICOT Lv10, COCONFORT Lv10, NOEUNOEUF Lv10, NOEUNOEUF Lv10, DARDARGNAN Lv10]]
-	[Name = Headbutt Trees Set 4, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common), Rate = 0, Offset = 0,
+		Encounters = [COCONFORT Lv10, NOEUNOEUF Lv10, NOEUNOEUF Lv10, DARDARGNAN Lv10]]
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare), Rate = 0, Offset = 0,
 		Encounters = [ASPICOT Lv10, POMDEPIK Lv10, POMDEPIK Lv10, NOEUNOEUF Lv10, NOEUNOEUF Lv10, DARDARGNAN Lv10]]
-	[Name = Headbutt Trees Set 5, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (common), Rate = 0, Offset = 0,
 		Encounters = [PIAFABEC Lv10, PIAFABEC Lv10, PIAFABEC Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10]]
-	[Name = Headbutt Trees Set 6, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (rare), Rate = 0, Offset = 0,
 		Encounters = [PIAFABEC Lv10, SCARHINO Lv10, SCARHINO Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10]]
-	[Name = Headbutt Trees Set 7, Rate = 0, Offset = 0,
+	[Name = Rock Smash, Rate = 0, Offset = 0,
 		Encounters = [KRABBY Lv15, CARATROC Lv15]]
 	[Name = Bug Catching Contest, Rate = 0, Offset = 0,
 		Encounters = [CHENIPAN Lvs 7-18, ASPICOT Lvs 7-18, CHRYSACIER Lvs 9-18, COCONFORT Lvs 9-18, PAPILUSION Lvs 12-15, DARDARGNAN Lvs 12-15, MIMITOSS Lvs 10-16, PARAS Lvs 10-17, INSECATEUR Lvs 13-14, SCARABRUTE Lvs 13-14]
@@ -1057,29 +1053,29 @@ useTimeOfDay=true
 		Encounters = [MARILL Lv13, NOSFERAPTI Lv15, MACHOC Lv14, MARILL Lv15, RACAILLOU Lv14, RATTATA Lv16, RATTATA Lv16]]
 	[Name = MONT CREUSET Surfing, Rate = 10, Offset = 0,
 		Encounters = [POISSIRENE Lv20, MARILL Lv20, POISSOROY Lv20]]
-	[Name = Fishing Group 1, Rate = 0, Offset = 0,
+	[Name = Fishing Shore, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, KRABBY Lv10, MAGICARPE Lv20, KRABBY Lv20, KRABBY Lv20, KRABBY Lv40, KRABBY Lv40, KRABBOSS Lv40]]
-	[Name = Fishing Group 2, Rate = 0, Offset = 0,
+	[Name = Fishing Ocean, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, TENTACOOL Lv10, MAGICARPE Lv20, TENTACOOL Lv20, LOUPIO Lv20, LOUPIO Lv40, TENTACRUEL Lv40, LANTURN Lv40]]
-	[Name = Fishing Group 3, Rate = 0, Offset = 0,
+	[Name = Fishing Lake, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, POISSIRENE Lv10, MAGICARPE Lv20, POISSIRENE Lv20, POISSIRENE Lv20, POISSIRENE Lv40, MAGICARPE Lv40, POISSOROY Lv40]]
-	[Name = Fishing Group 4, Rate = 0, Offset = 0,
+	[Name = Fishing Pond, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, PTITARD Lv10, MAGICARPE Lv20, PTITARD Lv20, PTITARD Lv20, PTITARD Lv40, MAGICARPE Lv40, PTITARD Lv40]]
-	[Name = Fishing Group 5, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 1 (Ice Path, Dragon's Den), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv20, MAGICARPE Lv20, MAGICARPE Lv20, MAGICARPE Lv40, MAGICARPE Lv40, DRACO Lv40]]
-	[Name = Fishing Group 6, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish Swarm (Route 32), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv5, MAGICARPE Lv5, QWILFISH Lv5, MAGICARPE Lv20, QWILFISH Lv20, QWILFISH Lv20, QWILFISH Lv40, QWILFISH Lv40, QWILFISH Lv40]]
-	[Name = Fishing Group 7, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid Swarm (Route 44), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, REMORAID Lv10, MAGICARPE Lv20, REMORAID Lv20, REMORAID Lv20, REMORAID Lv40, REMORAID Lv40, REMORAID Lv40]]
-	[Name = Fishing Group 8, Rate = 0, Offset = 0,
+	[Name = Fishing Gyarados (Lake of Rage, Fuchsia City), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv20, MAGICARPE Lv20, MAGICARPE Lv20, MAGICARPE Lv40, MAGICARPE Lv40, MAGICARPE Lv40]]
-	[Name = Fishing Group 9, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 2 (Route 45), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, MAGICARPE Lv10, DRACO Lv10]]
-	[Name = Fishing Group 10, Rate = 0, Offset = 0,
+	[Name = Fishing Whirl Islands, Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, KRABBY Lv10, MAGICARPE Lv20, KRABBY Lv20, KRABBY Lv20, KRABBY Lv40, KRABBOSS Lv40, HYPOCEAN Lv40]]
-	[Name = Fishing Group 11, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish (Routes 32, 12, 13), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, TENTACOOL Lv10, MAGICARPE Lv20, TENTACOOL Lv20, TENTACOOL Lv20, TENTACOOL Lv40, MAGICARPE Lv40, QWILFISH Lv40]]
-	[Name = Fishing Group 12, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid (Route 44), Rate = 0, Offset = 0,
 		Encounters = [MAGICARPE Lv10, MAGICARPE Lv10, PTITARD Lv10, MAGICARPE Lv20, PTITARD Lv20, PTITARD Lv20, PTITARD Lv40, MAGICARPE Lv40, REMORAID Lv40]]
 	[Name = Time-Specific Fishing 1, Rate = 0, Offset = 0,
 		Encounters = [CORAYON Lv20, STARI Lv20, CORAYON Lv40, STARI Lv40]]
@@ -1103,19 +1099,15 @@ useTimeOfDay=true
 		Encounters = [HYPOTREMPE Lv20, HYPOTREMPE Lv20, HYPOTREMPE Lv40, HYPOTREMPE Lv40]]
 	[Name = Time-Specific Fishing 11, Rate = 0, Offset = 0,
 		Encounters = [TENTACOOL Lv20, TENTACOOL Lv20, TENTACOOL Lv40, TENTACOOL Lv40]]
-	[Name = Headbutt Trees Set 1, Rate = 0, Offset = 0,
-		Encounters = [MIMITOSS Lv15, MIMITOSS Lv15, ABRA Lv15, ABRA Lv15, AEROMITE Lv15]]
-	[Name = Headbutt Trees Set 2, Rate = 0, Offset = 0,
-		Encounters = [MIMITOSS Lv15, MAGNETI Lv15, ABRA Lv15, ABRA Lv15, AEROMITE Lv15]]
-	[Name = Headbutt Trees Set 3, Rate = 0, Offset = 0,
-		Encounters = [ASPICOT Lv10, ASPICOT Lv10, COCONFORT Lv10, NOEUNOEUF Lv10, NOEUNOEUF Lv10, DARDARGNAN Lv10]]
-	[Name = Headbutt Trees Set 4, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common), Rate = 0, Offset = 0,
+		Encounters = [COCONFORT Lv10, NOEUNOEUF Lv10, NOEUNOEUF Lv10, DARDARGNAN Lv10]]
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare), Rate = 0, Offset = 0,
 		Encounters = [ASPICOT Lv10, POMDEPIK Lv10, POMDEPIK Lv10, NOEUNOEUF Lv10, NOEUNOEUF Lv10, DARDARGNAN Lv10]]
-	[Name = Headbutt Trees Set 5, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (common), Rate = 0, Offset = 0,
 		Encounters = [PIAFABEC Lv10, PIAFABEC Lv10, PIAFABEC Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10]]
-	[Name = Headbutt Trees Set 6, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (rare), Rate = 0, Offset = 0,
 		Encounters = [PIAFABEC Lv10, SCARHINO Lv10, SCARHINO Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10, CAPUMAIN Lv10]]
-	[Name = Headbutt Trees Set 7, Rate = 0, Offset = 0,
+	[Name = Rock Smash, Rate = 0, Offset = 0,
 		Encounters = [KRABBY Lv15, CARATROC Lv15]]
 	[Name = Bug Catching Contest, Rate = 0, Offset = 0,
 		Encounters = [CHENIPAN Lvs 7-18, ASPICOT Lvs 7-18, CHRYSACIER Lvs 9-18, COCONFORT Lvs 9-18, PAPILUSION Lvs 12-15, DARDARGNAN Lvs 12-15, MIMITOSS Lvs 10-16, PARAS Lvs 10-17, INSECATEUR Lvs 13-14, SCARABRUTE Lvs 13-14]

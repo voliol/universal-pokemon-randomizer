@@ -56,6 +56,10 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void encountersAreIdenticalToEarlierRandomizerCodeOutput(String romName) throws IOException {
+        // This test checks whether you've accidentally broken the reading of encounters
+        // by comparing the current output with logged output in text files. If you *intentionally* change something
+        // about how the encounters are read, like the EncounterArea names, you can expect this test to fail.
+        // In that case, check it only differs in the way you want, and then update the text files.
         loadROM(romName);
 
         StringWriter sw = new StringWriter();
@@ -699,9 +703,10 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         for (EncounterArea area : romHandler.getEncounters(true)) {
             catchable.addAll(PokemonSet.inArea(area));
         }
-        allPokes.removeAll(catchable);
-        System.out.println("Not catchable: " + allPokes.stream().map(Pokemon::getName).toList());
-        assertTrue(allPokes.isEmpty());
+        PokemonSet<Pokemon> notCatchable = new PokemonSet<>(allPokes);
+        notCatchable.removeAll(catchable);
+        System.out.println("Not catchable: " + notCatchable.stream().map(Pokemon::getName).toList());
+        assertTrue(notCatchable.isEmpty());
     }
 
     @ParameterizedTest

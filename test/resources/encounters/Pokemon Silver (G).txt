@@ -316,43 +316,39 @@ useTimeOfDay=false
 		Encounters = [MARILL Lv13, ZUBAT Lv15, MACHOLLO Lv14, MARILL Lv15, KLEINSTEIN Lv14, RATTFRATZ Lv16, RATTFRATZ Lv16]]
 	[Name = KESSELBERG Surfing, Rate = 10, Offset = 0,
 		Encounters = [GOLDINI Lv20, MARILL Lv20, GOLKING Lv20]]
-	[Name = Fishing Group 1, Rate = 0, Offset = 0,
+	[Name = Fishing Shore, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KRABBY Lv10, KARPADOR Lv20, KRABBY Lv20, KRABBY Lv20, STERNDU Lv20, KRABBY Lv40, STERNDU Lv40, KRABBY Lv40, KINGLER Lv40]]
-	[Name = Fishing Group 2, Rate = 0, Offset = 0,
+	[Name = Fishing Ocean, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, TENTACHA Lv10, KARPADOR Lv20, TENTACHA Lv20, LAMPI Lv20, MUSCHAS Lv20, LAMPI Lv40, MUSCHAS Lv40, TENTOXA Lv40, LANTURN Lv40]]
-	[Name = Fishing Group 3, Rate = 0, Offset = 0,
+	[Name = Fishing Lake, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, GOLDINI Lv10, KARPADOR Lv20, GOLDINI Lv20, GOLDINI Lv20, GOLDINI Lv20, GOLDINI Lv40, GOLDINI Lv40, KARPADOR Lv40, GOLKING Lv40]]
-	[Name = Fishing Group 4, Rate = 0, Offset = 0,
+	[Name = Fishing Pond, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, QUAPSEL Lv10, KARPADOR Lv20, QUAPSEL Lv20, QUAPSEL Lv20, QUAPSEL Lv20, QUAPSEL Lv40, QUAPSEL Lv40, KARPADOR Lv40, QUAPSEL Lv40]]
-	[Name = Fishing Group 5, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 1 (Ice Path, Dragon's Den), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv20, KARPADOR Lv20, KARPADOR Lv20, DRATINI Lv20, KARPADOR Lv40, DRATINI Lv40, KARPADOR Lv40, DRAGONIR Lv40]]
-	[Name = Fishing Group 6, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish Swarm (Route 32), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv5, KARPADOR Lv5, BALDORFISH Lv5, KARPADOR Lv20, BALDORFISH Lv20, BALDORFISH Lv20, BALDORFISH Lv20, BALDORFISH Lv40, BALDORFISH Lv40, BALDORFISH Lv40, BALDORFISH Lv40]]
-	[Name = Fishing Group 7, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid Swarm (Route 44), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, REMORAID Lv10, KARPADOR Lv20, REMORAID Lv20, REMORAID Lv20, REMORAID Lv20, REMORAID Lv40, REMORAID Lv40, REMORAID Lv40, REMORAID Lv40]]
-	[Name = Fishing Group 8, Rate = 0, Offset = 0,
+	[Name = Fishing Gyarados (Lake of Rage, Fuchsia City), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv20, KARPADOR Lv20, KARPADOR Lv20, GARADOS Lv20, KARPADOR Lv40, GARADOS Lv40, KARPADOR Lv40, KARPADOR Lv40]]
-	[Name = Fishing Group 9, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 2 (Route 45), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, DRATINI Lv10, KARPADOR Lv10, DRATINI Lv10, KARPADOR Lv10, DRAGONIR Lv10]]
-	[Name = Fishing Group 10, Rate = 0, Offset = 0,
+	[Name = Fishing Whirl Islands, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KRABBY Lv10, KARPADOR Lv20, KRABBY Lv20, KRABBY Lv20, SEEPER Lv20, KRABBY Lv40, SEEPER Lv40, KINGLER Lv40, SEEMON Lv40]]
-	[Name = Fishing Group 11, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish (Routes 32, 12, 13), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, TENTACHA Lv10, KARPADOR Lv20, TENTACHA Lv20, TENTACHA Lv20, TENTACHA Lv20, TENTACHA Lv40, TENTACHA Lv40, KARPADOR Lv40, BALDORFISH Lv40]]
-	[Name = Fishing Group 12, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid (Route 44), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, QUAPSEL Lv10, KARPADOR Lv20, QUAPSEL Lv20, QUAPSEL Lv20, QUAPSEL Lv20, QUAPSEL Lv40, QUAPSEL Lv40, KARPADOR Lv40, REMORAID Lv40]]
-	[Name = Headbutt Trees Set 1, Rate = 0, Offset = 0,
-		Encounters = [BLUZUK Lv15, BLUZUK Lv15, ABRA Lv15, ABRA Lv15, OMOT Lv15]]
-	[Name = Headbutt Trees Set 2, Rate = 0, Offset = 0,
-		Encounters = [BLUZUK Lv15, MAGNETILO Lv15, ABRA Lv15, ABRA Lv15, OMOT Lv15]]
-	[Name = Headbutt Trees Set 3, Rate = 0, Offset = 0,
-		Encounters = [HORNLIU Lv10, HORNLIU Lv10, KOKUNA Lv10, OWEI Lv10, OWEI Lv10, BIBOR Lv10]]
-	[Name = Headbutt Trees Set 4, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common), Rate = 0, Offset = 0,
+		Encounters = [KOKUNA Lv10, OWEI Lv10, OWEI Lv10, BIBOR Lv10]]
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare), Rate = 0, Offset = 0,
 		Encounters = [HORNLIU Lv10, TANNZA Lv10, TANNZA Lv10, OWEI Lv10, OWEI Lv10, BIBOR Lv10]]
-	[Name = Headbutt Trees Set 5, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (common), Rate = 0, Offset = 0,
 		Encounters = [HABITAK Lv10, HABITAK Lv10, HABITAK Lv10, GRIFFEL Lv10, GRIFFEL Lv10, GRIFFEL Lv10]]
-	[Name = Headbutt Trees Set 6, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (rare), Rate = 0, Offset = 0,
 		Encounters = [HABITAK Lv10, SKARABORN Lv10, SKARABORN Lv10, GRIFFEL Lv10, GRIFFEL Lv10, GRIFFEL Lv10]]
-	[Name = Headbutt Trees Set 7, Rate = 0, Offset = 0,
+	[Name = Rock Smash, Rate = 0, Offset = 0,
 		Encounters = [KRABBY Lv15, POTTROTT Lv15]]
 	[Name = Bug Catching Contest, Rate = 0, Offset = 0,
 		Encounters = [RAUPY Lvs 7-18, HORNLIU Lvs 7-18, SAFCON Lvs 9-18, KOKUNA Lvs 9-18, SMETTBO Lvs 12-15, BIBOR Lvs 12-15, BLUZUK Lvs 10-16, PARAS Lvs 10-17, SICHLOR Lvs 13-14, PINSIR Lvs 13-14]
@@ -1057,29 +1053,29 @@ useTimeOfDay=true
 		Encounters = [MARILL Lv13, ZUBAT Lv15, MACHOLLO Lv14, MARILL Lv15, KLEINSTEIN Lv14, RATTFRATZ Lv16, RATTFRATZ Lv16]]
 	[Name = KESSELBERG Surfing, Rate = 10, Offset = 0,
 		Encounters = [GOLDINI Lv20, MARILL Lv20, GOLKING Lv20]]
-	[Name = Fishing Group 1, Rate = 0, Offset = 0,
+	[Name = Fishing Shore, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KRABBY Lv10, KARPADOR Lv20, KRABBY Lv20, KRABBY Lv20, KRABBY Lv40, KRABBY Lv40, KINGLER Lv40]]
-	[Name = Fishing Group 2, Rate = 0, Offset = 0,
+	[Name = Fishing Ocean, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, TENTACHA Lv10, KARPADOR Lv20, TENTACHA Lv20, LAMPI Lv20, LAMPI Lv40, TENTOXA Lv40, LANTURN Lv40]]
-	[Name = Fishing Group 3, Rate = 0, Offset = 0,
+	[Name = Fishing Lake, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, GOLDINI Lv10, KARPADOR Lv20, GOLDINI Lv20, GOLDINI Lv20, GOLDINI Lv40, KARPADOR Lv40, GOLKING Lv40]]
-	[Name = Fishing Group 4, Rate = 0, Offset = 0,
+	[Name = Fishing Pond, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, QUAPSEL Lv10, KARPADOR Lv20, QUAPSEL Lv20, QUAPSEL Lv20, QUAPSEL Lv40, KARPADOR Lv40, QUAPSEL Lv40]]
-	[Name = Fishing Group 5, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 1 (Ice Path, Dragon's Den), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv20, KARPADOR Lv20, KARPADOR Lv20, KARPADOR Lv40, KARPADOR Lv40, DRAGONIR Lv40]]
-	[Name = Fishing Group 6, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish Swarm (Route 32), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv5, KARPADOR Lv5, BALDORFISH Lv5, KARPADOR Lv20, BALDORFISH Lv20, BALDORFISH Lv20, BALDORFISH Lv40, BALDORFISH Lv40, BALDORFISH Lv40]]
-	[Name = Fishing Group 7, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid Swarm (Route 44), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, REMORAID Lv10, KARPADOR Lv20, REMORAID Lv20, REMORAID Lv20, REMORAID Lv40, REMORAID Lv40, REMORAID Lv40]]
-	[Name = Fishing Group 8, Rate = 0, Offset = 0,
+	[Name = Fishing Gyarados (Lake of Rage, Fuchsia City), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv20, KARPADOR Lv20, KARPADOR Lv20, KARPADOR Lv40, KARPADOR Lv40, KARPADOR Lv40]]
-	[Name = Fishing Group 9, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 2 (Route 45), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, KARPADOR Lv10, DRAGONIR Lv10]]
-	[Name = Fishing Group 10, Rate = 0, Offset = 0,
+	[Name = Fishing Whirl Islands, Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, KRABBY Lv10, KARPADOR Lv20, KRABBY Lv20, KRABBY Lv20, KRABBY Lv40, KINGLER Lv40, SEEMON Lv40]]
-	[Name = Fishing Group 11, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish (Routes 32, 12, 13), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, TENTACHA Lv10, KARPADOR Lv20, TENTACHA Lv20, TENTACHA Lv20, TENTACHA Lv40, KARPADOR Lv40, BALDORFISH Lv40]]
-	[Name = Fishing Group 12, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid (Route 44), Rate = 0, Offset = 0,
 		Encounters = [KARPADOR Lv10, KARPADOR Lv10, QUAPSEL Lv10, KARPADOR Lv20, QUAPSEL Lv20, QUAPSEL Lv20, QUAPSEL Lv40, KARPADOR Lv40, REMORAID Lv40]]
 	[Name = Time-Specific Fishing 1, Rate = 0, Offset = 0,
 		Encounters = [CORASONN Lv20, STERNDU Lv20, CORASONN Lv40, STERNDU Lv40]]
@@ -1103,19 +1099,15 @@ useTimeOfDay=true
 		Encounters = [SEEPER Lv20, SEEPER Lv20, SEEPER Lv40, SEEPER Lv40]]
 	[Name = Time-Specific Fishing 11, Rate = 0, Offset = 0,
 		Encounters = [TENTACHA Lv20, TENTACHA Lv20, TENTACHA Lv40, TENTACHA Lv40]]
-	[Name = Headbutt Trees Set 1, Rate = 0, Offset = 0,
-		Encounters = [BLUZUK Lv15, BLUZUK Lv15, ABRA Lv15, ABRA Lv15, OMOT Lv15]]
-	[Name = Headbutt Trees Set 2, Rate = 0, Offset = 0,
-		Encounters = [BLUZUK Lv15, MAGNETILO Lv15, ABRA Lv15, ABRA Lv15, OMOT Lv15]]
-	[Name = Headbutt Trees Set 3, Rate = 0, Offset = 0,
-		Encounters = [HORNLIU Lv10, HORNLIU Lv10, KOKUNA Lv10, OWEI Lv10, OWEI Lv10, BIBOR Lv10]]
-	[Name = Headbutt Trees Set 4, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common), Rate = 0, Offset = 0,
+		Encounters = [KOKUNA Lv10, OWEI Lv10, OWEI Lv10, BIBOR Lv10]]
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare), Rate = 0, Offset = 0,
 		Encounters = [HORNLIU Lv10, TANNZA Lv10, TANNZA Lv10, OWEI Lv10, OWEI Lv10, BIBOR Lv10]]
-	[Name = Headbutt Trees Set 5, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (common), Rate = 0, Offset = 0,
 		Encounters = [HABITAK Lv10, HABITAK Lv10, HABITAK Lv10, GRIFFEL Lv10, GRIFFEL Lv10, GRIFFEL Lv10]]
-	[Name = Headbutt Trees Set 6, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (rare), Rate = 0, Offset = 0,
 		Encounters = [HABITAK Lv10, SKARABORN Lv10, SKARABORN Lv10, GRIFFEL Lv10, GRIFFEL Lv10, GRIFFEL Lv10]]
-	[Name = Headbutt Trees Set 7, Rate = 0, Offset = 0,
+	[Name = Rock Smash, Rate = 0, Offset = 0,
 		Encounters = [KRABBY Lv15, POTTROTT Lv15]]
 	[Name = Bug Catching Contest, Rate = 0, Offset = 0,
 		Encounters = [RAUPY Lvs 7-18, HORNLIU Lvs 7-18, SAFCON Lvs 9-18, KOKUNA Lvs 9-18, SMETTBO Lvs 12-15, BIBOR Lvs 12-15, BLUZUK Lvs 10-16, PARAS Lvs 10-17, SICHLOR Lvs 13-14, PINSIR Lvs 13-14]
