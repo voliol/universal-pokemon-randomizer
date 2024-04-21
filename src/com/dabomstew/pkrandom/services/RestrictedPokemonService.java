@@ -8,13 +8,18 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The class also provides {@link #randomPokemon(Random)}, to get a random Pokemon from all allowed ones.
+ * A service for restricted Pokemon. After setting restrictions with {@link #setRestrictions(Settings)},
+ * you can access a number of <i>unmodifiable</i> {@link PokemonSet}s, following those restrictions.<br>
+ * When randomizing, you generally want to use these sets,
+ * rather than anything provided directly by the {@link RomHandler}, like {@link RomHandler#getPokemon()} or
+ * {@link RomHandler#getPokemonSetInclFormes()}.
+ * <br><br>
+ * This class also provides {@link #randomPokemon(Random)}, to get a random Pokemon from all allowed ones.
  * To get a random Pokemon from the other sets, use {@link PokemonSet#getRandom(Random)}.
  */
 public class RestrictedPokemonService {
@@ -43,7 +48,7 @@ public class RestrictedPokemonService {
         if (allowAltFormes && !allowCosmeticFormes) {
             allowedPokes.removeIf(Pokemon::isActuallyCosmetic);
         }
-        return allowedPokes;
+        return PokemonSet.unmodifiable(allowedPokes);
     }
 
     /**
@@ -54,7 +59,7 @@ public class RestrictedPokemonService {
     }
 
     /**
-     * Returns an unmodifiable {@link PokemonSet} containing all restricted Pokemon.
+     * Returns an unmodifiable {@link PokemonSet} containing all Pokemon that follow the restrictions.
      */
     public PokemonSet<Pokemon> getAll(boolean includeAltFormes) {
         if (!restrictionsSet) {
@@ -64,7 +69,7 @@ public class RestrictedPokemonService {
     }
 
     /**
-     * Returns an unmodifiable {@link PokemonSet} containing all non-legendary restricted Pokemon.
+     * Returns an unmodifiable {@link PokemonSet} containing all non-legendary Pokemon that follow the restrictions.
      */
     public PokemonSet<Pokemon> getNonLegendaries(boolean includeAltFormes) {
         if (!restrictionsSet) {
@@ -74,7 +79,7 @@ public class RestrictedPokemonService {
     }
 
     /**
-     * Returns an unmodifiable {@link PokemonSet} containing all legendary restricted Pokemon.
+     * Returns an unmodifiable {@link PokemonSet} containing all legendary Pokemon that follow the restrictions.
      */
     public PokemonSet<Pokemon> getLegendaries(boolean includeAltFormes) {
         if (!restrictionsSet) {
@@ -84,7 +89,7 @@ public class RestrictedPokemonService {
     }
 
     /**
-     * Returns an unmodifiable {@link PokemonSet} containing all restricted ultra beasts.
+     * Returns an unmodifiable {@link PokemonSet} containing all ultra beasts that follow the restrictions.
      * Does NOT contain the legendary ultra beasts.
      */
     public PokemonSet<Pokemon> getUltrabeasts(boolean includeAltFormes) {
@@ -94,6 +99,9 @@ public class RestrictedPokemonService {
         return includeAltFormes ? ultraBeastsInclAltFormes : ultraBeasts;
     }
 
+    /**
+     * Returns an unmodifiable {@link Set} containing all {@link MegaEvolution}s that follow the restrictions.
+     */
     public Set<MegaEvolution> getMegaEvolutions() {
         if (!restrictionsSet) {
             throw new IllegalStateException("Restrictions not set.");
@@ -156,23 +164,23 @@ public class RestrictedPokemonService {
         restrictionsSet = true;
 
         if (restrictions != null) {
-            allInclAltFormes = allInclAltFormesFromRestrictions(restrictions);
+            allInclAltFormes = PokemonSet.unmodifiable(allInclAltFormesFromRestrictions(restrictions));
             megaEvolutions = romHandler.getMegaEvolutions().stream()
                     .filter(mevo -> allInclAltFormes.contains(mevo.to))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toUnmodifiableSet());
         } else {
-            allInclAltFormes = new PokemonSet<>(romHandler.getPokemonSetInclFormes());
-            megaEvolutions = new HashSet<>(romHandler.getMegaEvolutions());
+            allInclAltFormes = PokemonSet.unmodifiable(romHandler.getPokemonSetInclFormes());
+            megaEvolutions = Set.copyOf(romHandler.getMegaEvolutions());
         }
 
-        nonLegendariesInclAltFormes = allInclAltFormes.filter(pk -> !pk.isLegendary());
-        legendariesInclAltFormes = allInclAltFormes.filter(Pokemon::isLegendary);
-        ultraBeastsInclAltFormes = allInclAltFormes.filter(Pokemon::isUltraBeast);
+        nonLegendariesInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(pk -> !pk.isLegendary()));
+        legendariesInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(Pokemon::isLegendary));
+        ultraBeastsInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(Pokemon::isUltraBeast));
         PokemonSet<Pokemon> altFormes = romHandler.getAltFormes();
-        all = allInclAltFormes.filter(pk -> !altFormes.contains(pk));
-        nonLegendaries = nonLegendariesInclAltFormes.filter(pk -> !altFormes.contains(pk));
-        legendaries = legendariesInclAltFormes.filter(pk -> !altFormes.contains(pk));
-        ultraBeasts = ultraBeastsInclAltFormes.filter(pk -> !altFormes.contains(pk));
+        all = PokemonSet.unmodifiable(allInclAltFormes.filter(pk -> !altFormes.contains(pk)));
+        nonLegendaries = PokemonSet.unmodifiable(nonLegendariesInclAltFormes.filter(pk -> !altFormes.contains(pk)));
+        legendaries = PokemonSet.unmodifiable(legendariesInclAltFormes.filter(pk -> !altFormes.contains(pk)));
+        ultraBeasts = PokemonSet.unmodifiable(ultraBeastsInclAltFormes.filter(pk -> !altFormes.contains(pk)));
     }
 
     private PokemonSet<Pokemon> allInclAltFormesFromRestrictions(GenRestrictions restrictions) {

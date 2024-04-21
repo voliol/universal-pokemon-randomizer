@@ -188,12 +188,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public PokemonSet<Pokemon> getPokemonSet() {
-        return new PokemonSet<>(getPokemon()); // TODO: unmodifiable?
+        return PokemonSet.unmodifiable(getPokemon());
     }
 
     @Override
     public PokemonSet<Pokemon> getPokemonSetInclFormes() {
-        return new PokemonSet<>(getPokemonInclFormes()); // TODO: unmodifiable?
+        return PokemonSet.unmodifiable(getPokemonInclFormes());
     }
 
     @Override
