@@ -155,9 +155,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         shopNames = Gen6Constants.getShopNames(romEntry.getRomType());
 
         loadedWildMapNames = false;
-        if (romEntry.getRomType() == Gen6Constants.Type_ORAS) {
-            isORAS = true;
-        }
 
         allowedItems = Gen6Constants.getAllowedItems(romEntry.getRomType()).copy();
         nonBadItems = Gen6Constants.getNonBadItems(romEntry.getRomType()).copy();
@@ -2873,6 +2870,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     @Override
     public boolean hasTimeBasedEncounters() {
         return false;
+    }
+
+    @Override
+    public boolean isORAS() {
+        return romEntry.getRomType() == Gen6Constants.Type_ORAS;
     }
 
     @Override

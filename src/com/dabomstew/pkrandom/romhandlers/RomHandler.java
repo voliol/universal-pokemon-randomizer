@@ -38,6 +38,7 @@ import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.services.RestrictedPokemonService;
+import com.dabomstew.pkrandom.services.TypeService;
 
 public interface RomHandler {
 
@@ -125,8 +126,6 @@ public interface RomHandler {
 
     int starterCount();
 
-    void randomizeStarters(Settings settings);
-
     boolean hasStarterTypeTriangleSupport();
 
     boolean supportsStarterHeldItems();
@@ -135,34 +134,14 @@ public interface RomHandler {
 
     void setStarterHeldItems(List<Integer> items);
 
-    void randomizeStarterHeldItems(Settings settings);
-
     // =======================
     // Pokemon Base Statistics
     // =======================
-
-    // Run the stats shuffler on each Pokemon.
-    void shufflePokemonStats(Settings settings);
-
-    // Randomize stats following evolutions for proportions or not (see
-    // tooltips)
-    void randomizePokemonStats(Settings settings);
 
     // Update base stats to specified generation
     void updatePokemonStats(Settings settings);
 
     Map<Integer,StatChange> getUpdatedPokemonStats(int generation);
-
-    void standardizeEXPCurves(Settings settings);
-
-    // =============
-    // Pokemon Types
-    // =============
-
-    // randomize Pokemon types, with a switch on whether evolutions
-    // should follow the same types or not.
-    // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
-    void randomizePokemonTypes(Settings settings);
 
     // =================
     // Pokemon Abilities
@@ -173,8 +152,6 @@ public interface RomHandler {
     int highestAbilityIndex();
 
     String abilityName(int number);
-
-    void randomizeAbilities(Settings settings);
 
     Map<Integer,List<Integer>> getAbilityVariations();
 
@@ -211,12 +188,6 @@ public interface RomHandler {
 
     PokemonSet<Pokemon> getBannedForWildEncounters();
 
-    void randomizeWildHeldItems(Settings settings);
-
-    void changeCatchRates(Settings settings);
-
-    void minimumCatchRate(int rateNonLegendary, int rateLegendary);
-
     void enableGuaranteedPokemonCatching();
 
     // ===============
@@ -242,15 +213,11 @@ public interface RomHandler {
 
     boolean canAddPokemonToRegularTrainers();
 
-    void randomizeTrainerPokes(Settings settings);
-
     boolean canAddHeldItemsToBossTrainers();
 
     boolean canAddHeldItemsToImportantTrainers();
 
     boolean canAddHeldItemsToRegularTrainers();
-
-    void randomizeTrainerHeldItems(Settings settings);
 
     List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves);
 
@@ -258,37 +225,13 @@ public interface RomHandler {
 
     List<Integer> getAllHeldItems();
 
-    void rivalCarriesStarter();
-
     boolean hasRivalFinalBattle();
-
-    void forceFullyEvolvedTrainerPokes(Settings settings);
-
-    void onlyChangeTrainerLevels(Settings settings);
-
-    void addTrainerPokemon(Settings settings);
-
-    void setDoubleBattleMode();
-
-    List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
-
-    void pickTrainerMovesets(Settings settings);
 
     // =========
     // Move Data
     // =========
 
-    void randomizeMovePowers();
-
-    void randomizeMovePPs();
-
-    void randomizeMoveAccuracies();
-
-    void randomizeMoveTypes();
-
     boolean hasPhysicalSpecialSplit();
-
-    void randomizeMoveCategory();
 
     void updateMoves(Settings settings);
 
@@ -299,6 +242,8 @@ public interface RomHandler {
 
     // return all the moves valid in this game.
     List<Move> getMoves();
+
+    int getPerfectAccuracy();
 
     // ================
     // Pokemon Movesets
@@ -314,14 +259,6 @@ public interface RomHandler {
 
     void setEggMoves(Map<Integer, List<Integer>> eggMoves);
 
-    void randomizeMovesLearnt(Settings settings);
-
-    void randomizeEggMoves(Settings settings);
-
-    void orderDamagingMovesByDamage();
-
-    void metronomeOnlyMode();
-
     boolean supportsFourStartingMoves();
 
     // ==============
@@ -332,8 +269,6 @@ public interface RomHandler {
 
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
-    void randomizeStaticPokemon(Settings settings);
-
     boolean canChangeStaticPokemon();
 
     boolean hasStaticAltFormes();
@@ -341,8 +276,6 @@ public interface RomHandler {
     PokemonSet<Pokemon> getBannedForStaticPokemon();
 
     boolean forceSwapStaticMegaEvos();
-
-    void onlyChangeStaticLevels(Settings settings);
 
     boolean hasMainGameLegendaries();
 
@@ -362,8 +295,6 @@ public interface RomHandler {
 
     void setTotemPokemon(List<TotemPokemon> totemPokemon);
 
-    void randomizeTotemPokemon(Settings settings);
-
     // =========
     // TMs & HMs
     // =========
@@ -373,8 +304,6 @@ public interface RomHandler {
     List<Integer> getHMMoves();
 
     void setTMMoves(List<Integer> moveIndexes);
-
-    void randomizeTMMoves(Settings settings);
 
     int getTMCount();
 
@@ -394,21 +323,9 @@ public interface RomHandler {
 
     void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    void randomizeTMHMCompatibility(Settings settings);
-
-    void fullTMHMCompatibility();
-
-    void ensureTMCompatSanity();
-
-    void ensureTMEvolutionSanity();
-
-    void fullHMCompatibility();
-
     // ===========
     // Move Tutors
     // ===========
-
-    void copyTMCompatibilityToCosmeticFormes();
 
     boolean hasMoveTutors();
 
@@ -416,25 +333,13 @@ public interface RomHandler {
 
     void setMoveTutorMoves(List<Integer> moves);
 
-    void randomizeMoveTutorMoves(Settings settings);
-
     Map<Pokemon, boolean[]> getMoveTutorCompatibility();
 
     void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    void randomizeMoveTutorCompatibility(Settings settings);
-
-    void fullMoveTutorCompatibility();
-
-    void ensureMoveTutorCompatSanity();
-
-    void ensureMoveTutorEvolutionSanity();
-
     // =============
     // Trainer Names
     // =============
-
-    void copyMoveTutorCompatibilityToCosmeticFormes();
 
     boolean canChangeTrainerText();
 
@@ -458,8 +363,6 @@ public interface RomHandler {
     // Only needed if above mode is "MAX LENGTH WITH CLASS"
     List<Integer> getTCNameLengthsByTrainer();
 
-    void randomizeTrainerNames(Settings settings);
-
     // ===============
     // Trainer Classes
     // ===============
@@ -471,8 +374,6 @@ public interface RomHandler {
     boolean fixedTrainerClassNamesLength();
 
     int maxTrainerClassNameLength();
-
-    void randomizeTrainerClassNames(Settings settings);
 
     List<Integer> getDoublesTrainerClasses();
 
@@ -514,21 +415,11 @@ public interface RomHandler {
 
     void setRegularFieldItems(List<Integer> items);
 
-    // Randomizer methods
-
-    void shuffleFieldItems();
-
-    void randomizeFieldItems(Settings settings);
-
     // ============
     // Special Shops
     // =============
 
     boolean hasShopRandomization();
-
-    void shuffleShopItems();
-
-    void randomizeShopItems(Settings settings);
 
     Map<Integer, Shop> getShopItems();
 
@@ -544,8 +435,6 @@ public interface RomHandler {
 
     void setPickupItems(List<PickupItem> pickupItems);
 
-    void randomizePickupItems(Settings settings);
-
     // ==============
     // In-Game Trades
     // ==============
@@ -553,8 +442,6 @@ public interface RomHandler {
     List<IngameTrade> getIngameTrades();
 
     void setIngameTrades(List<IngameTrade> trades);
-
-    void randomizeIngameTrades(Settings settings);
 
     boolean hasDVs();
 
@@ -607,6 +494,8 @@ public interface RomHandler {
 
     boolean isYellow();
 
+    boolean isORAS();
+
     boolean hasMultiplePlayerCharacters();
 
     String getROMName();
@@ -639,8 +528,6 @@ public interface RomHandler {
 
     void applyMiscTweak(MiscTweak tweak);
 
-    void renderPlacementHistory();
-
     // ==========================
     // Misc forme-related methods
     // ==========================
@@ -669,12 +556,7 @@ public interface RomHandler {
     // Types
     // ======
 
-    /**
-     * return a random type valid in this game.
-     */
-    Type randomType();
-
-    boolean typeInGame(Type type);
+    TypeService getTypeService();
 
     TypeTable getTypeTable();
 

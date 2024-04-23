@@ -32,6 +32,7 @@ import java.util.*;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.EncounterRandomizer;
 import com.dabomstew.pkrandom.randomizers.EvolutionRandomizer;
+import com.dabomstew.pkrandom.randomizers.ItemRandomizer;
 import com.dabomstew.pkrandom.randomizers.TypeEffectivenessRandomizer;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -629,10 +630,12 @@ public class Randomizer {
             logTrades(log, oldTrades);
         }
 
+        ItemRandomizer itemRandomizer = new ItemRandomizer(romHandler, settings, random);
+
         // Field Items
         switch (settings.getFieldItemsMod()) {
-            case SHUFFLE -> romHandler.shuffleFieldItems();
-            case RANDOM, RANDOM_EVEN -> romHandler.randomizeFieldItems(settings);
+            case SHUFFLE -> itemRandomizer.shuffleFieldItems();
+            case RANDOM, RANDOM_EVEN -> itemRandomizer.randomizeFieldItems();
             default -> {
             }
         }
@@ -641,11 +644,11 @@ public class Randomizer {
 
         switch (settings.getShopItemsMod()) {
             case SHUFFLE -> {
-                romHandler.shuffleShopItems();
+                itemRandomizer.shuffleShopItems();
                 shopsChanged = true;
             }
             case RANDOM -> {
-                romHandler.randomizeShopItems(settings);
+                itemRandomizer.randomizeShopItems();
                 shopsChanged = true;
             }
             default -> {
@@ -658,7 +661,7 @@ public class Randomizer {
 
         // Pickup Items
         if (settings.getPickupItemsMod() == Settings.PickupItemsMod.RANDOM) {
-            romHandler.randomizePickupItems(settings);
+            itemRandomizer.randomizePickupItems();
             logPickupItems(log);
         }
 

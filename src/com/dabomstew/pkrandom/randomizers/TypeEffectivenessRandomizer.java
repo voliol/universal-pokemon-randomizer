@@ -6,16 +6,19 @@ import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.pokemon.TypeTable;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.services.TypeService;
 
 import java.util.*;
 
 public class TypeEffectivenessRandomizer {
 
     private final RomHandler romHandler;
+    private final TypeService typeService;
     private final Random random;
 
     public TypeEffectivenessRandomizer(RomHandler romHandler, Random random) {
         this.romHandler = romHandler;
+        this.typeService = romHandler.getTypeService();
         this.random = random;
     }
 
@@ -76,8 +79,8 @@ public class TypeEffectivenessRandomizer {
 
     private void placeEffectiveness(Effectiveness eff) {
         while (effCounts[eff.ordinal()] > 0 && placementTries <= MAX_PLACEMENT_TRIES) {
-            Type attacker = romHandler.randomType();
-            Type defender = romHandler.randomType();
+            Type attacker = typeService.randomType(random);
+            Type defender = typeService.randomType(random);
             if (isValidPlacement(attacker, defender, eff)) {
                 typeTable.setEffectiveness(attacker, defender, eff);
                 effCounts[eff.ordinal()]--;
@@ -112,13 +115,13 @@ public class TypeEffectivenessRandomizer {
 
         int swapsDone = 0;
         while (swapsDone < TYPES_KEEP_IDENTITIES_SWAPS) {
-            Type colA = romHandler.randomType();
-            Type colB = romHandler.randomType();
+            Type colA = typeService.randomType(random);
+            Type colB = typeService.randomType(random);
 
             int chunkSize = random.nextInt(typeTable.getTypes().size());
             Set<Type> chunk = new HashSet<>(chunkSize);
             while (chunk.size() < chunkSize) {
-                chunk.add(romHandler.randomType());
+                chunk.add(typeService.randomType(random));
             }
 
             if (typeTableChunkCanBeSwapped(typeTable, colA, colB, chunk)) {
