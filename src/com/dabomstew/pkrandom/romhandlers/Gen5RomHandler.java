@@ -2122,7 +2122,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private void removeFreeLuckyEgg() {
         int scriptFileGifts = romEntry.getIntValue("LuckyEggScriptOffset");
         int setVarGift = Gen5Constants.hiddenItemSetVarCommand;
-        int mulchIndex = this.random.nextInt(4);
 
         byte[] itemScripts = scriptNarc.files.get(scriptFileGifts);
         int offset = 0;
@@ -2148,7 +2147,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     int item = readWord(itemScripts, offsetInFile + 4);
                     if (command == setVarGift && variable == Gen5Constants.hiddenItemVarSet && item == Items.luckyEgg) {
 
-                        writeWord(itemScripts, offsetInFile + 4, Gen5Constants.mulchIndices[mulchIndex]);
+                        writeWord(itemScripts, offsetInFile + 4, Items.gooeyMulch);
                         lookingForEggs--;
                     }
                 }

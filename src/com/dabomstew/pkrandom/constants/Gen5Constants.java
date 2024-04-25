@@ -136,8 +136,6 @@ public class Gen5Constants {
 
     public static final int scriptListTerminator = 0xFD13;
 
-    public static final int[] mulchIndices = {Items.growthMulch, Items.dampMulch, Items.stableMulch, Items.gooeyMulch};
-
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
             MoveCategory.SPECIAL };
 
