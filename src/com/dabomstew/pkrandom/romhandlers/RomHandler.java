@@ -510,7 +510,10 @@ public interface RomHandler {
 
     int internalStringLength(String string);
 
-    void randomizeIntroPokemon();
+    /**
+     * Sets the Pokemon shown in the intro. Returns false if pk is not a valid intro Pokemon.
+     */
+    boolean setIntroPokemon(Pokemon pk);
 
     BufferedImage getMascotImage();
 

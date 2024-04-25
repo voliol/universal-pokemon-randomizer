@@ -2168,13 +2168,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
-        // First off, intro Pokemon
+    public boolean setIntroPokemon(Pokemon pk) {
         // 160 add yellow intro random // TODO: is this a strange todo telling random intro pokes don't work in yellow?
-        int introPokemon = pokeNumToRBYTable[rPokeService.randomPokemon(random).getNumber()];
+        int introPokemon = pokeNumToRBYTable[pk.getNumber()];
         writeByte(romEntry.getIntValue("IntroPokemonOffset"), (byte) introPokemon);
         writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) introPokemon);
-
+        return true;
     }
 
     @Override

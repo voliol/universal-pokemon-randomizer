@@ -2384,19 +2384,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
-        // Intro sprite
-
-        // Pick a pokemon
-        int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
-        while (pokemon == Species.unown) {
-            // Unown is banned
-            pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
+    public boolean setIntroPokemon(Pokemon pk) {
+        if (pk.getNumber() == Species.unown) {
+            return false;
         }
-
-        writeByte(romEntry.getIntValue("IntroSpriteOffset"), (byte) pokemon);
-        writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) pokemon);
-
+        writeByte(romEntry.getIntValue("IntroSpriteOffset"), (byte) pk.getNumber());
+        writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) pk.getNumber());
+        return true;
     }
 
     @Override

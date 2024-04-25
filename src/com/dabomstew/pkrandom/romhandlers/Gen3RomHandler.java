@@ -3336,7 +3336,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
+    public boolean setIntroPokemon(Pokemon pk) {
         int imageTableOffset = romEntry.getIntValue("PokemonFrontImages");
         int paletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
         int cryOffset = romEntry.getIntValue("IntroCryOffset");
@@ -3346,23 +3346,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         // FRLG
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-            // intro sprites : first 255 only due to size
-            Pokemon introPk = randomPokemonLimited(255, false);
-            if (introPk == null) {
-                return;
+            // first 255 only due to size
+            if (pokedexToInternal[pk.getNumber()] > 255) {
+                return false;
             }
-            int introPokemon = pokedexToInternal[introPk.getNumber()];
+            int introPokemon = pokedexToInternal[pk.getNumber()];
 
             writeByte(cryOffset, (byte) introPokemon);
             writeByte(otherOffset, (byte) introPokemon);
 
             writePointer(imageOffset, imageTableOffset + introPokemon * 8);
             writePointer(imageOffset + 4, paletteTableOffset + introPokemon * 8);
+
         } else if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
-            // intro sprites : any pokemon in the range 0-510 except bulbasaur
-            int introPokemon = pokedexToInternal[rPokeService.randomPokemon(random).getNumber()];
-            while (introPokemon == 1 || introPokemon > 510) {
-                introPokemon = pokedexToInternal[rPokeService.randomPokemon(random).getNumber()];
+            // any pokemon in the range 0-510 except bulbasaur
+            int introPokemon = pokedexToInternal[pk.getNumber()];
+            if (introPokemon == 1 || introPokemon > 510) {
+                return false;
             }
 
             if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
@@ -3392,12 +3392,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(imageOffset, imageTableOffset + introPokemon * 8);
             writePointer(paletteOffset, paletteTableOffset + introPokemon * 8);
         } else {
-            // Emerald, intro sprite: any Pokemon.
-            int introPokemon = pokedexToInternal[rPokeService.randomPokemon(random).getNumber()];
+            // Emerald: any Pokemon.
+            int introPokemon = pokedexToInternal[pk.getNumber()];
             writeWord(imageOffset, introPokemon);
             writeWord(cryOffset, introPokemon);
         }
-
+        return true;
     }
 
     private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {

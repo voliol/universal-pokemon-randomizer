@@ -3095,9 +3095,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
+    public boolean setIntroPokemon(Pokemon pk) {
         try {
-            int introPokemon = rPokeService.randomPokemon(random).getNumber();
+            int introPokemon = pk.getNumber();
+            // Assume alt formes can't be used. I haven't actually tested this, but it seemed like the safer guess.
+            if (pk.getBaseForme() != null) {
+                return false;
+            }
             byte[] introGraphicOverlay = readOverlay(romEntry.getIntValue("IntroGraphicOvlNumber"));
             int offset = find(introGraphicOverlay, Gen5Constants.introGraphicPrefix);
             if (offset > 0) {
@@ -3153,6 +3157,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+        return true;
     }
 
     @Override

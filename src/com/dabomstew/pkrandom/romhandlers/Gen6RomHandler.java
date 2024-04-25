@@ -3234,28 +3234,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
-
+    public boolean setIntroPokemon(Pokemon pk) {
+        // Doesn't do anything for ORAS
         if (romEntry.getRomType() == Gen6Constants.Type_XY) {
 
-            // Pick a random Pokemon, including formes
-
-            Pokemon introPokemon = rPokeService.getAll(true).getRandom(random);
-            while (introPokemon.isActuallyCosmetic()) {
-                introPokemon = rPokeService.getAll(true).getRandom(random);
-            }
-            int introPokemonNum = introPokemon.getNumber();
+            int introPokemonNum = pk.getNumber();
             int introPokemonForme = 0;
-            boolean checkCosmetics = true;
-            if (introPokemon.getFormeNumber() > 0) {
-                introPokemonForme = introPokemon.getFormeNumber();
-                introPokemonNum = introPokemon.getBaseForme().getNumber();
-                checkCosmetics = false;
-            }
-            if (checkCosmetics && introPokemon.getCosmeticForms() > 0) {
-                introPokemonForme = introPokemon.getCosmeticFormNumber(this.random.nextInt(introPokemon.getCosmeticForms()));
-            } else if (!checkCosmetics && introPokemon.getCosmeticForms() > 0) {
-                introPokemonForme += introPokemon.getCosmeticFormNumber(this.random.nextInt(introPokemon.getCosmeticForms()));
+            if (pk.getFormeNumber() > 0) {
+                introPokemonForme = pk.getFormeNumber();
+                introPokemonNum = pk.getBaseForme().getNumber();
             }
 
             // Find the value for the Pokemon's cry
@@ -3263,15 +3250,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             int baseAddr = find(code, Gen6Constants.criesTablePrefixXY);
             baseAddr += Gen6Constants.criesTablePrefixXY.length() / 2;
 
-            int pkNumKey = introPokemonNum;
-
             if (introPokemonForme != 0) {
-                int extraOffset = readLong(code, baseAddr + (pkNumKey * 0x14));
-                pkNumKey = extraOffset + (introPokemonForme - 1);
+                int extraOffset = readLong(code, baseAddr + (introPokemonNum * 0x14));
+                introPokemonNum = extraOffset + (introPokemonForme - 1);
             }
 
-            int initialCry = readLong(code, baseAddr + (pkNumKey * 0x14) + 0x4);
-            int repeatedCry = readLong(code, baseAddr + (pkNumKey * 0x14) + 0x10);
+            int initialCry = readLong(code, baseAddr + (introPokemonNum * 0x14) + 0x4);
+            int repeatedCry = readLong(code, baseAddr + (introPokemonNum * 0x14) + 0x10);
 
             // Write to DLLIntro.cro
             try {
@@ -3283,12 +3268,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 croModelOffset += Gen6Constants.introPokemonModelOffsetXY.length() / 2;
 
                 writeWord(introCRO, croModelOffset, introPokemonNum);
-                introCRO[croModelOffset + 2] = (byte)introPokemonForme;
-
-                // Shiny chance
-                if (this.random.nextInt(256) == 0) {
-                    introCRO[croModelOffset + 4] = 1;
-                }
+                introCRO[croModelOffset + 2] = (byte) introPokemonForme;
 
                 // Replace the initial cry when the Pokemon exits the ball
                 // First, re-point two branches
@@ -3329,6 +3309,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 e.printStackTrace();
             }
         }
+        return true;
     }
 
     @Override

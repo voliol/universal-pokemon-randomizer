@@ -2908,8 +2908,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
+    public boolean setIntroPokemon(Pokemon pk) {
         // For now, do nothing.
+        return true;
     }
 
     @Override

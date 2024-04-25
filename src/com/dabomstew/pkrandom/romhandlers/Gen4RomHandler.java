@@ -2740,21 +2740,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public void setDoubleBattleMode() {
 		super.setDoubleBattleMode();
-		// In Gen 4, the game prioritizes showing the special double battle intro over
-		// almost any
-		// other kind of intro. Since the trainer music is tied to the intro, this
-		// results in the
-		// vast majority of "special" trainers losing their intro and music in double
-		// battle mode.
-		// To fix this, the below code patches the executable to skip the case for the
-		// special
-		// double battle intro (by changing a beq to an unconditional branch); this
-		// slightly breaks
-		// battles that are double battles in the original game, but the trade-off is
-		// worth it.
+		// In Gen 4, the game prioritizes showing the special double battle intro over almost any
+		// other kind of intro. Since the trainer music is tied to the intro, this results in the
+		// vast majority of "special" trainers losing their intro and music in double battle mode.
+		// To fix this, the below code patches the executable to skip the case for the special
+		// double battle intro (by changing a beq to an unconditional branch); this slightly breaks
+		// battles that are double battles in the original game, but the trade-off is worth it.
 
-		// Then, also patch various subroutines that control the "Trainer Eye" event and
-		// text boxes
+		// Then, also patch various subroutines that control the "Trainer Eye" event and text boxes
 		// related to this in order to make double battles work on all trainers
 		try {
 			String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.getRomType());
@@ -4448,28 +4441,32 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public void randomizeIntroPokemon() {
+	public boolean setIntroPokemon(Pokemon pk) {
 		try {
 			if (romEntry.getRomType() == Gen4Constants.Type_DP || romEntry.getRomType() == Gen4Constants.Type_Plat) {
-				Pokemon introPokemon = rPokeService.randomPokemon(random);
-				while (introPokemon.getGenderRatio() == 0xFE) {
-					// This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only Pokemon *need*
-					// to pass a special parameter into the function that loads Pokemon sprites; the game will
-					// softlock on native hardware otherwise. The way the compiler has optimized the intro Pokemon
-					// code makes it very hard to modify, so passing in this special parameter is difficult. Rather
-					// than attempt to patch this code, just reroll until it isn't female-only.
-					introPokemon = rPokeService.randomPokemon(random);
+				// This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only Pokemon *need*
+				// to pass a special parameter into the function that loads Pokemon sprites; the game will
+				// softlock on native hardware otherwise. The way the compiler has optimized the intro Pokemon
+				// code makes it very hard to modify, so passing in this special parameter is difficult. Rather
+				// than attempt to patch this code, just report back that this Pokemon won't do.
+				if (pk.getGenderRatio() == 0xFE) {
+					return false;
+				}
+				// Assume alt formes can't be used. I haven't actually tested this, but it seemed like the safer guess.
+				if (pk.getBaseForme() != null) {
+					return false;
 				}
 				byte[] introOverlay = readOverlay(romEntry.getIntValue("IntroOvlNumber"));
 				for (String prefix : Gen4Constants.dpptIntroPrefixes) {
 					int offset = find(introOverlay, prefix);
 					if (offset > 0) {
 						offset += prefix.length() / 2; // because it was a prefix
-						writeWord(introOverlay, offset, introPokemon.getNumber());
+						writeWord(introOverlay, offset, pk.getNumber());
 					}
 				}
 				writeOverlay(romEntry.getIntValue("IntroOvlNumber"), introOverlay);
 			} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
+				// TODO: what's this about? which Pokemon are actually valid?
 				// Modify the sprite used for Ethan/Lyra's Marill
 				int marillReplacement = this.random.nextInt(548) + 297;
 				while (Gen4Constants.hgssBannedOverworldPokemon.contains(marillReplacement)) {
@@ -4529,6 +4526,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
+		return true;
 	}
 
 	@Override
