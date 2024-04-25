@@ -826,6 +826,11 @@ public abstract class AbstractRomHandler implements RomHandler {
      */
 
     @Override
+    public void makeDoubleBattleModePossible() {
+        // do nothing; this method is just needed by some ROMs
+    }
+
+    @Override
     public boolean hasTypeEffectivenessSupport() {
         // DEFAULT: no
         return false;

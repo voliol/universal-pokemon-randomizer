@@ -227,6 +227,8 @@ public interface RomHandler {
 
     boolean hasRivalFinalBattle();
 
+    void makeDoubleBattleModePossible();
+
     // =========
     // Move Data
     // =========

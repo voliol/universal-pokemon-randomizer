@@ -2738,8 +2738,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public void setDoubleBattleMode() {
-		super.setDoubleBattleMode();
+	public void makeDoubleBattleModePossible() {
 		// In Gen 4, the game prioritizes showing the special double battle intro over almost any
 		// other kind of intro. Since the trainer music is tied to the intro, this results in the
 		// vast majority of "special" trainers losing their intro and music in double battle mode.

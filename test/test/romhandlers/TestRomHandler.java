@@ -542,8 +542,8 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
-
+    public boolean setIntroPokemon(Pokemon pk) {
+        return true;
     }
 
     @Override

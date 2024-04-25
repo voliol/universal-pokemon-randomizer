@@ -983,9 +983,7 @@ public class TrainerPokemonRandomizer {
             }
         }
         romHandler.setTrainers(trainers);
-        // TODO: line above might have to be outside this method, otherwise subclasses calling
-        //  super.setDoubleBattleMode() will only get saved if they don't depend on a setTrainers() after.
-        //  Though "setTrainers" is bad any ways; "saveTrainers" is preferred.
+        romHandler.makeDoubleBattleModePossible();
     }
 
     public void randomizeTrainerHeldItems() {

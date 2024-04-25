@@ -1366,8 +1366,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setDoubleBattleMode() {
-        super.setDoubleBattleMode();
+    public void makeDoubleBattleModePossible() {
         try {
             NARCArchive trainerTextBoxes = readNARC(romEntry.getFile("TrainerTextBoxes"));
             byte[] data = trainerTextBoxes.files.get(0);
