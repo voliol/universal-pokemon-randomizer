@@ -4500,7 +4500,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         @Override
-        public Gen3PokemonImageGetter setForme(int forme) {
+        public Gen3PokemonImageGetter setGraphicalForme(int forme) {
             throw new UnsupportedOperationException("Graphical forme support not implemented");
         }
 

@@ -1,9 +1,14 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.graphics.palettes.PaletteDescriptionTool;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * A helping class for getting images of Pokemon out of the {@link RomHandler}, for purposes such as the mascot,
+ * debugging, and peripheral tools (e.g. {@link PaletteDescriptionTool}).
+ */
 public abstract class PokemonImageGetter {
     protected Pokemon pk;
     protected boolean back;
@@ -26,11 +31,27 @@ public abstract class PokemonImageGetter {
         return this;
     }
 
-    public PokemonImageGetter setForme(int forme) {
+    /**
+     * Decides which graphical forme should be gotten.
+     * <br><br>
+     * A graphical form is any variation in graphics, that is not due to gender or shininess.
+     * Note that these might not correspond to alt formes loaded as {@link Pokemon} objects by the {@link RomHandler},
+     * and that there are often <i>more</i> graphical formes, e.g. Unown and Arceus usually not getting Pokemon objects
+     * for their formes.
+     * <br><br>
+     * If the given Pokemon is a base forme, this can be used to look through <i>all</i> graphical formes,
+     * even those represented as alt forme Pokemon objects. In this case, 0 represents the base forme.
+     * If the given Pokemon is an alt forme, 0 represents that alt forme, and no other value should be settable
+     * (i.e. images will correspond to that form).
+     * <br><br>
+     * Throws an {@link IllegalArgumentException} if forme < 0, or if it's too high for the given {@link Pokemon};
+     * see {@link #getGraphicalFormeAmount()}.
+     */
+    public PokemonImageGetter setGraphicalForme(int forme) {
         if (forme < 0) {
             throw new IllegalArgumentException("forme must be positive");
         }
-        if (forme >= getFormeAmount()) {
+        if (forme >= getGraphicalFormeAmount()) {
             throw new IllegalArgumentException("invalid/too high forme for this Pokemon, " + forme + " for " + pk.fullName());
         }
         this.forme = forme;
@@ -49,9 +70,9 @@ public abstract class PokemonImageGetter {
 
     /**
      * Returns the amount of graphical formes for the {@link Pokemon} this PokemonImageGetter is set to work with.
-     * I.e. returns the highest valid value for {@link #setForme(int)}+1.
+     * I.e. returns the highest valid value for {@link #setGraphicalForme(int)}+1.
      */
-    public int getFormeAmount() {
+    public int getGraphicalFormeAmount() {
         return 1;
     }
 

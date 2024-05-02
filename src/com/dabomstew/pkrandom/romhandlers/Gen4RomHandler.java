@@ -5568,7 +5568,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 
 		@Override
-		public int getFormeAmount() {
+		public int getGraphicalFormeAmount() {
 			int[][] formeInfo = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber());
 			if (formeInfo == null) {
 				return 1;
@@ -5582,7 +5582,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			beforeGet();
 
 			int imageIndex = getImageIndex();
-			int[] imageData = readImageData(getFormeAmount() > 1 ? otherPokeGraphicsNARC : pokeGraphicsNARC, imageIndex);
+			int[] imageData = readImageData(getGraphicalFormeAmount() > 1 ? otherPokeGraphicsNARC : pokeGraphicsNARC, imageIndex);
 
 			Palette palette = getPalette();
 			int[] convPalette = palette.toARGB();
@@ -5613,7 +5613,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		private int getImageIndex() {
 			int imageIndex;
-			if (getFormeAmount() > 1) {
+			if (getGraphicalFormeAmount() > 1) {
 				imageIndex = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber())[back ? 1 : 0][forme];
 			} else {
 				imageIndex = pk.getNumber() * 6 + 2;
@@ -5630,7 +5630,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		private Palette getPalette() {
 			Palette palette;
 			// unown and deoxys have the same palette(s) for all their formes
-			if (getFormeAmount() > 1 && pk.getNumber() != Species.unown && pk.getNumber() != Species.deoxys) {
+			if (getGraphicalFormeAmount() > 1 && pk.getNumber() != Species.unown && pk.getNumber() != Species.deoxys) {
 				palette = shiny ? pk.getShinyPalette(forme) : pk.getNormalPalette(forme);
 			} else {
 				palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
@@ -5642,7 +5642,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		@Override
 		public BufferedImage getFull() {
 			System.out.println(pk);
-			if (getFormeAmount() > 1) {
+			if (getGraphicalFormeAmount() > 1) {
 				return withFormesGetFull();
 			} else {
 				return super.getFull();
@@ -5652,10 +5652,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		private BufferedImage withFormesGetFull() {
 			setIncludePalette(true);
 
-			BufferedImage[] normal = new BufferedImage[getFormeAmount()*2];
-			BufferedImage[] shiny = new BufferedImage[getFormeAmount()*2];
-			for (int i = 0; i < getFormeAmount(); i++) {
-				setForme(i);
+			BufferedImage[] normal = new BufferedImage[getGraphicalFormeAmount()*2];
+			BufferedImage[] shiny = new BufferedImage[getGraphicalFormeAmount()*2];
+			for (int i = 0; i < getGraphicalFormeAmount(); i++) {
+				setGraphicalForme(i);
 
 				normal[i*2] = get();
 				normal[i*2 + 1] = setBack(true).get();
@@ -5679,7 +5679,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 
 			// Decrypt image (why does EVERYTHING use the RNG formula geez)
-			if (romEntry.getRomType() != Gen4Constants.Type_DP && getFormeAmount() == 1) {
+			if (romEntry.getRomType() != Gen4Constants.Type_DP && getGraphicalFormeAmount() == 1) {
 				int key = imageData[0];
 				for (int i = 0; i < 3200; i++) {
 					imageData[i] ^= (key & 0xFFFF);

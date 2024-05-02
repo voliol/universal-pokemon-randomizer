@@ -3256,7 +3256,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         @Override
-        public int getFormeAmount() {
+        public int getGraphicalFormeAmount() {
             return pk.getNumber() == Species.unown ? Gen2Constants.unownFormeCount : 1;
         }
 
@@ -3302,7 +3302,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 BufferedImage[] normal = new BufferedImage[Gen2Constants.unownFormeCount*2];
                 BufferedImage[] shiny = new BufferedImage[Gen2Constants.unownFormeCount*2];
                 for (int i = 0; i < Gen2Constants.unownFormeCount; i++) {
-                    setForme(i);
+                    setGraphicalForme(i);
 
                     normal[i*2] = get();
                     normal[i*2 + 1] = setBack(true).get();

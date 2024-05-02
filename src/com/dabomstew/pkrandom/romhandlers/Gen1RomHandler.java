@@ -2892,7 +2892,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         @Override
-        public Gen1PokemonImageGetter setForme(int forme) {
+        public Gen1PokemonImageGetter setGraphicalForme(int forme) {
             throw new UnsupportedOperationException("No graphical formes in Generation 1");
         }
 
