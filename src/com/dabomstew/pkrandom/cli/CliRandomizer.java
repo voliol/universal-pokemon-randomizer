@@ -2,7 +2,7 @@ package com.dabomstew.pkrandom.cli;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RandomSource;
-import com.dabomstew.pkrandom.Randomizer;
+import com.dabomstew.pkrandom.GameRandomizer;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.romhandlers.*;
 
@@ -89,7 +89,7 @@ public class CliRandomizer {
 
                     String filename = fh.getAbsolutePath();
 
-                    Randomizer randomizer = new Randomizer(settings, RandomSource.instance(), romHandler, bundle, saveAsDirectory);
+                    GameRandomizer randomizer = new GameRandomizer(settings, RandomSource.instance(), romHandler, bundle, saveAsDirectory);
                     randomizer.randomize(filename, verboseLog);
                     verboseLog.close();
                     byte[] out = baos.toByteArray();

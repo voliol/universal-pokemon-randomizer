@@ -9,16 +9,10 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import java.util.List;
 import java.util.Random;
 
-public class MoveDataRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
+public class MoveDataRandomizer extends Randomizer {
 
     public MoveDataRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     // Makes sure to not touch move ID 165 (Struggle)
@@ -53,6 +47,7 @@ public class MoveDataRandomizer {
                 }
             }
         }
+        changesMade = true;
     }
 
     public void randomizeMovePPs() {
@@ -68,6 +63,7 @@ public class MoveDataRandomizer {
                 }
             }
         }
+        changesMade = true;
     }
 
     public void randomizeMoveAccuracies() {
@@ -116,6 +112,7 @@ public class MoveDataRandomizer {
                 }
             }
         }
+        changesMade = true;
     }
 
     public void randomizeMoveTypes() {
@@ -125,6 +122,7 @@ public class MoveDataRandomizer {
                 mv.type = romHandler.getTypeService().randomType(random);
             }
         }
+        changesMade = true;
     }
 
     public void randomizeMoveCategory() {
@@ -139,6 +137,7 @@ public class MoveDataRandomizer {
                 }
             }
         }
+        changesMade = true;
     }
 
     // TODO: might want to move romHandler.updateMoves() here as well

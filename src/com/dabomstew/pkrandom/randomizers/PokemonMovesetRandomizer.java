@@ -5,23 +5,14 @@ import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PokemonMovesetRandomizer {
-
-    private final RomHandler romHandler;
-    private final RestrictedPokemonService rPokeService;
-    private final Settings settings;
-    private final Random random;
+public class PokemonMovesetRandomizer extends Randomizer {
 
     public PokemonMovesetRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.rPokeService = romHandler.getRestrictedPokemonService();
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void randomizeMovesLearnt() {

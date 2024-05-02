@@ -8,18 +8,12 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.*;
 
-public class ItemRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
+public class ItemRandomizer extends Randomizer {
 
     private final Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
 
     public ItemRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void shuffleFieldItems() {

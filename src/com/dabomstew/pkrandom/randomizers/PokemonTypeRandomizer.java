@@ -1,32 +1,18 @@
 package com.dabomstew.pkrandom.randomizers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.MegaEvolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.TypeService;
 
 import java.util.List;
 import java.util.Random;
 
-public class PokemonTypeRandomizer {
-
-    private final RomHandler romHandler;
-    private final TypeService typeService;
-    private final Settings settings;
-    private final Random random;
-
-    private final CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper;
+public class PokemonTypeRandomizer extends Randomizer {
 
     public PokemonTypeRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.typeService = romHandler.getTypeService();
-        this.settings = settings;
-        this.random = random;
-
-        this.copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(romHandler::getPokemonSet);
+        super(romHandler, settings, random);
     }
 
     public void randomizePokemonTypes() {
@@ -85,6 +71,7 @@ public class PokemonTypeRandomizer {
                 }
             }
         }
+        changesMade = true;
     }
 
     private void assignRandomSecondaryType(Pokemon pk, double chance, boolean dualTypeOnly) {

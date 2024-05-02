@@ -8,19 +8,11 @@ import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
-import com.dabomstew.pkrandom.services.TypeService;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TrainerPokemonRandomizer {
-
-    private final RomHandler romHandler;
-    private final RestrictedPokemonService rPokeService;
-    private final TypeService typeService;
-    private final Settings settings;
-    private final Random random;
+public class TrainerPokemonRandomizer extends Randomizer {
 
     private Map<Type, PokemonSet<Pokemon>> cachedReplacements;
     private PokemonSet<Pokemon> cachedAll;
@@ -40,11 +32,7 @@ public class TrainerPokemonRandomizer {
     private List<Integer> allTMMoves, allTutorMoves;
 
     public TrainerPokemonRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.rPokeService = romHandler.getRestrictedPokemonService();
-        this.typeService = romHandler.getTypeService();
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void onlyChangeTrainerLevels() {

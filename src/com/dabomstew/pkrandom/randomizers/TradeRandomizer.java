@@ -6,22 +6,15 @@ import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-public class TradeRandomizer {
-
-    private final RomHandler romHandler;
-    private final RestrictedPokemonService rPokeService;
-    private final Settings settings;
-    private final Random random;
+public class TradeRandomizer extends Randomizer {
 
     public TradeRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.rPokeService = romHandler.getRestrictedPokemonService();
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void randomizeIngameTrades() {

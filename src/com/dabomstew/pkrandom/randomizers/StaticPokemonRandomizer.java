@@ -3,23 +3,14 @@ package com.dabomstew.pkrandom.randomizers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class StaticPokemonRandomizer {
-
-    private final RomHandler romHandler;
-    private final RestrictedPokemonService rPokeService;
-    private final Settings settings;
-    private final Random random;
+public class StaticPokemonRandomizer extends Randomizer {
 
     public StaticPokemonRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.rPokeService = romHandler.getRestrictedPokemonService();
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void onlyChangeStaticLevels() {

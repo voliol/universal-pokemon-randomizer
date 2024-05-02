@@ -4,27 +4,15 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
-import com.dabomstew.pkrandom.services.TypeService;
 
 import java.util.*;
 
-public class StarterRandomizer {
+public class StarterRandomizer extends Randomizer {
 
     private static final int MAX_TYPE_TRIANGLE_STARTER_TRIES = 500;
 
-    private final RomHandler romHandler;
-    private final RestrictedPokemonService rPokeService;
-    private final TypeService typeService;
-    private final Settings settings;
-    private final Random random;
-
     public StarterRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.rPokeService = romHandler.getRestrictedPokemonService();
-        this.typeService = romHandler.getTypeService();
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void randomizeStarters() {

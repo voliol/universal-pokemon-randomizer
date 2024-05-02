@@ -6,20 +6,10 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.Random;
 
-public class PokemonBaseStatRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
-
-    private final CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper;
+public class PokemonBaseStatRandomizer extends Randomizer {
 
     public PokemonBaseStatRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
-
-        this.copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(romHandler::getPokemonSet);
+        super(romHandler, settings, random);
     }
 
     public void shufflePokemonStats() {
@@ -40,6 +30,7 @@ public class PokemonBaseStatRandomizer {
                 megaEvo.to.copyShuffledStatsUpEvolution(megaEvo.from);
             }
         }
+        changesMade = true;
     }
 
     public void randomizePokemonStats() {
@@ -68,9 +59,10 @@ public class PokemonBaseStatRandomizer {
                 }
             }
         }
+        changesMade = true;
     }
 
-    public void standardizeEXPCurves(Settings settings) {
+    public void standardizeEXPCurves() {
         Settings.ExpCurveMod mod = settings.getExpCurveMod();
         ExpCurve expCurve = settings.getSelectedEXPCurve();
 

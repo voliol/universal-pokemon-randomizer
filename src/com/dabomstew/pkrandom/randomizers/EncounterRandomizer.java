@@ -3,25 +3,13 @@ package com.dabomstew.pkrandom.randomizers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
-import com.dabomstew.pkrandom.services.TypeService;
 
 import java.util.*;
 
-public class EncounterRandomizer {
-
-    private final RomHandler romHandler;
-    private final RestrictedPokemonService rPokeService;
-    private final TypeService typeService;
-    private final Settings settings;
-    private final Random random;
+public class EncounterRandomizer extends Randomizer {
 
     public EncounterRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.rPokeService = romHandler.getRestrictedPokemonService();
-        this.typeService = romHandler.getTypeService();
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void randomizeEncounters() {

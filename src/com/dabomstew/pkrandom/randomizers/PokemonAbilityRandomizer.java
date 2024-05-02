@@ -4,29 +4,17 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
-import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.MegaEvolution;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class PokemonAbilityRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
-
-    private final CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper;
+public class PokemonAbilityRandomizer extends Randomizer {
 
     public PokemonAbilityRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
-
-        this.copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(romHandler::getPokemonSet);
+        super(romHandler, settings, random);
     }
 
     public void randomizeAbilities() {
@@ -123,6 +111,8 @@ public class PokemonAbilityRandomizer {
                 megaEvo.to.setAbility3(megaEvo.from.getAbility3());
             }
         }
+
+        changesMade = true;
     }
 
     private int pickRandomAbilityVariation(int selectedAbility, int... alreadySetAbilities) {

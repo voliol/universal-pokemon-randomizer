@@ -1,7 +1,10 @@
 package com.dabomstew.pkrandom.randomizers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.pokemon.Move;
+import com.dabomstew.pkrandom.pokemon.MoveLearnt;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.ArrayList;
@@ -9,20 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class TMHMTutorCompatibilityRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
-
-    private final CopyUpEvolutionsHelper<Pokemon> copyUpEvolutionsHelper;
+public class TMHMTutorCompatibilityRandomizer extends Randomizer {
 
     public TMHMTutorCompatibilityRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
-
-        this.copyUpEvolutionsHelper = new CopyUpEvolutionsHelper<>(romHandler::getPokemonSet);
+        super(romHandler, settings, random);
     }
 
     public void randomizeTMHMCompatibility() {

@@ -7,17 +7,11 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.*;
 
-public class TrainerNameRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
+public class TrainerNameRandomizer extends Randomizer {
 
     // TODO: note, all randomness here is cosmetic, so the Random object should be a cosmetic random
     public TrainerNameRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     @SuppressWarnings("unchecked")

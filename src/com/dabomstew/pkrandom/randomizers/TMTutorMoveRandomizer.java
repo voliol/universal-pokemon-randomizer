@@ -11,16 +11,10 @@ import java.util.*;
  * A randomizer for which moves are found in TMs and at Move Tutors.
  * For compatibility with Pokemon, see {@link TMHMTutorCompatibilityRandomizer}.
  */
-public class TMTutorMoveRandomizer {
-
-    private final RomHandler romHandler;
-    private final Settings settings;
-    private final Random random;
+public class TMTutorMoveRandomizer extends Randomizer {
 
     public TMTutorMoveRandomizer(RomHandler romHandler, Settings settings, Random random) {
-        this.romHandler = romHandler;
-        this.settings = settings;
-        this.random = random;
+        super(romHandler, settings, random);
     }
 
     public void randomizeTMMoves() {

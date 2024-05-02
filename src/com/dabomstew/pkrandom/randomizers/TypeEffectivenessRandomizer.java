@@ -6,20 +6,13 @@ import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.pokemon.TypeTable;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
-import com.dabomstew.pkrandom.services.TypeService;
 
 import java.util.*;
 
-public class TypeEffectivenessRandomizer {
+public class TypeEffectivenessRandomizer extends Randomizer {
 
-    private final RomHandler romHandler;
-    private final TypeService typeService;
-    private final Random random;
-
-    public TypeEffectivenessRandomizer(RomHandler romHandler, Random random) {
-        this.romHandler = romHandler;
-        this.typeService = romHandler.getTypeService();
-        this.random = random;
+    public TypeEffectivenessRandomizer(RomHandler romHandler, Settings settings, Random random) {
+        super(romHandler, settings, random);
     }
 
     private static final Effectiveness[] TO_BALANCE_FOR = new Effectiveness[]
@@ -52,6 +45,7 @@ public class TypeEffectivenessRandomizer {
         placeEffectiveness(Effectiveness.DOUBLE);
 
         romHandler.setTypeTable(typeTable);
+        changesMade = true;
     }
 
     private void fillEffCounts() {
@@ -131,6 +125,7 @@ public class TypeEffectivenessRandomizer {
         }
 
         romHandler.setTypeTable(typeTable);
+        changesMade = true;
     }
 
     private boolean typeTableChunkCanBeSwapped(TypeTable typeTable, Type colA, Type colB, Set<Type> chunk) {
@@ -181,5 +176,6 @@ public class TypeEffectivenessRandomizer {
         }
 
         romHandler.setTypeTable(typeTable);
+        changesMade = true;
     }
 }
