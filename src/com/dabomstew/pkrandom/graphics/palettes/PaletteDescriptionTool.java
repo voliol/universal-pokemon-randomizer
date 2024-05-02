@@ -23,10 +23,12 @@ package com.dabomstew.pkrandom.graphics.palettes;
 
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RandomSource;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.newgui.ROMFilter;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import javax.swing.*;
@@ -56,6 +58,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
     @Serial
     private static final long serialVersionUID = 7741836888133659367L;
 
+    private static final Settings SETTINGS = new Settings();
     private static final Random RND = new Random();
 
     private static final String TITLE = "Palette Description Tool";
@@ -314,12 +317,12 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
             return;
         }
 
-        Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
+        Gen3to5PaletteRandomizer paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, SETTINGS, RND);
         for (Pokemon pk : romHandler.getPokemonSet()) {
             originalPalettes.put(pk, pk.getNormalPalette());
         }
         paletteDescriptions
-                .setListData(paletteHandler.getPaletteDescriptions(FILE_KEY).toArray(new PaletteDescription[0]));
+                .setListData(paletteRandomizer.getPaletteDescriptions(FILE_KEY).toArray(new PaletteDescription[0]));
         paletteDescriptions.setSelectedIndex(0);
 
     }
@@ -352,8 +355,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
         if (autoSave) {
             savePaletteDescription();
         }
-        Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
-        paletteHandler.savePaletteDescriptionSource(FILE_KEY, jlistToList(paletteDescriptions));
+        Gen3to5PaletteRandomizer paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, SETTINGS, RND);
+        paletteRandomizer.savePaletteDescriptionSource(FILE_KEY, jlistToList(paletteDescriptions));
     }
 
     private List<PaletteDescription> jlistToList(JList<? extends PaletteDescription> jlist) {
@@ -410,8 +413,8 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
         TypeBaseColorList typeBaseColorList = new TypeBaseColorList(pk, false, RND);
         PalettePartDescription[] palettePartDescriptions = PalettePartDescription.allFrom(paletteDescriptionBody);
 
-        Gen3to5PaletteHandler paletteHandler = (Gen3to5PaletteHandler) romHandler.getPaletteHandler();
-        paletteHandler.populatePalette(palette, pp, typeBaseColorList, palettePartDescriptions);
+        Gen3to5PaletteRandomizer paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, SETTINGS, RND);
+        paletteRandomizer.populatePalette(palette, pp, typeBaseColorList, palettePartDescriptions);
     }
 
     private void updateImagesAndText() {
@@ -439,19 +442,10 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
     }
 
     private BufferedImage getPokemonImage(Pokemon pk, boolean shiny) {
-        BufferedImage front = null;
-        BufferedImage back = null;
-        if (romHandler instanceof AbstractGBRomHandler gbRomHandler) {
-            front = gbRomHandler.getPokemonImage(pk, false, shiny, false, false);
-            back = gbRomHandler.getPokemonImage(pk, true, shiny, false, false);
-        } else if (romHandler instanceof AbstractDSRomHandler dsRomHandler) {
-            try {
-                front = dsRomHandler.getPokemonImage(pk, false, shiny, false, false);
-                back = dsRomHandler.getPokemonImage(pk, true, shiny, false, false);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        PokemonImageGetter pig = romHandler.createPokemonImageGetter(pk);
+        pig.setShiny(shiny);
+        BufferedImage front = pig.get();
+        BufferedImage back = pig.setBack(true).get();
         return GFXFunctions.stitchToGrid(new BufferedImage[][]{{front, back}});
     }
 
