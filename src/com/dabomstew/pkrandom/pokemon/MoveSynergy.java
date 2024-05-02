@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.stream.Collectors.toCollection;
+
 public class MoveSynergy {
 
     public static List<Move> getSoftAbilityMoveSynergy(int ability, List<Move> moveList, Type pkType1, Type pkType2) {
@@ -150,7 +152,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> synergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getSoftAbilityMoveAntiSynergy(int ability, List<Move> moveList) {
@@ -178,7 +180,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> antiSynergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getHardAbilityMoveSynergy(int ability, Type pkType1, Type pkType2, List<Move> moveList,
@@ -557,7 +559,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> synergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getHardAbilityMoveAntiSynergy(int ability, List<Move> moveList) {
@@ -708,7 +710,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> antiSynergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getStatMoveSynergy(Pokemon pk, List<Move> moveList) {
@@ -750,7 +752,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> synergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getStatMoveAntiSynergy(Pokemon pk, List<Move> moveList) {
@@ -785,7 +787,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> antiSynergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getMoveSynergy(Move mv1, List<Move> moveList, int generation) {
@@ -1014,7 +1016,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> synergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getSoftMoveSynergy(Move mv1, List<Move> moveList, TypeTable typeTable) {
@@ -1058,7 +1060,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> synergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getHardMoveAntiSynergy(Move mv1, List<Move> moveList) {
@@ -1125,7 +1127,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> antiSynergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> getSoftMoveAntiSynergy(Move mv1, List<Move> moveList) {
@@ -1157,7 +1159,7 @@ public class MoveSynergy {
                 .stream()
                 .filter(mv -> antiSynergisticMoves.contains(mv.number))
                 .distinct()
-                .toList();
+                .collect(toCollection(ArrayList::new));
     }
 
     public static List<Move> requiresOtherMove(Move mv1, List<Move> moveList) {
@@ -1170,6 +1172,10 @@ public class MoveSynergy {
                     .map(mv -> mv.number)
                     .toList());
         }
-        return moveList.stream().filter(mv -> requiresMove.contains(mv.number)).distinct().toList();
+        return moveList
+                .stream()
+                .filter(mv -> requiresMove.contains(mv.number))
+                .distinct()
+                .collect(toCollection(ArrayList::new));
     }
 }

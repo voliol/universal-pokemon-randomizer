@@ -35,6 +35,7 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
@@ -94,6 +95,13 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     protected abstract void initRomEntry();
+
+    protected void addRelativeOffsetToRomEntry(String newKey, String baseKey, int offset) {
+        int baseOffset = getRomEntry().getIntValue(baseKey);
+        if (baseOffset != 0 && getRomEntry().getIntValue(newKey) == 0) {
+            getRomEntry().putIntValue(newKey, baseOffset + offset);
+        }
+    }
 
     protected abstract void initTextTables();
 
@@ -251,9 +259,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	}
 
 	protected final void writeBytes(int offset, byte[] values) {
-		for (int i = 0; i < values.length; i++) {
-			writeByte(offset + i, values[i]);
-		}
+        if (offset == 0) {
+            throw new IllegalArgumentException("Not allowed to write at offset 0 of the ROM.");
+        }
+        writeBytes(rom, offset, values);
 	}
 
 	protected final void writeBytes(byte[] data, int offset, byte[] values) {
@@ -313,23 +322,10 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected class DataRewriter<E> {
 
+        protected Function<Integer, Integer> pointerReader = AbstractGBRomHandler.this::readPointer;
+        protected BiConsumer<Integer, Integer> pointerWriter = AbstractGBRomHandler.this::writePointer;
+
         private boolean longAlignAdresses = true;
-
-        public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
-                                Function<Integer, Integer> lengthOfOldFunction) {
-            rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
-        }
-
-        public void rewriteData(int pointerOffset, E e, int[] secondaryPointerOffsets,
-                                Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
-            byte[] newData = newDataFunction.apply(e);
-            int oldDataOffset = readPointer(pointerOffset);
-            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
-            freeSpace(oldDataOffset, oldLength);
-            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
-
-            rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
-        }
 
         public boolean isLongAlignAdresses() {
             return longAlignAdresses;
@@ -339,13 +335,37 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             this.longAlignAdresses = longAlignAdresses;
         }
 
+        public void setPointerReader(Function<Integer, Integer> pointerReader) {
+            this.pointerReader = pointerReader;
+        }
+
+        public void setPointerWriter(BiConsumer<Integer, Integer> pointerWriter) {
+            this.pointerWriter = pointerWriter;
+        }
+
+        public void rewriteData(int pointerOffset, E e, Function<E, byte[]> newDataFunction,
+                                Function<Integer, Integer> lengthOfOldFunction) {
+            rewriteData(pointerOffset, e, new int[0], newDataFunction, lengthOfOldFunction);
+        }
+
+        public void rewriteData(int pointerOffset, E e, int[] secondaryPointerOffsets,
+                                Function<E, byte[]> newDataFunction, Function<Integer, Integer> lengthOfOldFunction) {
+            byte[] newData = newDataFunction.apply(e);
+            int oldDataOffset = pointerReader.apply(pointerOffset);
+            int oldLength = lengthOfOldFunction.apply(oldDataOffset);
+            freeSpace(oldDataOffset, oldLength);
+            int newDataOffset = repointAndWriteToFreeSpace(pointerOffset, newData);
+
+            rewriteSecondaryPointers(pointerOffset, secondaryPointerOffsets, oldDataOffset, newDataOffset);
+        }
+
         /**
          * Returns the new offset of the data.
          **/
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
             int newOffset = findAndUnfreeSpace(data.length, longAlignAdresses);
 
-            writePointer(pointerOffset, newOffset);
+            pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
 
             return newOffset;
@@ -354,13 +374,15 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         protected void rewriteSecondaryPointers(int primaryPointerOffset, int[] secondaryPointerOffsets,
                                               int oldDataOffset, int newDataOffset) {
             for (int spo : secondaryPointerOffsets) {
-                if (spo != primaryPointerOffset && readPointer(spo) != oldDataOffset) {
+                int offset = pointerReader.apply(spo);
+                if (spo != primaryPointerOffset && offset != oldDataOffset) {
                     System.out.println();
                     System.out.println("bad: " + spo);
-                    throw new RandomizerIOException("Invalid secondary pointer spo=" + spo + ". Points to " +
-                            readPointer(spo) + " instead of " + oldDataOffset + ".");
+                    throw new RandomizerIOException("Invalid secondary pointer spo=0x" + Integer.toHexString(spo) +
+                            ". Points to 0x" + Integer.toHexString(offset) + " instead of 0x" +
+                            Integer.toHexString(oldDataOffset) + ".");
                 }
-                writePointer(spo, newDataOffset);
+                pointerWriter.accept(spo, newDataOffset);
             }
         }
     }
@@ -453,7 +475,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-	protected List<BufferedImage> getAllPokemonImages() {
+	public List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (Pokemon pk : getPokemonSet()) {
 			bims.add(createPokemonImageGetter(pk).getFull());
@@ -483,7 +505,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 	@Override
 	public final BufferedImage getMascotImage() {
 		try {
-			dumpAllPokemonSprites();
+			dumpAllPokemonImages();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

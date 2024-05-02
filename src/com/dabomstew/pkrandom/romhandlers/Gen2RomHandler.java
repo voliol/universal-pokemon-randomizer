@@ -25,16 +25,25 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.randomizers.Gen2PaletteRandomizer;
-import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.images.GBCImage;
+import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
+import com.dabomstew.pkrandom.graphics.palettes.Gen2SpritePaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.GBCTMTextEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen2RomEntry;
+import compressors.Gen2Cmp;
 import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 
 public class Gen2RomHandler extends AbstractGBCRomHandler {
@@ -134,6 +143,37 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         } else {
             isVietCrystal = false;
         }
+
+        if (romEntry.isCrystal()) {
+            addRelativeOffsetToRomEntry("KrisFrontImage", "ChrisFrontImage",
+                    Gen2Constants.krisFrontImageOffset);
+            addRelativeOffsetToRomEntry("KrisTrainerCardImage", "ChrisTrainerCardImage",
+                    Gen2Constants.krisTrainerCardImageOffset);
+            addRelativeOffsetToRomEntry("KrisPalettePointer", "ChrisPalettePointer",
+                    Gen2Constants.krisPalettePointerOffset);
+            addRelativeOffsetToRomEntry("KrisSpritePalette", "ChrisSpritePalette",
+                    Gen2Constants.krisSpritePaletteOffset);
+        }
+
+        int[] chrisBackPointers = romEntry.getArrayValue("ChrisBackImagePointers");
+        if (chrisBackPointers.length == 2) {
+            if (romEntry.getArrayValue("ChrisBackImageBankOffsets").length == 0) {
+                int offset0 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal0 :
+                        Gen2Constants.chrisBackBankOffsetGS0;
+                int offset1 = romEntry.isCrystal() ? Gen2Constants.chrisBackBankOffsetCrystal1 :
+                        Gen2Constants.chrisBackBankOffsetGS1;
+                int[] bankOffsets = new int[] {chrisBackPointers[0] + offset0, chrisBackPointers[1] + offset1};
+                System.out.println("ChrisBackImageBankOffsets=[0x" + Integer.toHexString(bankOffsets[0]) +
+                        ", 0x" + Integer.toHexString(bankOffsets[1]) + "]");
+                romEntry.putArrayValue("ChrisBackImageBankOffsets", bankOffsets);
+            }
+
+            if (!romEntry.isCrystal() && romEntry.getIntValue("DudeBackImagePointer") == 0) {
+                int dudeBackPointer = chrisBackPointers[0] + Gen2Constants.dudeBackPointerOffset;
+                romEntry.putIntValue("DudeBackImagePointer", dudeBackPointer);
+            }
+        }
+
     }
 
     @Override
@@ -154,13 +194,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Gen2RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap
                     && re.getCRCInHeader() == crcInHeader) {
-                return re;
+                return new Gen2RomEntry(re);
             }
         }
         // Now check for non-specific-CRC entries
         for (Gen2RomEntry re : roms) {
             if (romCode(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap && re.getCRCInHeader() == -1) {
-                return re;
+                return new Gen2RomEntry(re);
             }
         }
         // Not found
@@ -519,7 +559,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pkmn.setRareHeldItem(rom[offset + Gen2Constants.bsRareHeldItemOffset] & 0xFF);
         pkmn.setDarkGrassHeldItem(-1);
         pkmn.setGrowthCurve(ExpCurve.fromByte(rom[offset + Gen2Constants.bsGrowthCurveOffset]));
-        pkmn.setPicDimensions(rom[offset + Gen2Constants.bsPicDimensionsOffset] & 0xFF);
+        pkmn.setFrontImageDimensions(rom[offset + Gen2Constants.bsFrontImageDimensionsOffset] & 0xFF);
 
     }
 
@@ -595,6 +635,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public int starterCount() {
         return 3;
+    }
+
+    @Override
+    public boolean hasMultiplePlayerCharacters() {
+        return romEntry.isCrystal();
     }
 
     @Override
@@ -1076,8 +1121,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
             int trainersPerThisClass = trainersPerClass[trainerClassNum];
-            new GBDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
-                    lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
+            new SameBankDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b,
+                    oldDataOffset -> lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
         }
     }
 
@@ -1322,7 +1367,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             if (eggMoves.containsKey(i)) {
                 int pointerOffset = tableOffset + (i - 1) * 2;
-                new GBDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
+                new SameBankDataRewriter<List<Integer>>().rewriteData(pointerOffset, eggMoves.get(i), this::eggMovesToBytes,
                         oldDataOffset -> lengthOfDataWithTerminatorAt(oldDataOffset, Gen2Constants.eggMovesTerminator));
             }
         }
@@ -1665,7 +1710,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             writeByte(offset, mvList.next().byteValue());
         }
 
-        new GBDataRewriter<List<Integer>>().rewriteData(menuPointerOffset, moves,
+        new SameBankDataRewriter<List<Integer>>().rewriteData(menuPointerOffset, moves,
                 this::moveTutorMovesToDialogueOptionBytes, this::lengthOfDialogueOptionAt);
     }
 
@@ -1684,7 +1729,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             baos.writeBytes(translateString(option));
             baos.write(GBConstants.stringTerminator);
         }
-//        System.out.println(RomFunctions.bytesToHex(baos.toByteArray()));
         return baos.toByteArray();
     }
 
@@ -1795,7 +1839,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             while (rom[pointer] != 0) {
                 int method = rom[pointer] & 0xFF;
                 int otherPoke = rom[pointer + 2 + (method == 5 ? 1 : 0)] & 0xFF;
-                EvolutionType type = EvolutionType.fromIndex(2, method);
+                EvolutionType type = Gen2Constants.evolutionTypeFromIndex(method);
                 int extraInfo = 0;
                 if (type == EvolutionType.TRADE) {
                     int itemNeeded = rom[pointer + 1] & 0xFF;
@@ -1831,7 +1875,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // split evos don't carry stats
             if (pkmn.getEvolutionsFrom().size() > 1) {
                 for (Evolution e : pkmn.getEvolutionsFrom()) {
-                    e.carryStats = false;
+                    e.setCarryStats(false);
                 }
             }
         }
@@ -1843,29 +1887,29 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.getEvolutionsFrom()) {
-                    if (evol.type == EvolutionType.TRADE || evol.type == EvolutionType.TRADE_ITEM) {
+                    if (evol.getType() == EvolutionType.TRADE || evol.getType() == EvolutionType.TRADE_ITEM) {
                         // change
-                        if (evol.from.getNumber() == Species.slowpoke) {
+                        if (evol.getFrom().getNumber() == Species.slowpoke) {
                             // Slowpoke: Make water stone => Slowking
-                            evol.type = EvolutionType.STONE;
-                            evol.extraInfo = Gen2Items.waterStone;
+                            evol.setType(EvolutionType.STONE);
+                            evol.setExtraInfo(Gen2Items.waterStone);
                             addEvoUpdateStone(impossibleEvolutionUpdates, evol, itemNames[24]);
-                        } else if (evol.from.getNumber() == Species.seadra) {
+                        } else if (evol.getFrom().getNumber() == Species.seadra) {
                             // Seadra: level 40
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 40; // level
+                            evol.setType(EvolutionType.LEVEL);
+                            evol.setExtraInfo(40); // level
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
-                        } else if (evol.from.getNumber() == Species.poliwhirl || evol.type == EvolutionType.TRADE) {
+                        } else if (evol.getFrom().getNumber() == Species.poliwhirl || evol.getType() == EvolutionType.TRADE) {
                             // Poliwhirl or any of the original 4 trade evos
                             // Level 37
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 37; // level
+                            evol.setType(EvolutionType.LEVEL);
+                            evol.setExtraInfo(37); // level
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         } else {
                             // A new trade evo of a single stage Pokemon
                             // level 30
-                            evol.type = EvolutionType.LEVEL;
-                            evol.extraInfo = 30; // level
+                            evol.setType(EvolutionType.LEVEL);
+                            evol.setExtraInfo(30); // level
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evol);
                         }
                     }
@@ -1897,15 +1941,15 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.getEvolutionsFrom()) {
                     // In Gen 2, only Eevee has a time-based evolution.
-                    if (evol.type == EvolutionType.HAPPINESS_DAY) {
+                    if (evol.getType() == EvolutionType.HAPPINESS_DAY) {
                         // Eevee: Make sun stone => Espeon
-                        evol.type = EvolutionType.STONE;
-                        evol.extraInfo = Gen2Items.sunStone;
+                        evol.setType(EvolutionType.STONE);
+                        evol.setExtraInfo(Gen2Items.sunStone);
                         addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[169]);
-                    } else if (evol.type == EvolutionType.HAPPINESS_NIGHT) {
+                    } else if (evol.getType() == EvolutionType.HAPPINESS_NIGHT) {
                         // Eevee: Make moon stone => Umbreon
-                        evol.type = EvolutionType.STONE;
-                        evol.extraInfo = Gen2Items.moonStone;
+                        evol.setType(EvolutionType.STONE);
+                        evol.setExtraInfo(Gen2Items.moonStone);
                         addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[8]);
                     }
                 }
@@ -1969,7 +2013,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Map.Entry<Integer, Shop> entry : shopItems.entrySet()) {
             int shopNum = entry.getKey();
             Shop shop = entry.getValue();
-            new GBDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
+            new GBCDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
                     this::lengthOfShopAt);
         }
     }
@@ -2720,10 +2764,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pk != null) {
                 keepEvos.clear();
                 for (Evolution evol : pk.getEvolutionsFrom()) {
-                    if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+                    if (pokemonIncluded.contains(evol.getFrom()) && pokemonIncluded.contains(evol.getTo())) {
                         keepEvos.add(evol);
                     } else {
-                        evol.to.getEvolutionsTo().remove(evol);
+                        evol.getTo().getEvolutionsTo().remove(evol);
                     }
                 }
                 pk.getEvolutionsFrom().retainAll(keepEvos);
@@ -2738,7 +2782,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             if (pk == null) continue;
             int pokeNum = pk.getNumber();
             int pointerOffset = pointerTableOffset + (pokeNum - 1) * 2;
-            new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
+            new SameBankDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
                     oldDataOffset -> lengthOfDataWithTerminatorsAt(oldDataOffset,
                             GBConstants.evosAndMovesTerminator, 2));
         }
@@ -2759,23 +2803,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.type.toIndex(2));
+        baos.write(Gen2Constants.evolutionTypeToIndex(evo.getType()));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
-        baos.write(evo.to.getNumber());
+        baos.write(evo.getTo().getNumber());
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.type) {
-            case LEVEL, STONE, TRADE_ITEM -> new byte[]{(byte) evo.extraInfo};
+        return switch (evo.getType()) {
+            case LEVEL, STONE, TRADE_ITEM -> new byte[]{(byte) evo.getExtraInfo()};
             case TRADE -> new byte[]{(byte) 0xFF};
             case HAPPINESS -> new byte[]{(byte) 0x01};
             case HAPPINESS_DAY -> new byte[]{(byte) 0x02};
             case HAPPINESS_NIGHT -> new byte[]{(byte) 0x03};
-            case LEVEL_ATTACK_HIGHER -> new byte[]{(byte) evo.extraInfo, (byte) 0x01};
-            case LEVEL_DEFENSE_HIGHER -> new byte[]{(byte) evo.extraInfo, (byte) 0x02};
-            case LEVEL_ATK_DEF_SAME -> new byte[]{(byte) evo.extraInfo, (byte) 0x03};
-            default -> throw new IllegalStateException("EvolutionType " + evo.type + " is not supported " +
+            case LEVEL_ATTACK_HIGHER -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x01};
+            case LEVEL_DEFENSE_HIGHER -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x02};
+            case LEVEL_ATK_DEF_SAME -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x03};
+            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
                     "by Gen 2 games.");
         };
     }
@@ -2835,6 +2879,18 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
+    private Palette readTrainerPalette(int trainerClass) {
+        if (trainerClass < 0) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't be negative");
+        }
+        int lastTrainerClass = romEntry.getIntValue("TrainerClassAmount") - 1;
+        if (trainerClass > lastTrainerClass) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
+        }
+        int offset = romEntry.getIntValue("TrainerPalettes") + trainerClass * 4;
+        return read2ColorPalette(offset);
+    }
+
     private Palette read2ColorPalette(int offset) {
         byte[] paletteBytes = new byte[]{rom[offset], rom[offset + 1], rom[offset + 2], rom[offset + 3]};
         return new Palette(paletteBytes);
@@ -2846,13 +2902,346 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Pokemon pk : getPokemonSet()) {
             int num = pk.getNumber() - 1;
 
-            byte[] normalPaletteBytes = pk.getNormalPalette().toBytes();
-            writeBytes(palOffset + num * 8, normalPaletteBytes);
+            int normalPaletteOffset = palOffset + num * 8;
+            writePalette(normalPaletteOffset, pk.getNormalPalette());
 
-            byte[] shinyPaletteBytes = pk.getShinyPalette().toBytes();
-            writeBytes(palOffset + num * 8 + 4, shinyPaletteBytes);
-
+            int shinyPaletteOffset = palOffset + num * 8 + 4;
+            writePalette(shinyPaletteOffset, pk.getShinyPalette());
         }
+    }
+
+    private void writeTrainerPalette(int trainerClass, Palette palette) {
+        if (palette.size() != 2) {
+            throw new IllegalArgumentException("Invalid Palette, must have exactly 2 colors.");
+        }
+        int[] pointerOffsets = romEntry.getArrayValue("TrainerPalettesPointers");
+        int tableOffset = pointerOffsets.length == 0 ?
+                romEntry.getIntValue("TrainerPalettes") : readPointer(pointerOffsets[0]);
+        int offset = tableOffset + trainerClass * 4;
+        writePalette(offset, palette);
+    }
+
+    private void writePalette(int offset, Palette palette) {
+        writeBytes(offset, palette.toBytes());
+    }
+
+    private int getPokemonImagePointerOffset(Pokemon pk, boolean back) {
+        // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
+        // There is no zero-entry.
+        int pointerOffset;
+        if (pk.getNumber() == Species.unown) {
+            int unownLetter = new Random().nextInt(Gen2Constants.unownFormeCount);
+            pointerOffset = romEntry.getIntValue("UnownImages") + unownLetter * 6;
+        } else {
+            pointerOffset = romEntry.getIntValue("PokemonImages") + (pk.getNumber() - 1) * 6;
+        }
+        if (back) {
+            pointerOffset += 3;
+        }
+        return pointerOffset;
+    }
+
+    private void rewriteTrainerImage(int trainerClass, GBCImage image) {
+        if (trainerClass < 1) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't be less than 1");
+        }
+        int lastTrainerClass = romEntry.getIntValue("TrainerClassAmount") - 1;
+        if (trainerClass > lastTrainerClass) {
+            throw new IllegalArgumentException("Invalid trainerClass; can't exceed " + lastTrainerClass);
+        }
+        int pointerOffset = romEntry.getIntValue("TrainerImages") + (trainerClass - 1) * 3;
+        rewritePokemonOrTrainerImage(pointerOffset, image);
+    }
+
+    private void rewritePokemonOrTrainerImage(int pointerOffset, GBCImage image) {
+        byte[] uncompressed = image.toBytes();
+
+        GBCDataRewriter<byte[]> dataRewriter = new GBCDataRewriter<>();
+        dataRewriter.setPointerReader(this::readPokemonOrTrainerImagePointer);
+        dataRewriter.setPointerWriter(this::writePokemonOrTrainerImagePointer);
+        dataRewriter.rewriteData(pointerOffset, uncompressed, Gen2Cmp::compress, this::lengthOfCompressedDataAt);
+    }
+
+    private int lengthOfCompressedDataAt(int offset) {
+        if (offset == 0) {
+            throw new IllegalArgumentException("Invalid offset. Compressed data cannot be at offset 0.");
+        }
+        return Gen2Decmp.lengthOfCompressed(rom, offset);
+    }
+
+    private int readPokemonOrTrainerImagePointer(int pointerOffset) {
+        int bank = (rom[pointerOffset] & 0xFF);
+        if (romEntry.isCrystal()) {
+            // Crystal pic banks are offset by x36 for whatever reason.
+            bank += 0x36;
+        } else {
+            // Hey, G/S are dumb too! Arbitrarily redirected bank numbers.
+            if (bank == 0x13) {
+                bank = 0x1F;
+            } else if (bank == 0x14) {
+                bank = 0x20;
+            } else if (bank == 0x1F) {
+                bank = 0x2E;
+            }
+        }
+        return readPointer(pointerOffset + 1, bank);
+    }
+
+    private void writePokemonOrTrainerImagePointer(int offset, int pointer) {
+        int bank = bankOf(pointer);
+        if (romEntry.isCrystal()) {
+            // Crystal pic banks are offset by x36 for whatever reason.
+            bank -= 0x36;
+        } else {
+            // Hey, G/S are dumb too! Arbitrarily redirected bank numbers.
+            if (bank == 0x1F) {
+                bank = 0x13;
+            } else if (bank == 0x20) {
+                bank = 0x14;
+            } else if (bank == 0x2E) {
+                bank = 0x1F;
+            }
+        }
+        writeByte(offset, (byte) bank);
+        writePointer(offset + 1, pointer);
+    }
+
+    @Override
+    public boolean hasCustomPlayerGraphicsSupport() {
+        return true;
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (!(unchecked instanceof Gen2PlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+
+        if (playerGraphics.hasFrontImage()) {
+            rewritePlayerFrontImage(playerGraphics.getFrontImage(), toReplace);
+            rewritePlayerTrainerCardImage(playerGraphics.getTrainerCardImage(), toReplace);
+        }
+
+        if (playerGraphics.hasBackImage()) {
+            if (toReplace == Settings.PlayerCharacterMod.PC1) {
+                rewriteChrisBackImage(playerGraphics.getBackImage());
+            } else {
+                rewriteKrisBackImage(playerGraphics.getBackImage());
+            }
+        }
+
+        if (playerGraphics.hasImagePalette()) {
+            rewritePlayerImagePalette(playerGraphics.getImagePalette(), toReplace);
+        }
+
+        if (playerGraphics.hasWalkSprite()) {
+            int walkOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "WalkSprite");
+            writeImage(walkOffset, playerGraphics.getWalkSprite());
+        }
+        if (playerGraphics.hasBikeSprite()) {
+            int bikeOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "BikeSprite");
+            writeImage(bikeOffset, playerGraphics.getBikeSprite());
+        }
+        if (playerGraphics.hasFishSprite()) {
+            int fishOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "FishSprite");
+            writeImage(fishOffset, playerGraphics.getFishSprite());
+        }
+
+        if (playerGraphics.hasSpritePaletteID()) {
+            rewritePlayerSpritePalette(playerGraphics.getSpritePaletteID(), toReplace);
+        }
+    }
+
+    private void rewritePlayerFrontImage(GBCImage frontImage, Settings.PlayerCharacterMod toReplace) {
+        if (romEntry.isCrystal()) {
+            int frontOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "FrontImage");
+            writeImage(frontOffset, frontImage);
+        } else {
+            rewriteTrainerImage(Gen2Constants.chrisTrainerClassGS, frontImage);
+        }
+    }
+
+    private void rewritePlayerTrainerCardImage(GBCImage trainerCardImage, Settings.PlayerCharacterMod toReplace) {
+        int trainerCardOffset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "TrainerCardImage");
+        // the trainer card image has different column modes in GS / Crystal, for whatever reason
+        writeImage(trainerCardOffset, new GBCImage.Builder(trainerCardImage).columnMode(romEntry.isCrystal()).build());
+    }
+
+    private void rewritePlayerImagePalette(Palette palette, Settings.PlayerCharacterMod toReplace) {
+        if (toReplace == Settings.PlayerCharacterMod.PC1) {
+            rewriteChrisImagePalette(palette);
+        } else if (toReplace == Settings.PlayerCharacterMod.PC2) {
+            rewriteKrisImagePalette(palette);
+        } else {
+            throw new IllegalArgumentException("Unexpected value for toReplace: " + toReplace);
+        }
+    }
+
+    private void rewriteChrisImagePalette(Palette palette) {
+        if (romEntry.isCrystal()) {
+            writeTrainerPalette(Gen2Constants.chrisTrainerClassCrystal, palette);
+        } else {
+            // GS Chris uses mostly the palette at index 0, like in Crystal.
+            // This one is identical to Cal's palette, but in some places like the Oak Speech Cal's actual palette
+            // is used instead. Thus both of them need to be overwritten.
+            writeTrainerPalette(Gen2Constants.chrisTrainerClassGS, palette);
+            writeTrainerPalette(Gen2Constants.chrisPaletteTrainerClassGS, palette);
+        }
+    }
+
+    private void rewriteKrisImagePalette(Palette palette) {
+        // Due to the games routines for drawing images, the players (and Oak) are assigned trainer classes.
+        // Kris doesn't have a unique palette/class though, but shares one with Falkner.
+        // This means if we want to give Kris a unique palette, we have to do extra operations.
+        int classAmount = romEntry.getIntValue("TrainerClassAmount");
+        resizeTrainerPalettes(classAmount + 1);
+
+        writeTrainerPalette(classAmount, palette);
+        writeChrisTrainerClass(classAmount);
+        repointDirectPlayerPalettePointers(classAmount);
+        fixTrainerCardPalettes(classAmount);
+    }
+
+    private void resizeTrainerPalettes(int newSize) {
+        byte[] data = readPlayerPalettesBeforeMove();
+
+        int[] pointerOffsets = romEntry.getArrayValue("TrainerPalettesPointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        // uses a DataRewriter since it has checks to see if the pointers are valid,
+        // even though it just moves/resizes the same chunk of data
+        DataRewriter<byte[]> dataRewriter = new SpecificBankDataRewriter<>(romEntry.getIntValue("TrainerPalettesBank"));
+        dataRewriter.rewriteData(primaryPointerOffset, data, secondaryPointerOffsets,
+                data1 -> resizeTrainerPalettes(data1, newSize), odo -> data.length);
+    }
+
+    private byte[] readPlayerPalettesBeforeMove() {
+        int classAmount = romEntry.getIntValue("TrainerClassAmount");
+        int pointerOffset = romEntry.getArrayValue("TrainerPalettesPointers")[0];
+        int offset = readPointer(pointerOffset);
+        byte[] data = new byte[2 * 2 * classAmount];
+        System.arraycopy(rom, offset, data, 0, data.length);
+        return data;
+    }
+
+    private byte[] resizeTrainerPalettes(byte[] before, int newSize) {
+        byte[] after = new byte[2 * 2 * newSize];
+        System.arraycopy(before, 0, after, 0, Math.min(before.length, after.length));
+        return after;
+    }
+
+    private void writeChrisTrainerClass(int krisTrainerClass) {
+        int[] classOffsets = romEntry.getArrayValue("KrisTrainerClassOffsets");
+        int origClassValue = rom[classOffsets[0]] & 0xFF;
+        rom[classOffsets[0]] = (byte) (krisTrainerClass & 0xFF);
+        for (int i = 1; i < classOffsets.length; i++) {
+            int classValue = rom[classOffsets[i]];
+            if (classValue != origClassValue) {
+                throw new RuntimeException("Value mismatch; expected " + origClassValue + ", was " + classValue);
+            }
+            rom[classOffsets[i]] = (byte) (krisTrainerClass & 0xFF);
+        }
+    }
+
+    private void repointDirectPlayerPalettePointers(int krisTrainerClass) {
+        // One snippet of code also has direct pointers to the Chris and Kris/Falkner palettes.
+        // Since we resized/moved the TrainerPalettes table we need to
+        int trainerPalsOffset = readPointer(romEntry.getArrayValue("TrainerPalettesPointers")[0]);
+
+        int chrisPointerOffset = romEntry.getIntValue("ChrisPalettePointer");
+        writePointer(chrisPointerOffset, trainerPalsOffset);
+        int krisPointerOffset = romEntry.getIntValue("KrisPalettePointer");
+        writePointer(krisPointerOffset, trainerPalsOffset + 4 * krisTrainerClass);
+    }
+
+    private void fixTrainerCardPalettes(int krisTrainerClass) {
+        int startOffset = romEntry.getIntValue("TrainerCardPalettesRoutine");
+        if (startOffset != 0) {
+            // palette #1: Falkner -> Kris
+            // palette #5: Chuck -> Falkner
+            rom[startOffset + Gen2Constants.tcPal1Offset] = (byte) (krisTrainerClass & 0xFF);
+            rom[startOffset + Gen2Constants.tcPal5Offset] = (byte) (Gen2Constants.falknerTrainerClass & 0xFF);
+            // Falkner icon: pal #1 -> #5
+            // Chuck icon: pal #5 -> #7 (i.e. makes him share Pryce's pal)
+            // Claire icon: pal #1 -> #5
+            rom[startOffset + Gen2Constants.tcFalknerPalOffset] = (byte) 5;
+            rom[startOffset + Gen2Constants.tcChuckPalOffset] = (byte) 7;
+            rom[startOffset + Gen2Constants.tcClairePalOffset] = (byte) 5;
+        } else {
+            System.out.println("No value for TrainerCardPalettesRoutine in ROM entry.");
+        }
+    }
+
+    public void rewriteKrisBackImage(GBCImage krisBack) {
+        // not compressed
+        int krisBackOffset = romEntry.getIntValue("KrisBackImage");
+        writeImage(krisBackOffset, krisBack);
+    }
+
+    public void rewriteChrisBackImage(GBCImage chrisBack) {
+        int[] pointerOffsets = romEntry.getArrayValue("ChrisBackImagePointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
+        DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+
+        if (romEntry.isCrystal()) {
+            dataRewriter.rewriteData(primaryPointerOffset, chrisBack, secondaryPointerOffsets,
+                    image -> Gen2Cmp.compress(image.toBytes()), this::lengthOfCompressedDataAt);
+        } else {
+            // much more in GS since it has to make sure the catching tutorial dude's backpic ends up in the same bank
+            dataRewriter.rewriteData(primaryPointerOffset, chrisBack, secondaryPointerOffsets,
+                    this::chrisPlusDudeBackImagesToBytes, this::lengthOfChrisAndDudeBackImagesAt);
+            repointDudeBackImage(primaryPointerOffset);
+        }
+    }
+
+    private byte[] chrisPlusDudeBackImagesToBytes(GBCImage chrisBack) {
+        byte[] chrisBackData = Gen2Cmp.compress(chrisBack.toBytes());
+        byte[] dudeBackData = readDudeCompressedBackData();
+
+        byte[] bothData = new byte[chrisBackData.length + dudeBackData.length];
+        System.arraycopy(chrisBackData, 0, bothData, 0, chrisBackData.length);
+        System.arraycopy(dudeBackData, 0, bothData, chrisBackData.length, dudeBackData.length);
+        return bothData;
+    }
+
+    private byte[] readDudeCompressedBackData() {
+        int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+        int dudeBackOffset = readPointer(romEntry.getIntValue("DudeBackImagePointer"), bank);
+        int dudeBackLength = Gen2Decmp.lengthOfCompressed(rom, dudeBackOffset);
+        return Arrays.copyOfRange(rom, dudeBackOffset, dudeBackOffset + dudeBackLength);
+    }
+
+    /**
+     * The length in bytes of Chris' compressed back image, followed by the catching tutorial dude's.<br>
+     * Assumes they actually follow another in ROM, with no gaps.
+     */
+    private int lengthOfChrisAndDudeBackImagesAt(int offset) {
+        int length = lengthOfCompressedDataAt(offset);
+        length += lengthOfCompressedDataAt(offset + length);
+        return length;
+    }
+
+    private void repointDudeBackImage(int chrisBackPointerOffset) {
+        int[] bankOffsets = romEntry.getArrayValue("ChrisBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+
+        int newOffset = readPointer(chrisBackPointerOffset, bank);
+        int newDudeOffset = newOffset + lengthOfCompressedDataAt(newOffset);
+        int dudeBackPointerOffset = romEntry.getIntValue("DudeBackImagePointer");
+        writePointer(dudeBackPointerOffset, newDudeOffset);
+    }
+
+    private void rewritePlayerSpritePalette(Gen2SpritePaletteID spritePaletteID,
+                                            Settings.PlayerCharacterMod toReplace) {
+        int offset = romEntry.getIntValue(Gen2Constants.getName(toReplace) + "SpritePalette");
+        byte value = (byte) ((spritePaletteID.ordinal() | 0b1000) << 4);
+        System.out.println(spritePaletteID);
+        System.out.println("SpritePalette Offset: 0x" + Integer.toHexString(offset));
+        System.out.println("SpritePalette Value: 0x" + Integer.toHexString(Byte.toUnsignedInt(value)));
+        writeByte(offset, value);
     }
 
     @Override
@@ -2873,47 +3262,32 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         @Override
         public BufferedImage get() {
-            // Each Pokemon has a front and back pic with a bank and a pointer (3*2=6)
-            // There is no zero-entry.
-            int picPointer;
-            if (pk.getNumber() == Species.unown) {
-                int unownLetter = forme;
-                if (unownLetter >= Gen2Constants.unownFormeCount) {
-                    throw new IllegalStateException("Invalid Unown forme: " + unownLetter);
-                }
-                picPointer = romEntry.getIntValue("UnownPicPointers") + unownLetter * 6;
-            } else {
-                picPointer = romEntry.getIntValue("PicPointers") + (pk.getNumber() - 1) * 6;
-            }
-            if (back) {
-                picPointer += 3;
-            }
 
-            int picWidth = back ? 6 : pk.getPicDimensions() & 0x0F;
-            int picHeight = back ? 6 : (pk.getPicDimensions() >> 4) & 0x0F;
+            int pointerOffset = getPokemonImagePointerOffset(pk, back);
+
+            int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
+            int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
 
             byte[] data;
             try {
-                data = readSpriteData(picPointer, picWidth, picHeight);
+                data = readPokemonOrTrainerImageData(pointerOffset, width, height);
             } catch (Exception e) {
                 return null;
             }
-            int w = picWidth * 8;
-            int h = picHeight * 8;
 
             // White and black are always in the palettes at positions 0 and 3,
             // so only the middle colors are stored and need to be read.
             Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-            int[] convPalette = new int[]{0xFFFFFFFF, palette.toARGB()[0], palette.toARGB()[1], 0xFF000000};
+            palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
 
-            BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
+            BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
 
             if (transparentBackground) {
-                bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
+                bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
             }
             if (includePalette) {
-                for (int j = 0; j < convPalette.length; j++) {
-                    bim.setRGB(j, 0, convPalette[j]);
+                for (int j = 0; j < palette.size(); j++) {
+                    bim.setRGB(j, 0, palette.get(j).toARGB());
                 }
             }
 
@@ -2944,25 +3318,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
     }
 
-    private byte[] readSpriteData(int picPointer, int picWidth, int picHeight) {
-        int picBank = (rom[picPointer] & 0xFF);
-        if (romEntry.isCrystal()) {
-            // Crystal pic banks are offset by x36 for whatever reason.
-            picBank += 0x36;
-        } else {
-            // Hey, G/S are dumb too! Arbitrarily redirected bank numbers.
-            if (picBank == 0x13) {
-                picBank = 0x1F;
-            } else if (picBank == 0x14) {
-                picBank = 0x20;
-            } else if (picBank == 0x1F) {
-                picBank = 0x2E;
-            }
-        }
-        int picOffset = readPointer(picPointer + 1, picBank);
-
-        Gen2Decmp mscSprite = new Gen2Decmp(rom, picOffset, picWidth, picHeight);
-        return mscSprite.getFlattenedData();
+    private byte[] readPokemonOrTrainerImageData(int pointerOffset, int imageWidth, int imageHeight) {
+        int imageOffset = readPokemonOrTrainerImagePointer(pointerOffset);
+        byte[] data = Gen2Decmp.decompress(rom, imageOffset);
+        return Arrays.copyOf(data, imageWidth * imageHeight * 16);
     }
 
     @Override

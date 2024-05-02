@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.gbspace;
 
+import java.util.ListIterator;
+
 /**
  * A {@link FreedSpace} with bank functionality.<br>
  * Assumes there is data which must be in certain banks, and data which can be placed anywhere. It would be a problem
@@ -30,14 +32,14 @@ public class BankDividedFreedSpace extends FreedSpace {
 
     @Override
     public void free(int start, int length) {
-        // System.out.printf("freeing %d bytes starting from 0x%x.%n", length, start);
+        //System.out.printf("freeing %d bytes starting from 0x%x.%n", length, start);
         if (freedChunkWouldCrossBankBoundary(start, length)) {
             throw new RuntimeException("Can't free a space spanning over multiple banks. This is a safety measure " +
                     "to prevent bad usage of free().");
         }
         super.free(start, length);
         splitFreedChunksAtBankBoundaries();
-        // System.out.println("after:\t" + this);
+        //System.out.println("after:\t" + this);
     }
 
     private boolean freedChunkWouldCrossBankBoundary(int start, int length) {
@@ -49,8 +51,9 @@ public class BankDividedFreedSpace extends FreedSpace {
     private void splitFreedChunksAtBankBoundaries() {
         int bank = 0;
 
-        for (int i = 0; i < freedChunks.size(); i++) {
-            FreedChunk fs = freedChunks.get(i);
+        ListIterator<FreedChunk> iterator = freedChunks.listIterator();
+        while (iterator.hasNext()) {
+            FreedChunk fs = iterator.next();
             while (freedChunkStartBank(fs) > bank) {
                 bank++;
             }
@@ -59,7 +62,8 @@ public class BankDividedFreedSpace extends FreedSpace {
             if (fs.end >= startOfNextBank) {
                 FreedChunk splitOff = new FreedChunk(startOfNextBank, fs.end);
                 fs.end = startOfNextBank - 1;
-                freedChunks.add(splitOff);
+                iterator.add(splitOff);
+                iterator.previous();
             }
         }
     }
@@ -99,7 +103,7 @@ public class BankDividedFreedSpace extends FreedSpace {
         }
         int offset = found.start;
         unfree(found, length);
-        // System.out.println("after:\t" + this);
+        //System.out.println("after:\t" + this);
         return offset;
     }
 

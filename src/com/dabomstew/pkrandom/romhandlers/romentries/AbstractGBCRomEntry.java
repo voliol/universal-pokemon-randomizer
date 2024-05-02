@@ -31,6 +31,15 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
         super(name);
     }
 
+    public AbstractGBCRomEntry(AbstractGBCRomEntry original) {
+        super(original);
+        this.nonJapanese = original.nonJapanese;
+        this.extraTableFile = original.extraTableFile;
+        this.crcInHeader = original.getCRCInHeader();
+        this.tmTexts.addAll(original.tmTexts);
+        this.bankEndFreeSpaceMargins.putAll(original.bankEndFreeSpaceMargins);
+    }
+
     public int getNonJapanese() {
         return nonJapanese;
     }

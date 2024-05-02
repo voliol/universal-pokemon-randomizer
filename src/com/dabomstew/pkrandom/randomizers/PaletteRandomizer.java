@@ -22,6 +22,7 @@ package com.dabomstew.pkrandom.randomizers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -47,7 +48,7 @@ public abstract class PaletteRandomizer {
 	public abstract void randomizePokemonPalettes();
 
 	protected void setShinyPaletteFromNormal(Pokemon pk) {
-		pk.setShinyPalette(pk.getNormalPalette().clone());
+		pk.setShinyPalette(new Palette(pk.getNormalPalette()));
 	}
 
 }

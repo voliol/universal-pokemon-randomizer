@@ -37,6 +37,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -144,6 +145,8 @@ public class Settings {
     private boolean evosMaxThreeStages;
     private boolean evosForceChange;
     private boolean evosAllowAltFormes;
+    private boolean evosForceGrowth;
+    private boolean evosNoConvergence;
 
     // Move data
     private boolean randomizeMovePowers;
@@ -349,6 +352,18 @@ public class Settings {
     private boolean pokemonPalettesFollowEvolutions;
     private boolean pokemonPalettesShinyFromNormal;
 
+    public enum CustomPlayerGraphicsMod {
+        UNCHANGED, RANDOM
+    }
+
+    public enum PlayerCharacterMod {
+        PC1, PC2
+    }
+
+    private CustomPlayerGraphicsMod customPlayerGraphicsMod; // TODO: save/load from the settings file
+    private GraphicsPack customPlayerGraphics;
+    private PlayerCharacterMod customPlayerGraphicsCharacterMod;
+
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
         byte[] settings = toString().getBytes(StandardCharsets.UTF_8);
@@ -507,7 +522,7 @@ public class Settings {
         out.write(makeByteSelected(randomizeMovePowers, randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
                 randomizeMoveCategory, correctStaticMusic));
 
-        // 26 evolutions
+        // 26 evolutions 1
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
                 evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosAllowAltFormes,
                 evolutionsMod == EvolutionsMod.RANDOM_EVERY_LEVEL));
@@ -648,6 +663,9 @@ public class Settings {
                 typeEffectivenessMod == TypeEffectivenessMod.KEEP_IDENTITIES,
                 typeEffectivenessMod == TypeEffectivenessMod.INVERSE,
                 inverseTypesRandomImmunities, updateTypeEffectiveness));
+
+        // 56 evolutions 2
+        out.write(makeByteSelected(evosForceGrowth, evosNoConvergence));
 
         try {
             byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
@@ -979,6 +997,9 @@ public class Settings {
         settings.setInverseTypesRandomImmunities(restoreState(data[55], 5));
         settings.setUpdateTypeEffectiveness(restoreState(data[55], 6));
 
+        settings.setEvosForceGrowth(restoreState(data[56], 0));
+        settings.setEvosNoConvergence(restoreState(data[56], 1));
+
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
         settings.setRomName(romName);
@@ -1218,14 +1239,6 @@ public class Settings {
 
     public void setRemoveTimeBasedEvolutions(boolean removeTimeBasedEvolutions) {
         this.removeTimeBasedEvolutions = removeTimeBasedEvolutions;
-    }
-
-    public boolean isEvosAllowAltFormes() {
-        return evosAllowAltFormes;
-    }
-
-    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
-        this.evosAllowAltFormes = evosAllowAltFormes;
     }
 
     public boolean isRaceMode() {
@@ -1568,6 +1581,30 @@ public class Settings {
 
     public void setEvosForceChange(boolean evosForceChange) {
         this.evosForceChange = evosForceChange;
+    }
+
+    public boolean isEvosAllowAltFormes() {
+        return evosAllowAltFormes;
+    }
+
+    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
+        this.evosAllowAltFormes = evosAllowAltFormes;
+    }
+
+    public boolean isEvosForceGrowth() {
+        return evosForceGrowth;
+    }
+
+    public void setEvosForceGrowth(boolean evosForceGrowth) {
+        this.evosForceGrowth = evosForceGrowth;
+    }
+
+    public boolean isEvosNoConvergence() {
+        return evosNoConvergence;
+    }
+
+    public void setEvosNoConvergence(boolean evosNoConvergence) {
+        this.evosNoConvergence = evosNoConvergence;
     }
 
     public boolean isRandomizeMovePowers() {
@@ -2551,6 +2588,38 @@ public class Settings {
 	public void setPokemonPalettesShinyFromNormal(boolean pokemonPalettesShinyFromNormal) {
 		this.pokemonPalettesShinyFromNormal = pokemonPalettesShinyFromNormal;
 	}
+
+    public CustomPlayerGraphicsMod getCustomPlayerGraphicsMod() {
+        return customPlayerGraphicsMod;
+    }
+
+    public void setCustomPlayerGraphicsMod(boolean... bools) {
+        setCustomPlayerGraphicsMod(getEnum(CustomPlayerGraphicsMod.class, bools));
+    }
+
+    public void setCustomPlayerGraphicsMod(CustomPlayerGraphicsMod customPlayerGraphicsMod) {
+        this.customPlayerGraphicsMod = customPlayerGraphicsMod;
+    }
+
+    public GraphicsPack getCustomPlayerGraphics() {
+        return customPlayerGraphics;
+    }
+
+    public void setCustomPlayerGraphics(GraphicsPack customPlayerGraphics) {
+        this.customPlayerGraphics = customPlayerGraphics;
+    }
+
+    public PlayerCharacterMod getCustomPlayerGraphicsCharacterMod() {
+        return customPlayerGraphicsCharacterMod;
+    }
+
+    public void setCustomPlayerGraphicsCharacterMod(boolean... bools) {
+        setCustomPlayerGraphicsCharacterMod(getEnum(PlayerCharacterMod.class, bools));
+    }
+
+    public void setCustomPlayerGraphicsCharacterMod(PlayerCharacterMod playerCharacterMod) {
+        this.customPlayerGraphicsCharacterMod = playerCharacterMod;
+    }
 
 	private static int makeByteSelected(boolean... bools) {
         if (bools.length > 8) {

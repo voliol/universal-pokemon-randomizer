@@ -2,8 +2,14 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.constants.Gen2Constants;
 
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+
+import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
 /**
  * A description of a specific rom, or version of a rom. The {@code RomEntry} differentiates the rom from
@@ -32,6 +38,13 @@ public abstract class RomEntry extends IniEntry {
         }
 
         @Override
+        public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
+            Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+            setFileName(fileName);
+            return readEntriesFromScanner(scanner);
+        }
+
+        @Override
         protected boolean matchesCopyFromValue(T other, String value) {
             return switch (copyFromMode) {
                 case NAME -> value.equalsIgnoreCase(other.getName());
@@ -44,7 +57,7 @@ public abstract class RomEntry extends IniEntry {
     protected String romCode;
     protected int version;
     protected int romType;
-    protected Map<String, String> tweakFiles = new HashMap<>(); // TODO: is this a good name?
+    protected Map<String, String> tweakFiles = new HashMap<>(); // is this a good name?
 
     public RomEntry(String name) {
         super(name);

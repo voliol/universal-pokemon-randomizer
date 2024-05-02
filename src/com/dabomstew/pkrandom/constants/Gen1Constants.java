@@ -28,10 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.dabomstew.pkrandom.pokemon.EncounterArea;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen1Constants {
 
@@ -42,8 +39,8 @@ public class Gen1Constants {
 
 	public static final int bsHPOffset = 1, bsAttackOffset = 2, bsDefenseOffset = 3, bsSpeedOffset = 4,
 			bsSpecialOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8,
-			bsExpYieldOffset = 9, bsFrontSpriteOffset = 11, bsBackSpriteOffset = 13, bsLevel1MovesOffset = 15,
-			bsGrowthCurveOffset = 19, bsTMHMCompatOffset = 20;
+			bsExpYieldOffset = 9, bsFrontImageDimensionsOffset = 10, bsFrontImagePointerOffset = 11,
+            bsBackImagePointerOffset = 13, bsLevel1MovesOffset = 15, bsGrowthCurveOffset = 19, bsTMHMCompatOffset = 20;
 
     public static final int encounterTableEnd = 0xFFFF, encounterTableSize = 10, yellowSuperRodTableSize = 4;
 
@@ -103,6 +100,15 @@ public class Gen1Constants {
 
     public static final String guaranteedCatchPrefix = "CF7EFE01";
 
+    public static final int playerFrontImageOffset5 = 54; // "5" because it is used to put a value at index 5 of PlayerFrontImagePointers
+
+    public static final int playerFrontBankOffset1 = 4, playerFrontBankOffset2 = 3, playerFrontBankOffset3 = 4,
+            playerFrontBankOffset4 = 3, playerFrontBankOffset5 = 4;
+
+    public static final int playerBackImageOffsetRGB0 = 8, playerBackImageOffset1 = 3, playerBackImageOffsetYellow0 = 3;
+
+    public static final int oldManBackImageOffsetRGB = 5, oldManBackImageOffsetYellow = -14, oakBackImageOffset = -7;
+
     public static final Type[] typeTable = constructTypeTable();
 
     private static Type[] constructTypeTable() {
@@ -135,6 +141,24 @@ public class Gen1Constants {
     }
 
     public static final int nonNeutralEffectivenessCount = 82;
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        return switch (evolutionType) {
+            case LEVEL -> 1;
+            case STONE -> 2;
+            case TRADE -> 3;
+            default -> -1;
+        };
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        return switch (index) {
+            case 1 -> EvolutionType.LEVEL;
+            case 2 -> EvolutionType.STONE;
+            case 3 -> EvolutionType.TRADE;
+            default -> EvolutionType.NONE;
+        };
+    }
 
     public static final ItemList allowedItems = setupAllowedItems();
 

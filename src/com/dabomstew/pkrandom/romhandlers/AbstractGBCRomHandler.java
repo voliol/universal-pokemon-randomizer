@@ -25,17 +25,22 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.gbspace.BankDividedFreedSpace;
+import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
+
+import javax.imageio.ImageIO;
 
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
@@ -55,6 +60,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         this.freedSpace = new BankDividedFreedSpace(GBConstants.bankSize, rom.length / GBConstants.bankSize,
                 getRomEntry().getArrayValue("ReservedBanks"));
         freeUnusedSpaceAtEndOfBanks();
+        freeUnusedBanks();
     }
 
     /**
@@ -64,6 +70,33 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         for (Map.Entry<Integer, Integer> margin : getRomEntry().getBankEndFreeSpaceMargins().entrySet()) {
             freeUnusedSpaceAtEndOfBank(margin.getKey(), margin.getValue());
         }
+    }
+
+    protected void freeUnusedBanks() {
+        for (int bank : getRomEntry().getArrayValue("UnusedBanks")) {
+            if (isBankEmpty(bank)) {
+                freeSpaceBetween(bank*GBConstants.bankSize, (bank+1)*GBConstants.bankSize - 1);
+            } else {
+                // TODO: what is a good way to log this?
+                System.out.printf("""
+                        Bank 0x%2x was expected to be empty, but is not.
+                        This is a sign of a modified ROM which is not supported by the randomizer.
+                        The randomizer will handle it as well as it can, but be aware of the risk of
+                        the output being corrupted, or otherwise non-functional.
+                        """, bank);
+                freeUnusedSpaceAtEndOfBank(bank, 0x100); // arbitrary large amount
+            }
+        }
+    }
+
+    protected boolean isBankEmpty(int bank) {
+        byte unusedByte = this.getFreeSpaceByte();
+        for (int i = 0; i < GBConstants.bankSize; i++) {
+            if (rom[bank*GBConstants.bankSize + i] != unusedByte) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -247,29 +280,84 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         return readString(offset, Integer.MAX_VALUE, textEngineMode);
     }
 
-    protected class GBDataRewriter<E> extends DataRewriter<E> {
+    protected void writeImage(int offset, GBCImage image) {
+        writeBytes(offset, image.toBytes());
+    }
 
-        private boolean restrictToSameBank = true;
+    protected class GBCDataRewriter<E> extends DataRewriter<E> {
 
-        public GBDataRewriter() {
+        public GBCDataRewriter() {
+            super();
             setLongAlignAdresses(false);
         }
+    }
 
-        public boolean isRestrictToSameBank() {
-            return restrictToSameBank;
-        }
+    protected class SpecificBankDataRewriter<E> extends DataRewriter<E> {
 
-        public void setRestrictToSameBank(boolean restrictToSameBank) {
-            this.restrictToSameBank = restrictToSameBank;
+        int bank;
+
+        public SpecificBankDataRewriter(int bank) {
+            this.bank = bank;
+            this.pointerReader = offset -> readPointer(offset, bank);
         }
 
         @Override
         protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
-            int newOffset = restrictToSameBank ? findAndUnfreeSpaceInBank(data.length, bankOf(pointerOffset))
-                    : findAndUnfreeSpace(data.length);
+            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
 
-            writePointer(pointerOffset, newOffset);
+            pointerWriter.accept(pointerOffset, newOffset);
             writeBytes(newOffset, data);
+
+            return newOffset;
+        }
+    }
+
+    protected class SameBankDataRewriter<E> extends GBCDataRewriter<E> {
+
+        @Override
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+            int bank = bankOf(pointerReader.apply(pointerOffset));
+            int newOffset = findAndUnfreeSpaceInBank(data.length, bank);
+
+            pointerWriter.accept(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            return newOffset;
+        }
+    }
+
+    protected class IndirectBankDataRewriter<E> extends GBCDataRewriter<E> {
+
+        private final int[] bankOffsets;
+        private final int bank;
+
+        public IndirectBankDataRewriter(int[] bankOffsets) {
+            super();
+            this.bankOffsets = bankOffsets;
+            this.bank = rom[bankOffsets[0]] & 0xFF;
+            for (int i = 1; i < bankOffsets.length; i++) {
+                if ((rom[bankOffsets[i]] & 0xFF) != bank) {
+                    throw new IllegalArgumentException("Invalid bankOffset=0x" + Integer.toHexString(bankOffsets[i]) +
+                            ". Value is 0x" + Integer.toHexString(rom[bankOffsets[i]] & 0xFF) + ", instead of 0x" +
+                            Integer.toHexString(bank) + ".");
+                }
+            }
+
+            System.out.println("Bank before: " + Integer.toHexString(bank));
+            setPointerReader(pointerOffset -> readPointer(pointerOffset, bank));
+        }
+
+        @Override
+        protected int repointAndWriteToFreeSpace(int pointerOffset, byte[] data) {
+
+            int newOffset = findAndUnfreeSpace(data.length);
+
+            pointerWriter.accept(pointerOffset, newOffset);
+            writeBytes(newOffset, data);
+
+            for (int bankOffset : bankOffsets) {
+                writeByte(bankOffset, (byte) bankOf(newOffset));
+            }
 
             return newOffset;
         }
@@ -282,7 +370,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("Bank full. Can't find " + length + " free bytes anywhere.");
+            throw new RandomizerIOException("Bank 0x" + Integer.toHexString(bank) + " full. Can't find " + length +
+                    " free bytes anywhere.");
         }
         return foundOffset;
     }
@@ -298,7 +387,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     }
 
     protected void freeUnusedSpaceAtEndOfBank(int bank, int frontMargin) {
-        //System.out.println("Trying to free unused space at end of bank " + bank);
+//        System.out.println("Trying to free unused space at end of bank 0x" + Integer.toHexString(bank));
         freeUnusedSpaceBefore((bank + 1) * GBConstants.bankSize - 1, frontMargin);
     }
 
@@ -309,13 +398,32 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
      */
     protected void freeUnusedSpaceBefore(int end, int frontMargin) {
         int start = end;
-        while (rom[start] == getFreeSpaceByte()) {
+        int minStart = bankOf(end) * GBConstants.bankSize;
+        while (rom[start] == getFreeSpaceByte() && start >= minStart) {
             start--;
         }
         start++;
         start += frontMargin;
         if (start <= end) {
             freeSpaceBetween(start, end);
+        }
+    }
+
+    // for filling the RomEntries
+    public void findImageForRomEntry(String fileName, String romEntryName, boolean columnMode) {
+        try {
+            BufferedImage orig = ImageIO.read(new File(fileName));
+            byte[] data = new GBCImage.Builder(orig).columnMode(columnMode)
+                    .build().toBytes();
+//            System.out.println(RomFunctions.bytesToHex(data));
+//            System.out.println("found at:");
+            List<Integer> foundAt = RomFunctions.search(rom, data);
+//            System.out.println(foundAt);
+            if (!foundAt.isEmpty()) {
+                System.out.println(romEntryName + "=0x" + Integer.toHexString(foundAt.get(0)));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

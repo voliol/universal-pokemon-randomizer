@@ -178,7 +178,7 @@ public class SettingsUpdater {
                 oldTweaks |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
             }
             if ((dataBlock[0] & (1 << 5)) != 0) {
-                oldTweaks |= MiscTweak.UNUSED8.getValue(); // UPDATE_TYPE_EFFECTIVENESS at the time, that misc tweak was later made an ordinary option
+                oldTweaks |= MiscTweak.OLD_UPDATE_TYPE_EFFECTIVENESS.getValue();
             }
             if ((dataBlock[2] & (1 << 5)) != 0) {
                 oldTweaks |= MiscTweak.FORCE_CHALLENGE_MODE.getValue();
@@ -316,8 +316,13 @@ public class SettingsUpdater {
             dataBlock[16] &= ~0x60;
             dataBlock[50] |= ((oldMinimumCatchRate - 1) << 3);
         }
-        
+
         if (oldVersion < 322) {
+            // Pokemon palettes
+            insertExtraByte(51, (byte) 0x1);
+        }
+        
+        if (oldVersion < 326) {
             //added new enum WildPokemonTypeMod and moved TypeThemed to it,
             //so we need to select None on RestrictionMod if TypeThemed is selected,
             //and select None on TypeMod otherwise
@@ -327,17 +332,28 @@ public class SettingsUpdater {
             } else {
                 dataBlock[16] |= 0x20;
             }
+            // starter type mod / starter no legendaries / starter no dual type checkbox
+            insertExtraByte(52, (byte) 0x1);
+            // starter single-type type choice
+            insertExtraByte(53, (byte) 0);
+            // new wild pokes byte
+            insertExtraByte(54, (byte) 0);
         }
 
-        if (oldVersion < 323) {
-            //add two new bytes, including new enum
-            dataBlock[52] = 0x01;
-            dataBlock[53] = 0;
-            actualDataLength += 2;
-        }
+        if (oldVersion < 330) {
+            // type effectiveness
+            insertExtraByte(55, (byte) 0x1);
+            // move the former Update Type Effectiveness misctweak to a proper setting
+            int miscTweaks = FileFunctions.readFullIntBigEndian(dataBlock, 32);
+            boolean updateTypeEffectiveness = (MiscTweak.OLD_UPDATE_TYPE_EFFECTIVENESS.getValue() | miscTweaks) != 0;
+            if (updateTypeEffectiveness) {
+                dataBlock[55] &= 0x40;
+            }
 
-        // TODO: add a dataBlock for Type Effectiveness
-        // TODO: move the update type effectiveness misctweak to a proper setting
+            // new evolutions byte
+            insertExtraByte(56, (byte) 0);
+
+        }
 
         // fix checksum
         CRC32 checksum = new CRC32();

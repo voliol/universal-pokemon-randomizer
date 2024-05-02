@@ -22,9 +22,9 @@ package com.dabomstew.pkrandom.randomizers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.graphics.Color;
-import com.dabomstew.pkrandom.graphics.Gen2TypeColors;
-import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
+import com.dabomstew.pkrandom.graphics.palettes.Gen2TypeColors;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -63,8 +63,8 @@ public class Gen2PaletteRandomizer extends PaletteRandomizer {
 
 	private Palette getRandom2ColorPalette() {
 		Palette palette = new Palette(2);
-		palette.setColor(0, Gen2TypeColors.getRandomBrightColor(random));
-		palette.setColor(1, Gen2TypeColors.getRandomDarkColor(random));
+		palette.set(0, Gen2TypeColors.getRandomBrightColor(random));
+		palette.set(1, Gen2TypeColors.getRandomDarkColor(random));
 		return palette;
 	}
 
@@ -73,8 +73,8 @@ public class Gen2PaletteRandomizer extends PaletteRandomizer {
 		Color brightColor = Gen2TypeColors.getRandomBrightColor(primaryType, random);
 		Color darkColor = Gen2TypeColors.getRandomDarkColor(secondaryType == null ? primaryType : secondaryType,
 				random);
-		palette.setColor(0, brightColor);
-		palette.setColor(1, darkColor);
+		palette.set(0, brightColor);
+		palette.set(1, darkColor);
 		return palette;
 	}
 
@@ -106,17 +106,17 @@ public class Gen2PaletteRandomizer extends PaletteRandomizer {
 		}
 
 		private void setNormalPaletteFromPrevo(Pokemon evFrom, Pokemon evTo) {
-			Palette palette = evFrom.getNormalPalette().clone();
+			Palette palette = new Palette(evFrom.getNormalPalette());
 
 			if (typeSanity) {
 				if (evTo.getPrimaryType() != evFrom.getPrimaryType()) {
 					Color newBrightColor = Gen2TypeColors.getRandomBrightColor(evTo.getPrimaryType(), random);
-					palette.setColor(0, newBrightColor);
+					palette.set(0, newBrightColor);
 
 				} else if (evTo.getSecondaryType() != evFrom.getSecondaryType()) {
 					Color newDarkColor = Gen2TypeColors.getRandomDarkColor(
 							evTo.getSecondaryType() == null ? evTo.getPrimaryType() : evTo.getSecondaryType(), random);
-					palette.setColor(1, newDarkColor);
+					palette.set(1, newDarkColor);
 				}
 			}
 

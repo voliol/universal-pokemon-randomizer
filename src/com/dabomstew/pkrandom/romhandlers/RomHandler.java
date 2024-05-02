@@ -25,16 +25,17 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.pokemon.*;
+
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.*;
 
 public interface RomHandler {
 
@@ -606,8 +607,6 @@ public interface RomHandler {
 
     void randomizeEvolutions(Settings settings);
 
-    void randomizeEvolutionsEveryLevel(Settings settings);
-
     // In the earlier games, alt formes use the same evolutions as the base forme.
     // In later games, this was changed so that alt formes can have unique evolutions
     // compared to the base forme.
@@ -635,9 +634,13 @@ public interface RomHandler {
 
     boolean isYellow();
 
+    boolean hasMultiplePlayerCharacters();
+
     String getROMName();
 
     String getROMCode();
+
+    int getROMType();
 
     String getSupportLevel();
 
@@ -681,6 +684,10 @@ public interface RomHandler {
     // Graphics
     // ========
 
+    boolean hasCustomPlayerGraphicsSupport();
+
+    void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace);
+
     PokemonImageGetter createPokemonImageGetter(Pokemon pk);
 
     // Kind of strange this is a responsibility for the romHandler, when the resources are so specific to the
@@ -689,6 +696,10 @@ public interface RomHandler {
      * Returns an identifier for resource files related to this ROM, used when randomizing palettes.
      */
     String getPaletteFilesID();
+
+    void dumpAllPokemonImages();
+
+    List<BufferedImage> getAllPokemonImages();
 
     // ======
     // Types

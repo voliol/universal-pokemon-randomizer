@@ -24,10 +24,8 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.pokemon.EncounterArea;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.pokemon.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +52,7 @@ public class Gen2Constants {
 
     public static final int bsHPOffset = 1, bsAttackOffset = 2, bsDefenseOffset = 3, bsSpeedOffset = 4,
             bsSpAtkOffset = 5, bsSpDefOffset = 6, bsPrimaryTypeOffset = 7, bsSecondaryTypeOffset = 8,
-            bsCatchRateOffset = 9, bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12, bsPicDimensionsOffset = 17,
+            bsCatchRateOffset = 9, bsCommonHeldItemOffset = 11, bsRareHeldItemOffset = 12, bsFrontImageDimensionsOffset = 17,
             bsGrowthCurveOffset = 22, bsTMHMCompatOffset = 24, bsMTCompatOffset = 31;
 
     public static final int fishingAreaCount = 12, pokesPerFishingArea = 11, fishingAreaEntryLength = 3,
@@ -330,6 +328,34 @@ public class Gen2Constants {
 
     public static final String friendshipValueForEvoLocator = "FEDCDA";
 
+    public static String getName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Chris";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "Kris";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. Gen 2 only has two playable characters, Chris and Kris.");
+        }
+    }
+
+    // directly after chris's respective images
+    public static final int krisTrainerCardImageOffset = 16 * 5 * 7, krisFrontImageOffset = 16 * 7 * 7;
+
+    public static final int krisPalettePointerOffset = -4;
+
+    public static final int krisSpritePaletteOffset = 16;
+
+    public static final int chrisBackBankOffsetGS0 = 16, dudeBackPointerOffset = 10, // battle script GS
+                            chrisBackBankOffsetGS1 = 6, // hall of fame script GS
+                            chrisBackBankOffsetCrystal0 = -2, // battle script Crystal
+                            chrisBackBankOffsetCrystal1 = 3; // hall of fame script Crystal
+
+    public static final int chrisTrainerClassGS = 12, chrisPaletteTrainerClassGS = 0, chrisTrainerClassCrystal = 0,
+            falknerTrainerClass = 1;
+
+    public static final int tcPal1Offset = 0xB, tcPal5Offset = 0x2B,
+                            tcFalknerPalOffset = 0x7C, tcChuckPalOffset = 0xA8, tcClairePalOffset = 0xD0;
+
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
         table[0x00] = Type.NORMAL;
@@ -397,6 +423,28 @@ public class Gen2Constants {
     }
 
     public static final int nonNeutralEffectivenessCount = 110;
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        return switch (evolutionType) {
+            case LEVEL -> 1;
+            case STONE -> 2;
+            case TRADE, TRADE_ITEM -> 3;
+            case HAPPINESS, HAPPINESS_DAY, HAPPINESS_NIGHT -> 4;
+            case LEVEL_ATTACK_HIGHER, LEVEL_DEFENSE_HIGHER, LEVEL_ATK_DEF_SAME -> 5;
+            default -> -1;
+        };
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        return switch (index) {
+            case 1 -> EvolutionType.LEVEL;
+            case 2 -> EvolutionType.STONE;
+            case 3 -> EvolutionType.TRADE;
+            case 4 -> EvolutionType.HAPPINESS;
+            case 5 -> EvolutionType.LEVEL_ATTACK_HIGHER;
+            default -> EvolutionType.NONE;
+        };
+    }
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
         // Gym Leaders

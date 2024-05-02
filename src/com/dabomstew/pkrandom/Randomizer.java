@@ -196,11 +196,8 @@ public class Randomizer {
         // Random Evos
         // Applied after type to pick new evos based on new types.
 
-        if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
+        if (settings.getEvolutionsMod() != Settings.EvolutionsMod.UNCHANGED) {
             romHandler.randomizeEvolutions(settings);
-            evolutionsChanged = true;
-        } else if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL) {
-            romHandler.randomizeEvolutionsEveryLevel(settings);
             evolutionsChanged = true;
         }
 
@@ -672,6 +669,11 @@ public class Randomizer {
             paletteRandomizer.randomizePokemonPalettes();
         }
 
+        if (settings.getCustomPlayerGraphicsMod() == Settings.CustomPlayerGraphicsMod.RANDOM) {
+            romHandler.setCustomPlayerGraphics(settings.getCustomPlayerGraphics(),
+                    settings.getCustomPlayerGraphicsCharacterMod());
+        }
+
         // Intro Pokemon...
         romHandler.randomizeIntroPokemon();
 
@@ -758,7 +760,7 @@ public class Randomizer {
             }
             StringBuilder evoStr = new StringBuilder();
             try {
-                evoStr.append(" -> ").append(pkmn.getEvolutionsFrom().get(0).to.fullName());
+                evoStr.append(" -> ").append(pkmn.getEvolutionsFrom().get(0).getTo().fullName());
             } catch (Exception e) {
                 evoStr.append(" (no evolution)");
             }
@@ -875,12 +877,12 @@ public class Randomizer {
             if (pk != null && !pk.isActuallyCosmetic()) {
                 int numEvos = pk.getEvolutionsFrom().size();
                 if (numEvos > 0) {
-                    StringBuilder evoStr = new StringBuilder(pk.getEvolutionsFrom().get(0).toFullName());
+                    StringBuilder evoStr = new StringBuilder(pk.getEvolutionsFrom().get(0).getTo().fullName());
                     for (int i = 1; i < numEvos; i++) {
                         if (i == numEvos - 1) {
-                            evoStr.append(" and ").append(pk.getEvolutionsFrom().get(i).toFullName());
+                            evoStr.append(" and ").append(pk.getEvolutionsFrom().get(i).getTo().fullName());
                         } else {
-                            evoStr.append(", ").append(pk.getEvolutionsFrom().get(i).toFullName());
+                            evoStr.append(", ").append(pk.getEvolutionsFrom().get(i).getTo().fullName());
                         }
                     }
                     log.printf("%-15s -> %-15s" + NEWLINE, pk.fullName(), evoStr);

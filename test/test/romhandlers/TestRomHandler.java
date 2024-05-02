@@ -18,7 +18,7 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    protected List<BufferedImage> getAllPokemonImages() {
+    public List<BufferedImage> getAllPokemonImages() {
         return null;
     }
 

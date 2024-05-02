@@ -27,8 +27,10 @@ public class RomHandlerTest {
     private static final String TEST_ROMS_PATH = "test/roms";
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
+    private static final String TEST_CPG_PATH = "test/players";
+
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{4}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
     }
 
     public static String[] getAllRomNames() {

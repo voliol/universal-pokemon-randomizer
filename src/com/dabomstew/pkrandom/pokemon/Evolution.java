@@ -26,14 +26,16 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class Evolution implements Comparable<Evolution> {
 
-    public Pokemon from;
-    public Pokemon to;
-    public boolean carryStats;
-    public EvolutionType type;
-    public int extraInfo;
-    public int forme;
-    public String formeSuffix = "";
-    public int level = 0;
+    private Pokemon from;
+    private Pokemon to;
+    private EvolutionType type;
+    private int extraInfo;
+
+    private boolean carryStats;
+
+    // only relevant for Gen 7
+    private int forme;
+    private int level = 0; // in generations pre gen 7, the extrainfo has the level
 
     public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
         this.from = from;
@@ -43,6 +45,71 @@ public class Evolution implements Comparable<Evolution> {
         this.extraInfo = extra;
     }
 
+    /**
+     * Returns the {@link Pokemon} this Evolution is "from".<br>
+     * E.g. for the Evolution "Bulbasaur->Ivysaur" this would return Bulbasaur.
+     */
+    public Pokemon getFrom() {
+        return from;
+    }
+
+    public void setFrom(Pokemon from) {
+        this.from = from;
+    }
+
+    /**
+     * Returns the {@link Pokemon} this Evolution is "from".<br>
+     * E.g. for the Evolution "Bulbasaur->Ivysaur" this would return Ivysaur.
+     */
+    public Pokemon getTo() {
+        return to;
+    }
+
+    public void setTo(Pokemon to) {
+        this.to = to;
+    }
+
+    public EvolutionType getType() {
+        return type;
+    }
+
+    public void setType(EvolutionType type) {
+        this.type = type;
+    }
+
+    public int getExtraInfo() {
+        return extraInfo;
+    }
+
+    public void setExtraInfo(int extraInfo) {
+        this.extraInfo = extraInfo;
+    }
+
+    public boolean isCarryStats() {
+        return carryStats;
+    }
+
+    public void setCarryStats(boolean carryStats) {
+        this.carryStats = carryStats;
+    }
+
+    public int getForme() {
+        return forme;
+    }
+
+    public void setForme(int forme) {
+        this.forme = forme;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    // TODO: are the evolutions hashed somewhere????
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -78,7 +145,12 @@ public class Evolution implements Comparable<Evolution> {
         } else return Integer.compare(this.type.ordinal(), o.type.ordinal());
     }
 
-    public String toFullName() {
-        return to.getName() + formeSuffix;
+    @Override
+    public String toString() {
+        return forme == 0 && level == 0 ?
+                String.format("(%s->%s, %s, extraInfo:%d, carryStats:%b)", from.fullName(), to.fullName(),
+                        type, extraInfo, carryStats) :
+                String.format("(%s->%s, %s, extraInfo:%d, carryStats:%b, forme:%d, level:%d)", from.fullName(), to.fullName(),
+                        type, extraInfo, carryStats, forme, level);
     }
 }

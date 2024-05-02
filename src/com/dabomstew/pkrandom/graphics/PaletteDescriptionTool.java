@@ -21,47 +21,30 @@ package com.dabomstew.pkrandom.graphics;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
+import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.RandomSource;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.Utils;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.palettes.*;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
+import com.dabomstew.pkrandom.romhandlers.*;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.RandomSource;
-import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.Utils;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-//import com.dabomstew.pkrandom.gui.ROMFilter;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
-import com.dabomstew.pkrandom.romhandlers.*;
+import java.util.*;
 
 // TODO: show the name of the loaded ROM/desc file
 

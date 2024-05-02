@@ -1,8 +1,7 @@
 package com.dabomstew.pkrandom;
 
-import java.awt.Graphics2D;
-
 /*----------------------------------------------------------------------------*/
+
 /*--  GFXFunctions.java - functions relating to graphics rendering.         --*/
 /*--                      Mainly used for rendering the sprites.            --*/
 /*--                                                                        --*/
@@ -29,6 +28,9 @@ import java.awt.Graphics2D;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
@@ -41,6 +43,8 @@ public class GFXFunctions {
 
 	private static final int DEFAULT_TILE_WIDTH = 8;
 	private static final int DEFAULT_TILE_HEIGHT = 8;
+
+	private static final int DEFAULT_BPP = 4;
 
 	public static BufferedImage drawTiledImage(byte[] data, int[] palette, int width, int height, int bpp) {
 		return drawTiledImage(data, palette, 0, width, height, DEFAULT_TILE_WIDTH, DEFAULT_TILE_HEIGHT, bpp);
@@ -86,6 +90,17 @@ public class GFXFunctions {
 	}
 
 	/**
+	 * Takes a palette in the form of a {@link Palette} object and returns an
+	 * {@link IndexColorModel}.
+	 *
+	 * @param palette A Palette object.
+	 * @param bits    The number of bits each pixel occupies.
+	 */
+	public static IndexColorModel indexColorModelFromPalette(Palette palette, int bits) {
+		return indexColorModelFromPalette(palette.toARGB(), bits);
+	}
+
+	/**
 	 * Takes a palette in the form of 24-bit ARGB values and returns an
 	 * {@link IndexColorModel}.
 	 * 
@@ -112,11 +127,51 @@ public class GFXFunctions {
 		return new IndexColorModel(bits, size, r, g, b, a);
 	}
 
+	/**
+	 * Splits a {@link BufferedImage} into even rectangular pieces, given the
+	 * dimensions these should be, and returns an array of these pieces. Throws am
+	 * {@link IllegalArgumentException} if the dimensions of the BufferedImage is
+	 * not divisible by the piece dimensions. <br>
+	 * <br>
+	 * This method allows for easier handling of "sheets" of images, since the
+	 * return is the same regardless whether the pieces are laid out horizontally,
+	 * vertically, or even in a 2D grid. Pieces are read row-for-row, left-to-right,
+	 * top to bottom. I.e.: <br>
+	 * -----<br>
+	 * |0|1|<br>
+	 * |2|3|<br>
+	 * -----<br>
+	 *
+	 * @param bim         The BufferedImage to split.
+	 * @param pieceWidth  The width of each of the returned pieces, in pixels.
+	 * @param pieceHeight The height of each of the returned pieces, in pixels.
+	 */
+	public static BufferedImage[] splitImage(BufferedImage bim, int pieceWidth, int pieceHeight) {
+		if (bim.getWidth() % pieceWidth != 0 || bim.getHeight() % pieceHeight != 0) {
+			throw new IllegalArgumentException("Image (" + bim.getWidth() + "x" + bim.getHeight() + " pixels) "
+					+ "can't be evenly split into pieces of " + pieceWidth + "x" + pieceHeight + " pixels.");
+		}
+
+		int widthInPieces = bim.getWidth() / pieceWidth;
+		int heightInPieces = bim.getHeight() / pieceHeight;
+		BufferedImage[] pieces = new BufferedImage[widthInPieces * heightInPieces];
+
+		for (int pieceY = 0; pieceY < heightInPieces; pieceY++) {
+			for (int pieceX = 0; pieceX < widthInPieces; pieceX++) {
+				int x = pieceX * pieceWidth;
+				int y = pieceY * pieceHeight;
+				pieces[pieceY * widthInPieces + pieceX] = bim.getSubimage(x, y, pieceWidth, pieceHeight);
+			}
+		}
+		return pieces;
+	}
+
 	public static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
 			int bpp) {
 		return drawTiledZOrderImage(data, palette, offset, width, height, 8, 8, bpp);
 	}
 
+	// TODO: this long implementation should be redundant with transposeTiles() + drawTiledImage()
 	private static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
 			int tileWidth, int tileHeight, int bpp) {
 		if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
@@ -164,19 +219,20 @@ public class GFXFunctions {
 	 * Allows for writing image files to Gen III-V games, by using the data as an
 	 * argument for the appropriate writing method.
 	 */
-	// TODO: it makes sense for this to be handled by its own class(es).
+	@Deprecated
 	public static byte[] readTiledImageData(BufferedImage bim) {
+		return readTiledImageData(bim, DEFAULT_BPP);
+	}
 
-		int bpp = 4;
+	@Deprecated
+	public static byte[] readTiledImageData(BufferedImage bim, int bpp) {
+		System.out.println("GFXFunctions.readTiledImageData() is deprecated. Use GBAImage.toBytes() instead.");
+
 		int tileWidth = DEFAULT_TILE_WIDTH;
 		int tileHeight = DEFAULT_TILE_HEIGHT;
 
 		if (bim.getRaster().getNumBands() != 1) {
-			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .png file.");
-		}
-
-		if (bim.getRaster().getSampleModel().getSampleSize(0) != bpp) {
-			throw new IllegalArgumentException("Invalid input; image should come from a 4bpp .png file.");
+			throw new IllegalArgumentException("Invalid input.");
 		}
 
 		if (bim.getWidth() % tileWidth != 0 || bim.getHeight() % tileHeight != 0) {
@@ -184,7 +240,8 @@ public class GFXFunctions {
 					"Invalid input; image must be dividable into " + tileWidth + "x" + tileHeight + " pixel tiles.");
 		}
 
-		byte[] data = new byte[bim.getWidth() * bim.getHeight() / 2];
+		int ppb = (8 / bpp); // pixels-per-byte
+		byte[] data = new byte[bim.getWidth() * bim.getHeight() / ppb];
 
 		int numTiles = bim.getWidth() * bim.getHeight() / (tileWidth * tileHeight);
 		int widthInTiles = bim.getWidth() / tileWidth;
@@ -195,13 +252,48 @@ public class GFXFunctions {
 			int tileY = tileNum / widthInTiles;
 
 			for (int yT = 0; yT < tileHeight; yT++) {
-				for (int xT = 0; xT < tileWidth; xT += 2) {
+				for (int xT = 0; xT < tileWidth; xT += ppb) {
 
-					int low = bim.getData().getSample(tileX * tileWidth + xT, tileY * tileHeight + yT, 0);
-					int high = bim.getData().getSample(tileX * tileWidth + xT + 1, tileY * tileHeight + yT, 0);
-					data[next] = (byte) (low + (high << 4));
+//					if (7 == xT) {
+//						// general
+//						int combined = 0;
+//						for (int i = 0; i < ppb; i++) {
+//							int pixel = bim.getData().getSample(tileX * tileWidth + xT + i, tileY * tileHeight + yT, 0);
+//							combined += (pixel << (i * bpp));
+//						}
+//						data[next] = (byte) combined;
+//					}
+//
+//					// 8 bpp
+//					else if (bpp == 8) {
+//						data[next] = (byte) bim.getData().getSample(tileX * tileWidth + xT, tileY * tileHeight + yT, 0);
+//					}
+
+					// TODO: reconcile that 4bpp has the later pixel first, but 1 bpp has them in
+					// order
+
+					// 4 bpp
+					if (bpp == 4) {
+						int pixel1 = bim.getData().getSample(tileX * tileWidth + xT, tileY * tileHeight + yT, 0);
+						int pixel2 = bim.getData().getSample(tileX * tileWidth + xT + 1, tileY * tileHeight + yT, 0);
+						data[next] = (byte) ((pixel2 << 4) + pixel1);
+					}
+
+					// 1 bpp
+					else if (bpp == 1) {
+						int combined = 0;
+						for (int i = 0; i < 8; i++) {
+							int pixel = bim.getData().getSample(tileX * tileWidth + xT + i, tileY * tileHeight + yT, 0);
+							combined += (pixel << (7 - i));
+						}
+						data[next] = (byte) combined;
+					}
+
+					else {
+						throw new IllegalArgumentException("Other bpp than 4 and 1 not supported yet.");
+					}
+
 					next++;
-
 				}
 			}
 
@@ -355,10 +447,10 @@ public class GFXFunctions {
 	}
 
 	/**
-	 * Returns true if all non-null {@link BufferedImage}s in a jagged 2D array 
-	 * have {@link IndexColorModel}s with the same colors in the same order.
+	 * Returns true if all non-null {@link BufferedImage}s in a jagged 2D array have
+	 * {@link IndexColorModel}s with the same colors in the same order.
 	 *
-	 * @param bims     A jagged 2D array of {@link BufferedImage}s.
+	 * @param bims A jagged 2D array of {@link BufferedImage}s.
 	 */
 	private static boolean allSameIndexedPalette(BufferedImage[][] bims) {
 		BufferedImage base = firstNonNull(bims);

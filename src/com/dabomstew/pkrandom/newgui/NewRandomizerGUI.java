@@ -27,11 +27,13 @@ package com.dabomstew.pkrandom.newgui;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.cli.CliRandomizer;
+import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.graphics.packs.*;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -92,6 +94,8 @@ public class NewRandomizerGUI {
     private JCheckBox peForceChangeCheckBox;
     private JCheckBox peChangeImpossibleEvosCheckBox;
     private JCheckBox peMakeEvolutionsEasierCheckBox;
+    private JCheckBox peForceGrowthCheckBox;
+    private JCheckBox peNoConvergenceCheckBox;
     private JRadioButton spUnchangedRadioButton;
     private JRadioButton spCustomRadioButton;
     private JRadioButton spRandomCompletelyRadioButton;
@@ -310,6 +314,15 @@ public class NewRandomizerGUI {
     private JPanel graphicsPanel;
     private JLabel ppalNotExistLabel;
     private JLabel ppalPartiallyImplementedLabel;
+    private JLabel cpgNotExistLabel;
+    private JRadioButton cpgUnchangedRadioButton;
+    private JRadioButton cpgCustomRadioButton;
+    private JComboBox<GraphicsPack> cpgComboBox;
+    private JButton cpgRandomButton;
+    private GraphicsPackInfo cpgCustomInfo;
+    private JLabel cpgReplaceLabel;
+    private JRadioButton cpgReplaceRadioButton1;
+    private JRadioButton cpgReplaceRadioButton2;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox miscDisableLowHPMusicCheckBox;
     private JCheckBox tpUseLocalPokemonCheckBox;
@@ -331,6 +344,8 @@ public class NewRandomizerGUI {
     private JRadioButton teInverseRadioButton;
     private JCheckBox teAddRandomImmunitiesCheckBox;
     private JCheckBox teUpdateTypeEffectivenessCheckbox;
+
+    private static final Random RND = new Random();
 
     private static JFrame frame;
 
@@ -406,6 +421,7 @@ public class NewRandomizerGUI {
 
             try {
 
+                // TODO: think of how to make this work with the V branch
                 URL url = new URL(SysConstants.API_URL_ZX);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
@@ -613,6 +629,13 @@ public class NewRandomizerGUI {
         teInverseRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         ppalRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        cpgComboBox.addItemListener(e -> {
+            GraphicsPack cpg = (GraphicsPack) e.getItem();
+            cpgCustomInfo.setGraphicsPack(cpg);
+        });
+        cpgRandomButton.addActionListener(e -> cpgComboBox.setSelectedIndex(RND.nextInt(cpgComboBox.getItemCount())));
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -690,6 +713,7 @@ public class NewRandomizerGUI {
         mtNoneAvailableLabel.setVisible(false);
         ppalNotExistLabel.setVisible(false);
         ppalPartiallyImplementedLabel.setVisible(false);
+        cpgNotExistLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);
         liveTweaksPanel.setVisible(false);
         websiteLinkLabel.setCursor(new java.awt.Cursor(Cursor.HAND_CURSOR));
@@ -1578,6 +1602,8 @@ public class NewRandomizerGUI {
         peLimitEvolutionsToThreeCheckBox.setSelected(settings.isEvosMaxThreeStages());
         peForceChangeCheckBox.setSelected(settings.isEvosForceChange());
         peAllowAltFormesCheckBox.setSelected(settings.isEvosAllowAltFormes());
+        peForceGrowthCheckBox.setSelected(settings.isEvosForceGrowth());
+        peNoConvergenceCheckBox.setSelected(settings.isEvosNoConvergence());
 
         mdRandomizeMoveAccuracyCheckBox.setSelected(settings.isRandomizeMoveAccuracies());
         mdRandomizeMoveCategoryCheckBox.setSelected(settings.isRandomizeMoveCategory());
@@ -1831,6 +1857,8 @@ public class NewRandomizerGUI {
         settings.setEvosMaxThreeStages(peLimitEvolutionsToThreeCheckBox.isSelected());
         settings.setEvosForceChange(peForceChangeCheckBox.isSelected());
         settings.setEvosAllowAltFormes(peAllowAltFormesCheckBox.isSelected() && peAllowAltFormesCheckBox.isVisible());
+        settings.setEvosForceGrowth(peForceGrowthCheckBox.isSelected());
+        settings.setEvosNoConvergence(peNoConvergenceCheckBox.isSelected());
 
         settings.setRandomizeMoveAccuracies(mdRandomizeMoveAccuracyCheckBox.isSelected());
         settings.setRandomizeMoveCategory(mdRandomizeMoveCategoryCheckBox.isSelected());
@@ -1967,6 +1995,10 @@ public class NewRandomizerGUI {
         settings.setPokemonPalettesFollowTypes(ppalFollowTypesCheckBox.isSelected());
         settings.setPokemonPalettesFollowEvolutions(ppalFollowEvolutionsCheckBox.isSelected());
         settings.setPokemonPalettesShinyFromNormal(ppalShinyFromNormalCheckBox.isSelected());
+
+        settings.setCustomPlayerGraphicsMod(cpgUnchangedRadioButton.isSelected(), cpgCustomRadioButton.isSelected());
+        settings.setCustomPlayerGraphics((GraphicsPack) cpgComboBox.getSelectedItem());
+        settings.setCustomPlayerGraphicsCharacterMod(cpgReplaceRadioButton1.isSelected(), cpgReplaceRadioButton2.isSelected());
 
         int currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
@@ -2148,7 +2180,8 @@ public class NewRandomizerGUI {
 		Arrays.asList(peUnchangedRadioButton, peRandomRadioButton, peRandomEveryLevelRadioButton,
 				peSimilarStrengthCheckBox, peSameTypingCheckBox, peLimitEvolutionsToThreeCheckBox,
 				peForceChangeCheckBox, peChangeImpossibleEvosCheckBox, peMakeEvolutionsEasierCheckBox,
-				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox).forEach(this::setInitialButtonState);
+				peRemoveTimeBasedEvolutionsCheckBox, peAllowAltFormesCheckBox, peForceGrowthCheckBox,
+                peNoConvergenceCheckBox).forEach(this::setInitialButtonState);
 
 		Arrays.asList(spUnchangedRadioButton, spCustomRadioButton, spRandomCompletelyRadioButton,
 				spRandomTwoEvosRadioButton, spTypeNoneRadioButton, spTypeFwgRadioButton, spTypeTriangleRadioButton,
@@ -2289,7 +2322,14 @@ public class NewRandomizerGUI {
                 teUpdateTypeEffectivenessCheckbox).forEach(this::setInitialButtonState);
 
         Arrays.asList(ppalUnchangedRadioButton, ppalRandomRadioButton, ppalFollowTypesCheckBox,
-                ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox).forEach(this::setInitialButtonState);
+                ppalFollowEvolutionsCheckBox, ppalShinyFromNormalCheckBox,
+                        cpgUnchangedRadioButton, cpgCustomRadioButton, cpgRandomButton,
+                        cpgReplaceRadioButton1, cpgReplaceRadioButton2)
+                .forEach(this::setInitialButtonState);
+        cpgComboBox.setVisible(true);
+        cpgComboBox.setEnabled(false);
+        cpgCustomInfo.setVisible(true);
+        cpgCustomInfo.setEnabled(false);
 
         // TODO: why do these checkboxes exist? can't they just be generated from the MiscTweak objects?
 		Arrays.asList(miscBWExpPatchCheckBox, miscNerfXAccuracyCheckBox, miscFixCritRateCheckBox,
@@ -2668,6 +2708,32 @@ public class NewRandomizerGUI {
             ppalShinyFromNormalCheckBox.setVisible(!(romHandler instanceof Gen1RomHandler) && ppalSupport);
             ppalShinyFromNormalCheckBox.setEnabled(false);
 
+            boolean cpgSupport = romHandler.hasCustomPlayerGraphicsSupport();
+            cpgNotExistLabel.setVisible(!cpgSupport);
+            cpgUnchangedRadioButton.setVisible(cpgSupport);
+            cpgUnchangedRadioButton.setEnabled(cpgSupport);
+            cpgUnchangedRadioButton.setSelected(ppalSupport);
+            cpgCustomRadioButton.setVisible(cpgSupport);
+            cpgCustomRadioButton.setEnabled(cpgSupport);
+            cpgComboBox.setVisible(cpgSupport);
+            cpgComboBox.setEnabled(false);
+            if (cpgSupport) {
+                fillCustomPlayerGraphicsComboBox();
+            }
+            cpgRandomButton.setVisible(cpgSupport);
+            cpgRandomButton.setEnabled(false);
+            cpgCustomInfo.setVisible(cpgSupport);
+            cpgCustomInfo.setEnabled(false);
+            boolean cpgReplaceChoiceSupport = cpgSupport && romHandler.hasMultiplePlayerCharacters();
+            cpgReplaceLabel.setVisible(cpgReplaceChoiceSupport);
+            cpgReplaceLabel.setEnabled(false);
+            cpgReplaceRadioButton1.setVisible(cpgReplaceChoiceSupport);
+            cpgReplaceRadioButton1.setEnabled(false);
+            cpgReplaceRadioButton1.setSelected(cpgReplaceChoiceSupport);
+            cpgReplaceRadioButton2.setVisible(cpgReplaceChoiceSupport);
+            cpgReplaceRadioButton2.setEnabled(false);
+
+            // Misc. Tweaks
             int mtsAvailable = romHandler.miscTweaksAvailable();
             int mtCount = MiscTweak.allTweaks.size();
             List<JCheckBox> usableCheckBoxes = new ArrayList<>();
@@ -2720,6 +2786,41 @@ public class NewRandomizerGUI {
             attemptToLogException(e, "GUI.processFailed","GUI.processFailedNoLog", null, null);
             romHandler = null;
             initialState();
+        }
+    }
+
+    private void fillCustomPlayerGraphicsComboBox() {
+        DefaultComboBoxModel<GraphicsPack> comboBoxModel = new DefaultComboBoxModel<>();
+        cpgComboBox.setModel(comboBoxModel);
+        File players = new File(SysConstants.customPCGDirectory);
+        File[] playerDirectories = players.listFiles(File::isDirectory);
+        if (playerDirectories != null) {
+            for (File playerDir : playerDirectories) {
+                try {
+                    String path = playerDir.getCanonicalPath();
+                    List<GraphicsPackEntry> entries = GraphicsPackEntry.readAllFromFolder(path);
+                    entries.forEach(entry -> {
+                        if (entry.getStringValue("RomType").equalsIgnoreCase("Gen1") && romHandler.generationOfPokemon() == 1) {
+                            comboBoxModel.addElement(new Gen1PlayerCharacterGraphics(entry));
+                        } else if (entry.getStringValue("RomType").equalsIgnoreCase("Gen2") && romHandler.generationOfPokemon() == 2) {
+                            comboBoxModel.addElement(new Gen2PlayerCharacterGraphics(entry));
+                        } else if (romHandler.generationOfPokemon() == 3) {
+                            if ((romHandler.getROMType() == Gen3Constants.RomType_Ruby ||
+                                    romHandler.getROMType() == Gen3Constants.RomType_Sapp ||
+                                    romHandler.getROMType() == Gen3Constants.RomType_Em) &&
+                                    entry.getStringValue("RomType").equalsIgnoreCase("RSE")) {
+                                comboBoxModel.addElement(new RSEPlayerCharacterGraphics(entry));
+                            } else if (romHandler.getROMType() == Gen3Constants.RomType_FRLG &&
+                                    entry.getStringValue("RomType").equalsIgnoreCase("FRLG")) {
+                                comboBoxModel.addElement(new FRLGPlayerCharacterGraphics(entry));
+                            }
+                        }
+                    });
+                } catch (Exception ignored) {
+                    System.out.println("Could not read " + playerDir);
+                    ignored.printStackTrace();
+                }
+            }
         }
     }
 
@@ -2902,6 +3003,8 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setEnabled(true);
             peForceChangeCheckBox.setEnabled(true);
             peAllowAltFormesCheckBox.setEnabled(true);
+            peForceGrowthCheckBox.setEnabled(true);
+            peNoConvergenceCheckBox.setEnabled(true);
         } else if (peRandomEveryLevelRadioButton.isSelected()) {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2910,6 +3013,9 @@ public class NewRandomizerGUI {
             peLimitEvolutionsToThreeCheckBox.setSelected(false);
             peForceChangeCheckBox.setEnabled(true);
             peAllowAltFormesCheckBox.setEnabled(true);
+            peForceGrowthCheckBox.setEnabled(false);
+            peForceGrowthCheckBox.setSelected(false);
+            peNoConvergenceCheckBox.setEnabled(true);
         } else {
             peSimilarStrengthCheckBox.setEnabled(false);
             peSimilarStrengthCheckBox.setSelected(false);
@@ -2921,6 +3027,10 @@ public class NewRandomizerGUI {
             peForceChangeCheckBox.setSelected(false);
             peAllowAltFormesCheckBox.setEnabled(false);
             peAllowAltFormesCheckBox.setSelected(false);
+            peForceGrowthCheckBox.setEnabled(false);
+            peForceGrowthCheckBox.setSelected(false);
+            peNoConvergenceCheckBox.setEnabled(false);
+            peNoConvergenceCheckBox.setSelected(false);
         }
 
         boolean spCustomStatus = spCustomRadioButton.isSelected();
@@ -3447,6 +3557,22 @@ public class NewRandomizerGUI {
             ppalFollowEvolutionsCheckBox.setSelected(false);
             ppalShinyFromNormalCheckBox.setEnabled(false);
             ppalShinyFromNormalCheckBox.setSelected(false);
+        }
+
+        if (cpgCustomRadioButton.isSelected() && cpgCustomRadioButton.isVisible() && cpgCustomRadioButton.isEnabled()) {
+            cpgComboBox.setEnabled(true);
+            cpgRandomButton.setEnabled(true);
+            cpgCustomInfo.setEnabled(true);
+            cpgReplaceLabel.setEnabled(true);
+            cpgReplaceRadioButton1.setEnabled(true);
+            cpgReplaceRadioButton2.setEnabled(true);
+        } else {
+            cpgComboBox.setEnabled(false);
+            cpgRandomButton.setEnabled(false);
+            cpgCustomInfo.setEnabled(false);
+            cpgReplaceLabel.setEnabled(false);
+            cpgReplaceRadioButton1.setEnabled(false);
+            cpgReplaceRadioButton2.setEnabled(false);
         }
     }
 

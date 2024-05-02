@@ -24,26 +24,33 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.gbspace.FreedSpace;
+import com.dabomstew.pkrandom.graphics.images.GBAImage;
+import com.dabomstew.pkrandom.graphics.packs.FRLGPlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.graphics.packs.RSEPlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen3EventTextEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
+import compressors.DSCmp;
+import compressors.DSDecmp;
+
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen3EventTextEntry;
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
-import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.gbspace.FreedSpace;
-import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
-import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.pokemon.*;
-
-import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
-import compressors.DSCmp;
-import compressors.DSDecmp;
+import java.util.stream.IntStream;
 
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
@@ -195,6 +202,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
         addPointerBlocksToRomEntry();
         addMoveTutorInfoToRomEntry();
+        addTrainerGraphicsInfoToRomEntry();
     }
 
     private void addPointerBlocksToRomEntry() {
@@ -210,8 +218,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void addPointerBlock1ToRomEntry() {
-        romEntry.putIntValue("PokemonFrontSprites", readPointer(Gen3Constants.pokemonFrontSpritesPointer));
-        romEntry.putIntValue("PokemonBackSprites", readPointer(Gen3Constants.pokemonBackSpritesPointer));
+        romEntry.putIntValue("PokemonFrontImages", readPointer(Gen3Constants.pokemonFrontImagesPointer));
+        romEntry.putIntValue("PokemonBackImages", readPointer(Gen3Constants.pokemonBackImagesPointer));
         romEntry.putIntValue("PokemonNormalPalettes", readPointer(Gen3Constants.pokemonNormalPalettesPointer));
         romEntry.putIntValue("PokemonShinyPalettes", readPointer(Gen3Constants.pokemonShinyPalettesPointer));
         romEntry.putIntValue("PokemonIconSprites", readPointer(Gen3Constants.pokemonIconSpritesPointer));
@@ -235,6 +243,61 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (romEntry.getRomType() == Gen3Constants.RomType_Em || romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             romEntry.putIntValue("MoveTutorCompatibility",
                     romEntry.getIntValue("MoveTutorData") + romEntry.getIntValue("MoveTutorMoves") * 2);
+        }
+    }
+
+    private void addTrainerGraphicsInfoToRomEntry() {
+        addTrainerFrontPalettesToRomEntry();
+        addTrainerBackPalettesToRomEntry();
+        addMapIconInfoToRomEntry();
+    }
+
+    private void addTrainerFrontPalettesToRomEntry() {
+        int offset;
+        switch (romEntry.getRomType()) {
+            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+                    offset = Gen3Constants.rsTrainerFrontPalettesOffset;
+            case Gen3Constants.RomType_Em ->
+                    offset = Gen3Constants.emTrainerFrontPalettesOffset;
+            case Gen3Constants.RomType_FRLG ->
+                    offset = Gen3Constants.frlgTrainerFrontPalettesOffset;
+            default ->
+                    throw new RuntimeException("Invalid romType");
+        }
+        addRelativeOffsetToRomEntry("TrainerFrontPalettes", "TrainerFrontImages", offset);
+    }
+
+    private void addTrainerBackPalettesToRomEntry() {
+        int offset;
+        switch (romEntry.getRomType()) {
+            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+                    offset = Gen3Constants.rsTrainerBackPalettesOffset;
+            case Gen3Constants.RomType_Em ->
+                    offset = Gen3Constants.emTrainerBackPalettesOffset;
+            case Gen3Constants.RomType_FRLG ->
+                    offset = Gen3Constants.frlgTrainerBackPalettesOffset;
+            default ->
+                    throw new RuntimeException("Invalid romType");
+        }
+        addRelativeOffsetToRomEntry("TrainerBackPalettes", "TrainerBackImages", offset);
+
+    }
+
+    private void addMapIconInfoToRomEntry() {
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            addRelativeOffsetToRomEntry("RedMapIconPalettePointer", "RedMapIconImagePointer",
+                    Gen3Constants.redMapIconPalettePointerOffset);
+            addRelativeOffsetToRomEntry("LeafMapIconImagePointer", "RedMapIconImagePointer",
+                    Gen3Constants.leafMapIconImagePointerOffset);
+            addRelativeOffsetToRomEntry("LeafMapIconPalettePointer", "RedMapIconImagePointer",
+                    Gen3Constants.leafMapIconPalettePointerOffset);
+        } else {
+            addRelativeOffsetToRomEntry("BrendanMapIconPalette", "BrendanMapIconImage",
+                    Gen3Constants.brendanMapIconPaletteOffset);
+            addRelativeOffsetToRomEntry("MayMapIconImage", "BrendanMapIconImage",
+                    Gen3Constants.mayMapIconImageOffset);
+            addRelativeOffsetToRomEntry("MayMapIconPalette", "BrendanMapIconImage",
+                    Gen3Constants.mayMapIconPaletteOffset);
         }
     }
 
@@ -1120,7 +1183,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (handleInvalidPointerExternally) {
                 return -1;
             } else {
-                throw new IllegalArgumentException("No valid pointer at " + offset + ".");
+                throw new IllegalArgumentException("No valid pointer at 0x" + Integer.toHexString(offset) + ".");
             }
         }
         return pointer;
@@ -2760,7 +2823,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 if (method >= 1 && method <= Gen3Constants.evolutionMethodCount && evolvingTo >= 1
                         && evolvingTo <= numInternalPokes) {
                     int extraInfo = readWord(evoOffset + j * 8 + 2);
-                    EvolutionType et = EvolutionType.fromIndex(3, method);
+                    EvolutionType et = Gen3Constants.evolutionTypeFromIndex(method);
                     Evolution evo = new Evolution(pk, pokesInternal[evolvingTo], true, et, extraInfo);
                     if (!pk.getEvolutionsFrom().contains(evo)) {
                         pk.getEvolutionsFrom().add(evo);
@@ -2772,8 +2835,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // In that case, we should have Ninjask carry stats
             if (pk.getEvolutionsFrom().size() > 1) {
                 for (Evolution e : pk.getEvolutionsFrom()) {
-                    if (e.type != EvolutionType.LEVEL_CREATE_EXTRA) {
-                        e.carryStats = false;
+                    if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
+                        e.setCarryStats(false);
                     }
                 }
             }
@@ -2788,9 +2851,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int evoOffset = baseOffset + (idx) * 0x28;
             int evosWritten = 0;
             for (Evolution evo : pk.getEvolutionsFrom()) {
-                writeWord(evoOffset, evo.type.toIndex(3));
-                writeWord(evoOffset + 2, evo.extraInfo);
-                writeWord(evoOffset + 4, pokedexToInternal[evo.to.getNumber()]);
+                writeWord(evoOffset, Gen3Constants.evolutionTypeToIndex(evo.getType()));
+                writeWord(evoOffset + 2, evo.getExtraInfo());
+                writeWord(evoOffset + 4, pokedexToInternal[evo.getTo().getNumber()]);
                 writeWord(evoOffset + 6, 0);
                 evoOffset += 8;
                 evosWritten++;
@@ -2818,65 +2881,65 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.getEvolutionsFrom()) {
                     // Not trades, but impossible without trading
-                    if (evo.type == EvolutionType.HAPPINESS_DAY && romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+                    if (evo.getType() == EvolutionType.HAPPINESS_DAY && romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
                         // happiness day change to Sun Stone
-                        evo.type = EvolutionType.STONE;
-                        evo.extraInfo = Gen3Items.sunStone;
+                        evo.setType(EvolutionType.STONE);
+                        evo.setExtraInfo(Gen3Items.sunStone);
                         addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames[Gen3Items.sunStone]);
                     }
-                    if (evo.type == EvolutionType.HAPPINESS_NIGHT && romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+                    if (evo.getType() == EvolutionType.HAPPINESS_NIGHT && romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
                         // happiness night change to Moon Stone
-                        evo.type = EvolutionType.STONE;
-                        evo.extraInfo = Gen3Items.moonStone;
+                        evo.setType(EvolutionType.STONE);
+                        evo.setExtraInfo(Gen3Items.moonStone);
                         addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames[Gen3Items.moonStone]);
                     }
-                    if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY && romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+                    if (evo.getType() == EvolutionType.LEVEL_HIGH_BEAUTY && romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
                         // beauty change to level 35
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 35;
+                        evo.setType(EvolutionType.LEVEL);
+                        evo.setExtraInfo(35);
                         addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Pure Trade
-                    if (evo.type == EvolutionType.TRADE) {
+                    if (evo.getType() == EvolutionType.TRADE) {
                         // Haunter, Machoke, Kadabra, Graveler
                         // Make it into level 37, we're done.
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 37;
+                        evo.setType(EvolutionType.LEVEL);
+                        evo.setExtraInfo(37);
                         addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                     }
                     // Trade w/ Held Item
-                    if (evo.type == EvolutionType.TRADE_ITEM) {
-                        if (evo.from.getNumber() == Species.poliwhirl) {
+                    if (evo.getType() == EvolutionType.TRADE_ITEM) {
+                        if (evo.getFrom().getNumber() == Species.poliwhirl) {
                             // Poliwhirl: Lv 37
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 37;
+                            evo.setType(EvolutionType.LEVEL);
+                            evo.setExtraInfo(37);
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
-                        } else if (evo.from.getNumber() == Species.slowpoke) {
+                        } else if (evo.getFrom().getNumber() == Species.slowpoke) {
                             // Slowpoke: Water Stone
-                            evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen3Items.waterStone;
+                            evo.setType(EvolutionType.STONE);
+                            evo.setExtraInfo(Gen3Items.waterStone);
                             addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames[Gen3Items.waterStone]);
-                        } else if (evo.from.getNumber() == Species.seadra) {
+                        } else if (evo.getFrom().getNumber() == Species.seadra) {
                             // Seadra: Lv 40
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 40;
+                            evo.setType(EvolutionType.LEVEL);
+                            evo.setExtraInfo(40);
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
-                        } else if (evo.from.getNumber() == Species.clamperl
-                                && evo.extraInfo == Gen3Items.deepSeaTooth) {
+                        } else if (evo.getFrom().getNumber() == Species.clamperl
+                                && evo.getExtraInfo() == Gen3Items.deepSeaTooth) {
                             // Clamperl -> Huntail: Lv30
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 30;
+                            evo.setType(EvolutionType.LEVEL);
+                            evo.setExtraInfo(30);
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
-                        } else if (evo.from.getNumber() == Species.clamperl
-                                && evo.extraInfo == Gen3Items.deepSeaScale) {
+                        } else if (evo.getFrom().getNumber() == Species.clamperl
+                                && evo.getExtraInfo() == Gen3Items.deepSeaScale) {
                             // Clamperl -> Gorebyss: Water Stone
-                            evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen3Items.waterStone;
+                            evo.setType(EvolutionType.STONE);
+                            evo.setExtraInfo(Gen3Items.waterStone);
                             addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames[Gen3Items.waterStone]);
                         } else {
                             // Onix, Scyther or Porygon: Lv30
-                            evo.type = EvolutionType.LEVEL;
-                            evo.extraInfo = 30;
+                            evo.setType(EvolutionType.LEVEL);
+                            evo.setExtraInfo(30);
                             addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
                         }
                     }
@@ -2915,16 +2978,16 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.getEvolutionsFrom()) {
                     // In Gen 3, only Eevee has a time-based evolution.
-                    if (evol.type == EvolutionType.HAPPINESS_DAY) {
+                    if (evol.getType() == EvolutionType.HAPPINESS_DAY) {
                         // Eevee: Make sun stone => Espeon
-                        evol.type = EvolutionType.STONE;
-                        evol.extraInfo = Gen3Items.sunStone;
-                        addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[evol.extraInfo]);
-                    } else if (evol.type == EvolutionType.HAPPINESS_NIGHT) {
+                        evol.setType(EvolutionType.STONE);
+                        evol.setExtraInfo(Gen3Items.sunStone);
+                        addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[evol.getExtraInfo()]);
+                    } else if (evol.getType() == EvolutionType.HAPPINESS_NIGHT) {
                         // Eevee: Make moon stone => Umbreon
-                        evol.type = EvolutionType.STONE;
-                        evol.extraInfo = Gen3Items.moonStone;
-                        addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[evol.extraInfo]);
+                        evol.setType(EvolutionType.STONE);
+                        evol.setExtraInfo(Gen3Items.moonStone);
+                        addEvoUpdateStone(timeBasedEvolutionUpdates, evol, itemNames[evol.getExtraInfo()]);
                     }
                 }
             }
@@ -3258,6 +3321,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void randomizeIntroPokemon() {
+        int imageTableOffset = romEntry.getIntValue("PokemonFrontImages");
+        int paletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
+        int cryOffset = romEntry.getIntValue("IntroCryOffset");
+        int imageOffset = romEntry.getIntValue("IntroImageOffset");
+        int paletteOffset = romEntry.getIntValue("IntroPaletteOffset");
+        int otherOffset = romEntry.getIntValue("IntroOtherOffset");
+
         // FRLG
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             // intro sprites : first 255 only due to size
@@ -3266,57 +3336,50 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
             }
             int introPokemon = pokedexToInternal[introPk.getNumber()];
-            int frontSprites = romEntry.getIntValue("PokemonFrontSprites");
-            int palettes = romEntry.getIntValue("PokemonNormalPalettes");
 
-            writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) introPokemon);
-            writeByte(romEntry.getIntValue("IntroOtherOffset"), (byte) introPokemon);
+            writeByte(cryOffset, (byte) introPokemon);
+            writeByte(otherOffset, (byte) introPokemon);
 
-            int spriteBase = romEntry.getIntValue("IntroSpriteOffset");
-            writePointer(spriteBase, frontSprites + introPokemon * 8);
-            writePointer(spriteBase + 4, palettes + introPokemon * 8);
+            writePointer(imageOffset, imageTableOffset + introPokemon * 8);
+            writePointer(imageOffset + 4, paletteTableOffset + introPokemon * 8);
         } else if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
             // intro sprites : any pokemon in the range 0-510 except bulbasaur
             int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
             while (introPokemon == 1 || introPokemon > 510) {
                 introPokemon = pokedexToInternal[randomPokemon().getNumber()];
             }
-            int frontSprites = romEntry.getIntValue("PokemonFrontSprites");
-            int palettes = romEntry.getIntValue("PokemonNormalPalettes");
-            int cryCommand = romEntry.getIntValue("IntroCryOffset");
-            int otherCommand = romEntry.getIntValue("IntroOtherOffset");
 
             if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
-                rom[cryCommand] = (byte) 0xFF;
-                rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
+                rom[cryOffset] = (byte) 0xFF;
+                rom[cryOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
 
-                rom[cryCommand + 2] = (byte) (introPokemon - 0xFF);
-                rom[cryCommand + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR0;
+                rom[cryOffset + 2] = (byte) (introPokemon - 0xFF);
+                rom[cryOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR0;
 
-                rom[otherCommand] = (byte) 0xFF;
-                rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
+                rom[otherOffset] = (byte) 0xFF;
+                rom[otherOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
 
-                rom[otherCommand + 2] = (byte) (introPokemon - 0xFF);
-                rom[otherCommand + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR4;
+                rom[otherOffset + 2] = (byte) (introPokemon - 0xFF);
+                rom[otherOffset + 3] = Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR4;
             } else {
-                rom[cryCommand] = (byte) introPokemon;
-                rom[cryCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
+                rom[cryOffset] = (byte) introPokemon;
+                rom[cryOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR0;
 
-                writeWord(cryCommand + 2, Gen3Constants.gbaNopOpcode);
+                writeWord(cryOffset + 2, Gen3Constants.gbaNopOpcode);
 
-                rom[otherCommand] = (byte) introPokemon;
-                rom[otherCommand + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
+                rom[otherOffset] = (byte) introPokemon;
+                rom[otherOffset + 1] = Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR4;
 
-                writeWord(otherCommand + 2, Gen3Constants.gbaNopOpcode);
+                writeWord(otherOffset + 2, Gen3Constants.gbaNopOpcode);
             }
 
-            writePointer(romEntry.getIntValue("IntroSpriteOffset"), frontSprites + introPokemon * 8);
-            writePointer(romEntry.getIntValue("IntroPaletteOffset"), palettes + introPokemon * 8);
+            writePointer(imageOffset, imageTableOffset + introPokemon * 8);
+            writePointer(paletteOffset, paletteTableOffset + introPokemon * 8);
         } else {
             // Emerald, intro sprite: any Pokemon.
             int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
-            writeWord(romEntry.getIntValue("IntroSpriteOffset"), introPokemon);
-            writeWord(romEntry.getIntValue("IntroCryOffset"), introPokemon);
+            writeWord(imageOffset, introPokemon);
+            writeWord(cryOffset, introPokemon);
         }
 
     }
@@ -3717,10 +3780,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             if (pk != null) {
                 keepEvos.clear();
                 for (Evolution evol : pk.getEvolutionsFrom()) {
-                    if (pokemonIncluded.contains(evol.from) && pokemonIncluded.contains(evol.to)) {
+                    if (pokemonIncluded.contains(evol.getFrom()) && pokemonIncluded.contains(evol.getTo())) {
                         keepEvos.add(evol);
                     } else {
-                        evol.to.getEvolutionsTo().remove(evol);
+                        evol.getTo().getEvolutionsTo().remove(evol);
                     }
                 }
                 pk.getEvolutionsFrom().retainAll(keepEvos);
@@ -4065,17 +4128,270 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int shinyPaletteTableOffset = romEntry.getIntValue("PokemonShinyPalettes");
         for (Pokemon pk : getPokemonSet()) {
             int pokeNumber = pokedexToInternal[pk.getNumber()];
-
             int normalPalPointerOffset = normalPaletteTableOffset + pokeNumber * 8;
-            rewritePalette(normalPalPointerOffset, pk.getNormalPalette());
-
             int shinyPalPointerOffset = shinyPaletteTableOffset + pokeNumber * 8;
-            rewritePalette(shinyPalPointerOffset, pk.getShinyPalette());
+
+            if (pk.getNumber() == Species.unown) {
+                int[] altFormeNormalPointerOffsets = IntStream.range(0, Gen3Constants.unownFormeCount - 1)
+                        .map(i -> normalPaletteTableOffset + (Gen3Constants.unownBIndex + i) * 8)
+                        .toArray();
+                int[] altFormeShinyPointerOffsets = IntStream.range(0, Gen3Constants.unownFormeCount - 1)
+                        .map(i -> shinyPaletteTableOffset + (Gen3Constants.unownBIndex + i) * 8)
+                        .toArray();
+                rewriteCompressedData(normalPalPointerOffset, pk.getNormalPalette().toBytes(),
+                        altFormeNormalPointerOffsets);
+                rewriteCompressedData(shinyPalPointerOffset, pk.getShinyPalette().toBytes(),
+                        altFormeShinyPointerOffsets);
+
+            } else {
+                rewriteCompressedPalette(normalPalPointerOffset, pk.getNormalPalette());
+                rewriteCompressedPalette(shinyPalPointerOffset, pk.getShinyPalette());
+            }
         }
     }
 
-    private void rewritePalette(int pointerOffset, Palette palette) {
+    @Override
+    public boolean hasCustomPlayerGraphicsSupport() {
+        return true;
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (!(unchecked instanceof Gen3PlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+
+        if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
+            separateFrontAndBackPlayerPalettes();
+        }
+        if (playerGraphics.hasFrontImage()) {
+            int trainerNum = toReplace.ordinal();
+            if (romEntry.getRomType() == Gen3Constants.RomType_Em) {
+                trainerNum += Gen3Constants.emBrendanFrontImageIndex;
+            } else if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+                trainerNum += Gen3Constants.frlgRedFrontImageIndex;
+            }
+            writeTrainerImage(trainerNum, playerGraphics.getFrontImage());
+        }
+        if (playerGraphics.hasBackImage()) {
+            writeTrainerBackImage(toReplace.ordinal(), playerGraphics.getBackImage());
+        }
+        if (playerGraphics.hasSpritePalettes()) {
+            String name = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                    Gen3Constants.frlgGetName(toReplace) : Gen3Constants.rseGetName(toReplace);
+            int normalIndex = romEntry.getIntValue(name + "NormalPalette");
+            writeOverworldPalette(normalIndex, playerGraphics.getNormalSpritePalette());
+            int reflectionIndex = romEntry.getIntValue(name + "ReflectionPalette");
+            writeOverworldPalette(reflectionIndex, playerGraphics.getReflectionSpritePalette());
+        }
+        if (playerGraphics.hasWalkSprite()) {
+            writePlayerSprite(playerGraphics.getWalkSprite(), toReplace, "WalkImage");
+            writePlayerSprite(playerGraphics.getRunSprite(), toReplace, "RunImage");
+        }
+        if (playerGraphics.hasBikeSprite()) {
+            writePlayerSprite(playerGraphics.getBikeSprite(), toReplace, "BikeImage");
+        }
+        if (playerGraphics.hasFishSprite()) {
+            writePlayerSprite(playerGraphics.getFishSprite(), toReplace, "FishImage");
+        }
+        if (playerGraphics.hasSitSprite()) {
+            writePlayerSprite(playerGraphics.getSitSprite(), toReplace, "SitImage");
+        }
+        if (playerGraphics.hasSurfBlobSprite()) {
+            writePlayerSurfBlobSprite(playerGraphics.getSurfBlobSprite());
+        }
+        if (playerGraphics.hasBirdSprite()) {
+            writePlayerBirdSprite(playerGraphics.getBirdSprite(), toReplace);
+        }
+        if (playerGraphics.hasMapIcon()) {
+            writePlayerMapIcon(playerGraphics.getMapIcon(), toReplace);
+        }
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            setFRLGCustomPlayerGraphics(playerGraphics, toReplace);
+        } else {
+            setRSECustomPlayerGraphics(playerGraphics, toReplace);
+        }
+    }
+
+    private void setRSECustomPlayerGraphics(Gen3PlayerCharacterGraphics unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (!(unchecked instanceof RSEPlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+        if (playerGraphics.hasSitJumpSprite()) {
+            writePlayerSprite(playerGraphics.getSitJumpSprite(), toReplace, "SitJumpImage");
+        }
+        if (playerGraphics.hasAcroBikeSprite()) {
+            writePlayerSprite(playerGraphics.getAcroBikeSprite(), toReplace, "AcroBikeImage");
+        }
+        if (playerGraphics.hasUnderwaterSprite()) {
+            writePlayerSprite(playerGraphics.getUnderwaterSprite(), toReplace, "UnderwaterImage");
+            int underwaterIndex = romEntry.getIntValue("UnderwaterPalette");
+            writeOverworldPalette(underwaterIndex, playerGraphics.getUnderwaterPalette());
+        }
+        if (playerGraphics.hasWateringCanSprite()) {
+            writePlayerWateringCanSprite(playerGraphics.getWateringCanSprite(), toReplace);
+        }
+        if (playerGraphics.hasDecorateSprite()) {
+            writePlayerSprite(playerGraphics.getDecorateSprite(), toReplace, "DecorateImage");
+        }
+        if (playerGraphics.hasFieldMoveSprite()) {
+            writePlayerSprite(playerGraphics.getFieldMoveSprite(), toReplace, "FieldMoveImage");
+        }
+    }
+
+    private void setFRLGCustomPlayerGraphics(Gen3PlayerCharacterGraphics unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (!(unchecked instanceof FRLGPlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+        if (playerGraphics.hasItemSprite()) {
+            writePlayerSprite(playerGraphics.getItemSprite(), toReplace, "ItemImage");
+        }
+        if (playerGraphics.hasItemBikeSprite()) {
+            writePlayerSprite(playerGraphics.getItemBikeSprite(), toReplace, "ItemBikeImage");
+        }
+    }
+
+    private void separateFrontAndBackPlayerPalettes() {
+        int frontTableOffset = romEntry.getIntValue("TrainerFrontPalettes");
+
+        for (int i = 0; i <= 1; i++) {
+            int trainerImageNum = romEntry.getRomType() ==
+                    Gen3Constants.RomType_Em ? i + Gen3Constants.emBrendanFrontImageIndex : i;
+            int frontPointerOffset = frontTableOffset + trainerImageNum * 8;
+            Palette palette = readPalette(readPointer(frontPointerOffset));
+            byte[] paletteBytes = DSCmp.compressLZ10(palette.toBytes());
+            int newOffset = findAndUnfreeSpace(paletteBytes.length);
+            writeBytes(newOffset, paletteBytes);
+            writePointer(frontPointerOffset, newOffset);
+        }
+    }
+
+    private void writeTrainerImage(int trainerNumber, GBAImage image) {
+        int imageTableOffset = romEntry.getIntValue("TrainerFrontImages");
+        int paletteTableOffset = romEntry.getIntValue("TrainerFrontPalettes");
+
+        int imagePointerOffset = imageTableOffset + trainerNumber * 8;
+        rewriteCompressedImage(imagePointerOffset, image);
+
+        int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
+        rewriteCompressedPalette(palettePointerOffset, image.getPalette());
+    }
+
+    private void writeTrainerBackImage(int trainerNumber, GBAImage image) {
+        int imageTableOffset = romEntry.getIntValue("TrainerBackImages");
+        int paletteTableOffset = romEntry.getIntValue("TrainerBackPalettes");
+
+        int imagePointerOffset = imageTableOffset + trainerNumber * 8;
+        if (romEntry.getRomType() == Gen3Constants.RomType_Ruby ||
+                romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
+            rewriteCompressedImage(imagePointerOffset, image);
+        } else {
+            writeBytes(readPointer(imagePointerOffset), image.toBytes());
+        }
+
+        int palettePointerOffset = paletteTableOffset + trainerNumber * 8;
+        rewriteCompressedPalette(palettePointerOffset, image.getPalette());
+    }
+
+    private void writePlayerSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace, String key) {
+        for (int i = 0; i < sprite.getFrameAmount(); i++) {
+            GBAImage frame = sprite.getSubimageFromFrame(i);
+            String name = romEntry.getRomType() == Gen3Constants.RomType_FRLG ?
+                    Gen3Constants.frlgGetName(toReplace) : Gen3Constants.rseGetName(toReplace);
+            int imageNum = romEntry.getIntValue(name + key) + i;
+            writeOverworldImage(imageNum, frame);
+        }
+    }
+
+    private void writePlayerWateringCanSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        int imageNum = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "WateringCanImage");
+        writeOverworldImage(imageNum, sprite.getSubimageFromFrame(0));
+        writeOverworldImage(imageNum + 1, sprite.getSubimageFromFrame(2));
+        writeOverworldImage(imageNum + 2, sprite.getSubimageFromFrame(4));
+        writeOverworldImage(imageNum + 3, sprite.getSubimageFromFrame(1));
+        writeOverworldImage(imageNum + 5, sprite.getSubimageFromFrame(3));
+        writeOverworldImage(imageNum + 7, sprite.getSubimageFromFrame(5));
+    }
+
+    private void writePlayerSurfBlobSprite(GBAImage sprite) {
+        int imageTableOffset = romEntry.getIntValue("OverworldSurfBlobImages");
+
+        for (int frame = 0; frame < sprite.getFrameAmount(); frame++) {
+            writeOverworldImage(frame, sprite.getSubimageFromFrame(frame), imageTableOffset);
+        }
+    }
+
+    private void writePlayerBirdSprite(GBAImage sprite, Settings.PlayerCharacterMod toReplace) {
+        int imageTableOffset = romEntry.getIntValue("OverworldBirdImages");
+
+        writeOverworldImage(0, sprite.getSubimageFromFrame(0), imageTableOffset);
+
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            writeOverworldImage(toReplace == Settings.PlayerCharacterMod.PC1 ? 1 : 3,
+                    sprite.getSubimageFromFrame(1), imageTableOffset);
+            writeOverworldImage(toReplace == Settings.PlayerCharacterMod.PC1 ? 2 : 4,
+                    sprite.getSubimageFromFrame(2), imageTableOffset);
+        }
+    }
+
+    /**
+     * Overwrites an entry in the main overworld image table, with a given {@link BufferedImage}.
+     * The given image must be as large as the one it is overwriting.
+     */
+    private void writeOverworldImage(int index, GBAImage image) {
+        int imageTableOffset = romEntry.getIntValue("OverworldSpriteImages");
+        writeOverworldImage(index, image, imageTableOffset);
+    }
+
+    /**
+     * Overwrites an entry in an overworld image table, with a given {@link BufferedImage}.
+     * The given image must be as large as the one it is overwriting.
+     */
+    private void writeOverworldImage(int index, GBAImage image, int imageTableOffset) {
+        int imagePointerOffset = imageTableOffset + index * 8;
+        int imageOffset = readPointer(imagePointerOffset);
+        int imageLength = readWord(imagePointerOffset + 4);
+
+        byte[] imageData = image.toBytes();
+        if (imageData.length != imageLength) {
+            throw new IllegalArgumentException("Wrong image size. Expected " + imageLength + " bytes, was "
+                    + imageData.length + ".");
+        }
+        writeBytes(imageOffset, imageData);
+    }
+
+    private void writeOverworldPalette(int index, Palette palette) {
+        if (palette.size() != 16) {
+            throw new IllegalArgumentException("Palette must have exactly 16 colors");
+        }
+        int paletteTableOffset = romEntry.getIntValue("OverworldPalettes");
+        int paletteOffset = readPointer(paletteTableOffset + index * 8);
+        writeBytes(paletteOffset, palette.toBytes());
+    }
+
+    private void writePlayerMapIcon(GBAImage mapIcon, Settings.PlayerCharacterMod toReplace) {
+        if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+            int imagePointerOffset = romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace)
+                    + "MapIconImagePointer");
+            rewriteCompressedImage(imagePointerOffset, mapIcon);
+            int paletteOffset = readPointer(romEntry.getIntValue(Gen3Constants.frlgGetName(toReplace)
+                    + "MapIconPalettePointer"));
+            writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
+
+        } else {
+            int imageOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconImage");
+            int paletteOffset = romEntry.getIntValue(Gen3Constants.rseGetName(toReplace) + "MapIconPalette");
+            writeBytes(imageOffset, mapIcon.toBytes());
+            writeBytes(paletteOffset, mapIcon.getPalette().toBytes());
+        }
+    }
+
+    private void rewriteCompressedPalette(int pointerOffset, Palette palette) {
         rewriteCompressedData(pointerOffset, palette.toBytes());
+    }
+
+    private void rewriteCompressedImage(int pointerOffset, GBAImage image) {
+        rewriteCompressedData(pointerOffset, image.toBytes());
     }
 
     /*
@@ -4190,34 +4506,37 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         @Override
         public BufferedImage get() {
-            int num = pokedexToInternal[pk.getNumber()];
-            int sprites = back ? romEntry.getIntValue("PokemonBackSprites") : romEntry.getIntValue("PokemonFrontSprites");
+            // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
 
-            int spriteOffset = readPointer(sprites + num * 8);
-            byte[] trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+            int num = pokedexToInternal[pk.getNumber()];
+            int tableOffset = back ? romEntry.getIntValue("PokemonBackImages") : romEntry.getIntValue("PokemonFrontImages");
+
+            int imageOffset = readPointer(tableOffset + num * 8);
+            byte[] data = DSDecmp.Decompress(rom, imageOffset);
             // Uses the 0-index missingno sprite if the data failed to read, for debugging
             // purposes
-            if (trueSprite == null) {
-                spriteOffset = readPointer(sprites);
-                trueSprite = DSDecmp.Decompress(rom, spriteOffset);
+            if (data == null) {
+                imageOffset = readPointer(tableOffset);
+                data = DSDecmp.Decompress(rom, imageOffset);
             }
 
             Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            // Castform has a 64-color palette, 16 colors for each form.
+            if (pk.getNumber() == Species.castform) {
+                palette = new Palette(Arrays.copyOf(palette.toARGB(), 16));
+            }
+
+            // TODO: make this work
             int[] convPalette = palette.toARGB();
             if (transparentBackground) {
                 convPalette[0] = 0;
             }
-            // Castform has a 64-color palette, 16 colors for each form.
-            if (pk.getNumber() == Species.castform) {
-                convPalette = Arrays.copyOfRange(convPalette, 0, 16);
-            }
 
             // Make image, 4bpp
-            BufferedImage bim = GFXFunctions.drawTiledImage(trueSprite, convPalette, 64, 64, 4);
-
+            GBAImage bim = new GBAImage.Builder(8, 8, palette, data).build();
             if (includePalette) {
-                for (int j = 0; j < convPalette.length; j++) {
-                    bim.setRGB(j, 0, convPalette[j]);
+                for (int i = 0; i < palette.size(); i++) {
+                    bim.setColor(i, 0, i);
                 }
             }
 

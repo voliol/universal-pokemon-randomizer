@@ -37,7 +37,7 @@ import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
 import com.dabomstew.pkrandom.pokemon.Effectiveness;
@@ -496,7 +496,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     protected abstract void saveGraphicalFormePokemonPalettes(Pokemon pk);
 
     @Override
-    protected List<BufferedImage> getAllPokemonImages() {
+    public List<BufferedImage> getAllPokemonImages() {
 //        ripAllOtherPokes();
         List<BufferedImage> bims = new ArrayList<>();
 
@@ -549,7 +549,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     @Override
     public final BufferedImage getMascotImage() {
         try {
-            dumpAllPokemonSprites();
+            dumpAllPokemonImages(); // TODO: rename to dumpAllPokemonImages, maybe don't have it here
         } catch (Exception e) {
             e.printStackTrace();
         }

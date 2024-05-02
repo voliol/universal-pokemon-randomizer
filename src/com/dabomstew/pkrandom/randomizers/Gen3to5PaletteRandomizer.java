@@ -24,7 +24,7 @@ package com.dabomstew.pkrandom.randomizers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.*;
+import com.dabomstew.pkrandom.graphics.palettes.*;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
@@ -49,6 +49,12 @@ import java.util.Map.Entry;
 public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 
 	/**
+	 * A setting to use when testing the palette description files.
+	 * If false, the corresponding source file is read instead of the compiled resource.
+	 */
+	private final static boolean COMPILED = true;
+
+	/**
 	 * An identifier for the related resource files. ROMs that share a
 	 * paletteFilesID also share all resources. If they shouldn't, different ROMs
 	 * must be assigned separate IDs.
@@ -68,7 +74,7 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 	public void randomizePokemonPalettes() {
 
 		// TODO: Figure out what to do with forms, with different palettes and with the same.
-		// TODO: figure out genders in gen IV and V, if anything needs to be done at all
+		// TODO: figure out genders in gen V, if anything needs to be done at all
 
 		this.typeSanity = settings.isPokemonPalettesFollowTypes();
 		this.shinyFromNormal = settings.isPokemonPalettesShinyFromNormal();
@@ -91,7 +97,7 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler.getPokemonSet());
 		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
-		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes", true);
+		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");
 		populatePokemonPalettes(paletteDescriptions);
 
 	}
@@ -142,19 +148,21 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 	 * 
 	 * @param fileKey         The key to this particular kind of file, e.g.
 	 *                        "pokePalettes".
-	 * @param useWhenCompiled If false, the corresponding source file is read
-	 *                        instead of the compiled resource.
 	 */
-	public List<PaletteDescription> getPaletteDescriptions(String fileKey, boolean useWhenCompiled) {
+	public List<PaletteDescription> getPaletteDescriptions(String fileKey) {
 		List<PaletteDescription> paletteDescriptions = new ArrayList<>();
 
 		Reader reader;
-		if (useWhenCompiled) {
-			InputStream infi = getClass().getResourceAsStream(getResourceAdress(fileKey));
-			reader = new InputStreamReader(infi);
+		if (COMPILED) {
+			try {
+				InputStream infi = getClass().getResourceAsStream(getResourceAddress(fileKey));
+				reader = new InputStreamReader(infi);
+			} catch (NullPointerException e) {
+				throw new RandomizerIOException(new RuntimeException("Could not find resource " + getResourceAddress(fileKey), e));
+			}
 		} else {
 			try {
-				reader = new FileReader(getSourceFileAdress(fileKey));
+				reader = new FileReader(getSourceFileAddress(fileKey));
 			} catch (FileNotFoundException e) {
 				throw new RandomizerIOException(e);
 			}
@@ -169,14 +177,14 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 		} catch (java.io.IOException ioe) {
 			// using RandomizerIOException because it is unchecked
 			throw new RandomizerIOException("Could not read palette description file "
-					+ (useWhenCompiled ? getResourceAdress(fileKey) : getSourceFileAdress(fileKey)) + ".");
+					+ (COMPILED ? getResourceAddress(fileKey) : getSourceFileAddress(fileKey)) + ".");
 		}
 
 		return paletteDescriptions;
 	}
 
 	public void savePaletteDescriptionSource(String fileKey, List<PaletteDescription> paletteDescriptions) {
-		String fileAdress = getSourceFileAdress(fileKey);
+		String fileAdress = getSourceFileAddress(fileKey);
 
 		try (PrintWriter writer = new PrintWriter(new FileWriter(fileAdress))) {
 
@@ -192,12 +200,16 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 		}
 	}
 
-	private String getResourceAdress(String fileKey) {
-		return "resources/" + fileKey + paletteFilesID + ".txt";
+	private String getFileName(String fileKey) {
+		return fileKey + paletteFilesID + ".txt";
 	}
 
-	private String getSourceFileAdress(String fileKey) {
-		return "src/com/dabomstew/pkrandom/graphics/" + getResourceAdress(fileKey);
+	private String getResourceAddress(String fileKey) {
+		return "/com/dabomstew/pkrandom/graphics/resources/" + getFileName(fileKey);
+	}
+
+	private String getSourceFileAddress(String fileKey) {
+		return "src/com/dabomstew/pkrandom/graphics/resources/" + getFileName(fileKey);
 	}
 
 	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {

@@ -24,15 +24,24 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.pokemon.EncounterArea;
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.Type;
+
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.Trainer;
+import com.dabomstew.pkrandom.pokemon.Type;
+// TODO: check imports
+
+// TO
 
 public class Gen3Constants {
 
@@ -50,6 +59,8 @@ public class Gen3Constants {
 
     public static final int pokemonCount = 386;
 
+    public static final int unownFormeCount = 28, unownBIndex = 413;
+
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
 
     // These pointer prefixes aren't used despite being accurate to all vanilla ROMs. Using them to search was slow
@@ -63,7 +74,7 @@ public class Gen3Constants {
             pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
     // pointer block 1
-    public static final int pokemonFrontSpritesPointer = 0x128, pokemonBackSpritesPointer = 0x12C,
+    public static final int pokemonFrontImagesPointer = 0x128, pokemonBackImagesPointer = 0x12C,
     		pokemonNormalPalettesPointer = 0x130, pokemonShinyPalettesPointer = 0x134,
     		pokemonIconSpritesPointer = 0x138, pokemonIconPalettesPointer = 0x13C,
     		pokemonNamesPointer = 0x144, moveNamesPointer = 0x148, decorationNamesPointer = 0x14C;
@@ -182,6 +193,37 @@ public class Gen3Constants {
     public static final int cacophonyIndex = 76, airLockIndex = 77, highestAbilityIndex = 77;
 
     public static final int emMeteorFallsStevenIndex = 804;
+
+    public static String rseGetName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Brendan";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "May";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. RSE only has two playable characters, Brendan and May.");
+        }
+    }
+
+    public static String frlgGetName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Red";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "Leaf";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. FRLG only has two playable characters, Red and Leaf.");
+        }
+    }
+
+    public static final int emBrendanFrontImageIndex = 71, frlgRedFrontImageIndex = 135;
+
+    public static final int rsTrainerFrontPalettesOffset = 0x298, emTrainerFrontPalettesOffset = 0x2E8,
+            frlgTrainerFrontPalettesOffset = 0x4A0,
+            rsTrainerBackPalettesOffset = 0x18, emTrainerBackPalettesOffset = 0x40,
+            frlgTrainerBackPalettesOffset = 0x30;
+
+    public static final int brendanMapIconPaletteOffset = -0x20, mayMapIconImageOffset = 0xA0,
+            mayMapIconPaletteOffset = 0x80, redMapIconPalettePointerOffset = 0xC4,
+            leafMapIconImagePointerOffset = -0x30, leafMapIconPalettePointerOffset = 0xE0;
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
@@ -496,6 +538,30 @@ public class Gen3Constants {
     }
 
     public static final int nonNeutralEffectivenessCount = 110;
+
+    private static final EvolutionType[] evolutionTypeTable = new EvolutionType[] {
+            EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT, EvolutionType.LEVEL,
+            EvolutionType.TRADE, EvolutionType.TRADE_ITEM, EvolutionType.STONE, EvolutionType.LEVEL_ATTACK_HIGHER,
+            EvolutionType.LEVEL_ATK_DEF_SAME, EvolutionType.LEVEL_DEFENSE_HIGHER, EvolutionType.LEVEL_LOW_PV,
+            EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_CREATE_EXTRA, EvolutionType.LEVEL_IS_EXTRA,
+            EvolutionType.LEVEL_HIGH_BEAUTY
+    };
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        for (int i = 0; i < evolutionTypeTable.length; i++) {
+            if (evolutionType == evolutionTypeTable[i]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        if (index == -1) {
+            return EvolutionType.NONE;
+        }
+        return evolutionTypeTable[index - 1];
+    }
 
     public static ItemList allowedItems, nonBadItemsRSE, nonBadItemsFRLG;
     public static List<Integer> regularShopItems, opShopItems;

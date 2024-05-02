@@ -60,13 +60,20 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
     private final List<Gen1RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
     private int[] ghostMarowakOffsets = new int[0];
 
-    public Gen1RomEntry(String name) {
+    private Gen1RomEntry(String name) {
         super(name);
+    }
+
+    public Gen1RomEntry(Gen1RomEntry original) {
+        super(original);
+        staticPokemon.addAll(original.staticPokemon);
+        ghostMarowakOffsets = original.ghostMarowakOffsets;
     }
 
     public boolean isYellow() {
         return romType == Gen1Constants.Type_Yellow;
     }
+
     @Override
     protected void setRomType(String s) {
         if (s.equalsIgnoreCase("RB")) {

@@ -20,6 +20,9 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
             super();
             putSpecialKeyMethod("StaticPokemon{}", Gen2RomEntry::addStaticPokemon);
             putSpecialKeyMethod("StaticPokemonGameCorner{}", Gen2RomEntry::addStaticPokemonGameCorner);
+            // aliases for backwards compatibility with old .ini files
+            putIntAlias("PicPointers", "PokemonImages");
+            putIntAlias("UnownPicPointers", "UnownImages");
         }
 
         /**
@@ -65,11 +68,15 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
 
     public static final Gen2RomEntryReader<Gen2RomEntry> READER = new Gen2RomEntryReader<>();
 
-    private String cancelString;
     private final List<Gen2RomHandler.StaticPokemon> staticPokemon = new ArrayList<>();
 
-    public Gen2RomEntry(String name) {
+    private Gen2RomEntry(String name) {
         super(name);
+    }
+
+    public Gen2RomEntry(Gen2RomEntry original) {
+        super(original);
+        this.staticPokemon.addAll(original.staticPokemon);
     }
 
     public boolean isCrystal() {

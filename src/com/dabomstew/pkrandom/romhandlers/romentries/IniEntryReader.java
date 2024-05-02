@@ -1,6 +1,9 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -21,6 +24,20 @@ import static com.dabomstew.pkrandom.FileFunctions.openConfig;
  * @param <T>
  */
 public abstract class IniEntryReader<T extends IniEntry> {
+
+    public static int[] parseArray(String s) {
+        String[] unparsed = s.substring(1, s.length() - 1).split(",");
+        if (unparsed.length == 1 && unparsed[0].trim().isEmpty()) {
+            return new int[0];
+        } else {
+            int[] value = new int[unparsed.length];
+            int i = 0;
+            for (String part : unparsed) {
+                value[i++] = parseInt(part);
+            }
+            return value;
+        }
+    }
 
     public static int parseInt(String s) {
         int radix = 10;
@@ -89,9 +106,30 @@ public abstract class IniEntryReader<T extends IniEntry> {
         specialKeyMethods.put(key, method);
     }
 
-    public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
-        Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+    protected void putArrayAlias(String oldKey, String newKey) {
+        putSpecialKeyMethod(oldKey, (entry, value) -> addArrayValue(entry, newKey, value));
+    }
+
+    protected void putIntAlias(String oldKey, String newKey) {
+        putSpecialKeyMethod(oldKey, (entry, value) -> addIntValue(entry, newKey, value));
+    }
+
+    protected void putStringAlias(String oldKey, String newKey) {
+        putSpecialKeyMethod(oldKey, (entry, value) -> addStringValue(entry, newKey, value));
+    }
+
+    protected void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
+        Scanner scanner = new Scanner(new FileInputStream(fileName), StandardCharsets.UTF_8);
+        setFileName(fileName);
+        return readEntriesFromScanner(scanner);
+    }
+
+    public List<T> readFromString(String string) {
+        Scanner scanner = new Scanner(new StringReader(string));
         return readEntriesFromScanner(scanner);
     }
 
@@ -141,6 +179,12 @@ public abstract class IniEntryReader<T extends IniEntry> {
             return;
         }
 
+        BiConsumer<T, String> specialKeyMethod = specialKeyMethods.get(valuePair[0]);
+        if (specialKeyMethod != null) {
+            specialKeyMethod.accept(current, valuePair[1]);
+            return;
+        }
+
         BiConsumer<T, String[]> keyPrefixMethod = checkForKeyPrefixMethod(valuePair);
         if (keyPrefixMethod != null) {
             keyPrefixMethod.accept(current, valuePair);
@@ -150,12 +194,6 @@ public abstract class IniEntryReader<T extends IniEntry> {
         BiConsumer<T, String[]> keySuffixMethod = checkForKeySuffixMethod(valuePair);
         if (keySuffixMethod != null) {
             keySuffixMethod.accept(current, valuePair);
-            return;
-        }
-
-        BiConsumer<T, String> specialKeyMethod = specialKeyMethods.get(valuePair[0]);
-        if (specialKeyMethod != null) {
-            specialKeyMethod.accept(current, valuePair[1]);
             return;
         }
 
@@ -210,34 +248,41 @@ public abstract class IniEntryReader<T extends IniEntry> {
     }
 
     protected void addArrayValue(String[] valuePair) {
-        String[] unparsed = valuePair[1].substring(1, valuePair[1].length() - 1).split(",");
-        if (unparsed.length == 1 && unparsed[0].trim().isEmpty()) {
-            current.putArrayValue(valuePair[0], new int[0]);
-        } else {
-            int[] value = new int[unparsed.length];
-            int i = 0;
-            for (String s : unparsed) {
-                value[i++] = parseInt(s);
-            }
-            current.putArrayValue(valuePair[0], value);
-        }
+        addArrayValue(current, valuePair[0], valuePair[1]);
+    }
+
+    protected void addArrayValue(T entry, String[] valuePair) {
+        addArrayValue(entry, valuePair[0], valuePair[1]);
+    }
+
+    protected void addArrayValue(T entry, String key, String valueString) {
+        int[] value = parseArray(valueString);
+        entry.putArrayValue(key, value);
     }
 
     protected void addIntValue(String[] valuePair) {
-        addIntValue(current, valuePair);
+        addIntValue(current, valuePair[0], valuePair[1]);
     }
 
     protected void addIntValue(T entry, String[] valuePair) {
-        int value = parseInt(valuePair[1]);
-        entry.putIntValue(valuePair[0], value);
+        addIntValue(entry, valuePair[0], valuePair[1]);
+    }
+
+    protected void addIntValue(T entry, String key, String valueString) {
+        int value = parseInt(valueString);
+        entry.putIntValue(key, value);
     }
 
     protected void addStringValue(String[] valuePair) {
-        addStringValue(current, valuePair);
+        addStringValue(current, valuePair[0], valuePair[1]);
     }
 
     protected void addStringValue(T entry, String[] valuePair) {
-        entry.putStringValue(valuePair[0], valuePair[1]);
+        addStringValue(entry, valuePair[0], valuePair[1]);
+    }
+
+    protected void addStringValue(T entry, String key, String value) {
+        entry.putStringValue(key, value);
     }
 
     private void copyFrom(T entry, String value) {

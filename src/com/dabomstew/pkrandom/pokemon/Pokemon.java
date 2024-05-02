@@ -25,7 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.constants.Species;
-import com.dabomstew.pkrandom.graphics.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,8 +79,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private int genderRatio;
 
-    private int frontSpritePointer;
-    private int picDimensions;
+    private int frontImageDimensions;
 
     private int callRate;
 
@@ -462,6 +461,15 @@ public class Pokemon implements Comparable<Pokemon> {
         return originalSecondaryType;
     }
 
+    /**
+     * Returns true if this shares any {@link Type} with the given Pokemon.
+     */
+    public boolean hasSharedType(Pokemon other) {
+        return getPrimaryType().equals(other.getPrimaryType()) || getPrimaryType().equals(other.getSecondaryType())
+                || (getSecondaryType() != null &&
+                (getSecondaryType().equals(other.getPrimaryType()) || getSecondaryType().equals(other.getSecondaryType())));
+    }
+
     public int getHp() {
         return hp;
     }
@@ -598,20 +606,12 @@ public class Pokemon implements Comparable<Pokemon> {
         this.genderRatio = genderRatio;
     }
 
-    public int getFrontSpritePointer() {
-        return frontSpritePointer;
+    public int getFrontImageDimensions() {
+        return frontImageDimensions;
     }
 
-    public void setFrontSpritePointer(int frontSpritePointer) {
-        this.frontSpritePointer = frontSpritePointer;
-    }
-
-    public int getPicDimensions() {
-        return picDimensions;
-    }
-
-    public void setPicDimensions(int picDimensions) {
-        this.picDimensions = picDimensions;
+    public void setFrontImageDimensions(int frontImageDimensions) {
+        this.frontImageDimensions = frontImageDimensions;
     }
 
     public int getCallRate() {
@@ -678,10 +678,6 @@ public class Pokemon implements Comparable<Pokemon> {
         return evolutionsFrom;
     }
 
-    public void setEvolutionsFrom(List<Evolution> evolutionsFrom) {
-        this.evolutionsFrom = evolutionsFrom;
-    }
-
     /**
      * Returns a (modifiable!) {@link List} of {@link Evolution}s where this Pokémon species is what the evolution is
      * "to".<br>
@@ -692,10 +688,6 @@ public class Pokemon implements Comparable<Pokemon> {
      */
     public List<Evolution> getEvolutionsTo() {
         return evolutionsTo;
-    }
-
-    public void setEvolutionsTo(List<Evolution> evolutionsTo) {
-        this.evolutionsTo = evolutionsTo;
     }
 
     public List<MegaEvolution> getMegaEvolutionsFrom() {

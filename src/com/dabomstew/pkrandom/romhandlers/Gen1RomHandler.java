@@ -24,22 +24,27 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.images.GBCImage;
+import com.dabomstew.pkrandom.graphics.packs.GBCPlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.graphics.palettes.SGBPaletteID;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.GBCTMTextEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen1RomEntry;
+import compressors.Gen1Cmp;
+import compressors.Gen1Decmp;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
-
-import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
-import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.Palette;
-import com.dabomstew.pkrandom.graphics.PaletteID;
-import com.dabomstew.pkrandom.pokemon.*;
-import compressors.Gen1Decmp;
 
 public class Gen1RomHandler extends AbstractGBCRomHandler {
 
@@ -129,6 +134,62 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     protected void initRomEntry() {
         romEntry = checkRomEntry(this.rom);
+
+        addPlayerFrontImagePointersToRomEntry();
+        addPlayerBackImageBankOffsetsToRomEntry();
+        addOldManBackImagePointerToRomEntry();
+        if (romEntry.isYellow()) {
+            addOakBackImagePointerToRomEntry();
+        }
+    }
+
+    private void addPlayerFrontImagePointersToRomEntry() {
+        int[] oldPointers = romEntry.getArrayValue("PlayerFrontImagePointers");
+        int[] oldBankOffsets = romEntry.getArrayValue("PlayerFrontImageBankOffsets");
+        if (oldPointers.length != 5 || oldBankOffsets.length != 1) {
+            return;
+        }
+
+        int[] newPointers = new int[6];
+        System.arraycopy(oldPointers, 0, newPointers, 0, 5);
+        newPointers[5] = oldPointers[1] + Gen1Constants.playerFrontImageOffset5;
+        romEntry.putArrayValue("PlayerFrontImagePointers", newPointers);
+
+        int[] newBankOffsets = new int[]{oldBankOffsets[0],
+                newPointers[1] + Gen1Constants.playerFrontBankOffset1,
+                newPointers[2] + Gen1Constants.playerFrontBankOffset2,
+                newPointers[3] + Gen1Constants.playerFrontBankOffset3,
+                newPointers[4] + Gen1Constants.playerFrontBankOffset4,
+                newPointers[5] + Gen1Constants.playerFrontBankOffset5};
+        romEntry.putArrayValue("PlayerFrontImageBankOffsets", newBankOffsets);
+    }
+
+    private void addPlayerBackImageBankOffsetsToRomEntry() {
+        int[] pointers = romEntry.getArrayValue("PlayerBackImagePointers");
+        if (pointers.length != 2) {
+            return;
+        }
+        int backOffset0 = romEntry.isYellow() ? Gen1Constants.playerBackImageOffsetYellow0 :
+                Gen1Constants.playerBackImageOffsetRGB0;
+        int[] bankOffsets = new int[]{pointers[0] + backOffset0,
+                pointers[1] + Gen1Constants.playerBackImageOffset1};
+        romEntry.putArrayValue("PlayerBackImageBankOffsets", bankOffsets);
+    }
+
+    private void addOldManBackImagePointerToRomEntry() {
+        int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
+        if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OldManBackImagePointer") == 0) {
+            int oldManOffset = romEntry.isYellow() ? Gen1Constants.oldManBackImageOffsetYellow :
+                    Gen1Constants.oldManBackImageOffsetRGB;
+            romEntry.putIntValue("OldManBackImagePointer", playerBackImagePointers[0] + oldManOffset);
+        }
+    }
+
+    private void addOakBackImagePointerToRomEntry() {
+        int[] playerBackImagePointers = romEntry.getArrayValue("PlayerBackImagePointers");
+        if (playerBackImagePointers.length != 0 && romEntry.getIntValue("OakBackImagePointer") == 0) {
+            romEntry.putIntValue("OakBackImagePointer", playerBackImagePointers[0] + Gen1Constants.oakBackImageOffset);
+        }
     }
 
     @Override
@@ -149,13 +210,13 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Gen1RomEntry re : roms) {
             if (romSig(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap
                     && re.getCRCInHeader() == crcInHeader) {
-                return re;
+                return new Gen1RomEntry(re);
             }
         }
         // Now check for non-specific-CRC entries
         for (Gen1RomEntry re : roms) {
             if (romSig(rom, re.getRomCode()) && re.getVersion() == version && re.getNonJapanese() == nonjap && re.getCRCInHeader() == -1) {
-                return re;
+                return new Gen1RomEntry(re);
             }
         }
         // Not found
@@ -513,8 +574,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         pkmn.setCatchRate(rom[offset + Gen1Constants.bsCatchRateOffset] & 0xFF);
         pkmn.setExpYield(rom[offset + Gen1Constants.bsExpYieldOffset] & 0xFF);
         pkmn.setGrowthCurve(ExpCurve.fromByte(rom[offset + Gen1Constants.bsGrowthCurveOffset]));
-        pkmn.setFrontSpritePointer(readWord(offset + Gen1Constants.bsFrontSpriteOffset));
-        pkmn.setBackSpritePointer(readWord(offset + Gen1Constants.bsBackSpriteOffset));
+        pkmn.setFrontImageDimensions(rom[offset + Gen1Constants.bsFrontImageDimensionsOffset] & 0xFF);
+        pkmn.setFrontImagePointer(readWord(offset + Gen1Constants.bsFrontImagePointerOffset));
+        pkmn.setBackImagePointer(readWord(offset + Gen1Constants.bsBackImagePointerOffset));
         
         pkmn.setGuaranteedHeldItem(-1);
         pkmn.setCommonHeldItem(-1);
@@ -1182,7 +1244,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             byte[] trainersOfClassBytes = baos.toByteArray();
             int pointerOffset = trainerClassTableOffset + trainerClassNum * 2;
             int trainersPerThisClass = trainersPerClass[trainerClassNum];
-            new GBDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
+            new GBCDataRewriter<byte[]>().rewriteData(pointerOffset, trainersOfClassBytes, b -> b, oldDataOffset ->
                     lengthOfTrainerClassAt(oldDataOffset, trainersPerThisClass));
         }
 
@@ -1274,6 +1336,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean isYellow() {
         return romEntry.isYellow();
+    }
+
+    @Override
+    public boolean hasMultiplePlayerCharacters() {
+        return false;
     }
 
     @Override
@@ -1689,7 +1756,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 Pokemon pkmn = pokes[thisPoke];
                 while (rom[pointer] != 0) {
                     int method = rom[pointer];
-                    EvolutionType type = EvolutionType.fromIndex(1, method);
+                    EvolutionType type = Gen1Constants.evolutionTypeFromIndex(method);
                     int otherPoke = pokeRBYToNumTable[rom[pointer + 2 + (type == EvolutionType.STONE ? 1 : 0)] & 0xFF];
                     int extraInfo = rom[pointer + 1] & 0xFF;
                     Evolution evo = new Evolution(pkmn, pokes[otherPoke], true, type, extraInfo);
@@ -1704,7 +1771,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 // split evos don't carry stats
                 if (pkmn.getEvolutionsFrom().size() > 1) {
                     for (Evolution e : pkmn.getEvolutionsFrom()) {
-                        e.carryStats = false;
+                        e.setCarryStats(false);
                     }
                 }
             }
@@ -1718,10 +1785,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.getEvolutionsFrom()) {
-                    if (evo.type == EvolutionType.TRADE) {
+                    if (evo.getType() == EvolutionType.TRADE) {
                         // change
-                        evo.type = EvolutionType.LEVEL;
-                        evo.extraInfo = 37;
+                        evo.setType(EvolutionType.LEVEL);
+                        evo.setExtraInfo(37);
                         addEvoUpdateLevel(impossibleEvolutionUpdates,evo);
                     }
                 }
@@ -2530,7 +2597,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (int i = 1; i <= pokemonCount; i++) {
             Pokemon pk = pokes[pokeRBYToNumTable[i]];
             int pointerOffset = pointerTableOffset + (i - 1) * 2;
-            new GBDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
+            new GBCDataRewriter<Pokemon>().rewriteData(pointerOffset, pk, this::pokemonToEvosAndMovesLearntBytes,
                     oldDataOffset -> lengthOfDataWithTerminatorsAt(oldDataOffset,
                             GBConstants.evosAndMovesTerminator, 2));
         }
@@ -2584,24 +2651,60 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(evo.type.toIndex(1));
+        baos.write(Gen1Constants.evolutionTypeToIndex(evo.getType()));
         baos.writeBytes(evoTypeExtraInfoToBytes(evo));
-        baos.write(pokeNumToRBYTable[evo.to.getNumber()]);
+        baos.write(pokeNumToRBYTable[evo.getTo().getNumber()]);
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.type) {
-            case LEVEL -> new byte[]{(byte) evo.extraInfo};
-            case STONE -> new byte[]{(byte) evo.extraInfo, 0x01}; // minimum level
+        return switch (evo.getType()) {
+            case LEVEL -> new byte[]{(byte) evo.getExtraInfo()};
+            case STONE -> new byte[]{(byte) evo.getExtraInfo(), 0x01}; // minimum level
             case TRADE -> new byte[]{(byte) 0x01}; // minimum level
-            default -> throw new IllegalStateException("EvolutionType " + evo.type + " is not supported " +
+            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
                     "by Gen 1 games.");
         };
     }
 
     private byte[] moveLearntToBytes(MoveLearnt ml) {
         return new byte[] {(byte) ml.level, (byte) moveNumToRomTable[ml.move]};
+    }
+
+    @Override
+    public boolean hasCustomPlayerGraphicsSupport() {
+        // The JP games probably can't get support due to extreme space issues.
+        // They would need a more powerful space handling system (than DataRewriter) or even ROM expansion.
+        return romEntry.isNonJapanese();
+    }
+
+    @Override
+    public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
+        if (toReplace != Settings.PlayerCharacterMod.PC1) {
+            throw new IllegalArgumentException("Invalid toReplace. Only one player character in Gen 1.");
+        }
+        if (!(unchecked instanceof GBCPlayerCharacterGraphics playerGraphics)) {
+            throw new IllegalArgumentException("Invalid playerGraphics");
+        }
+
+        if (playerGraphics.hasFrontImage()) {
+            rewritePlayerFrontImage(playerGraphics.getFrontImage());
+        }
+        if (playerGraphics.hasBackImage()) {
+            rewritePlayerBackImage(playerGraphics.getBackImage());
+        }
+        if (playerGraphics.hasWalkSprite()) {
+            int walkOffset = romEntry.getIntValue("PlayerWalkSprite");
+            writeImage(walkOffset, playerGraphics.getWalkSprite());
+        }
+        if (playerGraphics.hasBikeSprite()) {
+            int bikeOffset = romEntry.getIntValue("PlayerBikeSprite");
+            writeImage(bikeOffset, playerGraphics.getBikeSprite());
+        }
+        if (playerGraphics.hasFishSprite()) {
+            int fishOffset = romEntry.getIntValue("PlayerFishSprite");
+            writeImage(fishOffset, playerGraphics.getFishSprite());
+        }
     }
 
     private int calculateFrontSpriteBank(Gen1Pokemon pk) {
@@ -2615,9 +2718,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             fsBank = 0x9;
         } else if (idx < 0x4A) {
             fsBank = 0xA;
-        } else if (idx < 0x74 || idx == 0x74 && pk.getFrontSpritePointer() > 0x7000) {
+        } else if (idx < 0x74 || idx == 0x74 && pk.getFrontImagePointer() > 0x7000) {
             fsBank = 0xB;
-        } else if (idx < 0x99 || idx == 0x99 && pk.getFrontSpritePointer() > 0x7000) {
+        } else if (idx < 0x99 || idx == 0x99 && pk.getFrontImagePointer() > 0x7000) {
             fsBank = 0xC;
         } else {
             fsBank = 0xD;
@@ -2631,7 +2734,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 		for (Pokemon pk : getPokemonSet()) {
             // they are in Pokédex order
 			Gen1Pokemon gen1pk = (Gen1Pokemon) pk;
-			gen1pk.setPaletteID((PaletteID.values()[rom[palIndex + gen1pk.getNumber()]]));
+			gen1pk.setPaletteID((SGBPaletteID.values()[rom[palIndex + gen1pk.getNumber()]]));
 		}
 	}
 
@@ -2649,6 +2752,122 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         byte[] paletteBytes = new byte[8];
         System.arraycopy(rom, offset, paletteBytes, 0, 8);
         return new Palette(paletteBytes);
+    }
+
+    public void rewritePlayerFrontImage(GBCImage frontImage) {
+        int[] pointerOffsets = romEntry.getArrayValue("PlayerFrontImagePointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        int[] bankOffsets = romEntry.getArrayValue("PlayerFrontImageBankOffsets");
+        DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+
+        dataRewriter.rewriteData(primaryPointerOffset, frontImage, secondaryPointerOffsets,
+                Gen1Cmp::compress, this::lengthOfCompressedDataAt);
+    }
+
+    private void rewritePlayerBackImage(GBCImage backImage) {
+        int[] pointerOffsets = romEntry.getArrayValue("PlayerBackImagePointers");
+        int primaryPointerOffset = pointerOffsets[0];
+        int[] secondaryPointerOffsets = Arrays.copyOfRange(pointerOffsets, 1, pointerOffsets.length);
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        DataRewriter<GBCImage> dataRewriter = new IndirectBankDataRewriter<>(bankOffsets);
+
+        if (romEntry.isYellow()) {
+            dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
+                    this::playerPlusOtherBackImagesToBytes, this::lengthOfPlayerAndOtherBackImagesAt);
+            repointOakBackImage(primaryPointerOffset);
+        } else {
+            dataRewriter.rewriteData(primaryPointerOffset, backImage, secondaryPointerOffsets,
+                    this::playerPlusOldManBackImagesToBytes, this::lengthOfPlayerAndOldManBackImagesAt);
+        }
+        repointOldManBackImage(primaryPointerOffset);
+    }
+
+    private byte[] playerPlusOtherBackImagesToBytes(GBCImage playerBack) {
+        byte[] playerPlusOldManBackData = playerPlusOldManBackImagesToBytes(playerBack);
+        byte[] oakBackData = readCompressedOakBackData();
+
+        byte[] allData = new byte[playerPlusOldManBackData.length + oakBackData.length];
+        System.arraycopy(playerPlusOldManBackData, 0, allData, 0, playerPlusOldManBackData.length);
+        System.arraycopy(oakBackData, 0, allData, playerPlusOldManBackData.length, oakBackData.length);
+        return allData;
+    }
+
+    private byte[] playerPlusOldManBackImagesToBytes(GBCImage playerBack) {
+        byte[] playerBackData = Gen1Cmp.compress(playerBack);
+        byte[] oldManBackData = readCompressedOldManBackData();
+
+        byte[] bothData = new byte[playerBackData.length + oldManBackData.length];
+        System.arraycopy(playerBackData, 0, bothData, 0, playerBackData.length);
+        System.arraycopy(oldManBackData, 0, bothData, playerBackData.length, oldManBackData.length);
+        return bothData;
+    }
+
+    private byte[] readCompressedOldManBackData() {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+        int oldManBackOffset = readPointer(romEntry.getIntValue("OldManBackImagePointer"), bank);
+        int oldManBackLength = lengthOfCompressedDataAt(oldManBackOffset);
+        return Arrays.copyOfRange(rom, oldManBackOffset, oldManBackOffset + oldManBackLength);
+    }
+
+    private byte[] readCompressedOakBackData() {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+        int oakBackOffset = readPointer(romEntry.getIntValue("OakBackImagePointer"), bank);
+        int oakBackLength = lengthOfCompressedDataAt(oakBackOffset);
+        return Arrays.copyOfRange(rom, oakBackOffset, oakBackOffset + oakBackLength);
+    }
+
+    /**
+     * The length in bytes of the player's compressed back image, followed by the catching tutorial old man's,
+     * and then prof. Oak's shown when catching the starter.<br>
+     * Assumes they actually follow another in ROM, with no gaps.
+     */
+    private int lengthOfPlayerAndOtherBackImagesAt(int offset) {
+        int length = lengthOfPlayerAndOldManBackImagesAt(offset);
+        length += lengthOfCompressedDataAt(offset + length);
+        return length;
+    }
+
+    /**
+     * The length in bytes of the player's compressed back image, followed by the catching tutorial old man's.<br>
+     * Assumes they actually follow another in ROM, with no gaps.
+     */
+    private int lengthOfPlayerAndOldManBackImagesAt(int offset) {
+        int length = lengthOfCompressedDataAt(offset);
+        length += lengthOfCompressedDataAt(offset + length);
+        return length;
+    }
+
+    private void repointOakBackImage(int playerBackPointerOffset) {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+
+        int newOffset = readPointer(playerBackPointerOffset, bank);
+        int newOldManOffset = newOffset + lengthOfCompressedDataAt(newOffset);
+        int newOakOffset = newOldManOffset + lengthOfCompressedDataAt(newOldManOffset);
+        int oakBackPointerOffset = romEntry.getIntValue("OakBackImagePointer");
+        writePointer(oakBackPointerOffset, newOakOffset);
+    }
+
+    private void repointOldManBackImage(int playerBackPointerOffset) {
+        int[] bankOffsets = romEntry.getArrayValue("PlayerBackImageBankOffsets");
+        int bank = rom[bankOffsets[0]];
+
+        int newOffset = readPointer(playerBackPointerOffset, bank);
+        int newOldManOffset = newOffset + lengthOfCompressedDataAt(newOffset);
+        int oldManBackPointerOffset = romEntry.getIntValue("OldManBackImagePointer");
+        writePointer(oldManBackPointerOffset, newOldManOffset);
+    }
+
+    private int lengthOfCompressedDataAt(int offset) {
+        if (offset == 0) {
+            throw new IllegalArgumentException("Invalid offset. Compressed data cannot be at offset 0.");
+        }
+        Gen1Decmp decmp = new Gen1Decmp(rom, offset);
+        decmp.decompress();
+        return decmp.getCompressedLength();
     }
 
     @Override
@@ -2679,20 +2898,36 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         @Override
         public BufferedImage get() {
-            // assumes the backsprites are in the same bank as the frontSprites
-            int spriteBank = calculateFrontSpriteBank(pk);
-            int spriteOffset = calculateOffset(back ? pk.getBackSpritePointer() : pk.getFrontSpritePointer(), spriteBank);
+            int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
+            int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
 
-            Gen1Decmp sprite = new Gen1Decmp(rom, spriteOffset);
-            sprite.decompress();
-            sprite.transpose();
-            int w = sprite.getWidth();
-            int h = sprite.getHeight();
+            int bank = calculateFrontSpriteBank(pk);
+            int imageOffset = calculateOffset(back ? pk.getBackImagePointer() : pk.getFrontImagePointer(), bank);
+            byte[] data = readImageData(imageOffset);
+            Palette palette = getVisiblePokemonPalette(pk);
 
-            byte[] data = sprite.getFlattenedData();
+            BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
 
-            // Palette?
-            int[] convPalette;
+            if (transparentBackground) {
+                bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
+            }
+            if (includePalette) {
+                for (int j = 0; j < palette.size(); j++) {
+                    bim.setRGB(j, 0, palette.get(j).toARGB());
+                }
+            }
+
+            return bim;
+        }
+
+        private byte[] readImageData(int imageOffset) {
+            Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
+            image.decompress();
+            return image.getData();
+        }
+
+        private Palette getVisiblePokemonPalette(Gen1Pokemon pk) {
+            Palette palette;
             if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
                 int palIndex = pk.getPaletteID().ordinal();
                 int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
@@ -2701,26 +2936,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     // Stored directly after regular SGB palettes.
                     palOffset += 320;
                 }
-                Palette palette = read4ColorPalette(palOffset);
-                convPalette = palette.toARGB();
+                palette = read4ColorPalette(palOffset);
             } else {
-                convPalette = new int[] { 0xFFFFFFFF, 0xFFAAAAAA, 0xFF666666, 0xFF000000 };
+                palette = GBCImage.DEFAULT_PALETTE;
             }
-
-            BufferedImage bim = GFXFunctions.drawTiledImage(data, convPalette, w, h, 8);
-
-            if (transparentBackground) {
-                bim = GFXFunctions.pseudoTransparent(bim, convPalette[0]);
-            }
-            if (includePalette) {
-                for (int j = 0; j < convPalette.length; j++) {
-                    bim.setRGB(j, 0, convPalette[j]);
-                }
-            }
-
-            return bim;
+            return palette;
         }
-
         @Override
         public BufferedImage getFull() {
             setIncludePalette(true);

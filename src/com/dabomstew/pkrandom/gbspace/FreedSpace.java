@@ -23,6 +23,7 @@ package com.dabomstew.pkrandom.gbspace;
 /*----------------------------------------------------------------------------*/
 
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * Represents/handles all the manually freed bytes in a ROM. If bytes are manually freed (using free())
@@ -31,7 +32,8 @@ import java.util.LinkedList;
 public class FreedSpace {
 
     private static final String ALREADY_FREED_EXCEPTION_MESSAGE =  "Can't free a space that is already freed. " +
-            "This is a safety measure to prevent bad usage of free().";
+            "This is a safety measure to prevent bad usage of free()." +
+            "\n%s overlaps with existing freed chunk %s";
 
     protected static class FreedChunk {
 
@@ -63,71 +65,61 @@ public class FreedSpace {
         int end = start + length - 1;
         FreedChunk toFree = new FreedChunk(start, end);
 
-        if (freedChunks.size() == 0) {
-            freedChunks.add(toFree);
-            return;
-        }
-
-        for (int i = 0; i < freedChunks.size(); i++) {
-            FreedChunk neighbor = freedChunks.get(i);
+        boolean freedChunkAdded = false;
+        ListIterator<FreedChunk> iterator = freedChunks.listIterator();
+        while (iterator.hasNext() && !freedChunkAdded) {
+            FreedChunk neighbor = iterator.next();
 
             if (toFree.start < neighbor.start) {
-                addFreedChunkBefore(toFree, i);
-                return;
+                addChunkBeforeOrMergeWithRightNeighbor(toFree, neighbor, iterator);
+                freedChunkAdded = true;
 
-            } else {
-                if (addFreedChunkAfterOrBetween(toFree, i)) {
-                    return;
-                }
+            } else if (neighbor.end == toFree.start - 1) {
+                mergeChunkWithLeftOrBothNeighbors(toFree, neighbor, iterator);
+                freedChunkAdded = true;
+
+            } else if (neighbor.end >= toFree.start) {
+                throw new RuntimeException(String.format(ALREADY_FREED_EXCEPTION_MESSAGE, toFree, neighbor));
             }
         }
-    }
 
-    protected final void addFreedChunkBefore(FreedChunk toFree, int i) {
-        FreedChunk neighbor = freedChunks.get(i);
-        if (toFree.end >= neighbor.start) {
-            throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
-        }
-
-        if (toFree.end == neighbor.start - 1) {
-            neighbor.start = toFree.start;
-        } else {
-            freedChunks.add(i, toFree);
-        }
-    }
-
-    protected final boolean addFreedChunkAfterOrBetween(FreedChunk toFree, int i) {
-        FreedChunk leftNeighbor = freedChunks.get(i);
-        if (leftNeighbor.end >= toFree.start) {
-            throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
-        }
-
-        if (leftNeighbor.end == toFree.start - 1) {
-
-            if (i == freedChunks.size() - 1) {
-                leftNeighbor.end = toFree.end;
-
-            } else {
-                FreedChunk rightNeighbor = freedChunks.get(i + 1);
-                if (toFree.end >= rightNeighbor.start) {
-                    throw new RuntimeException(ALREADY_FREED_EXCEPTION_MESSAGE);
-                }
-                else if (toFree.end == rightNeighbor.start - 1) {
-                    leftNeighbor.end = rightNeighbor.end;
-                    freedChunks.remove(rightNeighbor);
-                } else {
-                    leftNeighbor.end = toFree.end;
-                }
-
-            }
-            return true;
-
-        } else if (i == freedChunks.size() - 1) {
+        if (!freedChunkAdded) {
             freedChunks.add(toFree);
-            return true;
+        }
+    }
+
+    protected final void addChunkBeforeOrMergeWithRightNeighbor(FreedChunk toFree, FreedChunk rightNeighbor,
+                                                                ListIterator<FreedChunk> iterator) {
+        if (toFree.end >= rightNeighbor.start) {
+            throw new RuntimeException(String.format(ALREADY_FREED_EXCEPTION_MESSAGE, toFree, rightNeighbor));
         }
 
-        return false;
+        if (toFree.end == rightNeighbor.start - 1) {
+            rightNeighbor.start = toFree.start;
+        } else {
+            iterator.previous();
+            iterator.add(toFree);
+        }
+    }
+
+    protected final void mergeChunkWithLeftOrBothNeighbors(FreedChunk toFree, FreedChunk leftNeighbor,
+                                                           ListIterator<FreedChunk> iterator) {
+        if (iterator.hasNext()) {
+            FreedChunk rightNeighbor = iterator.next();
+
+            if (toFree.end >= rightNeighbor.start) {
+                throw new RuntimeException(String.format(ALREADY_FREED_EXCEPTION_MESSAGE, toFree, rightNeighbor));
+            } else if (toFree.end == rightNeighbor.start - 1) {
+                leftNeighbor.end = rightNeighbor.end;
+                iterator.remove();
+            } else {
+                leftNeighbor.end = toFree.end;
+            }
+            iterator.previous();
+
+        } else {
+            leftNeighbor.end = toFree.end;
+        }
     }
 
     public int findAndUnfree(int length) {
@@ -150,6 +142,7 @@ public class FreedSpace {
     }
 
     protected final void unfree(FreedChunk toUnfree, int length) {
+        // System.out.println("unfreeing " + length + " bytes starting from 0x" + Integer.toHexString(toUnfree.start));
         toUnfree.start += length;
         if (toUnfree.start > toUnfree.end) {
             freedChunks.remove(toUnfree);

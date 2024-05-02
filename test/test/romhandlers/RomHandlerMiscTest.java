@@ -295,10 +295,4 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         }
     }
 
-    @Test
-    public void dumpAllPokemonInChosenRom(){
-        loadROM("Black (U)");
-        ((AbstractRomHandler)romHandler).dumpAllPokemonSprites();
-    }
-
 }
