@@ -58,8 +58,10 @@ public class GameRandomizer {
     private final MoveDataRandomizer moveDataRandomizer;
     private final PokemonMovesetRandomizer pokeMovesetRandomizer;
     private final TrainerPokemonRandomizer trainerPokeRandomizer;
+    private final TrainerMovesetRandomizer trainerMovesetRandomizer;
     private final TrainerNameRandomizer trainerNameRandomizer;
     private final EncounterRandomizer encounterRandomizer;
+    private final PokemonWildHeldItemRandomizer pokeHeldItemRandomizer;
     private final TMTutorMoveRandomizer tmtMoveRandomizer;
     private final TMHMTutorCompatibilityRandomizer tmhmtCompRandomizer;
     private final ItemRandomizer itemRandomizer;
@@ -82,8 +84,10 @@ public class GameRandomizer {
         this.moveDataRandomizer = new MoveDataRandomizer(romHandler, settings, random);
         this.pokeMovesetRandomizer = new PokemonMovesetRandomizer(romHandler, settings, random);
         this.trainerPokeRandomizer = new TrainerPokemonRandomizer(romHandler, settings, random);
+        this.trainerMovesetRandomizer = new TrainerMovesetRandomizer(romHandler, settings, random);
         this.trainerNameRandomizer = new TrainerNameRandomizer(romHandler, settings, random);
         this.encounterRandomizer = new EncounterRandomizer(romHandler, settings, random);
+        this.pokeHeldItemRandomizer = new PokemonWildHeldItemRandomizer(romHandler, settings, random);
         this.tmtMoveRandomizer = new TMTutorMoveRandomizer(romHandler, settings, random);
         this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, random);
         this.itemRandomizer = new ItemRandomizer(romHandler, settings, random);
@@ -120,11 +124,6 @@ public class GameRandomizer {
         boolean movesUpdated = false;
         boolean pokemonStatsUpdated = false;
         boolean typeEffectivenessUpdated = false;
-
-        // All possible changes that can be logged
-        boolean pokemonTraitsChanged = false;
-        boolean trainersChanged = false;
-        boolean trainerMovesetsChanged = false;
 
         if (settings.isUpdateTypeEffectiveness()) {
             romHandler.updateTypeEffectiveness();
@@ -211,8 +210,7 @@ public class GameRandomizer {
 
         // Wild Held Items
         if (settings.isRandomizeWildPokemonHeldItems()) {
-            encounterRandomizer.randomizeWildHeldItems();
-            pokemonTraitsChanged = true;
+            pokeHeldItemRandomizer.randomizeWildHeldItems();
         }
 
         // Random Evos
@@ -228,14 +226,9 @@ public class GameRandomizer {
 
         // Base stat randomization
         switch (settings.getBaseStatisticsMod()) {
-            case SHUFFLE -> {
-                pokeBSRandomizer.shufflePokemonStats();
-            }
-            case RANDOM -> {
-                pokeBSRandomizer.randomizePokemonStats();
-            }
-            default -> {
-            }
+            case SHUFFLE -> pokeBSRandomizer.shufflePokemonStats();
+            case RANDOM -> pokeBSRandomizer.randomizePokemonStats();
+            default -> {}
         }
 
         // Abilities
@@ -245,7 +238,7 @@ public class GameRandomizer {
 
         // Log Pokemon traits (stats, abilities, etc) if any have changed
         if (pokemonStatsUpdated || pokeBSRandomizer.isChangesMade() || pokeTypeRandomizer.isChangesMade() ||
-                pokeAbilityRandomizer.isChangesMade() || pokemonTraitsChanged) {
+                pokeAbilityRandomizer.isChangesMade() || pokeHeldItemRandomizer.isChangesMade()) {
             logPokemonTraitChanges(log);
         } else {
             log.println("Pokemon base stats & type: unchanged" + NEWLINE);
@@ -447,12 +440,10 @@ public class GameRandomizer {
                 || settings.getAdditionalImportantTrainerPokemon() > 0
                 || settings.getAdditionalBossTrainerPokemon() > 0) {
             trainerPokeRandomizer.addTrainerPokemon();
-            trainersChanged = true;
         }
         
         if (settings.isDoubleBattleMode()) {
             trainerPokeRandomizer.setDoubleBattleMode();
-            trainersChanged = true;
         }
 
         switch(settings.getTrainersMod()) {
@@ -463,12 +454,10 @@ public class GameRandomizer {
             case TYPE_THEMED_ELITE4_GYMS:
             case KEEP_THEMED:
                 trainerPokeRandomizer.randomizeTrainerPokes();
-                trainersChanged = true;
                 break;
             default:
                 if (settings.isTrainersLevelModified()) {
                     trainerPokeRandomizer.onlyChangeTrainerLevels();
-                    trainersChanged = true;
                 }
                 break;
         }
@@ -477,47 +466,39 @@ public class GameRandomizer {
                 || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
             trainerPokeRandomizer.makeRivalCarryStarter();
-            trainersChanged = true;
         }
 
         if (settings.isTrainersForceFullyEvolved()) {
             trainerPokeRandomizer.forceFullyEvolvedTrainerPokes();
-            trainersChanged = true;
         }
 
         if (settings.isBetterTrainerMovesets()) {
-            trainerPokeRandomizer.pickTrainerMovesets();
-            trainersChanged = true;
-            trainerMovesetsChanged = true;
+            trainerMovesetRandomizer.randomizeTrainerMovesets();
         }
 
         if (settings.isRandomizeHeldItemsForBossTrainerPokemon()
                 || settings.isRandomizeHeldItemsForImportantTrainerPokemon()
                 || settings.isRandomizeHeldItemsForRegularTrainerPokemon()) {
             trainerPokeRandomizer.randomizeTrainerHeldItems();
-            trainersChanged = true;
         }
 
         List<String> originalTrainerNames = getTrainerNames();
-        boolean trainerNamesChanged = false;
 
         // Trainer names & class names randomization
         if (romHandler.canChangeTrainerText()) {
             if (settings.isRandomizeTrainerClassNames()) {
                 trainerNameRandomizer.randomizeTrainerClassNames();
-                trainersChanged = true;
-                trainerNamesChanged = true;
             }
 
             if (settings.isRandomizeTrainerNames()) {
                 trainerNameRandomizer.randomizeTrainerNames();
-                trainersChanged = true;
-                trainerNamesChanged = true;
             }
         }
 
-        if (trainersChanged) {
-            maybeLogTrainerChanges(log, originalTrainerNames, trainerNamesChanged, trainerMovesetsChanged);
+        if (trainerPokeRandomizer.isChangesMade() || trainerMovesetRandomizer.isChangesMade()
+                || trainerNameRandomizer.isChangesMade()) {
+            maybeLogTrainerChanges(log, originalTrainerNames, trainerNameRandomizer.isChangesMade(),
+                    trainerMovesetRandomizer.isChangesMade());
         } else {
             log.println("Trainers: Unchanged." + NEWLINE);
         }

@@ -137,6 +137,7 @@ public class TrainerNameRandomizer extends Randomizer {
 
         // Done choosing, save
         romHandler.setTrainerNames(newTrainerNames);
+        changesMade = true;
     }
 
     @SuppressWarnings("unchecked")
@@ -216,5 +217,6 @@ public class TrainerNameRandomizer extends Randomizer {
 
         // Done choosing, save
         romHandler.setTrainerClassNames(newClassNames);
+        changesMade = true;
     }
 }
