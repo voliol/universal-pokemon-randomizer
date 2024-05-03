@@ -12,8 +12,33 @@ public class ItemRandomizer extends Randomizer {
 
     private final Map<Integer, Integer> itemPlacementHistory = new HashMap<>();
 
+    private boolean fieldChangesMade;
+    private boolean shopChangesMade;
+    private boolean pickupChangesMade;
+
     public ItemRandomizer(RomHandler romHandler, Settings settings, Random random) {
         super(romHandler, settings, random);
+    }
+
+    /**
+     * Returns whether any changes have been made to Field Items.
+     */
+    public boolean isFieldChangesMade() {
+        return fieldChangesMade;
+    }
+
+    /**
+     * Returns whether any changes have been made to Shop Items.
+     */
+    public boolean isShopChangesMade() {
+        return shopChangesMade;
+    }
+
+    /**
+     * Returns whether any changes have been made to Pickup Items.
+     */
+    public boolean isPickupChangesMade() {
+        return pickupChangesMade;
     }
 
     public void shuffleFieldItems() {
@@ -25,6 +50,7 @@ public class ItemRandomizer extends Randomizer {
 
         romHandler.setRegularFieldItems(currentItems);
         romHandler.setFieldTMs(currentTMs);
+        fieldChangesMade = true;
     }
 
     public void randomizeFieldItems() {
@@ -90,6 +116,7 @@ public class ItemRandomizer extends Randomizer {
 
         romHandler.setRegularFieldItems(newItems);
         romHandler.setFieldTMs(newTMs);
+        fieldChangesMade = true;
     }
 
     private void setItemPlacementHistory(int newItem) {
@@ -140,6 +167,7 @@ public class ItemRandomizer extends Randomizer {
         }
 
         romHandler.setShopItems(currentItems);
+        shopChangesMade = true;
     }
 
     public void randomizeShopItems() {
@@ -252,6 +280,7 @@ public class ItemRandomizer extends Randomizer {
         if (balancePrices) {
             romHandler.setBalancedShopPrices();
         }
+        shopChangesMade = true;
     }
 
     public void randomizePickupItems() {
@@ -274,6 +303,7 @@ public class ItemRandomizer extends Randomizer {
         }
 
         romHandler.setPickupItems(newItems);
+        pickupChangesMade = true;
     }
 
 }

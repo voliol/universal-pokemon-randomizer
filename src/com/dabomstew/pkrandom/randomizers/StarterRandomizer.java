@@ -279,6 +279,7 @@ public class StarterRandomizer extends Randomizer {
         }
 
         romHandler.setStarters(pickedStarters);
+        changesMade = true;
     }
 
     private Set<List<Type>> findTypeTriangles() {
@@ -322,5 +323,6 @@ public class StarterRandomizer extends Randomizer {
             newHeldItems.add(possibleItems.randomItem(this.random));
         }
         romHandler.setStarterHeldItems(newHeldItems);
+        changesMade = true;
     }
 }

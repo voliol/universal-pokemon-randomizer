@@ -124,6 +124,7 @@ public class TradeRandomizer extends Randomizer {
 
         // things that the game doesn't support should just be ignored
         romHandler.setIngameTrades(trades);
+        changesMade = true;
     }
 
 }

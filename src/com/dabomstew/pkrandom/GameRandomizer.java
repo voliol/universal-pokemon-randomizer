@@ -35,7 +35,7 @@ import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 /**
- * Directs other randomizers to randomize a game, as given by the {@link RomHandler}, and log the changes.
+ * Coordinates and logs the randomization of a game, via a {@link RomHandler}, and various sub-{@link Randomizer}s.
  * Output varies by seed.
  */
 public class GameRandomizer {
@@ -43,17 +43,51 @@ public class GameRandomizer {
     private static final String NEWLINE = System.getProperty("line.separator");
 
     private final Settings settings;
-    private final Random random;
     private final RomHandler romHandler;
     private final ResourceBundle bundle;
     private final boolean saveAsDirectory;
 
+    private final IntroPokemonRandomizer introPokeRandomizer;
+    private final PokemonBaseStatRandomizer pokeBSRandomizer;
+    private final PokemonTypeRandomizer pokeTypeRandomizer;
+    private final PokemonAbilityRandomizer pokeAbilityRandomizer;
+    private final EvolutionRandomizer evoRandomizer;
+    private final StarterRandomizer starterRandomizer;
+    private final StaticPokemonRandomizer staticPokeRandomizer;
+    private final TradeRandomizer tradeRandomizer;
+    private final MoveDataRandomizer moveDataRandomizer;
+    private final PokemonMovesetRandomizer pokeMovesetRandomizer;
+    private final TrainerPokemonRandomizer trainerPokeRandomizer;
+    private final TrainerNameRandomizer trainerNameRandomizer;
+    private final EncounterRandomizer encounterRandomizer;
+    private final TMTutorMoveRandomizer tmtMoveRandomizer;
+    private final TMHMTutorCompatibilityRandomizer tmhmtCompRandomizer;
+    private final ItemRandomizer itemRandomizer;
+    private final TypeEffectivenessRandomizer typeEffRandomizer;
+
     public GameRandomizer(Settings settings, Random random, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
         this.settings = settings;
-        this.random = random;
         this.romHandler = romHandler;
         this.bundle = bundle;
         this.saveAsDirectory = saveAsDirectory;
+
+        this.introPokeRandomizer = new IntroPokemonRandomizer(romHandler, settings, random);
+        this.pokeBSRandomizer = new PokemonBaseStatRandomizer(romHandler, settings, random);
+        this.pokeTypeRandomizer = new PokemonTypeRandomizer(romHandler, settings, random);
+        this.pokeAbilityRandomizer = new PokemonAbilityRandomizer(romHandler, settings, random);
+        this.evoRandomizer = new EvolutionRandomizer(romHandler, settings, random);
+        this.starterRandomizer = new StarterRandomizer(romHandler, settings, random);
+        this.staticPokeRandomizer = new StaticPokemonRandomizer(romHandler, settings, random);
+        this.tradeRandomizer = new TradeRandomizer(romHandler, settings, random);
+        this.moveDataRandomizer = new MoveDataRandomizer(romHandler, settings, random);
+        this.pokeMovesetRandomizer = new PokemonMovesetRandomizer(romHandler, settings, random);
+        this.trainerPokeRandomizer = new TrainerPokemonRandomizer(romHandler, settings, random);
+        this.trainerNameRandomizer = new TrainerNameRandomizer(romHandler, settings, random);
+        this.encounterRandomizer = new EncounterRandomizer(romHandler, settings, random);
+        this.tmtMoveRandomizer = new TMTutorMoveRandomizer(romHandler, settings, random);
+        this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, random);
+        this.itemRandomizer = new ItemRandomizer(romHandler, settings, random);
+        this.typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, random);
     }
 
     public int randomize(final String filename) {
@@ -77,12 +111,6 @@ public class GameRandomizer {
 
         int checkValue = 0;
 
-        PokemonBaseStatRandomizer pokeBSRandomizer = new PokemonBaseStatRandomizer(romHandler, settings, random);
-        PokemonTypeRandomizer pokeTypeRandomizer = new PokemonTypeRandomizer(romHandler, settings, random);
-        PokemonAbilityRandomizer pokeAbilityRandomizer = new PokemonAbilityRandomizer(romHandler, settings, random);
-        MoveDataRandomizer moveDataRandomizer = new MoveDataRandomizer(romHandler, settings, random);
-        TypeEffectivenessRandomizer typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, random);
-
         log.println("Randomizer Version: " + Version.VERSION_STRING);
         log.println("Random Seed: " + seed);
         log.println("Settings String: " + Version.VERSION + settings.toString());
@@ -94,21 +122,9 @@ public class GameRandomizer {
         boolean typeEffectivenessUpdated = false;
 
         // All possible changes that can be logged
-        boolean movesetsChanged = false;
         boolean pokemonTraitsChanged = false;
-        boolean startersChanged = false;
-        boolean evolutionsChanged = false;
         boolean trainersChanged = false;
         boolean trainerMovesetsChanged = false;
-        boolean staticsChanged = false;
-        boolean totemsChanged = false;
-        boolean wildsChanged = false;
-        boolean tmMovesChanged = false;
-        boolean moveTutorMovesChanged = false;
-        boolean tradesChanged = false;
-        boolean tmsHmsCompatChanged = false;
-        boolean tutorCompatChanged = false;
-        boolean shopsChanged = false;
 
         if (settings.isUpdateTypeEffectiveness()) {
             romHandler.updateTypeEffectiveness();
@@ -195,7 +211,7 @@ public class GameRandomizer {
 
         // Wild Held Items
         if (settings.isRandomizeWildPokemonHeldItems()) {
-            romHandler.randomizeWildHeldItems(settings);
+            encounterRandomizer.randomizeWildHeldItems();
             pokemonTraitsChanged = true;
         }
 
@@ -203,12 +219,10 @@ public class GameRandomizer {
         // Applied after type to pick new evos based on new types.
 
         if (settings.getEvolutionsMod() != Settings.EvolutionsMod.UNCHANGED) {
-            EvolutionRandomizer er = new EvolutionRandomizer(romHandler, settings, random);
-            er.randomizeEvolutions();
-            evolutionsChanged = true;
+            evoRandomizer.randomizeEvolutions();
         }
 
-        if (evolutionsChanged) {
+        if (evoRandomizer.isChangesMade()) {
             logEvolutionChanges(log);
         }
 
@@ -282,14 +296,13 @@ public class GameRandomizer {
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
         if(settings.getStartersMod() != Settings.StartersMod.UNCHANGED) {
-            romHandler.randomizeStarters(settings);
-            startersChanged = true;
+            starterRandomizer.randomizeStarters();
         }
         if (settings.isRandomizeStartersHeldItems() && !(romHandler instanceof Gen1RomHandler)) {
-            romHandler.randomizeStarterHeldItems(settings);
+            starterRandomizer.randomizeStarterHeldItems();
         }
 
-        if (startersChanged) {
+        if (starterRandomizer.isChangesMade()) {
             logStarters(log);
         }
 
@@ -308,18 +321,16 @@ public class GameRandomizer {
 
         if (settings.getMovesetsMod() != Settings.MovesetsMod.UNCHANGED &&
                 settings.getMovesetsMod() != Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.randomizeMovesLearnt(settings);
-            romHandler.randomizeEggMoves(settings);
-            movesetsChanged = true;
+            pokeMovesetRandomizer.randomizeMovesLearnt();
+            pokeMovesetRandomizer.randomizeEggMoves();
         }
 
         if (settings.isReorderDamagingMoves()) {
-            romHandler.orderDamagingMovesByDamage();
-            movesetsChanged = true;
+            pokeMovesetRandomizer.orderDamagingMovesByDamage();
         }
 
         // Show the new movesets if applicable
-        if (movesetsChanged) {
+        if (pokeMovesetRandomizer.isChangesMade()) {
             logMovesetChanges(log);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             log.println("Pokemon Movesets: Metronome Only." + NEWLINE);
@@ -331,11 +342,10 @@ public class GameRandomizer {
 
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
-            romHandler.randomizeTMMoves(settings);
-            tmMovesChanged = true;
+            tmtMoveRandomizer.randomizeTMMoves();
         }
 
-        if (tmMovesChanged) {
+        if (tmtMoveRandomizer.isTMChangesMade()) {
             checkValue = logTMMoves(log, checkValue);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             log.println("TM Moves: Metronome Only." + NEWLINE);
@@ -351,34 +361,26 @@ public class GameRandomizer {
         // 5. Copy to cosmetic forms
 
         switch (settings.getTmsHmsCompatibilityMod()) {
-            case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> {
-                romHandler.randomizeTMHMCompatibility(settings);
-                tmsHmsCompatChanged = true;
-            }
-            case FULL -> {
-                romHandler.fullTMHMCompatibility();
-                tmsHmsCompatChanged = true;
-            }
+            case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> tmhmtCompRandomizer.randomizeTMHMCompatibility();
+            case FULL -> tmhmtCompRandomizer.fullTMHMCompatibility();
             default -> {
             }
         }
 
         if (settings.isTmLevelUpMoveSanity()) {
-            romHandler.ensureTMCompatSanity();
+            tmhmtCompRandomizer.ensureTMCompatSanity();
             if (settings.isTmsFollowEvolutions()) {
-                romHandler.ensureTMEvolutionSanity();
+                tmhmtCompRandomizer.ensureTMEvolutionSanity();
             }
-            tmsHmsCompatChanged = true;
         }
 
         if (settings.isFullHMCompat()) {
-            romHandler.fullHMCompatibility();
-            tmsHmsCompatChanged = true;
+            tmhmtCompRandomizer.fullHMCompatibility();
         }
 
         // Copy TM/HM compatibility to cosmetic formes if it was changed at all, and log changes
-        if (tmsHmsCompatChanged) {
-            romHandler.copyTMCompatibilityToCosmeticFormes();
+        if (tmhmtCompRandomizer.isTMHMChangesMade()) {
+            tmhmtCompRandomizer.copyTMCompatibilityToCosmeticFormes();
             logTMHMCompatibility(log);
         }
 
@@ -389,12 +391,10 @@ public class GameRandomizer {
 
             if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                     && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
-
-                romHandler.randomizeMoveTutorMoves(settings);
-                moveTutorMovesChanged = true;
+                tmtMoveRandomizer.randomizeMoveTutorMoves();
             }
 
-            if (moveTutorMovesChanged) {
+            if (tmtMoveRandomizer.isTutorChangesMade()) {
                 checkValue = logMoveTutorMoves(log, checkValue, oldMtMoves);
             } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
                 log.println("Move Tutor Moves: Metronome Only." + NEWLINE);
@@ -409,29 +409,21 @@ public class GameRandomizer {
             // 4. Copy to cosmetic forms
 
             switch (settings.getMoveTutorsCompatibilityMod()) {
-                case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> {
-                    romHandler.randomizeMoveTutorCompatibility(settings);
-                    tutorCompatChanged = true;
-                }
-                case FULL -> {
-                    romHandler.fullMoveTutorCompatibility();
-                    tutorCompatChanged = true;
-                }
-                default -> {
-                }
+                case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> tmhmtCompRandomizer.randomizeMoveTutorCompatibility();
+                case FULL -> tmhmtCompRandomizer.fullMoveTutorCompatibility();
+                default -> {}
             }
 
             if (settings.isTutorLevelUpMoveSanity()) {
-                romHandler.ensureMoveTutorCompatSanity();
+                tmhmtCompRandomizer.ensureMoveTutorCompatSanity();
                 if (settings.isTutorFollowEvolutions()) {
-                    romHandler.ensureMoveTutorEvolutionSanity();
+                    tmhmtCompRandomizer.ensureMoveTutorEvolutionSanity();
                 }
-                tutorCompatChanged = true;
             }
 
             // Copy move tutor compatibility to cosmetic formes if it was changed at all
-            if (tutorCompatChanged) {
-                romHandler.copyMoveTutorCompatibilityToCosmeticFormes();
+            if (tmhmtCompRandomizer.isTutorChangesMade()) {
+                tmhmtCompRandomizer.copyMoveTutorCompatibilityToCosmeticFormes();
                 logTutorCompatibility(log);
             }
 
@@ -441,9 +433,7 @@ public class GameRandomizer {
         if (settings.isTrainersUseLocalPokemon() &&
                 (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
                         settings.isWildLevelsModified())) {
-            EncounterRandomizer er = new EncounterRandomizer(romHandler, settings, random);
-            er.randomizeEncounters();
-            wildsChanged = true;
+            encounterRandomizer.randomizeEncounters();
         }
 
         // Trainer Pokemon
@@ -456,12 +446,12 @@ public class GameRandomizer {
         if (settings.getAdditionalRegularTrainerPokemon() > 0
                 || settings.getAdditionalImportantTrainerPokemon() > 0
                 || settings.getAdditionalBossTrainerPokemon() > 0) {
-            romHandler.addTrainerPokemon(settings);
+            trainerPokeRandomizer.addTrainerPokemon();
             trainersChanged = true;
         }
         
         if (settings.isDoubleBattleMode()) {
-            romHandler.setDoubleBattleMode();
+            trainerPokeRandomizer.setDoubleBattleMode();
             trainersChanged = true;
         }
 
@@ -472,12 +462,12 @@ public class GameRandomizer {
             case TYPE_THEMED:
             case TYPE_THEMED_ELITE4_GYMS:
             case KEEP_THEMED:
-                romHandler.randomizeTrainerPokes(settings);
+                trainerPokeRandomizer.randomizeTrainerPokes();
                 trainersChanged = true;
                 break;
             default:
                 if (settings.isTrainersLevelModified()) {
-                    romHandler.onlyChangeTrainerLevels(settings);
+                    trainerPokeRandomizer.onlyChangeTrainerLevels();
                     trainersChanged = true;
                 }
                 break;
@@ -486,17 +476,17 @@ public class GameRandomizer {
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
                 || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-            romHandler.rivalCarriesStarter();
+            trainerPokeRandomizer.makeRivalCarryStarter();
             trainersChanged = true;
         }
 
         if (settings.isTrainersForceFullyEvolved()) {
-            romHandler.forceFullyEvolvedTrainerPokes(settings);
+            trainerPokeRandomizer.forceFullyEvolvedTrainerPokes();
             trainersChanged = true;
         }
 
         if (settings.isBetterTrainerMovesets()) {
-            romHandler.pickTrainerMovesets(settings);
+            trainerPokeRandomizer.pickTrainerMovesets();
             trainersChanged = true;
             trainerMovesetsChanged = true;
         }
@@ -504,7 +494,7 @@ public class GameRandomizer {
         if (settings.isRandomizeHeldItemsForBossTrainerPokemon()
                 || settings.isRandomizeHeldItemsForImportantTrainerPokemon()
                 || settings.isRandomizeHeldItemsForRegularTrainerPokemon()) {
-            romHandler.randomizeTrainerHeldItems(settings);
+            trainerPokeRandomizer.randomizeTrainerHeldItems();
             trainersChanged = true;
         }
 
@@ -514,13 +504,13 @@ public class GameRandomizer {
         // Trainer names & class names randomization
         if (romHandler.canChangeTrainerText()) {
             if (settings.isRandomizeTrainerClassNames()) {
-                romHandler.randomizeTrainerClassNames(settings);
+                trainerNameRandomizer.randomizeTrainerClassNames();
                 trainersChanged = true;
                 trainerNamesChanged = true;
             }
 
             if (settings.isRandomizeTrainerNames()) {
-                romHandler.randomizeTrainerNames(settings);
+                trainerNameRandomizer.randomizeTrainerNames();
                 trainersChanged = true;
                 trainerNamesChanged = true;
             }
@@ -534,7 +524,7 @@ public class GameRandomizer {
 
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.metronomeOnlyMode();
+            pokeMovesetRandomizer.metronomeOnlyMode();
         }
 
         List<Trainer> trainers = romHandler.getTrainers();
@@ -548,14 +538,12 @@ public class GameRandomizer {
         if (romHandler.canChangeStaticPokemon()) {
             List<StaticEncounter> oldStatics = romHandler.getStaticPokemon();
             if (settings.getStaticPokemonMod() != Settings.StaticPokemonMod.UNCHANGED) { // Legendary for L
-                romHandler.randomizeStaticPokemon(settings);
-                staticsChanged = true;
+                staticPokeRandomizer.randomizeStaticPokemon();
             } else if (settings.isStaticLevelModified()) {
-                romHandler.onlyChangeStaticLevels(settings);
-                staticsChanged = true;
+                staticPokeRandomizer.onlyChangeStaticLevels();
             }
 
-            if (staticsChanged) {
+            if (staticPokeRandomizer.isStaticChangesMade()) {
                 checkValue = logStaticPokemon(log, checkValue, oldStatics);
             } else {
                 log.println("Static Pokemon: Unchanged." + NEWLINE);
@@ -563,6 +551,7 @@ public class GameRandomizer {
         }
 
         // Totem Pokemon
+        // TODO: ask the romHandler whether it has totem support, instead of hardcoding only Gen7 to have them
         if (romHandler.generationOfPokemon() == 7) {
             List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
             if (settings.getTotemPokemonMod() != Settings.TotemPokemonMod.UNCHANGED ||
@@ -571,11 +560,10 @@ public class GameRandomizer {
                     settings.isRandomizeTotemHeldItems() ||
                     settings.isTotemLevelsModified()) {
 
-                romHandler.randomizeTotemPokemon(settings);
-                totemsChanged = true;
+                staticPokeRandomizer.randomizeTotemPokemon();
             }
 
-            if (totemsChanged) {
+            if (staticPokeRandomizer.isTotemChangesMade()) {
                 checkValue = logTotemPokemon(log, checkValue, oldTotems);
             } else {
                 log.println("Totem Pokemon: Unchanged." + NEWLINE);
@@ -585,18 +573,16 @@ public class GameRandomizer {
         // Wild Pokemon
 
         if (settings.isUseMinimumCatchRate()) {
-            romHandler.changeCatchRates(settings);
+            encounterRandomizer.changeCatchRates();
         }
 
         if (!settings.isTrainersUseLocalPokemon() &&
                 (settings.getWildPokemonMod() != Settings.WildPokemonMod.UNCHANGED ||
                 settings.isWildLevelsModified())) {
-            EncounterRandomizer er = new EncounterRandomizer(romHandler, settings, random);
-            er.randomizeEncounters();
-            wildsChanged = true;
+            encounterRandomizer.randomizeEncounters();
         }
 
-        if (wildsChanged) {
+        if (encounterRandomizer.isChangesMade()) {
             logWildPokemonChanges(log);
         } else {
             log.println("Wild Pokemon: Unchanged." + NEWLINE);
@@ -616,19 +602,13 @@ public class GameRandomizer {
 
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
         switch (settings.getInGameTradesMod()) {
-            case RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED -> {
-                romHandler.randomizeIngameTrades(settings);
-                tradesChanged = true;
-            }
-            default -> {
-            }
+            case RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED -> tradeRandomizer.randomizeIngameTrades();
+            default -> {}
         }
 
-        if (tradesChanged) {
+        if (tradeRandomizer.isChangesMade()) {
             logTrades(log, oldTrades);
         }
-
-        ItemRandomizer itemRandomizer = new ItemRandomizer(romHandler, settings, random);
 
         // Field Items
         switch (settings.getFieldItemsMod()) {
@@ -641,19 +621,12 @@ public class GameRandomizer {
         // Shops
 
         switch (settings.getShopItemsMod()) {
-            case SHUFFLE -> {
-                itemRandomizer.shuffleShopItems();
-                shopsChanged = true;
-            }
-            case RANDOM -> {
-                itemRandomizer.randomizeShopItems();
-                shopsChanged = true;
-            }
-            default -> {
-            }
+            case SHUFFLE -> itemRandomizer.shuffleShopItems();
+            case RANDOM -> itemRandomizer.randomizeShopItems();
+            default -> {}
         }
 
-        if (shopsChanged) {
+        if (itemRandomizer.isShopChangesMade()) {
             logShops(log);
         }
 
@@ -676,7 +649,7 @@ public class GameRandomizer {
         }
 
         // Intro Pokemon...
-        romHandler.randomizeIntroPokemon();
+        introPokeRandomizer.randomizeIntroPokemon();
 
         // Record check value?
         romHandler.writeCheckValueToROM(checkValue);
@@ -1061,6 +1034,8 @@ public class GameRandomizer {
     }
 
     private void logStarters(final PrintStream log) {
+
+        // TODO: log starter held items
 
         switch (settings.getStartersMod()) {
             case CUSTOM -> log.println("--Custom Starters--");

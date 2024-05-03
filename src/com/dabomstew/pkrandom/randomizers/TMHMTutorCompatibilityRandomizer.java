@@ -14,8 +14,25 @@ import java.util.Random;
 
 public class TMHMTutorCompatibilityRandomizer extends Randomizer {
 
+    private boolean tmhmChangesMade;
+    private boolean tutorChangesMade;
+
     public TMHMTutorCompatibilityRandomizer(RomHandler romHandler, Settings settings, Random random) {
         super(romHandler, settings, random);
+    }
+
+    /**
+     * Returns whether TM/HM compatibility has been changed.
+     */
+    public boolean isTMHMChangesMade() {
+        return tmhmChangesMade;
+    }
+
+    /**
+     * Returns whether Move Tutor compatibility has been changed.
+     */
+    public boolean isTutorChangesMade() {
+        return tutorChangesMade;
     }
 
     public void randomizeTMHMCompatibility() {
@@ -43,6 +60,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
 
         // Set the new compatibility
         romHandler.setTMHMCompatibility(compat);
+        tmhmChangesMade = true;
     }
 
     private void randomizePokemonMoveCompatibility(Pokemon pkmn, boolean[] moveCompatibilityFlags,
@@ -140,6 +158,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
             }
         }
         romHandler.setTMHMCompatibility(compat);
+        tmhmChangesMade = true;
     }
 
     public void ensureTMEvolutionSanity() {
@@ -155,6 +174,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
                     }
                 });
         romHandler.setTMHMCompatibility(compat);
+        tmhmChangesMade = true;
     }
 
     public void fullHMCompatibility() {
@@ -168,6 +188,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
 
         // Set the new compatibility
         romHandler.setTMHMCompatibility(compat);
+        tmhmChangesMade = true;
     }
 
     public void copyTMCompatibilityToCosmeticFormes() {
@@ -185,6 +206,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
         }
 
         romHandler.setTMHMCompatibility(compat);
+        tmhmChangesMade = true;
     }
 
     public void randomizeMoveTutorCompatibility() {
@@ -215,6 +237,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
 
         // Set the new compatibility
         romHandler.setMoveTutorCompatibility(compat);
+        tutorChangesMade = true;
     }
 
     public void fullMoveTutorCompatibility() {
@@ -229,6 +252,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
             }
         }
         romHandler.setMoveTutorCompatibility(compat);
+        tutorChangesMade = true;
     }
 
     public void ensureMoveTutorCompatSanity() {
@@ -252,6 +276,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
             }
         }
         romHandler.setMoveTutorCompatibility(compat);
+        tutorChangesMade = true;
     }
 
     public void ensureMoveTutorEvolutionSanity() {
@@ -269,6 +294,7 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
                     }
                 });
         romHandler.setMoveTutorCompatibility(compat);
+        tutorChangesMade = true;
     }
 
     public void copyMoveTutorCompatibilityToCosmeticFormes() {
@@ -286,5 +312,6 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
         }
 
         romHandler.setMoveTutorCompatibility(compat);
+        tutorChangesMade = true;
     }
 }

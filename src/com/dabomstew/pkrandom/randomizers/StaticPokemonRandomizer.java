@@ -9,8 +9,26 @@ import java.util.stream.Collectors;
 
 public class StaticPokemonRandomizer extends Randomizer {
 
+    // the totem randomization is here because the code is very similar,
+    // but some notion of changes made to statics vs totems was still needed.
+    private boolean totemChangesMade;
+
     public StaticPokemonRandomizer(RomHandler romHandler, Settings settings, Random random) {
         super(romHandler, settings, random);
+    }
+
+    /**
+     * Returns whether any changes to non-Totem static Pokemon have been made. Alias for {@link #isChangesMade()};
+     */
+    public boolean isStaticChangesMade() {
+        return changesMade;
+    }
+
+    /**
+     * Returns whether any changes to Totem Pokemon have been made.
+     */
+    public boolean isTotemChangesMade() {
+        return totemChangesMade;
     }
 
     public void onlyChangeStaticLevels() {
@@ -283,6 +301,7 @@ public class StaticPokemonRandomizer extends Randomizer {
 
         // Save
         romHandler.setStaticPokemon(replacements);
+        changesMade = true;
     }
 
     public void randomizeTotemPokemon() {
@@ -431,6 +450,7 @@ public class StaticPokemonRandomizer extends Randomizer {
 
         // Save
         romHandler.setTotemPokemon(replacements);
+        totemChangesMade = true;
     }
 
     // TODO: should be a copy constructor in StaticEncounter instead

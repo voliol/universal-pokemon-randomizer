@@ -194,6 +194,7 @@ public class PokemonMovesetRandomizer extends Randomizer {
         }
         // Done, save
         romHandler.setMovesLearnt(movesets);
+        changesMade = true;
     }
 
     public void randomizeEggMoves() {
@@ -313,6 +314,7 @@ public class PokemonMovesetRandomizer extends Randomizer {
         }
         // Done, save
         romHandler.setEggMoves(movesets);
+        changesMade = true;
     }
 
     private boolean checkForUnusedMove(List<Move> potentialList, List<Integer> alreadyUsed) {
@@ -472,6 +474,7 @@ public class PokemonMovesetRandomizer extends Randomizer {
 
         // Done, save
         romHandler.setMovesLearnt(movesets);
+        changesMade = true;
     }
 
     public void metronomeOnlyMode() {

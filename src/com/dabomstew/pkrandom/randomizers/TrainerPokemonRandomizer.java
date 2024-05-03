@@ -881,7 +881,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
     }
 
 
-    public void forceFullyEvolvedTrainerPokes(Settings settings) {
+    public void forceFullyEvolvedTrainerPokes() {
         int minLevel = settings.getTrainersForceFullyEvolvedLevel();
 
         List<Trainer> currentTrainers = romHandler.getTrainers();

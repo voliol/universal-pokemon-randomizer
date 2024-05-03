@@ -30,6 +30,7 @@ public class EncounterRandomizer extends Randomizer {
         randomizeEncounters(mode, useTimeOfDay,
                 randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, noLegendaries,
                 balanceShakingGrass, levelModifier, allowAltFormes, banIrregularAltFormes, abilitiesAreRandomized);
+        changesMade = true;
     }
 
     // only exists for some old test cases, please don't use

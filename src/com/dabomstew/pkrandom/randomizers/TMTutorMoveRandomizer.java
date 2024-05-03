@@ -13,8 +13,25 @@ import java.util.*;
  */
 public class TMTutorMoveRandomizer extends Randomizer {
 
+    private boolean tmChangesMade;
+    private boolean tutorChangesMade;
+
     public TMTutorMoveRandomizer(RomHandler romHandler, Settings settings, Random random) {
         super(romHandler, settings, random);
+    }
+
+    /**
+     * Returns whether any changes have been made to TM moves.
+     */
+    public boolean isTMChangesMade() {
+        return tmChangesMade;
+    }
+
+    /**
+     * Returns whether any changes have been made to Move Tutor moves.
+     */
+    public boolean isTutorChangesMade() {
+        return tutorChangesMade;
     }
 
     public void randomizeTMMoves() {
@@ -98,6 +115,7 @@ public class TMTutorMoveRandomizer extends Randomizer {
         }
 
         romHandler.setTMMoves(newTMs);
+        tmChangesMade = true;
     }
 
     public void randomizeMoveTutorMoves() {
@@ -186,6 +204,7 @@ public class TMTutorMoveRandomizer extends Randomizer {
         }
 
         romHandler.setMoveTutorMoves(newMTs);
+        tutorChangesMade = true;
     }
 
 }
