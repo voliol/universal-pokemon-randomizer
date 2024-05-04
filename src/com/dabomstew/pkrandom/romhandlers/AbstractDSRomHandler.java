@@ -414,20 +414,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return true;
     }
 
-    @Override
-    public void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-    }
-
 	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
 	// is separate methods called in loadROM()/loadedRom() methods. Even though
 	// one call in AbstractRomHandler should suffice.

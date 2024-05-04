@@ -560,8 +560,6 @@ public interface RomHandler {
 
     void setTypeTable(TypeTable typeTable);
 
-    void updateTypeEffectiveness();
-
     boolean hasTypeEffectivenessSupport();
 
 }

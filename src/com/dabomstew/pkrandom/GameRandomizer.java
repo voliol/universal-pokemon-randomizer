@@ -31,6 +31,7 @@ import com.dabomstew.pkrandom.randomizers.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.updaters.MoveUpdater;
+import com.dabomstew.pkrandom.updaters.TypeEffectivenessUpdater;
 
 /**
  * Coordinates and logs the randomization of a game, via a {@link RomHandler}, and various sub-{@link Randomizer}s.
@@ -46,6 +47,7 @@ public class GameRandomizer {
     private final boolean saveAsDirectory;
 
     private final MoveUpdater moveUpdater;
+    private final TypeEffectivenessUpdater typeEffUpdater;
 
     private final IntroPokemonRandomizer introPokeRandomizer;
     private final PokemonBaseStatRandomizer pokeBSRandomizer;
@@ -74,6 +76,7 @@ public class GameRandomizer {
         this.saveAsDirectory = saveAsDirectory;
 
         this.moveUpdater = new MoveUpdater(romHandler);
+        this.typeEffUpdater = new TypeEffectivenessUpdater(romHandler);
 
         this.introPokeRandomizer = new IntroPokemonRandomizer(romHandler, settings, random);
         this.pokeBSRandomizer = new PokemonBaseStatRandomizer(romHandler, settings, random);
@@ -123,13 +126,10 @@ public class GameRandomizer {
         log.println();
 
         // All updates that can be logged
-        boolean movesUpdated = false;
         boolean pokemonStatsUpdated = false;
-        boolean typeEffectivenessUpdated = false;
 
         if (settings.isUpdateTypeEffectiveness()) {
-            romHandler.updateTypeEffectiveness();
-            typeEffectivenessUpdated = true;
+            typeEffUpdater.updateTypeEffectiveness();
         }
         if (settings.getTypeEffectivenessMod() != Settings.TypeEffectivenessMod.UNCHANGED) {
             switch (settings.getTypeEffectivenessMod()) {
@@ -140,7 +140,7 @@ public class GameRandomizer {
                 case INVERSE -> typeEffRandomizer.invertTypeEffectiveness(settings.isInverseTypesRandomImmunities());
             }
         }
-        if (typeEffectivenessUpdated || typeEffRandomizer.isChangesMade()) {
+        if (typeEffUpdater.isUpdated() || typeEffRandomizer.isChangesMade()) {
             log.println("--Type Effectiveness--");
             log.println(romHandler.getTypeTable().toBigString() + NEWLINE);
         }
@@ -301,9 +301,9 @@ public class GameRandomizer {
 
         // Move Data Log
         // Placed here so it matches its position in the randomizer interface
-        if (moveDataRandomizer.isChangesMade()) {
+        if (moveDataRandomizer.isChangesMade() || moveUpdater.isUpdated()) {
             logMoveChanges(log);
-        } else if (!movesUpdated) {
+        } else {
             log.println("Move Data: Unchanged." + NEWLINE);
         }
 

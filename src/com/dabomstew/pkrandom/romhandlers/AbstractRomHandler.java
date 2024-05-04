@@ -359,11 +359,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void updateTypeEffectiveness() {
-        // do nothing
-    }
-
-    @Override
     public String abilityName(int number) {
         return "";
     }

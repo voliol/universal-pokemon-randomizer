@@ -461,20 +461,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-    }
-
-    @Override
 	public List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
 		for (int i = 1; i < getPokemon().size(); i++) {

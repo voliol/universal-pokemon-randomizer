@@ -1354,24 +1354,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.POISON, Type.BUG, Effectiveness.NEUTRAL);
-        log("Changed: Poison super effective vs Bug => Poison neutral vs Bug");
-        typeTable.setEffectiveness(Type.BUG, Type.POISON, Effectiveness.HALF);
-        log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
-        typeTable.setEffectiveness(Type.GHOST, Type.PSYCHIC, Effectiveness.DOUBLE);
-        log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
-        typeTable.setEffectiveness(Type.ICE, Type.FIRE, Effectiveness.HALF);
-        log("Changed: Ice neutral vs Fire => Ice not very effective vs Fire");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-    }
-
-    @Override
     public TypeTable getTypeTable() {
         return readTypeTable();
     }
