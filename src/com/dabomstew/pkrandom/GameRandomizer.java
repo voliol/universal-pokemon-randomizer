@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom;
 
 /*----------------------------------------------------------------------------*/
-/*--  Randomizer.java - Can randomize a file based on settings.             --*/
-/*--                    Output varies by seed.                              --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/

@@ -463,214 +463,56 @@ public class Gen4Constants {
 
     public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
 
-    public static final List<Integer> hgssBigOverworldPokemon = Arrays.asList(
-            536, // MMODEL_FOLLOWER_MON_STEELIX
-            537, // MMODEL_FOLLOWER_MON_STEELIX_F
-            579, // MMODEL_FOLLOWER_MON_LUGIA
-            580, // MMODEL_FOLLOWER_MON_HO_OH
-            651, // MMODEL_FOLLOWER_MON_WAILORD
-            712, // MMODEL_FOLLOWER_MON_KYOGRE
-            713, // MMODEL_FOLLOWER_MON_GROUDON
-            714, // MMODEL_FOLLOWER_MON_RAYQUAZA
-            833, // MMODEL_FOLLOWER_MON_DIALGA
-            834, // MMODEL_FOLLOWER_MON_PALKIA
-            836, // MMODEL_FOLLOWER_MON_REGIGIGAS
-            837, // MMODEL_FOLLOWER_MON_GIRATINA
-            838, // MMODEL_FOLLOWER_MON_GIRATINA_ORIGIN
-            845, // MMODEL_FOLLOWER_MON_ARCEUS_NORMAL
-            846, // MMODEL_FOLLOWER_MON_ARCEUS_FIGHTING
-            847, // MMODEL_FOLLOWER_MON_ARCEUS_FLYING
-            848, // MMODEL_FOLLOWER_MON_ARCEUS_POISON
-            849, // MMODEL_FOLLOWER_MON_ARCEUS_GROUND
-            850, // MMODEL_FOLLOWER_MON_ARCEUS_ROCK
-            851, // MMODEL_FOLLOWER_MON_ARCEUS_BUG
-            852, // MMODEL_FOLLOWER_MON_ARCEUS_GHOST
-            853, // MMODEL_FOLLOWER_MON_ARCEUS_STEEL
-            854, // MMODEL_FOLLOWER_MON_ARCEUS_MYSTERY
-            855, // MMODEL_FOLLOWER_MON_ARCEUS_FIRE
-            856, // MMODEL_FOLLOWER_MON_ARCEUS_WATER
-            857, // MMODEL_FOLLOWER_MON_ARCEUS_GRASS
-            858, // MMODEL_FOLLOWER_MON_ARCEUS_ELECTRIC
-            859, // MMODEL_FOLLOWER_MON_ARCEUS_PSYCHIC
-            860, // MMODEL_FOLLOWER_MON_ARCEUS_ICE
-            861, // MMODEL_FOLLOWER_MON_ARCEUS_DRAGON
-            862  // MMODEL_FOLLOWER_MON_ARCEUS_DARK
-    );
+    private final static int bulbasaurOverworldSpriteID = 297; // TODO is this correct?
 
-    public static final List<Integer> hgssBannedOverworldPokemon = Arrays.asList(
-            // Unown alts (to avoid 28x chance of getting Unown)
-            // Arcues alts (to avoid 18x chance of getting Arceus)
-            502, // MMODEL_FOLLOWER_MON_UNOWN_B
-            503, // MMODEL_FOLLOWER_MON_UNOWN_C
-            504, // MMODEL_FOLLOWER_MON_UNOWN_D
-            505, // MMODEL_FOLLOWER_MON_UNOWN_E
-            506, // MMODEL_FOLLOWER_MON_UNOWN_F
-            507, // MMODEL_FOLLOWER_MON_UNOWN_G
-            508, // MMODEL_FOLLOWER_MON_UNOWN_H
-            509, // MMODEL_FOLLOWER_MON_UNOWN_I
-            510, // MMODEL_FOLLOWER_MON_UNOWN_J
-            511, // MMODEL_FOLLOWER_MON_UNOWN_K
-            512, // MMODEL_FOLLOWER_MON_UNOWN_L
-            513, // MMODEL_FOLLOWER_MON_UNOWN_M
-            514, // MMODEL_FOLLOWER_MON_UNOWN_N
-            515, // MMODEL_FOLLOWER_MON_UNOWN_O
-            516, // MMODEL_FOLLOWER_MON_UNOWN_P
-            517, // MMODEL_FOLLOWER_MON_UNOWN_Q
-            518, // MMODEL_FOLLOWER_MON_UNOWN_R
-            519, // MMODEL_FOLLOWER_MON_UNOWN_S
-            520, // MMODEL_FOLLOWER_MON_UNOWN_T
-            521, // MMODEL_FOLLOWER_MON_UNOWN_U
-            522, // MMODEL_FOLLOWER_MON_UNOWN_V
-            523, // MMODEL_FOLLOWER_MON_UNOWN_W
-            524, // MMODEL_FOLLOWER_MON_UNOWN_X
-            525, // MMODEL_FOLLOWER_MON_UNOWN_Y
-            526, // MMODEL_FOLLOWER_MON_UNOWN_Z
-            527, // MMODEL_FOLLOWER_MON_UNOWN_QMARK
-            528, // MMODEL_FOLLOWER_MON_UNOWN_EXCL
-            846, // MMODEL_FOLLOWER_MON_ARCEUS_FIGHTING
-            847, // MMODEL_FOLLOWER_MON_ARCEUS_FLYING
-            848, // MMODEL_FOLLOWER_MON_ARCEUS_POISON
-            849, // MMODEL_FOLLOWER_MON_ARCEUS_GROUND
-            850, // MMODEL_FOLLOWER_MON_ARCEUS_ROCK
-            851, // MMODEL_FOLLOWER_MON_ARCEUS_BUG
-            852, // MMODEL_FOLLOWER_MON_ARCEUS_GHOST
-            853, // MMODEL_FOLLOWER_MON_ARCEUS_STEEL
-            854, // MMODEL_FOLLOWER_MON_ARCEUS_MYSTERY
-            855, // MMODEL_FOLLOWER_MON_ARCEUS_FIRE
-            856, // MMODEL_FOLLOWER_MON_ARCEUS_WATER
-            857, // MMODEL_FOLLOWER_MON_ARCEUS_GRASS
-            858, // MMODEL_FOLLOWER_MON_ARCEUS_ELECTRIC
-            859, // MMODEL_FOLLOWER_MON_ARCEUS_PSYCHIC
-            860, // MMODEL_FOLLOWER_MON_ARCEUS_ICE
-            861, // MMODEL_FOLLOWER_MON_ARCEUS_DRAGON
-            862  // MMODEL_FOLLOWER_MON_ARCEUS_DARK
-    );
-
-    public static int convertOverworldSpriteToSpecies(int overworldSpriteID) {
-        int speciesID = overworldSpriteID - 296;
-
-        // Venusaur
-        if (overworldSpriteID >= 300) {
-            speciesID -= 1;
+    /**
+     * Returns the first overworld sprite ID for a given Pokemon species.
+     * Some species have more than one sprite ID, either due to gender
+     * differences or formes, but this gives the first one only.
+     */
+    public static int getOverworldSpriteIDOfSpecies(int species) {
+        int spriteID = bulbasaurOverworldSpriteID;
+        for (int i = 1; i < species; i++) {
+            spriteID += speciesToOverworldSpriteAmount.getOrDefault(i, 1);
         }
-
-        // Pikachu
-        if (overworldSpriteID >= 323) {
-            speciesID -= 1;
-        }
-
-        // Meganium
-        if (overworldSpriteID >= 453) {
-            speciesID -= 1;
-        }
-
-        // Pichu
-        if (overworldSpriteID >= 472) {
-            speciesID -= 1;
-        }
-
-        // Unown
-        if (overworldSpriteID >= 528) {
-            speciesID -= 27;
-        } else if (overworldSpriteID > 501) {
-            speciesID -= (overworldSpriteID - 501);
-        }
-
-        // Wobbuffet
-        if (overworldSpriteID >= 530) {
-            speciesID -= 1;
-        }
-
-        // Steelix
-        if (overworldSpriteID >= 537) {
-            speciesID -= 1;
-        }
-
-        // Heracross
-        if (overworldSpriteID >= 544) {
-            speciesID -= 1;
-        }
-
-        // Deoxys
-        if (overworldSpriteID >= 719) {
-            speciesID -= 3;
-        } else if (overworldSpriteID > 716) {
-            speciesID -= (overworldSpriteID - 716);
-        }
-
-        // Burmy
-        if (overworldSpriteID >= 747) {
-            speciesID -= 2;
-        } else if (overworldSpriteID > 745) {
-            speciesID -= (overworldSpriteID - 745);
-        }
-
-        // Wormadam
-        if (overworldSpriteID >= 750) {
-            speciesID -= 2;
-        } else if (overworldSpriteID > 748) {
-            speciesID -= (overworldSpriteID - 748);
-        }
-
-        // Combee
-        if (overworldSpriteID >= 753) {
-            speciesID -= 1;
-        }
-
-        // Shellos
-        if (overworldSpriteID >= 761) {
-            speciesID -= 1;
-        }
-
-        // Gastrodon
-        if (overworldSpriteID >= 763) {
-            speciesID -= 1;
-        }
-
-        // Gible
-        if (overworldSpriteID >= 784) {
-            speciesID -= 1;
-        }
-
-        // Gabite
-        if (overworldSpriteID >= 786) {
-            speciesID -= 1;
-        }
-
-        // Garchomp
-        if (overworldSpriteID >= 788) {
-            speciesID -= 1;
-        }
-
-        // Hippopotas
-        if (overworldSpriteID >= 793) {
-            speciesID -= 1;
-        }
-
-        // Hippowdon
-        if (overworldSpriteID >= 795) {
-            speciesID -= 1;
-        }
-
-        // Rotom
-        if (overworldSpriteID >= 829) {
-            speciesID -= 5;
-        } else if (overworldSpriteID > 824) {
-            speciesID -= (overworldSpriteID - 824);
-        }
-
-        // Giratina
-        if (overworldSpriteID >= 838) {
-            speciesID -= 1;
-        }
-
-        // Arceus
-        if (overworldSpriteID > 845) {
-            speciesID -= (overworldSpriteID - 845);
-        }
-
-        return speciesID;
+        return spriteID;
     }
+
+    private final static Map<Integer, Integer> speciesToOverworldSpriteAmount = initSpeciesToOverworldSpriteAmount();
+
+    private static Map<Integer, Integer> initSpeciesToOverworldSpriteAmount() {
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(Species.venusaur, 2);
+        map.put(Species.pikachu, 2);
+        map.put(Species.meganium, 2);
+        map.put(Species.pichu, 2);
+        map.put(Species.unown, 28);
+        map.put(Species.wobbuffet, 2);
+        map.put(Species.steelix, 2);
+        map.put(Species.heracross, 2);
+        map.put(Species.deoxys, 4);
+        map.put(Species.burmy, 3);
+        map.put(Species.wormadam, 3);
+        map.put(Species.combee, 2);
+        map.put(Species.shellos, 2);
+        map.put(Species.gastrodon, 2);
+        map.put(Species.gible, 2);
+        map.put(Species.gabite, 2);
+        map.put(Species.garchomp, 2);
+        map.put(Species.hippopotas, 2);
+        map.put(Species.hippowdon, 2);
+        map.put(Species.rotom, 6);
+        map.put(Species.giratina, 2);
+        map.put(Species.arceus, 18);
+        return map;
+    }
+
+    // Technically the property of being big or not is one of the sprites and not species,
+    // but it just happens that all species with SOME overworld sprite that's big have all
+    // their overworld sprites be big.
+    public static final List<Integer> hgssBigOverworldPokemon = List.of(Species.steelix, Species.lugia, Species.hoOh,
+            Species.wailord, Species.kyogre, Species.groudon, Species.rayquaza, Species.dialga, Species.palkia,
+            Species.regigigas, Species.giratina, Species.arceus);
 
     // The original slot each of the 20 "alternate" slots is mapped to
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10

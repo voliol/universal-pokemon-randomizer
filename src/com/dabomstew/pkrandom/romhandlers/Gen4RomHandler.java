@@ -4465,20 +4465,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				writeOverlay(romEntry.getIntValue("IntroOvlNumber"), introOverlay);
 			} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
-				// TODO: what's this about? which Pokemon are actually valid?
-				// Modify the sprite used for Ethan/Lyra's Marill
-				int marillReplacement = this.random.nextInt(548) + 297;
-				while (Gen4Constants.hgssBannedOverworldPokemon.contains(marillReplacement)) {
-					marillReplacement = this.random.nextInt(548) + 297;
+				// In HGSS, Ethan/Lyra's Marill is changed instead of the intro Pokemon.
+				// This is really cool, but there *is* an actual intro Pokemon to randomize,
+				// and it is a Marill to boot too! Ideally, Ethan/Lyra's Marill should be
+				// in addition to the intro one, not instead of.
+				if (pk.getBaseForme() != null) {
+					return false;
 				}
+				int spriteID = Gen4Constants.getOverworldSpriteIDOfSpecies(pk.getNumber());
 
 				byte[] fieldOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
 				String prefix = Gen4Constants.lyraEthanMarillSpritePrefix;
 				int offset = find(fieldOverlay, prefix);
 				if (offset > 0) {
 					offset += prefix.length() / 2; // because it was a prefix
-					writeWord(fieldOverlay, offset, marillReplacement);
-					if (Gen4Constants.hgssBigOverworldPokemon.contains(marillReplacement)) {
+					writeWord(fieldOverlay, offset, spriteID);
+					if (Gen4Constants.hgssBigOverworldPokemon.contains(pk.getNumber())) {
 						// Write the constant to indicate it's big (0x208 | (20 << 10))
 						writeWord(fieldOverlay, offset + 2, 0x5208);
 					} else {
@@ -4488,19 +4490,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				writeOverlay(romEntry.getIntValue("FieldOvlNumber"), fieldOverlay);
 
-				// Now modify the Marill's cry in every script it appears in to ensure
-				// consistency
-				int marillReplacementId = Gen4Constants.convertOverworldSpriteToSpecies(marillReplacement);
+				// Now modify the Marill's cry in every script it appears in to ensure consistency
 				for (InFileEntry entry : romEntry.getMarillCryScriptEntries()) {
 					byte[] script = scriptNarc.files.get(entry.getFile());
-					writeWord(script, entry.getOffset(), marillReplacementId);
+					writeWord(script, entry.getOffset(), pk.getNumber());
 					scriptNarc.files.set(entry.getFile(), script);
 				}
 
 				// Modify the text too for additional consistency
 				int[] textOffsets = romEntry.getArrayValue("MarillTextFiles");
 				String originalSpeciesString = pokes[Species.marill].getName().toUpperCase();
-				String newSpeciesString = pokes[marillReplacementId].getName();
+				String newSpeciesString = pk.getName();
 				Map<String, String> replacements = new TreeMap<>();
 				replacements.put(originalSpeciesString, newSpeciesString);
 				for (int textOffset : textOffsets) {
@@ -4518,7 +4518,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						// As part of our catching tutorial patch, the player Pokemon's ID is just
 						// pc-relative
 						// loaded, and offset is now pointing to it.
-						writeWord(arm9, offset, marillReplacementId);
+						writeWord(arm9, offset, pk.getNumber());
 					}
 				}
 			}
