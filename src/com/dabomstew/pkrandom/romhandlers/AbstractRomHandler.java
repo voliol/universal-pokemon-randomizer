@@ -79,55 +79,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void updatePokemonStats(Settings settings) {
-        int generation = settings.getUpdateBaseStatsToGeneration();
-
-        List<Pokemon> pokes = getPokemonInclFormes();
-
-        for (int gen = 6; gen <= generation; gen++) {
-            Map<Integer,StatChange> statChanges = getUpdatedPokemonStats(gen);
-
-            for (int i = 1; i < pokes.size(); i++) {
-                StatChange changedStats = statChanges.get(i);
-                if (changedStats != null) {
-                    int statNum = 0;
-                    if ((changedStats.stat & Stat.HP.val) != 0) {
-                        pokes.get(i).setHp(changedStats.values[statNum]);
-                        statNum++;
-                    }
-                    if ((changedStats.stat & Stat.ATK.val) != 0) {
-                        pokes.get(i).setAttack(changedStats.values[statNum]);
-                        statNum++;
-                    }
-                    if ((changedStats.stat & Stat.DEF.val) != 0) {
-                        pokes.get(i).setDefense(changedStats.values[statNum]);
-                        statNum++;
-                    }
-                    if ((changedStats.stat & Stat.SPATK.val) != 0) {
-                        if (generationOfPokemon() != 1) {
-                            pokes.get(i).setSpatk(changedStats.values[statNum]);
-                        }
-                        statNum++;
-                    }
-                    if ((changedStats.stat & Stat.SPDEF.val) != 0) {
-                        if (generationOfPokemon() != 1) {
-                            pokes.get(i).setSpdef(changedStats.values[statNum]);
-                        }
-                        statNum++;
-                    }
-                    if ((changedStats.stat & Stat.SPEED.val) != 0) {
-                        pokes.get(i).setSpeed(changedStats.values[statNum]);
-                        statNum++;
-                    }
-                    if ((changedStats.stat & Stat.SPECIAL.val) != 0) {
-                        pokes.get(i).setSpecial(changedStats.values[statNum]);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
     public PokemonSet<Pokemon> getPokemonSet() {
         return PokemonSet.unmodifiable(getPokemon());
     }
@@ -467,6 +418,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public boolean isORAS() {
+        return false;
+    }
+
+    @Override
+    public boolean isUSUM() {
         return false;
     }
 

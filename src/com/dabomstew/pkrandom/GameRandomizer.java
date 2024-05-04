@@ -31,6 +31,7 @@ import com.dabomstew.pkrandom.randomizers.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.updaters.MoveUpdater;
+import com.dabomstew.pkrandom.updaters.PokemonBaseStatUpdater;
 import com.dabomstew.pkrandom.updaters.TypeEffectivenessUpdater;
 
 /**
@@ -46,6 +47,7 @@ public class GameRandomizer {
     private final ResourceBundle bundle;
     private final boolean saveAsDirectory;
 
+    private final PokemonBaseStatUpdater pokeBSUpdater;
     private final MoveUpdater moveUpdater;
     private final TypeEffectivenessUpdater typeEffUpdater;
 
@@ -75,6 +77,7 @@ public class GameRandomizer {
         this.bundle = bundle;
         this.saveAsDirectory = saveAsDirectory;
 
+        this.pokeBSUpdater = new PokemonBaseStatUpdater(romHandler);
         this.moveUpdater = new MoveUpdater(romHandler);
         this.typeEffUpdater = new TypeEffectivenessUpdater(romHandler);
 
@@ -125,8 +128,17 @@ public class GameRandomizer {
         log.println("Settings String: " + Version.VERSION + settings.toString());
         log.println();
 
-        // All updates that can be logged
-        boolean pokemonStatsUpdated = false;
+        // Limit Pokemon
+        // 1. Set Pokemon pool according to limits (or lack thereof)
+        // 2. If limited, remove evolutions that are outside of the pool
+
+        romHandler.getRestrictedPokemonService().setRestrictions(settings);
+
+        if (settings.isLimitPokemon()) {
+            romHandler.removeEvosForPokemonPool();
+        }
+
+        // Type effectiveness
 
         if (settings.isUpdateTypeEffectiveness()) {
             typeEffUpdater.updateTypeEffectiveness();
@@ -145,22 +157,12 @@ public class GameRandomizer {
             log.println(romHandler.getTypeTable().toBigString() + NEWLINE);
         }
 
-        // Limit Pokemon
-        // 1. Set Pokemon pool according to limits (or lack thereof)
-        // 2. If limited, remove evolutions that are outside of the pool
-
-        romHandler.getRestrictedPokemonService().setRestrictions(settings);
-
-        if (settings.isLimitPokemon()) {
-            romHandler.removeEvosForPokemonPool();
-        }
-
         // Move updates & data changes
         // 1. Update moves to a future generation
         // 2. Randomize move stats
 
         if (settings.isUpdateMoves()) {
-            moveUpdater.updateMoves(settings);
+            moveUpdater.updateMoves(settings.getUpdateMovesToGeneration());
         }
 
         if (moveUpdater.isUpdated()) {
@@ -194,8 +196,7 @@ public class GameRandomizer {
 
         // Update base stats to a future generation
         if (settings.isUpdateBaseStats()) {
-            romHandler.updatePokemonStats(settings);
-            pokemonStatsUpdated = true;
+            pokeBSUpdater.updatePokemonStats(settings.getUpdateBaseStatsToGeneration());
         }
 
         // Standardize EXP curves
@@ -237,7 +238,7 @@ public class GameRandomizer {
         }
 
         // Log Pokemon traits (stats, abilities, etc) if any have changed
-        if (pokemonStatsUpdated || pokeBSRandomizer.isChangesMade() || pokeTypeRandomizer.isChangesMade() ||
+        if (pokeBSUpdater.isUpdated() || pokeBSRandomizer.isChangesMade() || pokeTypeRandomizer.isChangesMade() ||
                 pokeAbilityRandomizer.isChangesMade() || pokeHeldItemRandomizer.isChangesMade()) {
             logPokemonTraitChanges(log);
         } else {

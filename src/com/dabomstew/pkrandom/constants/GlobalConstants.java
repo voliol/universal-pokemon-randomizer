@@ -25,9 +25,8 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.pokemon.*;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -107,78 +106,6 @@ public class GlobalConstants {
 
     public static final List<Integer> zMoves = Stream.concat(fixedPowerZMoves.stream(),
             varyingPowerZMoves.stream()).collect(Collectors.toList());
-
-    public static Map<Integer,StatChange> getStatChanges(int generation) {
-        Map<Integer,StatChange> map = new TreeMap<>();
-
-        switch (generation) {
-            case 6 -> {
-                map.put(Species.butterfree, new StatChange(Stat.SPATK.val, 90));
-                map.put(Species.beedrill, new StatChange(Stat.ATK.val, 90));
-                map.put(Species.pidgeot, new StatChange(Stat.SPEED.val, 101));
-                map.put(Species.pikachu, new StatChange(Stat.DEF.val | Stat.SPDEF.val, 40, 50));
-                map.put(Species.raichu, new StatChange(Stat.SPEED.val, 110));
-                map.put(Species.nidoqueen, new StatChange(Stat.ATK.val, 92));
-                map.put(Species.nidoking, new StatChange(Stat.ATK.val, 102));
-                map.put(Species.clefable, new StatChange(Stat.SPATK.val, 95));
-                map.put(Species.wigglytuff, new StatChange(Stat.SPATK.val, 85));
-                map.put(Species.vileplume, new StatChange(Stat.SPATK.val, 110));
-                map.put(Species.poliwrath, new StatChange(Stat.ATK.val, 95));
-                map.put(Species.alakazam, new StatChange(Stat.SPDEF.val, 95));
-                map.put(Species.victreebel, new StatChange(Stat.SPDEF.val, 70));
-                map.put(Species.golem, new StatChange(Stat.ATK.val, 120));
-                map.put(Species.ampharos, new StatChange(Stat.DEF.val, 85));
-                map.put(Species.bellossom, new StatChange(Stat.DEF.val, 95));
-                map.put(Species.azumarill, new StatChange(Stat.SPATK.val, 60));
-                map.put(Species.jumpluff, new StatChange(Stat.SPDEF.val, 95));
-                map.put(Species.beautifly, new StatChange(Stat.SPATK.val, 100));
-                map.put(Species.exploud, new StatChange(Stat.SPDEF.val, 73));
-                map.put(Species.staraptor, new StatChange(Stat.SPDEF.val, 60));
-                map.put(Species.roserade, new StatChange(Stat.DEF.val, 65));
-                map.put(Species.stoutland, new StatChange(Stat.ATK.val, 110));
-                map.put(Species.unfezant, new StatChange(Stat.ATK.val, 115));
-                map.put(Species.gigalith, new StatChange(Stat.SPDEF.val, 80));
-                map.put(Species.seismitoad, new StatChange(Stat.ATK.val, 95));
-                map.put(Species.leavanny, new StatChange(Stat.SPDEF.val, 80));
-                map.put(Species.scolipede, new StatChange(Stat.ATK.val, 100));
-                map.put(Species.krookodile, new StatChange(Stat.DEF.val, 80));
-            }
-            case 7 -> {
-                map.put(Species.arbok, new StatChange(Stat.ATK.val, 95));
-                map.put(Species.dugtrio, new StatChange(Stat.ATK.val, 100));
-                map.put(Species.farfetchd, new StatChange(Stat.ATK.val, 90));
-                map.put(Species.dodrio, new StatChange(Stat.SPEED.val, 110));
-                map.put(Species.electrode, new StatChange(Stat.SPEED.val, 150));
-                map.put(Species.exeggutor, new StatChange(Stat.SPDEF.val, 75));
-                map.put(Species.noctowl, new StatChange(Stat.SPATK.val, 86));
-                map.put(Species.ariados, new StatChange(Stat.SPDEF.val, 70));
-                map.put(Species.qwilfish, new StatChange(Stat.DEF.val, 85));
-                map.put(Species.magcargo, new StatChange(Stat.HP.val | Stat.SPATK.val, 60, 90));
-                map.put(Species.corsola, new StatChange(Stat.HP.val | Stat.DEF.val | Stat.SPDEF.val, 65, 95, 95));
-                map.put(Species.mantine, new StatChange(Stat.HP.val, 85));
-                map.put(Species.swellow, new StatChange(Stat.SPATK.val, 75));
-                map.put(Species.pelipper, new StatChange(Stat.SPATK.val, 95));
-                map.put(Species.masquerain, new StatChange(Stat.SPATK.val | Stat.SPEED.val, 100, 80));
-                map.put(Species.delcatty, new StatChange(Stat.SPEED.val, 90));
-                map.put(Species.volbeat, new StatChange(Stat.DEF.val | Stat.SPDEF.val, 75, 85));
-                map.put(Species.illumise, new StatChange(Stat.DEF.val | Stat.SPDEF.val, 75, 85));
-                map.put(Species.lunatone, new StatChange(Stat.HP.val, 90));
-                map.put(Species.solrock, new StatChange(Stat.HP.val, 90));
-                map.put(Species.chimecho, new StatChange(Stat.HP.val | Stat.DEF.val | Stat.SPDEF.val, 75, 80, 90));
-                map.put(Species.woobat, new StatChange(Stat.HP.val, 65));
-                map.put(Species.crustle, new StatChange(Stat.ATK.val, 105));
-                map.put(Species.beartic, new StatChange(Stat.ATK.val, 130));
-                map.put(Species.cryogonal, new StatChange(Stat.HP.val | Stat.DEF.val, 80, 50));
-            }
-            case 8 -> map.put(Species.aegislash, new StatChange(Stat.DEF.val | Stat.SPDEF.val, 140, 140));
-            case 9 -> {
-                map.put(Species.cresselia, new StatChange(Stat.DEF.val | Stat.SPDEF.val, 110, 120));
-                map.put(Species.zacian, new StatChange(Stat.ATK.val, 120));
-                map.put(Species.zamazenta, new StatChange(Stat.ATK.val, 120));
-            }
-        }
-        return map;
-    }
 
     /* @formatter:on */
 

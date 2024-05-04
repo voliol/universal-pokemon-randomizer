@@ -134,15 +134,6 @@ public interface RomHandler {
 
     void setStarterHeldItems(List<Integer> items);
 
-    // =======================
-    // Pokemon Base Statistics
-    // =======================
-
-    // Update base stats to specified generation
-    void updatePokemonStats(Settings settings);
-
-    Map<Integer,StatChange> getUpdatedPokemonStats(int generation);
-
     // =================
     // Pokemon Abilities
     // =================
@@ -490,6 +481,8 @@ public interface RomHandler {
     boolean isYellow();
 
     boolean isORAS();
+
+    boolean isUSUM();
 
     boolean hasMultiplePlayerCharacters();
 

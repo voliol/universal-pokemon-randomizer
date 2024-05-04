@@ -10,10 +10,18 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class MoveUpdater extends Updater {
 
     private final Map<Integer, boolean[]> moveUpdates = new HashMap<>();
+
+    // starts with two null-consumers so the indexing can be nicer
+    private final List<Consumer<List<Move>>> updates = List.of(
+            l -> {}, l -> {},
+            this::gen2Updates, this::gen3Updates, this::gen4Updates, this::gen5Updates,
+            this::gen6Updates, this::gen7Updates, this::gen8Updates, this::gen9Updates
+    );
 
     public MoveUpdater(RomHandler romHandler) {
         super(romHandler);
@@ -26,43 +34,17 @@ public class MoveUpdater extends Updater {
         return moveUpdates;
     }
 
-    public void updateMoves(Settings settings) {
-        int generation = settings.getUpdateMovesToGeneration();
-
+    public void updateMoves(int updateToGen) {
+        if (updateToGen > updates.size() - 1) {
+            throw new IllegalArgumentException("updateToGen too high, can't update to Gen " + updateToGen);
+        }
         List<Move> moves = romHandler.getMoves();
 
-        if (generation >= 2 && romHandler.generationOfPokemon() == 1) {
-            gen2Updates(moves);
+        for (int i = 2; i <= updates.size(); i++) {
+            if (updateToGen >= i && romHandler.generationOfPokemon() < i) {
+                updates.get(i).accept(moves);
+            }
         }
-
-        if (generation >= 3 && romHandler.generationOfPokemon() < 3) {
-            gen3Updates(moves);
-        }
-
-        if (generation >= 4 && romHandler.generationOfPokemon() < 4) {
-            gen4Updates(moves);
-        }
-
-        if (generation >= 5 && romHandler.generationOfPokemon() < 5) {
-            gen5Updates(moves);
-        }
-
-        if (generation >= 6 && romHandler.generationOfPokemon() < 6) {
-            gen6Updates(moves);
-        }
-
-        if (generation >= 7 && romHandler.generationOfPokemon() < 7) {
-            gen7Updates(moves);
-        }
-
-        if (generation >= 8 && romHandler.generationOfPokemon() < 8) {
-            gen8Updates(moves);
-        }
-
-        if (generation >= 9 && romHandler.generationOfPokemon() < 9) {
-            gen9Updates(moves);
-        }
-
         updated = true;
     }
 

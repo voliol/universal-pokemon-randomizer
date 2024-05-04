@@ -1116,21 +1116,6 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
-        int aegislashBlade = Species.SMFormes.aegislashB;
-        if (romEntry.getRomType() == Gen7Constants.Type_USUM) {
-            aegislashBlade = Species.USUMFormes.aegislashB;
-        }
-        switch(generation) {
-            case 8:
-                map.put(aegislashBlade, new StatChange(Stat.ATK.val | Stat.SPATK.val, 140, 140));
-                break;
-        }
-        return map;
-    }
-
-    @Override
     public boolean supportsStarterHeldItems() {
         return true;
     }
@@ -2544,6 +2529,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public boolean hasTimeBasedEncounters() {
         return true;
+    }
+
+    @Override
+    public boolean isUSUM() {
+        return romEntry.getRomType() == Gen7Constants.Type_USUM;
     }
 
     @Override

@@ -1011,20 +1011,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        Map<Integer, StatChange> map = GlobalConstants.getStatChanges(generation);
-        switch (generation) {
-            case 7:
-                map.put(Species.Gen6Formes.alakazamMega, new StatChange(Stat.SPDEF.val, 105));
-                break;
-            case 8:
-                map.put(Species.Gen6Formes.aegislashB, new StatChange(Stat.ATK.val | Stat.SPATK.val, 140, 140));
-                break;
-        }
-        return map;
-    }
-
-    @Override
     public boolean supportsStarterHeldItems() {
         return true;
     }

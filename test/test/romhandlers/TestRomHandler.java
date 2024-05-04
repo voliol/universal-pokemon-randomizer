@@ -143,11 +143,6 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        return null;
-    }
-
-    @Override
     public int abilitiesPerPokemon() {
         return 0;
     }
