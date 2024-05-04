@@ -235,13 +235,6 @@ public interface RomHandler {
 
     boolean hasPhysicalSpecialSplit();
 
-    void updateMoves(Settings settings);
-
-    // stuff for printing move changes
-    void initMoveUpdates();
-
-    Map<Integer, boolean[]> getMoveUpdates();
-
     // return all the moves valid in this game.
     List<Move> getMoves();
 

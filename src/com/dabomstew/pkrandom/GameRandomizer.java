@@ -30,6 +30,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.*;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.updaters.MoveUpdater;
 
 /**
  * Coordinates and logs the randomization of a game, via a {@link RomHandler}, and various sub-{@link Randomizer}s.
@@ -43,6 +44,8 @@ public class GameRandomizer {
     private final RomHandler romHandler;
     private final ResourceBundle bundle;
     private final boolean saveAsDirectory;
+
+    private final MoveUpdater moveUpdater;
 
     private final IntroPokemonRandomizer introPokeRandomizer;
     private final PokemonBaseStatRandomizer pokeBSRandomizer;
@@ -69,6 +72,8 @@ public class GameRandomizer {
         this.romHandler = romHandler;
         this.bundle = bundle;
         this.saveAsDirectory = saveAsDirectory;
+
+        this.moveUpdater = new MoveUpdater(romHandler);
 
         this.introPokeRandomizer = new IntroPokemonRandomizer(romHandler, settings, random);
         this.pokeBSRandomizer = new PokemonBaseStatRandomizer(romHandler, settings, random);
@@ -155,12 +160,10 @@ public class GameRandomizer {
         // 2. Randomize move stats
 
         if (settings.isUpdateMoves()) {
-            romHandler.initMoveUpdates();
-            romHandler.updateMoves(settings);
-            movesUpdated = true;
+            moveUpdater.updateMoves(settings);
         }
 
-        if (movesUpdated) {
+        if (moveUpdater.isUpdated()) {
             logMoveUpdates(log);
         }
 
@@ -776,7 +779,7 @@ public class GameRandomizer {
     private void logMoveUpdates(PrintStream log) {
         log.println("--Move Updates--");
         List<Move> moves = romHandler.getMoves();
-        Map<Integer, boolean[]> moveUpdates = romHandler.getMoveUpdates();
+        Map<Integer, boolean[]> moveUpdates = moveUpdater.getMoveUpdates();
         for (int moveID : moveUpdates.keySet()) {
             boolean[] changes = moveUpdates.get(moveID);
             Move mv = moves.get(moveID);
