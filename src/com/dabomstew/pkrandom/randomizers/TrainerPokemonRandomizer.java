@@ -66,7 +66,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
 
         // Set up Pokemon pool
         cachedReplacements = new TreeMap<>();
-        cachedAll = rPokeService.getPokemon(noLegendaries, includeFormes, false);
+        cachedAll = new PokemonSet<>(rPokeService.getPokemon(noLegendaries, includeFormes, false));
 
         if (useLocalPokemon) {
             PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
@@ -196,7 +196,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
             if (useLocalPokemon) {
                 //elite four unique pokemon are excepted from local requirement
                 //and in fact, non-local pokemon should be chosen first
-                eliteFourExceptions = rPokeService.getPokemon(noLegendaries, includeFormes, false);
+                eliteFourExceptions = new PokemonSet<>(rPokeService.getPokemon(noLegendaries, includeFormes, false));
                 eliteFourExceptions.removeAll(banned);
                 eliteFourExceptions.removeAll(cachedAll); // i.e. retains only non-local pokes
 

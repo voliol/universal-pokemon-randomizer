@@ -1,5 +1,6 @@
 package test.romhandlers;
 
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,13 +25,15 @@ public class RomHandlerTest {
     // and expect some test cases to need updating too, though hopefully only in a minor way
     protected static final int HIGHEST_GENERATION = 7;
 
+    protected static final Random RND = new Random();
+
     private static final String TEST_ROMS_PATH = "test/roms";
     private static final String LAST_DOT_REGEX = "\\.+(?![^.]*\\.)";
 
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2}, Roms.Region.values(), false);
+        return Roms.getRoms(new int[]{1, 2, 3, 4, 5}, new Roms.Region[]{Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {
@@ -64,6 +67,9 @@ public class RomHandlerTest {
         }
         romHandler = factory.create(new Random(), new PrintStream(System.out));
         romHandler.loadRom(fullRomName);
+        // Sets restrictions to... not restrict.
+        // This can be overturned later for tests interested in certain restrictions.
+        romHandler.getRestrictedPokemonService().setRestrictions(new Settings());
     }
 
     protected Generation getGenerationOf(String romName) {

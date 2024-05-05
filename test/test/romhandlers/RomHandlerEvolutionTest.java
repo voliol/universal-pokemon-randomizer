@@ -7,6 +7,7 @@ import com.dabomstew.pkrandom.pokemon.EvolutionType;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.randomizers.EvolutionRandomizer;
+import com.dabomstew.pkrandom.randomizers.PokemonBaseStatRandomizer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -498,7 +499,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         s.setExpCurveMod(false, false, true);
         s.setSelectedEXPCurve(ExpCurve.MEDIUM_FAST);
         s.setStandardizeEXPCurves(true);
-        romHandler.standardizeEXPCurves(s);
+        new PokemonBaseStatRandomizer(romHandler, s, RND).standardizeEXPCurves();
         s.setEvolutionsMod(false, false, true);
         s.setEvosSameTyping(true);
         new EvolutionRandomizer(romHandler, s, RND).randomizeEvolutions();

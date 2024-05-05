@@ -1,5 +1,6 @@
 package test.romhandlers;
 
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.pokemon.TypeTable;
@@ -80,7 +81,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
         System.out.println(before.toBigString());
         System.out.println(Arrays.toString(effCountsBefore));
 
-        new TypeEffectivenessRandomizer(romHandler, RND).randomizeTypeEffectiveness(false);
+        new TypeEffectivenessRandomizer(romHandler, new Settings(), RND).randomizeTypeEffectiveness(false);
 
         TypeTable after = romHandler.getTypeTable();
         int[] effCountsAfter = getEffCounts(after);
@@ -111,7 +112,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
             maxSEWhenDefending = Math.max(maxSEWhenDefending, before.superEffectiveWhenDefending(t).size());
         }
 
-        new TypeEffectivenessRandomizer(romHandler, RND).randomizeTypeEffectiveness(true);
+        new TypeEffectivenessRandomizer(romHandler, new Settings(), RND).randomizeTypeEffectiveness(true);
         TypeTable after = romHandler.getTypeTable();
         System.out.println(after.toBigString());
 
@@ -178,7 +179,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
     public void randomizeTypeEffectivenessKeepIdentitiesWorks(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
-        new TypeEffectivenessRandomizer(romHandler, RND).randomizeTypeEffectivenessKeepIdentities();
+        new TypeEffectivenessRandomizer(romHandler, new Settings(), RND).randomizeTypeEffectivenessKeepIdentities();
         TypeTable after = romHandler.getTypeTable();
 
         System.out.println("Before:");
@@ -205,7 +206,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
     public void invertTypeEffectivenessWorks(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
-        new TypeEffectivenessRandomizer(romHandler, RND).invertTypeEffectiveness(false);
+        new TypeEffectivenessRandomizer(romHandler, new Settings(), RND).invertTypeEffectiveness(false);
         TypeTable after = romHandler.getTypeTable();
 
         for (Type attacker : after.getTypes()) {
@@ -231,7 +232,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
     public void invertTypeEffectivenessWithRandomImmsDoesNotChangeImmCount(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
-        new TypeEffectivenessRandomizer(romHandler, RND).invertTypeEffectiveness(true);
+        new TypeEffectivenessRandomizer(romHandler, new Settings(), RND).invertTypeEffectiveness(true);
         TypeTable after = romHandler.getTypeTable();
         int immCountBefore = 0;
         int immCountAfter = 0;
@@ -252,7 +253,7 @@ public class RomHandlerTypeTest extends RomHandlerTest {
     public void invertTypeEffectivenessWithRandomImmsChangesSEToImms(String romName) {
         loadROM(romName);
         TypeTable before = new TypeTable(romHandler.getTypeTable());
-        new TypeEffectivenessRandomizer(romHandler, RND).invertTypeEffectiveness(true);
+        new TypeEffectivenessRandomizer(romHandler, new Settings(), RND).invertTypeEffectiveness(true);
         TypeTable after = romHandler.getTypeTable();
         for (Type attacker : before.getTypes()) {
             for (Type defender : before.getTypes()) {
