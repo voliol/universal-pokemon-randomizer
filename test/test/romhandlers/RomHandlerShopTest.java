@@ -31,10 +31,10 @@ public class RomHandlerShopTest extends RomHandlerTest {
         loadROM(romName);
         assumeTrue(romHandler.hasShopRandomization());
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
-        System.out.println(toStringWithNames(shopItems));
+        System.out.println("Before: " + toStringWithNames(shopItems));
         Map<Integer, Shop> before = new HashMap<>(shopItems);
         romHandler.setShopItems(shopItems);
-        System.out.println(toStringWithNames(romHandler.getShopItems()));
+        System.out.println("After: " + toStringWithNames(romHandler.getShopItems()));
         assertEquals(before, romHandler.getShopItems());
     }
 
@@ -266,7 +266,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
             sb.append(entry.getKey());
             sb.append(" -> ");
             sb.append(toStringWithNames(entry.getValue()));
-            sb.append("/n");
+            sb.append("\n");
         }
         sb.append("}\n");
         return sb.toString();

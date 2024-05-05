@@ -2008,7 +2008,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Map.Entry<Integer, Shop> entry : shopItems.entrySet()) {
             int shopNum = entry.getKey();
             Shop shop = entry.getValue();
-            new GBCDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
+            new SameBankDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
                     this::lengthOfShopAt);
         }
     }
