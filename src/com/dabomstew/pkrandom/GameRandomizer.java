@@ -70,6 +70,7 @@ public class GameRandomizer {
     private final TMHMTutorCompatibilityRandomizer tmhmtCompRandomizer;
     private final ItemRandomizer itemRandomizer;
     private final TypeEffectivenessRandomizer typeEffRandomizer;
+    private final MiscTweakRandomizer miscTweakRandomizer;
 
     public GameRandomizer(Settings settings, Random random, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
         this.settings = settings;
@@ -100,6 +101,7 @@ public class GameRandomizer {
         this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, random);
         this.itemRandomizer = new ItemRandomizer(romHandler, settings, random);
         this.typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, random);
+        this.miscTweakRandomizer = new MiscTweakRandomizer(romHandler, settings, random);
     }
 
     public int randomize(final String filename) {
@@ -191,7 +193,7 @@ public class GameRandomizer {
 
         // Misc Tweaks
         if (settings.getCurrentMiscTweaks() != MiscTweak.NO_MISC_TWEAKS) {
-            romHandler.applyMiscTweaks(settings);
+            miscTweakRandomizer.applyMiscTweaks();
         }
 
         // Update base stats to a future generation

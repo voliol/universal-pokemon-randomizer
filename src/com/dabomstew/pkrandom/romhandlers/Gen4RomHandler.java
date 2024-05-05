@@ -4971,8 +4971,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void applyMiscTweak(MiscTweak tweak) {
         if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-            randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
@@ -4992,51 +4990,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			applyReusableTMsPatch();
 		}
     }
-
-	private void randomizeCatchingTutorial() {
-		int opponentOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
-
-		if (romEntry.hasTweakFile("NewCatchingTutorialSubroutineTweak")) {
-			String catchingTutorialMonTablePrefix = romEntry.getStringValue("CatchingTutorialMonTablePrefix");
-			int offset = find(arm9, catchingTutorialMonTablePrefix);
-			if (offset > 0) {
-				offset += catchingTutorialMonTablePrefix.length() / 2; // because it was a prefix
-
-				// The player's mon is randomized as part of randomizing Lyra/Ethan's Pokemon
-				// (see
-				// randomizeIntroPokemon), so we just care about the enemy mon. As part of our
-				// catching
-				// tutorial patch, the player and enemy species IDs are pc-relative loaded, with
-				// the
-				// enemy ID occurring right after the player ID (which is what offset is
-				// pointing to).
-				Pokemon opponent = randomPokemonLimited(Integer.MAX_VALUE, false);
-				writeWord(arm9, offset + 4, opponent.getNumber());
-			}
-		} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
-			// For non-US HGSS, just handle it in the old-school way. Can randomize both
-			// Pokemon, but both limited to 1-255
-			// Make sure to raise the level of Lyra/Ethan's Pokemon to 10 to prevent
-			// softlocks
-			int playerOffset = romEntry.getIntValue("CatchingTutorialPlayerMonOffset");
-			int levelOffset = romEntry.getIntValue("CatchingTutorialPlayerLevelOffset");
-			Pokemon opponent = randomPokemonLimited(255, false);
-			Pokemon player = randomPokemonLimited(255, false);
-			if (opponent != null && player != null) {
-				arm9[opponentOffset] = (byte) opponent.getNumber();
-				arm9[playerOffset] = (byte) player.getNumber();
-				arm9[levelOffset] = 10;
-			}
-		} else {
-			// DPPt only supports randomizing the opponent, but enough space for any mon
-			Pokemon opponent = randomPokemonLimited(Integer.MAX_VALUE, false);
-
-			if (opponent != null) {
-				writeLong(arm9, opponentOffset, opponent.getNumber());
-			}
-		}
-
-	}
 
 	private void applyFastestText() {
 		genericIPSPatch(arm9, "FastestTextTweak");
@@ -5128,6 +5081,44 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
 		}
+	}
+
+	@Override
+	public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+		int opponentOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
+
+		if (romEntry.hasTweakFile("NewCatchingTutorialSubroutineTweak")) {
+			String catchingTutorialMonTablePrefix = romEntry.getStringValue("CatchingTutorialMonTablePrefix");
+			int offset = find(arm9, catchingTutorialMonTablePrefix);
+			if (offset > 0) {
+				offset += catchingTutorialMonTablePrefix.length() / 2; // because it was a prefix
+
+				// The player's mon is randomized as part of randomizing Lyra/Ethan's Pokemon
+				// (see randomizeIntroPokemon), so we just care about the enemy mon. As part of our
+				// catching tutorial patch, the player and enemy species IDs are pc-relative loaded, with
+				// the enemy ID occurring right after the player ID (which is what offset is pointing to).
+				writeWord(arm9, offset + 4, opponent.getNumber());
+			}
+		} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
+			// For non-US HGSS, just handle it in the old-school way.
+			// Can randomize both Pokemon, but both limited to 1-255.
+			// Make sure to raise the level of Lyra/Ethan's Pokemon to 10 to prevent softlocks.
+			int playerOffset = romEntry.getIntValue("CatchingTutorialPlayerMonOffset");
+			int levelOffset = romEntry.getIntValue("CatchingTutorialPlayerLevelOffset");
+			if (opponent.getNumber() > 255 || player.getNumber() > 255) {
+				return false;
+			}
+			arm9[opponentOffset] = (byte) opponent.getNumber();
+			arm9[playerOffset] = (byte) player.getNumber();
+			arm9[levelOffset] = 10;
+		} else {
+			// DPPt only supports randomizing the opponent, but enough space for any mon
+			if (opponent != null) {
+				writeLong(arm9, opponentOffset, opponent.getNumber());
+			}
+		}
+
+		return true;
 	}
 
 	@Override

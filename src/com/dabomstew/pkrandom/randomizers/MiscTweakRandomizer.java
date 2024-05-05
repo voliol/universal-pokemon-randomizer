@@ -43,6 +43,8 @@ public class MiscTweakRandomizer extends Randomizer {
                 romHandler.applyMiscTweak(mt);
             }
         }
+
+        changesMade = true;
     }
 
     private void randomizeCatchingTutorial() {

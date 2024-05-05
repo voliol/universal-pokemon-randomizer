@@ -2208,31 +2208,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             applyFastestTextPatch();
         } else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-            randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen2Items.luckyEgg);
             nonBadItems.banSingles(Gen2Items.luckyEgg);
         } else if (tweak == MiscTweak.REUSABLE_TMS) {
             applyReusableTMsPatch();
         }
-    }
-
-    private void randomizeCatchingTutorial() {
-        if (romEntry.getArrayValue("CatchingTutorialOffsets").length != 0) {
-            // Pick a pokemon
-            int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
-            while (pokemon == Species.unown) {
-                // Unown is banned
-                pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
-            }
-
-            int[] offsets = romEntry.getArrayValue("CatchingTutorialOffsets");
-            for (int offset : offsets) {
-                writeByte(offset, (byte) pokemon);
-            }
-        }
-
     }
 
     private void applyBWEXPPatch() {
@@ -2268,6 +2249,22 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         writeByte(offset++, GBConstants.gbZ80Jump);
         writeByte(offset, (byte) jumpLength);
+    }
+
+    @Override
+    public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+        if (romEntry.getArrayValue("CatchingTutorialOffsets").length != 0) {
+            // Unown is banned
+            if (opponent.getNumber() == Species.unown) {
+                return false;
+            }
+
+            int[] offsets = romEntry.getArrayValue("CatchingTutorialOffsets");
+            for (int offset : offsets) {
+                writeByte(offset, (byte) opponent.getNumber());
+            }
+        }
+        return true;
     }
 
     @Override

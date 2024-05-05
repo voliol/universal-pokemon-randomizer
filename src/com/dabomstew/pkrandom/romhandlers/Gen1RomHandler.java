@@ -2008,8 +2008,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             applyPikachuEvoPatch();
         } else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-            randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.REUSABLE_TMS) {
             applyReusableTMsPatch();
         }
@@ -2036,13 +2034,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private void applyPikachuEvoPatch() {
         if (romEntry.getIntValue("PikachuEvoJumpOffset") != 0) {
             writeByte(romEntry.getIntValue("PikachuEvoJumpOffset"), GBConstants.gbZ80JumpRelative);
-        }
-    }
-
-    private void randomizeCatchingTutorial() {
-        if (romEntry.getIntValue("CatchingTutorialMonOffset") != 0) {
-            writeByte(romEntry.getIntValue("CatchingTutorialMonOffset"),
-                    (byte) pokeNumToRBYTable[rPokeService.randomPokemon(random).getNumber()]);
         }
     }
 
@@ -2094,6 +2085,15 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+        if (romEntry.getIntValue("CatchingTutorialMonOffset") != 0) {
+            writeByte(romEntry.getIntValue("CatchingTutorialMonOffset"),
+                    (byte) pokeNumToRBYTable[opponent.getNumber()]);
+        }
+        return true;
     }
 
     @Override
