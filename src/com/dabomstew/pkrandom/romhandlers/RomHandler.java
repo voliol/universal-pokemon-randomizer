@@ -43,11 +43,7 @@ import com.dabomstew.pkrandom.services.TypeService;
 public interface RomHandler {
 
     abstract class Factory {
-        public RomHandler create(Random random) {
-            return create(random, null);
-        }
-
-        public abstract RomHandler create(Random random, PrintStream log);
+        public abstract RomHandler create(Random random);
 
         public abstract boolean isLoadable(String filename);
     }
@@ -77,8 +73,6 @@ public interface RomHandler {
     // ===========
     // Log methods
     // ===========
-
-    void setLog(PrintStream logStream);
 
     void printRomDiagnostics(PrintStream logStream);
 

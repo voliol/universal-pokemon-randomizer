@@ -49,8 +49,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen7RomHandler create(Random random, PrintStream logStream) {
-            return new Gen7RomHandler(random, logStream);
+        public Gen7RomHandler create(Random random) {
+            return new Gen7RomHandler(random);
         }
 
         public boolean isLoadable(String filename) {
@@ -59,11 +59,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     public Gen7RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen7RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+        super(random);
     }
     
     private static List<Gen7RomEntry> roms;

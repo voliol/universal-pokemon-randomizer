@@ -52,8 +52,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen5RomHandler create(Random random, PrintStream logStream) {
-            return new Gen5RomHandler(random, logStream);
+        public Gen5RomHandler create(Random random) {
+            return new Gen5RomHandler(random);
         }
 
         public boolean isLoadable(String filename) {
@@ -62,11 +62,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     public Gen5RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen5RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+        super(random);
     }
 
     private static List<Gen5RomEntry> roms;

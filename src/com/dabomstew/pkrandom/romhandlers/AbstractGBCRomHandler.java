@@ -47,8 +47,8 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     private BankDividedFreedSpace freedSpace;
 
-    public AbstractGBCRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+    public AbstractGBCRomHandler(Random random) {
+        super(random);
     }
 
     @Override

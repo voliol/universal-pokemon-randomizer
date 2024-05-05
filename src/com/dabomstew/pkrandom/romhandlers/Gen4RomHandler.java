@@ -50,8 +50,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen4RomHandler create(Random random, PrintStream logStream) {
-			return new Gen4RomHandler(random, logStream);
+		public Gen4RomHandler create(Random random) {
+			return new Gen4RomHandler(random);
 		}
 
 		public boolean isLoadable(String filename) {
@@ -60,11 +60,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	public Gen4RomHandler(Random random) {
-		super(random, null);
-	}
-
-	public Gen4RomHandler(Random random, PrintStream logStream) {
-		super(random, logStream);
+		super(random);
 	}
 
 	private static List<Gen4RomEntry> roms;

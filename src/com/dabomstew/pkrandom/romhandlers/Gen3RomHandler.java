@@ -56,8 +56,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen3RomHandler create(Random random, PrintStream logStream) {
-            return new Gen3RomHandler(random, logStream);
+        public Gen3RomHandler create(Random random) {
+            return new Gen3RomHandler(random);
         }
 
         public boolean isLoadable(String filename) {
@@ -72,11 +72,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     public Gen3RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen3RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+        super(random);
     }
 
     private static List<Gen3RomEntry> roms;
@@ -2376,9 +2372,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				try {
 					rewriteVariableLengthString(itemDescPointerOffset, newItemDesc);
 				} catch (RandomizerIOException e) {
-					String nl = System.getProperty("line.separator");
-					log("Couldn't insert new item description. " + e.getMessage() + nl);
-					return;
+                    // This used to be a simple logging, turned it into a full error because I don't *think* it
+                    // should be too common? Plus the RomHandler arguably should not do logging.
+					throw new RandomizerIOException("Couldn't insert new item description. " + e.getMessage());
 				}
 			}
 		}
@@ -2477,7 +2473,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void writeEventText(List<Gen3EventTextEntry> eventTextEntries, Function<Integer, String[]> idToReplacers,
                                 String[] targets, String description) {
-        String nl = System.getProperty("line.separator"); // TODO: should just "/n" do?
         for (Gen3EventTextEntry ete : eventTextEntries) {
             // create the new text
             Map<String, String> replacements = new HashMap<>();
@@ -2499,8 +2494,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 rewriteVariableLengthString(pointerOffset, newText, secondaryPointerOffsets);
             } catch (RandomizerIOException e) {
-                log("Couldn't insert new " + description + " text. " + e.getMessage() + nl);
-                return;
+                // This used to be a simple logging, turned it into a full error because I don't *think* it
+                // should be too common? Plus the RomHandler arguably should not do logging.
+                throw new RandomizerIOException("Couldn't insert new " + description + " text. " + e.getMessage());
             }
         }
     }
@@ -2694,29 +2690,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void patchForNationalDex() {
-        log("--Patching for National Dex at Start of Game--");
         String nl = System.getProperty("line.separator");
         if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.rsPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. Could not find script.");
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " +
+                        "Could not find pointer to script.");
             }
             // Find free space for our new routine
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.rsNatDexScriptLength);
             } catch (RandomizerIOException e) {
-                log("Patch unsuccessful. " + e.getMessage() + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writePointer(pointerLocToScript, writeSpace);
             writeHexString(Gen3Constants.rsNatDexScriptPart1, writeSpace);
@@ -2727,16 +2720,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.frlgPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. Could not find script.");
             }
             // Find free space for our new routine
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.frlgNatDexScriptLength);
             } catch (RandomizerIOException e) {
-                log("Patch unsuccessful. " + e.getMessage() + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
             writePointer(pkDexOffset + 1, writeSpace);
@@ -2779,23 +2770,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.ePokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. Could not find script.");
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " +
+                        "Could not find pointer to script.");
             }
             // Find free space for our new routine
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.eNatDexScriptLength);
             } catch (RandomizerIOException e) {
-                log("Patch unsuccessful. " + e.getMessage() + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writePointer(pointerLocToScript, writeSpace);
             writeHexString(Gen3Constants.eNatDexScriptPart1, writeSpace);
@@ -2804,7 +2793,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else {
             throw new IllegalStateException("Invalid ROM Type: " + romEntry.getRomType());
         }
-        log("Patch successful!" + nl);
     }
 
     private String pointerToHexString(int pointer) {

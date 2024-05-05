@@ -28,8 +28,10 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
@@ -42,13 +44,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.*;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
     protected final Random random;
-    protected PrintStream logStream;
 
     protected final RestrictedPokemonService rPokeService = new RestrictedPokemonService(this);
     protected final TypeService typeService = new TypeService(this);
@@ -57,18 +57,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     /* Constructor */
 
-    public AbstractRomHandler(Random random, PrintStream logStream) {
+    public AbstractRomHandler(Random random) {
         this.random = random;
-        this.logStream = logStream;
     }
 
     /*
      * Public Methods, implemented here for all gens. Unlikely to be overridden.
      */
-
-    public void setLog(PrintStream logStream) {
-        this.logStream = logStream;
-    }
 
     public RestrictedPokemonService getRestrictedPokemonService() {
         return rPokeService;
@@ -259,18 +254,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     protected void applyCamelCaseNames() {
         getPokemonSet().forEach(pk -> pk.setName(RomFunctions.camelCase(pk.getName())));
-    }
-
-    protected void log(String log) {
-        if (logStream != null) {
-            logStream.println(log);
-        }
-    }
-
-    protected void logBlankLine() {
-        if (logStream != null) {
-            logStream.println();
-        }
     }
 
     /* Default Implementations */

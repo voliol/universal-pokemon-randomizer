@@ -47,8 +47,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen2RomHandler create(Random random, PrintStream logStream) {
-            return new Gen2RomHandler(random, logStream);
+        public Gen2RomHandler create(Random random) {
+            return new Gen2RomHandler(random);
         }
 
         public boolean isLoadable(String filename) {
@@ -63,11 +63,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     public Gen2RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen2RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+        super(random);
         this.paletteHandler = new Gen2PaletteHandler(random);
     }
 

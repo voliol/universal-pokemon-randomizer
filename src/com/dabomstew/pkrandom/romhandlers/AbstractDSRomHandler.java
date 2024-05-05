@@ -64,8 +64,8 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     private String loadedFN;
     private boolean arm9Extended = false;
 
-    public AbstractDSRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+    public AbstractDSRomHandler(Random random) {
+        super(random);
     }
 
     protected abstract boolean detectNDSRom(String ndsCode, byte version);

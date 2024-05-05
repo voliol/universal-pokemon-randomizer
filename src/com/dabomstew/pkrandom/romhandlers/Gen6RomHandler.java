@@ -48,8 +48,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen6RomHandler create(Random random, PrintStream logStream) {
-            return new Gen6RomHandler(random, logStream);
+        public Gen6RomHandler create(Random random) {
+            return new Gen6RomHandler(random);
         }
 
         public boolean isLoadable(String filename) {
@@ -58,11 +58,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     public Gen6RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen6RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+        super(random);
     }
 
     private static List<Gen6RomEntry> roms;

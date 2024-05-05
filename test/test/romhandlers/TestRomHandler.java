@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Random;
 
 public class TestRomHandler extends AbstractRomHandler {
-    public TestRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+    public TestRomHandler(Random random) {
+        super(random);
     }
 
     @Override

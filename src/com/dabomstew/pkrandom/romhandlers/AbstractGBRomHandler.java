@@ -55,8 +55,8 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     private String loadedFileName;
     private long actualCRC32;
 
-    public AbstractGBRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
+    public AbstractGBRomHandler(Random random) {
+        super(random);
     }
 
     @Override

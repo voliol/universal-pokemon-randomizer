@@ -49,8 +49,8 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 	private NCCH gameUpdate;
 	private String loadedFN;
 
-	public Abstract3DSRomHandler(Random random, PrintStream logStream) {
-		super(random, logStream);
+	public Abstract3DSRomHandler(Random random) {
+		super(random);
 	}
 
 	@Override

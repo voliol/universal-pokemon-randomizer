@@ -65,7 +65,7 @@ public class RomHandlerTest {
         if (!factory.isLoadable(fullRomName)) {
             throw new IllegalArgumentException("ROM is not loadable.");
         }
-        romHandler = factory.create(new Random(), new PrintStream(System.out));
+        romHandler = factory.create(new Random());
         romHandler.loadRom(fullRomName);
         // Sets restrictions to... not restrict.
         // This can be overturned later for tests interested in certain restrictions.
