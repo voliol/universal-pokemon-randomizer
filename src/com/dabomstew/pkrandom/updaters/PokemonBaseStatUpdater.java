@@ -9,6 +9,8 @@ import java.util.function.Consumer;
 
 public class PokemonBaseStatUpdater extends Updater {
 
+    // TODO: write unit tests
+
     // starts with two null-consumers so the indexing can be nicer,
     // and then four more since Gens 2-5 didn't change the base stats of any existing Pokemon
     private final List<Consumer<List<Pokemon>>> updates = List.of(

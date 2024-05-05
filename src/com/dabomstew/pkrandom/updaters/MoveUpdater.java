@@ -14,6 +14,8 @@ import java.util.function.Consumer;
 
 public class MoveUpdater extends Updater {
 
+    // TODO: write unit tests
+
     private final Map<Integer, boolean[]> moveUpdates = new HashMap<>();
 
     // starts with two null-consumers so the indexing can be nicer

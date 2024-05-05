@@ -2004,8 +2004,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             applyCritRatePatch();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestTextPatch();
-        } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
-            randomizePCPotion();
         } else if (tweak == MiscTweak.ALLOW_PIKACHU_EVOLUTION) {
             applyPikachuEvoPatch();
         } else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
@@ -2032,13 +2030,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private void applyFastestTextPatch() {
         if (romEntry.getIntValue("TextDelayFunctionOffset") != 0) {
             writeByte(romEntry.getIntValue("TextDelayFunctionOffset"), GBConstants.gbZ80Ret);
-        }
-    }
-
-    private void randomizePCPotion() {
-        if (romEntry.getIntValue("PCPotionOffset") != 0) {
-            writeByte(romEntry.getIntValue("PCPotionOffset"),
-                    (byte) this.getNonBadItems().randomNonTM(this.random));
         }
     }
 
@@ -2102,6 +2093,18 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             return true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
+        }
+    }
+
+    @Override
+    public void setPCPotionItem(int itemID) {
+        if (romEntry.getIntValue("PCPotionOffset") != 0) {
+            if (!getAllowedItems().getItemSet().contains(itemID)) {
+                String itemName = itemID >= itemNames.length ? "unknown item, ID=" + itemID : itemNames[itemID];
+                throw new IllegalArgumentException("item not allowed for PC Potion: " + itemName);
+            }
+            writeByte(romEntry.getIntValue("PCPotionOffset"),
+                    (byte) itemID);
         }
     }
 

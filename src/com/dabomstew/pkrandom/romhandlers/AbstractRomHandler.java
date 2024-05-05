@@ -426,30 +426,18 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void applyMiscTweaks(Settings settings) {
-        int selectedMiscTweaks = settings.getCurrentMiscTweaks();
-
-        int codeTweaksAvailable = miscTweaksAvailable();
-        List<MiscTweak> tweaksToApply = new ArrayList<>();
-
-        for (MiscTweak mt : MiscTweak.allTweaks) {
-            if ((codeTweaksAvailable & mt.getValue()) > 0 && (selectedMiscTweaks & mt.getValue()) > 0) {
-                tweaksToApply.add(mt);
-            }
-        }
-
-        // Sort so priority is respected in tweak ordering.
-        Collections.sort(tweaksToApply);
-
-        // Now apply in order.
-        for (MiscTweak mt : tweaksToApply) {
-            applyMiscTweak(mt);
-        }
+    public void applyMiscTweak(MiscTweak tweak) {
+        // default: do nothing
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
-        // default: do nothing
+    public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setPCPotionItem(int itemID) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

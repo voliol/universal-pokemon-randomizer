@@ -509,9 +509,14 @@ public interface RomHandler {
 
     int miscTweaksAvailable();
 
-    void applyMiscTweaks(Settings settings);
-
     void applyMiscTweak(MiscTweak tweak);
+
+    /**
+     * Sets the Pokemon shown in the catching tutorial. Returns false if the Pokemon are not valid catching tutorial Pokemon.
+     */
+    boolean setCatchingTutorial(Pokemon opponent, Pokemon player);
+
+    void setPCPotionItem(int itemID);
 
     // ==========================
     // Misc forme-related methods

@@ -3855,8 +3855,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen3Items.luckyEgg);
             nonBadItems.banSingles(Gen3Items.luckyEgg);
-        } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
-            randomizePCPotion();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
             applyRunWithoutRunningShoesPatch();
         } else if (tweak == MiscTweak.BALANCE_STATIC_LEVELS) {
@@ -3941,12 +3939,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
     }
 
-    private void randomizePCPotion() {
-        if (romEntry.getIntValue("PCPotionOffset") != 0) {
-            writeWord(romEntry.getIntValue("PCPotionOffset"), this.getNonBadItems().randomNonTM(this.random));
-        }
-    }
-
     private void applyRunWithoutRunningShoesPatch() {
         String prefix = Gen3Constants.getRunningShoesCheckPrefix(romEntry.getRomType());
         int offset = find(prefix);
@@ -3979,6 +3971,17 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         + Integer.toHexString(rom[offset]) + ". Likely TMMovesReusableFunctionOffsets is faulty.");
             }
             writeByte(offset, (byte) 0);
+        }
+    }
+
+    @Override
+    public void setPCPotionItem(int itemID) {
+        if (romEntry.getIntValue("PCPotionOffset") != 0) {
+            if (!getAllowedItems().getItemSet().contains(itemID)) {
+                String itemName = itemID >= itemNames.length ? "unknown item, ID=" + itemID : itemNames[itemID];
+                throw new IllegalArgumentException("item not allowed for PC Potion: " + itemName);
+            }
+            writeWord(romEntry.getIntValue("PCPotionOffset"), itemID);
         }
     }
 
