@@ -5352,13 +5352,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
-		PokemonSet<Pokemon> validPokemon = rPokeService.getAll(false)
-				.filter(pk -> (pk.getNumber() <= maxValue
-						&& (!blockNonMales || pk.getGenderRatio() <= 0xFD)));
-		return validPokemon.getRandom(random);
-	}
-
 	private void computeCRC32sForRom() throws IOException {
 		this.actualOverlayCRC32s = new HashMap<>();
 		this.actualFileCRC32s = new HashMap<>();

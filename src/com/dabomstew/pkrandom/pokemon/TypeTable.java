@@ -117,7 +117,9 @@ public class TypeTable {
 
     public Map<Type, Effectiveness> against(Type defenderPrimary, Type defenderSecondary) {
         validTypeCheck(defenderPrimary);
-        validTypeCheck(defenderSecondary);
+        if (defenderSecondary != null) {
+            validTypeCheck(defenderSecondary);
+        }
         Map<Type, Effectiveness> results = new HashMap<>();
         for (int i = 0; i < types.size(); i++) {
             Effectiveness eff = effectivenesses[i][typeIndexMap.get(defenderPrimary)];
