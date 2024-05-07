@@ -939,6 +939,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
+        // Old code had the starters be set to a random cosmetic forme, if they had any.
+        // However, since randomness was factored out of the RomHandlers, that functionality was simply removed.
+        // If you want to reimplement it, do so outside this method.
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
             byte[] displayCRO = readFile(romEntry.getFile("StarterDisplay"));
@@ -968,9 +971,6 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     starter = starter.getBaseForme();
                 }
                 newStatic.pkmn = starter;
-                if (starter.getCosmeticForms() > 0) {
-                    newStatic.forme = this.random.nextInt(starter.getCosmeticForms());
-                }
                 writeWord(staticCRO,offset+i*size, newStatic.pkmn.getNumber());
                 staticCRO[offset+i*size + 4] = (byte)newStatic.forme;
 //                staticCRO[offset+i*size + 5] = (byte)newStatic.level;

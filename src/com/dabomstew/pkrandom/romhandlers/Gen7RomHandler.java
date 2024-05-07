@@ -1022,6 +1022,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public boolean setStarters(List<Pokemon> newStarters) {
+        // Old code had the starters be set to a random cosmetic forme, if they had any.
+        // However, since randomness was factored out of the RomHandlers, that functionality was simply removed.
+        // If you want to reimplement it, do so outside this method.
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -1029,16 +1032,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int offset = i * 0x14;
                 Pokemon starter = newStarters.get(i);
                 int forme = 0;
-                boolean checkCosmetics = true;
                 if (starter.getFormeNumber() > 0) {
                     forme = starter.getFormeNumber();
                     starter = starter.getBaseForme();
-                    checkCosmetics = false;
-                }
-                if (checkCosmetics && starter.getCosmeticForms() > 0) {
-                    forme = starter.getCosmeticFormNumber(this.random.nextInt(starter.getCosmeticForms()));
-                } else if (!checkCosmetics && starter.getCosmeticForms() > 0) {
-                    forme += starter.getCosmeticFormNumber(this.random.nextInt(starter.getCosmeticForms()));
                 }
                 writeWord(giftsFile, offset, starter.getNumber());
                 giftsFile[offset + 2] = (byte) forme;
