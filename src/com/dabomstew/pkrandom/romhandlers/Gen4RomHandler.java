@@ -1418,10 +1418,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		byte[] trophyGardenData = extraEncounterData.files.get(8);
 		EncounterArea area = readExtraEncounterAreaDPPt(trophyGardenData, 0, 16);
 
-		// Trophy Garden rotating Pokemon get their levels from the regular Trophy
-		// Garden grass encounters,
-		// indices 6 and 7. To make the logs nice, read in these encounters for this
-		// area and set the level
+		// Trophy Garden rotating Pokemon get their levels from the regular Trophy Garden grass encounters,
+		// indices 6 and 7. To make the logs nice, read in these encounters for this area and set the level
 		// and maxLevel for the rotating encounters appropriately.
 		int trophyGardenGrassEncounterIndex = Gen4Constants.getTrophyGardenGrassEncounterIndex(romEntry.getRomType());
 		EncounterArea trophyGardenGrassEncounterSet = encounterAreas.get(trophyGardenGrassEncounterIndex);
@@ -1434,6 +1432,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 		area.setDisplayName("Trophy Garden Rotating Pokemon (via Mr. Backlot)");
+		area.setForceMultipleSpecies(true); // prevents a possible softlock
 		encounterAreas.add(area);
 	}
 
@@ -1443,10 +1442,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
 			EncounterArea area = readExtraEncounterAreaDPPt(greatMarshData, 0, 32);
 
-			// Great Marsh rotating Pokemon get their levels from the regular Great Marsh
-			// grass encounters,
-			// indices 6 and 7. To make the logs nice, read in these encounters for all
-			// areas and set the
+			// Great Marsh rotating Pokemon get their levels from the regular Great Marsh grass encounters,
+			// indices 6 and 7. To make the logs nice, read in these encounters for all areas and set the
 			// level and maxLevel for the rotating encounters appropriately.
 			int level = 100;
 			int maxLevel = 0;
@@ -1956,14 +1953,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// Trophy Garden rotating Pokemon (Mr. Backlot)
 		byte[] trophyGardenData = extraEncounterData.files.get(8);
 		EncounterArea trophyGardenArea = areaIterator.next();
-
-		// The game will softlock if all the Pokemon here are the same species. As an
-		// emergency mitigation, just randomly pick a different species in case this
-		// happens. This is very unlikely to happen in practice, even with very
-		// restrictive settings, so it should be okay that we're breaking logic here.
-		while (trophyGardenArea.stream().distinct().count() == 1) {
-			trophyGardenArea.get(0).setPokemon(rPokeService.randomPokemon(random));
-		}
 		writeExtraEncountersDPPt(trophyGardenData, 0, trophyGardenArea);
 	}
 
@@ -3232,19 +3221,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					int tradeNum = trades[i];
 					StaticEncounter se = statics.next();
 					Pokemon thisTrade = se.pkmn;
-					List<Integer> possibleAbilities = new ArrayList<>();
-					possibleAbilities.add(thisTrade.getAbility1());
-					if (thisTrade.getAbility2() > 0) {
-						possibleAbilities.add(thisTrade.getAbility2());
-					}
-					if (thisTrade.getAbility3() > 0) {
-						possibleAbilities.add(thisTrade.getAbility3());
-					}
 
-					// Write species and ability
+					// Write species and ability,
+					// always ability1 out of simplicity even if some pokes got a second one.
 					writeLong(tradeNARC.files.get(tradeNum), 0, thisTrade.getNumber());
-					writeLong(tradeNARC.files.get(tradeNum), 0x1C,
-							possibleAbilities.get(this.random.nextInt(possibleAbilities.size())));
+					writeLong(tradeNARC.files.get(tradeNum), 0x1C, thisTrade.getAbility1());
 
 					// Write level to script file
 					byte[] scriptFile = scriptNARC.files.get(scripts[i]);

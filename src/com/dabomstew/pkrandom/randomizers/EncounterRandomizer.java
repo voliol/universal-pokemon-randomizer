@@ -214,6 +214,9 @@ public class EncounterRandomizer extends Randomizer {
                         }
                     }
                 }
+                if (area.isForceMultipleSpecies()) {
+                    enforceMultipleSpecies(area);
+                }
             }
         }
 
@@ -373,6 +376,16 @@ public class EncounterRandomizer extends Randomizer {
                 refillRemainingPokemon();
             }
             allowedForArea = areaType != null ? allowedByType.get(areaType) : remaining;
+        }
+
+        private void enforceMultipleSpecies(EncounterArea area) {
+            // If an area with forceMultipleSpecies yet has a single species,
+            // just randomly pick a different species for one of the Encounters.
+            // This is very unlikely to happen in practice, even with very
+            // restrictive settings, so it should be okay to break logic here.
+            while (area.stream().distinct().count() == 1) {
+                area.get(0).setPokemon(rPokeService.randomPokemon(random));
+            }
         }
 
         // quite different functionally from the other random encounter methods,
