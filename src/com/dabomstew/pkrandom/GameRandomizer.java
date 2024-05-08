@@ -478,6 +478,12 @@ public class GameRandomizer {
         if (settings.isBetterTrainerMovesets()) {
             trainerMovesetRandomizer.randomizeTrainerMovesets();
         }
+        
+        if (pokeMovesetRandomizer.isChangesMade() || trainerPokeRandomizer.isChangesMade()
+                || trainerMovesetRandomizer.isChangesMade()) {
+            // if earlier randomization could have led to unusable Z-crystals, fix them to something usable here
+            trainerPokeRandomizer.randomUsableZCrystals();
+        }
 
         if (settings.isRandomizeHeldItemsForBossTrainerPokemon()
                 || settings.isRandomizeHeldItemsForImportantTrainerPokemon()

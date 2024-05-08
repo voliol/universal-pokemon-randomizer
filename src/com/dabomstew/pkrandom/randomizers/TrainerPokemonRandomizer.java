@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Abilities;
+import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -1056,5 +1057,30 @@ public class TrainerPokemonRandomizer extends Randomizer {
             toChooseFrom = romHandler.getAllHeldItems();
         }
         tp.heldItem = toChooseFrom.get(random.nextInt(toChooseFrom.size()));
+    }
+
+    /**
+     * Gives each Trainer Pokemon with a held (non-species-specific) Z-crystal a new random one,
+     * based on the types of its moves.
+     */
+    public void randomUsableZCrystals() {
+        List<Trainer> trainers = romHandler.getTrainers();
+        for (Trainer tr : trainers) {
+            for (TrainerPokemon tp : tr.pokemon) {
+                if (Gen7Constants.heldZCrystalsByType.containsValue(tp.heldItem)) {
+                    int[] pokeMoves = tp.resetMoves ?
+                            RomFunctions.getMovesAtLevel(
+                                    romHandler.getAltFormeOfPokemon(tp.pokemon, tp.forme).getNumber(),
+                                    romHandler.getMovesLearnt(), tp.level) :
+                            tp.moves;
+                    pokeMoves = Arrays.stream(pokeMoves).filter(mv -> mv != 0).toArray();
+                    int chosenMove = pokeMoves[random.nextInt(pokeMoves.length)];
+                    Type chosenMoveType = romHandler.getMoves().get(chosenMove).type;
+                    tp.heldItem = Gen7Constants.heldZCrystalsByType.get(chosenMoveType);
+                }
+            }
+        }
+        romHandler.setTrainers(trainers);
+        // TODO: should this could as "changes made"?
     }
 }

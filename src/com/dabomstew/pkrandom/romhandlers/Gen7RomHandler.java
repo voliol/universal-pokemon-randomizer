@@ -1603,21 +1603,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         for (int m = 0; m < 4; m++) {
                             writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
                         }
-                        if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
-                            int chosenMove = this.random.nextInt(Arrays.stream(pokeMoves).filter(mv -> mv != 0).toArray().length);
-                            int newZCrystal = Gen7Constants.heldZCrystals.get(Gen7Constants.typeToByte(moves[pokeMoves[chosenMove]].type));
-                            writeWord(trpoke, pokeOffs - 4, newZCrystal);
-                        }
                     } else {
                         writeWord(trpoke, pokeOffs, tp.moves[0]);
                         writeWord(trpoke, pokeOffs + 2, tp.moves[1]);
                         writeWord(trpoke, pokeOffs + 4, tp.moves[2]);
                         writeWord(trpoke, pokeOffs + 6, tp.moves[3]);
-                        if (Gen7Constants.heldZCrystals.contains(tp.heldItem)) { // Choose a new Z-Crystal at random based on the types of the Pokemon's moves
-                            int chosenMove = this.random.nextInt(Arrays.stream(tp.moves).filter(mv -> mv != 0).toArray().length);
-                            int newZCrystal = Gen7Constants.heldZCrystals.get(Gen7Constants.typeToByte(moves[tp.moves[chosenMove]].type));
-                            writeWord(trpoke, pokeOffs - 4, newZCrystal);
-                        }
                     }
                     pokeOffs += 8;
                 }

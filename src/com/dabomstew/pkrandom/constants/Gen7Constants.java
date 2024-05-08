@@ -255,26 +255,52 @@ public class Gen7Constants {
     private static final List<Boolean> relevantEncounterFilesSM = setupRelevantEncounterFiles(Type_SM);
     private static final List<Boolean> relevantEncounterFilesUSUM = setupRelevantEncounterFiles(Type_USUM);
 
-    public static final List<Integer> heldZCrystals = Arrays.asList(
-            Items.normaliumZHeld, // Normal
-            Items.fightiniumZHeld, // Fighting
-            Items.flyiniumZHeld, // Flying
-            Items.poisoniumZHeld, // Poison
-            Items.groundiumZHeld, // Ground
-            Items.rockiumZHeld, // Rock
-            Items.buginiumZHeld, // Bug
-            Items.ghostiumZHeld, // Ghost
-            Items.steeliumZHeld, // Steel
-            Items.firiumZHeld, // Fire
-            Items.wateriumZHeld, // Water
-            Items.grassiumZHeld, // Grass
-            Items.electriumZHeld, // Electric
-            Items.psychiumZHeld, // Psychic
-            Items.iciumZHeld, // Ice
-            Items.dragoniumZHeld, // Dragon
-            Items.darkiniumZHeld, // Dark
-            Items.fairiumZHeld  // Fairy
-    );
+    public static final Map<Type, Integer> heldZCrystalsByType = initHeldZCrystalsByType();
+
+    private static Map<Type, Integer> initHeldZCrystalsByType() {
+        Map<Type, Integer> map = new EnumMap<>(Type.class);
+        map.put(Type.NORMAL, Items.normaliumZHeld);
+        map.put(Type.FIGHTING, Items.fightiniumZHeld);
+        map.put(Type.FLYING, Items.flyiniumZHeld);
+        map.put(Type.POISON, Items.poisoniumZHeld);
+        map.put(Type.GROUND, Items.groundiumZHeld);
+        map.put(Type.ROCK, Items.rockiumZHeld);
+        map.put(Type.BUG, Items.buginiumZHeld);
+        map.put(Type.GHOST, Items.ghostiumZHeld);
+        map.put(Type.STEEL, Items.steeliumZHeld);
+        map.put(Type.FIRE, Items.firiumZHeld);
+        map.put(Type.WATER, Items.wateriumZHeld);
+        map.put(Type.GRASS, Items.grassiumZHeld);
+        map.put(Type.ELECTRIC, Items.electriumZHeld);
+        map.put(Type.PSYCHIC, Items.psychiumZHeld);
+        map.put(Type.ICE, Items.iciumZHeld);
+        map.put(Type.DRAGON, Items.dragoniumZHeld);
+        map.put(Type.DARK, Items.darkiniumZHeld);
+        map.put(Type.FAIRY, Items.fairiumZHeld);
+        return Collections.unmodifiableMap(map);
+    }
+
+
+//    Arrays.asList(
+//            Items.normaliumZHeld, // Normal
+//            Items.fightiniumZHeld, // Fighting
+//            Items.flyiniumZHeld, // Flying
+//            Items.poisoniumZHeld, // Poison
+//            Items.groundiumZHeld, // Ground
+//            Items.rockiumZHeld, // Rock
+//            Items.buginiumZHeld, // Bug
+//            Items.ghostiumZHeld, // Ghost
+//            Items.steeliumZHeld, // Steel
+//            Items.firiumZHeld, // Fire
+//            Items.wateriumZHeld, // Water
+//            Items.grassiumZHeld, // Grass
+//            Items.electriumZHeld, // Electric
+//            Items.psychiumZHeld, // Psychic
+//            Items.iciumZHeld, // Ice
+//            Items.dragoniumZHeld, // Dragon
+//            Items.darkiniumZHeld, // Dark
+//            Items.fairiumZHeld  // Fairy
+//    );
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 

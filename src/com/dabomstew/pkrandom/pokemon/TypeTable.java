@@ -262,10 +262,6 @@ public class TypeTable {
                 + types + ")";
     }
 
-    public static void main(String[] args) {
-        System.out.println(getVanillaGen6PlusTable().toBigString());
-    }
-
     private static final String[] effectivenessSymbols = new String[] {"Imm", "nve", "---", "SE!"};
 
     public String toBigString() {
