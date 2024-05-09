@@ -42,6 +42,8 @@ import pptxt.N3DSTxtHandler;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Gen7RomHandler extends Abstract3DSRomHandler {
@@ -1657,28 +1659,29 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     // Finds the highest stat for the purposes of setting the aura boost on Beast Lusamine's Pokemon.
     // In the case where two or more stats are tied for the highest stat, it randomly selects one.
     private int getAuraNumberForHighestStat(Pokemon boostedPokemon) {
-        int currentBestStat = boostedPokemon.getAttack();
-        int auraNumber = 1;
-        boolean useDefenseAura = boostedPokemon.getDefense() > currentBestStat || (boostedPokemon.getDefense() == currentBestStat && random.nextBoolean());
-        if (useDefenseAura) {
-            currentBestStat = boostedPokemon.getDefense();
-            auraNumber = 2;
+
+        List<Supplier<Integer>> statSuppliers = List.of(boostedPokemon::getAttack, boostedPokemon::getDefense,
+                boostedPokemon::getSpatk, boostedPokemon::getSpdef, boostedPokemon::getSpeed);
+
+        // finds the highest stat(s)
+        int currentBestStat = -1;
+        List<Integer> possibleAuras = new ArrayList<>();
+        for (int auraNum = 1; auraNum <= statSuppliers.size(); auraNum++) {
+            Supplier<Integer> statSupplier = statSuppliers.get(auraNum - 1);
+            if (statSupplier.get() > currentBestStat) {
+                possibleAuras.clear();
+                currentBestStat = statSupplier.get();
+            }
+            if (statSupplier.get() >= currentBestStat) {
+                possibleAuras.add(auraNum);
+            }
         }
-        boolean useSpAtkAura = boostedPokemon.getSpatk() > currentBestStat || (boostedPokemon.getSpatk() == currentBestStat && random.nextBoolean());
-        if (useSpAtkAura) {
-            currentBestStat = boostedPokemon.getSpatk();
-            auraNumber = 3;
-        }
-        boolean useSpDefAura = boostedPokemon.getSpdef() > currentBestStat || (boostedPokemon.getSpdef() == currentBestStat && random.nextBoolean());
-        if (useSpDefAura) {
-            currentBestStat = boostedPokemon.getSpdef();
-            auraNumber = 4;
-        }
-        boolean useSpeedAura = boostedPokemon.getSpeed() > currentBestStat || (boostedPokemon.getSpeed() == currentBestStat && random.nextBoolean());
-        if (useSpeedAura) {
-            auraNumber = 5;
-        }
-        return auraNumber;
+
+        // Makes a "random" choice between tied highest stats using the Pokemon's number
+        // (not actual randomness since that's not permitted in the RomHandler classes).
+        // This means the aura chosen will be the same for the same species being boosted
+        // the same way, but that's 100% fine.
+        return possibleAuras.get(boostedPokemon.getNumber() % possibleAuras.size());
     }
 
     @Override
