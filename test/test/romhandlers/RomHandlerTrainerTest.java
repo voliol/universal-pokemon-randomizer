@@ -1,7 +1,9 @@
 package test.romhandlers;
 
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.PokemonTypeRandomizer;
 import com.dabomstew.pkrandom.randomizers.TrainerPokemonRandomizer;
@@ -11,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -662,6 +665,86 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         List<String> before = new ArrayList<>(trainerClassNames);
         romHandler.setTrainerClassNames(trainerClassNames);
         assertEquals(before, romHandler.getTrainerClassNames());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomUsableZCrystalsDoesNotChangeWhichPokemonHaveZCrystals(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) == 7);
+        loadROM(romName);
+
+        System.out.println("==== BEFORE: ====");
+        Map<Integer, boolean[]> before = findZCrystals();
+        new TrainerPokemonRandomizer(romHandler, new Settings(), RND).randomUsableZCrystals();
+        System.out.println("==== AFTER: ====");
+        Map<Integer, boolean[]> after = findZCrystals();
+
+        assertEquals(before.keySet(), after.keySet());
+        for (Integer key : before.keySet()) {
+            assertArrayEquals(before.get(key), after.get(key));
+        }
+    }
+
+    private Map<Integer, boolean[]> findZCrystals() {
+        String[] itemNames = romHandler.getItemNames();
+
+        Map<Integer, boolean[]> zCrystalsByTrainer = new HashMap<>();
+        List<Trainer> trainersBefore = romHandler.getTrainers();
+        for (int i = 0; i < trainersBefore.size(); i++) {
+            Trainer tr = trainersBefore.get(i);
+            System.out.println(tr);
+            boolean[] zCrystals = new boolean[tr.pokemon.size()];
+            boolean anyHasZCrystal = false;
+            for (int pkNum = 0; pkNum < tr.pokemon.size(); pkNum++) {
+                TrainerPokemon tp = tr.pokemon.get(pkNum);
+                System.out.println(itemNames[tp.heldItem]);
+                if (Gen7Constants.heldZCrystalsByType.containsValue(tp.heldItem)) {
+                    zCrystals[pkNum] = true;
+                    anyHasZCrystal = true;
+                }
+            }
+            if (anyHasZCrystal) {
+                zCrystalsByTrainer.put(i, zCrystals);
+            }
+        }
+        return zCrystalsByTrainer;
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomUsableZCrystalsGivesZCrystalsOfUsableType(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) == 7);
+        loadROM(romName);
+
+        String[] itemNames = romHandler.getItemNames();
+
+        new TrainerPokemonRandomizer(romHandler, new Settings(), RND).randomUsableZCrystals();
+        for (Trainer tr : romHandler.getTrainers()) {
+            System.out.println(tr);
+            for (TrainerPokemon tp : tr.pokemon) {
+                if (Gen7Constants.heldZCrystalsByType.containsValue(tp.heldItem)) {
+                    System.out.println(tp.pokemon.getName() + " holds " + itemNames[tp.heldItem]);
+
+                    int[] pkMoves = tp.resetMoves ?
+                            RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), romHandler.getMovesLearnt(), tp.level)
+                            : Arrays.stream(tp.moves).distinct().filter(mv -> mv != 0).toArray();
+                    Set<Type> moveTypes = new HashSet<>();
+                    for (int moveID : pkMoves) {
+                        Move mv = romHandler.getMoves().get(moveID);
+                        System.out.println(mv.name + " | " + mv.type);
+                        moveTypes.add(mv.type);
+                    }
+
+                    boolean anyMoveTypeCorrect = false;
+                    for (Type t : moveTypes) {
+                        if (Gen7Constants.heldZCrystalsByType.get(t) == tp.heldItem) {
+                            anyMoveTypeCorrect = true;
+                        }
+                    }
+                    assertTrue(anyMoveTypeCorrect);
+                }
+            }
+        }
     }
 
 }
