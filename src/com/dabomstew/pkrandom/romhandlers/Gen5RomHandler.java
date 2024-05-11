@@ -24,28 +24,29 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.pokemon.*;
-import pptxt.PPTxtHandler;
-
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen5RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import compressors.DSDecmp;
+import pptxt.PPTxtHandler;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
+import java.io.IOException;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Gen5RomHandler extends AbstractDSRomHandler {
 
@@ -393,6 +394,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.setRareHeldItem(item2);
             pkmn.setDarkGrassHeldItem(readWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset));
         }
+
+        pkmn.setGenderRatio(stats[Gen5Constants.bsGenderRatioOffset] & 0xFF);
 
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
@@ -1903,7 +1906,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             for (int group = 0; group < 4; group++) {
                                 StaticEncounter se = statics.next();
                                 writeWord(hhEntry, version * 78 + raritySlot * 26 + group * 2, se.pkmn.getNumber());
-                                int genderRatio = this.random.nextInt(101);
+                                // genderRatio here is a percentage from 0-100;
+                                // this value overrides the genderRatio of the species.
+                                // The vanilla grottoes have some variance in genderRatios, but for simplicity's sake
+                                // we just set all Pokémon to 30% female, unless they are always female/male/genderless.
+                                int genderRatio = switch (se.pkmn.getGenderRatio()) {
+                                    case 0xFE -> 100; // female
+                                    case 0x00, 0xFF -> 0; // male, genderless
+                                    default -> 30;
+                                };
                                 hhEntry[version * 78 + raritySlot * 26 + 16 + group] = (byte) genderRatio;
                                 hhEntry[version * 78 + raritySlot * 26 + 20 + group] = (byte) se.forme; // forme
                                 hhEntry[version * 78 + raritySlot * 26 + 12 + group] = (byte) se.level;
