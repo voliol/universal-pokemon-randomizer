@@ -20,8 +20,9 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
 
  * "Preserve Type Themed Trainers" (trainer)
      functions the same as "Preserve Type Themed Areas", except the "area" is a single trainer.  
-     also, if all the pokemon share a pair of types, it will choose the primary type of the trainer's first pokemon - unless it's Normal, in which case it chooses the secondary.  
+     also, if all the pokemon share a pair of types, it will choose the primary type of the trainer's first pokemon - unless it's Normal, in which case it chooses the secondary.
      always triggers if the trainer has only one pokemon.  
+     if the trainer is a gym or league trainer, they will be forced to their original theme even if they did not originally strictly follow it (e.g. Pryce using a Seel (Water-type) despite being an Ice trainer)  
      here, it's an option on the trainers dropdown.
 
  * "Local pokemon only"

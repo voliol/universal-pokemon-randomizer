@@ -1714,7 +1714,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Type Themed related
         Map<Trainer, Type> trainerTypes = new TreeMap<>();
         Set<Type> usedUberTypes = new TreeSet<>();
-        if (isTypeThemed || isTypeThemedEliteFourGymOnly) {
+        if (isTypeThemed || isTypeThemedEliteFourGymOnly || keepTypeThemes) {
             typeWeightings = new TreeMap<>();
             totalTypeWeighting = 0;
             // Construct groupings for types
@@ -1746,34 +1746,63 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            // Give a type to each group
-            // Gym & elite types have to be unique
-            // So do uber types, including the type we pick for champion
-            Set<Type> usedGymTypes = new TreeSet<>();
-            Set<Type> usedEliteTypes = new TreeSet<>();
-            for (String group : groups.keySet()) {
-                List<Trainer> trainersInGroup = groups.get(group);
-                // Shuffle ordering within group to promote randomness
-                Collections.shuffle(trainersInGroup, random);
-                Type typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
-                if (group.startsWith("GYM")) {
-                    while (usedGymTypes.contains(typeForGroup)) {
-                        typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
-                    }
-                    usedGymTypes.add(typeForGroup);
-                }
-                if (group.startsWith("ELITE")) {
-                    while (usedEliteTypes.contains(typeForGroup)) {
-                        typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
-                    }
-                    usedEliteTypes.add(typeForGroup);
-                }
-                if (group.equals("CHAMPION")) {
-                    usedUberTypes.add(typeForGroup);
-                }
 
-                for (Trainer t : trainersInGroup) {
-                    trainerTypes.put(t, typeForGroup);
+            if(keepTypeThemes) {
+                Map<String, Type> originalThemes = getGymAndEliteTypeThemes();
+
+                //TODO: remove spading block
+                if(originalThemes == null) {
+                    for (String group : groups.keySet()) {
+                        logStream.print(group + ": ");
+
+                        List<Trainer> trainersInGroup = groups.get(group);
+                        for(Trainer t : trainersInGroup) {
+                            logStream.print(t.fullDisplayName + ", ");
+                        }
+                        logStream.println();
+                    }
+                } else {
+                    for (String group : groups.keySet()) {
+                        if (!originalThemes.containsKey(group)) {
+                            continue;
+                        }
+                        Type groupType = originalThemes.get(group);
+                        List<Trainer> trainersInGroup = groups.get(group);
+                        for (Trainer t : trainersInGroup) {
+                            trainerTypes.put(t, groupType);
+                        }
+                    }
+                }
+            } else {
+                // Give a random type to each group
+                // Gym & elite types have to be unique
+                // So do uber types, including the type we pick for champion
+                Set<Type> usedGymTypes = new TreeSet<>();
+                Set<Type> usedEliteTypes = new TreeSet<>();
+                for (String group : groups.keySet()) {
+                    List<Trainer> trainersInGroup = groups.get(group);
+                    // Shuffle ordering within group to promote randomness
+                    Collections.shuffle(trainersInGroup, random);
+                    Type typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                    if (group.startsWith("GYM")) {
+                        while (usedGymTypes.contains(typeForGroup)) {
+                            typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                        }
+                        usedGymTypes.add(typeForGroup);
+                    }
+                    if (group.startsWith("ELITE")) {
+                        while (usedEliteTypes.contains(typeForGroup)) {
+                            typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                        }
+                        usedEliteTypes.add(typeForGroup);
+                    }
+                    if (group.equals("CHAMPION")) {
+                        usedUberTypes.add(typeForGroup);
+                    }
+
+                    for (Trainer t : trainersInGroup) {
+                        trainerTypes.put(t, typeForGroup);
+                    }
                 }
             }
         }
@@ -1993,6 +2022,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Save it all up
         this.setTrainers(currentTrainers, false);
     }
+
+    abstract protected Map<String, Type> getGymAndEliteTypeThemes();
 
     @Override
     public void randomizeTrainerHeldItems(Settings settings) {
