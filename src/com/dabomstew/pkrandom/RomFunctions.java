@@ -24,12 +24,12 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.pokemon.MoveLearnt;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 
 public class RomFunctions {
 
@@ -415,6 +415,20 @@ public class RomFunctions {
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
+    public static byte[] hexToBytes(String hex) {
+        hex = hex.replaceAll("\s","");
+        int len = hex.length();
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("hex string is not of even length");
+        }
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            bytes[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i+1), 16));
+        }
+        return bytes;
+    }
+
     /**
      * A debugging tool
      */
@@ -430,7 +444,7 @@ public class RomFunctions {
     }
 
     /**
-     * A debugging tool, appropriate for copy-pasting to hexstrings"
+     * A debugging tool
      */
     public static String bytesToHexNoSeparator(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];

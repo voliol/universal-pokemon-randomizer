@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen4Constants {
@@ -96,6 +97,26 @@ public class Gen4Constants {
     public static final int evolutionMethodCount = 26;
 
     public static final int highestAbilityIndex = Abilities.badDreams;
+
+    public static final int mysteryEggCommandOffset = 0x1C7CC;
+
+    // by AdAstra
+    public static final byte[] mysteryEggCommandImprovement = RomFunctions.hexToBytes(
+                    "F8 B5 84 B0 80 30 07 68 F8 68 26 F6 E1 FE 04 1C" +
+                    "F8 68 72 F6 11 FC 02 90 72 F6 AC FA 06 28 02 DB" +
+                    "57 E0 0B 20 6B F6 1C FE 05 1C 6B F6 F5 FD 01 20" +
+                    "0D 21 15 F6 71 FF 03 21 00 91 01 90 28 1C 26 49" +
+                    "01 22 23 1C 6A F6 D2 FB 00 24 26 1C 21 1C 28 1C" +
+                    "36 31 32 1C 6C F6 0E FA 00 28 04 D0 01 34 04 2C" +
+                    "F6 DB 04 2C 02 D1 03 24 1C 49 03 A8 41 80 21 1C" +
+                    "03 AA 28 1C 36 31 02 32 6C F6 7C FD 21 1C 28 1C" +
+                    "42 31 00 22 6C F6 F6 F9 03 A9 08 70 3A 34 28 1C" +
+                    "21 1C 03 AA 6C F6 6E FD 02 98 29 1C 72 F6 DC F9" +
+                    "28 1C 18 F6 CD FC F8 68 28 F6 EE FB 00 21 04 1C" +
+                    "28 1C 0A 1C 6C F6 DE F9 06 1C 28 1C 6F 21 00 22" +
+                    "6C F6 D8 F9 02 1C 12 06 20 1C 31 1C 12 0E 28 F6" +
+                    "09 FD 00 20 04 B0 F8 BD"
+    );
 
     public static final List<Integer> consumableHeldItems = Arrays.asList(
             Items.cheriBerry, Items.chestoBerry, Items.pechaBerry, Items.rawstBerry, Items.aspearBerry,
@@ -529,6 +550,8 @@ public class Gen4Constants {
     public static final String[] hgssNonGrassSetNames = new String[] { "", "Surfing", "Rock Smash", "Old Rod",
             "Good Rod", "Super Rod" };
     public static final int hgssGoodRodReplacementIndex = 3, hgssSuperRodReplacementIndex = 1;
+
+    public static final double stabMultiplier = 1.5;
 
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.PHYSICAL, MoveCategory.SPECIAL,
             MoveCategory.STATUS };

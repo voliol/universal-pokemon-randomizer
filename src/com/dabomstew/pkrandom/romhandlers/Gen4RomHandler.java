@@ -24,26 +24,26 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.pokemon.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
-import thenewpoketext.PokeTextData;
-import thenewpoketext.TextToPoke;
-
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen4RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
+import thenewpoketext.PokeTextData;
+import thenewpoketext.TextToPoke;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
@@ -2963,6 +2963,33 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return eggMoves;
 	}
 
+	/**
+	 * Returns a Set of move IDs of all {@link Move}s a {@link Pokemon} could possibly have through egg move breeding.
+	 * I.e., all the Pokemon's and all of its prevos' egg moves.
+	 */
+	private Set<Integer> getEffectiveEggMoves(Pokemon pk) {
+		Map<Integer, List<Integer>> allEggMoves = getEggMoves();
+		Set<Integer> eggMoves = new HashSet<>();
+
+		Stack<Pokemon> stack = new Stack<>();
+		List<Pokemon> visited = new ArrayList<>();
+		stack.add(pk);
+		while (!stack.isEmpty()) {
+			Pokemon curr = stack.pop();
+			visited.add(curr);
+			for (Evolution evo : curr.getEvolutionsTo()) {
+				if (!visited.contains(evo.getFrom())) {
+					stack.push(evo.getFrom());
+				}
+			}
+			if (allEggMoves.containsKey(curr.getNumber())) {
+				eggMoves.addAll(allEggMoves.get(curr.getNumber()));
+			}
+		}
+
+		return eggMoves;
+	}
+
 	@Override
 	public void setEggMoves(Map<Integer, List<Integer>> eggMoves) {
 		try {
@@ -3157,8 +3184,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			if (romEntry.getIntValue("MysteryEggOffset") > 0) {
 				byte[] ovOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
-				StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getIntValue("MysteryEggOffset")] & 0xFF]);
-				se.isEgg = true;
+				StaticEncounter se = isMysteryEggCommandImproved(ovOverlay) ?
+						readImprovedMysteryEgg(ovOverlay) : readVanillaMysteryEgg(ovOverlay);
 				sp.add(se);
 			}
 			if (romEntry.getIntValue("FossilTableOffset") > 0) {
@@ -3185,6 +3212,29 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			throw new RandomizerIOException(e);
 		}
 		return sp;
+	}
+
+	private boolean isMysteryEggCommandImproved(byte[] ovOverlay) {
+		int offset = romEntry.getIntValue("MysteryEggCommandOffset");
+		for (int i = 0; i < Gen4Constants.mysteryEggCommandImprovement.length; i++) {
+			if (ovOverlay[offset++] != Gen4Constants.mysteryEggCommandImprovement[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private StaticEncounter readImprovedMysteryEgg(byte[] ovOverlay) {
+		int offset = romEntry.getIntValue("MysteryEggCommandOffset") + Gen4Constants.mysteryEggCommandImprovement.length;
+		StaticEncounter se = new StaticEncounter(pokes[readLong(ovOverlay, offset)]);
+		se.isEgg = true;
+		return se;
+	}
+
+	private StaticEncounter readVanillaMysteryEgg(byte[] ovOverlay) {
+		StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getIntValue("MysteryEggOffset")] & 0xFF]);
+		se.isEgg = true;
+		return se;
 	}
 
 	@Override
@@ -3241,15 +3291,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeNARC(romEntry.getFile("InGameTrades"), tradeNARC);
 			}
 			if (romEntry.getIntValue("MysteryEggOffset") > 0) {
-				// Same overlay as MT moves
-				// Truncate the pokemon# to 1byte, unless it's 0
-				int pokenum = statics.next().pkmn.getNumber();
-				if (pokenum > 255) {
-					pokenum = this.random.nextInt(255) + 1;
-				}
-				byte[] ovOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
-				ovOverlay[romEntry.getIntValue("MysteryEggOffset")] = (byte) pokenum;
-				writeOverlay(romEntry.getIntValue("FieldOvlNumber"), ovOverlay);
+				setMysteryEgg(statics.next());
 			}
 			if (romEntry.getIntValue("FossilTableOffset") > 0) {
 				int baseOffset = romEntry.getIntValue("FossilTableOffset");
@@ -3284,6 +3326,112 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			throw new RandomizerIOException(e);
 		}
 		return true;
+	}
+
+	private void setMysteryEgg(StaticEncounter se) throws IOException {
+		// The Mystery Egg (HGSS Togepi) uses a different command than other eggs,
+		// which is hardcoded in the field overlay. Normally this command uses a single
+		// byte to represent Togepi's number, which clearly doesn't allow for any Pokemon
+		// with a number > 255 to replace it.
+		// To fix this, we overwrite the command with an improved version by AdAstra
+		// on the Kingdom of DS Hacking Discord server. This improved command allows
+		// a full long for both the Pokemon and the Move ID.
+		// (The Move ID is an extra move the Mystery Egg mon gets. In Vanilla, it is Togepi's Extrasensory.)
+		byte[] ovOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
+		int offset = romEntry.getIntValue("MysteryEggCommandOffset");
+
+		writeBytes(ovOverlay, offset, Gen4Constants.mysteryEggCommandImprovement);
+		offset += Gen4Constants.mysteryEggCommandImprovement.length;
+
+		writeLong(ovOverlay, offset, se.pkmn.getNumber());
+		offset += 4;
+
+		writeLong(ovOverlay, offset, getMysteryEggMove(se.pkmn).number);
+
+		writeOverlay(romEntry.getIntValue("FieldOvlNumber"), ovOverlay);
+	}
+
+	/**
+	 * Returns an appropriate extra move for the Mystery Egg mon.<br>
+	 * Egg moves have the highest priority, then Move Tutor moves, then TM moves. Within each of these groups,
+	 * strong attacking moves are prioritized. If the Pokemon has neither Egg, Move Tutor, nor TM moves,
+	 * then the last move it learns via level-up is chosen.
+	 */
+	public Move getMysteryEggMove(Pokemon pk) {
+		System.out.println(pk.fullName());
+
+		Set<Integer> moveIDs = getEffectiveEggMoves(pk);
+		if (moveIDs.isEmpty()) {
+			System.out.println("no egg moves");
+			moveIDs.addAll(getCompatibleTutorMoves(pk));
+		}
+		if (moveIDs.isEmpty()) {
+			System.out.println("no Tutor moves");
+			moveIDs.addAll(getCompatibleTMMoves(pk));
+		}
+		if (moveIDs.isEmpty()) {
+			System.out.println("no TM moves");
+			List<Integer> movesLearnt = getMovesLearnt().get(pk.getNumber()).stream()
+					.sorted(Comparator.comparingInt(ml -> ml.level)).map(ml -> ml.move)
+					.toList();
+			if (movesLearnt.isEmpty()) {
+				System.out.println("no level-up moves");
+			} else {
+				moveIDs.add(movesLearnt.get(movesLearnt.size() - 1));
+			}
+		}
+
+		List<Move> posMoves = moveIDs.stream().map(moveID -> moves[moveID])
+				.distinct()
+				.sorted(Comparator.comparingDouble(m -> calculateMoveStrength(m, pk)))
+				.toList();
+		for (Move m : posMoves) {
+			System.out.println("\t" + m);
+		}
+
+		return null;
+	}
+
+	private List<Integer> getCompatibleTutorMoves(Pokemon pk) {
+		List<Integer> moveIDs = new ArrayList<>();
+		List<Integer> tutorMoves = getMoveTutorMoves();
+		boolean[] comp = getMoveTutorCompatibility().get(pk);
+		for (int i = 0; i < tutorMoves.size(); i++) {
+			if (comp[i + 1]) {
+				moveIDs.add(tutorMoves.get(i));
+			}
+		}
+		return moveIDs;
+	}
+
+	private List<Integer> getCompatibleTMMoves(Pokemon pk) {
+		List<Integer> moveIDs = new ArrayList<>();
+		List<Integer> tmMoves = getTMMoves();
+		boolean[] comp = getTMHMCompatibility().get(pk);
+		for (int i = 0; i < tmMoves.size(); i++) {
+			if (comp[i + 1]) {
+				moveIDs.add(tmMoves.get(i));
+			}
+		}
+		return moveIDs;
+	}
+
+	/**
+	 * Calculates the Move's expected damage output when used by a specific Pokemon,
+	 * taking hit ratio, hit count, attacking stat, and STAB into account.
+	 * Status moves always return 0.
+	 */
+	private double calculateMoveStrength(Move m, Pokemon pk) {
+		// TODO: this could be used in more places
+		if (m.category == MoveCategory.STATUS) {
+			return 0;
+		}
+		double strength = m.power * m.hitCount * m.hitratio;
+		strength *= m.category == MoveCategory.PHYSICAL ? pk.getAttack() : pk.getSpatk();
+		if (m.type == pk.getPrimaryType() || m.type == pk.getSecondaryType()) {
+			strength *= Gen4Constants.stabMultiplier;
+		}
+		return strength;
 	}
 
 	private void getRoamers(List<StaticEncounter> statics) {
