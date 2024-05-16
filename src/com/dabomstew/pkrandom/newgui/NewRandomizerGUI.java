@@ -586,6 +586,7 @@ public class NewRandomizerGUI {
         mtLevelupMoveSanityCheckBox.addActionListener(e -> enableOrDisableSubControls());
         noIrregularAltFormesCheckBox.addActionListener(e -> enableOrDisableSubControls());
         ptIsDualTypeCheckBox.addActionListener(e->enableOrDisableSubControls());
+        spTypeNoDualCheckbox.addActionListener(e->enableOrDisableSubControls());
         tpComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 enableOrDisableSubControls();
@@ -2845,6 +2846,8 @@ public class NewRandomizerGUI {
             spRandomBasicRadioButton.setEnabled(true);
             if (romHandler.isYellow()) {
                 spComboBox3.setVisible(false);
+                spTypeFwgRadioButton.setVisible(false);
+                spTypeTriangleRadioButton.setVisible(false);
             }
             populateDropdowns();
 
@@ -3340,7 +3343,18 @@ public class NewRandomizerGUI {
             spTypeNoneRadioButton.setEnabled(true);
             spTypeUniqueRadioButton.setEnabled(true);
             spTypeSingleRadioButton.setEnabled(true);
-            spTypeNoDualCheckbox.setEnabled(true);
+
+            if(ptIsDualTypeCheckBox.isSelected()) {
+                spTypeNoDualCheckbox.setEnabled(false);
+            } else {
+                spTypeNoDualCheckbox.setEnabled(true);
+            }
+            if(spTypeNoDualCheckbox.isSelected()) {
+                ptIsDualTypeCheckBox.setEnabled(false);
+            } else {
+                ptIsDualTypeCheckBox.setEnabled(true);
+            }
+
             spAllowAltFormesCheckBox.setEnabled(true);
             spNoLegendariesCheckBox.setEnabled(true);
             if (spCustomRadioButton.isSelected()) {
