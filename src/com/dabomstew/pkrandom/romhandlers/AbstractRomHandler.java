@@ -4052,9 +4052,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             //also assuming that the triangle restrictions (typeTriangle, fireWaterGrass)
             //are not used with custom starters
             if(typeTriangle) {
-                pickedStarters = starterRandomTypeTriangle(typeListMap);
+                pickedStarters = starterRandomTypeTriangle(typeListMap, starterCount);
             } else if (typeFwg) {
-                pickedStarters = chooseStartersFireWaterGrass(typeListMap);
+                pickedStarters = chooseStartersFireWaterGrass(typeListMap, starterCount);
             } else if(typeSingle) {
                 int iterLoops = 0;
                 while(singleType == null && iterLoops < 10000) {
@@ -4079,14 +4079,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         setStarters(pickedStarters);
     }
 
-    private List<Pokemon> starterRandomTypeTriangle(Map<Type, List<Pokemon>> validPokemonByType) {
+    private List<Pokemon> starterRandomTypeTriangle(Map<Type, List<Pokemon>> validPokemonByType, int countNeeded) {
+
+        if(countNeeded < 3) {
+            throw new RandomizationException("Attempted to form type triangle with less than 3 starters.");
+        }
 
         int generation = this.generationOfPokemon();
         boolean effectivenessUpdated = isEffectivenessUpdated();
         List<Pokemon> startersChosen = new ArrayList<>();
 
         //find type triangles
-        List<Set<Type>> typeTriangles = null;
+        List<List<Type>> typeTriangles = null;
         typeTriangles = new ArrayList<>();
         for(Type typeOne : Type.getAllTypes(generation)) {
             List<Type> superEffectiveOne = Effectiveness.superEffective(typeOne, generation, effectivenessUpdated);
@@ -4101,10 +4105,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                     List<Type> superEffectiveThree = Effectiveness.superEffective(typeThree, generation, effectivenessUpdated);
                     if (superEffectiveThree.contains(typeOne)) {
                         //we found a triangle!
-                        Set<Type> triangle = EnumSet.of(typeOne, typeTwo, typeThree);
+                        List<Type> triangle = new ArrayList<Type>(3);
+                        triangle.add(typeThree);
+                        triangle.add(typeTwo);
+                        triangle.add(typeOne);
+                        //reversed so that the triangle will be in the right order
                         typeTriangles.add(triangle);
-                        //not entirely sure if the uniqueness constraint will work in this case,
-                        //but that's okay, we don't actually need it
+                        //this will actually add each triangle three times (one from each starting type)
+                        //but that's okay
                     }
                 }
             }
@@ -4113,7 +4121,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         //okay, we found our triangles! now pick one and pick starters from it.
         while(startersChosen.isEmpty() && !typeTriangles.isEmpty()) {
             //loop because we might find that there isn't a pokemon set of the appropriate types
-            Set<Type> triangle = typeTriangles.get(this.random.nextInt(typeTriangles.size()));
+            List<Type> triangle = typeTriangles.get(this.random.nextInt(typeTriangles.size()));
             boolean noPokemonSet = false;
             for (Type type : triangle) {
                 List<Pokemon> typeList = new ArrayList<>(validPokemonByType.get(type));
@@ -4149,17 +4157,60 @@ public abstract class AbstractRomHandler implements RomHandler {
             throw new RandomizationException("No valid starter set with a type triangle could be found!");
         }
 
+        if(countNeeded > 3) {
+            //we'll need ANOTHER triangle
+            //go ahead and remove the pokemon we chose, so the same one doesn't appear in both sets
+            for(Pokemon p : startersChosen) {
+                validPokemonByType.get(p.primaryType).remove(p);
+                if(p.secondaryType != null) {
+                    validPokemonByType.get(p.secondaryType).remove(p);
+                }
+            }
+
+            startersChosen.addAll(starterRandomTypeTriangle(validPokemonByType, countNeeded - 3));
+        }
+
         return startersChosen;
     }
 
-    private List<Pokemon> chooseStartersFireWaterGrass(Map<Type, List<Pokemon>> validPokemonByType) {
+    private List<Pokemon> chooseStartersFireWaterGrass(Map<Type, List<Pokemon>> validPokemonByType, int countNeeded) {
+
+        if(countNeeded < 3) {
+            throw new RandomizationException("Attempted to form type triangle with less than 3 starters.");
+        }
 
         List<Pokemon> startersChosen = new ArrayList<>();
 
-        //Fire
-        List<Pokemon> typeList = new ArrayList<>(validPokemonByType.get(Type.FIRE));
+        //turns out most of the games start with grass. So,
+        //Grass
+        List<Pokemon> typeList = new ArrayList<>(validPokemonByType.get(Type.GRASS));
         //clone so we can safely drain it
         boolean noPick = true;
+        while(noPick && !typeList.isEmpty()) {
+            Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
+            typeList.remove(picked);
+            Type otherType = null;
+
+            //check other type
+            if (picked.primaryType == Type.GRASS) {
+                otherType = picked.secondaryType;
+            } else {
+                otherType = picked.primaryType;
+            }
+            if(otherType != Type.FIRE && otherType != Type.WATER) {
+                //this pokemon works
+                noPick = false;
+                startersChosen.add(picked);
+            }
+        }
+        if(noPick) {
+            throw new RandomizationException("No valid Grass-type starter found!");
+        }
+
+        //Fire
+        typeList = new ArrayList<>(validPokemonByType.get(Type.FIRE));
+        //clone so we can safely drain it
+        noPick = true;
         while(noPick && !typeList.isEmpty()) {
             Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
             typeList.remove(picked);
@@ -4207,29 +4258,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             throw new RandomizationException("No valid Water-type starter found!");
         }
 
-        //Grass
-        typeList = new ArrayList<>(validPokemonByType.get(Type.GRASS));
-        //clone so we can safely drain it
-        noPick = true;
-        while(noPick && !typeList.isEmpty()) {
-            Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
-            typeList.remove(picked);
-            Type otherType = null;
-
-            //check other type
-            if (picked.primaryType == Type.GRASS) {
-                otherType = picked.secondaryType;
-            } else {
-                otherType = picked.primaryType;
-            }
-            if(otherType != Type.FIRE && otherType != Type.WATER) {
-                //this pokemon works
-                noPick = false;
-                startersChosen.add(picked);
-            }
+        if(generationOfPokemon() <= 2) {
+            //in gen 1 and 2, we need FWG rather than GFW
+            Pokemon grassStarter = startersChosen.remove(0);
+            startersChosen.add(grassStarter);
         }
-        if(noPick) {
-            throw new RandomizationException("No valid Grass-type starter found!");
+
+        if(countNeeded > 3) {
+            //we'll need ANOTHER triangle
+            startersChosen.addAll(chooseStartersFireWaterGrass(validPokemonByType, countNeeded - 3));
         }
 
         return startersChosen;
