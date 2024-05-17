@@ -98,8 +98,6 @@ public class Gen4Constants {
 
     public static final int highestAbilityIndex = Abilities.badDreams;
 
-    public static final int mysteryEggCommandOffset = 0x1C7CC;
-
     // by AdAstra
     public static final byte[] mysteryEggCommandImprovement = RomFunctions.hexToBytes(
                     "F8 B5 84 B0 80 30 07 68 F8 68 26 F6 E1 FE 04 1C" +
