@@ -2118,7 +2118,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             unlinkStaticEncounters(staticPokemon);
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> skipIndices = new ArrayList(
+            List<Integer> skipIndices = new ArrayList<>(
                     Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList());
             skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
@@ -2129,7 +2129,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i = 3; i < numberOfGifts; i++) {
                 int offset = i * 0x14;
                 StaticEncounter se = staticIter.next();
-                writeWord(giftsFile, offset, se.pkmn.getNumber());
+                writeWord(giftsFile, offset, se.pkmn.getBaseNumber());
                 giftsFile[offset + 2] = (byte) se.forme;
                 giftsFile[offset + 3] = (byte) se.level;
                 writeWord(giftsFile, offset + 8, se.heldItem);
@@ -2142,7 +2142,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 if (skipIndices.contains(i)) continue;
                 int offset = i * 0x38;
                 StaticEncounter se = staticIter.next();
-                writeWord(staticEncountersFile, offset, se.pkmn.getNumber());
+                writeWord(staticEncountersFile, offset, se.pkmn.getBaseNumber());
                 staticEncountersFile[offset + 2] = (byte) se.forme;
                 staticEncountersFile[offset + 3] = (byte) se.level;
                 if (se.heldItem == 0) {
