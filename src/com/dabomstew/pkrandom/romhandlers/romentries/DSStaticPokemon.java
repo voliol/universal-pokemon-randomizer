@@ -4,6 +4,8 @@ import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
 
+import java.util.Arrays;
+
 public class DSStaticPokemon {
 
     protected InFileEntry[] speciesEntries;
@@ -23,7 +25,7 @@ public class DSStaticPokemon {
     }
 
     public void setPokemon(AbstractDSRomHandler parent, NARCArchive scriptNARC, Pokemon pk) {
-        int value = pk.getNumber();
+        int value = pk.getBaseNumber();
         for (InFileEntry speciesEntry : speciesEntries) {
             byte[] file = scriptNARC.files.get(speciesEntry.getFile());
             parent.writeWord(file, speciesEntry.getOffset(), value);
@@ -64,4 +66,12 @@ public class DSStaticPokemon {
         }
     }
 
+    @Override
+    public String toString() {
+        return "DSStaticPokemon{" +
+                "speciesEntries=" + Arrays.toString(speciesEntries) +
+                ", formeEntries=" + Arrays.toString(formeEntries) +
+                ", levelEntries=" + Arrays.toString(levelEntries) +
+                '}';
+    }
 }

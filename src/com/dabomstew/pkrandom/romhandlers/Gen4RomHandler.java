@@ -3358,24 +3358,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	 * then the last move it learns via level-up is chosen.
 	 */
 	public Move getMysteryEggMove(Pokemon pk) {
-		System.out.println(pk.fullName());
-
 		Set<Integer> moveIDs = getEffectiveEggMoves(pk);
 		if (moveIDs.isEmpty()) {
-			System.out.println("no egg moves");
 			moveIDs.addAll(getCompatibleTutorMoves(pk));
 		}
 		if (moveIDs.isEmpty()) {
-			System.out.println("no Tutor moves");
 			moveIDs.addAll(getCompatibleTMMoves(pk));
 		}
 		if (moveIDs.isEmpty()) {
-			System.out.println("no TM moves");
 			List<Integer> movesLearnt = getMovesLearnt().get(pk.getNumber()).stream()
 					.sorted(Comparator.comparingInt(ml -> ml.level)).map(ml -> ml.move)
 					.toList();
 			if (movesLearnt.isEmpty()) {
-				System.out.println("no level-up moves");
+                throw new RuntimeException("Pokemon has no moves!?");
 			} else {
 				moveIDs.add(movesLearnt.get(movesLearnt.size() - 1));
 			}
@@ -3385,11 +3380,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				.distinct()
 				.sorted(Comparator.comparingDouble(m -> calculateMoveStrength(m, pk)))
 				.toList();
-		for (Move m : posMoves) {
-			System.out.println("\t" + m);
-		}
-
-		return null;
+		return posMoves.get(posMoves.size() - 1);
 	}
 
 	private List<Integer> getCompatibleTutorMoves(Pokemon pk) {

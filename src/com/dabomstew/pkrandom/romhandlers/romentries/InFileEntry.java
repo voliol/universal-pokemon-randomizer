@@ -21,4 +21,8 @@ public class InFileEntry {
         return offset;
     }
 
+    @Override
+    public String toString() {
+        return "file=" + file +"|offset=" + offset;
+    }
 }
