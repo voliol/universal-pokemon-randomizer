@@ -2,7 +2,7 @@ FORK README (do not merge)
 
 A fork of the Universal Pokemon Randomizer intending to add the following features:  
 
- * "Preserve Primary Type" (wild) (Implemented with some forbidden combinations)  
+ * "Preserve Primary Type" (wild) (Fully implemented)  
      for wild pokemon, ensures the original pokemon's primary type is present in the randomized pokemon. This preserves most type theming, including "soft" theming like forests have Bug and Grass types, while still allowing variety.  
 
  * "Preserve Type Themed Areas" (wild) (not implemented)  
