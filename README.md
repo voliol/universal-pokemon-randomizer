@@ -2,7 +2,7 @@ FORK README (do not merge)
 
 A fork of the Universal Pokemon Randomizer intending to add the following features:  
 
- * "Preserve Primary Type" (wild) (Implemented with some forbidden combinations)  
+ * "Preserve Primary Type" (wild) (Fully implemented)  
      for wild pokemon, ensures the original pokemon's primary type is present in the randomized pokemon. This preserves most type theming, including "soft" theming like forests have Bug and Grass types, while still allowing variety.  
 
  * "Preserve Type Themed Areas" (wild) (not implemented)  
@@ -15,10 +15,10 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
      usable with area 1-to-1, and maybe with random.  
      this is a checkbox that overrides other type theming.
 
- * "Preserve Primary Type" (trainer) (Fully Implemented)  
+ * "Preserve Primary Type" (trainer) (not implemented)  
      functions exactly the same as for wild pokemon
 
- * "Preserve Type Themed Trainers" (trainer) (not implemented)  
+ * "Preserve Type Themed Trainers" (trainer) (Fully implemented)  
      functions the same as "Preserve Type Themed Areas", except the "area" is a single trainer.  
      also, if all the pokemon share a pair of types, it will choose the primary type of the trainer's first pokemon - unless it's Normal, in which case it chooses the secondary.
      always triggers if the trainer has only one pokemon.  
