@@ -1965,6 +1965,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isTypeThemed = settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED;
         boolean isTypeThemedEliteFourGymOnly = settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED_ELITE4_GYMS;
         boolean keepTypeThemes = settings.getTrainersMod() == Settings.TrainersMod.KEEP_THEMED;
+        boolean keepThemeOrPrimaryTypes = settings.getTrainersMod() == Settings.TrainersMod.KEEP_THEME_OR_PRIMARY;
+        boolean hasSomeTypeTheme = isTypeThemed || isTypeThemedEliteFourGymOnly || keepTypeThemes
+                || keepThemeOrPrimaryTypes;
         boolean distributionSetting = settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED;
         boolean mainPlaythroughSetting = settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH;
         boolean includeFormes = settings.isAllowTrainerAlternateFormes();
@@ -2028,7 +2031,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Type Themed related
         Map<Trainer, Type> trainerTypes = new TreeMap<>();
         Set<Type> usedUberTypes = new TreeSet<>();
-        if (isTypeThemed || isTypeThemedEliteFourGymOnly || keepTypeThemes) {
+        if (hasSomeTypeTheme) {
             typeWeightings = new TreeMap<>();
             totalTypeWeighting = 0;
             // Construct groupings for types
@@ -2061,32 +2064,20 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
 
-            if(keepTypeThemes) {
+            if(keepTypeThemes || keepThemeOrPrimaryTypes) {
                 Map<String, Type> originalThemes = getGymAndEliteTypeThemes();
 
-                //TODO: remove spading block
-                if(originalThemes == null) {
-                    for (String group : groups.keySet()) {
-                        logStream.print(group + ": ");
-
-                        List<Trainer> trainersInGroup = groups.get(group);
-                        for(Trainer t : trainersInGroup) {
-                            logStream.print(t.fullDisplayName + ", ");
-                        }
-                        logStream.println();
+                for (String group : groups.keySet()) {
+                    if (!originalThemes.containsKey(group)) {
+                        continue;
                     }
-                } else {
-                    for (String group : groups.keySet()) {
-                        if (!originalThemes.containsKey(group)) {
-                            continue;
-                        }
-                        Type groupType = originalThemes.get(group);
-                        List<Trainer> trainersInGroup = groups.get(group);
-                        for (Trainer t : trainersInGroup) {
-                            trainerTypes.put(t, groupType);
-                        }
+                    Type groupType = originalThemes.get(group);
+                    List<Trainer> trainersInGroup = groups.get(group);
+                    for (Trainer t : trainersInGroup) {
+                        trainerTypes.put(t, groupType);
                     }
                 }
+
             } else {
                 // Give a random type to each group
                 // Gym & elite types have to be unique
@@ -2200,35 +2191,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            List<Pokemon> evolvesIntoTheWrongType = new ArrayList<>();
-            if (typeForTrainer != null) {
-                List<Pokemon> pokemonOfType = includeFormes ? pokemonOfTypeInclFormes(typeForTrainer, noLegendaries) :
-                        pokemonOfType(typeForTrainer, noLegendaries);
-                for (Pokemon pk : pokemonOfType) {
-                    if (!pokemonOfType.contains(fullyEvolve(pk, t.index))) {
-                        evolvesIntoTheWrongType.add(pk);
-                    }
-                }
-            }
-
             List<TrainerPokemon> trainerPokemonList = new ArrayList<>(t.pokemon);
-
-            // Elite Four Unique Pokemon related
-            boolean eliteFourTrackPokemon = false;
-            boolean eliteFourRival = false;
-            if (eliteFourUniquePokemon && eliteFourIndices.contains(t.index)) {
-                eliteFourTrackPokemon = true;
-
-                // Sort Pokemon list back to front, and then put highest level Pokemon first
-                // (Only while randomizing, does not affect order in game)
-                Collections.reverse(trainerPokemonList);
-                trainerPokemonList.sort((tp1, tp2) -> Integer.compare(tp2.level, tp1.level));
-                if (rivalCarriesStarter && (t.tag.contains("RIVAL") || t.tag.contains("FRIEND"))) {
-                    eliteFourRival = true;
-                }
-            }
-
-            if (keepTypeThemes) {
+            if (keepTypeThemes || keepThemeOrPrimaryTypes) {
                 //determine if this trainer has a type theme
                 Pokemon poke = trainerPokemonList.get(0).pokemon;
                 Type primary = poke.originalPrimaryType;
@@ -2260,6 +2224,32 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+            List<Pokemon> evolvesIntoTheWrongType = new ArrayList<>();
+            if (typeForTrainer != null) {
+                List<Pokemon> pokemonOfType = includeFormes ? pokemonOfTypeInclFormes(typeForTrainer, noLegendaries) :
+                        pokemonOfType(typeForTrainer, noLegendaries);
+                for (Pokemon pk : pokemonOfType) {
+                    if (!pokemonOfType.contains(fullyEvolve(pk, t.index))) {
+                        evolvesIntoTheWrongType.add(pk);
+                    }
+                }
+            }
+
+            // Elite Four Unique Pokemon related
+            boolean eliteFourTrackPokemon = false;
+            boolean eliteFourRival = false;
+            if (eliteFourUniquePokemon && eliteFourIndices.contains(t.index)) {
+                eliteFourTrackPokemon = true;
+
+                // Sort Pokemon list back to front, and then put highest level Pokemon first
+                // (Only while randomizing, does not affect order in game)
+                Collections.reverse(trainerPokemonList);
+                trainerPokemonList.sort((tp1, tp2) -> Integer.compare(tp2.level, tp1.level));
+                if (rivalCarriesStarter && (t.tag.contains("RIVAL") || t.tag.contains("FRIEND"))) {
+                    eliteFourRival = true;
+                }
+            }
+
             for (TrainerPokemon tp : trainerPokemonList) {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
@@ -2272,6 +2262,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                 Pokemon oldPK = tp.pokemon;
                 if (tp.forme > 0) {
                     oldPK = getAltFormeOfPokemon(oldPK, tp.forme);
+                }
+
+                if (keepThemeOrPrimaryTypes && typeForTrainer == null && willForceEvolve) {
+                    List<Pokemon> pokemonOfType = includeFormes ? pokemonOfTypeInclFormes(oldPK.originalPrimaryType, noLegendaries) :
+                            pokemonOfType(oldPK.originalPrimaryType, noLegendaries);
+                    for (Pokemon pk : pokemonOfType) {
+                        if (!pokemonOfType.contains(fullyEvolve(pk, t.index))) {
+                            evolvesIntoTheWrongType.add(pk);
+                        }
+                    }
                 }
 
                 bannedList = new ArrayList<>();
@@ -2287,10 +2287,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                     bannedList.addAll(evolvesIntoTheWrongType);
                 }
 
+                Type typeForPokemon = typeForTrainer;
+                if(keepThemeOrPrimaryTypes && typeForPokemon == null) {
+                    typeForPokemon = oldPK.originalPrimaryType;
+                }
+
                 Pokemon newPK = pickTrainerPokeReplacement(
                                 oldPK,
                                 usePowerLevels,
-                                typeForTrainer,
+                                typeForPokemon,
                                 wgAllowed,
                                 distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
                                 swapThisMegaEvo,

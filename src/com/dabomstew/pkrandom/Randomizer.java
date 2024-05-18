@@ -441,22 +441,14 @@ public class Randomizer {
             trainersChanged = true;
         }
 
-        switch(settings.getTrainersMod()) {
-            case RANDOM:
-            case DISTRIBUTED:
-            case MAINPLAYTHROUGH:
-            case TYPE_THEMED:
-            case TYPE_THEMED_ELITE4_GYMS:
-            case KEEP_THEMED:
-                romHandler.randomizeTrainerPokes(settings);
+        if(settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED) {
+            romHandler.randomizeTrainerPokes(settings);
+            trainersChanged = true;
+        } else {
+            if (settings.isTrainersLevelModified()) {
+                romHandler.onlyChangeTrainerLevels(settings);
                 trainersChanged = true;
-                break;
-            default:
-                if (settings.isTrainersLevelModified()) {
-                    romHandler.onlyChangeTrainerLevels(settings);
-                    trainersChanged = true;
-                }
-                break;
+            }
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
