@@ -1931,6 +1931,14 @@ public class Settings {
     }
 
     public boolean isUseTimeBasedEncounters() {
+        if(wildPokemonMod == WildPokemonMod.UNCHANGED) {
+            return true;
+            //if it's unchanged, we should use the default setting of the game
+            //we can't access that from here
+            //but true is safely ignored if the game doesn't have time based encounters
+            //false will remove time based encounters from consideration if the game does have them
+            //therefore, the safe option is true.
+        }
         return useTimeBasedEncounters;
     }
 
