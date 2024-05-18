@@ -1371,7 +1371,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //i feel that the chance is low enough it's not worth worrying about
                 //and that one pokemon the same is not the end of the world.
                 //however it IS a change so it probably should be returned to its previous state if pulling this branch.
-                //TODO: that, if applicable
                 Pokemon picked;
                 if(usePowerLevels) {
                     picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, Math.min(5, pickablePokemon.size() / 4),
@@ -1470,14 +1469,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (banIrregularAltFormes) {
             banned.addAll(getIrregularFormes());
         }
-
-        // I don't know if there's a reason encounters aren't scrambled for ORAS.
-        // Since I don't have the games to test with, though, I'm going to try to make
-        // minimum possibly-breaking changes, which means leaving them unscrambled.
-        // I'm putting the code here commented as a reminder/easy way to implement.
-        // TODO: (for maintainer) determine if this code is viable
-        //List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
-        //Collections.shuffle(scrambledEncounters, this.random);
 
         // similar refactor to random
         // get list of all allowable wilds
