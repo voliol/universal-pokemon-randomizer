@@ -12,16 +12,18 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
      this would override "preserve primary type" if they are used together.  
      if they share a pair of types, the primary of the first pokemon examined will be used, unless it's Normal.  
      *will* trigger if there is only one pokemon in the area.  
-     usable with area 1-to-1 and random, but not global 1-to-1.  
-
- * "Preserve Primary Type" (trainer) (not implemented)  
-     functions exactly the same as for wild pokemon
+     usable with area 1-to-1 and random, but not global 1-to-1.
 
  * "Preserve Type Themed Trainers" (trainer) (Fully implemented)  
      functions the same as "Preserve Type Themed Areas", except the "area" is a single trainer.  
      also, if all the pokemon share a pair of types, it will choose the primary type of the trainer's first pokemon - unless it's Normal, in which case it chooses the secondary.
      always triggers if the trainer has only one pokemon.  
      if the trainer is a gym or league trainer, they will be forced to their original theme even if they did not originally strictly follow it (e.g. Pryce using a Seel (Water-type) despite being an Ice trainer)  
+
+* "Preserve Theme Or Primary" (trainer) (not implemented)  
+     functions the same as "Preserve Type Themed Trainers", unless the trainer has no theme.  
+     In this case, replaces each pokemon with a new pokemon sharing its primary type, just as the wild pokemons' "Preserve Primary Type".  
+     (I figured no one would be interested in *only* preserve primary.)
 
  * "Local pokemon only" (fully implemented)  
      restricts trainers to only using pokemon that can be caught in the wild, or their evolutionary relatives  

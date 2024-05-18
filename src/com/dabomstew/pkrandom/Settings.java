@@ -168,7 +168,8 @@ public class Settings {
     private boolean evolutionMovesForAll;
 
     public enum TrainersMod {
-        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED, TYPE_THEMED_ELITE4_GYMS, KEEP_THEMED
+        UNCHANGED, RANDOM, DISTRIBUTED, MAINPLAYTHROUGH, TYPE_THEMED,
+        TYPE_THEMED_ELITE4_GYMS, KEEP_THEMED, KEEP_THEME_OR_PRIMARY
     }
 
     private TrainersMod trainersMod = TrainersMod.UNCHANGED;
@@ -426,7 +427,8 @@ public class Settings {
                 trainersMod == TrainersMod.MAINPLAYTHROUGH,
                 trainersMod == TrainersMod.TYPE_THEMED,
                 trainersMod == TrainersMod.TYPE_THEMED_ELITE4_GYMS,
-                trainersMod == TrainersMod.KEEP_THEMED));
+                trainersMod == TrainersMod.KEEP_THEMED,
+                trainersMod == TrainersMod.KEEP_THEME_OR_PRIMARY));
         
         // 14 trainer pokemon force evolutions
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
@@ -725,7 +727,8 @@ public class Settings {
                 3, // MAINPLAYTHROUGH 
                 4, // TYPE_THEMED
                 5, // TYPE_THEMED_ELITE4_GYMS
-                6 // KEEP_THEMED
+                6, // KEEP_THEMED
+                7  // KEEP_THEME_OR_PRIMARY
         ));
 
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
@@ -734,16 +737,16 @@ public class Settings {
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 0, // UNCHANGED
                 1, // RANDOM
                 2, // AREA_MAPPING
-                3 // GLOBAL_MAPPING
+                3  // GLOBAL_MAPPING
         ));
         settings.setWildPokemonRestrictionMod(restoreEnum(WildPokemonRestrictionMod.class, data[16], 0, // NONE
                 1, // SIMILAR_STRENGTH
-                2 // CATCH_EM_ALL
+                2  // CATCH_EM_ALL
         ));
         settings.setWildPokemonTypeMod(restoreEnum(WildPokemonTypeMod.class, data[17], 0, // NONE
                 2, // THEMED_AREAS
                 1, // KEEP_PRIMARY
-                3 // KEEP_THEMES
+                3  // KEEP_THEMES
         ));
         
         settings.setUseTimeBasedEncounters(restoreState(data[18], 0));
