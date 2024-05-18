@@ -2658,6 +2658,7 @@
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
+                          <enabled value="false"/>
                           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpTRKeepThemesRadioButton.text"/>
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpTRKeepThemesRadioButton.toolTipText"/>
                         </properties>
@@ -4137,6 +4138,7 @@
       <member id="50cd5"/>
       <member id="fec14"/>
       <member id="f1b97"/>
+      <member id="7ae6e"/>
     </group>
     <group name="starterPokemonTypeButtonGroup">
       <member id="787a"/>
