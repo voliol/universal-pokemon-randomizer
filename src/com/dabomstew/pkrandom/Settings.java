@@ -50,7 +50,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 51;
+    public static final int LENGTH_OF_SETTINGS_DATA = 53;
 
     private CustomNamesSet customNames;
 
@@ -924,13 +924,17 @@ public class Settings {
         if(data[52] == 0) {
             settings.setStartersSingleType(null);
         } else {
-            settings.setStartersSingleType(Type.fromInt((data[52] | 0x1F) - 1));
+            settings.setStartersSingleType(Type.fromInt((data[52] & 0x1F) - 1));
         }
 
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
-        String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
-        settings.setRomName(romName);
+        try {
+            String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
+            settings.setRomName(romName);
+        } catch (Exception e) {
+            int x = 1; //dummy statement
+        }
 
         return settings;
     }
