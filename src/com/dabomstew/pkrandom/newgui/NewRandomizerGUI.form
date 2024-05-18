@@ -2648,10 +2648,21 @@
                       </component>
                       <vspacer id="c1eb3">
                         <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                       </vspacer>
+                      <component id="7ae6e" class="javax.swing.JRadioButton" binding="wpTRKeepThemesRadioButton">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpTRKeepThemesRadioButton.text"/>
+                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpTRKeepThemesRadioButton.toolTipText"/>
+                        </properties>
+                      </component>
                     </children>
                   </grid>
                 </children>
@@ -4127,6 +4138,7 @@
       <member id="50cd5"/>
       <member id="fec14"/>
       <member id="f1b97"/>
+      <member id="7ae6e"/>
     </group>
     <group name="starterPokemonTypeButtonGroup">
       <member id="787a"/>

@@ -707,8 +707,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean noTyping = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.NONE;
         boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
@@ -761,7 +763,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         //step 2: if types matter, then get a typemap.
         Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
         Map<Type, List<Pokemon>> initialTypeLists = new EnumMap<>(Type.class);
-        if (typeThemed || keepPrimary) {
+        if (!noTyping) {
             for (Type type : Type.values()) {
                 if(typeInGame(type)) {
                     typeListMap.put(type, new ArrayList<>());
@@ -791,11 +793,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             //step 4: generate local pickable list (for all algorithms except keepPrimary,
             // as it has a different pool per-Pokemon)
             List<Pokemon> pickablePokemon;
+            Type areaTheme = null;
             if(typeThemed) {
                 int iterLoops = 0;
                 pickablePokemon = null;
                 while (pickablePokemon == null && iterLoops < 10000) {
-                    Type areaTheme = randomType();
+                    areaTheme = randomType();
                     pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
                     if (!area.bannedPokemon.isEmpty()) {
                         pickablePokemon.removeAll(area.bannedPokemon);
@@ -809,11 +812,45 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pickablePokemon == null) {
                     throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
                 }
+            } else if (keepThemes) {
+                //determine if this area has a type theme
+                Pokemon poke = area.encounters.get(0).pokemon;
+                Type primary = poke.originalPrimaryType;
+                Type secondary = poke.originalSecondaryType;
+                for (int i = 1; i < area.encounters.size(); i++) {
+                    poke = area.encounters.get(i).pokemon;
+                    if(secondary != null) {
+                        if (secondary != poke.originalPrimaryType && secondary != poke.originalSecondaryType) {
+                            secondary = null;
+                        }
+                    }
+                    if (primary != poke.originalPrimaryType && primary != poke.originalSecondaryType) {
+                        primary = secondary;
+                        secondary = null;
+                    }
+                    if (primary == null) {
+                        break; //no type is shared, no need to look at the remaining pokemon
+                    }
+                }
+                if (primary != null) {
+                    //we have a type theme!
+                    if(primary == Type.NORMAL && secondary != null) {
+                        //Bird override
+                        //(Normal is less significant than other types, for example, Flying)
+                        areaTheme = secondary;
+                    } else {
+                        areaTheme = primary;
+                    }
+                    pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
+                } else {
+                    pickablePokemon = new ArrayList<>(allPokes);
+                }
             } else {
                 pickablePokemon = new ArrayList<>(allPokes);
-                if (! area.bannedPokemon.isEmpty()) {
-                    pickablePokemon.removeAll(area.bannedPokemon);
-                }
+            }
+
+            if (! area.bannedPokemon.isEmpty()) {
+                pickablePokemon.removeAll(area.bannedPokemon);
             }
 
             //step 5: iterate over encounters
@@ -854,10 +891,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                             throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon with type "
                                     + enc.pokemon.originalPrimaryType.toString());
                         }
-                    } else if (typeThemed) {
-                        //this shouldn't happen in the current implementation
-                        //since the list size is checked before finalizing its use
-                        throw new RandomizationException("ERROR: Type Themed size check failed??");
+                    } else if (typeThemed || keepThemes) {
+                        pickablePokemon = new ArrayList<>(initialTypeLists.get(areaTheme));
+                        if(typeListMap.get(areaTheme).isEmpty()) {
+                            //restart only if empty
+                            typeListMap.put(areaTheme, new ArrayList<>(pickablePokemon));
+                        }
+                        if (!area.bannedPokemon.isEmpty()) {
+                            pickablePokemon.removeAll(area.bannedPokemon);
+                        }
+                        if (pickablePokemon.isEmpty()) {
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon in area themed to "
+                                    + areaTheme);
+                        }
                     } else {
                         pickablePokemon = new ArrayList<>(initialPokes);
                         if(allPokes.isEmpty()) {
@@ -895,7 +941,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 setFormeForEncounter(enc, enc.pokemon);
                 if(catchEmAll) {
                     pickablePokemon.remove(picked);
-                    if(keepPrimary || typeThemed) {
+                    if(!noTyping) {
                         typeListMap.get(picked.primaryType).remove(picked);
                         if(picked.secondaryType != null) {
                             typeListMap.get(picked.secondaryType).remove(picked);
@@ -930,8 +976,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean noTyping = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.NONE;
         boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
         boolean noLegendaries = settings.isBlockWildLegendaries();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
         boolean allowAltFormes = settings.isAllowWildAltFormes();
@@ -975,7 +1023,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         //step 2: if types matter, then build a typemap.
         Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
         Map<Type, List<Pokemon>> initialTypeLists = new EnumMap<>(Type.class);
-        if (typeThemed || keepPrimary) {
+        if (!noTyping) {
             for (Type type : Type.values()) {
                 if(typeInGame(type)) {
                     typeListMap.put(type, new ArrayList<>());
@@ -1007,10 +1055,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             //step 4: generate pickable list (for all algorithms except keepPrimary,
             // as it has a different pool per-Pokemon)
             List<Pokemon> pickablePokemon = null;
+            Type areaTheme = null;
             if(typeThemed) {
                 int iterLoops = 0;
                 while (pickablePokemon == null && iterLoops < 10000) {
-                    Type areaTheme = randomType();
+                    areaTheme = randomType();
                     pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
                     if (!area.bannedPokemon.isEmpty()) {
                         pickablePokemon.removeAll(area.bannedPokemon);
@@ -1023,6 +1072,39 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 if (pickablePokemon == null) {
                     throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
+                }
+            } else if (keepThemes) {
+                //determine if this area has a type theme
+                Pokemon poke = area.encounters.get(0).pokemon;
+                Type primary = poke.originalPrimaryType;
+                Type secondary = poke.originalSecondaryType;
+                for (int i = 1; i < area.encounters.size(); i++) {
+                    poke = area.encounters.get(i).pokemon;
+                    if(secondary != null) {
+                        if (secondary != poke.originalPrimaryType && secondary != poke.originalSecondaryType) {
+                            secondary = null;
+                        }
+                    }
+                    if (primary != poke.originalPrimaryType && primary != poke.originalSecondaryType) {
+                        primary = secondary;
+                        secondary = null;
+                    }
+                    if (primary == null) {
+                        break; //no type is shared, no need to look at the remaining pokemon
+                    }
+                }
+                if (primary != null) {
+                    //we have a type theme!
+                    if(primary == Type.NORMAL && secondary != null) {
+                        //Bird override
+                        //(Normal is less significant than other types, for example, Flying)
+                        areaTheme = secondary;
+                    } else {
+                        areaTheme = primary;
+                    }
+                    pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
+                } else {
+                    pickablePokemon = new ArrayList<>(allPokes);
                 }
             } else if(!keepPrimary) {
                 pickablePokemon = new ArrayList<>(allPokes);
@@ -1066,9 +1148,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                             throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon with type "
                                     + areaPk.originalPrimaryType.toString());
                         }
-                    } else if (typeThemed) {
-                        //this shouldn't happen in the current implementation
-                        throw new RandomizationException("ERROR: Type Themed size check failed??");
+                    } else if (typeThemed || keepThemes) {
+                        pickablePokemon = new ArrayList<>(initialTypeLists.get(areaTheme));
+                        if(typeListMap.get(areaTheme).isEmpty()) {
+                            //restart only if empty
+                            typeListMap.put(areaTheme, new ArrayList<>(pickablePokemon));
+                        }
+                        if (!area.bannedPokemon.isEmpty()) {
+                            pickablePokemon.removeAll(area.bannedPokemon);
+                        }
+                        if (pickablePokemon.isEmpty()) {
+                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon in area themed to "
+                                    + areaTheme);
+                        }
                     } else {
                         pickablePokemon = new ArrayList<>(initialPokes);
                         if(allPokes.isEmpty()) {
@@ -1100,7 +1192,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 pickablePokemon.remove(picked);
                 usedPks.add(picked); //this being for keepPrimary without catchEmAll
                 if(catchEmAll) {
-                    if(keepPrimary || typeThemed) {
+                    if(!noTyping) {
                         typeListMap.get(picked.primaryType).remove(picked);
                         if(picked.secondaryType != null) {
                             typeListMap.get(picked.secondaryType).remove(picked);
