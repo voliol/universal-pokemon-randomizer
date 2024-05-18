@@ -50,7 +50,7 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 53;
+    public static final int LENGTH_OF_SETTINGS_DATA = 55;
 
     private CustomNamesSet customNames;
 
@@ -211,7 +211,7 @@ public class Settings {
     }
     
     public enum WildPokemonTypeMod {
-        NONE, THEMED_AREAS, KEEP_PRIMARY
+        NONE, THEMED_AREAS, KEEP_PRIMARY, KEEP_THEMES
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
@@ -431,19 +431,31 @@ public class Settings {
         // 14 trainer pokemon force evolutions
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
 
-        // 15 wild pokemon
-        out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
+        // 15 wild pokemon (areas)
+        out.write(makeByteSelected(wildPokemonMod == WildPokemonMod.UNCHANGED,
+                wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
-                wildPokemonTypeMod == WildPokemonTypeMod.THEMED_AREAS,
-                wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING, wildPokemonMod == WildPokemonMod.RANDOM,
-                wildPokemonMod == WildPokemonMod.UNCHANGED, useTimeBasedEncounters));
+                wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING,
+                false, false, false, false));
 
-        // 16 wild pokemon 2
-        out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, wildPokemonTypeMod == WildPokemonTypeMod.NONE,
-                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY, balanceShakingGrass));
+        // 16 wild pokemon (restriction)
+        out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
+                wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH,
+                wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
+                false, false, false, false, false));
+
+        // 17 wild pokemon (types)
+        out.write(makeByteSelected(wildPokemonTypeMod == WildPokemonTypeMod.NONE,
+                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY,
+                wildPokemonTypeMod == WildPokemonTypeMod.THEMED_AREAS,
+                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_THEMES,
+                false, false, false, false));
+
+        // 18 wild pokemon (various)
+        out.write(makeByteSelected(useTimeBasedEncounters, useMinimumCatchRate,
+                blockWildLegendaries, randomizeWildPokemonHeldItems,
+                banBadRandomWildPokemonHeldItems, balanceShakingGrass,
+                false, false));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -719,27 +731,27 @@ public class Settings {
         settings.setTrainersForceFullyEvolved(restoreState(data[14], 7));
         settings.setTrainersForceFullyEvolvedLevel(data[14] & 0x7F);
 
-        settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 6, // UNCHANGED
-                5, // RANDOM
-                1, // AREA_MAPPING
-                4 // GLOBAL_MAPPING
+        settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 0, // UNCHANGED
+                1, // RANDOM
+                2, // AREA_MAPPING
+                3 // GLOBAL_MAPPING
         ));
-        settings.setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, restoreState(data[15], 2), // NONE
-                restoreState(data[16], 2), // SIMILAR_STRENGTH
-                restoreState(data[15], 0) // CATCH_EM_ALL
+        settings.setWildPokemonRestrictionMod(restoreEnum(WildPokemonRestrictionMod.class, data[16], 0, // NONE
+                1, // SIMILAR_STRENGTH
+                2 // CATCH_EM_ALL
         ));
-        settings.setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, restoreState(data[16], 5), // NONE
-                restoreState(data[15], 3), // THEMED_AREAS
-                restoreState(data[16], 6) // KEEP_PRIMARY
+        settings.setWildPokemonTypeMod(restoreEnum(WildPokemonTypeMod.class, data[17], 0, // NONE
+                2, // THEMED_AREAS
+                1, // KEEP_PRIMARY
+                3 // KEEP_THEMES
         ));
         
-        settings.setUseTimeBasedEncounters(restoreState(data[15], 7));
-
-        settings.setUseMinimumCatchRate(restoreState(data[16], 0));
-        settings.setBlockWildLegendaries(restoreState(data[16], 1));
-        settings.setRandomizeWildPokemonHeldItems(restoreState(data[16], 3));
-        settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[16], 4));
-        settings.setBalanceShakingGrass(restoreState(data[16], 7));
+        settings.setUseTimeBasedEncounters(restoreState(data[18], 0));
+        settings.setUseMinimumCatchRate(restoreState(data[18], 1));
+        settings.setBlockWildLegendaries(restoreState(data[18], 2));
+        settings.setRandomizeWildPokemonHeldItems(restoreState(data[18], 3));
+        settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[18], 4));
+        settings.setBalanceShakingGrass(restoreState(data[18], 5));
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
                 1, // RANDOM_MATCHING

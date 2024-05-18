@@ -336,6 +336,40 @@ public class SettingsUpdater {
             actualDataLength += 2;
         }
 
+        if (oldVersion < 324) {
+            //insert two additional wild pokemon bytes and reorganize
+            insertExtraByte(17, (byte) 0);
+            insertExtraByte(18, (byte) 0);
+            byte areaMethod = 0, restriction = 0,
+                    types = 0, various = 0;
+
+            areaMethod |= (dataBlock[15] & 0x40) >> 6;
+            areaMethod |= (dataBlock[15] & 0x20) >> 4;
+            areaMethod |= (dataBlock[15] & 0x02) << 1;
+            areaMethod |= (dataBlock[15] & 0x10) >> 1;
+
+            restriction |= (dataBlock[15] & 0x04) >> 2;
+            restriction |= (dataBlock[16] & 0x04) >> 1;
+            restriction |= (dataBlock[15] & 0x01) << 2;
+
+            types |= (dataBlock[16] & 0x20) >> 5;
+            types |= (dataBlock[16] & 0x40) >> 5;
+            types |= (dataBlock[15] & 0x08) >> 1;
+
+            various |= (dataBlock[15] & 0x80) >> 7;
+            various |= (dataBlock[16] & 0x01) << 1;
+            various |= (dataBlock[16] & 0x02) << 1;
+            various |= dataBlock[16] & 0x08;
+            various |= dataBlock[16] & 0x10;
+            various |= dataBlock[16] & 0x80 >> 2;
+
+            dataBlock[15] = areaMethod;
+            dataBlock[16] = restriction;
+            dataBlock[17] = types;
+            dataBlock[18] = various;
+
+        }
+
         // fix checksum
         CRC32 checksum = new CRC32();
         checksum.update(dataBlock, 0, actualDataLength - 8);
