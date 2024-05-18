@@ -2608,8 +2608,8 @@
                         </constraints>
                         <properties>
                           <enabled value="false"/>
-                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARNoneRadioButton.text"/>
-                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpARNoneRadioButton.toolTipText"/>
+                          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpTRNoneRadioButton.text"/>
+                          <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wpTRNoneRadioButton.toolTipText"/>
                         </properties>
                       </component>
                       <hspacer id="c9bcb">
