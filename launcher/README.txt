@@ -13,6 +13,8 @@ The launcher is necessary for being able to randomize 3DS games.
 
 2. TROUBLESHOOTING
 
-Please go here if you run into problems with the launcher and need help:
+Please go to one of these links if you run into problems with the launcher and need help:
 
-https://github.com/Ajarmar/universal-pokemon-randomizer-zx/issues/221
+https://github.com/foxoftheasterisk/UPR-ZX-closer-to-vanilla  (my fork)
+OR
+https://github.com/Ajarmar/universal-pokemon-randomizer-zx/issues/221  (original UPR-ZX)
