@@ -20,7 +20,7 @@ A fork of the Universal Pokemon Randomizer intending to add the following featur
      always triggers if the trainer has only one pokemon.  
      if the trainer is a gym or league trainer, they will be forced to their original theme even if they did not originally strictly follow it (e.g. Pryce using a Seel (Water-type) despite being an Ice trainer)  
 
-* "Preserve Theme Or Primary" (trainer) (not implemented)  
+* "Preserve Theme Or Primary" (trainer) (Fully implemented)  
      functions the same as "Preserve Type Themed Trainers", unless the trainer has no theme.  
      In this case, replaces each pokemon with a new pokemon sharing its primary type, just as the wild pokemons' "Preserve Primary Type".  
      (I figured no one would be interested in *only* preserve primary.)
