@@ -222,6 +222,30 @@ public class Pokemon implements Comparable<Pokemon> {
         return base.number;
     }
 
+    /**
+     * Gets all Pokemon that this Pokemon can evolve into.
+     * @return a PokemonSet containing all possible evolved forms of this Pokemon.
+     */
+    public PokemonSet getAllEvolvedPokemon() {
+        PokemonSet evolvedPokemon = new PokemonSet();
+        for(Evolution evo : evolutionsFrom) {
+            evolvedPokemon.add(evo.to);
+        }
+        return evolvedPokemon;
+    }
+
+    /**
+     * Gets all Pokemon that can evolve into this Pokemon.
+     * @return a PokemonSet containing all pre-evolved forms of this Pokemon.
+     */
+    public PokemonSet getAllPreEvolvedPokemon() {
+        PokemonSet evolvedPokemon = new PokemonSet();
+        for(Evolution evo : evolutionsTo) {
+            evolvedPokemon.add(evo.from);
+        }
+        return evolvedPokemon;
+    }
+
     public void copyBaseFormeBaseStats(Pokemon baseForme) {
         hp = baseForme.hp;
         attack = baseForme.attack;
