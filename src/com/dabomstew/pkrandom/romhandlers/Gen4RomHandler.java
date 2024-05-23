@@ -41,6 +41,7 @@ import thenewpoketext.TextToPoke;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -3346,7 +3347,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		writeLong(ovOverlay, offset, se.pkmn.getNumber());
 		offset += 4;
 
-		writeLong(ovOverlay, offset, getMysteryEggMove(se.pkmn).number);
+		Move extraMove = getMysteryEggMove(se.pkmn);
+		writeLong(ovOverlay, offset, extraMove == null ? 0 : extraMove.number);
 
 		writeOverlay(romEntry.getIntValue("FieldOvlNumber"), ovOverlay);
 	}
@@ -3355,25 +3357,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	 * Returns an appropriate extra move for the Mystery Egg mon.<br>
 	 * Egg moves have the highest priority, then Move Tutor moves, then TM moves. Within each of these groups,
 	 * strong attacking moves are prioritized. If the Pokemon has neither Egg, Move Tutor, nor TM moves,
-	 * then the last move it learns via level-up is chosen.
+	 * <b>returns null</b>.
 	 */
-	public Move getMysteryEggMove(Pokemon pk) {
+	private Move getMysteryEggMove(Pokemon pk) {
 		Set<Integer> moveIDs = getEffectiveEggMoves(pk);
 		if (moveIDs.isEmpty()) {
-			moveIDs.addAll(getCompatibleTutorMoves(pk));
+			moveIDs = getCompatibleTutorMoves(pk);
 		}
 		if (moveIDs.isEmpty()) {
-			moveIDs.addAll(getCompatibleTMMoves(pk));
+			moveIDs = getCompatibleTMMoves(pk);
 		}
 		if (moveIDs.isEmpty()) {
-			List<Integer> movesLearnt = getMovesLearnt().get(pk.getNumber()).stream()
-					.sorted(Comparator.comparingInt(ml -> ml.level)).map(ml -> ml.move)
-					.toList();
-			if (movesLearnt.isEmpty()) {
-                throw new RuntimeException("Pokemon has no moves!?");
-			} else {
-				moveIDs.add(movesLearnt.get(movesLearnt.size() - 1));
-			}
+			return null;
 		}
 
 		List<Move> posMoves = moveIDs.stream().map(moveID -> moves[moveID])
@@ -3383,8 +3378,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return posMoves.get(posMoves.size() - 1);
 	}
 
-	private List<Integer> getCompatibleTutorMoves(Pokemon pk) {
-		List<Integer> moveIDs = new ArrayList<>();
+	private Set<Integer> getCompatibleTutorMoves(Pokemon pk) {
+		Set<Integer> moveIDs = new HashSet<>();
 		List<Integer> tutorMoves = getMoveTutorMoves();
 		boolean[] comp = getMoveTutorCompatibility().get(pk);
 		for (int i = 0; i < tutorMoves.size(); i++) {
@@ -3395,8 +3390,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return moveIDs;
 	}
 
-	private List<Integer> getCompatibleTMMoves(Pokemon pk) {
-		List<Integer> moveIDs = new ArrayList<>();
+	private Set<Integer> getCompatibleTMMoves(Pokemon pk) {
+		Set<Integer> moveIDs = new HashSet<>();
 		List<Integer> tmMoves = getTMMoves();
 		boolean[] comp = getTMHMCompatibility().get(pk);
 		for (int i = 0; i < tmMoves.size(); i++) {
