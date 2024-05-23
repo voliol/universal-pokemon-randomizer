@@ -1,14 +1,11 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
-
-import static com.dabomstew.pkrandom.FileFunctions.openConfig;
 
 /**
  * An abstract class for any kind of {@link IniEntry} reading, presumably from an .ini file, though reading directly

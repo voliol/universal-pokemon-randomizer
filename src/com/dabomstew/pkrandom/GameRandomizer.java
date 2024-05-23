@@ -75,6 +75,7 @@ public class GameRandomizer {
     private final TMHMTutorCompatibilityRandomizer tmhmtCompRandomizer;
     private final ItemRandomizer itemRandomizer;
     private final TypeEffectivenessRandomizer typeEffRandomizer;
+    private final PaletteRandomizer paletteRandomizer;
     private final MiscTweakRandomizer miscTweakRandomizer;
 
     public GameRandomizer(Settings settings, Random random, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
@@ -107,6 +108,13 @@ public class GameRandomizer {
         this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, random);
         this.itemRandomizer = new ItemRandomizer(romHandler, settings, random);
         this.typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, random);
+        this.paletteRandomizer =
+                switch (romHandler.generationOfPokemon()) {
+                    case 1 -> new Gen1PaletteRandomizer(romHandler, settings, random);
+                    case 2 -> new Gen2PaletteRandomizer(romHandler, settings, random);
+                    case 3, 4, 5 -> new Gen3to5PaletteRandomizer(romHandler, settings, random);
+                    default -> null;
+                };
         this.miscTweakRandomizer = new MiscTweakRandomizer(romHandler, settings, random);
     }
 
@@ -636,14 +644,6 @@ public class GameRandomizer {
         // romHandler.renderPlacementHistory();
 
         if (settings.getPokemonPalettesMod() == Settings.PokemonPalettesMod.RANDOM) {
-            PaletteRandomizer paletteRandomizer =
-                    switch (romHandler.generationOfPokemon()) {
-                        case 1 -> new Gen1PaletteRandomizer(romHandler, settings, random);
-                        case 2 -> new Gen2PaletteRandomizer(romHandler, settings, random);
-                        case 3, 4, 5 -> new Gen3to5PaletteRandomizer(romHandler, settings, random);
-                        default -> throw new IllegalStateException(
-                                "Tried to create paletteRandomizer for romHandler without randomizable palettes");
-                    };
             paletteRandomizer.randomizePokemonPalettes();
         }
 

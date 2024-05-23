@@ -36,7 +36,6 @@ import pptxt.N3DSTxtHandler;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;

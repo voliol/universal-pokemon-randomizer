@@ -26,6 +26,8 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.services.RestrictedPokemonService;
+import com.dabomstew.pkrandom.services.TypeService;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
@@ -33,14 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
-import com.dabomstew.pkrandom.pokemon.*;
-import com.dabomstew.pkrandom.services.RestrictedPokemonService;
-import com.dabomstew.pkrandom.services.TypeService;
 
 /**
  * Responsible for direct handling a Rom/game file, and the data therein.

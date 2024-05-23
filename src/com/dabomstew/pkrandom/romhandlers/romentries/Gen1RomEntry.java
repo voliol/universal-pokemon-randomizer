@@ -1,10 +1,11 @@
 package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import com.dabomstew.pkrandom.constants.Gen1Constants;
-import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -25,9 +25,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
-import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -36,17 +33,6 @@ import com.dabomstew.pkrandom.romhandlers.romentries.Gen5RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import compressors.DSDecmp;
 import pptxt.PPTxtHandler;
-import pptxt.PPTxtHandler;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.IndexColorModel;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.List;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.naming.OperationNotSupportedException;
 import java.awt.*;

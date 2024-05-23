@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers;
 
-import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteDescriptionTool;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
 
 import java.awt.image.BufferedImage;
 
