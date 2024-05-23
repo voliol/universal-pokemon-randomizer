@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen6RomHandler.java - randomizer handler for X/Y/OR/AS.               --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2020.                                 --*/
@@ -43,6 +41,9 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * {@link RomHandler} for X, Y, Omega Ruby, Alpha Sapphire.
+ */
 public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -3105,7 +3106,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return true;
     }
 

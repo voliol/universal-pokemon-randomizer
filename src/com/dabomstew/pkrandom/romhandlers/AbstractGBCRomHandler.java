@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  AbstractGBCRomHandler.java - an extension of AbstractGBRomHandler     --*/
-/*--                               used for Gen 1 and Gen 2.                --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -39,6 +36,9 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * An extension of {@link AbstractGBRomHandler} used for Gen 1 and Gen 2.
+ */
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     private String[] tb;

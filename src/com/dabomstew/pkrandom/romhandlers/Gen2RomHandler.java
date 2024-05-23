@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen2RomHandler.java - randomizer handler for G/S/C.                   --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -42,6 +40,9 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * {@link RomHandler} for Gold, Silver, Crystal.
+ */
 public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -1950,7 +1951,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return true;
     }
 

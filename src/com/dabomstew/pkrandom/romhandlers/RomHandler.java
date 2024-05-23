@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  RomHandler.java - defines the functionality that each randomization   --*/
-/*--                    handler must implement.                             --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -40,6 +37,28 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.services.RestrictedPokemonService;
 import com.dabomstew.pkrandom.services.TypeService;
 
+/**
+ * Responsible for direct handling a Rom/game file, and the data therein.
+ * <br><br>
+ * After a Rom has been loaded with {@link #loadRom(String)}, a number of data types reflecting the contents of the
+ * Rom can be acquired through getters (e.g. {@link #getPokemon()}, {@link #getStarters()}, {@link #getTrainers()}).
+ * Most of the corresponding data also have setters which update the contents of the Rom (e.g.
+ * {@link #setStarters(List)}, {@link #setTrainers(List)}), but some (most notably the {@link Pokemon} data from
+ * {@link #getPokemon()}) are instead updated simply by editing the object returned by the setter.
+ * An edited Rom can be saved with {@link #saveRom(String, long, boolean)}.
+ * <br><br>
+ * Some methods giving extra context to the main data are also provided (e.g. {@link #hasRivalFinalBattle()},
+ * {@link #hasPhysicalSpecialSplit()}, {@link #abilitiesPerPokemon()}).
+ * <br><br>
+ * Though given a Rom, the RomHandler might not be able to get/set all kinds of data. Either because the Rom itself
+ * does not support the data type (there are no Starter held items in Red), or because the RomHandler itself does not
+ * implement it. For these non-universal data types, boolean methods are provided to report which ones are supported
+ * (e.g. {@link #supportsStarterHeldItems()}, {@link #hasShopSupport()}, {@link #canChangeStaticPokemon()}).
+ * <br><br>
+ * Finally, the RomHandler is responsible for giving general info about the Rom (e.g. {@link #getROMName()},
+ * {@link #getROMType()}, {@link #printRomDiagnostics(PrintStream)}), and the loading process (e.g.
+ * {@link #loadedFilename()}, {@link #hasGameUpdateLoaded()}).
+ */
 public interface RomHandler {
 
     abstract class Factory {
@@ -399,7 +418,7 @@ public interface RomHandler {
     // Special Shops
     // =============
 
-    boolean hasShopRandomization();
+    boolean hasShopSupport();
 
     Map<Integer, Shop> getShopItems();
 

@@ -21,7 +21,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopItemsAreNotEmpty(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         assertFalse(romHandler.getShopItems().isEmpty());
     }
 
@@ -29,7 +29,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopItemsDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         System.out.println("Before: " + toStringWithNames(shopItems));
         Map<Integer, Shop> before = new HashMap<>(shopItems);
@@ -42,7 +42,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopItemsCanBeRandomizedAndGetAndSet(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         new ItemRandomizer(romHandler, new Settings(), RND).randomizeShopItems();
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         Map<Integer, Shop> before = new HashMap<>(shopItems);
@@ -54,7 +54,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopsHaveNames(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         for (Shop shop : shopItems.values()) {
             assertNotNull(shop.name);
@@ -65,7 +65,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void mainGameShopsExist(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         boolean hasMainGameShops = false;
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         for (Shop shop : shopItems.values()) {
@@ -82,7 +82,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void regularShopItemsIsNotEmpty(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         assertFalse(romHandler.getRegularShopItems().isEmpty());
     }
 
@@ -90,7 +90,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void opShopItemsIsNotEmpty(String romName) {
         loadROM(romName);
-        assumeTrue(romHandler.hasShopRandomization());
+        assumeTrue(romHandler.hasShopSupport());
         assertFalse(romHandler.getOPShopItems().isEmpty());
     }
 

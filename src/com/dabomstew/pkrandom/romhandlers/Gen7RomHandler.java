@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen7RomHandler.java - randomizer handler for Su/Mo/US/UM.             --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2020.                                 --*/
@@ -46,6 +44,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * {@link RomHandler} for Sun, Moon, Ultra Sun, Ultra Moon.
+ */
 public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -2774,7 +2775,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return true;
     }
 

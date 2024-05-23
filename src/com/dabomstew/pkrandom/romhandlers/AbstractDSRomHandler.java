@@ -2,9 +2,6 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.awt.image.BufferedImage;
 /*----------------------------------------------------------------------------*/
-/*--  AbstractDSRomHandler.java - a base class for DS rom handlers          --*/
-/*--                              which standardises common DS functions.   --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -43,14 +40,15 @@ import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
-import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
-import com.dabomstew.pkrandom.pokemon.TypeTable;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractDSRomEntry;
 
 import javax.imageio.ImageIO;
 
+/**
+ * An abstract base class for DS {@link RomHandler}s, which standardises common DS functions.
+ */
 public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 	
     private static final byte[] PALETTE_PREFIX_BYTES = { (byte) 0x52, (byte) 0x4C, (byte) 0x43, (byte) 0x4E,

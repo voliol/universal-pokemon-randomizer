@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen4RomHandler.java - randomizer handler for D/P/Pt/HG/SS.            --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -41,11 +39,13 @@ import thenewpoketext.TextToPoke;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * {@link RomHandler} for Diamond, Pearl, Platinum, HeartGold, SoulSilver.
+ */
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	public static class Factory extends RomHandler.Factory {
@@ -4272,7 +4272,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public boolean hasShopRandomization() {
+	public boolean hasShopSupport() {
 		return true;
 	}
 

@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Abstract3DSRomHandler.java - a base class for 3DS rom handlers        --*/
-/*--                              which standardises common 3DS functions.  --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2020.                                 --*/
@@ -43,6 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * An abstract base class for 3DS {@link RomHandler}s, which standardises common 3DS functions.
+ */
 public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
 	private NCCH baseRom;

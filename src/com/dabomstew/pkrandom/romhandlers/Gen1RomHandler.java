@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen1RomHandler.java - randomizer handler for R/B/Y.                   --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -48,6 +46,9 @@ import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
 
+/**
+ * {@link RomHandler} for Red, Blue, Yellow, Green.
+ */
 public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
@@ -1775,7 +1776,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return false;
     }
 

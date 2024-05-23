@@ -1134,7 +1134,7 @@ public class Settings {
             this.setRandomizeMoveCategory(false);
         }
 
-        if (!rh.hasShopRandomization()) {
+        if (!rh.hasShopSupport()) {
             this.setShopItemsMod(ShopItemsMod.UNCHANGED);
         }
 

@@ -3,9 +3,6 @@ package com.dabomstew.pkrandom.romhandlers;
 import java.awt.image.BufferedImage;
 
 /*----------------------------------------------------------------------------*/
-/*--  AbstractGBRomHandler.java - a base class for GB/GBA rom handlers      --*/
-/*--                              which standardises common GB(A) functions.--*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -48,6 +45,9 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBRomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
+/**
+ * An abstract base class for GB/GBA {@link RomHandler}s, which standardises common GB(A) functions.
+ */
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected byte[] rom;

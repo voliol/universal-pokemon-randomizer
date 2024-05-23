@@ -452,7 +452,7 @@ public class TestRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return false;
     }
 

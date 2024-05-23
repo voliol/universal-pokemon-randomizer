@@ -46,6 +46,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * An abstract base class for {@link RomHandler}s, with default implementations for many of the interface's methods.
+ */
 public abstract class AbstractRomHandler implements RomHandler {
 
     protected final Random random;

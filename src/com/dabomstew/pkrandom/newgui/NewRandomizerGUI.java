@@ -2665,7 +2665,7 @@ public class NewRandomizerGUI {
             fiRandomRadioButton.setEnabled(true);
             fiRandomEvenDistributionRadioButton.setEnabled(true);
 
-            shopItemsPanel.setVisible(romHandler.hasShopRandomization());
+            shopItemsPanel.setVisible(romHandler.hasShopSupport());
             shUnchangedRadioButton.setEnabled(true);
             shUnchangedRadioButton.setSelected(true);
             shShuffleRadioButton.setEnabled(true);
