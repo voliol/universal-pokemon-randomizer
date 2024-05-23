@@ -24,7 +24,6 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
@@ -37,6 +36,7 @@ import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
+import javax.naming.OperationNotSupportedException;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -2741,7 +2741,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				offset += doubleBattleFixPrefix.length() / 2; // because it was a prefix
 				arm9[offset] = (byte) 0xE0;
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			String doubleBattleFlagReturnPrefix = romEntry.getStringValue("DoubleBattleFlagReturnPrefix");
@@ -2757,7 +2757,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				offset += doubleBattleFlagReturnPrefix.length() / 2; // because it was a prefix
 				writeWord(arm9, offset, 0xBD08);
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// Instead of doing "double trainer walk" for nonzero values, do it only for
@@ -2768,7 +2768,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				arm9[offset] = (byte) 0x2; // cmp r0, #0x2
 				arm9[offset + 3] = (byte) 0xD0; // beq DOUBLE_TRAINER_WALK
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// Instead of checking if the value was exactly 1 after checking that it was
@@ -2779,7 +2779,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				offset += doubleBattleWalkingPrefix2.length() / 2; // because it was a prefix
 				arm9[offset] = (byte) 0x2;
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// Once again, compare a value to 2 instead of just checking that it's nonzero
@@ -2790,7 +2790,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeWord(arm9, offset + 2, 0x2802);
 				arm9[offset + 5] = (byte) 0xD0;
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// This NARC has some data that controls how text boxes are handled at the end
@@ -2806,6 +2806,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			writeNARC(romEntry.getFile("BattleSkillSubSeq"), battleSkillSubSeq);
 		} catch (IOException e) {
 			throw new RandomizerIOException(e);
+		} catch (OperationNotSupportedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

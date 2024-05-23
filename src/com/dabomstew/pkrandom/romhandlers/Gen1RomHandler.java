@@ -34,7 +34,6 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.graphics.packs.GBCPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
@@ -631,7 +630,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         // Basic checks
         if (newStarters.size() != starterAmount) {
-            throw new RandomizationException("Unexpected amount of new starters. Should be " + starterAmount +
+            throw new IllegalArgumentException("Unexpected amount of new starters. Should be " + starterAmount +
                     ", was " + newStarters.size());
         }
 

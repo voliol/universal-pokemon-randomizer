@@ -24,7 +24,6 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
@@ -37,6 +36,7 @@ import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import compressors.DSDecmp;
 import pptxt.PPTxtHandler;
 
+import javax.naming.OperationNotSupportedException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
@@ -1394,7 +1394,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     fieldOverlay[offset] = 2;
                     fieldOverlay[offset+2] = 0x18;
                 } else {
-                    throw new RandomizationException("Double Battle Mode not supported for this game");
+                    throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
                 }
 
                 String doubleBattleLimitPrefix = romEntry.getStringValue("DoubleBattleLimitPrefix");
@@ -1405,7 +1405,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     writeWord(fieldOverlay, offset, 0x46C0);           // nop
                     writeWord(fieldOverlay, offset+2, 0x46C0);  // nop
                 } else {
-                    throw new RandomizationException("Double Battle Mode not supported for this game");
+                    throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
                 }
 
                 String doubleBattleGetPointerPrefix = romEntry.getStringValue("DoubleBattleGetPointerPrefix");
@@ -1421,7 +1421,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     writeWord(fieldOverlay, offset + 0xA, beqToSingleTrainer);
                     writeWord(fieldOverlay, offset + 8, 0x2800);
                 } else {
-                    throw new RandomizationException("Double Battle Mode not supported for this game");
+                    throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
                 }
 
                 writeOverlay(romEntry.getIntValue("FieldOvlNumber"), fieldOverlay);
@@ -1439,11 +1439,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 offset += textBoxChoicePrefix.length() / 2;
                 arm9[offset-4] = 2;
             } else {
-                throw new RandomizationException("Double Battle Mode not supported for this game");
+                throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
             }
 
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
+        } catch (OperationNotSupportedException e) {
+            throw new RuntimeException(e);
         }
     }
 
