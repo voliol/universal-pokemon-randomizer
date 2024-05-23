@@ -258,6 +258,12 @@ public abstract class AbstractRomHandler implements RomHandler {
      */
 
     @Override
+    public boolean hasTotemPokemon() {
+        // DEFAULT: no
+        return false;
+    }
+
+    @Override
     public void makeDoubleBattleModePossible() {
         // do nothing; this method is just needed by some ROMs
     }

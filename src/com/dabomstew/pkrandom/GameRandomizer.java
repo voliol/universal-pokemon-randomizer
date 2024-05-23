@@ -555,8 +555,7 @@ public class GameRandomizer {
         }
 
         // Totem Pokemon
-        // TODO: ask the romHandler whether it has totem support, instead of hardcoding only Gen7 to have them
-        if (romHandler.generationOfPokemon() == 7) {
+        if (romHandler.hasTotemPokemon()) {
             List<TotemPokemon> oldTotems = romHandler.getTotemPokemon();
             if (settings.getTotemPokemonMod() != Settings.TotemPokemonMod.UNCHANGED ||
                     settings.getAllyPokemonMod() != Settings.AllyPokemonMod.UNCHANGED ||

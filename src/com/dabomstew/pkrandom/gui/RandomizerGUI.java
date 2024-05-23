@@ -2584,18 +2584,18 @@ public class RandomizerGUI {
             tpBetterMovesetsCheckBox.setVisible(pokemonGeneration >= 3);
             tpBetterMovesetsCheckBox.setEnabled(pokemonGeneration >= 3);
 
-            totpPanel.setVisible(pokemonGeneration == 7);
+            totpPanel.setVisible(romHandler.hasTotemPokemon());
             if (totpPanel.isVisible()) {
                 totpUnchangedRadioButton.setEnabled(true);
                 totpRandomRadioButton.setEnabled(true);
                 totpRandomSimilarStrengthRadioButton.setEnabled(true);
 
-                totpAllyPanel.setVisible(pokemonGeneration == 7);
+                totpAllyPanel.setVisible(romHandler.hasTotemPokemon());
                 totpAllyUnchangedRadioButton.setEnabled(true);
                 totpAllyRandomRadioButton.setEnabled(true);
                 totpAllyRandomSimilarStrengthRadioButton.setEnabled(true);
 
-                totpAuraPanel.setVisible(pokemonGeneration == 7);
+                totpAuraPanel.setVisible(romHandler.hasTotemPokemon());
                 totpAuraUnchangedRadioButton.setEnabled(true);
                 totpAuraRandomRadioButton.setEnabled(true);
                 totpAuraRandomSameStrengthRadioButton.setEnabled(true);

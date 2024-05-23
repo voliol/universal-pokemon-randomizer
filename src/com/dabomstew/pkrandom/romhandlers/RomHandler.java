@@ -289,6 +289,8 @@ public interface RomHandler {
     // Totem Pokemon
     // =============
 
+    boolean hasTotemPokemon();
+
     List<TotemPokemon> getTotemPokemon();
 
     void setTotemPokemon(List<TotemPokemon> totemPokemon);

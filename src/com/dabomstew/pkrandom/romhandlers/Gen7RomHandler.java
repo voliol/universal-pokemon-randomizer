@@ -1862,6 +1862,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean hasTotemPokemon() {
+        return true;
+    }
+
+    @Override
     public List<TotemPokemon> getTotemPokemon() {
         List<TotemPokemon> totems = new ArrayList<>();
         try {
