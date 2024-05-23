@@ -47,7 +47,12 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
     public Type primaryType, secondaryType;
+
+    //best practices says these should be private with a public get,
+    //but I can't be arsed.
+    //(If it was C#, I would, but...)
     public Type originalPrimaryType, originalSecondaryType;
+    public PokemonSet originalEvolvedForms, originalPreEvolvedForms;
 
     public int hp, attack, defense, spatk, spdef, speed, special;
 
@@ -244,6 +249,19 @@ public class Pokemon implements Comparable<Pokemon> {
             evolvedPokemon.add(evo.from);
         }
         return evolvedPokemon;
+    }
+
+    /**
+     * Saves certain pieces of data that can be randomized, but that
+     * we want to know the original version of for later randomization.
+     * Currently: Types, evolutions.
+     * Must be called before randomizing any of this data.
+     */
+    public void saveOriginalData() {
+        originalPrimaryType = primaryType;
+        originalSecondaryType = secondaryType;
+        originalEvolvedForms = getAllEvolvedPokemon();
+        originalPreEvolvedForms = getAllPreEvolvedPokemon();
     }
 
     public void copyBaseFormeBaseStats(Pokemon baseForme) {

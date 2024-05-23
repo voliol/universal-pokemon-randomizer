@@ -162,10 +162,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         for (Pokemon p : mainPokemonListInclFormes) {
-            //ok. that should ACTUALLY do all of them.
-            //...kinda sus though. am tempted to hit it on AllPokemonList.
-            p.originalPrimaryType = p.primaryType;
-            p.originalSecondaryType = p.secondaryType;
             if (p.isLegendary()) {
                 onlyLegendaryListInclFormes.add(p);
             } else if (!ultraBeastList.contains(p)) {
@@ -178,6 +174,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             } else {
                 noLegendaryAltsList.add(f);
             }
+        }
+
+        for (Pokemon p : this.allPokemonInclFormesWithoutNull()) {
+            p.saveOriginalData();
         }
     }
 

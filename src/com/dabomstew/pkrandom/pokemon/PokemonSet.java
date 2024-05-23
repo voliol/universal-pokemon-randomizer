@@ -45,7 +45,7 @@ public class PokemonSet implements Set<Pokemon> {
      * Adds the given Pokemon and every evolutionary relative to this set, if they are
      * not already contained in the set.
      * @param pokemon The Pokemon to add the family of.
-     * @return If any Pokemon were added to the set.
+     * @return True if any Pokemon were added to the set, false otherwise.
      */
     public boolean addFamily(Pokemon pokemon) {
         boolean changed = false;
@@ -65,6 +65,35 @@ public class PokemonSet implements Set<Pokemon> {
             }
             toCheck.addAll(checking.getAllEvolvedPokemon());
             toCheck.addAll(checking.getAllPreEvolvedPokemon());
+        }
+
+        return changed;
+    }
+
+    /**
+     * Adds the given Pokemon and every Pokemon that was related to it before randomization
+     * to this set, if they are not already in the set.
+     * @param pokemon The Pokemon to add the family of.
+     * @return True if any Pokemon were added to the set, false otherwise.
+     */
+    public boolean addOriginalFamily(Pokemon pokemon) {
+        boolean changed = false;
+        PokemonSet checked = new PokemonSet();
+
+        Queue<Pokemon> toCheck = new ArrayDeque<>();
+        toCheck.add(pokemon);
+        while(!toCheck.isEmpty()) {
+            Pokemon checking = toCheck.remove();
+            if(checked.contains(checking)) {
+                continue;
+            }
+            checked.add(checking);
+            boolean added = this.add(checking);
+            if(added) {
+                changed = true;
+            }
+            toCheck.addAll(checking.originalEvolvedForms);
+            toCheck.addAll(checking.originalPreEvolvedForms);
         }
 
         return changed;
@@ -101,6 +130,35 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
+     * Removes the given Pokemon and every Pokemon that was related to it before randomization
+     * from this set, if they are contained in the set.
+     * @param pokemon The Pokemon to remove the family of.
+     * @return If any Pokemon were removed from the set.
+     */
+    public boolean removeOriginalFamily(Pokemon pokemon) {
+        boolean changed = false;
+        PokemonSet checked = new PokemonSet();
+
+        Queue<Pokemon> toCheck = new ArrayDeque<>();
+        toCheck.add(pokemon);
+        while(!toCheck.isEmpty()) {
+            Pokemon checking = toCheck.remove();
+            if(checked.contains(checking)) {
+                continue;
+            }
+            checked.add(checking);
+            boolean removed = this.remove(checking);
+            if(removed) {
+                changed = true;
+            }
+            toCheck.addAll(checking.originalEvolvedForms);
+            toCheck.addAll(checking.originalPreEvolvedForms);
+        }
+
+        return changed;
+    }
+
+    /**
      * Returns all members of the given Pokemon's evolutionary family that this set contains.
      * Returns an empty set if no members are in this set.
      * @param pokemon The Pokemon to get the family of.
@@ -130,7 +188,36 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
-     * Returns all members of the given Pokemon's evolutionary
+     * Returns all members of the given Pokemon's evolutionary family before randomization
+     * that this set contains. Returns an empty set if no members are in this set.
+     * @param pokemon The Pokemon to get the family of.
+     * @return a PokemonSet containing every member of the given Pokemon's family
+     */
+    public PokemonSet getOriginalFamily(Pokemon pokemon) {
+        //note: cannot use getEvolutions and getPreEvolutions as that would only return *contiguous* family.
+        PokemonSet family = new PokemonSet();
+        PokemonSet checked = new PokemonSet();
+
+        Queue<Pokemon> toCheck = new ArrayDeque<>();
+        toCheck.add(pokemon);
+        while(!toCheck.isEmpty()) {
+            Pokemon checking = toCheck.remove();
+            if(checked.contains(checking)) {
+                continue;
+            }
+            checked.add(checking);
+            if(this.contains(checking)) {
+                family.add(checking);
+            }
+            toCheck.addAll(checking.originalEvolvedForms);
+            toCheck.addAll(checking.originalPreEvolvedForms);
+        }
+
+        return family;
+    }
+
+    /**
+     * Returns all members of the given Pokemon's evolutionary family
      * that are contained uninterrupted within this set.
      * Returns an empty set if the given Pokemon is not in this set.
      * @param pokemon The Pokemon to get the family of.
@@ -158,12 +245,52 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
+     * Returns all members of the given Pokemon's evolutionary family before randomization
+     * that are contained uninterrupted within this set.
+     * Returns an empty set if the given Pokemon is not in this set.
+     * @param pokemon The Pokemon to get the family of.
+     * @return a PokemonSet containing every Pokemon related to the given Pokemon by members of this set.
+     */
+    public PokemonSet getContiguousOriginalFamily(Pokemon pokemon) {
+        PokemonSet family = new PokemonSet();
+        if(!this.contains(pokemon)) {
+            return family;
+        }
+
+        Queue<Pokemon> toCheck = new ArrayDeque<>();
+        toCheck.add(pokemon);
+        while(!toCheck.isEmpty()) {
+            Pokemon checking = toCheck.remove();
+            if(family.contains(checking)) {
+                continue;
+            }
+            family.add(checking);
+            toCheck.addAll(this.getOriginalEvolutions(checking));
+            toCheck.addAll(this.getOriginalPreEvolutions(checking));
+        }
+
+        return family;
+    }
+
+    /**
      * Returns all Pokemon in this set that the given Pokemon can evolve directly into.
      * @param pokemon The Pokemon to get evolutions of.
      * @return A PokemonSet containing all direct evolutions of the given Pokemon in this set.
      */
     public PokemonSet getEvolutions(Pokemon pokemon) {
         PokemonSet evolvedPokemon = pokemon.getAllEvolvedPokemon();
+        evolvedPokemon.retainAll(this);
+        return evolvedPokemon;
+    }
+
+    /**
+     * Returns all Pokemon in this set that the given Pokemon could evolve
+     * directly into before randomization.
+     * @param pokemon The Pokemon to get evolutions of.
+     * @return A PokemonSet containing all direct evolutions of the given Pokemon in this set.
+     */
+    public PokemonSet getOriginalEvolutions(Pokemon pokemon) {
+        PokemonSet evolvedPokemon = pokemon.originalEvolvedForms;
         evolvedPokemon.retainAll(this);
         return evolvedPokemon;
     }
@@ -181,12 +308,41 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
+     * Returns all Pokemon in this set that the given Pokemon evolved from before randomization.
+     * @param pokemon The Pokemon to get the pre-evolution of.
+     * @return A PokemonSet containing all Pokemon that the given Pokemon evolves from in this set.
+     */
+    public PokemonSet getOriginalPreEvolutions(Pokemon pokemon) {
+        //I *think* there are no cases of merged evolution? But... better not to assume that.
+        //There are certainly forms—e.g., Burmy to Mothim.
+        PokemonSet preEvolvedPokemon = pokemon.originalPreEvolvedForms;
+        preEvolvedPokemon.retainAll(this);
+        return preEvolvedPokemon;
+    }
+
+    /**
      * Checks whether this set contains any evolved forms of the given Pokemon.
      * @param pokemon The Pokemon to check for evolutions of.
      * @return true if this set contains at least one evolved form of the given Pokemon, false otherwise.
      */
     public boolean hasEvolutions(Pokemon pokemon) {
         PokemonSet evolvedPokemon = pokemon.getAllEvolvedPokemon();
+        for (Pokemon evo : evolvedPokemon) {
+            if(this.contains(evo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether this set contains any Pokemon the given Pokemon could
+     * evolve into before randomization.
+     * @param pokemon The Pokemon to check for evolutions of.
+     * @return true if this set contains at least one evolved form of the given Pokemon, false otherwise.
+     */
+    public boolean hasOriginalEvolutions(Pokemon pokemon) {
+        PokemonSet evolvedPokemon = pokemon.originalEvolvedForms;
         for (Pokemon evo : evolvedPokemon) {
             if(this.contains(evo)) {
                 return true;
@@ -211,6 +367,22 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
+     * Checks whether this set contains any Pokemon that could evolve
+     * into the given Pokemon before randomization.
+     * @param pokemon The Pokemon to check for pre-evolutions of.
+     * @return true if this set contains at least one pre-evolved form of the given Pokemon, false otherwise.
+     */
+    public boolean hasOriginalPreEvolutions(Pokemon pokemon) {
+        PokemonSet preEvolvedPokemon = pokemon.originalPreEvolvedForms;
+        for (Pokemon prevo : preEvolvedPokemon) {
+            if(this.contains(prevo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns all Pokemon in this set that no other Pokemon in this set evolves into.
      * @return A PokemonSet containing all Pokemon that no other Pokemon in this set evolves into.
      */
@@ -225,6 +397,21 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
+     * Returns all Pokemon in this set that no other Pokemon in this set
+     * could evolve into before randomization.
+     * @return A PokemonSet containing all Pokemon that no other Pokemon in this set evolves into.
+     */
+    public PokemonSet getAllOriginalFirstInLine() {
+        PokemonSet firstInLines = new PokemonSet();
+        for(Pokemon pokemon : this) {
+            if(!this.hasOriginalPreEvolutions(pokemon)) {
+                firstInLines.add(pokemon);
+            }
+        }
+        return firstInLines;
+    }
+
+    /**
      * Returns all Pokemon in this set that no other Pokemon (in this set or otherwise) evolves into.
      * @return A PokemonSet containing all basic Pokemon in this set.
      */
@@ -232,6 +419,21 @@ public class PokemonSet implements Set<Pokemon> {
         PokemonSet basics = new PokemonSet();
         for(Pokemon pokemon : this) {
             if(pokemon.evolutionsTo.isEmpty()) {
+                basics.add(pokemon);
+            }
+        }
+        return basics;
+    }
+
+    /**
+     * Returns all Pokemon in this set that no other Pokemon (in this set or otherwise)
+     * could evolve into before randomization.
+     * @return A PokemonSet containing all basic Pokemon in this set.
+     */
+    public PokemonSet getAllOriginalBasicPokemon() {
+        PokemonSet basics = new PokemonSet();
+        for(Pokemon pokemon : this) {
+            if(pokemon.originalPreEvolvedForms.isEmpty()) {
                 basics.add(pokemon);
             }
         }
@@ -263,6 +465,41 @@ public class PokemonSet implements Set<Pokemon> {
                     validEvoLines.add(firstEvo);
                 }
                 for (Pokemon secondEvo : this.getEvolutions(firstEvo)) {
+                    validEvoLines.add(basic);
+                    validEvoLines.add(firstEvo);
+                    validEvoLines.add(secondEvo);
+                }
+            }
+        }
+
+        return validEvoLines;
+    }
+
+    /**
+     * Returns all Pokemon for which uninterrupted evolutionary lines (before randomization)
+     * of at least the given length are contained within this set.
+     * In the case of branching evolutions, only branches of the correct length will be included.
+     * @param length the number of Pokemon required in the evolutionary line. 1 to 3.
+     * @return a PokemonSet containing all valid Pokemon.
+     */
+    public PokemonSet Original(int length) {
+        if(length > 3 || length < 1) {
+            throw new IllegalArgumentException("Invalid evolutionary line length.");
+        }
+        if(length == 1) {
+            return new PokemonSet(this);
+        }
+
+        PokemonSet validEvoLines = new PokemonSet();
+        PokemonSet firstInLines = this.getAllOriginalFirstInLine();
+
+        for(Pokemon basic : firstInLines) {
+            for (Pokemon firstEvo : this.getOriginalEvolutions(basic)) {
+                if(length == 2) {
+                    validEvoLines.add(basic);
+                    validEvoLines.add(firstEvo);
+                }
+                for (Pokemon secondEvo : this.getOriginalEvolutions(firstEvo)) {
                     validEvoLines.add(basic);
                     validEvoLines.add(firstEvo);
                     validEvoLines.add(secondEvo);
