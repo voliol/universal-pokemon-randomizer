@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dabomstew.pkrandom.newgui;
+package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
 /*--  PresetLoadDialog.java - a dialog to allow use of preset files or      --*/
@@ -54,7 +54,7 @@ public class PresetLoadDialog extends JDialog {
      *
      */
     private static final long serialVersionUID = -7898067118947765260L;
-    private NewRandomizerGUI parentGUI;
+    private RandomizerGUI parentGUI;
     private RomHandler currentROM;
     private boolean completed = false;
     private String requiredName = null;
@@ -65,9 +65,9 @@ public class PresetLoadDialog extends JDialog {
     /**
      * Creates new form PresetLoadDialog
      */
-    public PresetLoadDialog(NewRandomizerGUI parent, JFrame frame) {
+    public PresetLoadDialog(RandomizerGUI parent, JFrame frame) {
         super(frame, true);
-        bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle"); // NOI18N
+        bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         initComponents();
         this.parentGUI = parent;
         this.presetFileChooser.setCurrentDirectory(new File("./"));
@@ -270,7 +270,7 @@ public class PresetLoadDialog extends JDialog {
             for (RomHandler.Factory rhf : parentGUI.checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
                     final RomHandler checkHandler = rhf.create();
-                    if (!NewRandomizerGUI.usedLauncher && checkHandler instanceof Abstract3DSRomHandler) {
+                    if (!RandomizerGUI.usedLauncher && checkHandler instanceof Abstract3DSRomHandler) {
                         String message = bundle.getString("GUI.pleaseUseTheLauncher");
                         Object[] messages = {message};
                         JOptionPane.showMessageDialog(this, messages);
@@ -359,7 +359,7 @@ public class PresetLoadDialog extends JDialog {
         romFileChooser.setFileFilter(new ROMFilter());
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle"); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         setTitle(bundle.getString("PresetLoadDialog.title")); // NOI18N
         setModal(true);
         setResizable(false);

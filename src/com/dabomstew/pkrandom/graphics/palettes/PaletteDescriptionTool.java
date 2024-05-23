@@ -22,11 +22,10 @@ package com.dabomstew.pkrandom.graphics.palettes;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.GFXFunctions;
-import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
-import com.dabomstew.pkrandom.newgui.ROMFilter;
+import com.dabomstew.pkrandom.gui.ROMFilter;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.randomizers.Gen3to5PaletteRandomizer;
 import com.dabomstew.pkrandom.romhandlers.*;
@@ -37,7 +36,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.io.Serial;
 import java.util.List;
 import java.util.*;

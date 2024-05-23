@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dabomstew.pkrandom.newgui;
+package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
 /*--  PresetFileFilter.java - a file filter for the "randomization presets" --*/
@@ -33,7 +33,7 @@ package com.dabomstew.pkrandom.newgui;
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
-public class PresetFileFilter extends FileFilter {
+public class QSFileFilter extends FileFilter {
 
     @Override
     public boolean accept(File arg0) {
@@ -44,14 +44,13 @@ public class PresetFileFilter extends FileFilter {
         if (!filename.contains(".")) {
             return false;
         }
-        String extension = arg0.getName().substring(
-                arg0.getName().lastIndexOf('.') + 1);
-        return extension.toLowerCase().equals("rndp");
+        String extension = arg0.getName().substring(arg0.getName().lastIndexOf('.') + 1);
+        return extension.toLowerCase().equals("rnqs");
     }
 
     @Override
     public String getDescription() {
-        return "Pokemon Randomizer Preset (*.rndp)";
+        return "Randomization Quick Settings (*.rnqs)";
     }
 
 }

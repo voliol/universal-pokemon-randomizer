@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dabomstew.pkrandom.newgui;
+package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
 /*--  PresetMakeDialog.java - a dialog to allow preset pairs to either be   --*/
@@ -31,7 +31,6 @@ package com.dabomstew.pkrandom.newgui;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.Version;
 
@@ -93,7 +92,7 @@ public class PresetMakeDialog extends javax.swing.JDialog {
         presetFileChooser.setFileFilter(new PresetFileFilter());
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle"); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle"); // NOI18N
         setTitle(bundle.getString("PresetMakeDialog.title")); // NOI18N
         setModal(true);
         setResizable(false);

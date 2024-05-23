@@ -1,9 +1,6 @@
-package com.dabomstew.pkrandom.newgui;
+package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
-/*--  NewRandomizerGUI.java - the main GUI for the randomizer, containing   --*/
-/*--                          the various options available and such        --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -56,7 +53,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class NewRandomizerGUI {
+/**
+ * The main GUI for the Universal Pokemon Randomizer ZX, containing the various options available and such.
+ */
+public class RandomizerGUI {
     private JTabbedPane tabbedPane1;
     private JCheckBox raceModeCheckBox;
     private JButton openROMButton;
@@ -381,7 +381,7 @@ public class NewRandomizerGUI {
     private JMenuItem keepOrUnloadGameAfterRandomizingMenuItem;
     private JMenuItem batchRandomizationMenuItem;
 
-    private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/emptyIcon.png"));
+    private ImageIcon emptyIcon = new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/gui/emptyIcon.png"));
     private boolean haveCheckedCustomNames, unloadGameOnSuccess;
     private Map<String, String> gameUpdates = new TreeMap<>();
 
@@ -392,10 +392,10 @@ public class NewRandomizerGUI {
 
     private BatchRandomizationSettings batchRandomizationSettings;
 
-    public NewRandomizerGUI() {
+    public RandomizerGUI() {
         ToolTipManager.sharedInstance().setInitialDelay(400);
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
-        bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
+        bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
         testForRequiredConfigs();
         checkHandlers = new RomHandler.Factory[] { new Gen1RomHandler.Factory(), new Gen2RomHandler.Factory(),
                 new Gen3RomHandler.Factory(), new Gen4RomHandler.Factory(), new Gen5RomHandler.Factory(),
@@ -564,7 +564,7 @@ public class NewRandomizerGUI {
         loadGetSettingsMenuItem.addActionListener(e -> loadGetSettingsMenuItemActionPerformed());
         keepOrUnloadGameAfterRandomizingMenuItem.addActionListener(e -> keepOrUnloadGameAfterRandomizingMenuItemActionPerformed());
         limitPokemonButton.addActionListener(e -> {
-            NewGenerationLimitDialog gld = new NewGenerationLimitDialog(frame, currentRestrictions,
+            GenerationLimitDialog gld = new GenerationLimitDialog(frame, currentRestrictions,
                     romHandler.generationOfPokemon(), romHandler.forceSwapStaticMegaEvos());
             if (gld.pressedOK()) {
                 currentRestrictions = gld.getChoice();
@@ -2031,7 +2031,7 @@ public class NewRandomizerGUI {
 
         // Make sure the operation dialog doesn't show up over the error
         // dialog
-        SwingUtilities.invokeLater(() -> NewRandomizerGUI.this.opDialog.setVisible(false));
+        SwingUtilities.invokeLater(() -> RandomizerGUI.this.opDialog.setVisible(false));
 
         Date now = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -3895,7 +3895,7 @@ public class NewRandomizerGUI {
             launcherInput = firstCliArg;
             if (launcherInput.equals("please-use-the-launcher")) usedLauncher = true;
             SwingUtilities.invokeLater(() -> {
-                frame = new JFrame("NewRandomizerGUI");
+                frame = new JFrame("RandomizerGUI");
                 try {
                     String lafName = javax.swing.UIManager.getSystemLookAndFeelClassName();
                     // NEW: Only set Native LaF on windows.
@@ -3903,10 +3903,10 @@ public class NewRandomizerGUI {
                         javax.swing.UIManager.setLookAndFeel(lafName);
                     }
                 } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException ex) {
-                    java.util.logging.Logger.getLogger(NewRandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                    java.util.logging.Logger.getLogger(RandomizerGUI.class.getName()).log(java.util.logging.Level.SEVERE, null,
                             ex);
                 }
-                frame.setContentPane(new NewRandomizerGUI().mainPanel);
+                frame.setContentPane(new RandomizerGUI().mainPanel);
                 frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setVisible(true);

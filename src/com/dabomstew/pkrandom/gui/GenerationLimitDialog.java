@@ -1,10 +1,6 @@
-package com.dabomstew.pkrandom.newgui;
+package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
-/*--  NewGenerationLimitDialog.java - a GUI interface to allow users to     --*/
-/*--                                  limit which Pokemon appear based on   --*/
-/*--                                  their generation of origin.           --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -30,7 +26,10 @@ import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 
 import javax.swing.*;
 
-public class NewGenerationLimitDialog extends javax.swing.JDialog {
+/**
+ * A GUI interface to allow users to limit which Pokemon appear based on their generation of origin.
+ */
+public class GenerationLimitDialog extends javax.swing.JDialog {
     private JCheckBox gen1CheckBox;
     private JCheckBox gen2CheckBox;
     private JCheckBox gen3CheckBox;
@@ -47,7 +46,7 @@ public class NewGenerationLimitDialog extends javax.swing.JDialog {
     private boolean pressedOk;
     private boolean isXY;
 
-    public NewGenerationLimitDialog(JFrame parent, GenRestrictions current, int generation, boolean isXY) {
+    public GenerationLimitDialog(JFrame parent, GenRestrictions current, int generation, boolean isXY) {
         super(parent, true);
         add(mainPanel);
         this.isXY = isXY;
@@ -117,7 +116,7 @@ public class NewGenerationLimitDialog extends javax.swing.JDialog {
 
     private void initComponents() {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/dabomstew/pkrandom/gui/Bundle");
         setTitle(bundle.getString("GenerationLimitDialog.title"));
         gen1CheckBox.addActionListener(ev -> enableAndDisableBoxes());
         gen2CheckBox.addActionListener(ev -> enableAndDisableBoxes());

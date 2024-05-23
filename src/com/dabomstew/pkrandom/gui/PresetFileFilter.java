@@ -1,9 +1,16 @@
-package com.dabomstew.pkrandom.newgui;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.dabomstew.pkrandom.gui;
 
 /*----------------------------------------------------------------------------*/
-/*-- GameUpdateFilter.java - a file filter for 3DS game updates.            --*/
+/*--  PresetFileFilter.java - a file filter for the "randomization presets" --*/
+/*--                          which allow the same random ROM to be produced--*/
+/*--                          on demand.                                    --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
+/*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2020.                                 --*/
 /*--                                                                        --*/
@@ -26,7 +33,7 @@ package com.dabomstew.pkrandom.newgui;
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
-public class GameUpdateFilter extends FileFilter {
+public class PresetFileFilter extends FileFilter {
 
     @Override
     public boolean accept(File arg0) {
@@ -37,13 +44,14 @@ public class GameUpdateFilter extends FileFilter {
         if (!filename.contains(".")) {
             return false;
         }
-        String extension = arg0.getName().substring(arg0.getName().lastIndexOf('.') + 1).toLowerCase();
-        return extension.equals("cia");
+        String extension = arg0.getName().substring(
+                arg0.getName().lastIndexOf('.') + 1);
+        return extension.toLowerCase().equals("rndp");
     }
 
     @Override
     public String getDescription() {
-        return "Nintendo 3DS game update (*.cia)";
+        return "Pokemon Randomizer Preset (*.rndp)";
     }
 
 }

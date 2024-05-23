@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.newgui;
+package com.dabomstew.pkrandom.gui;
 
 import com.dabomstew.pkrandom.romhandlers.Abstract3DSRomHandler;
 import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;

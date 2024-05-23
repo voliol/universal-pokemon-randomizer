@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.dabomstew.pkrandom.newgui.NewGenerationLimitDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.dabomstew.pkrandom.gui.GenerationLimitDialog">
   <grid id="27dc6" binding="mainPanel" layout-manager="GridBagLayout">
     <constraints>
       <xy x="20" y="20" width="585" height="400"/>
@@ -111,7 +111,7 @@
         </constraints>
         <properties>
           <font style="1"/>
-          <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GenerationLimitDialog.warningXYLabel.text"/>
+          <text resource-bundle="com/dabomstew/pkrandom/gui/Bundle" key="GenerationLimitDialog.warningXYLabel.text"/>
         </properties>
       </component>
       <hspacer id="1601f">

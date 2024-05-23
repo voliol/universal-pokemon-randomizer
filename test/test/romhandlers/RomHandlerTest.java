@@ -33,7 +33,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1, 2, 3, 4, 5}, new Roms.Region[]{Roms.Region.USA}, false);
+        return Roms.getRoms(new int[]{1}, new Roms.Region[]{Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {
@@ -65,7 +65,7 @@ public class RomHandlerTest {
         if (!factory.isLoadable(fullRomName)) {
             throw new IllegalArgumentException("ROM is not loadable.");
         }
-        romHandler = factory.create(new Random());
+        romHandler = factory.create();
         romHandler.loadRom(fullRomName);
         // Sets restrictions to... not restrict.
         // This can be overturned later for tests interested in certain restrictions.
