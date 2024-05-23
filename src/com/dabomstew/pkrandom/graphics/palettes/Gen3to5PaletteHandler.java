@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
@@ -176,13 +176,13 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 				InputStream infi = getClass().getResourceAsStream(getResourceAddress(fileKey));
 				reader = new InputStreamReader(infi);
 			} catch (NullPointerException e) {
-				throw new RandomizerIOException(new RuntimeException("Could not find resource " + getResourceAddress(fileKey), e));
+				throw new RuntimeException(new RuntimeException("Could not find resource " + getResourceAddress(fileKey), e));
 			}
 		} else {
 			try {
 				reader = new FileReader(getSourceFileAddress(fileKey));
 			} catch (FileNotFoundException e) {
-				throw new RandomizerIOException(e);
+				throw new RuntimeException(e);
 			}
 		}
 		BufferedReader br = new BufferedReader(reader);
@@ -192,9 +192,8 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			while ((line = br.readLine()) != null) {
 				paletteDescriptions.add(new PaletteDescription(line));
 			}
-		} catch (java.io.IOException ioe) {
-			// using RandomizerIOException because it is unchecked
-			throw new RandomizerIOException("Could not read palette description file "
+		} catch (IOException e) {
+			throw new RuntimeException("Could not read palette description file "
 					+ (COMPILED ? getResourceAddress(fileKey) : getSourceFileAddress(fileKey)) + ".");
 		}
 
@@ -214,7 +213,7 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 			}
 
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -32,7 +32,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -538,7 +538,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         try {
             prepareSaveRom();
             return saveAsDirectory ? saveRomDirectory(filename) : saveRomFile(filename, seed);
-        } catch (RandomizerIOException e) {
+        } catch (RomIOException e) {
             e.printStackTrace();
             return false;
         }

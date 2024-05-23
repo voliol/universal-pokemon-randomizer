@@ -36,7 +36,7 @@ import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.newnds.NDSRom;
@@ -77,7 +77,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         try {
             baseRom = new NDSRom(filename);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         loadedFN = filename;
         loadedROM(baseRom.getCode(), baseRom.getVersion());
@@ -107,7 +107,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             if (e.getMessage().contains("Access is denied")) {
                 throw new CannotWriteToLocationException("The randomizer cannot write to this location: " + filename);
             } else {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         }
         return true;
@@ -174,7 +174,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             fis.close();
             return new String(sig, StandardCharsets.US_ASCII);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -186,7 +186,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             fis.close();
             return version[0];
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -464,7 +464,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             writeNARC(NARCpath, pokeGraphicsNARC);
 
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
     
@@ -478,7 +478,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 		try {
 			pokeGraphicsNARC = readNARC(NARCPath);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
 		for (Pokemon pk : getPokemonSet()) {
@@ -500,7 +500,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         try {
             pokeGraphicsNARC = readNARC(NARCPath);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         for (int i=0; i <= 157; i++) {
             ripAndDumpOtherPokemon(pokeGraphicsNARC, i);
@@ -539,7 +539,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
 			return getPokemonImage(pk, false, shiny, true, false);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 

@@ -40,7 +40,7 @@ import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBRomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
@@ -66,7 +66,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             midLoadingSetUp();
             loadGameData();
             return true;
-        } catch (RandomizerIOException e) {
+        } catch (RomIOException e) {
             e.printStackTrace();
             return false;
         }
@@ -75,7 +75,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected void loadRomFile(String filename) {
         byte[] loaded = loadFile(filename);
         if (!detectRom(loaded)) {
-            throw new RandomizerIOException("Could not detect ROM.");
+            throw new RomIOException("Could not detect ROM.");
         }
         this.rom = loaded;
         this.originalRom = new byte[rom.length];
@@ -212,7 +212,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         try {
             return FileFunctions.readFileFullyIntoBuffer(filename);
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
     }
 
@@ -378,7 +378,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
                 if (spo != primaryPointerOffset && offset != oldDataOffset) {
                     System.out.println();
                     System.out.println("bad: " + spo);
-                    throw new RandomizerIOException("Invalid secondary pointer spo=0x" + Integer.toHexString(spo) +
+                    throw new RomIOException("Invalid secondary pointer spo=0x" + Integer.toHexString(spo) +
                             ". Points to 0x" + Integer.toHexString(offset) + " instead of 0x" +
                             Integer.toHexString(oldDataOffset) + ".");
                 }
@@ -425,7 +425,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("ROM full. Can't find " + length + " free bytes anywhere.");
+            throw new RomIOException("ROM full. Can't find " + length + " free bytes anywhere.");
         }
 
         if (longAligned) {

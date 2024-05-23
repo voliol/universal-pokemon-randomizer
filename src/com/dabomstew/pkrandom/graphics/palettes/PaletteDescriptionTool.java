@@ -24,7 +24,7 @@ package com.dabomstew.pkrandom.graphics.palettes;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.RandomSource;
 import com.dabomstew.pkrandom.Utils;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.newgui.ROMFilter;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.*;
@@ -309,7 +309,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
         try {
             openRom(romChooser.getSelectedFile());
-        } catch (RandomizerIOException e) {
+        } catch (RomIOException e) {
             e.printStackTrace();
             return;
         }
@@ -328,7 +328,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
         try {
             Utils.validateRomFile(file);
         } catch (Utils.InvalidROMException e) {
-            throw new RandomizerIOException("Invalid ROM file.\n" + Arrays.toString(e.getStackTrace()));
+            throw new RomIOException("Invalid ROM file.\n" + Arrays.toString(e.getStackTrace()));
         }
 
         for (RomHandler.Factory rhf : checkHandlers) {
@@ -338,7 +338,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
                     romHandler.loadRom(file.getAbsolutePath());
                 } catch (Exception e) {
                     romHandler = null;
-                    throw new RandomizerIOException("ROM file could not be loaded.\n" + Arrays.toString(e.getStackTrace()));
+                    throw new RomIOException("ROM file could not be loaded.\n" + Arrays.toString(e.getStackTrace()));
                 }
             }
         }

@@ -26,7 +26,7 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.ctr.AMX;
 import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -131,14 +131,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             code = readCode();
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         try {
             stringsGarc = readGARC(romEntry.getFile("TextStrings"),true);
             storyTextGarc = readGARC(romEntry.getFile("StoryText"), true);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         loadPokemonStats();
@@ -159,7 +159,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             computeCRC32sForRom();
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -211,7 +211,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         populateEvolutions();
         populateMegaEvolutions();
@@ -368,7 +368,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -411,7 +411,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -560,7 +560,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -572,7 +572,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             writeGARC(romEntry.getFile("TextStrings"), stringsGarc);
             writeGARC(romEntry.getFile("StoryText"), storyTextGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -612,7 +612,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             this.writeGARC(romEntry.getFile("PokemonStats"),pokeGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         writeEvolutions();
@@ -686,7 +686,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             writeGARC(romEntry.getFile("PokemonEvolutions"), evoGARC);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -815,7 +815,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             this.writeGARC(romEntry.getFile("MoveData"), moveGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -932,7 +932,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 starters.add(se);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         return starters.stream().map(pk -> pk.pkmn).collect(Collectors.toList());
@@ -987,7 +987,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             writeFile(romEntry.getFile("StarterDisplay"),displayCRO);
             setStrings(false, romEntry.getIntValue("StarterTextOffset"), starterText);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return true;
     }
@@ -1033,7 +1033,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 starterHeldItems.add(heldItem);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         return starterHeldItems;
@@ -1064,7 +1064,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             writeFile(romEntry.getFile("StaticPokemon"),staticCRO);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -1087,7 +1087,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 encounterAreas = getEncountersXY();
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         Gen6Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType());
@@ -1374,7 +1374,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 setEncountersXY(encounterAreas);
             }
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
     }
 
@@ -1729,7 +1729,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             loadedWildMapNames = true;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -1838,7 +1838,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 Gen6Constants.setMultiBattleStatusORAS(allTrainers);
             }
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
         return allTrainers;
     }
@@ -1933,7 +1933,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             this.writeGARC(romEntry.getFile("TrainerData"), trainers);
             this.writeGARC(romEntry.getFile("TrainerPokemon"), trpokes);
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
     }
 
@@ -1967,7 +1967,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 movesets.put(pkmn.getNumber(), learnt);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return movesets;
     }
@@ -2001,7 +2001,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             // Save
             this.writeGARC(romEntry.getFile("PokemonMovesets"), movesLearnt);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
     }
@@ -2023,7 +2023,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 eggMoves.put(pkmn.getNumber(), moves);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return eggMoves;
     }
@@ -2043,7 +2043,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             // Save
             this.writeGARC(romEntry.getFile("EggMoves"), eggMovesGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2132,7 +2132,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         consolidateLinkedEncounters(statics);
@@ -2270,7 +2270,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             return true;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2415,7 +2415,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             encounterGarc.setFile(Gen6Constants.seaSpiritsDenEncounterFileXY, seaSpiritsDenAreaFile);
             writeGARC(romEntry.getFile("WildPokemon"), encounterGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2589,7 +2589,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 writeFile(romEntry.getFile("Battle"), battleCRO);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3137,7 +3137,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             writeStringsForAllLanguages(newTNames, romEntry.getIntValue("TrainerNamesTextOffset"));
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3172,7 +3172,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             writeStringsForAllLanguages(trainerClassNames, romEntry.getIntValue("TrainerClassesTextOffset"));
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3496,7 +3496,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 fieldItems.addAll(fieldMegaStones);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         return fieldItems;
@@ -3579,7 +3579,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             writeGARC(romEntry.getFile("Scripts"),scriptGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3719,7 +3719,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             babyGarc.setFile(Gen6Constants.pokemonCount + 1, masterFile);
             writeGARC(romEntry.getFile("BabyPokemon"), babyGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3847,7 +3847,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
             writeGARC(romEntry.getFile("ItemData"),itemPriceGarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 

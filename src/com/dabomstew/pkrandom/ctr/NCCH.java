@@ -23,9 +23,8 @@ package com.dabomstew.pkrandom.ctr;
 
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.SysConstants;
-import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import cuecompressors.BLZCoder;
 
 import java.io.*;
@@ -488,7 +487,7 @@ public class NCCH {
             } catch (Exception e) {
                 String message = String.format("Error when building romfs: File: %s, offset: %s, size: %s",
                         metadata.file.fullPath, metadata.offset, metadata.file.size);
-                throw new RandomizerIOException(message, e);
+                throw new RomIOException(message, e);
             }
         }
 
@@ -866,7 +865,7 @@ public class NCCH {
             long tmdHeaderOffset = tmdOffset + 4 + signatureSize + paddingSize;
             return FileFunctions.read2ByteBigEndianIntFromFile(this.baseRom, tmdHeaderOffset + 0x9C);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -917,7 +916,7 @@ public class NCCH {
                 return -1;
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 

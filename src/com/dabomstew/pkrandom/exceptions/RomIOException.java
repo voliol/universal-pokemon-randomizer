@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.exceptions;
 
 /*----------------------------------------------------------------------------*/
-/*--  RandomizerIOException.java - generic exception for various IO errors  --*/
+/*--  RomIOException.java - generic exception for various IO errors  --*/
 /*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
@@ -24,18 +24,24 @@ package com.dabomstew.pkrandom.exceptions;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-public class RandomizerIOException extends RuntimeException {
-    public RandomizerIOException(Exception e) {
+import java.io.Serial;
+
+/**
+ * Generic exception for various IO errors when dealing with ROMs.
+ */
+public class RomIOException extends RuntimeException {
+    public RomIOException(Exception e) {
         super(e);
     }
 
-    public RandomizerIOException(String text) {
+    public RomIOException(String text) {
         super(text);
     }
 
-    public RandomizerIOException(String text, Exception e) {
+    public RomIOException(String text, Exception e) {
         super(text, e);
     }
 
+    @Serial
     private static final long serialVersionUID = -8174099615381353972L;
 }

@@ -26,7 +26,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.*;
 
 // TODO: imports
@@ -36,7 +35,7 @@ import com.dabomstew.pkrandom.graphics.packs.GBCPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
@@ -2083,7 +2082,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             FileFunctions.applyPatch(rom, patchName);
             return true;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 

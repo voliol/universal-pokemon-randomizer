@@ -24,7 +24,7 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.graphics.images.GBAImage;
 import com.dabomstew.pkrandom.graphics.packs.FRLGPlayerCharacterGraphics;
@@ -2060,7 +2060,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     FileFunctions.applyPatch(rom, romEntry.getTweakFile("StaticFirstBattleTweak"));
                     species = readWord(startingSpeciesOffset);
                 } catch (IOException e) {
-                    throw new RandomizerIOException(e);
+                    throw new RomIOException(e);
                 }
             }
             Pokemon pkmn = pokesInternal[species];
@@ -2080,7 +2080,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     FileFunctions.applyPatch(rom, romEntry.getTweakFile("GhostMarowakTweak"));
                     species = readWord(ghostMarowakOffsets[0]);
                 } catch (IOException e) {
-                    throw new RandomizerIOException(e);
+                    throw new RomIOException(e);
                 }
             }
             Pokemon pkmn = pokesInternal[species];
@@ -2095,7 +2095,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         try {
             getRoamers(statics);
         } catch (Exception e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         return statics;
@@ -2372,10 +2372,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				int itemDescPointerOffset = itemBaseOffset + Gen3Constants.itemDataDescriptionOffset;
 				try {
 					rewriteVariableLengthString(itemDescPointerOffset, newItemDesc);
-				} catch (RandomizerIOException e) {
+				} catch (RomIOException e) {
                     // This used to be a simple logging, turned it into a full error because I don't *think* it
                     // should be too common? Plus the RomHandler arguably should not do logging.
-					throw new RandomizerIOException("Couldn't insert new item description. " + e.getMessage());
+					throw new RomIOException("Couldn't insert new item description. " + e.getMessage());
 				}
 			}
 		}
@@ -2494,10 +2494,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int[] secondaryPointerOffsets = searchForPointerCopies(pointerOffset);
             try {
                 rewriteVariableLengthString(pointerOffset, newText, secondaryPointerOffsets);
-            } catch (RandomizerIOException e) {
+            } catch (RomIOException e) {
                 // This used to be a simple logging, turned it into a full error because I don't *think* it
                 // should be too common? Plus the RomHandler arguably should not do logging.
-                throw new RandomizerIOException("Couldn't insert new " + description + " text. " + e.getMessage());
+                throw new RomIOException("Couldn't insert new " + description + " text. " + e.getMessage());
             }
         }
     }
@@ -2709,7 +2709,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.rsNatDexScriptLength);
-            } catch (RandomizerIOException e) {
+            } catch (RomIOException e) {
                 throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -2727,7 +2727,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.frlgNatDexScriptLength);
-            } catch (RandomizerIOException e) {
+            } catch (RomIOException e) {
                 throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
@@ -2784,7 +2784,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.eNatDexScriptLength);
-            } catch (RandomizerIOException e) {
+            } catch (RomIOException e) {
                 throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writePointer(pointerLocToScript, writeSpace);
@@ -3228,7 +3228,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 FileFunctions.applyPatch(rom, romEntry.getTweakFile("NewIndexToMusicTweak"));
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
 
             newIndexToMusicPoolOffset  = romEntry.getIntValue("NewIndexToMusicPoolOffset");
@@ -3870,7 +3870,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 FileFunctions.applyPatch(rom, romEntry.getTweakFile("InstantTextTweak"));
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         } else if (romEntry.getIntValue("TextSpeedValuesOffset") > 0) {
             int tsvOffset = romEntry.getIntValue("TextSpeedValuesOffset");

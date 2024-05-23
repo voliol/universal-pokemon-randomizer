@@ -23,12 +23,12 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.palettes.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.pokemon.*;
 import compressors.Gen2Cmp;
@@ -1992,7 +1992,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             shop.items.add((int) rom[offset++] & 0xFF);
         }
         if (rom[offset] != Gen2Constants.shopItemsTerminator) {
-            throw new RandomizerIOException("Invalid shop data");
+            throw new RomIOException("Invalid shop data");
         }
         return shop;
     }
@@ -2224,7 +2224,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         try {
             FileFunctions.applyPatch(rom, patchName);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 

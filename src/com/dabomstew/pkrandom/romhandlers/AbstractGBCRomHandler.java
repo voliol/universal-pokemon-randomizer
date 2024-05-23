@@ -25,7 +25,7 @@ package com.dabomstew.pkrandom.romhandlers;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.gbspace.BankDividedFreedSpace;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
@@ -367,7 +367,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("Bank 0x" + Integer.toHexString(bank) + " full. Can't find " + length +
+            throw new RomIOException("Bank 0x" + Integer.toHexString(bank) + " full. Can't find " + length +
                     " free bytes anywhere.");
         }
         return foundOffset;

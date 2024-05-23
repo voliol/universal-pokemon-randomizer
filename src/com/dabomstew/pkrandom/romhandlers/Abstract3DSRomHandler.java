@@ -26,7 +26,7 @@ import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.NCCH;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -67,7 +67,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 				throw new EncryptedROMException(filename);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		loadedFN = filename;
 		this.loadedROM(productCode, titleId);
@@ -94,7 +94,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			if (e.getMessage().contains("Access is denied")) {
 				throw new CannotWriteToLocationException("The randomizer cannot write to this location: " + filename);
 			} else {
-				throw new RandomizerIOException(e);
+				throw new RomIOException(e);
 			}
 		}
 		return true;
@@ -105,7 +105,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		try {
 			baseRom.saveAsLayeredFS(filename);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return true;
 	}
@@ -131,7 +131,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 				System.out.println("Game Update: Supplied unexpected version " + version);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		this.loadedROM(baseRom.getProductCode(), baseRom.getTitleId());
 		return true;
@@ -263,7 +263,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			fis.close();
 			return new String(productCode, StandardCharsets.UTF_8).trim();
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -280,7 +280,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			reverseArray(programId);
 			return bytesToHex(programId);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -363,7 +363,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		try {
 			pokeGraphicsGARC = readGARC(GARCPath, false);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
 		for (Pokemon pk : getPokemonSet()) {
@@ -388,7 +388,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
 			return getPokemonIcon(pk, pokeGraphicsGARC, true, false);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
