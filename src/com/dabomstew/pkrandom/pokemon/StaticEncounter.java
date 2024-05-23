@@ -56,6 +56,28 @@ public class StaticEncounter {
         this.linkedEncounters = new ArrayList<>();
     }
 
+    public StaticEncounter(StaticEncounter original) {
+        this.pkmn = original.pkmn;
+        this.forme = original.forme;
+        this.level = original.level;
+        this.maxLevel = original.maxLevel;
+        this.heldItem = original.heldItem;
+        this.isEgg = original.isEgg;
+        this.resetMoves = original.resetMoves;
+        this.restrictedPool = original.restrictedPool;
+        this.restrictedList = new ArrayList<>(original.restrictedList);
+        for (StaticEncounter oldLinked : original.linkedEncounters) {
+            StaticEncounter newLinked = new StaticEncounter();
+            newLinked.pkmn = oldLinked.pkmn;
+            newLinked.level = oldLinked.level;
+            newLinked.maxLevel = oldLinked.maxLevel;
+            newLinked.heldItem = oldLinked.heldItem;
+            newLinked.isEgg = oldLinked.isEgg;
+            newLinked.resetMoves = oldLinked.resetMoves;
+            this.linkedEncounters.add(newLinked);
+        }
+    }
+
     public boolean canMegaEvolve() {
         if (heldItem != 0) {
             for (MegaEvolution mega: pkmn.getMegaEvolutionsFrom()) {

@@ -453,24 +453,11 @@ public class StaticPokemonRandomizer extends Randomizer {
         totemChangesMade = true;
     }
 
-    // TODO: should be a copy constructor in StaticEncounter instead
     private StaticEncounter cloneStaticEncounter(StaticEncounter old) {
-        StaticEncounter newStatic = new StaticEncounter();
-        newStatic.pkmn = old.pkmn;
-        newStatic.level = old.level;
-        newStatic.maxLevel = old.maxLevel;
-        newStatic.heldItem = old.heldItem;
-        newStatic.isEgg = old.isEgg;
+        StaticEncounter newStatic = new StaticEncounter(old);
         newStatic.resetMoves = true;
-        for (StaticEncounter oldLinked : old.linkedEncounters) {
-            StaticEncounter newLinked = new StaticEncounter();
-            newLinked.pkmn = oldLinked.pkmn;
-            newLinked.level = oldLinked.level;
-            newLinked.maxLevel = oldLinked.maxLevel;
-            newLinked.heldItem = oldLinked.heldItem;
-            newLinked.isEgg = oldLinked.isEgg;
-            newLinked.resetMoves = true;
-            newStatic.linkedEncounters.add(newLinked);
+        for (StaticEncounter linked : newStatic.linkedEncounters) {
+            linked.resetMoves = true;
         }
         return newStatic;
     }
