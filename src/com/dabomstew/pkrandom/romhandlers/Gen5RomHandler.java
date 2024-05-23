@@ -26,8 +26,9 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
@@ -35,6 +36,17 @@ import com.dabomstew.pkrandom.romhandlers.romentries.Gen5RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import compressors.DSDecmp;
 import pptxt.PPTxtHandler;
+import pptxt.PPTxtHandler;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.naming.OperationNotSupportedException;
 import java.awt.*;
@@ -80,9 +92,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-    
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM
     private Pokemon[] pokes;
@@ -187,10 +196,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RomIOException(e);
         }
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 
         // If there are tweaks for expanding the ARM9, do it here to keep it simple.
         boolean shouldExtendARM9 = romEntry.hasTweakFile("ShedinjaEvolutionTweak") || romEntry.hasTweakFile("NewIndexToMusicTweak");
@@ -3951,6 +3956,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return calculatePokemonNormalPaletteIndex(i) + 1; 
     }
 
+    @Override
+    protected Collection<Integer> getGraphicalFormePokes() {
+        // TODO
+        return null;
+    }
+
+    @Override
+    protected void loadGraphicalFormePokemonPalettes(Pokemon pk) {
+        // TODO
+    }
+
+    @Override
+    protected void saveGraphicalFormePokemonPalettes(Pokemon pk) {
+        // TODO
+    }
+
     // TODO: remove
     @Override
     protected BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC) {
@@ -3958,63 +3979,86 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
-		
-		int spriteIndex = pk.getNumber() * 20;
-		if (back) {
-			spriteIndex += 9;
-		}
-		byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
-		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
-		
-		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
-		}
-
-		// Output to 64x144 tiled image, then unscramble to a 96x96
-		BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, convPalette, 48, 64, 144, 4);
-		bim = unscramblePokemonSprite(bim);
-
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
-			}
-		}
-
-		return bim;
-	}
-
-    // TODO: remove
-    @Override
-    public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
-        return null;
+    public Gen5PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen5PokemonImageGetter(pk);
     }
 
-    private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
-		BufferedImage unscrambled = new BufferedImage(96, 96, BufferedImage.TYPE_BYTE_INDEXED,
-				(IndexColorModel) bim.getColorModel());
-		Graphics g = unscrambled.getGraphics();
-		g.drawImage(bim, 0, 0, 64, 64, 0, 0, 64, 64, null);
-		g.drawImage(bim, 64, 0, 96, 8, 0, 64, 32, 72, null);
-		g.drawImage(bim, 64, 8, 96, 16, 32, 64, 64, 72, null);
-		g.drawImage(bim, 64, 16, 96, 24, 0, 72, 32, 80, null);
-		g.drawImage(bim, 64, 24, 96, 32, 32, 72, 64, 80, null);
-		g.drawImage(bim, 64, 32, 96, 40, 0, 80, 32, 88, null);
-		g.drawImage(bim, 64, 40, 96, 48, 32, 80, 64, 88, null);
-		g.drawImage(bim, 64, 48, 96, 56, 0, 88, 32, 96, null);
-		g.drawImage(bim, 64, 56, 96, 64, 32, 88, 64, 96, null);
-		g.drawImage(bim, 0, 64, 64, 96, 0, 96, 64, 128, null);
-		g.drawImage(bim, 64, 64, 96, 72, 0, 128, 32, 136, null);
-		g.drawImage(bim, 64, 72, 96, 80, 32, 128, 64, 136, null);
-		g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
-		g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
-		return unscrambled;
-	}
+    public class Gen5PokemonImageGetter extends DSPokemonImageGetter {
+
+        // TODO: getting the full animation sheets
+        // These are 64x144 pixel images, stored 2 files after their respective non-animated image.
+        // They are LZ11-compressed, and has what Tinke calls a "lineal" image pattern, as opposed to
+        // the common "horizontal" one.
+        // Methods for reading the "lineal" images are needed.
+
+        public Gen5PokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public BufferedImage get() {
+            beforeGet();
+
+            int spriteIndex = pk.getNumber() * 20;
+
+            if (hasGenderedImages() && gender == Gender.FEMALE) {
+                spriteIndex++;
+            }
+            if (back) {
+                spriteIndex += 9;
+            }
+            byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
+            byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
+
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            int[] convPalette = palette.toARGB();
+            if (transparentBackground) {
+                convPalette[0] = 0;
+            }
+
+            // Output to 64x144 tiled image, then unscramble to a 96x96
+            BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, convPalette, 48, 64, 144, 4);
+            bim = unscramblePokemonSprite(bim);
+
+            if (includePalette) {
+                for (int j = 0; j < 16; j++) {
+                    bim.setRGB(j, 0, convPalette[j]);
+                }
+            }
+
+            return bim;
+        }
+
+        private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
+            BufferedImage unscrambled = new BufferedImage(96, 96, BufferedImage.TYPE_BYTE_INDEXED,
+                    (IndexColorModel) bim.getColorModel());
+            Graphics g = unscrambled.getGraphics();
+            g.drawImage(bim, 0, 0, 64, 64, 0, 0, 64, 64, null);
+            g.drawImage(bim, 64, 0, 96, 8, 0, 64, 32, 72, null);
+            g.drawImage(bim, 64, 8, 96, 16, 32, 64, 64, 72, null);
+            g.drawImage(bim, 64, 16, 96, 24, 0, 72, 32, 80, null);
+            g.drawImage(bim, 64, 24, 96, 32, 32, 72, 64, 80, null);
+            g.drawImage(bim, 64, 32, 96, 40, 0, 80, 32, 88, null);
+            g.drawImage(bim, 64, 40, 96, 48, 32, 80, 64, 88, null);
+            g.drawImage(bim, 64, 48, 96, 56, 0, 88, 32, 96, null);
+            g.drawImage(bim, 64, 56, 96, 64, 32, 88, 64, 96, null);
+            g.drawImage(bim, 0, 64, 64, 96, 0, 96, 64, 128, null);
+            g.drawImage(bim, 64, 64, 96, 72, 0, 128, 32, 136, null);
+            g.drawImage(bim, 64, 72, 96, 80, 32, 128, 64, 136, null);
+            g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
+            g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
+            return unscrambled;
+        }
+
+        @Override
+        public boolean hasGenderedImages() {
+            int imageIndex = pk.getNumber() * 20 + 1;
+            byte[] imageData = pokeGraphicsNARC.files.get(imageIndex);
+            return imageData.length != 0;
+        }
+    }
     
-    private String getPaletteFilesID() {
+    public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen5Constants.Type_BW -> "BW";
             case Gen5Constants.Type_BW2 ->
@@ -4022,11 +4066,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     "BW";
             default -> null;
         };
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

@@ -34,7 +34,6 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 import com.dabomstew.pkrandom.services.RestrictedPokemonService;
@@ -484,23 +483,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizePokemonPalettes(Settings settings) {
-        // I personally don't think it should be the responsibility of the RomHandlers to
-        // communicate with the Settings - isn't that the role of the Randomizer class?
-        // This (overloading the method) is a compromise. // voliol 2022-08-28
-        randomizePokemonPalettes(settings.isPokemonPalettesFollowTypes(), settings.isPokemonPalettesFollowEvolutions(),
-                settings.isPokemonPalettesShinyFromNormal());
-    }
-
-    public void randomizePokemonPalettes(boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal) {
-        getPaletteHandler().randomizePokemonPalettes(getPokemonSet(), typeSanity, evolutionSanity, shinyFromNormal);
-    }
-
-    @Override
-    public abstract PaletteHandler getPaletteHandler();
-
-
-    @Override
     public boolean hasCustomPlayerGraphicsSupport() {
         return false;
     }
@@ -510,7 +492,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         throw new UnsupportedOperationException("Custom player graphics not supported for this game.");
     }
 
-    @Override
     // just for testing
     public final void dumpAllPokemonImages() {
         List<BufferedImage> bims = getAllPokemonImages();
@@ -529,6 +510,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public String getPaletteFilesID() {
+        throw new UnsupportedOperationException(); // default: assumes no resource files are needed
+    }
+
     public abstract List<BufferedImage> getAllPokemonImages();
 
     public abstract void savePokemonPalettes();

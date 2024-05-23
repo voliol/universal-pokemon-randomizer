@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.graphics.palettes;
+package com.dabomstew.pkrandom.randomizers;
 
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
@@ -38,12 +38,20 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.exceptions.RomIOException;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.palettes.*;
 import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.romhandlers.RomHandler;
+
+import java.io.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
- * A {@link PaletteHandler} for Gen 3, Gen 4, and Gen 5 games (R/S/E/FR/LG,
+ * A {@link PaletteRandomizer} for Gen 3, Gen 4, and Gen 5 games (R/S/E/FR/LG,
  * D/P/Pt/HG/SS, B/W/B2/W2).
  * <p>
  * All three generations use similar 16-color palettes, that are implemented
@@ -55,7 +63,7 @@ import com.dabomstew.pkrandom.pokemon.PokemonSet;
  * {@link TypeBaseColorList}, which uses its types to come up with appropriate
  * base colors.
  */
-public class Gen3to5PaletteHandler extends PaletteHandler {
+public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 
 	/**
 	 * A setting to use when testing the palette description files.
@@ -74,45 +82,36 @@ public class Gen3to5PaletteHandler extends PaletteHandler {
 	private boolean shinyFromNormal;
 	private Map<Pokemon, TypeBaseColorList> typeBaseColorLists;
 
-	public Gen3to5PaletteHandler(Random random, String paletteFilesID) {
-		super(random);
-		this.paletteFilesID = paletteFilesID;
+	public Gen3to5PaletteRandomizer(RomHandler romHandler, Settings settings, Random random) {
+		super(romHandler, settings, random);
+		this.paletteFilesID = romHandler.getPaletteFilesID();
 	}
 
 	@Override
-	public void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet, boolean typeSanity, boolean evolutionSanity,
-										 boolean shinyFromNormal) {
+	public void randomizePokemonPalettes() {
 
 		// TODO: Figure out what to do with forms, with different palettes and with the same.
 		// TODO: figure out genders in gen V, if anything needs to be done at all
 
-		this.typeSanity = typeSanity;
-		this.shinyFromNormal = shinyFromNormal;
+		this.typeSanity = settings.isPokemonPalettesFollowTypes();
+		this.shinyFromNormal = settings.isPokemonPalettesShinyFromNormal();
+		boolean evolutionSanity = settings.isPokemonPalettesFollowEvolutions();
+
 		this.typeBaseColorLists = new HashMap<>();
 
 		if (paletteFilesID == null) {
-
-			// TODO: better error raising/logging, is there a log file for errors like this
-			// that do not need to interrupt the program?
-			// If there was a log for putting stuff when only unessential parts of the
-			// randomizing failed, then this could throw anything, and
-			// AbstractRandomizer.randomizeColors()
-			// could have a try-catch block for any uncaught exceptions,
-			// printing it into the log there.
-
-			// e.g. - You click "randomize"
-			// - Something throws an exception here in the PaletteHandler
-			// - The AbstractRomHandler catches it and prints it to a log,
-			// doesn't write the palettes.
-			// - The rest of the randomization continues
-			// - It finishes and the end-user gets the pop-up message
-			// "The randomization finished, but with some errors. See..."
-			System.out.println("Could not randomize palettes, unrecognized romtype.");
-			return;
-
+			// TODO: this is the kind of exception which the user could basically ignore, the ROM is still
+			//  fully functional. Is there a better way of logging that?
+			//  e.g. - You click "randomize"
+			//  - Something throws an exception here in the PaletteRandomizer
+			//  - The Randomizer catches it and prints it to a log, doesn't write the palettes.
+			//  - The rest of the randomization continues
+			//  - It finishes and the end-user gets the pop-up message
+			//  "The randomization finished, but with some errors. See..."
+			throw new RandomizationException("Could not randomize palettes, unrecognized romtype.");
 		}
 
-		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> pokemonSet);
+		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler.getPokemonSet());
 		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
 		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");

@@ -22,7 +22,10 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
@@ -31,9 +34,7 @@ import com.dabomstew.pkrandom.graphics.packs.FRLGPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.packs.RSEPlayerCharacterGraphics;
-import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen3EventTextEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
@@ -111,9 +112,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     }
 
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
-
     // This ROM's data
     private Gen3RomEntry romEntry;
     private Pokemon[] pokes, pokesInternal;
@@ -181,10 +179,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         mapLoadingDone = true;
 
         freeAllUnusedSpace();
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     @Override
@@ -4479,49 +4473,65 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 	}
-    
+
     @Override
-    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
-            boolean includePalette) {
-
-        // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
-
-        int num = pokedexToInternal[pk.getNumber()];
-        int tableOffset = back ? romEntry.getIntValue("PokemonBackImages") : romEntry.getIntValue("PokemonFrontImages");
-
-        int imageOffset = readPointer(tableOffset + num * 8);
-        byte[] data = DSDecmp.Decompress(rom, imageOffset);
-        // Uses the 0-index missingno sprite if the data failed to read, for debugging
-        // purposes
-        if (data == null) {
-            imageOffset = readPointer(tableOffset);
-            data = DSDecmp.Decompress(rom, imageOffset);
-        }
-
-        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        // Castform has a 64-color palette, 16 colors for each form.
-        if (pk.getNumber() == Species.castform) {
-            palette = new Palette(Arrays.copyOf(palette.toARGB(), 16));
-        }
-
-        // TODO: make this work
-        int[] convPalette = palette.toARGB();
-        if (transparentBackground) {
-            convPalette[0] = 0;
-        }
-
-        // Make image, 4bpp
-        GBAImage bim = new GBAImage.Builder(8, 8, palette, data).build();
-        if (includePalette) {
-            for (int i = 0; i < palette.size(); i++) {
-                bim.setColor(i, 0, i);
-            }
-        }
-
-        return bim;
+    public Gen3PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen3PokemonImageGetter(pk);
     }
 
-    private String getPaletteFilesID() {
+    public class Gen3PokemonImageGetter extends GBPokemonImageGetter {
+        // No support for Unown/Castform formes (nor Deoxys, but kind of unsure if that's even possible)
+
+        public Gen3PokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public Gen3PokemonImageGetter setGraphicalForme(int forme) {
+            throw new UnsupportedOperationException("Graphical forme support not implemented");
+        }
+
+        @Override
+        public BufferedImage get() {
+            // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
+
+            int num = pokedexToInternal[pk.getNumber()];
+            int tableOffset = back ? romEntry.getIntValue("PokemonBackImages") : romEntry.getIntValue("PokemonFrontImages");
+
+            int imageOffset = readPointer(tableOffset + num * 8);
+            byte[] data = DSDecmp.Decompress(rom, imageOffset);
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging
+            // purposes
+            if (data == null) {
+                imageOffset = readPointer(tableOffset);
+                data = DSDecmp.Decompress(rom, imageOffset);
+            }
+
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            // Castform has a 64-color palette, 16 colors for each form.
+            if (pk.getNumber() == Species.castform) {
+                palette = new Palette(Arrays.copyOf(palette.toARGB(), 16));
+            }
+
+            // TODO: make this work
+            int[] convPalette = palette.toARGB();
+            if (transparentBackground) {
+                convPalette[0] = 0;
+            }
+
+            // Make image, 4bpp
+            GBAImage bim = new GBAImage.Builder(8, 8, palette, data).build();
+            if (includePalette) {
+                for (int i = 0; i < palette.size(); i++) {
+                    bim.setColor(i, 0, i);
+                }
+            }
+
+            return bim;
+        }
+    }
+
+    public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
                 // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
@@ -4572,11 +4582,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         }
         return items;
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

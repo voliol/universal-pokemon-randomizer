@@ -25,12 +25,13 @@ import java.util.Map;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.randomizers.Gen2PaletteRandomizer;
 
 /**
  * Contains methods for accessing TypeColor constants for Gen 2 games (G/S/C).
  * The constants are read from .txt files.
  * <p>
- * See {@link Gen2PaletteHandler} for an explanation on "bright colors" and
+ * See {@link Gen2PaletteRandomizer} for an explanation on "bright colors" and
  * "dark colors".
  */
 public class Gen2TypeColors {

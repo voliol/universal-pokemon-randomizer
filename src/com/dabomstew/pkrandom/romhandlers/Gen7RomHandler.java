@@ -32,6 +32,7 @@ import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.Mini;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen7RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.ThreeDSLinkedEncounter;
@@ -3481,10 +3482,13 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public String getGARCPath(String fileName) {
         return romEntry.getFile(fileName);
     }
-    
+
     @Override
-    public PaletteHandler getPaletteHandler() {
-    	return null; // N/A (?)
+    public BufferedImage getPokemonIcon(int pkIndex, GARCArchive pokeGraphicsGARC,
+                                        boolean transparentBackground, boolean includePalette) {
+        byte[] iconBytes = pokeGraphicsGARC.files.get(pkIndex).get(0);
+        BFLIM icon = new BFLIM(iconBytes);
+        return icon.getImage();
     }
 
     @Override

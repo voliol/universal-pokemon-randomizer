@@ -29,7 +29,6 @@ import java.util.Random;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
-// TODO: is it alright to have a "list" that doesn't implement List?
 /**
  * A list of {@link TypeColor}s based on a Pokémon's types. Which TypeColors are
  * used, and their order, can be carried up evolutions using a

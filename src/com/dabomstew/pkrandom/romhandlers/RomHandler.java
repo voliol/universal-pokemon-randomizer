@@ -22,6 +22,11 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.pokemon.*;
+
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
 import java.util.List;
@@ -552,10 +557,15 @@ public interface RomHandler {
     boolean hasCustomPlayerGraphicsSupport();
 
     void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace);
-    
-    void randomizePokemonPalettes(Settings settings);
 
-    PaletteHandler getPaletteHandler();
+    PokemonImageGetter createPokemonImageGetter(Pokemon pk);
+
+    // Kind of strange this is a responsibility for the romHandler, when the resources are so specific to the
+    // randomizer parts, and the goal is to keep those separate. Still, it works for now.
+    /**
+     * Returns an identifier for resource files related to this ROM, used when randomizing palettes.
+     */
+    String getPaletteFilesID();
 
     void dumpAllPokemonImages();
 

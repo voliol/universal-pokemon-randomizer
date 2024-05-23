@@ -30,14 +30,23 @@ import com.dabomstew.pkrandom.graphics.palettes.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
+import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
+import com.dabomstew.pkrandom.graphics.palettes.Gen2SpritePaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.GBCTMTextEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen2RomEntry;
 import compressors.Gen2Cmp;
 import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
-import java.util.List;
 
 /**
  * {@link RomHandler} for Gold, Silver, Crystal.
@@ -64,7 +73,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     public Gen2RomHandler(Random random) {
         super(random);
-        this.paletteHandler = new Gen2PaletteHandler(random);
     }
 
     private static List<Gen2RomEntry> roms;
@@ -80,9 +88,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Gen2RomEntry romEntry;
@@ -3227,49 +3232,83 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
-                                         boolean includePalette) {
+    public Gen2PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen2PokemonImageGetter(pk);
+    }
 
-        int pointerOffset = getPokemonImagePointerOffset(pk, back);
+    public class Gen2PokemonImageGetter extends GBPokemonImageGetter {
 
-        int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
-        int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
-
-        byte[] data;
-        try {
-            data = readPokemonOrTrainerImageData(pointerOffset, width, height);
-        } catch (Exception e) {
-            return null;
+        public Gen2PokemonImageGetter(Pokemon pk) {
+            super(pk);
         }
 
-        // White and black are always in the palettes at positions 0 and 3, 
-        // so only the middle colors are stored and need to be read.
-        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
-
-        BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
-
-        if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
+        @Override
+        public int getGraphicalFormeAmount() {
+            return pk.getNumber() == Species.unown ? Gen2Constants.unownFormeCount : 1;
         }
-        if (includePalette) {
-            for (int j = 0; j < palette.size(); j++) {
-                bim.setRGB(j, 0, palette.get(j).toARGB());
+
+        @Override
+        public BufferedImage get() {
+
+            int pointerOffset = getPokemonImagePointerOffset(pk, back);
+
+            int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
+            int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
+
+            byte[] data;
+            try {
+                data = readPokemonOrTrainerImageData(pointerOffset, width, height);
+            } catch (Exception e) {
+                return null;
+            }
+
+            // White and black are always in the palettes at positions 0 and 3,
+            // so only the middle colors are stored and need to be read.
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
+
+            BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
+
+            if (transparentBackground) {
+                bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
+            }
+            if (includePalette) {
+                for (int j = 0; j < palette.size(); j++) {
+                    bim.setRGB(j, 0, palette.get(j).toARGB());
+                }
+            }
+
+            return bim;
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            if (pk.getNumber() == Species.unown) {
+                setIncludePalette(true);
+
+                BufferedImage[] normal = new BufferedImage[Gen2Constants.unownFormeCount*2];
+                BufferedImage[] shiny = new BufferedImage[Gen2Constants.unownFormeCount*2];
+                for (int i = 0; i < Gen2Constants.unownFormeCount; i++) {
+                    setGraphicalForme(i);
+
+                    normal[i*2] = get();
+                    normal[i*2 + 1] = setBack(true).get();
+                    shiny[i*2 + 1] = setShiny(true).get();
+                    shiny[i*2] = setBack(false).get();
+                    setShiny(false);
+                }
+                return GFXFunctions.stitchToGrid(new BufferedImage[][] { normal, shiny });
+
+            } else {
+                return super.getFull();
             }
         }
-
-        return bim;
     }
 
     private byte[] readPokemonOrTrainerImageData(int pointerOffset, int imageWidth, int imageHeight) {
         int imageOffset = readPokemonOrTrainerImagePointer(pointerOffset);
         byte[] data = Gen2Decmp.decompress(rom, imageOffset);
         return Arrays.copyOf(data, imageWidth * imageHeight * 16);
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

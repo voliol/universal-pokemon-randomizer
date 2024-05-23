@@ -35,6 +35,23 @@ import com.dabomstew.pkrandom.romhandlers.romentries.Gen4RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen4RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
+import thenewpoketext.PokeTextData;
+import thenewpoketext.TextToPoke;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.naming.OperationNotSupportedException;
 import java.awt.image.BufferedImage;
@@ -78,9 +95,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			throw new RuntimeException("Could not read Rom Entries.", e);
 		}
 	}
-
-	// Sub-handlers
-	private PaletteHandler paletteHandler;
 
 	// This rom
 	private Pokemon[] pokes;
@@ -185,10 +199,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			arm9 = extendARM9(arm9, extendBy, romEntry.getStringValue("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
 			genericIPSPatch(arm9, "NewCatchingTutorialSubroutineTweak");
 		}
-
-		// Having this in the constructor would be preferred,
-		// but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-		this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 	}
 
 	private void loadMoves() {
@@ -5600,85 +5610,211 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return calculatePokemonNormalPaletteIndex(i) + 1;
 	}
 
-	@Override
-	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
+    protected Collection<Integer> getGraphicalFormePokes() {
+        return Gen4Constants.otherPokemonGraphicsPalettes.keySet();
+    }
 
-		int spriteIndex = pk.getNumber() * 6 + 2 + random.nextInt(2);
-		if (back) {
-			spriteIndex -= 2;
+    protected void loadGraphicalFormePokemonPalettes(Pokemon pk) {
+        String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+        NARCArchive NARC;
+        try {
+            NARC = readNARC(NARCpath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+		int[][] palettes = Gen4Constants.otherPokemonGraphicsPalettes.get(pk.getNumber());
+		for (int palID = 0; palID < palettes[0].length; palID++) {
+			// assumes there are as many normal and shiny palettes
+			pk.setNormalPalette(palID, readPalette(NARC, palettes[0][palID]));
+			pk.setShinyPalette(palID, readPalette(NARC, palettes[1][palID]));
 		}
-		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+    }
 
-		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
-		}
-
-		// Deliberately chop off the right half of the image while still
-		// correctly indexing the array.
-		int bpp = 4;
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
-		for (int y = 0; y < 80; y++) {
-			for (int x = 0; x < 80; x++) {
-				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-				bim.setRGB(x, y, convPalette[value]);
-			}
-		}
-
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
-			}
+    protected void saveGraphicalFormePokemonPalettes(Pokemon pk) {
+		String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+		NARCArchive NARC;
+		try {
+			NARC = readNARC(NARCpath);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
-		return bim;
+		int[][] palettes = Gen4Constants.otherPokemonGraphicsPalettes.get(pk.getNumber());
+		for (int palID = 0; palID < palettes[0].length; palID++) {
+			// assumes there are as many normal and shiny palettes
+			writePalette(NARC, palettes[0][palID], pk.getNormalPalette(palID));
+			writePalette(NARC, palettes[1][palID], pk.getShinyPalette(palID));
+		}
+    }
+
+	public Gen4PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+		return new Gen4PokemonImageGetter(pk);
 	}
 
-	// Temporary
-	@Override
-	public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-										 boolean transparentBackground, boolean includePalette) {
+	public class Gen4PokemonImageGetter extends DSPokemonImageGetter {
 
-		int spriteIndex = number * 6 + 2 + random.nextInt(2);
-		if (back) {
-			spriteIndex -= 2;
-		}
-		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+		protected NARCArchive otherPokeGraphicsNARC;
 
-
-		int normalPaletteIndex = calculatePokemonNormalPaletteIndex(number);
-		Palette normalPalette = readPalette(pokeGraphicsNARC, normalPaletteIndex);
-		int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(number);
-		Palette shinyPalette = readPalette(pokeGraphicsNARC, shinyPaletteIndex);
-
-		Palette palette = shiny ? shinyPalette : normalPalette;
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
+		public Gen4PokemonImageGetter(Pokemon pk) {
+			super(pk);
 		}
 
-		// Deliberately chop off the right half of the image while still
-		// correctly indexing the array.
-		int bpp = 4;
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
-		for (int y = 0; y < 80; y++) {
-			for (int x = 0; x < 80; x++) {
-				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-				bim.setRGB(x, y, convPalette[value]);
+		public DSPokemonImageGetter setOtherPokeGraphicsNARC(NARCArchive otherPokeGraphicsNARC) {
+			this.otherPokeGraphicsNARC = otherPokeGraphicsNARC;
+			return this;
+		}
+
+		protected void beforeGet() {
+			super.beforeGet();
+			if (otherPokeGraphicsNARC == null) {
+				try {
+					String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+					otherPokeGraphicsNARC = readNARC(NARCpath);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
+		@Override
+		public int getGraphicalFormeAmount() {
+			int[][] formeInfo = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber());
+			if (formeInfo == null) {
+				return 1;
+			} else {
+				return formeInfo[0].length;
 			}
 		}
 
-		return bim;
+		@Override
+		public BufferedImage get() {
+			beforeGet();
+
+			int imageIndex = getImageIndex();
+			int[] imageData = readImageData(getGraphicalFormeAmount() > 1 ? otherPokeGraphicsNARC : pokeGraphicsNARC, imageIndex);
+
+			Palette palette = getPalette();
+			int[] convPalette = palette.toARGB();
+			if (transparentBackground) {
+				convPalette[0] = 0;
+			}
+
+			// Deliberately chop off the right half of the image while still
+			// correctly indexing the array.
+			int bpp = 4;
+			BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+					GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+			for (int y = 0; y < 80; y++) {
+				for (int x = 0; x < 80; x++) {
+					int value = ((imageData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+					bim.setRGB(x, y, convPalette[value]);
+				}
+			}
+
+			if (includePalette) {
+				for (int j = 0; j < 16; j++) {
+					bim.setRGB(j, 0, convPalette[j]);
+				}
+			}
+
+			return bim;
+		}
+
+		private int getImageIndex() {
+			int imageIndex;
+			if (getGraphicalFormeAmount() > 1) {
+				imageIndex = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber())[back ? 1 : 0][forme];
+			} else {
+				imageIndex = pk.getNumber() * 6 + 2;
+				if (gender == Gender.MALE) {
+					imageIndex++;
+				}
+				if (back) {
+					imageIndex -= 2;
+				}
+			}
+			return imageIndex;
+		}
+
+		private Palette getPalette() {
+			Palette palette;
+			// unown and deoxys have the same palette(s) for all their formes
+			if (getGraphicalFormeAmount() > 1 && pk.getNumber() != Species.unown && pk.getNumber() != Species.deoxys) {
+				palette = shiny ? pk.getShinyPalette(forme) : pk.getNormalPalette(forme);
+			} else {
+				palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+			}
+			return palette;
+		}
+
+
+		@Override
+		public BufferedImage getFull() {
+			System.out.println(pk);
+			if (getGraphicalFormeAmount() > 1) {
+				return withFormesGetFull();
+			} else {
+				return super.getFull();
+			}
+		}
+
+		private BufferedImage withFormesGetFull() {
+			setIncludePalette(true);
+
+			BufferedImage[] normal = new BufferedImage[getGraphicalFormeAmount()*2];
+			BufferedImage[] shiny = new BufferedImage[getGraphicalFormeAmount()*2];
+			for (int i = 0; i < getGraphicalFormeAmount(); i++) {
+				setGraphicalForme(i);
+
+				normal[i*2] = get();
+				normal[i*2 + 1] = setBack(true).get();
+				shiny[i*2 + 1] = setShiny(true).get();
+				shiny[i*2] = setBack(false).get();
+				setShiny(false);
+			}
+			return GFXFunctions.stitchToGrid(new BufferedImage[][] { normal, shiny });
+		}
+
+		private int[] readImageData(NARCArchive graphicsNARC, int imageIndex) {
+			// read sprite
+			byte[] rawImage = graphicsNARC.files.get(imageIndex);
+			if (rawImage.length == 0) {
+				// Must use other gender form
+				rawImage = graphicsNARC.files.get(imageIndex ^ 1);
+			}
+			int[] imageData = new int[3200];
+			for (int i = 0; i < 3200; i++) {
+				imageData[i] = readWord(rawImage, i * 2 + 48);
+			}
+
+			// Decrypt image (why does EVERYTHING use the RNG formula geez)
+			if (romEntry.getRomType() != Gen4Constants.Type_DP && getGraphicalFormeAmount() == 1) {
+				int key = imageData[0];
+				for (int i = 0; i < 3200; i++) {
+					imageData[i] ^= (key & 0xFFFF);
+					key = key * 0x41C64E6D + 0x6073;
+				}
+			} else {
+				// D/P images are encrypted *backwards*. Wut.
+				int key = imageData[3199];
+				for (int i = 3199; i >= 0; i--) {
+					imageData[i] ^= (key & 0xFFFF);
+					key = key * 0x41C64E6D + 0x6073;
+				}
+			}
+			return imageData;
+		}
+
+		@Override
+		public boolean hasGenderedImages() {
+			beforeGet();
+			int imageIndex = pk.getNumber() * 6 + 2;
+			byte[] rawImageFemale = pokeGraphicsNARC.files.get(imageIndex);
+			byte[] rawImageMale = pokeGraphicsNARC.files.get(imageIndex + 1);
+			return rawImageFemale.length != 0 && rawImageMale.length != 0
+					&& !Arrays.equals(rawImageFemale, rawImageMale);
+		}
 	}
 
 	//TODO: remove
@@ -5742,12 +5878,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return bim;
 	}
 
-	private int[] readSpriteData(NARCArchive pokespritesNARC, int spriteIndex) {
+	// TODO: remove
+	private int[] readSpriteData(NARCArchive graphicsNARC, int spriteIndex) {
 		// read sprite
-		byte[] rawSprite = pokespritesNARC.files.get(spriteIndex);
+		byte[] rawSprite = graphicsNARC.files.get(spriteIndex);
 		if (rawSprite.length == 0) {
 			// Must use other gender form
-			rawSprite = pokespritesNARC.files.get(spriteIndex ^ 1);
+			rawSprite = graphicsNARC.files.get(spriteIndex ^ 1);
 		}
 		int[] spriteData = new int[3200];
 		for (int i = 0; i < 3200; i++) {
@@ -5772,7 +5909,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return spriteData;
 	}
 
-	private String getPaletteFilesID() {
+	public String getPaletteFilesID() {
 		return switch (romEntry.getRomType()) {
 			case Gen4Constants.Type_DP -> "DP";
 			case Gen4Constants.Type_Plat, Gen4Constants.Type_HGSS ->
@@ -5780,11 +5917,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					"DP";
 			default -> null;
 		};
-	}
-
-	@Override
-	public PaletteHandler getPaletteHandler() {
-		return paletteHandler;
 	}
 
 	@Override

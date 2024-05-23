@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.graphics.palettes;
+package com.dabomstew.pkrandom.randomizers;
 
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
@@ -21,30 +21,31 @@ package com.dabomstew.pkrandom.graphics.palettes;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.romhandlers.RomHandler;
+
 import java.util.Random;
 
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.PokemonSet;
-
 /**
- * A sub-handler for palette randomizing/modifications. Loading/writing palettes
+ * A sub-randomizer for palette randomizing/modifications. Loading/writing palettes
  * should be done elsewhere, with implementations of this class only handling
  * changes done to said palettes.
  */
-public abstract class PaletteHandler {
+public abstract class PaletteRandomizer {
 
-	protected Random random;
+	protected final RomHandler romHandler;
+	protected final Settings settings;
+	protected final Random random;
 
-	public PaletteHandler(Random random) {
+	public PaletteRandomizer(RomHandler romHandler, Settings settings, Random random) {
+		this.romHandler = romHandler;
+		this.settings = settings;
 		this.random = random;
 	}
 
-	public PaletteHandler(int seed) {
-		this.random = new Random(seed);
-	}
-
-	public abstract void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet,
-												  boolean typeSanity, boolean evolutionSanity, boolean shinyFromNormal);
+	public abstract void randomizePokemonPalettes();
 
 	protected void setShinyPaletteFromNormal(Pokemon pk) {
 		pk.setShinyPalette(new Palette(pk.getNormalPalette()));

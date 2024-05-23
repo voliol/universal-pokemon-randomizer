@@ -87,8 +87,8 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private ExpCurve growthCurve;
     
-    private Palette normalPalette;
-    private Palette shinyPalette;
+    private List<Palette> normalPalettes = new ArrayList<>(1);
+    private List<Palette> shinyPalettes = new ArrayList<>(1);
 
     private List<Evolution> evolutionsFrom = new ArrayList<>();
     private List<Evolution> evolutionsTo = new ArrayList<>();
@@ -644,19 +644,41 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     public Palette getNormalPalette() {
-        return normalPalette;
+        return getNormalPalette(0);
+    }
+
+    public Palette getNormalPalette(int index) {
+        return normalPalettes.size() <= index ? null : normalPalettes.get(index);
     }
 
     public void setNormalPalette(Palette normalPalette) {
-        this.normalPalette = normalPalette;
+        setNormalPalette(0, normalPalette);
+    }
+
+    public void setNormalPalette(int index, Palette normalPalette) {
+        while (normalPalettes.size() <= index) {
+            normalPalettes.add(index, null);
+        }
+        normalPalettes.set(index, normalPalette);
     }
 
     public Palette getShinyPalette() {
-        return shinyPalette;
+        return getShinyPalette(0);
+    }
+
+    public Palette getShinyPalette(int index) {
+        return shinyPalettes.size() <= index ? null : shinyPalettes.get(index);
     }
 
     public void setShinyPalette(Palette shinyPalette) {
-        this.shinyPalette = shinyPalette;
+        setShinyPalette(0, shinyPalette);
+    }
+
+    public void setShinyPalette(int index, Palette shinyPalette) {
+        while (shinyPalettes.size() <= index) {
+            shinyPalettes.add(index, null);
+        }
+        shinyPalettes.set(index, shinyPalette);
     }
 
     /**

@@ -463,39 +463,43 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     @Override
 	public List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
-		for (int i = 1; i < getPokemon().size(); i++) {
-			Pokemon pk = getPokemon().get(i);
-
-			BufferedImage frontNormal = getPokemonImage(pk, false, false, false, true);
-			BufferedImage backNormal = getPokemonImage(pk, true, false, false, false);
-			BufferedImage frontShiny = getPokemonImage(pk, false, true, false, true);
-			BufferedImage backShiny = getPokemonImage(pk, true, true, false, false);
-
-			BufferedImage combined = GFXFunctions
-					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
-			bims.add(combined);
+		for (Pokemon pk : getPokemonSet()) {
+			bims.add(createPokemonImageGetter(pk).getFull());
 		}
 		return bims;
 	}
 
+    public abstract static class GBPokemonImageGetter extends PokemonImageGetter {
+
+        public GBPokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            setIncludePalette(true);
+
+            BufferedImage frontNormal = get();
+            BufferedImage backNormal = setBack(true).get();
+            BufferedImage backShiny = setShiny(true).get();
+            BufferedImage frontShiny = setBack(false).get();
+
+            return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+        }
+    }
+
 	@Override
 	public final BufferedImage getMascotImage() {
-        // uncomment to dump all Pokemon images to a folder, helps when making changes to the palette randomization
-//		try {
-//			dumpAllPokemonImages();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		Pokemon pk = getPokemonSet().getRandom(random);
-		boolean shiny = random.nextInt(10) == 0;
-		boolean gen1 = generationOfPokemon() == 1;
-
-		return getPokemonImage(pk, false, !gen1 && shiny, true, false);
+		try {
+			dumpAllPokemonImages();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        return createPokemonImageGetter(getPokemonSet().getRandom(random))
+                .setShiny(random.nextInt(10) == 0 && generationOfPokemon() != 1)
+                .setTransparentBackground(true)
+                .get();
 	}
-
-	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette);
 
     @Override
     public abstract AbstractGBRomEntry getRomEntry();

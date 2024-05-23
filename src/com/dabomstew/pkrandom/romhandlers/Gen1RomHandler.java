@@ -30,6 +30,9 @@ import java.util.*;
 
 // TODO: imports
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.graphics.packs.GBCPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
@@ -38,11 +41,19 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.graphics.palettes.Gen1PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.SGBPaletteID;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.GBCTMTextEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen1RomEntry;
 import compressors.Gen1Cmp;
 import compressors.Gen1Decmp;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.*;
 
 /**
  * {@link RomHandler} for Red, Blue, Yellow, Green.
@@ -69,7 +80,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     public Gen1RomHandler(Random random) {
         super(random);
-        this.paletteHandler = new Gen1PaletteHandler(random);
     }
 
     // Important RBY Data Structures
@@ -93,9 +103,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-    
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Gen1RomEntry romEntry;
@@ -2839,65 +2846,88 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return decmp.getCompressedLength();
     }
 
-	@Override
-	public BufferedImage getPokemonImage(Pokemon uncheckedPk, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
-		if (!(uncheckedPk instanceof Gen1Pokemon pk)) {
-			throw new IllegalArgumentException("Argument \"uncheckedPk\" is not a Gen1Pokemon");
-		}
-		if (shiny) {
-			return null;
-		}
-
-        int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
-        int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
-
-        int bank = calculateFrontSpriteBank(pk);
-        int imageOffset = calculateOffset(back ? pk.getBackImagePointer() : pk.getFrontImagePointer(), bank);
-        byte[] data = readImageData(imageOffset);
-        Palette palette = getVisiblePokemonPalette(pk);
-
-        BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
-
-        if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
-        }
-        if (includePalette) {
-            for (int j = 0; j < palette.size(); j++) {
-                bim.setRGB(j, 0, palette.get(j).toARGB());
-            }
-        }
-        
-        return bim;
-    }
-
-    private byte[] readImageData(int imageOffset) {
-        Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
-        image.decompress();
-        return image.getData();
-    }
-
-    private Palette getVisiblePokemonPalette(Gen1Pokemon pk) {
-        Palette palette;
-        if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
-            int palIndex = pk.getPaletteID().ordinal();
-            int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
-            if (romEntry.isYellow() && romEntry.isNonJapanese()) {
-                // Non-japanese Yellow can use GBC palettes instead.
-                // Stored directly after regular SGB palettes.
-                palOffset += 320;
-            }
-            palette = read4ColorPalette(palOffset);
-        } else {
-            palette = GBCImage.DEFAULT_PALETTE;
-        }
-        return palette;
-    }
-
     @Override
-	public PaletteHandler getPaletteHandler() {
-	    return paletteHandler;
-	}
+    public Gen1PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen1PokemonImageGetter(pk);
+    }
+
+    public class Gen1PokemonImageGetter extends GBPokemonImageGetter {
+        private final Gen1Pokemon pk;
+
+        public Gen1PokemonImageGetter(Pokemon pk) {
+            super(pk);
+            if (!(pk instanceof Gen1Pokemon gen1Pk)) {
+                throw new IllegalArgumentException("Argument \"pk\" is not a Gen1Pokemon");
+            }
+            this.pk = gen1Pk;
+        }
+
+        @Override
+        public Gen1PokemonImageGetter setShiny(boolean shiny) {
+            throw new UnsupportedOperationException("No shinies in Generation 1");
+        }
+
+        @Override
+        public Gen1PokemonImageGetter setGraphicalForme(int forme) {
+            throw new UnsupportedOperationException("No graphical formes in Generation 1");
+        }
+
+        @Override
+        public BufferedImage get() {
+            int width = back ? 4 : pk.getFrontImageDimensions() & 0x0F;
+            int height = back ? 4 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
+
+            int bank = calculateFrontSpriteBank(pk);
+            int imageOffset = calculateOffset(back ? pk.getBackImagePointer() : pk.getFrontImagePointer(), bank);
+            byte[] data = readImageData(imageOffset);
+            Palette palette = getVisiblePokemonPalette(pk);
+
+            BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
+
+            if (transparentBackground) {
+                bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
+            }
+            if (includePalette) {
+                for (int j = 0; j < palette.size(); j++) {
+                    bim.setRGB(j, 0, palette.get(j).toARGB());
+                }
+            }
+
+            return bim;
+        }
+
+        private byte[] readImageData(int imageOffset) {
+            Gen1Decmp image = new Gen1Decmp(rom, imageOffset);
+            image.decompress();
+            return image.getData();
+        }
+
+        private Palette getVisiblePokemonPalette(Gen1Pokemon pk) {
+            Palette palette;
+            if (romEntry.getIntValue("MonPaletteIndicesOffset") > 0 && romEntry.getIntValue("SGBPalettesOffset") > 0) {
+                int palIndex = pk.getPaletteID().ordinal();
+                int palOffset = romEntry.getIntValue("SGBPalettesOffset") + palIndex * 8;
+                if (romEntry.isYellow() && romEntry.isNonJapanese()) {
+                    // Non-japanese Yellow can use GBC palettes instead.
+                    // Stored directly after regular SGB palettes.
+                    palOffset += 320;
+                }
+                palette = read4ColorPalette(palOffset);
+            } else {
+                palette = GBCImage.DEFAULT_PALETTE;
+            }
+            return palette;
+        }
+        @Override
+        public BufferedImage getFull() {
+            setIncludePalette(true);
+
+            BufferedImage frontNormal = get();
+            BufferedImage backNormal = setBack(true).get();
+
+            return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal } });
+        }
+    }
 
     @Override
     public Gen1RomEntry getRomEntry() {

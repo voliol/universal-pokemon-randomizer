@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.graphics.palettes;
+package com.dabomstew.pkrandom.randomizers;
 
 /*----------------------------------------------------------------------------*/
 /*--  Part of "Universal Pokemon Randomizer" by Dabomstew                   --*/
@@ -21,23 +21,29 @@ package com.dabomstew.pkrandom.graphics.palettes;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.palettes.SGBPaletteID;
+import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.Gen1Pokemon;
+import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.romhandlers.RomHandler;
+
 import java.util.EnumMap;
 import java.util.Random;
 
-import com.dabomstew.pkrandom.pokemon.*;
-
 /**
- * A {@link PaletteHandler} for Gen 1 games (R/B/Y).
+ * A {@link PaletteRandomizer} for Gen 1 games (R/B/Y).
  */
-public class Gen1PaletteHandler extends PaletteHandler {
+public class Gen1PaletteRandomizer extends PaletteRandomizer {
 
 	private static final SGBPaletteID DEFAULT_PALETTE_ID = SGBPaletteID.MEWMON;
 	private static final EnumMap<Type, SGBPaletteID[]> TYPE_PALETTE_IDS = initTypePaletteIDs();
 
 	private boolean typeSanity;
 
-	public Gen1PaletteHandler(Random random) {
-		super(random);
+	public Gen1PaletteRandomizer(RomHandler romHandler, Settings settings, Random random) {
+		super(romHandler, settings, random);
 	}
 
 	private static EnumMap<Type, SGBPaletteID[]> initTypePaletteIDs() {
@@ -61,13 +67,12 @@ public class Gen1PaletteHandler extends PaletteHandler {
 	}
 
 	@Override
-	public void randomizePokemonPalettes(PokemonSet<Pokemon> pokemonSet, boolean typeSanity,
-										 boolean evolutionSanity, boolean shinyFromNormal) {
-		// obviously shinyFromNormal is not used, it is here for a hopefully prettier
-		// class structure
-		this.typeSanity = typeSanity;
-		PokemonSet<Gen1Pokemon> gen1PokemonSet = new PokemonSet<>(pokemonSet, new Gen1Pokemon(0));
-		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() -> gen1PokemonSet);
+	public void randomizePokemonPalettes() {
+		this.typeSanity = settings.isPokemonPalettesFollowTypes();
+		boolean evolutionSanity = settings.isPokemonPalettesFollowEvolutions();
+
+		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() ->
+				new PokemonSet<>(romHandler.getPokemonSet(), new Gen1Pokemon(0)));
 		cueh.apply(evolutionSanity, true, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
 	}
 
