@@ -17,21 +17,20 @@ public class MascotGetter {
     }
 
     public BufferedImage getMascotImage(RomHandler romHandler) {
-        System.out.println("Getting mascot image...");
         if (romHandler.hasPokemonImageGetter()) {
             return getMascotUsingPIG(romHandler);
         } else if (romHandler instanceof Abstract3DSRomHandler ab3DSRomHandler) {
             return getMascotIcon(ab3DSRomHandler);
         }
-        System.out.println("neither");
         return null;
     }
 
     private BufferedImage getMascotUsingPIG(RomHandler romHandler) {
-        System.out.println("pig");
         PokemonImageGetter pig = romHandler.createPokemonImageGetter(romHandler.getPokemonSet().getRandom(random))
-                .setShiny(random.nextInt(10) == 0 && romHandler.generationOfPokemon() != 1)
                 .setTransparentBackground(true);
+        if (romHandler.generationOfPokemon() != 1) {
+            pig = pig.setShiny(random.nextInt(10) == 0);
+        }
         if (pig instanceof AbstractDSRomHandler.DSPokemonImageGetter dsPig) {
             pig = dsPig.setGender(random.nextInt(2));
         }
@@ -39,7 +38,6 @@ public class MascotGetter {
     }
 
     private BufferedImage getMascotIcon(Abstract3DSRomHandler romHandler) {
-        System.out.println("icons");
         // ideally the 3DS games would have a PokemonImageGetter, but they don't, so we use this somewhat hacky
         // method instead to get a random Pokemon icon for the mascot.
         int iconIndex = random.nextInt(romHandler.getIconGARCSize() - 1) + 1;
