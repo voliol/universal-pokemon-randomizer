@@ -52,17 +52,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen5RomHandler create(Random random) {
-            return new Gen5RomHandler(random);
+        public Gen5RomHandler create() {
+            return new Gen5RomHandler();
         }
 
         public boolean isLoadable(String filename) {
             return detectNDSRomInner(getROMCodeFromFile(filename), getVersionFromFile(filename));
         }
-    }
-
-    public Gen5RomHandler(Random random) {
-        super(random);
     }
 
     private static List<Gen5RomEntry> roms;
@@ -3945,7 +3941,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     protected Collection<Integer> getGraphicalFormePokes() {
         // TODO
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -3987,7 +3983,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             int spriteIndex = pk.getNumber() * 20;
 
-            if (hasGenderedImages() && gender == Gender.FEMALE) {
+            if (hasGenderedImages() && gender == FEMALE) {
                 spriteIndex++;
             }
             if (back) {

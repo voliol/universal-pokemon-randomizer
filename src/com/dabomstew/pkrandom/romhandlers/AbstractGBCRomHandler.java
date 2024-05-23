@@ -50,10 +50,6 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     private BankDividedFreedSpace freedSpace;
 
-    public AbstractGBCRomHandler(Random random) {
-        super(random);
-    }
-
     @Override
     protected void midLoadingSetUp() {
         super.midLoadingSetUp();

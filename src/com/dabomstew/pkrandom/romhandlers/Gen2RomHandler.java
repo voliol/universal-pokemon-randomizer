@@ -51,8 +51,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen2RomHandler create(Random random) {
-            return new Gen2RomHandler(random);
+        public Gen2RomHandler create() {
+            return new Gen2RomHandler();
         }
 
         public boolean isLoadable(String filename) {
@@ -64,10 +64,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // nope
             return loaded.length != 0 && detectRomInner(loaded, (int) fileLength);
         }
-    }
-
-    public Gen2RomHandler(Random random) {
-        super(random);
     }
 
     private static List<Gen2RomEntry> roms;

@@ -48,17 +48,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen6RomHandler create(Random random) {
-            return new Gen6RomHandler(random);
+        public Gen6RomHandler create() {
+            return new Gen6RomHandler();
         }
 
         public boolean isLoadable(String filename) {
             return detect3DSRomInner(getProductCodeFromFile(filename), getTitleIdFromFile(filename));
         }
-    }
-
-    public Gen6RomHandler(Random random) {
-        super(random);
     }
 
     private static List<Gen6RomEntry> roms;
@@ -3936,50 +3932,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-	public BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC, 
-			boolean transparentBackground, boolean includePalette) {
-
-        // for now picks icon randomly, instead of by the given Pokemon
-    	int pkIndex = this.random.nextInt(pokeGraphicsGARC.files.size()-2)+1;
-
-		byte[] icon = pokeGraphicsGARC.files.get(pkIndex).get(0);
-		Palette palette = Palette.read3DSIconPalette(icon);
-
-		int width = 64;
-		int height = 32;
-		// Get the picture and uncompress it.
-		byte[] uncompressedPic = Arrays.copyOfRange(icon, 4 + palette.size() * 2,
-				4 + palette.size() * 2 + width * height);
-
-		int bpp = palette.size() <= 0x10 ? 4 : 8;
-		BufferedImage bim = GFXFunctions.drawTiledZOrderImage(uncompressedPic, palette.toARGB(), 0, width, height, bpp);
-
-        // Unscramble the above onto a 96x96 canvas
-        BufferedImage finalImage = new BufferedImage(40, 30, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = finalImage.getGraphics();
-        g.drawImage(bim, 0, 0, 64, 64, 0, 0, 64, 64, null);
-        g.drawImage(bim, 64, 0, 96, 8, 0, 64, 32, 72, null);
-        g.drawImage(bim, 64, 8, 96, 16, 32, 64, 64, 72, null);
-        g.drawImage(bim, 64, 16, 96, 24, 0, 72, 32, 80, null);
-        g.drawImage(bim, 64, 24, 96, 32, 32, 72, 64, 80, null);
-        g.drawImage(bim, 64, 32, 96, 40, 0, 80, 32, 88, null);
-        g.drawImage(bim, 64, 40, 96, 48, 32, 80, 64, 88, null);
-        g.drawImage(bim, 64, 48, 96, 56, 0, 88, 32, 96, null);
-        g.drawImage(bim, 64, 56, 96, 64, 32, 88, 64, 96, null);
-        g.drawImage(bim, 0, 64, 64, 96, 0, 96, 64, 128, null);
-        g.drawImage(bim, 64, 64, 96, 72, 0, 128, 32, 136, null);
-        g.drawImage(bim, 64, 72, 96, 80, 32, 128, 64, 136, null);
-        g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
-        g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
-
-        // Phew, all done.
-        return finalImage;
-	}
-
-    @Override
-    public BufferedImage getPokemonIcon(int pkIndex, GARCArchive pokeGraphicsGARC,
+    public BufferedImage getPokemonIcon(int iconIndex, GARCArchive pokeGraphicsGARC,
                                         boolean transparentBackground, boolean includePalette) {
-        byte[] icon = pokeGraphicsGARC.files.get(pkIndex).get(0);
+        byte[] icon = pokeGraphicsGARC.files.get(iconIndex).get(0);
         Palette palette = Palette.read3DSIconPalette(icon);
 
         int width = 64;

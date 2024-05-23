@@ -56,7 +56,7 @@ public class CliRandomizer {
 
             for (RomHandler.Factory rhf : checkHandlers) {
                 if (rhf.isLoadable(romFileHandler.getAbsolutePath())) {
-                    romHandler = rhf.create(RandomSource.instance());
+                    romHandler = rhf.create();
                     romHandler.loadRom(romFileHandler.getAbsolutePath());
                     if (updateFilePath != null && (romHandler.generationOfPokemon() == 6 || romHandler.generationOfPokemon() == 7)) {
                         romHandler.loadGameUpdate(updateFilePath);

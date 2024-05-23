@@ -49,10 +49,6 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 	private NCCH gameUpdate;
 	private String loadedFN;
 
-	public Abstract3DSRomHandler(Random random) {
-		super(random);
-	}
-
 	@Override
 	public boolean loadRom(String filename) {
 		String productCode = getProductCodeFromFile(filename);
@@ -373,20 +369,22 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		return bims;
 	}
 
-	@Override
-	public final BufferedImage getMascotImage() {
-		// uncomment to dump all Pokemon images to a folder
-//		try {
-//			dumpAllPokemonImages();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+	public int getIconGARCSize() {
 		try {
-			Pokemon pk = getPokemonSet().getRandom(random);
+			String GARCPath = getGARCPath("PokemonGraphics");
+			GARCArchive pokeGraphicsGARC = readGARC(GARCPath, false);
+			return pokeGraphicsGARC.files.size();
+		} catch (IOException e) {
+			throw new RomIOException(e);
+		}
+	}
+
+	public BufferedImage getPokemonIcon(int iconIndex) {
+		try {
 			String GARCPath = getGARCPath("PokemonGraphics");
 			GARCArchive pokeGraphicsGARC = readGARC(GARCPath, false);
 
-			return getPokemonIcon(pk, pokeGraphicsGARC, true, false);
+			return getPokemonIcon(iconIndex, pokeGraphicsGARC, true, false);
 		} catch (IOException e) {
 			throw new RomIOException(e);
 		}
@@ -395,8 +393,6 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 	public abstract BufferedImage getPokemonIcon(int pkIndex, GARCArchive pokeGraphicsGARC,
 												 boolean transparentBackground, boolean includePalette);
 
-	public abstract BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
-			boolean transparentBackground, boolean includePalette);
 
 	public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
 		// No PokemonImageGetter for the 3DS games for now, in part because they can only get icons,

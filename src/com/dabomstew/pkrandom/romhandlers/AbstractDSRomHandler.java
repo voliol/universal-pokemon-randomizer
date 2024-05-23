@@ -37,10 +37,6 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     private String loadedFN;
     private boolean arm9Extended = false;
 
-    public AbstractDSRomHandler(Random random) {
-        super(random);
-    }
-
     protected abstract boolean detectNDSRom(String ndsCode, byte version);
 
     @Override
@@ -509,34 +505,19 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
     protected abstract BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC);
 
     @Override
-    public final BufferedImage getMascotImage() {
-        try {
-            dumpAllPokemonImages();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        NARCArchive pokeGraphicsNARC;
-        try {
-            String NARCpath = getRomEntry().getFile("PokemonGraphics");
-            pokeGraphicsNARC = readNARC(NARCpath);
-        } catch (IOException e) {
-            throw new RomIOException(e);
-        }
-        return createPokemonImageGetter(getRestrictedPokemonService().randomPokemon(random))
-                .setPokeGraphicsNARC(pokeGraphicsNARC)
-                .setGender(DSPokemonImageGetter.Gender.values()[random.nextInt(2)])
-                .setShiny(random.nextInt(10) == 0)
-                .setTransparentBackground(true)
-                .get();
+    public boolean hasPokemonImageGetter() {
+        return true;
     }
 
+    @Override
     public abstract DSPokemonImageGetter createPokemonImageGetter(Pokemon pk);
 
     public abstract class DSPokemonImageGetter extends PokemonImageGetter {
-        public enum Gender {MALE, FEMALE}
+        public static final int MALE = 0;
+        public static final int FEMALE = 1;
 
         protected NARCArchive pokeGraphicsNARC;
-        protected Gender gender = Gender.FEMALE;
+        protected int gender = FEMALE;
 
         public DSPokemonImageGetter(Pokemon pk) {
             super(pk);
@@ -547,7 +528,10 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             return this;
         }
 
-        public DSPokemonImageGetter setGender(Gender gender) {
+        public DSPokemonImageGetter setGender(int gender) {
+            if (gender != FEMALE && gender != MALE) {
+                throw new IllegalArgumentException("invalid gender, must be 0(MALE) or 1(FEMALE)");
+            }
             this.gender = gender;
             return this;
         }
@@ -566,7 +550,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         public abstract boolean hasGenderedImages();
 
         public BufferedImage getFull() {
-            setGender(DSPokemonImageGetter.Gender.MALE)
+            setGender(DSPokemonImageGetter.MALE)
                     .setIncludePalette(true);
 
             BufferedImage frontNormalM = get();
@@ -576,7 +560,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
             BufferedImage combined;
             if (hasGenderedImages()) {
-                BufferedImage frontShinyF = setGender(DSPokemonImageGetter.Gender.FEMALE).get();
+                BufferedImage frontShinyF = setGender(DSPokemonImageGetter.FEMALE).get();
                 BufferedImage backShinyF = setBack(true).get();
                 BufferedImage backNormalF = setShiny(false).get();
                 BufferedImage frontNormalF = setBack(false).get();

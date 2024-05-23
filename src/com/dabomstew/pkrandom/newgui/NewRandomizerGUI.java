@@ -836,7 +836,7 @@ public class NewRandomizerGUI {
 
             for (RomHandler.Factory rhf : checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
-                    this.romHandler = rhf.create(RandomSource.instance());
+                    this.romHandler = rhf.create();
                     if (!usedLauncher && this.romHandler instanceof Abstract3DSRomHandler) {
                         String message = bundle.getString("GUI.pleaseUseTheLauncher");
                         Object[] messages = {message};
@@ -1480,7 +1480,7 @@ public class NewRandomizerGUI {
         String currentFN = this.romHandler.loadedFilename();
         for (RomHandler.Factory rhf : checkHandlers) {
             if (rhf.isLoadable(currentFN)) {
-                this.romHandler = rhf.create(RandomSource.instance());
+                this.romHandler = rhf.create();
                 opDialog = new OperationDialog(bundle.getString("GUI.loadingText"), frame, true);
                 Thread t = new Thread(() -> {
                     SwingUtilities.invokeLater(() -> opDialog.setVisible(!batchRandomization));
@@ -3695,7 +3695,7 @@ public class NewRandomizerGUI {
 
     private ImageIcon makeMascotIcon() {
         try {
-            BufferedImage handlerImg = romHandler.getMascotImage();
+            BufferedImage handlerImg = new MascotGetter(RND).getMascotImage(romHandler);
 
             if (handlerImg == null) {
                 return emptyIcon;

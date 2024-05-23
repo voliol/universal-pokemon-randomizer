@@ -269,7 +269,7 @@ public class PresetLoadDialog extends JDialog {
             final File fh = romFileChooser.getSelectedFile();
             for (RomHandler.Factory rhf : parentGUI.checkHandlers) {
                 if (rhf.isLoadable(fh.getAbsolutePath())) {
-                    final RomHandler checkHandler = rhf.create(RandomSource.instance());
+                    final RomHandler checkHandler = rhf.create();
                     if (!NewRandomizerGUI.usedLauncher && checkHandler instanceof Abstract3DSRomHandler) {
                         String message = bundle.getString("GUI.pleaseUseTheLauncher");
                         Object[] messages = {message};

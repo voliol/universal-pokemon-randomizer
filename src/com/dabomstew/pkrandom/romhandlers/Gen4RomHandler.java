@@ -49,17 +49,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen4RomHandler create(Random random) {
-			return new Gen4RomHandler(random);
+		public Gen4RomHandler create() {
+			return new Gen4RomHandler();
 		}
 
 		public boolean isLoadable(String filename) {
 			return detectNDSRomInner(getROMCodeFromFile(filename), getVersionFromFile(filename));
 		}
-	}
-
-	public Gen4RomHandler(Random random) {
-		super(random);
 	}
 
 	private static List<Gen4RomEntry> roms;
@@ -5708,7 +5704,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				imageIndex = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber())[back ? 1 : 0][forme];
 			} else {
 				imageIndex = pk.getNumber() * 6 + 2;
-				if (gender == Gender.MALE) {
+				if (gender == MALE) {
 					imageIndex++;
 				}
 				if (back) {

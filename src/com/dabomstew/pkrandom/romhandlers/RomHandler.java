@@ -61,7 +61,7 @@ import java.util.Set;
 public interface RomHandler {
 
     abstract class Factory {
-        public abstract RomHandler create(Random random);
+        public abstract RomHandler create();
 
         public abstract boolean isLoadable(String filename);
     }
@@ -515,8 +515,6 @@ public interface RomHandler {
      */
     boolean setIntroPokemon(Pokemon pk);
 
-    BufferedImage getMascotImage();
-
     int generationOfPokemon();
 
     void writeCheckValueToROM(int value);
@@ -551,6 +549,11 @@ public interface RomHandler {
     boolean hasCustomPlayerGraphicsSupport();
 
     void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace);
+
+    /**
+     * Returns whether {@link #createPokemonImageGetter(Pokemon)} is implemented or not.
+     */
+    boolean hasPokemonImageGetter();
 
     PokemonImageGetter createPokemonImageGetter(Pokemon pk);
 

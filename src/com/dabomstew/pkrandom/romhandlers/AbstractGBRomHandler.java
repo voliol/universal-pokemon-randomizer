@@ -32,10 +32,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     private String loadedFileName;
     private long actualCRC32;
 
-    public AbstractGBRomHandler(Random random) {
-        super(random);
-    }
-
     @Override
     public boolean loadRom(String filename) {
         try {
@@ -446,6 +442,11 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 		return bims;
 	}
 
+    @Override
+    public boolean hasPokemonImageGetter() {
+        return true;
+    }
+
     public abstract static class GBPokemonImageGetter extends PokemonImageGetter {
 
         public GBPokemonImageGetter(Pokemon pk) {
@@ -464,19 +465,6 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
         }
     }
-
-	@Override
-	public final BufferedImage getMascotImage() {
-		try {
-			dumpAllPokemonImages();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        return createPokemonImageGetter(getPokemonSet().getRandom(random))
-                .setShiny(random.nextInt(10) == 0 && generationOfPokemon() != 1)
-                .setTransparentBackground(true)
-                .get();
-	}
 
     @Override
     public abstract AbstractGBRomEntry getRomEntry();

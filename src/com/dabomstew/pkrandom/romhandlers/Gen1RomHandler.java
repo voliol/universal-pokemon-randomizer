@@ -50,8 +50,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen1RomHandler create(Random random) {
-            return new Gen1RomHandler(random);
+        public Gen1RomHandler create() {
+            return new Gen1RomHandler();
         }
 
         public boolean isLoadable(String filename) {
@@ -63,10 +63,6 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             // nope
             return loaded.length != 0 && detectRomInner(loaded, (int) fileLength);
         }
-    }
-
-    public Gen1RomHandler(Random random) {
-        super(random);
     }
 
     // Important RBY Data Structures

@@ -50,18 +50,10 @@ import java.util.*;
  */
 public abstract class AbstractRomHandler implements RomHandler {
 
-    protected final Random random;
-
     protected final RestrictedPokemonService rPokeService = new RestrictedPokemonService(this);
     protected final TypeService typeService = new TypeService(this);
 
     protected int perfectAccuracy = 100; // default
-
-    /* Constructor */
-
-    public AbstractRomHandler(Random random) {
-        this.random = random;
-    }
 
     /*
      * Public Methods, implemented here for all gens. Unlikely to be overridden.
@@ -490,6 +482,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace) {
         throw new UnsupportedOperationException("Custom player graphics not supported for this game.");
+    }
+
+    @Override
+    public boolean hasPokemonImageGetter() {
+        return false; // default: no
     }
 
     // just for testing

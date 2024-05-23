@@ -336,7 +336,7 @@ public class PaletteDescriptionTool extends javax.swing.JFrame {
 
         for (RomHandler.Factory rhf : checkHandlers) {
             if (rhf.isLoadable(file.getAbsolutePath())) {
-                romHandler = rhf.create(RandomSource.instance());
+                romHandler = rhf.create();
                 try {
                     romHandler.loadRom(file.getAbsolutePath());
                 } catch (Exception e) {
