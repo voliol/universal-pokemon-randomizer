@@ -1089,7 +1089,7 @@ public class RandomizerGUI {
                 SwingUtilities.invokeLater(() -> opDialog.setVisible(!batchRandomization));
                 boolean succeededSave = false;
                 try {
-                    finishedCV.set(new GameRandomizer(settings, RandomSource.instance(), romHandler, bundle, saveAsDirectory).randomize(filename,
+                    finishedCV.set(new GameRandomizer(settings, romHandler, bundle, saveAsDirectory).randomize(filename,
                             verboseLog, seed));
                     succeededSave = true;
                 } catch (RandomizationException ex) {

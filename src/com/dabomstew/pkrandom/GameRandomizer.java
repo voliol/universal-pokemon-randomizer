@@ -47,7 +47,6 @@ public class GameRandomizer {
     private static final String NEWLINE = System.getProperty("line.separator");
 
     private final Settings settings;
-    private final Random random;
     private final RomHandler romHandler;
     private final ResourceBundle bundle;
     private final boolean saveAsDirectory;
@@ -78,9 +77,8 @@ public class GameRandomizer {
     private final PaletteRandomizer paletteRandomizer;
     private final MiscTweakRandomizer miscTweakRandomizer;
 
-    public GameRandomizer(Settings settings, Random random, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
+    public GameRandomizer(Settings settings, RomHandler romHandler, ResourceBundle bundle, boolean saveAsDirectory) {
         this.settings = settings;
-        this.random = random;
         this.romHandler = romHandler;
         this.bundle = bundle;
         this.saveAsDirectory = saveAsDirectory;
@@ -89,33 +87,33 @@ public class GameRandomizer {
         this.moveUpdater = new MoveUpdater(romHandler);
         this.typeEffUpdater = new TypeEffectivenessUpdater(romHandler);
 
-        this.introPokeRandomizer = new IntroPokemonRandomizer(romHandler, settings, random);
-        this.pokeBSRandomizer = new PokemonBaseStatRandomizer(romHandler, settings, random);
-        this.pokeTypeRandomizer = new PokemonTypeRandomizer(romHandler, settings, random);
-        this.pokeAbilityRandomizer = new PokemonAbilityRandomizer(romHandler, settings, random);
-        this.evoRandomizer = new EvolutionRandomizer(romHandler, settings, random);
-        this.starterRandomizer = new StarterRandomizer(romHandler, settings, random);
-        this.staticPokeRandomizer = new StaticPokemonRandomizer(romHandler, settings, random);
-        this.tradeRandomizer = new TradeRandomizer(romHandler, settings, random);
-        this.moveDataRandomizer = new MoveDataRandomizer(romHandler, settings, random);
-        this.pokeMovesetRandomizer = new PokemonMovesetRandomizer(romHandler, settings, random);
-        this.trainerPokeRandomizer = new TrainerPokemonRandomizer(romHandler, settings, random);
-        this.trainerMovesetRandomizer = new TrainerMovesetRandomizer(romHandler, settings, random);
-        this.trainerNameRandomizer = new TrainerNameRandomizer(romHandler, settings, random);
-        this.encounterRandomizer = new EncounterRandomizer(romHandler, settings, random);
-        this.pokeHeldItemRandomizer = new PokemonWildHeldItemRandomizer(romHandler, settings, random);
-        this.tmtMoveRandomizer = new TMTutorMoveRandomizer(romHandler, settings, random);
-        this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, random);
-        this.itemRandomizer = new ItemRandomizer(romHandler, settings, random);
-        this.typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, random);
+        this.introPokeRandomizer = new IntroPokemonRandomizer(romHandler, settings, RandomSource.instance());
+        this.pokeBSRandomizer = new PokemonBaseStatRandomizer(romHandler, settings, RandomSource.instance());
+        this.pokeTypeRandomizer = new PokemonTypeRandomizer(romHandler, settings, RandomSource.instance());
+        this.pokeAbilityRandomizer = new PokemonAbilityRandomizer(romHandler, settings, RandomSource.instance());
+        this.evoRandomizer = new EvolutionRandomizer(romHandler, settings, RandomSource.instance());
+        this.starterRandomizer = new StarterRandomizer(romHandler, settings, RandomSource.instance());
+        this.staticPokeRandomizer = new StaticPokemonRandomizer(romHandler, settings, RandomSource.instance());
+        this.tradeRandomizer = new TradeRandomizer(romHandler, settings, RandomSource.instance());
+        this.moveDataRandomizer = new MoveDataRandomizer(romHandler, settings, RandomSource.instance());
+        this.pokeMovesetRandomizer = new PokemonMovesetRandomizer(romHandler, settings, RandomSource.instance());
+        this.trainerPokeRandomizer = new TrainerPokemonRandomizer(romHandler, settings, RandomSource.instance());
+        this.trainerMovesetRandomizer = new TrainerMovesetRandomizer(romHandler, settings, RandomSource.instance());
+        this.trainerNameRandomizer = new TrainerNameRandomizer(romHandler, settings,  RandomSource.cosmeticInstance());
+        this.encounterRandomizer = new EncounterRandomizer(romHandler, settings, RandomSource.instance());
+        this.pokeHeldItemRandomizer = new PokemonWildHeldItemRandomizer(romHandler, settings, RandomSource.instance());
+        this.tmtMoveRandomizer = new TMTutorMoveRandomizer(romHandler, settings, RandomSource.instance());
+        this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, RandomSource.instance());
+        this.itemRandomizer = new ItemRandomizer(romHandler, settings, RandomSource.instance());
+        this.typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, RandomSource.instance());
         this.paletteRandomizer =
                 switch (romHandler.generationOfPokemon()) {
-                    case 1 -> new Gen1PaletteRandomizer(romHandler, settings, random);
-                    case 2 -> new Gen2PaletteRandomizer(romHandler, settings, random);
-                    case 3, 4, 5 -> new Gen3to5PaletteRandomizer(romHandler, settings, random);
+                    case 1 -> new Gen1PaletteRandomizer(romHandler, settings, RandomSource.cosmeticInstance());
+                    case 2 -> new Gen2PaletteRandomizer(romHandler, settings, RandomSource.cosmeticInstance());
+                    case 3, 4, 5 -> new Gen3to5PaletteRandomizer(romHandler, settings, RandomSource.cosmeticInstance());
                     default -> null;
                 };
-        this.miscTweakRandomizer = new MiscTweakRandomizer(romHandler, settings, random);
+        this.miscTweakRandomizer = new MiscTweakRandomizer(romHandler, settings, RandomSource.instance());
     }
 
     public int randomize(final String filename) {

@@ -26,80 +26,23 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.Random;
 
 public class RandomSource {
 
-    private static Random source = new Random();
-    private static Random cosmeticSource = new Random();
-    private static int calls = 0;
-    private static int cosmeticCalls = 0;
-    private static Random instance = new RandomSourceInstance();
-    private static Random cosmeticInstance = new CosmeticRandomSourceInstance();
+    private static RandomWithCounter instance = new RandomWithCounter();
+    private static RandomWithCounter cosmeticInstance = new RandomWithCounter();
 
     public static void reset() {
-        source = new Random();
-        cosmeticSource = new Random();
-        calls = 0;
-        cosmeticCalls = 0;
+        instance = new RandomWithCounter();
+        cosmeticInstance = new RandomWithCounter();
     }
 
     public static void seed(long seed) {
-        source.setSeed(seed);
-        cosmeticSource.setSeed(seed);
-        calls = 0;
-        cosmeticCalls = 0;
-    }
-
-    public static double random() {
-        calls++;
-        return source.nextDouble();
-    }
-
-    public static int nextInt(int size) {
-        calls++;
-        return source.nextInt(size);
-    }
-
-    public static int nextIntCosmetic(int size) {
-        cosmeticCalls++;
-        return cosmeticSource.nextInt(size);
-    }
-
-    public static void nextBytes(byte[] bytes) {
-        calls++;
-        source.nextBytes(bytes);
-    }
-
-    public static int nextInt() {
-        calls++;
-        return source.nextInt();
-    }
-
-    public static long nextLong() {
-        calls++;
-        return source.nextLong();
-    }
-
-    public static boolean nextBoolean() {
-        calls++;
-        return source.nextBoolean();
-    }
-
-    public static float nextFloat() {
-        calls++;
-        return source.nextFloat();
-    }
-
-    public static double nextDouble() {
-        calls++;
-        return source.nextDouble();
-    }
-
-    public static synchronized double nextGaussian() {
-        calls++;
-        return source.nextGaussian();
+        instance.setSeed(seed);
+        cosmeticInstance.setSeed(seed);
     }
 
     public static long pickSeed() {
@@ -120,115 +63,70 @@ public class RandomSource {
     }
 
     public static int callsSinceSeed() {
-        return calls + cosmeticCalls;
+        return instance.calls + cosmeticInstance.calls;
     }
 
-    private static class RandomSourceInstance extends Random {
+    private static class RandomWithCounter extends Random {
 
-        /**
-         * 
-         */
+        private int calls = 0;
+
+        @Serial
         private static final long serialVersionUID = -4876737183441746322L;
 
         @Override
         public synchronized void setSeed(long seed) {
-            RandomSource.seed(seed);
+            super.setSeed(seed);
+            calls = 0;
         }
 
         @Override
         public void nextBytes(byte[] bytes) {
-            RandomSource.nextBytes(bytes);
+            calls++;
+            super.nextBytes(bytes);
         }
 
         @Override
         public int nextInt() {
-            return RandomSource.nextInt();
+            calls++;
+            return super.nextInt();
         }
 
         @Override
-        public int nextInt(int n) {
-            return RandomSource.nextInt(n);
+        public int nextInt(int bound) {
+            calls++;
+            return super.nextInt(bound);
         }
 
         @Override
         public long nextLong() {
-            return RandomSource.nextLong();
+            calls++;
+            return super.nextLong();
         }
 
         @Override
         public boolean nextBoolean() {
-            return RandomSource.nextBoolean();
+            calls++;
+            return super.nextBoolean();
         }
 
         @Override
         public float nextFloat() {
-            return RandomSource.nextFloat();
+            calls++;
+            return super.nextFloat();
         }
 
         @Override
         public double nextDouble() {
-            return RandomSource.nextDouble();
+            calls++;
+            return super.nextDouble();
         }
 
         @Override
         public synchronized double nextGaussian() {
-            return RandomSource.nextGaussian();
+            calls++;
+            return super.nextGaussian();
         }
 
     }
 
-    private static class CosmeticRandomSourceInstance extends Random {
-
-        @Override
-        public synchronized void setSeed(long seed) {
-            RandomSource.seed(seed);
-        }
-
-        @Override
-        @Deprecated
-        public void nextBytes(byte[] bytes) {
-
-        }
-
-        @Override
-        @Deprecated
-        public int nextInt() {
-            return 0;
-        }
-
-        @Override
-        public int nextInt(int n) {
-            return RandomSource.nextIntCosmetic(n);
-        }
-
-        @Override
-        @Deprecated
-        public long nextLong() {
-            return 0;
-        }
-
-        @Override
-        @Deprecated
-        public boolean nextBoolean() {
-            return false;
-        }
-
-        @Override
-        @Deprecated
-        public float nextFloat() {
-            return 0;
-        }
-
-        @Override
-        @Deprecated
-        public double nextDouble() {
-            return 0;
-        }
-
-        @Override
-        @Deprecated
-        public synchronized double nextGaussian() {
-            return 0;
-        }
-    }
 }
