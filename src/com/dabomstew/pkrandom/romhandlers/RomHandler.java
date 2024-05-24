@@ -548,6 +548,10 @@ public interface RomHandler {
     // Graphics
     // ========
 
+    boolean hasPokemonPaletteSupport();
+
+    boolean pokemonPaletteSupportIsPartial();
+
     boolean hasCustomPlayerGraphicsSupport();
 
     void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace);

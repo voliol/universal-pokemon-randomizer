@@ -86,5 +86,4 @@ public class PokemonBaseStatRandomizer extends Randomizer {
         }
     }
 
-    // TODO: maybe move RomHandler.updatePokemonStats() here as well?
 }

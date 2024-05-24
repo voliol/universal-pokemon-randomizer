@@ -178,6 +178,11 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return false;
     }
 
+    @Override
+    public boolean hasPokemonPaletteSupport() {
+        return true;
+    }
+
     public abstract boolean detectRom(byte[] rom);
 
 

@@ -482,7 +482,7 @@ public class Gen4Constants {
 
     public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
 
-    private final static int bulbasaurOverworldSpriteID = 297; // TODO is this correct?
+    private final static int bulbasaurOverworldSpriteID = 297;
 
     /**
      * Returns the first overworld sprite ID for a given Pokemon species.

@@ -383,7 +383,17 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return true;
     }
 
-	// I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
+    @Override
+    public boolean hasPokemonPaletteSupport() {
+        return true;
+    }
+
+    @Override
+    public boolean pokemonPaletteSupportIsPartial() {
+        return true;
+    }
+
+    // I dare not rewrite the load ROM structure, so for now loadPokemonPalettes()
 	// is separate methods called in loadROM()/loadedRom() methods. Even though
 	// one call in AbstractRomHandler should suffice.
 	protected void loadPokemonPalettes() {

@@ -481,6 +481,16 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public boolean hasPokemonPaletteSupport() {
+        return false;
+    }
+
+    @Override
+    public boolean pokemonPaletteSupportIsPartial() {
+        return false;
+    }
+
+    @Override
     public boolean hasCustomPlayerGraphicsSupport() {
         return false;
     }

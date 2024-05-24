@@ -2843,7 +2843,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void loadPokemonPalettes() {
-        // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = romEntry.getIntValue("PokemonPalettes") + 8;
         for (Pokemon pk : getPokemonSet()) {
             int num = pk.getNumber() - 1;
@@ -2853,7 +2852,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
             int shinyPaletteOffset = palOffset + num * 8 + 4;
             pk.setShinyPalette(read2ColorPalette(shinyPaletteOffset));
-
         }
     }
 

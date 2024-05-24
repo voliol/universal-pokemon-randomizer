@@ -2691,9 +2691,9 @@ public class RandomizerGUI {
             teUpdateTypeEffectivenessCheckbox.setSelected(false);
 
             // Graphics
-            boolean ppalSupport = romHandler.generationOfPokemon() < 6; // TODO: is this the RomHandler's job?
+            boolean ppalSupport = romHandler.hasPokemonPaletteSupport();
             ppalNotExistLabel.setVisible(!ppalSupport);
-            boolean ppalPartialSupport = romHandler.generationOfPokemon() == 4 || romHandler.generationOfPokemon() == 5;
+            boolean ppalPartialSupport = romHandler.pokemonPaletteSupportIsPartial();
             ppalPartiallyImplementedLabel.setVisible(ppalPartialSupport);
             ppalUnchangedRadioButton.setVisible(ppalSupport);
             ppalUnchangedRadioButton.setEnabled(ppalSupport);
