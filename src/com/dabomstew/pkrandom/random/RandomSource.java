@@ -1,10 +1,6 @@
-package com.dabomstew.pkrandom;
+package com.dabomstew.pkrandom.random;
 
 /*----------------------------------------------------------------------------*/
-/*--  RandomSource.java - functions as a centralized source of randomness   --*/
-/*--                      to allow the same seed to produce the same random --*/
-/*--                      ROM consistently.                                 --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -26,52 +22,38 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.Serial;
-import java.security.SecureRandom;
 import java.util.Random;
 
+/**
+ * Holds a non-cosmetic and a cosmetic {@link Random}, and keeps track of their usage.
+ * This allows both Randoms to use a single seed without cosmetic RNG calls affecting non-cosmetic ones.
+ * Seeing how many times RNG has been called is interesting when logging.
+ */
 public class RandomSource {
 
-    private static RandomWithCounter instance = new RandomWithCounter();
-    private static RandomWithCounter cosmeticInstance = new RandomWithCounter();
+    private final RandomWithCounter nonCosmetic = new RandomWithCounter();
+    private final RandomWithCounter cosmetic = new RandomWithCounter();
 
-    public static void reset() {
-        instance = new RandomWithCounter();
-        cosmeticInstance = new RandomWithCounter();
+    public void seed(long seed) {
+        nonCosmetic.setSeed(seed);
+        cosmetic.setSeed(seed);
     }
 
-    public static void seed(long seed) {
-        instance.setSeed(seed);
-        cosmeticInstance.setSeed(seed);
+    public Random getNonCosmetic() {
+        return nonCosmetic;
     }
 
-    public static long pickSeed() {
-        long value = 0;
-        byte[] by = SecureRandom.getSeed(6);
-        for (int i = 0; i < by.length; i++) {
-            value |= ((long) by[i] & 0xffL) << (8 * i);
-        }
-        return value;
+    public Random getCosmetic() {
+        return cosmetic;
     }
 
-    public static Random instance() {
-        return instance;
-    }
-
-    public static Random cosmeticInstance() {
-        return cosmeticInstance;
-    }
-
-    public static int callsSinceSeed() {
-        return instance.calls + cosmeticInstance.calls;
+    public int callsSinceSeed() {
+        return nonCosmetic.calls + cosmetic.calls;
     }
 
     private static class RandomWithCounter extends Random {
 
         private int calls = 0;
-
-        @Serial
-        private static final long serialVersionUID = -4876737183441746322L;
 
         @Override
         public synchronized void setSeed(long seed) {

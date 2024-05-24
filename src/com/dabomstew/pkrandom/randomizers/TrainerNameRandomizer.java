@@ -9,7 +9,6 @@ import java.util.*;
 
 public class TrainerNameRandomizer extends Randomizer {
 
-    // TODO: note, all randomness here is cosmetic, so the Random object should be a cosmetic random
     public TrainerNameRandomizer(RomHandler romHandler, Settings settings, Random random) {
         super(romHandler, settings, random);
     }

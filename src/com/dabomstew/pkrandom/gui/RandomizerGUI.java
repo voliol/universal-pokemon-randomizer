@@ -35,6 +35,7 @@ import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.random.SeedPicker;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import javax.swing.*;
@@ -992,10 +993,7 @@ public class RandomizerGUI {
     }
 
     private void saveRandomizedRom(SaveType outputType, File fh) {
-        // Get a seed
-        long seed = RandomSource.pickSeed();
-        // Apply it
-        RandomSource.seed(seed);
+        long seed = SeedPicker.pickSeed();
         presetMode = false;
 
         try {
@@ -1266,7 +1264,6 @@ public class RandomizerGUI {
 
             if (allowed && fh != null) {
                 // Apply the seed we were given
-                RandomSource.seed(seed);
                 presetMode = true;
                 performRandomization(fh.getAbsolutePath(), seed, pld.getCustomNames(), outputType == SaveType.DIRECTORY);
             }
