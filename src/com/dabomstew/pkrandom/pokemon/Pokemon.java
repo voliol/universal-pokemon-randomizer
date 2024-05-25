@@ -252,6 +252,26 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     /**
+     * Gets all Pokemon that this Pokemon is related to by evolution.
+     * @return a PokemonSet containing all Pokemon this Pokemon is related to (including itself)
+     */
+    public PokemonSet getAllRelatedPokemon() {
+        PokemonSet family = new PokemonSet();
+        family.addFamily(this);
+        return family;
+    }
+
+    /**
+     * Gets all Pokemon that this Pokemon was related to by evolution before randomization.
+     * @return a PokemonSet containing all Pokemon this Pokemon was related to (including itself)
+     */
+    public PokemonSet getAllOriginallyRelatedPokemon() {
+        PokemonSet family = new PokemonSet();
+        family.addOriginalFamily(this);
+        return family;
+    }
+
+    /**
      * Saves certain pieces of data that can be randomized, but that
      * we want to know the original version of for later randomization.
      * Currently: Types, evolutions.

@@ -189,6 +189,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    /**
+     * Deprecated. Use PokemonSet and its addAllFamilies() method instead.
+     * TODO: remove usages
+     */
     private void addEvolutionaryRelatives(List<Pokemon> pokemonPool) {
         Set<Pokemon> newPokemon = new TreeSet<>();
         for (Pokemon pk : pokemonPool) {
@@ -203,6 +207,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokemonPool.addAll(newPokemon);
     }
 
+    //TODO: implement this into PokemonSet
+    //...preferably in a more elegant way.
     private void addAllPokesInclFormes(List<Pokemon> pokemonPool, List<Pokemon> pokemonPoolInclFormes) {
         List<Pokemon> altFormes = this.getAltFormes();
         for (int i = 0; i < pokemonPool.size(); i++) {
@@ -6852,6 +6858,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     // Note that this is slow and somewhat hacky.
+    // TODO: implement for PokemonSet (hopefully in a less hacky way)
     private Pokemon findPokemonInPoolWithSpeciesID(List<Pokemon> pokemonPool, int speciesID) {
         for (int i = 0; i < pokemonPool.size(); i++) {
             if (pokemonPool.get(i).number == speciesID) {
@@ -6861,6 +6868,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         return null;
     }
 
+    /**
+     * Deprecated; use Pokemon.getAllRelatedPokemon() instead.
+     * TODO: remove usages
+     */
     private List<Pokemon> getEvolutionaryRelatives(Pokemon pk) {
         List<Pokemon> evolutionaryRelatives = new ArrayList<>();
         for (Evolution ev : pk.evolutionsFrom) {

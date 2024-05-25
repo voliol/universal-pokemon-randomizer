@@ -217,6 +217,57 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
+     * Creates a new set containing the full evolutionary families of all Pokemon in this set.
+     * @return a PokemonSet containing all Pokemon in this set and all their evolutionary relatives.
+     */
+    public PokemonSet getAllWithFamilies() {
+        PokemonSet allRelatedPokemon = new PokemonSet();
+        for(Pokemon pokemon : this) {
+            if(!allRelatedPokemon.contains(pokemon)) {
+                allRelatedPokemon.addFamily(pokemon);
+            }
+        }
+        return allRelatedPokemon;
+    }
+
+    /**
+     * Creates a new set containing the full evolutionary families,
+     * before randomization, of all Pokemon in this set.
+     * @return a PokemonSet containing all Pokemon in this set and all their evolutionary relatives.
+     */
+    public PokemonSet getAllWithOriginalFamilies() {
+        PokemonSet allRelatedPokemon = new PokemonSet();
+        for(Pokemon pokemon : this) {
+            if(!allRelatedPokemon.contains(pokemon)) {
+                //technically, this check isn't strictly necessary; it just speeds things up
+                allRelatedPokemon.addOriginalFamily(pokemon);
+            }
+        }
+        return allRelatedPokemon;
+    }
+
+    /**
+     * Adds to this set the evolutionary families of every Pokemon in this set.
+     * @return True if any Pokemon were added, false otherwise.
+     */
+    public boolean addAllFamilies() {
+        PokemonSet allWithFamilies = this.getAllWithFamilies();
+        boolean changed = this.addAll(allWithFamilies);
+        return changed;
+    }
+
+    /**
+     * Adds to this set the evolutionary families, before randomization,
+     * of every Pokemon in this set.
+     * @return True if any Pokemon were added, false otherwise.
+     */
+    public boolean addAllOriginalFamilies() {
+        PokemonSet allWithFamilies = this.getAllWithOriginalFamilies();
+        boolean changed = this.addAll(allWithFamilies);
+        return changed;
+    }
+
+    /**
      * Returns all members of the given Pokemon's evolutionary family
      * that are contained uninterrupted within this set.
      * Returns an empty set if the given Pokemon is not in this set.
@@ -482,7 +533,7 @@ public class PokemonSet implements Set<Pokemon> {
      * @param length the number of Pokemon required in the evolutionary line. 1 to 3.
      * @return a PokemonSet containing all valid Pokemon.
      */
-    public PokemonSet Original(int length) {
+    public PokemonSet getOriginalEvoLinesAtLeastLength(int length) {
         if(length > 3 || length < 1) {
             throw new IllegalArgumentException("Invalid evolutionary line length.");
         }
