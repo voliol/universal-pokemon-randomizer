@@ -8,7 +8,7 @@ public class SeedPicker {
     // I honestly don't know how it works or whether it is better
     // than standard implementations of picking a seed in, say,
     // Random, or Math.random().
-    // However, it's from older code native used in the
+    // However, it's from older code used in the
     // Universal Pokemon Randomizer, and risking breaking stuff
     // just because I don't get it seems unwise.
     public static long pickSeed() {

@@ -9,8 +9,6 @@ import java.util.function.Consumer;
 
 public class PokemonBaseStatUpdater extends Updater {
 
-    // TODO: write unit tests
-
     // starts with two null-consumers so the indexing can be nicer,
     // and then four more since Gens 2-5 didn't change the base stats of any existing Pokemon
     private final List<Consumer<List<Pokemon>>> updates = List.of(
@@ -126,7 +124,6 @@ public class PokemonBaseStatUpdater extends Updater {
             updateHP(pokes, Species.cryogonal, 80);
             updateDef(pokes, Species.cryogonal, 50);
         }
-
         if (romHandler.generationOfPokemon() == 6) {
             updateSpDef(pokes, Species.Gen6Formes.alakazamMega, 105);
             updateAtk(pokes, Species.Gen6Formes.aegislashB, 140);
@@ -135,23 +132,29 @@ public class PokemonBaseStatUpdater extends Updater {
     }
 
     private void gen8Updates(List<Pokemon> pokes) {
-        updateDef(pokes, Species.aegislash, 140);
-        updateSpDef(pokes, Species.aegislash, 140);
-        int aegislashBlade;
-        if (romHandler.generationOfPokemon() == 6) {
-            aegislashBlade = Species.Gen6Formes.aegislashB;
-        } else { // Gen 7
-            aegislashBlade = romHandler.isUSUM() ? Species.USUMFormes.aegislashB : Species.SMFormes.aegislashB;
+        if (romHandler.generationOfPokemon() >= 6) {
+            updateDef(pokes, Species.aegislash, 140);
+            updateSpDef(pokes, Species.aegislash, 140);
+            int aegislashBlade;
+            if (romHandler.generationOfPokemon() == 6) {
+                aegislashBlade = Species.Gen6Formes.aegislashB;
+            } else { // Gen 7
+                aegislashBlade = romHandler.isUSUM() ? Species.USUMFormes.aegislashB : Species.SMFormes.aegislashB;
+            }
+            updateAtk(pokes, aegislashBlade, 140);
+            updateSpAtk(pokes, aegislashBlade, 140);
         }
-        updateAtk(pokes, aegislashBlade, 140);
-        updateSpAtk(pokes, aegislashBlade, 140);
     }
 
     private void gen9Updates(List<Pokemon> pokes) {
-        updateDef(pokes, Species.cresselia, 110);
-        updateSpDef(pokes, Species.cresselia, 120);
-        updateAtk(pokes, Species.zacian, 120);
-        updateAtk(pokes, Species.zamazenta, 120);
+        if (romHandler.generationOfPokemon() >= 4) {
+            updateDef(pokes, Species.cresselia, 110);
+            updateSpDef(pokes, Species.cresselia, 120);
+        }
+        if (romHandler.generationOfPokemon() >= 8) {
+            updateAtk(pokes, Species.zacian, 120);
+            updateAtk(pokes, Species.zamazenta, 120);
+        }
     }
 
     private void updateHP(List<Pokemon> pokes, int species, int value) {

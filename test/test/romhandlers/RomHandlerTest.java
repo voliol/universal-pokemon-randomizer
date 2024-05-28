@@ -33,7 +33,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{1}, new Roms.Region[]{Roms.Region.USA}, false);
+        return Roms.getRoms(new int[]{1,2 ,3, 4, 5, 6,7}, new Roms.Region[]{Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {
@@ -72,7 +72,7 @@ public class RomHandlerTest {
         romHandler.getRestrictedPokemonService().setRestrictions(new Settings());
     }
 
-    protected Generation getGenerationOf(String romName) {
+    protected static Generation getGenerationOf(String romName) {
         return Generation.GAME_TO_GENERATION.get(stripToBaseRomName(romName));
     }
 
@@ -81,14 +81,14 @@ public class RomHandlerTest {
      * RomHandler.generationOfPokemon() is almost as slow as running the test cases. Increasingly relevant with
      * newer/bigger ROMs involved.
      */
-    protected int getGenerationNumberOf(String romName) {
+    protected static int getGenerationNumberOf(String romName) {
         return getGenerationOf(romName).getNumber();
     }
 
     /**
      * A fast check whether a ROM uses an AbstractGBRomHandler.
      */
-    protected boolean isGBGame(String romName) {
+    protected static boolean isGBGame(String romName) {
         return getGenerationNumberOf(romName) <= 3;
     }
 
@@ -97,7 +97,7 @@ public class RomHandlerTest {
      *
      * @param romName The full name of the ROM
      */
-    private String stripToBaseRomName(String romName) {
+    private static String stripToBaseRomName(String romName) {
         return romName.split("\\(")[0].trim();
     }
 

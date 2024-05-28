@@ -7,8 +7,6 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 public class TypeEffectivenessUpdater extends Updater {
 
-    // TODO: write unit tests
-
     // for now has no method to return anything loggable, separate from the final TypeTable
 
     public TypeEffectivenessUpdater(RomHandler romHandler) {
