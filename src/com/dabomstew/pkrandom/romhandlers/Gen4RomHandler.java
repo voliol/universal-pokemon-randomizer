@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen4RomHandler.java - randomizer handler for D/P/Pt/HG/SS.            --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -24,47 +22,40 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen4RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
 import thenewpoketext.PokeTextData;
 import thenewpoketext.TextToPoke;
 
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
-import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
-import com.dabomstew.pkrandom.newnds.NARCArchive;
+import javax.naming.OperationNotSupportedException;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
+/**
+ * {@link RomHandler} for Diamond, Pearl, Platinum, HeartGold, SoulSilver.
+ */
 public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	public static class Factory extends RomHandler.Factory {
 
 		@Override
-		public Gen4RomHandler create(Random random, PrintStream logStream) {
-			return new Gen4RomHandler(random, logStream);
+		public Gen4RomHandler create() {
+			return new Gen4RomHandler();
 		}
 
 		public boolean isLoadable(String filename) {
 			return detectNDSRomInner(getROMCodeFromFile(filename), getVersionFromFile(filename));
 		}
-	}
-
-	public Gen4RomHandler(Random random) {
-		super(random, null);
-	}
-
-	public Gen4RomHandler(Random random, PrintStream logStream) {
-		super(random, logStream);
 	}
 
 	private static List<Gen4RomEntry> roms;
@@ -81,9 +72,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			throw new RuntimeException("Could not read Rom Entries.", e);
 		}
 	}
-
-	// Sub-handlers
-	private PaletteHandler paletteHandler;
 
 	// This rom
 	private Pokemon[] pokes;
@@ -133,22 +121,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			arm9 = readARM9();
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		try {
 			msgNarc = readNARC(romEntry.getFile("Text"));
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		try {
 			scriptNarc = readNARC(romEntry.getFile("Scripts"));
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		try {
 			eventNarc = readNARC(romEntry.getFile("Events"));
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		loadPokemonStats();
 		pokemonListInclFormes = Arrays.asList(pokes);
@@ -171,7 +159,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			computeCRC32sForRom();
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		
 		// We want to guarantee that the catching tutorial in HGSS has Ethan/Lyra's new
@@ -188,10 +176,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			arm9 = extendARM9(arm9, extendBy, romEntry.getStringValue("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
 			genericIPSPatch(arm9, "NewCatchingTutorialSubroutineTweak");
 		}
-
-		// Having this in the constructor would be preferred,
-		// but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-		this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 	}
 
 	private void loadMoves() {
@@ -236,7 +220,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				loadMiscMoveInfoFromEffect(moves[i], secondaryEffectChance);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -632,8 +616,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			for (int i = 1; i <= Gen4Constants.pokemonCount; i++) {
 				pokes[i] = new Pokemon(i);
 				loadBasicPokeStats(pokes[i], pokeNarc.files.get(i));
-				// Name?
 				pokes[i].setName(pokeNames[i]);
+				pokes[i].setGeneration(generationOf(pokes[i]));
 			}
 
 			int i = Gen4Constants.pokemonCount + 1;
@@ -647,14 +631,29 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				pokes[i].setBaseForme(pokes[Gen4Constants.formeMappings.get(k).baseForme]);
 				pokes[i].setFormeNumber(Gen4Constants.formeMappings.get(k).formeNumber);
 				pokes[i].setFormeSuffix(Gen4Constants.formeSuffixes.get(k));
+				pokes[i].setGeneration(generationOf(pokes[i]));
 				i = i + 1;
 			}
 
 			populateEvolutions();
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
+	}
+
+	private int generationOf(Pokemon pk) {
+		if (pk.getBaseForme() != null) {
+			return pk.getBaseForme().getGeneration();
+		}
+		if (pk.getNumber() >= Species.turtwig) {
+			return 4;
+		} else if (pk.getNumber() >= Species.treecko) {
+			return 3;
+		} else if (pk.getNumber() >= Species.chikorita) {
+			return 2;
+		}
+		return 1;
 	}
 
 	private void loadBasicPokeStats(Pokemon pkmn, byte[] stats) {
@@ -717,22 +716,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			writeARM9(arm9);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		try {
 			writeNARC(romEntry.getFile("Text"), msgNarc);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		try {
 			writeNARC(romEntry.getFile("Scripts"), scriptNarc);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		try {
 			writeNARC(romEntry.getFile("Events"), eventNarc);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -758,7 +757,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			this.writeNARC(romEntry.getFile("MoveData"), moveNarc);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
 	}
@@ -797,7 +796,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			String pstatsnarc = romEntry.getFile("PokemonStats");
 			this.writeNARC(pstatsnarc, pokeNarc);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
 		writeEvolutions();
@@ -893,7 +892,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				int poke3 = readWord(starterData, romEntry.getIntValue("StarterPokemonOffset") + 8);
 				return Arrays.asList(pokes[poke1], pokes[poke2], pokes[poke3]);
 			} catch (IOException e) {
-				throw new RandomizerIOException(e);
+				throw new RomIOException(e);
 			}
 		}
 	}
@@ -975,7 +974,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					}
 					writeOverlay(romEntry.getIntValue("StarterPokemonOvlNumber"), starterPokemonOverlay);
 				} catch (IOException e) {
-					throw new RandomizerIOException(e);
+					throw new RomIOException(e);
 				}
 				return true;
 			} else {
@@ -1202,7 +1201,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					setStrings(romEntry.getIntValue("StarterLocationTextOffset"), r201Strings);
 				}
 			} catch (IOException e) {
-				throw new RandomizerIOException(e);
+				throw new RomIOException(e);
 			}
 			return true;
 		}
@@ -1249,7 +1248,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				encounterAreas = getEncountersDPPt(useTimeOfDay);
 			}
 		} catch (IOException ex) {
-			throw new RandomizerIOException(ex);
+			throw new RomIOException(ex);
 		}
 
 		Gen4Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType(), useTimeOfDay);
@@ -1407,10 +1406,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		byte[] trophyGardenData = extraEncounterData.files.get(8);
 		EncounterArea area = readExtraEncounterAreaDPPt(trophyGardenData, 0, 16);
 
-		// Trophy Garden rotating Pokemon get their levels from the regular Trophy
-		// Garden grass encounters,
-		// indices 6 and 7. To make the logs nice, read in these encounters for this
-		// area and set the level
+		// Trophy Garden rotating Pokemon get their levels from the regular Trophy Garden grass encounters,
+		// indices 6 and 7. To make the logs nice, read in these encounters for this area and set the level
 		// and maxLevel for the rotating encounters appropriately.
 		int trophyGardenGrassEncounterIndex = Gen4Constants.getTrophyGardenGrassEncounterIndex(romEntry.getRomType());
 		EncounterArea trophyGardenGrassEncounterSet = encounterAreas.get(trophyGardenGrassEncounterIndex);
@@ -1423,6 +1420,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 		area.setDisplayName("Trophy Garden Rotating Pokemon (via Mr. Backlot)");
+		area.setForceMultipleSpecies(true); // prevents a possible softlock
 		encounterAreas.add(area);
 	}
 
@@ -1432,10 +1430,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			byte[] greatMarshData = extraEncounterData.files.get(greatMarshOffsets[i]);
 			EncounterArea area = readExtraEncounterAreaDPPt(greatMarshData, 0, 32);
 
-			// Great Marsh rotating Pokemon get their levels from the regular Great Marsh
-			// grass encounters,
-			// indices 6 and 7. To make the logs nice, read in these encounters for all
-			// areas and set the
+			// Great Marsh rotating Pokemon get their levels from the regular Great Marsh grass encounters,
+			// indices 6 and 7. To make the logs nice, read in these encounters for all areas and set the
 			// level and maxLevel for the rotating encounters appropriately.
 			int level = 100;
 			int maxLevel = 0;
@@ -1786,7 +1782,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				updatePokedexAreaDataDPPt(encounterAreas);
 			}
 		} catch (IOException ex) {
-			throw new RandomizerIOException(ex);
+			throw new RomIOException(ex);
 		}
 	}
 
@@ -1945,14 +1941,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// Trophy Garden rotating Pokemon (Mr. Backlot)
 		byte[] trophyGardenData = extraEncounterData.files.get(8);
 		EncounterArea trophyGardenArea = areaIterator.next();
-
-		// The game will softlock if all the Pokemon here are the same species. As an
-		// emergency mitigation, just randomly pick a different species in case this
-		// happens. This is very unlikely to happen in practice, even with very
-		// restrictive settings, so it should be okay that we're breaking logic here.
-		while (trophyGardenArea.stream().distinct().count() == 1) {
-			trophyGardenArea.get(0).setPokemon(randomPokemon());
-		}
 		writeExtraEncountersDPPt(trophyGardenData, 0, trophyGardenArea);
 	}
 
@@ -2201,7 +2189,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			loadedWildMapNames = true;
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
 	}
@@ -2607,7 +2595,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				Gen4Constants.setMultiBattleStatusHGSS(allTrainers);
 			}
 		} catch (IOException ex) {
-			throw new RandomizerIOException(ex);
+			throw new RomIOException(ex);
 		}
 		return allTrainers;
 	}
@@ -2718,28 +2706,20 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			this.writeNARC(romEntry.getFile("TrainerData"), trainers);
 			this.writeNARC(romEntry.getFile("TrainerPokemon"), trpokes);
 		} catch (IOException ex) {
-			throw new RandomizerIOException(ex);
+			throw new RomIOException(ex);
 		}
 	}
 
 	@Override
-	public void setDoubleBattleMode() {
-		super.setDoubleBattleMode();
-		// In Gen 4, the game prioritizes showing the special double battle intro over
-		// almost any
-		// other kind of intro. Since the trainer music is tied to the intro, this
-		// results in the
-		// vast majority of "special" trainers losing their intro and music in double
-		// battle mode.
-		// To fix this, the below code patches the executable to skip the case for the
-		// special
-		// double battle intro (by changing a beq to an unconditional branch); this
-		// slightly breaks
-		// battles that are double battles in the original game, but the trade-off is
-		// worth it.
+	public void makeDoubleBattleModePossible() {
+		// In Gen 4, the game prioritizes showing the special double battle intro over almost any
+		// other kind of intro. Since the trainer music is tied to the intro, this results in the
+		// vast majority of "special" trainers losing their intro and music in double battle mode.
+		// To fix this, the below code patches the executable to skip the case for the special
+		// double battle intro (by changing a beq to an unconditional branch); this slightly breaks
+		// battles that are double battles in the original game, but the trade-off is worth it.
 
-		// Then, also patch various subroutines that control the "Trainer Eye" event and
-		// text boxes
+		// Then, also patch various subroutines that control the "Trainer Eye" event and text boxes
 		// related to this in order to make double battles work on all trainers
 		try {
 			String doubleBattleFixPrefix = Gen4Constants.getDoubleBattleFixPrefix(romEntry.getRomType());
@@ -2748,7 +2728,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				offset += doubleBattleFixPrefix.length() / 2; // because it was a prefix
 				arm9[offset] = (byte) 0xE0;
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			String doubleBattleFlagReturnPrefix = romEntry.getStringValue("DoubleBattleFlagReturnPrefix");
@@ -2764,7 +2744,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				offset += doubleBattleFlagReturnPrefix.length() / 2; // because it was a prefix
 				writeWord(arm9, offset, 0xBD08);
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// Instead of doing "double trainer walk" for nonzero values, do it only for
@@ -2775,7 +2755,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				arm9[offset] = (byte) 0x2; // cmp r0, #0x2
 				arm9[offset + 3] = (byte) 0xD0; // beq DOUBLE_TRAINER_WALK
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// Instead of checking if the value was exactly 1 after checking that it was
@@ -2786,7 +2766,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				offset += doubleBattleWalkingPrefix2.length() / 2; // because it was a prefix
 				arm9[offset] = (byte) 0x2;
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// Once again, compare a value to 2 instead of just checking that it's nonzero
@@ -2797,7 +2777,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeWord(arm9, offset + 2, 0x2802);
 				arm9[offset + 5] = (byte) 0xD0;
 			} else {
-				throw new RandomizationException("Double Battle Mode not supported for this game");
+				throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
 			}
 
 			// This NARC has some data that controls how text boxes are handled at the end
@@ -2812,7 +2792,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			trainerEndFile[romEntry.getIntValue("TrainerEndTextBoxOffset")] = 0;
 			writeNARC(romEntry.getFile("BattleSkillSubSeq"), battleSkillSubSeq);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
+		} catch (OperationNotSupportedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -2895,7 +2877,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				movesets.put(pkmn.getNumber(), learnt);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return movesets;
 	}
@@ -2943,7 +2925,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		try {
 			this.writeNARC(romEntry.getFile("PokemonMovesets"), movesLearnt);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
 	}
@@ -2965,7 +2947,34 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
+		}
+
+		return eggMoves;
+	}
+
+	/**
+	 * Returns a Set of move IDs of all {@link Move}s a {@link Pokemon} could possibly have through egg move breeding.
+	 * I.e., all the Pokemon's and all of its prevos' egg moves.
+	 */
+	private Set<Integer> getEffectiveEggMoves(Pokemon pk) {
+		Map<Integer, List<Integer>> allEggMoves = getEggMoves();
+		Set<Integer> eggMoves = new HashSet<>();
+
+		Stack<Pokemon> stack = new Stack<>();
+		List<Pokemon> visited = new ArrayList<>();
+		stack.add(pk);
+		while (!stack.isEmpty()) {
+			Pokemon curr = stack.pop();
+			visited.add(curr);
+			for (Evolution evo : curr.getEvolutionsTo()) {
+				if (!visited.contains(evo.getFrom())) {
+					stack.push(evo.getFrom());
+				}
+			}
+			if (allEggMoves.containsKey(curr.getNumber())) {
+				eggMoves.addAll(allEggMoves.get(curr.getNumber()));
+			}
 		}
 
 		return eggMoves;
@@ -2990,7 +2999,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -3165,8 +3174,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			if (romEntry.getIntValue("MysteryEggOffset") > 0) {
 				byte[] ovOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
-				StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getIntValue("MysteryEggOffset")] & 0xFF]);
-				se.isEgg = true;
+				StaticEncounter se = isMysteryEggCommandImproved(ovOverlay) ?
+						readImprovedMysteryEgg(ovOverlay) : readVanillaMysteryEgg(ovOverlay);
 				sp.add(se);
 			}
 			if (romEntry.getIntValue("FossilTableOffset") > 0) {
@@ -3190,9 +3199,32 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				getRoamers(sp);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return sp;
+	}
+
+	private boolean isMysteryEggCommandImproved(byte[] ovOverlay) {
+		int offset = romEntry.getIntValue("MysteryEggCommandOffset");
+		for (int i = 0; i < Gen4Constants.mysteryEggCommandImprovement.length; i++) {
+			if (ovOverlay[offset++] != Gen4Constants.mysteryEggCommandImprovement[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private StaticEncounter readImprovedMysteryEgg(byte[] ovOverlay) {
+		int offset = romEntry.getIntValue("MysteryEggCommandOffset") + Gen4Constants.mysteryEggCommandImprovement.length;
+		StaticEncounter se = new StaticEncounter(pokes[readLong(ovOverlay, offset)]);
+		se.isEgg = true;
+		return se;
+	}
+
+	private StaticEncounter readVanillaMysteryEgg(byte[] ovOverlay) {
+		StaticEncounter se = new StaticEncounter(pokes[ovOverlay[romEntry.getIntValue("MysteryEggOffset")] & 0xFF]);
+		se.isEgg = true;
+		return se;
 	}
 
 	@Override
@@ -3229,19 +3261,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					int tradeNum = trades[i];
 					StaticEncounter se = statics.next();
 					Pokemon thisTrade = se.pkmn;
-					List<Integer> possibleAbilities = new ArrayList<>();
-					possibleAbilities.add(thisTrade.getAbility1());
-					if (thisTrade.getAbility2() > 0) {
-						possibleAbilities.add(thisTrade.getAbility2());
-					}
-					if (thisTrade.getAbility3() > 0) {
-						possibleAbilities.add(thisTrade.getAbility3());
-					}
 
-					// Write species and ability
+					// Write species and ability,
+					// always ability1 out of simplicity even if some pokes got a second one.
 					writeLong(tradeNARC.files.get(tradeNum), 0, thisTrade.getNumber());
-					writeLong(tradeNARC.files.get(tradeNum), 0x1C,
-							possibleAbilities.get(this.random.nextInt(possibleAbilities.size())));
+					writeLong(tradeNARC.files.get(tradeNum), 0x1C, thisTrade.getAbility1());
 
 					// Write level to script file
 					byte[] scriptFile = scriptNARC.files.get(scripts[i]);
@@ -3257,15 +3281,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeNARC(romEntry.getFile("InGameTrades"), tradeNARC);
 			}
 			if (romEntry.getIntValue("MysteryEggOffset") > 0) {
-				// Same overlay as MT moves
-				// Truncate the pokemon# to 1byte, unless it's 0
-				int pokenum = statics.next().pkmn.getNumber();
-				if (pokenum > 255) {
-					pokenum = this.random.nextInt(255) + 1;
-				}
-				byte[] ovOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
-				ovOverlay[romEntry.getIntValue("MysteryEggOffset")] = (byte) pokenum;
-				writeOverlay(romEntry.getIntValue("FieldOvlNumber"), ovOverlay);
+				setMysteryEgg(statics.next());
 			}
 			if (romEntry.getIntValue("FossilTableOffset") > 0) {
 				int baseOffset = romEntry.getIntValue("FossilTableOffset");
@@ -3297,9 +3313,100 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				patchDistortionWorldGroundCheck();
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return true;
+	}
+
+	private void setMysteryEgg(StaticEncounter se) throws IOException {
+		// The Mystery Egg (HGSS Togepi) uses a different command than other eggs,
+		// which is hardcoded in the field overlay. Normally this command uses a single
+		// byte to represent Togepi's number, which clearly doesn't allow for any Pokemon
+		// with a number > 255 to replace it.
+		// To fix this, we overwrite the command with an improved version by AdAstra
+		// on the Kingdom of DS Hacking Discord server. This improved command allows
+		// a full long for both the Pokemon and the Move ID.
+		// (The Move ID is an extra move the Mystery Egg mon gets. In Vanilla, it is Togepi's Extrasensory.)
+		byte[] ovOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
+		int offset = romEntry.getIntValue("MysteryEggCommandOffset");
+
+		writeBytes(ovOverlay, offset, Gen4Constants.mysteryEggCommandImprovement);
+		offset += Gen4Constants.mysteryEggCommandImprovement.length;
+
+		writeLong(ovOverlay, offset, se.pkmn.getNumber());
+		offset += 4;
+
+		Move extraMove = getMysteryEggMove(se.pkmn);
+		writeLong(ovOverlay, offset, extraMove == null ? 0 : extraMove.number);
+
+		writeOverlay(romEntry.getIntValue("FieldOvlNumber"), ovOverlay);
+	}
+
+	/**
+	 * Returns an appropriate extra move for the Mystery Egg mon.<br>
+	 * Egg moves have the highest priority, then Move Tutor moves, then TM moves. Within each of these groups,
+	 * strong attacking moves are prioritized. If the Pokemon has neither Egg, Move Tutor, nor TM moves,
+	 * <b>returns null</b>.
+	 */
+	private Move getMysteryEggMove(Pokemon pk) {
+		Set<Integer> moveIDs = getEffectiveEggMoves(pk);
+		if (moveIDs.isEmpty()) {
+			moveIDs = getCompatibleTutorMoves(pk);
+		}
+		if (moveIDs.isEmpty()) {
+			moveIDs = getCompatibleTMMoves(pk);
+		}
+		if (moveIDs.isEmpty()) {
+			return null;
+		}
+
+		List<Move> posMoves = moveIDs.stream().map(moveID -> moves[moveID])
+				.distinct()
+				.sorted(Comparator.comparingDouble(m -> calculateMoveStrength(m, pk)))
+				.toList();
+		return posMoves.get(posMoves.size() - 1);
+	}
+
+	private Set<Integer> getCompatibleTutorMoves(Pokemon pk) {
+		Set<Integer> moveIDs = new HashSet<>();
+		List<Integer> tutorMoves = getMoveTutorMoves();
+		boolean[] comp = getMoveTutorCompatibility().get(pk);
+		for (int i = 0; i < tutorMoves.size(); i++) {
+			if (comp[i + 1]) {
+				moveIDs.add(tutorMoves.get(i));
+			}
+		}
+		return moveIDs;
+	}
+
+	private Set<Integer> getCompatibleTMMoves(Pokemon pk) {
+		Set<Integer> moveIDs = new HashSet<>();
+		List<Integer> tmMoves = getTMMoves();
+		boolean[] comp = getTMHMCompatibility().get(pk);
+		for (int i = 0; i < tmMoves.size(); i++) {
+			if (comp[i + 1]) {
+				moveIDs.add(tmMoves.get(i));
+			}
+		}
+		return moveIDs;
+	}
+
+	/**
+	 * Calculates the Move's expected damage output when used by a specific Pokemon,
+	 * taking hit ratio, hit count, attacking stat, and STAB into account.
+	 * Status moves always return 0.
+	 */
+	private double calculateMoveStrength(Move m, Pokemon pk) {
+		// TODO: this could be used in more places
+		if (m.category == MoveCategory.STATUS) {
+			return 0;
+		}
+		double strength = m.power * m.hitCount * m.hitratio;
+		strength *= m.category == MoveCategory.PHYSICAL ? pk.getAttack() : pk.getSpatk();
+		if (m.type == pk.getPrimaryType() || m.type == pk.getSecondaryType()) {
+			strength *= Gen4Constants.stabMultiplier;
+		}
+		return strength;
 	}
 
 	private void getRoamers(List<StaticEncounter> statics) {
@@ -3605,7 +3712,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return mtMoves;
 	}
@@ -3634,7 +3741,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				setHGSSHeadbuttTutor(moves.get(moves.size() - 1));
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -3680,7 +3787,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				compat.put(pkmn, flags);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return compat;
 	}
@@ -3723,7 +3830,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeOverlay(romEntry.getIntValue("MoveTutorCompatOvlNumber"), mtcFile);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -3826,11 +3933,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return 3;
 	}
 
-	@Override
-	public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-		return GlobalConstants.getStatChanges(generation);
-	}
-
 	private void populateEvolutions() {
 		for (Pokemon pkmn : pokes) {
 			if (pkmn != null) {
@@ -3869,7 +3971,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -3901,7 +4003,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			writeNARC(romEntry.getFile("PokemonEvolutions"), evoNARC);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -4159,7 +4261,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public boolean hasShopRandomization() {
+	public boolean hasShopSupport() {
 		return true;
 	}
 
@@ -4249,7 +4351,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			writeNARC(romEntry.getFile("ItemData"), itemPriceNarc);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -4305,7 +4407,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return pickupItems;
 	}
@@ -4329,7 +4431,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -4433,45 +4535,47 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public void randomizeIntroPokemon() {
+	public boolean setIntroPokemon(Pokemon pk) {
 		try {
 			if (romEntry.getRomType() == Gen4Constants.Type_DP || romEntry.getRomType() == Gen4Constants.Type_Plat) {
-				Pokemon introPokemon = randomPokemon();
-				while (introPokemon.getGenderRatio() == 0xFE) {
-					// This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only
-					// Pokemon *need*
-					// to pass a special parameter into the function that loads Pokemon sprites; the
-					// game will
-					// softlock on native hardware otherwise. The way the compiler has optimized the
-					// intro Pokemon
-					// code makes it very hard to modify, so passing in this special parameter is
-					// difficult. Rather
-					// than attempt to patch this code, just reroll until it isn't female-only.
-					introPokemon = randomPokemon();
+				// This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only Pokemon *need*
+				// to pass a special parameter into the function that loads Pokemon sprites; the game will
+				// softlock on native hardware otherwise. The way the compiler has optimized the intro Pokemon
+				// code makes it very hard to modify, so passing in this special parameter is difficult. Rather
+				// than attempt to patch this code, just report back that this Pokemon won't do.
+				if (pk.getGenderRatio() == 0xFE) {
+					return false;
+				}
+				// Assume alt formes can't be used. I haven't actually tested this, but it seemed like the safer guess.
+				if (pk.getBaseForme() != null) {
+					return false;
 				}
 				byte[] introOverlay = readOverlay(romEntry.getIntValue("IntroOvlNumber"));
 				for (String prefix : Gen4Constants.dpptIntroPrefixes) {
 					int offset = find(introOverlay, prefix);
 					if (offset > 0) {
 						offset += prefix.length() / 2; // because it was a prefix
-						writeWord(introOverlay, offset, introPokemon.getNumber());
+						writeWord(introOverlay, offset, pk.getNumber());
 					}
 				}
 				writeOverlay(romEntry.getIntValue("IntroOvlNumber"), introOverlay);
 			} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
-				// Modify the sprite used for Ethan/Lyra's Marill
-				int marillReplacement = this.random.nextInt(548) + 297;
-				while (Gen4Constants.hgssBannedOverworldPokemon.contains(marillReplacement)) {
-					marillReplacement = this.random.nextInt(548) + 297;
+				// In HGSS, Ethan/Lyra's Marill is changed instead of the intro Pokemon.
+				// This is really cool, but there *is* an actual intro Pokemon to randomize,
+				// and it is a Marill to boot too! Ideally, Ethan/Lyra's Marill should be
+				// in addition to the intro one, not instead of.
+				if (pk.getBaseForme() != null) {
+					return false;
 				}
+				int spriteID = Gen4Constants.getOverworldSpriteIDOfSpecies(pk.getNumber());
 
 				byte[] fieldOverlay = readOverlay(romEntry.getIntValue("FieldOvlNumber"));
 				String prefix = Gen4Constants.lyraEthanMarillSpritePrefix;
 				int offset = find(fieldOverlay, prefix);
 				if (offset > 0) {
 					offset += prefix.length() / 2; // because it was a prefix
-					writeWord(fieldOverlay, offset, marillReplacement);
-					if (Gen4Constants.hgssBigOverworldPokemon.contains(marillReplacement)) {
+					writeWord(fieldOverlay, offset, spriteID);
+					if (Gen4Constants.hgssBigOverworldPokemon.contains(pk.getNumber())) {
 						// Write the constant to indicate it's big (0x208 | (20 << 10))
 						writeWord(fieldOverlay, offset + 2, 0x5208);
 					} else {
@@ -4481,19 +4585,17 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				writeOverlay(romEntry.getIntValue("FieldOvlNumber"), fieldOverlay);
 
-				// Now modify the Marill's cry in every script it appears in to ensure
-				// consistency
-				int marillReplacementId = Gen4Constants.convertOverworldSpriteToSpecies(marillReplacement);
+				// Now modify the Marill's cry in every script it appears in to ensure consistency
 				for (InFileEntry entry : romEntry.getMarillCryScriptEntries()) {
 					byte[] script = scriptNarc.files.get(entry.getFile());
-					writeWord(script, entry.getOffset(), marillReplacementId);
+					writeWord(script, entry.getOffset(), pk.getNumber());
 					scriptNarc.files.set(entry.getFile(), script);
 				}
 
 				// Modify the text too for additional consistency
 				int[] textOffsets = romEntry.getArrayValue("MarillTextFiles");
 				String originalSpeciesString = pokes[Species.marill].getName().toUpperCase();
-				String newSpeciesString = pokes[marillReplacementId].getName();
+				String newSpeciesString = pk.getName();
 				Map<String, String> replacements = new TreeMap<>();
 				replacements.put(originalSpeciesString, newSpeciesString);
 				for (int textOffset : textOffsets) {
@@ -4511,13 +4613,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						// As part of our catching tutorial patch, the player Pokemon's ID is just
 						// pc-relative
 						// loaded, and offset is now pointing to it.
-						writeWord(arm9, offset, marillReplacementId);
+						writeWord(arm9, offset, pk.getNumber());
 					}
 				}
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
+		return true;
 	}
 
 	@Override
@@ -4776,7 +4879,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				trades.add(trade);
 			}
 		} catch (IOException ex) {
-			throw new RandomizerIOException(ex);
+			throw new RomIOException(ex);
 		}
 		return trades;
 	}
@@ -4842,7 +4945,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 		} catch (IOException ex) {
-			throw new RandomizerIOException(ex);
+			throw new RomIOException(ex);
 		}
 	}
 
@@ -4886,7 +4989,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public void removeEvosForPokemonPool() {
 		// slightly more complicated than gen2/3
 		// we have to update a "baby table" too
-		PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+		PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
 		Set<Evolution> keepEvos = new HashSet<>();
 		for (Pokemon pk : pokes) {
 			if (pk != null) {
@@ -4916,7 +5019,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// finish up
 			writeFile(romEntry.getFile("BabyPokemon"), babyPokes);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -4972,8 +5075,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void applyMiscTweak(MiscTweak tweak) {
         if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-            randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
@@ -4993,51 +5094,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			applyReusableTMsPatch();
 		}
     }
-
-	private void randomizeCatchingTutorial() {
-		int opponentOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
-
-		if (romEntry.hasTweakFile("NewCatchingTutorialSubroutineTweak")) {
-			String catchingTutorialMonTablePrefix = romEntry.getStringValue("CatchingTutorialMonTablePrefix");
-			int offset = find(arm9, catchingTutorialMonTablePrefix);
-			if (offset > 0) {
-				offset += catchingTutorialMonTablePrefix.length() / 2; // because it was a prefix
-
-				// The player's mon is randomized as part of randomizing Lyra/Ethan's Pokemon
-				// (see
-				// randomizeIntroPokemon), so we just care about the enemy mon. As part of our
-				// catching
-				// tutorial patch, the player and enemy species IDs are pc-relative loaded, with
-				// the
-				// enemy ID occurring right after the player ID (which is what offset is
-				// pointing to).
-				Pokemon opponent = randomPokemonLimited(Integer.MAX_VALUE, false);
-				writeWord(arm9, offset + 4, opponent.getNumber());
-			}
-		} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
-			// For non-US HGSS, just handle it in the old-school way. Can randomize both
-			// Pokemon, but both limited to 1-255
-			// Make sure to raise the level of Lyra/Ethan's Pokemon to 10 to prevent
-			// softlocks
-			int playerOffset = romEntry.getIntValue("CatchingTutorialPlayerMonOffset");
-			int levelOffset = romEntry.getIntValue("CatchingTutorialPlayerLevelOffset");
-			Pokemon opponent = randomPokemonLimited(255, false);
-			Pokemon player = randomPokemonLimited(255, false);
-			if (opponent != null && player != null) {
-				arm9[opponentOffset] = (byte) opponent.getNumber();
-				arm9[playerOffset] = (byte) player.getNumber();
-				arm9[levelOffset] = 10;
-			}
-		} else {
-			// DPPt only supports randomizing the opponent, but enough space for any mon
-			Pokemon opponent = randomPokemonLimited(Integer.MAX_VALUE, false);
-
-			if (opponent != null) {
-				writeLong(arm9, opponentOffset, opponent.getNumber());
-			}
-		}
-
-	}
 
 	private void applyFastestText() {
 		genericIPSPatch(arm9, "FastestTextTweak");
@@ -5127,8 +5183,46 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
 
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
+	}
+
+	@Override
+	public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+		int opponentOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
+
+		if (romEntry.hasTweakFile("NewCatchingTutorialSubroutineTweak")) {
+			String catchingTutorialMonTablePrefix = romEntry.getStringValue("CatchingTutorialMonTablePrefix");
+			int offset = find(arm9, catchingTutorialMonTablePrefix);
+			if (offset > 0) {
+				offset += catchingTutorialMonTablePrefix.length() / 2; // because it was a prefix
+
+				// The player's mon is randomized as part of randomizing Lyra/Ethan's Pokemon
+				// (see randomizeIntroPokemon), so we just care about the enemy mon. As part of our
+				// catching tutorial patch, the player and enemy species IDs are pc-relative loaded, with
+				// the enemy ID occurring right after the player ID (which is what offset is pointing to).
+				writeWord(arm9, offset + 4, opponent.getNumber());
+			}
+		} else if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
+			// For non-US HGSS, just handle it in the old-school way.
+			// Can randomize both Pokemon, but both limited to 1-255.
+			// Make sure to raise the level of Lyra/Ethan's Pokemon to 10 to prevent softlocks.
+			int playerOffset = romEntry.getIntValue("CatchingTutorialPlayerMonOffset");
+			int levelOffset = romEntry.getIntValue("CatchingTutorialPlayerLevelOffset");
+			if (opponent.getNumber() > 255 || player.getNumber() > 255) {
+				return false;
+			}
+			arm9[opponentOffset] = (byte) opponent.getNumber();
+			arm9[playerOffset] = (byte) player.getNumber();
+			arm9[levelOffset] = 10;
+		} else {
+			// DPPt only supports randomizing the opponent, but enough space for any mon
+			if (opponent != null) {
+				writeLong(arm9, opponentOffset, opponent.getNumber());
+			}
+		}
+
+		return true;
 	}
 
 	@Override
@@ -5171,7 +5265,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			return typeTable;
 
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -5199,7 +5293,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 			writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -5291,7 +5385,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 	@Override
@@ -5349,7 +5443,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	private boolean genericIPSPatch(byte[] data, String ctName) {
 		if (!romEntry.hasTweakFile(ctName)) {
-			throw new RandomizerIOException("IPS Patch " + ctName + " is not supported by this ROM (" +
+			throw new RomIOException("IPS Patch " + ctName + " is not supported by this ROM (" +
 					romEntry.getName() + ").");
 		}
 		String patchName = romEntry.getTweakFile(ctName);
@@ -5358,22 +5452,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			FileFunctions.applyPatch(data, patchName);
 			return true;
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
-		}
-	}
-
-	private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
-		checkPokemonRestrictions();
-		List<Pokemon> validPokemon = new ArrayList<>();
-		for (Pokemon pk : this.restrictedPokemon) {
-			if (pk.getNumber() <= maxValue && (!blockNonMales || pk.getGenderRatio() <= 0xFD)) {
-				validPokemon.add(pk);
-			}
-		}
-		if (validPokemon.size() == 0) {
-			return null;
-		} else {
-			return validPokemon.get(random.nextInt(validPokemon.size()));
+			throw new RomIOException(e);
 		}
 	}
 
@@ -5508,85 +5587,211 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return calculatePokemonNormalPaletteIndex(i) + 1;
 	}
 
-	@Override
-	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
+    protected Collection<Integer> getGraphicalFormePokes() {
+        return Gen4Constants.otherPokemonGraphicsPalettes.keySet();
+    }
 
-		int spriteIndex = pk.getNumber() * 6 + 2 + random.nextInt(2);
-		if (back) {
-			spriteIndex -= 2;
+    protected void loadGraphicalFormePokemonPalettes(Pokemon pk) {
+        String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+        NARCArchive NARC;
+        try {
+            NARC = readNARC(NARCpath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+		int[][] palettes = Gen4Constants.otherPokemonGraphicsPalettes.get(pk.getNumber());
+		for (int palID = 0; palID < palettes[0].length; palID++) {
+			// assumes there are as many normal and shiny palettes
+			pk.setNormalPalette(palID, readPalette(NARC, palettes[0][palID]));
+			pk.setShinyPalette(palID, readPalette(NARC, palettes[1][palID]));
 		}
-		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+    }
 
-		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
-		}
-
-		// Deliberately chop off the right half of the image while still
-		// correctly indexing the array.
-		int bpp = 4;
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
-		for (int y = 0; y < 80; y++) {
-			for (int x = 0; x < 80; x++) {
-				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-				bim.setRGB(x, y, convPalette[value]);
-			}
-		}
-
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
-			}
+    protected void saveGraphicalFormePokemonPalettes(Pokemon pk) {
+		String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+		NARCArchive NARC;
+		try {
+			NARC = readNARC(NARCpath);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
-		return bim;
+		int[][] palettes = Gen4Constants.otherPokemonGraphicsPalettes.get(pk.getNumber());
+		for (int palID = 0; palID < palettes[0].length; palID++) {
+			// assumes there are as many normal and shiny palettes
+			writePalette(NARC, palettes[0][palID], pk.getNormalPalette(palID));
+			writePalette(NARC, palettes[1][palID], pk.getShinyPalette(palID));
+		}
+    }
+
+	public Gen4PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+		return new Gen4PokemonImageGetter(pk);
 	}
 
-	// Temporary
-	@Override
-	public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-										 boolean transparentBackground, boolean includePalette) {
+	public class Gen4PokemonImageGetter extends DSPokemonImageGetter {
 
-		int spriteIndex = number * 6 + 2 + random.nextInt(2);
-		if (back) {
-			spriteIndex -= 2;
-		}
-		int[] spriteData = readSpriteData(pokeGraphicsNARC, spriteIndex);
+		protected NARCArchive otherPokeGraphicsNARC;
 
-
-		int normalPaletteIndex = calculatePokemonNormalPaletteIndex(number);
-		Palette normalPalette = readPalette(pokeGraphicsNARC, normalPaletteIndex);
-		int shinyPaletteIndex = calculatePokemonShinyPaletteIndex(number);
-		Palette shinyPalette = readPalette(pokeGraphicsNARC, shinyPaletteIndex);
-
-		Palette palette = shiny ? shinyPalette : normalPalette;
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
+		public Gen4PokemonImageGetter(Pokemon pk) {
+			super(pk);
 		}
 
-		// Deliberately chop off the right half of the image while still
-		// correctly indexing the array.
-		int bpp = 4;
-		BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
-				GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
-		for (int y = 0; y < 80; y++) {
-			for (int x = 0; x < 80; x++) {
-				int value = ((spriteData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
-				bim.setRGB(x, y, convPalette[value]);
+		public DSPokemonImageGetter setOtherPokeGraphicsNARC(NARCArchive otherPokeGraphicsNARC) {
+			this.otherPokeGraphicsNARC = otherPokeGraphicsNARC;
+			return this;
+		}
+
+		protected void beforeGet() {
+			super.beforeGet();
+			if (otherPokeGraphicsNARC == null) {
+				try {
+					String NARCpath = getRomEntry().getFile("OtherPokemonGraphics");
+					otherPokeGraphicsNARC = readNARC(NARCpath);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
+		@Override
+		public int getGraphicalFormeAmount() {
+			int[][] formeInfo = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber());
+			if (formeInfo == null) {
+				return 1;
+			} else {
+				return formeInfo[0].length;
 			}
 		}
 
-		return bim;
+		@Override
+		public BufferedImage get() {
+			beforeGet();
+
+			int imageIndex = getImageIndex();
+			int[] imageData = readImageData(getGraphicalFormeAmount() > 1 ? otherPokeGraphicsNARC : pokeGraphicsNARC, imageIndex);
+
+			Palette palette = getPalette();
+			int[] convPalette = palette.toARGB();
+			if (transparentBackground) {
+				convPalette[0] = 0;
+			}
+
+			// Deliberately chop off the right half of the image while still
+			// correctly indexing the array.
+			int bpp = 4;
+			BufferedImage bim = new BufferedImage(80, 80, BufferedImage.TYPE_BYTE_INDEXED,
+					GFXFunctions.indexColorModelFromPalette(convPalette, bpp));
+			for (int y = 0; y < 80; y++) {
+				for (int x = 0; x < 80; x++) {
+					int value = ((imageData[y * 40 + x / 4]) >> (x % 4) * 4) & 0x0F;
+					bim.setRGB(x, y, convPalette[value]);
+				}
+			}
+
+			if (includePalette) {
+				for (int j = 0; j < 16; j++) {
+					bim.setRGB(j, 0, convPalette[j]);
+				}
+			}
+
+			return bim;
+		}
+
+		private int getImageIndex() {
+			int imageIndex;
+			if (getGraphicalFormeAmount() > 1) {
+				imageIndex = Gen4Constants.otherPokemonGraphicsImages.get(pk.getNumber())[back ? 1 : 0][forme];
+			} else {
+				imageIndex = pk.getNumber() * 6 + 2;
+				if (gender == MALE) {
+					imageIndex++;
+				}
+				if (back) {
+					imageIndex -= 2;
+				}
+			}
+			return imageIndex;
+		}
+
+		private Palette getPalette() {
+			Palette palette;
+			// unown and deoxys have the same palette(s) for all their formes
+			if (getGraphicalFormeAmount() > 1 && pk.getNumber() != Species.unown && pk.getNumber() != Species.deoxys) {
+				palette = shiny ? pk.getShinyPalette(forme) : pk.getNormalPalette(forme);
+			} else {
+				palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+			}
+			return palette;
+		}
+
+
+		@Override
+		public BufferedImage getFull() {
+			System.out.println(pk);
+			if (getGraphicalFormeAmount() > 1) {
+				return withFormesGetFull();
+			} else {
+				return super.getFull();
+			}
+		}
+
+		private BufferedImage withFormesGetFull() {
+			setIncludePalette(true);
+
+			BufferedImage[] normal = new BufferedImage[getGraphicalFormeAmount()*2];
+			BufferedImage[] shiny = new BufferedImage[getGraphicalFormeAmount()*2];
+			for (int i = 0; i < getGraphicalFormeAmount(); i++) {
+				setGraphicalForme(i);
+
+				normal[i*2] = get();
+				normal[i*2 + 1] = setBack(true).get();
+				shiny[i*2 + 1] = setShiny(true).get();
+				shiny[i*2] = setBack(false).get();
+				setShiny(false);
+			}
+			return GFXFunctions.stitchToGrid(new BufferedImage[][] { normal, shiny });
+		}
+
+		private int[] readImageData(NARCArchive graphicsNARC, int imageIndex) {
+			// read sprite
+			byte[] rawImage = graphicsNARC.files.get(imageIndex);
+			if (rawImage.length == 0) {
+				// Must use other gender form
+				rawImage = graphicsNARC.files.get(imageIndex ^ 1);
+			}
+			int[] imageData = new int[3200];
+			for (int i = 0; i < 3200; i++) {
+				imageData[i] = readWord(rawImage, i * 2 + 48);
+			}
+
+			// Decrypt image (why does EVERYTHING use the RNG formula geez)
+			if (romEntry.getRomType() != Gen4Constants.Type_DP && getGraphicalFormeAmount() == 1) {
+				int key = imageData[0];
+				for (int i = 0; i < 3200; i++) {
+					imageData[i] ^= (key & 0xFFFF);
+					key = key * 0x41C64E6D + 0x6073;
+				}
+			} else {
+				// D/P images are encrypted *backwards*. Wut.
+				int key = imageData[3199];
+				for (int i = 3199; i >= 0; i--) {
+					imageData[i] ^= (key & 0xFFFF);
+					key = key * 0x41C64E6D + 0x6073;
+				}
+			}
+			return imageData;
+		}
+
+		@Override
+		public boolean hasGenderedImages() {
+			beforeGet();
+			int imageIndex = pk.getNumber() * 6 + 2;
+			byte[] rawImageFemale = pokeGraphicsNARC.files.get(imageIndex);
+			byte[] rawImageMale = pokeGraphicsNARC.files.get(imageIndex + 1);
+			return rawImageFemale.length != 0 && rawImageMale.length != 0
+					&& !Arrays.equals(rawImageFemale, rawImageMale);
+		}
 	}
 
 	//TODO: remove
@@ -5650,12 +5855,13 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return bim;
 	}
 
-	private int[] readSpriteData(NARCArchive pokespritesNARC, int spriteIndex) {
+	// TODO: remove
+	private int[] readSpriteData(NARCArchive graphicsNARC, int spriteIndex) {
 		// read sprite
-		byte[] rawSprite = pokespritesNARC.files.get(spriteIndex);
+		byte[] rawSprite = graphicsNARC.files.get(spriteIndex);
 		if (rawSprite.length == 0) {
 			// Must use other gender form
-			rawSprite = pokespritesNARC.files.get(spriteIndex ^ 1);
+			rawSprite = graphicsNARC.files.get(spriteIndex ^ 1);
 		}
 		int[] spriteData = new int[3200];
 		for (int i = 0; i < 3200; i++) {
@@ -5680,7 +5886,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		return spriteData;
 	}
 
-	private String getPaletteFilesID() {
+	public String getPaletteFilesID() {
 		return switch (romEntry.getRomType()) {
 			case Gen4Constants.Type_DP -> "DP";
 			case Gen4Constants.Type_Plat, Gen4Constants.Type_HGSS ->
@@ -5688,11 +5894,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					"DP";
 			default -> null;
 		};
-	}
-
-	@Override
-	public PaletteHandler getPaletteHandler() {
-		return paletteHandler;
 	}
 
 	@Override

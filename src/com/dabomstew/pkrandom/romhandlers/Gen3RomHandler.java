@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen3RomHandler.java - randomizer handler for R/S/E/FR/LG.             --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -24,18 +22,19 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.graphics.images.GBAImage;
 import com.dabomstew.pkrandom.graphics.packs.FRLGPlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.Gen3PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.graphics.packs.RSEPlayerCharacterGraphics;
-import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen3EventTextEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.Gen3RomEntry;
@@ -44,20 +43,26 @@ import compressors.DSCmp;
 import compressors.DSDecmp;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * {@link RomHandler} for Ruby, Sapphire, Emerald, FireRed, LeafGreen.
+ */
 public class Gen3RomHandler extends AbstractGBRomHandler {
 
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen3RomHandler create(Random random, PrintStream logStream) {
-            return new Gen3RomHandler(random, logStream);
+        public Gen3RomHandler create() {
+            return new Gen3RomHandler();
         }
 
         public boolean isLoadable(String filename) {
@@ -69,14 +74,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // nope
             return loaded.length != 0 && detectRomInner(loaded, (int) fileLength);
         }
-    }
-
-    public Gen3RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen3RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
     }
 
     private static List<Gen3RomEntry> roms;
@@ -113,9 +110,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
     }
-
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Gen3RomEntry romEntry;
@@ -184,10 +178,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         mapLoadingDone = true;
 
         freeAllUnusedSpace();
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
     }
 
     @Override
@@ -544,6 +534,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             pokesInternal[i] = pk;
             int pkoffs = offs + i * Gen3Constants.baseStatsEntrySize;
             loadBasicPokeStats(pk, pkoffs);
+            pk.setGeneration(generationOf(pk));
         }
 
         // In these games, the alternate formes of Deoxys have hardcoded stats that are used 99% of the time;
@@ -565,6 +556,15 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         constructPokemonList();
+    }
+
+    private int generationOf(Pokemon pk) {
+        if (pk.getNumber() >= Species.treecko) {
+            return 3;
+        } else if (pk.getNumber() >= Species.chikorita) {
+            return 2;
+        }
+        return 1;
     }
 
     @Override
@@ -1296,11 +1296,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public int starterCount() {
         return 3;
-    }
-
-    @Override
-    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        return GlobalConstants.getStatChanges(generation);
     }
 
     @Override
@@ -2058,7 +2053,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     FileFunctions.applyPatch(rom, romEntry.getTweakFile("StaticFirstBattleTweak"));
                     species = readWord(startingSpeciesOffset);
                 } catch (IOException e) {
-                    throw new RandomizerIOException(e);
+                    throw new RomIOException(e);
                 }
             }
             Pokemon pkmn = pokesInternal[species];
@@ -2078,7 +2073,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     FileFunctions.applyPatch(rom, romEntry.getTweakFile("GhostMarowakTweak"));
                     species = readWord(ghostMarowakOffsets[0]);
                 } catch (IOException e) {
-                    throw new RandomizerIOException(e);
+                    throw new RomIOException(e);
                 }
             }
             Pokemon pkmn = pokesInternal[species];
@@ -2093,7 +2088,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         try {
             getRoamers(statics);
         } catch (Exception e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         return statics;
@@ -2370,10 +2365,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 				int itemDescPointerOffset = itemBaseOffset + Gen3Constants.itemDataDescriptionOffset;
 				try {
 					rewriteVariableLengthString(itemDescPointerOffset, newItemDesc);
-				} catch (RandomizerIOException e) {
-					String nl = System.getProperty("line.separator");
-					log("Couldn't insert new item description. " + e.getMessage() + nl);
-					return;
+				} catch (RomIOException e) {
+                    // This used to be a simple logging, turned it into a full error because I don't *think* it
+                    // should be too common? Plus the RomHandler arguably should not do logging.
+					throw new RomIOException("Couldn't insert new item description. " + e.getMessage());
 				}
 			}
 		}
@@ -2472,7 +2467,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void writeEventText(List<Gen3EventTextEntry> eventTextEntries, Function<Integer, String[]> idToReplacers,
                                 String[] targets, String description) {
-        String nl = System.getProperty("line.separator"); // TODO: should just "/n" do?
         for (Gen3EventTextEntry ete : eventTextEntries) {
             // create the new text
             Map<String, String> replacements = new HashMap<>();
@@ -2493,9 +2487,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int[] secondaryPointerOffsets = searchForPointerCopies(pointerOffset);
             try {
                 rewriteVariableLengthString(pointerOffset, newText, secondaryPointerOffsets);
-            } catch (RandomizerIOException e) {
-                log("Couldn't insert new " + description + " text. " + e.getMessage() + nl);
-                return;
+            } catch (RomIOException e) {
+                // This used to be a simple logging, turned it into a full error because I don't *think* it
+                // should be too common? Plus the RomHandler arguably should not do logging.
+                throw new RomIOException("Couldn't insert new " + description + " text. " + e.getMessage());
             }
         }
     }
@@ -2689,29 +2684,26 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void patchForNationalDex() {
-        log("--Patching for National Dex at Start of Game--");
         String nl = System.getProperty("line.separator");
         if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.rsPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. Could not find script.");
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " +
+                        "Could not find pointer to script.");
             }
             // Find free space for our new routine
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.rsNatDexScriptLength);
-            } catch (RandomizerIOException e) {
-                log("Patch unsuccessful. " + e.getMessage() + nl);
-                return;
+            } catch (RomIOException e) {
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writePointer(pointerLocToScript, writeSpace);
             writeHexString(Gen3Constants.rsNatDexScriptPart1, writeSpace);
@@ -2722,16 +2714,14 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.frlgPokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. Could not find script.");
             }
             // Find free space for our new routine
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.frlgNatDexScriptLength);
-            } catch (RandomizerIOException e) {
-                log("Patch unsuccessful. " + e.getMessage() + nl);
-                return;
+            } catch (RomIOException e) {
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writeByte(pkDexOffset, (byte) 4); // TODO: "4" should be a constant
             writePointer(pkDexOffset + 1, writeSpace);
@@ -2774,23 +2764,21 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Find the original pokedex script
             int pkDexOffset = find(Gen3Constants.ePokedexScriptIdentifier);
             if (pkDexOffset < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. Could not find script.");
             }
             int textPointer = readPointer(pkDexOffset - 4);
             int realScriptLocation = pkDexOffset - 8;
             int pointerLocToScript = find(pointerToHexString(realScriptLocation));
             if (pointerLocToScript < 0) {
-                log("Patch unsuccessful." + nl);
-                return;
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " +
+                        "Could not find pointer to script.");
             }
             // Find free space for our new routine
             int writeSpace;
             try {
                 writeSpace = findAndUnfreeSpace(Gen3Constants.eNatDexScriptLength);
-            } catch (RandomizerIOException e) {
-                log("Patch unsuccessful. " + e.getMessage() + nl);
-                return;
+            } catch (RomIOException e) {
+                throw new RuntimeException("Patch for National Dex at Start of Game unsuccessful. " + e.getMessage());
             }
             writePointer(pointerLocToScript, writeSpace);
             writeHexString(Gen3Constants.eNatDexScriptPart1, writeSpace);
@@ -2799,7 +2787,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else {
             throw new IllegalStateException("Invalid ROM Type: " + romEntry.getRomType());
         }
-        log("Patch successful!" + nl);
     }
 
     private String pointerToHexString(int pointer) {
@@ -3001,7 +2988,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return true;
     }
 
@@ -3234,7 +3221,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 FileFunctions.applyPatch(rom, romEntry.getTweakFile("NewIndexToMusicTweak"));
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
 
             newIndexToMusicPoolOffset  = romEntry.getIntValue("NewIndexToMusicPoolOffset");
@@ -3326,7 +3313,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
+    public boolean setIntroPokemon(Pokemon pk) {
         int imageTableOffset = romEntry.getIntValue("PokemonFrontImages");
         int paletteTableOffset = romEntry.getIntValue("PokemonNormalPalettes");
         int cryOffset = romEntry.getIntValue("IntroCryOffset");
@@ -3336,23 +3323,23 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
         // FRLG
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-            // intro sprites : first 255 only due to size
-            Pokemon introPk = randomPokemonLimited(255, false);
-            if (introPk == null) {
-                return;
+            // first 255 only due to size
+            if (pokedexToInternal[pk.getNumber()] > 255) {
+                return false;
             }
-            int introPokemon = pokedexToInternal[introPk.getNumber()];
+            int introPokemon = pokedexToInternal[pk.getNumber()];
 
             writeByte(cryOffset, (byte) introPokemon);
             writeByte(otherOffset, (byte) introPokemon);
 
             writePointer(imageOffset, imageTableOffset + introPokemon * 8);
             writePointer(imageOffset + 4, paletteTableOffset + introPokemon * 8);
+
         } else if (romEntry.getRomType() == Gen3Constants.RomType_Ruby || romEntry.getRomType() == Gen3Constants.RomType_Sapp) {
-            // intro sprites : any pokemon in the range 0-510 except bulbasaur
-            int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
-            while (introPokemon == 1 || introPokemon > 510) {
-                introPokemon = pokedexToInternal[randomPokemon().getNumber()];
+            // any pokemon in the range 0-510 except bulbasaur
+            int introPokemon = pokedexToInternal[pk.getNumber()];
+            if (introPokemon == 1 || introPokemon > 510) {
+                return false;
             }
 
             if (introPokemon > 255) { // TODO: this pattern is recurring, maybe extractable into a method?
@@ -3382,27 +3369,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             writePointer(imageOffset, imageTableOffset + introPokemon * 8);
             writePointer(paletteOffset, paletteTableOffset + introPokemon * 8);
         } else {
-            // Emerald, intro sprite: any Pokemon.
-            int introPokemon = pokedexToInternal[randomPokemon().getNumber()];
+            // Emerald: any Pokemon.
+            int introPokemon = pokedexToInternal[pk.getNumber()];
             writeWord(imageOffset, introPokemon);
             writeWord(cryOffset, introPokemon);
         }
-
-    }
-
-    private Pokemon randomPokemonLimited(int maxValue, boolean blockNonMales) {
-        checkPokemonRestrictions();
-        List<Pokemon> validPokemon = new ArrayList<>();
-        for (Pokemon pk : this.restrictedPokemon) {
-            if (pokedexToInternal[pk.getNumber()] <= maxValue && (!blockNonMales || pk.getGenderRatio() <= 0xFD)) {
-                validPokemon.add(pk);
-            }
-        }
-        if (validPokemon.size() == 0) {
-            return null;
-        } else {
-            return validPokemon.get(random.nextInt(validPokemon.size()));
-        }
+        return true;
     }
 
     private void determineMapBankSizes() {
@@ -3780,7 +3752,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     //TODO: this is identical to the Gen 2 implementation => merge (?)
     public void removeEvosForPokemonPool() {
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {
@@ -3865,13 +3837,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             applyCamelCaseNames();
         } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
             patchForNationalDex();
-        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-            randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen3Items.luckyEgg);
             nonBadItems.banSingles(Gen3Items.luckyEgg);
-        } else if (tweak == MiscTweak.RANDOMIZE_PC_POTION) {
-            randomizePCPotion();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
             applyRunWithoutRunningShoesPatch();
         } else if (tweak == MiscTweak.BALANCE_STATIC_LEVELS) {
@@ -3882,56 +3850,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         } else if (tweak == MiscTweak.REUSABLE_TMS) {
             applyReusableTMsPatch();
         }
-    }
-
-    private void randomizeCatchingTutorial() {
-        if (romEntry.getIntValue("CatchingTutorialOpponentMonOffset") > 0) {
-            int oppOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
-            if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
-                Pokemon opponent = randomPokemonLimited(255, true);
-                if (opponent != null) {
-
-                    int oppValue = pokedexToInternal[opponent.getNumber()];
-                    writeBytes(oppOffset, new byte[] {(byte) oppValue,
-                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
-                }
-            } else {
-                Pokemon opponent = randomPokemonLimited(510, true);
-                if (opponent != null) {
-                    int oppValue = pokedexToInternal[opponent.getNumber()];
-                    if (oppValue > 255) {
-                        writeBytes(oppOffset, new byte[] {(byte) 0xFF,
-                                Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
-                                (byte) (oppValue - 0xFF),
-                                Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
-                    } else {
-                        writeBytes(oppOffset, new byte[] {(byte) oppValue,
-                                Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
-
-                        writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
-                    }
-                }
-            }
-        }
-
-        if (romEntry.getIntValue("CatchingTutorialPlayerMonOffset") > 0) {
-            int playerOffset = romEntry.getIntValue("CatchingTutorialPlayerMonOffset");
-            Pokemon playerMon = randomPokemonLimited(510, false);
-            if (playerMon != null) {
-                int plyValue = pokedexToInternal[playerMon.getNumber()];
-                if (plyValue > 255) {
-                    writeBytes(playerOffset, new byte[] {(byte) 0xFF,
-                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
-                            (byte) (plyValue - 0xFF),
-                            Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
-                } else {
-                    writeBytes(playerOffset, new byte[] {(byte) plyValue,
-                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
-                    writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
-                }
-            }
-        }
-
     }
 
     private void applyRunningShoesIndoorsPatch() {
@@ -3945,7 +3863,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             try {
                 FileFunctions.applyPatch(rom, romEntry.getTweakFile("InstantTextTweak"));
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         } else if (romEntry.getIntValue("TextSpeedValuesOffset") > 0) {
             int tsvOffset = romEntry.getIntValue("TextSpeedValuesOffset");
@@ -3953,12 +3871,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     1, // medium = fast
                     0}; // fast = instant
             writeBytes(tsvOffset, newTextSpeedValues);
-        }
-    }
-
-    private void randomizePCPotion() {
-        if (romEntry.getIntValue("PCPotionOffset") != 0) {
-            writeWord(romEntry.getIntValue("PCPotionOffset"), this.getNonBadItems().randomNonTM(this.random));
         }
     }
 
@@ -3994,6 +3906,74 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         + Integer.toHexString(rom[offset]) + ". Likely TMMovesReusableFunctionOffsets is faulty.");
             }
             writeByte(offset, (byte) 0);
+        }
+    }
+
+    @Override
+    public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+        if (romEntry.getIntValue("CatchingTutorialOpponentMonOffset") > 0) {
+            // only Pokemon that can be males are allowed (not sure why, taken from uncommented older code)
+            if (opponent.getGenderRatio() > 0xFD) {
+                return false;
+            }
+            int oppOffset = romEntry.getIntValue("CatchingTutorialOpponentMonOffset");
+            if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
+                if (opponent.getNumber() > 255) {
+                    return false;
+                }
+
+                int oppValue = pokedexToInternal[opponent.getNumber()];
+                writeBytes(oppOffset, new byte[] {(byte) oppValue,
+                        Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
+
+            } else {
+                if (opponent.getNumber() > 510) {
+                    return false;
+                }
+                int oppValue = pokedexToInternal[opponent.getNumber()];
+                if (oppValue > 255) {
+                    writeBytes(oppOffset, new byte[] {(byte) 0xFF,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                            (byte) (oppValue - 0xFF),
+                            Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
+                } else {
+                    writeBytes(oppOffset, new byte[] {(byte) oppValue,
+                            Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
+
+                    writeWord(oppOffset + 2, Gen3Constants.gbaNopOpcode);
+                }
+            }
+        }
+
+        if (romEntry.getIntValue("CatchingTutorialPlayerMonOffset") > 0) {
+            int playerOffset = romEntry.getIntValue("CatchingTutorialPlayerMonOffset");
+            if (player.getNumber() > 510) {
+                return false;
+            }
+
+            int plyValue = pokedexToInternal[player.getNumber()];
+            if (plyValue > 255) {
+                writeBytes(playerOffset, new byte[] {(byte) 0xFF,
+                        Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1,
+                        (byte) (plyValue - 0xFF),
+                        Gen3Constants.gbaAddRxOpcode | Gen3Constants.gbaR1});
+            } else {
+                writeBytes(playerOffset, new byte[] {(byte) plyValue,
+                        Gen3Constants.gbaSetRxOpcode | Gen3Constants.gbaR1});
+                writeWord(playerOffset + 2, Gen3Constants.gbaNopOpcode);
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void setPCPotionItem(int itemID) {
+        if (romEntry.getIntValue("PCPotionOffset") != 0) {
+            if (!getAllowedItems().getItemSet().contains(itemID)) {
+                String itemName = itemID >= itemNames.length ? "unknown item, ID=" + itemID : itemNames[itemID];
+                throw new IllegalArgumentException("item not allowed for PC Potion: " + itemName);
+            }
+            writeWord(romEntry.getIntValue("PCPotionOffset"), itemID);
         }
     }
 
@@ -4492,49 +4472,65 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 		}
 
 	}
-    
+
     @Override
-    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
-            boolean includePalette) {
-
-        // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
-
-        int num = pokedexToInternal[pk.getNumber()];
-        int tableOffset = back ? romEntry.getIntValue("PokemonBackImages") : romEntry.getIntValue("PokemonFrontImages");
-
-        int imageOffset = readPointer(tableOffset + num * 8);
-        byte[] data = DSDecmp.Decompress(rom, imageOffset);
-        // Uses the 0-index missingno sprite if the data failed to read, for debugging
-        // purposes
-        if (data == null) {
-            imageOffset = readPointer(tableOffset);
-            data = DSDecmp.Decompress(rom, imageOffset);
-        }
-
-        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        // Castform has a 64-color palette, 16 colors for each form.
-        if (pk.getNumber() == Species.castform) {
-            palette = new Palette(Arrays.copyOf(palette.toARGB(), 16));
-        }
-
-        // TODO: make this work
-        int[] convPalette = palette.toARGB();
-        if (transparentBackground) {
-            convPalette[0] = 0;
-        }
-
-        // Make image, 4bpp
-        GBAImage bim = new GBAImage.Builder(8, 8, palette, data).build();
-        if (includePalette) {
-            for (int i = 0; i < palette.size(); i++) {
-                bim.setColor(i, 0, i);
-            }
-        }
-
-        return bim;
+    public Gen3PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen3PokemonImageGetter(pk);
     }
 
-    private String getPaletteFilesID() {
+    public class Gen3PokemonImageGetter extends GBPokemonImageGetter {
+        // No support for Unown/Castform formes (nor Deoxys, but kind of unsure if that's even possible)
+
+        public Gen3PokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public Gen3PokemonImageGetter setGraphicalForme(int forme) {
+            throw new UnsupportedOperationException("Graphical forme support not implemented");
+        }
+
+        @Override
+        public BufferedImage get() {
+            // TODO: what's up with shiny lileep in one of the international games (forgot which)? is the ROM bad?
+
+            int num = pokedexToInternal[pk.getNumber()];
+            int tableOffset = back ? romEntry.getIntValue("PokemonBackImages") : romEntry.getIntValue("PokemonFrontImages");
+
+            int imageOffset = readPointer(tableOffset + num * 8);
+            byte[] data = DSDecmp.Decompress(rom, imageOffset);
+            // Uses the 0-index missingno sprite if the data failed to read, for debugging
+            // purposes
+            if (data == null) {
+                imageOffset = readPointer(tableOffset);
+                data = DSDecmp.Decompress(rom, imageOffset);
+            }
+
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            // Castform has a 64-color palette, 16 colors for each form.
+            if (pk.getNumber() == Species.castform) {
+                palette = new Palette(Arrays.copyOf(palette.toARGB(), 16));
+            }
+
+            // TODO: make this work
+            int[] convPalette = palette.toARGB();
+            if (transparentBackground) {
+                convPalette[0] = 0;
+            }
+
+            // Make image, 4bpp
+            GBAImage bim = new GBAImage.Builder(8, 8, palette, data).build();
+            if (includePalette) {
+                for (int i = 0; i < palette.size(); i++) {
+                    bim.setColor(i, 0, i);
+                }
+            }
+
+            return bim;
+        }
+    }
+
+    public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
                 // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
@@ -4585,11 +4581,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             }
         }
         return items;
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

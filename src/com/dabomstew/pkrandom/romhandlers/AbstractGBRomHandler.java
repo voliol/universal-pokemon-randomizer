@@ -1,63 +1,36 @@
 package com.dabomstew.pkrandom.romhandlers;
 
-import java.awt.image.BufferedImage;
-
-/*----------------------------------------------------------------------------*/
-/*--  AbstractGBRomHandler.java - a base class for GB/GBA rom handlers      --*/
-/*--                              which standardises common GB(A) functions.--*/
-/*--                                                                        --*/
-/*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
-/*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
-/*--  Pokemon and any associated names and the like are                     --*/
-/*--  trademark and (C) Nintendo 1996-2020.                                 --*/
-/*--                                                                        --*/
-/*--  The custom code written here is licensed under the terms of the GPL:  --*/
-/*--                                                                        --*/
-/*--  This program is free software: you can redistribute it and/or modify  --*/
-/*--  it under the terms of the GNU General Public License as published by  --*/
-/*--  the Free Software Foundation, either version 3 of the License, or     --*/
-/*--  (at your option) any later version.                                   --*/
-/*--                                                                        --*/
-/*--  This program is distributed in the hope that it will be useful,       --*/
-/*--  but WITHOUT ANY WARRANTY; without even the implied warranty of        --*/
-/*--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          --*/
-/*--  GNU General Public License for more details.                          --*/
-/*--                                                                        --*/
-/*--  You should have received a copy of the GNU General Public License     --*/
-/*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
-/*----------------------------------------------------------------------------*/
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.constants.GBConstants;
-import com.dabomstew.pkrandom.gbspace.FreedSpace;
 import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.constants.GBConstants;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
+import com.dabomstew.pkrandom.gbspace.FreedSpace;
+import com.dabomstew.pkrandom.pokemon.Move;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBRomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.RomEntry;
 
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+/**
+ * An abstract base class for GB/GBA {@link RomHandler}s, which standardises common GB(A) functions.
+ */
 public abstract class AbstractGBRomHandler extends AbstractRomHandler {
 
     protected byte[] rom;
     protected byte[] originalRom;
     private String loadedFileName;
     private long actualCRC32;
-
-    public AbstractGBRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
-    }
 
     @Override
     public boolean loadRom(String filename) {
@@ -66,7 +39,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
             midLoadingSetUp();
             loadGameData();
             return true;
-        } catch (RandomizerIOException e) {
+        } catch (RomIOException e) {
             e.printStackTrace();
             return false;
         }
@@ -75,7 +48,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     protected void loadRomFile(String filename) {
         byte[] loaded = loadFile(filename);
         if (!detectRom(loaded)) {
-            throw new RandomizerIOException("Could not detect ROM.");
+            throw new RomIOException("Could not detect ROM.");
         }
         this.rom = loaded;
         this.originalRom = new byte[rom.length];
@@ -205,6 +178,11 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         return false;
     }
 
+    @Override
+    public boolean hasPokemonPaletteSupport() {
+        return true;
+    }
+
     public abstract boolean detectRom(byte[] rom);
 
 
@@ -212,7 +190,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         try {
             return FileFunctions.readFileFullyIntoBuffer(filename);
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
     }
 
@@ -378,7 +356,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
                 if (spo != primaryPointerOffset && offset != oldDataOffset) {
                     System.out.println();
                     System.out.println("bad: " + spo);
-                    throw new RandomizerIOException("Invalid secondary pointer spo=0x" + Integer.toHexString(spo) +
+                    throw new RomIOException("Invalid secondary pointer spo=0x" + Integer.toHexString(spo) +
                             ". Points to 0x" + Integer.toHexString(offset) + " instead of 0x" +
                             Integer.toHexString(oldDataOffset) + ".");
                 }
@@ -425,7 +403,7 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("ROM full. Can't find " + length + " free bytes anywhere.");
+            throw new RomIOException("ROM full. Can't find " + length + " free bytes anywhere.");
         }
 
         if (longAligned) {
@@ -461,55 +439,37 @@ public abstract class AbstractGBRomHandler extends AbstractRomHandler {
     }
 
     @Override
-    public void updateTypeEffectiveness() {
-        TypeTable typeTable = getTypeTable();
-        log("--Updating Type Effectiveness--");
-
-        typeTable.setEffectiveness(Type.GHOST, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-        typeTable.setEffectiveness(Type.DARK, Type.STEEL, Effectiveness.NEUTRAL);
-        log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-        logBlankLine();
-        setTypeTable(typeTable);
-    }
-
-    @Override
 	public List<BufferedImage> getAllPokemonImages() {
 		List<BufferedImage> bims = new ArrayList<>();
-		for (int i = 1; i < getPokemon().size(); i++) {
-			Pokemon pk = getPokemon().get(i);
-
-			BufferedImage frontNormal = getPokemonImage(pk, false, false, false, true);
-			BufferedImage backNormal = getPokemonImage(pk, true, false, false, false);
-			BufferedImage frontShiny = getPokemonImage(pk, false, true, false, true);
-			BufferedImage backShiny = getPokemonImage(pk, true, true, false, false);
-
-			BufferedImage combined = GFXFunctions
-					.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
-			bims.add(combined);
+		for (Pokemon pk : getPokemonSet()) {
+			bims.add(createPokemonImageGetter(pk).getFull());
 		}
 		return bims;
 	}
 
-	@Override
-	public final BufferedImage getMascotImage() {
-        // uncomment to dump all Pokemon images to a folder, helps when making changes to the palette randomization
-//		try {
-//			dumpAllPokemonImages();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		Pokemon pk = randomPokemon();
-		boolean shiny = random.nextInt(10) == 0;
-		boolean gen1 = generationOfPokemon() == 1;
+    @Override
+    public boolean hasPokemonImageGetter() {
+        return true;
+    }
 
-		return getPokemonImage(pk, false, !gen1 && shiny, true, false);
-	}
+    public abstract static class GBPokemonImageGetter extends PokemonImageGetter {
 
-	// TODO: Using many boolean arguments is suboptimal in Java, but I am unsure of the pattern to replace it
-	public abstract BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette);
+        public GBPokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            setIncludePalette(true);
+
+            BufferedImage frontNormal = get();
+            BufferedImage backNormal = setBack(true).get();
+            BufferedImage backShiny = setShiny(true).get();
+            BufferedImage frontShiny = setBack(false).get();
+
+            return GFXFunctions.stitchToGrid(new BufferedImage[][] { { frontNormal, backNormal }, { frontShiny, backShiny } });
+        }
+    }
 
     @Override
     public abstract AbstractGBRomEntry getRomEntry();

@@ -1,9 +1,14 @@
 package test.romhandlers;
 
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.Gen3Constants;
+import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.randomizers.PokemonTypeRandomizer;
+import com.dabomstew.pkrandom.randomizers.TrainerPokemonRandomizer;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
-import com.dabomstew.pkrandom.romhandlers.RomHandler;
+import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -77,7 +82,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
     public void trainersHaveAtLeastTwoPokemonAfterSettingDoubleBattleMode(String romName) {
         assumeTrue(getGenerationNumberOf(romName) >= 3);
         loadROM(romName);
-        romHandler.setDoubleBattleMode();
+        new TrainerPokemonRandomizer(romHandler, new Settings(), RND).setDoubleBattleMode();
         for (Trainer trainer : romHandler.getTrainers()) {
             System.out.println(trainer);
             if (trainer.forcedDoubleBattle) {
@@ -93,7 +98,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
     public void trainersSaveAndLoadCorrectlyAfterSettingDoubleBattleMode(String romName) {
         assumeTrue(getGenerationNumberOf(romName) == 3);
         loadROM(romName);
-        romHandler.setDoubleBattleMode();
+        new TrainerPokemonRandomizer(romHandler, new Settings(), RND).setDoubleBattleMode();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -111,7 +116,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         assumeTrue(romHandler.canAddPokemonToBossTrainers());
         Settings s = new Settings();
         s.setAdditionalBossTrainerPokemon(6);
-        romHandler.addTrainerPokemon(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).addTrainerPokemon();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -129,7 +134,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         assumeTrue(romHandler.canAddPokemonToImportantTrainers());
         Settings s = new Settings();
         s.setAdditionalImportantTrainerPokemon(6);
-        romHandler.addTrainerPokemon(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).addTrainerPokemon();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -148,7 +153,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setAdditionalBossTrainerPokemon(6);
         s.setAdditionalImportantTrainerPokemon(6);
-        romHandler.addTrainerPokemon(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).addTrainerPokemon();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -169,7 +174,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setAdditionalBossTrainerPokemon(5);
         s.setAdditionalImportantTrainerPokemon(5);
         s.setAdditionalRegularTrainerPokemon(5);
-        romHandler.addTrainerPokemon(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).addTrainerPokemon();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -188,7 +193,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setAdditionalBossTrainerPokemon(5);
         s.setAdditionalImportantTrainerPokemon(5);
-        romHandler.addTrainerPokemon(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).addTrainerPokemon();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         gbRomHandler.setTrainers(trainers);
@@ -214,7 +219,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setAdditionalBossTrainerPokemon(5);
         s.setAdditionalImportantTrainerPokemon(5);
         s.setAdditionalRegularTrainerPokemon(5);
-        romHandler.addTrainerPokemon(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).addTrainerPokemon();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         gbRomHandler.setTrainers(trainers);
@@ -236,7 +241,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         assumeTrue(romHandler.canAddHeldItemsToBossTrainers());
         Settings s = new Settings();
         s.setRandomizeHeldItemsForBossTrainerPokemon(true);
-        romHandler.randomizeTrainerHeldItems(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerHeldItems();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -254,7 +259,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         assumeTrue(romHandler.canAddHeldItemsToImportantTrainers());
         Settings s = new Settings();
         s.setRandomizeHeldItemsForImportantTrainerPokemon(true);
-        romHandler.randomizeTrainerHeldItems(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerHeldItems();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -274,7 +279,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setRandomizeHeldItemsForImportantTrainerPokemon(true);
         s.setRandomizeHeldItemsForBossTrainerPokemon(true);
-        romHandler.randomizeTrainerHeldItems(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerHeldItems();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -296,7 +301,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setRandomizeHeldItemsForImportantTrainerPokemon(true);
         s.setRandomizeHeldItemsForBossTrainerPokemon(true);
         s.setRandomizeHeldItemsForRegularTrainerPokemon(true);
-        romHandler.randomizeTrainerHeldItems(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerHeldItems();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         List<Trainer> before = new ArrayList<>(trainers);
@@ -309,7 +314,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void addHeldItemsToAllTrainersAndSaveAndLoadGivesThemHeldItems(String romName) {
-        // Fails in Emerald because it can't give a
+        // Fails in Emerald because it can't give held items to Mossdeep Steven
         assumeTrue(isGBGame(romName));
         loadROM(romName);
         assumeTrue(romHandler.canAddHeldItemsToBossTrainers());
@@ -319,13 +324,14 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setRandomizeHeldItemsForImportantTrainerPokemon(true);
         s.setRandomizeHeldItemsForBossTrainerPokemon(true);
         s.setRandomizeHeldItemsForRegularTrainerPokemon(true);
-        romHandler.randomizeTrainerHeldItems(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerHeldItems();
         AbstractGBRomHandler gbRomHandler = (AbstractGBRomHandler) romHandler;
         List<Trainer> trainers = gbRomHandler.getTrainers();
         gbRomHandler.setTrainers(trainers);
         gbRomHandler.saveTrainers();
         gbRomHandler.loadTrainers();
         for (Trainer tr : gbRomHandler.getTrainers()) {
+            // TODO: add clause to ignore mossdeep steven
             System.out.println(tr.fullDisplayName);
             if (tr.shouldNotGetBuffs()) {
                 System.out.println("skip");
@@ -349,7 +355,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setTrainersMod(false, false, false, false, false, false, true);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         keepTypeThemedCheck(beforeTrainerStrings, typeThemedTrainers);
     }
@@ -365,9 +371,9 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setTypesMod(false, false, true);
-        romHandler.randomizePokemonTypes(s);
+        new PokemonTypeRandomizer(romHandler, s, RND).randomizePokemonTypes();
         s.setTrainersMod(false, false, false, false, false, false, true);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         keepTypeThemedCheck(beforeTrainerStrings, typeThemedTrainers);
     }
@@ -397,7 +403,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         Type secondary = first.getOriginalSecondaryType();
         for (int i = 1; i < tr.pokemon.size(); i++) {
             Pokemon pk = tr.pokemon.get(i).pokemon;
-            if(secondary != null) {
+            if (secondary != null) {
                 if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
                     secondary = null;
                 }
@@ -412,7 +418,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         }
 
         //we have a type theme!
-        if(primary == Type.NORMAL && secondary != null) {
+        if (primary == Type.NORMAL && secondary != null) {
             //Bird override
             //(Normal is less significant than other types, for example, Flying)
             return secondary;
@@ -453,7 +459,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
         s.setTrainersUseLocalPokemon(true);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
         for (EncounterArea area : romHandler.getEncounters(true)) {
@@ -493,7 +499,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
         s.setTrainersUseLocalPokemon(true);
         s.setEliteFourUniquePokemonNumber(wantedNonLocal); // should be at least 4 non-local Pokemon in each game
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
         romHandler.getMainGameWildPokemon(true)
@@ -532,7 +538,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setEliteFourUniquePokemonNumber(1);
         s.setTrainersMod(false, true, false, false, false);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         elite4UniquePokemonCheck();
     }
@@ -546,7 +552,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setTrainersUseLocalPokemon(true);
         s.setEliteFourUniquePokemonNumber(1);
         s.setTrainersMod(false, true, false, false, false);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         elite4UniquePokemonCheck();
     }
@@ -560,7 +566,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setTrainersUseLocalPokemon(true);
         s.setEliteFourUniquePokemonNumber(1);
         s.setTrainersMod(false, false, false, false, true);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         elite4UniquePokemonCheck();
     }
@@ -604,7 +610,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setTrainersMod(false, false, false, false, true);
-        romHandler.randomizeTrainerPokes(s);
+        new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
         Map<String, List<Type>> e4Types = new HashMap<>();
         for (Trainer tr : romHandler.getTrainers()) {
@@ -659,6 +665,86 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         List<String> before = new ArrayList<>(trainerClassNames);
         romHandler.setTrainerClassNames(trainerClassNames);
         assertEquals(before, romHandler.getTrainerClassNames());
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomUsableZCrystalsDoesNotChangeWhichPokemonHaveZCrystals(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) == 7);
+        loadROM(romName);
+
+        System.out.println("==== BEFORE: ====");
+        Map<Integer, boolean[]> before = findZCrystals();
+        new TrainerPokemonRandomizer(romHandler, new Settings(), RND).randomUsableZCrystals();
+        System.out.println("==== AFTER: ====");
+        Map<Integer, boolean[]> after = findZCrystals();
+
+        assertEquals(before.keySet(), after.keySet());
+        for (Integer key : before.keySet()) {
+            assertArrayEquals(before.get(key), after.get(key));
+        }
+    }
+
+    private Map<Integer, boolean[]> findZCrystals() {
+        String[] itemNames = romHandler.getItemNames();
+
+        Map<Integer, boolean[]> zCrystalsByTrainer = new HashMap<>();
+        List<Trainer> trainersBefore = romHandler.getTrainers();
+        for (int i = 0; i < trainersBefore.size(); i++) {
+            Trainer tr = trainersBefore.get(i);
+            System.out.println(tr);
+            boolean[] zCrystals = new boolean[tr.pokemon.size()];
+            boolean anyHasZCrystal = false;
+            for (int pkNum = 0; pkNum < tr.pokemon.size(); pkNum++) {
+                TrainerPokemon tp = tr.pokemon.get(pkNum);
+                System.out.println(itemNames[tp.heldItem]);
+                if (Gen7Constants.heldZCrystalsByType.containsValue(tp.heldItem)) {
+                    zCrystals[pkNum] = true;
+                    anyHasZCrystal = true;
+                }
+            }
+            if (anyHasZCrystal) {
+                zCrystalsByTrainer.put(i, zCrystals);
+            }
+        }
+        return zCrystalsByTrainer;
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void randomUsableZCrystalsGivesZCrystalsOfUsableType(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) == 7);
+        loadROM(romName);
+
+        String[] itemNames = romHandler.getItemNames();
+
+        new TrainerPokemonRandomizer(romHandler, new Settings(), RND).randomUsableZCrystals();
+        for (Trainer tr : romHandler.getTrainers()) {
+            System.out.println(tr);
+            for (TrainerPokemon tp : tr.pokemon) {
+                if (Gen7Constants.heldZCrystalsByType.containsValue(tp.heldItem)) {
+                    System.out.println(tp.pokemon.getName() + " holds " + itemNames[tp.heldItem]);
+
+                    int[] pkMoves = tp.resetMoves ?
+                            RomFunctions.getMovesAtLevel(tp.pokemon.getNumber(), romHandler.getMovesLearnt(), tp.level)
+                            : Arrays.stream(tp.moves).distinct().filter(mv -> mv != 0).toArray();
+                    Set<Type> moveTypes = new HashSet<>();
+                    for (int moveID : pkMoves) {
+                        Move mv = romHandler.getMoves().get(moveID);
+                        System.out.println(mv.name + " | " + mv.type);
+                        moveTypes.add(mv.type);
+                    }
+
+                    boolean anyMoveTypeCorrect = false;
+                    for (Type t : moveTypes) {
+                        if (Gen7Constants.heldZCrystalsByType.get(t) == tp.heldItem) {
+                            anyMoveTypeCorrect = true;
+                        }
+                    }
+                    assertTrue(anyMoveTypeCorrect);
+                }
+            }
+        }
     }
 
 }

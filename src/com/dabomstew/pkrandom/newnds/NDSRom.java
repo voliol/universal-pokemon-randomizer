@@ -10,8 +10,7 @@ import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 
-import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import cuecompressors.BLZCoder;
 
 /*----------------------------------------------------------------------------*/
@@ -531,7 +530,7 @@ public class NDSRom {
                     if (foundOffsets.size() == 1) {
                         arm9_szoffset = foundOffsets.get(0);
                     } else {
-                        throw new RandomizerIOException("Could not read ARM9 size offset. May be a bad ROM.");
+                        throw new RomIOException("Could not read ARM9 size offset. May be a bad ROM.");
                     }
                 }
             }

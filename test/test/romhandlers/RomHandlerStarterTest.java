@@ -1,9 +1,10 @@
 package test.romhandlers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.Effectiveness;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.randomizers.StarterRandomizer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -38,10 +39,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void startersCanBeRandomizedAndGetAndSet(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true);
-        System.out.println(settings.getStartersMod());
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true);
+        System.out.println(s.getStartersMod());
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
         List<Pokemon> starters = romHandler.getStarters();
         List<Pokemon> before = new ArrayList<>(starters);
         romHandler.setStarters(starters);
@@ -55,9 +56,9 @@ public class RomHandlerStarterTest extends RomHandlerTest {
 
         List<Pokemon> before = new ArrayList<>(romHandler.getStarters());
 
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         System.out.println("Before: " + before);
         System.out.println("After: " + romHandler.getStarters());
@@ -68,16 +69,16 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void customStartersCanBeSet(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, true, false);
+        Settings s = new Settings();
+        s.setStartersMod(false, true, false);
         int customCount = romHandler.starterCount();
         int[] custom = new int[customCount];
         for (int i = 0; i < custom.length; i++) {
             custom[i] = i + 1;
         }
-        settings.setCustomStarters(custom);
+        s.setCustomStarters(custom);
 
-        romHandler.randomizeStarters(settings);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         List<Pokemon> starters = romHandler.getStarters();
         List<Pokemon> allPokes = romHandler.getPokemon();
@@ -103,27 +104,27 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void completelyRandomWithNoOtherOptionsDoesntThrow(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void randomWithTwoEvosWithNoOtherOptionsDoesntThrow(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, true);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, true);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void randomBasicWithNoOtherOptionsDoesntThrow(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, false, true);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, false, true);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
     }
 
     @ParameterizedTest
@@ -131,10 +132,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     public void fwgTriangleWorksWithCompletelyRandom(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasStarterTypeTriangleSupport());
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true, false, false);
-        settings.setStartersTypeMod(false, true, false, false, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true, false, false);
+        s.setStartersTypeMod(false, true, false, false, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         fwgCheck();
     }
@@ -144,10 +145,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     public void fwgTriangleWorksWithRandomWithTwoEvos(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasStarterTypeTriangleSupport());
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, true, false);
-        settings.setStartersTypeMod(false, true, false, false, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, true, false);
+        s.setStartersTypeMod(false, true, false, false, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         fwgCheck();
     }
@@ -157,10 +158,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     public void fwgTriangleWorksWithRandomBasic(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasStarterTypeTriangleSupport());
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, false, true);
-        settings.setStartersTypeMod(false, true, false, false, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, false, true);
+        s.setStartersTypeMod(false, true, false, false, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         fwgCheck();
     }
@@ -192,10 +193,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     public void typeTriangleWorksWithCompletelyRandom(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasStarterTypeTriangleSupport());
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true, false, false);
-        settings.setStartersTypeMod(false, false, true, false, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true, false, false);
+        s.setStartersTypeMod(false, false, true, false, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         typeTriangleCheck(getGenerationNumberOf(romName));
     }
@@ -205,10 +206,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     public void typeTriangleWorksWithRandomWithTwoEvos(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasStarterTypeTriangleSupport());
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, true, false);
-        settings.setStartersTypeMod(false, false, true, false, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, true, false);
+        s.setStartersTypeMod(false, false, true, false, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         typeTriangleCheck(getGenerationNumberOf(romName));
     }
@@ -218,14 +219,13 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     public void typeTriangleWorksWithRandomBasic(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasStarterTypeTriangleSupport());
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, false, true);
-        settings.setStartersTypeMod(false, false, true, false, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, false, true);
+        s.setStartersTypeMod(false, false, true, false, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         typeTriangleCheck(getGenerationNumberOf(romName));
     }
-
 
     private void typeTriangleCheck(int generation) {
         // Checks only for type triangles going in the same direction as the vanilla starter's triangle
@@ -267,10 +267,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void uniqueTypesWorksWithCompletelyRandom(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true, false, false);
-        settings.setStartersTypeMod(false, false, false, true, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true, false, false);
+        s.setStartersTypeMod(false, false, false, true, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         uniqueTypesCheck();
     }
@@ -279,10 +279,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void uniqueTypesWorksWithRandomWithTwoEvos(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, true, false);
-        settings.setStartersTypeMod(false, false, false, true, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, true, false);
+        s.setStartersTypeMod(false, false, false, true, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         uniqueTypesCheck();
     }
@@ -291,10 +291,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void uniqueTypesWorksWithRandomBasic(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, false, true);
-        settings.setStartersTypeMod(false, false, false, true, false);
-        romHandler.randomizeStarters(settings);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, false, true);
+        s.setStartersTypeMod(false, false, false, true, false);
+        new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
         uniqueTypesCheck();
     }
@@ -328,43 +328,45 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void singleTypeWorksWithCompletelyRandom(String romName) {
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, true, false, false);
-        settings.setStartersTypeMod(false, false, false, false, true);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, true, false, false);
+        s.setStartersTypeMod(false, false, false, false, true);
 
-        singleTypeCheck(settings);
+        singleTypeCheck(s);
     }
 
+    @Disabled
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void singleTypeWorksWithRandomWithTwoEvos(String romName) {
         // fails on all vanilla games afaik, due to there being only Machop and Timburr that fulfill this for Fighting.
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, true, false);
-        settings.setStartersTypeMod(false, false, false, false, true);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, true, false);
+        s.setStartersTypeMod(false, false, false, false, true);
 
-        singleTypeCheck(settings);
+        singleTypeCheck(s);
     }
 
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void singleTypeWorksWithRandomBasic(String romName) {
+        assumeTrue(getGenerationNumberOf(romName) > 2); // Gen 1 & 2 have too few basic Dragon/Ghost types
         loadROM(romName);
-        Settings settings = new Settings();
-        settings.setStartersMod(false, false, false, false, true);
-        settings.setStartersTypeMod(false, false, false, false, true);
+        Settings s = new Settings();
+        s.setStartersMod(false, false, false, false, true);
+        s.setStartersTypeMod(false, false, false, false, true);
 
-        singleTypeCheck(settings);
+        singleTypeCheck(s);
     }
 
-    private void singleTypeCheck(Settings settings) {
+    private void singleTypeCheck(Settings s) {
         for (int i = 0; i < Type.values().length; i++) {
             Type t = Type.values()[i];
-            if (romHandler.typeInGame(t)) {
-                settings.setStartersSingleType(i + 1);
+            if (romHandler.getTypeService().typeInGame(t)) {
+                s.setStartersSingleType(i + 1);
                 System.out.println(t);
-                romHandler.randomizeStarters(settings);
+                new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
                 List<Pokemon> starters = romHandler.getStarters();
                 System.out.println(starters.stream().map(pk -> pk.getName() + " " + pk.getPrimaryType() +

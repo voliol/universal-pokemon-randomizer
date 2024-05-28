@@ -36,6 +36,7 @@ public class Gen1Pokemon extends Pokemon {
     public Gen1Pokemon(int number) {
         super(number);
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4);
+        setGeneration(1);
     }
 
     private int frontImagePointer;

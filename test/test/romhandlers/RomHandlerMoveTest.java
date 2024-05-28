@@ -3,6 +3,7 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.Move;
 import com.dabomstew.pkrandom.pokemon.MoveLearnt;
+import com.dabomstew.pkrandom.randomizers.TMTutorMoveRandomizer;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -105,7 +106,7 @@ public class RomHandlerMoveTest extends RomHandlerTest {
     public void moveTutorsCanBeRandomizedAndGetAndSet(String romName) {
         loadROM(romName);
         assumeTrue(romHandler.hasMoveTutors());
-        romHandler.randomizeMoveTutorMoves(new Settings());
+        new TMTutorMoveRandomizer(romHandler, new Settings(), RND).randomizeMoveTutorMoves();
         List<Integer> moveTutorMoves = romHandler.getMoveTutorMoves();
         List<Integer> before = new ArrayList<>(moveTutorMoves);
         romHandler.setMoveTutorMoves(moveTutorMoves);

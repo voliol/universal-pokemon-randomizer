@@ -40,6 +40,10 @@ public class EncounterArea extends ArrayList<Encounter> {
     // start.
     private int partiallyPostGameCutoff = -1;
 
+    // For areas that work like/is the Trophy Garden rotating Pokemon in DPPt, where the game
+    // softlocks or otherwise has logical issues if all Encounters' species are the same.
+    private boolean forceMultipleSpecies;
+
     public EncounterArea() {
     }
 
@@ -112,6 +116,14 @@ public class EncounterArea extends ArrayList<Encounter> {
 
     public void setPartiallyPostGameCutoff(int partiallyPostGameCutoff) {
         this.partiallyPostGameCutoff = partiallyPostGameCutoff;
+    }
+
+    public void setForceMultipleSpecies(boolean forceMultipleSpecies) {
+        this.forceMultipleSpecies = forceMultipleSpecies;
+    }
+
+    public boolean isForceMultipleSpecies() {
+        return forceMultipleSpecies;
     }
 
     @Override

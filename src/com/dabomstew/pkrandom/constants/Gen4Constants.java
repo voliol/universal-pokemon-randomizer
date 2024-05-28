@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen4Constants {
@@ -96,6 +97,24 @@ public class Gen4Constants {
     public static final int evolutionMethodCount = 26;
 
     public static final int highestAbilityIndex = Abilities.badDreams;
+
+    // by AdAstra
+    public static final byte[] mysteryEggCommandImprovement = RomFunctions.hexToBytes(
+                    "F8 B5 84 B0 80 30 07 68 F8 68 26 F6 E1 FE 04 1C" +
+                    "F8 68 72 F6 11 FC 02 90 72 F6 AC FA 06 28 57 DA" +
+                    "0B 20 6B F6 1D FE 05 1C 6B F6 F6 FD 01 20 0D 21" +
+                    "15 F6 72 FF 03 21 00 91 01 90 28 1C 26 49 01 22" +
+                    "23 1C 6A F6 D3 FB 00 24 26 1C 21 1C 28 1C 36 31" +
+                    "32 1C 6C F6 0F FA 00 28 02 D0 01 34 04 2C F4 DB" +
+                    "04 2C 00 D1 03 24 1D 49 03 A8 41 80 21 1C 03 AA" +
+                    "28 1C 36 31 02 32 6C F6 7D FD 21 1C 28 1C 42 31" +
+                    "00 22 6C F6 F7 F9 03 A9 08 70 3A 34 28 1C 21 1C" +
+                    "03 AA 6C F6 6F FD 02 98 29 1C 72 F6 DD F9 28 1C" +
+                    "18 F6 CE FC F8 68 28 F6 EF FB 00 21 04 1C 28 1C" +
+                    "0A 1C 6C F6 DF F9 06 1C 28 1C 6F 21 00 22 6C F6" +
+                    "D9 F9 02 1C 12 06 20 1C 31 1C 12 0E 28 F6 0A FD" +
+                    "00 20 04 B0 F8 BD 00 00"
+    );
 
     public static final List<Integer> consumableHeldItems = Arrays.asList(
             Items.cheriBerry, Items.chestoBerry, Items.pechaBerry, Items.rawstBerry, Items.aspearBerry,
@@ -463,213 +482,104 @@ public class Gen4Constants {
 
     public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
 
-    public static final List<Integer> hgssBigOverworldPokemon = Arrays.asList(
-            536, // MMODEL_FOLLOWER_MON_STEELIX
-            537, // MMODEL_FOLLOWER_MON_STEELIX_F
-            579, // MMODEL_FOLLOWER_MON_LUGIA
-            580, // MMODEL_FOLLOWER_MON_HO_OH
-            651, // MMODEL_FOLLOWER_MON_WAILORD
-            712, // MMODEL_FOLLOWER_MON_KYOGRE
-            713, // MMODEL_FOLLOWER_MON_GROUDON
-            714, // MMODEL_FOLLOWER_MON_RAYQUAZA
-            833, // MMODEL_FOLLOWER_MON_DIALGA
-            834, // MMODEL_FOLLOWER_MON_PALKIA
-            836, // MMODEL_FOLLOWER_MON_REGIGIGAS
-            837, // MMODEL_FOLLOWER_MON_GIRATINA
-            838, // MMODEL_FOLLOWER_MON_GIRATINA_ORIGIN
-            845, // MMODEL_FOLLOWER_MON_ARCEUS_NORMAL
-            846, // MMODEL_FOLLOWER_MON_ARCEUS_FIGHTING
-            847, // MMODEL_FOLLOWER_MON_ARCEUS_FLYING
-            848, // MMODEL_FOLLOWER_MON_ARCEUS_POISON
-            849, // MMODEL_FOLLOWER_MON_ARCEUS_GROUND
-            850, // MMODEL_FOLLOWER_MON_ARCEUS_ROCK
-            851, // MMODEL_FOLLOWER_MON_ARCEUS_BUG
-            852, // MMODEL_FOLLOWER_MON_ARCEUS_GHOST
-            853, // MMODEL_FOLLOWER_MON_ARCEUS_STEEL
-            854, // MMODEL_FOLLOWER_MON_ARCEUS_MYSTERY
-            855, // MMODEL_FOLLOWER_MON_ARCEUS_FIRE
-            856, // MMODEL_FOLLOWER_MON_ARCEUS_WATER
-            857, // MMODEL_FOLLOWER_MON_ARCEUS_GRASS
-            858, // MMODEL_FOLLOWER_MON_ARCEUS_ELECTRIC
-            859, // MMODEL_FOLLOWER_MON_ARCEUS_PSYCHIC
-            860, // MMODEL_FOLLOWER_MON_ARCEUS_ICE
-            861, // MMODEL_FOLLOWER_MON_ARCEUS_DRAGON
-            862  // MMODEL_FOLLOWER_MON_ARCEUS_DARK
-    );
+    private final static int bulbasaurOverworldSpriteID = 297;
 
-    public static final List<Integer> hgssBannedOverworldPokemon = Arrays.asList(
-            // Unown alts (to avoid 28x chance of getting Unown)
-            // Arcues alts (to avoid 18x chance of getting Arceus)
-            502, // MMODEL_FOLLOWER_MON_UNOWN_B
-            503, // MMODEL_FOLLOWER_MON_UNOWN_C
-            504, // MMODEL_FOLLOWER_MON_UNOWN_D
-            505, // MMODEL_FOLLOWER_MON_UNOWN_E
-            506, // MMODEL_FOLLOWER_MON_UNOWN_F
-            507, // MMODEL_FOLLOWER_MON_UNOWN_G
-            508, // MMODEL_FOLLOWER_MON_UNOWN_H
-            509, // MMODEL_FOLLOWER_MON_UNOWN_I
-            510, // MMODEL_FOLLOWER_MON_UNOWN_J
-            511, // MMODEL_FOLLOWER_MON_UNOWN_K
-            512, // MMODEL_FOLLOWER_MON_UNOWN_L
-            513, // MMODEL_FOLLOWER_MON_UNOWN_M
-            514, // MMODEL_FOLLOWER_MON_UNOWN_N
-            515, // MMODEL_FOLLOWER_MON_UNOWN_O
-            516, // MMODEL_FOLLOWER_MON_UNOWN_P
-            517, // MMODEL_FOLLOWER_MON_UNOWN_Q
-            518, // MMODEL_FOLLOWER_MON_UNOWN_R
-            519, // MMODEL_FOLLOWER_MON_UNOWN_S
-            520, // MMODEL_FOLLOWER_MON_UNOWN_T
-            521, // MMODEL_FOLLOWER_MON_UNOWN_U
-            522, // MMODEL_FOLLOWER_MON_UNOWN_V
-            523, // MMODEL_FOLLOWER_MON_UNOWN_W
-            524, // MMODEL_FOLLOWER_MON_UNOWN_X
-            525, // MMODEL_FOLLOWER_MON_UNOWN_Y
-            526, // MMODEL_FOLLOWER_MON_UNOWN_Z
-            527, // MMODEL_FOLLOWER_MON_UNOWN_QMARK
-            528, // MMODEL_FOLLOWER_MON_UNOWN_EXCL
-            846, // MMODEL_FOLLOWER_MON_ARCEUS_FIGHTING
-            847, // MMODEL_FOLLOWER_MON_ARCEUS_FLYING
-            848, // MMODEL_FOLLOWER_MON_ARCEUS_POISON
-            849, // MMODEL_FOLLOWER_MON_ARCEUS_GROUND
-            850, // MMODEL_FOLLOWER_MON_ARCEUS_ROCK
-            851, // MMODEL_FOLLOWER_MON_ARCEUS_BUG
-            852, // MMODEL_FOLLOWER_MON_ARCEUS_GHOST
-            853, // MMODEL_FOLLOWER_MON_ARCEUS_STEEL
-            854, // MMODEL_FOLLOWER_MON_ARCEUS_MYSTERY
-            855, // MMODEL_FOLLOWER_MON_ARCEUS_FIRE
-            856, // MMODEL_FOLLOWER_MON_ARCEUS_WATER
-            857, // MMODEL_FOLLOWER_MON_ARCEUS_GRASS
-            858, // MMODEL_FOLLOWER_MON_ARCEUS_ELECTRIC
-            859, // MMODEL_FOLLOWER_MON_ARCEUS_PSYCHIC
-            860, // MMODEL_FOLLOWER_MON_ARCEUS_ICE
-            861, // MMODEL_FOLLOWER_MON_ARCEUS_DRAGON
-            862  // MMODEL_FOLLOWER_MON_ARCEUS_DARK
-    );
-
-    public static int convertOverworldSpriteToSpecies(int overworldSpriteID) {
-        int speciesID = overworldSpriteID - 296;
-
-        // Venusaur
-        if (overworldSpriteID >= 300) {
-            speciesID -= 1;
+    /**
+     * Returns the first overworld sprite ID for a given Pokemon species.
+     * Some species have more than one sprite ID, either due to gender
+     * differences or formes, but this gives the first one only.
+     */
+    public static int getOverworldSpriteIDOfSpecies(int species) {
+        int spriteID = bulbasaurOverworldSpriteID;
+        for (int i = 1; i < species; i++) {
+            spriteID += speciesToOverworldSpriteAmount.getOrDefault(i, 1);
         }
+        return spriteID;
+    }
 
-        // Pikachu
-        if (overworldSpriteID >= 323) {
-            speciesID -= 1;
-        }
+    private final static Map<Integer, Integer> speciesToOverworldSpriteAmount = initSpeciesToOverworldSpriteAmount();
 
-        // Meganium
-        if (overworldSpriteID >= 453) {
-            speciesID -= 1;
-        }
+    private static Map<Integer, Integer> initSpeciesToOverworldSpriteAmount() {
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(Species.venusaur, 2);
+        map.put(Species.pikachu, 2);
+        map.put(Species.meganium, 2);
+        map.put(Species.pichu, 2);
+        map.put(Species.unown, 28);
+        map.put(Species.wobbuffet, 2);
+        map.put(Species.steelix, 2);
+        map.put(Species.heracross, 2);
+        map.put(Species.deoxys, 4);
+        map.put(Species.burmy, 3);
+        map.put(Species.wormadam, 3);
+        map.put(Species.combee, 2);
+        map.put(Species.shellos, 2);
+        map.put(Species.gastrodon, 2);
+        map.put(Species.gible, 2);
+        map.put(Species.gabite, 2);
+        map.put(Species.garchomp, 2);
+        map.put(Species.hippopotas, 2);
+        map.put(Species.hippowdon, 2);
+        map.put(Species.rotom, 6);
+        map.put(Species.giratina, 2);
+        map.put(Species.arceus, 18);
+        return map;
+    }
 
-        // Pichu
-        if (overworldSpriteID >= 472) {
-            speciesID -= 1;
-        }
+    // Technically the property of being big or not is one of the sprites and not species,
+    // but it just happens that all species with SOME overworld sprite that's big have all
+    // their overworld sprites be big.
+    public static final List<Integer> hgssBigOverworldPokemon = List.of(Species.steelix, Species.lugia, Species.hoOh,
+            Species.wailord, Species.kyogre, Species.groudon, Species.rayquaza, Species.dialga, Species.palkia,
+            Species.regigigas, Species.giratina, Species.arceus);
 
-        // Unown
-        if (overworldSpriteID >= 528) {
-            speciesID -= 27;
-        } else if (overworldSpriteID > 501) {
-            speciesID -= (overworldSpriteID - 501);
-        }
+    /**
+     * Maps {@link Species} IDs to the file indices of images found in the OtherPokemonGraphics NARC.<br>
+     * [0] lists the front images, [1] the back images.
+     */
+    public static final Map<Integer, int[][]> otherPokemonGraphicsImages = initOtherPokemonGraphicsImages();
 
-        // Wobbuffet
-        if (overworldSpriteID >= 530) {
-            speciesID -= 1;
-        }
+    private static Map<Integer,int[][]> initOtherPokemonGraphicsImages() {
+        Map<Integer, int[][]> palettes = new HashMap<>();
+        palettes.put(Species.unown, new int[][]{
+                // alphabetical order, !, ?
+                {9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63},
+                {8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62}});
+        palettes.put(Species.castform, new int[][]{{68, 69, 70, 71}, {64, 65, 66, 67}}); // normal, sunny, rainy, snowy
+        palettes.put(Species.deoxys, new int[][]{{1, 3, 5, 7}, {0, 2, 4, 6}}); // normal, attack, defense, speed
+        palettes.put(Species.burmy, new int[][]{{73, 75, 77}, {72, 74, 76}}); // plant, sandy, trash
+        palettes.put(Species.wormadam, new int[][]{{79, 81, 83}, {78, 80, 82}}); // plant, sandy, trash
+        palettes.put(Species.cherrim, new int[][]{{94, 95}, {92, 93}}); // normal, sunny
+        palettes.put(Species.shellos, new int[][]{{86, 87}, {84, 85}}); // west, east
+        palettes.put(Species.gastrodon, new int[][]{{90, 91}, {88, 89}}); // west, east
+        palettes.put(Species.arceus, new int[][]{
+                // same order as types internally, see typeToByte() (though ??? type is also included)
+                {97, 99, 101, 103, 105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131},
+                {96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120, 122, 124, 126, 128, 130}});
+        return Collections.unmodifiableMap(palettes);
+    }
 
-        // Steelix
-        if (overworldSpriteID >= 537) {
-            speciesID -= 1;
-        }
+    /**
+     * Maps {@link Species} IDs to the file indices of palettes found in the OtherPokemonGraphics NARC.<br>
+     * [0] lists the normal palettes, [1] the shiny palettes.
+     */
+    public static final Map<Integer, int[][]> otherPokemonGraphicsPalettes = initOtherPokemonGraphicsPalettes();
 
-        // Heracross
-        if (overworldSpriteID >= 544) {
-            speciesID -= 1;
-        }
-
-        // Deoxys
-        if (overworldSpriteID >= 719) {
-            speciesID -= 3;
-        } else if (overworldSpriteID > 716) {
-            speciesID -= (overworldSpriteID - 716);
-        }
-
-        // Burmy
-        if (overworldSpriteID >= 747) {
-            speciesID -= 2;
-        } else if (overworldSpriteID > 745) {
-            speciesID -= (overworldSpriteID - 745);
-        }
-
-        // Wormadam
-        if (overworldSpriteID >= 750) {
-            speciesID -= 2;
-        } else if (overworldSpriteID > 748) {
-            speciesID -= (overworldSpriteID - 748);
-        }
-
-        // Combee
-        if (overworldSpriteID >= 753) {
-            speciesID -= 1;
-        }
-
-        // Shellos
-        if (overworldSpriteID >= 761) {
-            speciesID -= 1;
-        }
-
-        // Gastrodon
-        if (overworldSpriteID >= 763) {
-            speciesID -= 1;
-        }
-
-        // Gible
-        if (overworldSpriteID >= 784) {
-            speciesID -= 1;
-        }
-
-        // Gabite
-        if (overworldSpriteID >= 786) {
-            speciesID -= 1;
-        }
-
-        // Garchomp
-        if (overworldSpriteID >= 788) {
-            speciesID -= 1;
-        }
-
-        // Hippopotas
-        if (overworldSpriteID >= 793) {
-            speciesID -= 1;
-        }
-
-        // Hippowdon
-        if (overworldSpriteID >= 795) {
-            speciesID -= 1;
-        }
-
-        // Rotom
-        if (overworldSpriteID >= 829) {
-            speciesID -= 5;
-        } else if (overworldSpriteID > 824) {
-            speciesID -= (overworldSpriteID - 824);
-        }
-
-        // Giratina
-        if (overworldSpriteID >= 838) {
-            speciesID -= 1;
-        }
-
-        // Arceus
-        if (overworldSpriteID > 845) {
-            speciesID -= (overworldSpriteID - 845);
-        }
-
-        return speciesID;
+    private static Map<Integer,int[][]> initOtherPokemonGraphicsPalettes() {
+        Map<Integer, int[][]> palettes = new HashMap<>();
+        palettes.put(Species.unown, new int[][]{{136}, {137}});
+        palettes.put(Species.castform, new int[][]{{138, 139, 140, 141}, {142, 143, 144, 145}}); // normal, sunny, rainy, snowy
+        palettes.put(Species.deoxys, new int[][]{{134}, {135}});
+        palettes.put(Species.burmy, new int[][]{{146, 148, 150}, {147, 149, 151}}); // plant, sandy, trash
+        palettes.put(Species.wormadam, new int[][]{{152, 154, 156}, {153, 155, 157}}); // plant, sandy, trash
+        palettes.put(Species.cherrim, new int[][]{{166, 167}, {168, 169}}); // normal, sunny
+        palettes.put(Species.shellos, new int[][]{{158, 160}, {159, 161}}); // west, east
+        palettes.put(Species.gastrodon, new int[][]{{162, 164}, {163, 165}}); // west, east
+        palettes.put(Species.arceus, new int[][]{
+                // same order as types internally, see typeToByte() (though this also includes a ???-type)
+                {170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 198, 200, 202, 204},
+                {171, 173, 175, 177, 179, 181, 183, 185, 187, 189, 191, 193, 195, 197, 199, 201, 203, 205}});
+        return Collections.unmodifiableMap(palettes);
     }
 
     // The original slot each of the 20 "alternate" slots is mapped to
@@ -687,6 +597,8 @@ public class Gen4Constants {
     public static final String[] hgssNonGrassSetNames = new String[] { "", "Surfing", "Rock Smash", "Old Rod",
             "Good Rod", "Super Rod" };
     public static final int hgssGoodRodReplacementIndex = 3, hgssSuperRodReplacementIndex = 1;
+
+    public static final double stabMultiplier = 1.5;
 
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.PHYSICAL, MoveCategory.SPECIAL,
             MoveCategory.STATUS };
@@ -1633,18 +1545,18 @@ public class Gen4Constants {
 
     private static Map<Integer,String> setupFormeSuffixes() {
         Map<Integer,String> formeSuffixes = new HashMap<>();
-        formeSuffixes.put(Species.Gen4Formes.deoxysA + formeOffset,"-A");
-        formeSuffixes.put(Species.Gen4Formes.deoxysD + formeOffset,"-D");
-        formeSuffixes.put(Species.Gen4Formes.deoxysS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.wormadamS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.wormadamT + formeOffset,"-T");
-        formeSuffixes.put(Species.Gen4Formes.giratinaO + formeOffset,"-O");
-        formeSuffixes.put(Species.Gen4Formes.shayminS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.rotomH + formeOffset,"-H");
-        formeSuffixes.put(Species.Gen4Formes.rotomW + formeOffset,"-W");
-        formeSuffixes.put(Species.Gen4Formes.rotomFr + formeOffset,"-Fr");
-        formeSuffixes.put(Species.Gen4Formes.rotomFa + formeOffset,"-Fa");
-        formeSuffixes.put(Species.Gen4Formes.rotomM + formeOffset,"-M");
+        formeSuffixes.put(Species.Gen4Formes.deoxysA + formeOffset,"-Attack");
+        formeSuffixes.put(Species.Gen4Formes.deoxysD + formeOffset,"-Defense");
+        formeSuffixes.put(Species.Gen4Formes.deoxysS + formeOffset,"-Speed");
+        formeSuffixes.put(Species.Gen4Formes.wormadamS + formeOffset,"-Sandy");
+        formeSuffixes.put(Species.Gen4Formes.wormadamT + formeOffset,"-Trash");
+        formeSuffixes.put(Species.Gen4Formes.giratinaO + formeOffset,"-Origin");
+        formeSuffixes.put(Species.Gen4Formes.shayminS + formeOffset,"-Sky");
+        formeSuffixes.put(Species.Gen4Formes.rotomH + formeOffset,"-Heat");
+        formeSuffixes.put(Species.Gen4Formes.rotomW + formeOffset,"-Wash");
+        formeSuffixes.put(Species.Gen4Formes.rotomFr + formeOffset,"-Frost");
+        formeSuffixes.put(Species.Gen4Formes.rotomFa + formeOffset,"-Fan");
+        formeSuffixes.put(Species.Gen4Formes.rotomM + formeOffset,"-Mow");
         return formeSuffixes;
     }
 

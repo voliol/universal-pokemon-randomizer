@@ -117,7 +117,9 @@ public class TypeTable {
 
     public Map<Type, Effectiveness> against(Type defenderPrimary, Type defenderSecondary) {
         validTypeCheck(defenderPrimary);
-        validTypeCheck(defenderSecondary);
+        if (defenderSecondary != null) {
+            validTypeCheck(defenderSecondary);
+        }
         Map<Type, Effectiveness> results = new HashMap<>();
         for (int i = 0; i < types.size(); i++) {
             Effectiveness eff = effectivenesses[i][typeIndexMap.get(defenderPrimary)];
@@ -258,10 +260,6 @@ public class TypeTable {
     public String toString() {
         return "TypeTable(#types=" + types.size() + " , #nonNeutral=" + nonNeutralEffectivenessCount() + ", types="
                 + types + ")";
-    }
-
-    public static void main(String[] args) {
-        System.out.println(getVanillaGen6PlusTable().toBigString());
     }
 
     private static final String[] effectivenessSymbols = new String[] {"Imm", "nve", "---", "SE!"};

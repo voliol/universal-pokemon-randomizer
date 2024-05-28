@@ -316,43 +316,39 @@ useTimeOfDay=false
 		Encounters = [マりル Lv13, ズバット Lv15, ワンりキー Lv14, マりル Lv15, イシツブテ Lv14, コラッタ Lv16, コラッタ Lv16]]
 	[Name = スりバチやま Surfing, Rate = 10, Offset = 0,
 		Encounters = [トサキント Lv20, マりル Lv20, アズマオウ Lv20]]
-	[Name = Fishing Group 1, Rate = 0, Offset = 0,
+	[Name = Fishing Shore, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, クラブ Lv10, コイキング Lv20, クラブ Lv20, クラブ Lv20, ヒトデマン Lv20, クラブ Lv40, ヒトデマン Lv40, クラブ Lv40, キングラー Lv40]]
-	[Name = Fishing Group 2, Rate = 0, Offset = 0,
+	[Name = Fishing Ocean, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, メノクラゲ Lv10, コイキング Lv20, メノクラゲ Lv20, チョンチー Lv20, シェルダー Lv20, チョンチー Lv40, シェルダー Lv40, ドククラゲ Lv40, ランターン Lv40]]
-	[Name = Fishing Group 3, Rate = 0, Offset = 0,
+	[Name = Fishing Lake, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, トサキント Lv10, コイキング Lv20, トサキント Lv20, トサキント Lv20, トサキント Lv20, トサキント Lv40, トサキント Lv40, コイキング Lv40, アズマオウ Lv40]]
-	[Name = Fishing Group 4, Rate = 0, Offset = 0,
+	[Name = Fishing Pond, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, ニョロモ Lv10, コイキング Lv20, ニョロモ Lv20, ニョロモ Lv20, ニョロモ Lv20, ニョロモ Lv40, ニョロモ Lv40, コイキング Lv40, ニョロモ Lv40]]
-	[Name = Fishing Group 5, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 1 (Ice Path, Dragon's Den), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv20, コイキング Lv20, コイキング Lv20, ミニりュウ Lv20, コイキング Lv40, ミニりュウ Lv40, コイキング Lv40, ハクりュー Lv40]]
-	[Name = Fishing Group 6, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish Swarm (Route 32), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv5, コイキング Lv5, ハりーセン Lv5, コイキング Lv20, ハりーセン Lv20, ハりーセン Lv20, ハりーセン Lv20, ハりーセン Lv40, ハりーセン Lv40, ハりーセン Lv40, ハりーセン Lv40]]
-	[Name = Fishing Group 7, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid Swarm (Route 44), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, テッポウオ Lv10, コイキング Lv20, テッポウオ Lv20, テッポウオ Lv20, テッポウオ Lv20, テッポウオ Lv40, テッポウオ Lv40, テッポウオ Lv40, テッポウオ Lv40]]
-	[Name = Fishing Group 8, Rate = 0, Offset = 0,
+	[Name = Fishing Gyarados (Lake of Rage, Fuchsia City), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv20, コイキング Lv20, コイキング Lv20, ギャラドス Lv20, コイキング Lv40, ギャラドス Lv40, コイキング Lv40, コイキング Lv40]]
-	[Name = Fishing Group 9, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 2 (Route 45), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, ミニりュウ Lv10, コイキング Lv10, ミニりュウ Lv10, コイキング Lv10, ハクりュー Lv10]]
-	[Name = Fishing Group 10, Rate = 0, Offset = 0,
+	[Name = Fishing Whirl Islands, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, クラブ Lv10, コイキング Lv20, クラブ Lv20, クラブ Lv20, タッツー Lv20, クラブ Lv40, タッツー Lv40, キングラー Lv40, シードラ Lv40]]
-	[Name = Fishing Group 11, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish (Routes 32, 12, 13), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, メノクラゲ Lv10, コイキング Lv20, メノクラゲ Lv20, メノクラゲ Lv20, メノクラゲ Lv20, メノクラゲ Lv40, メノクラゲ Lv40, コイキング Lv40, ハりーセン Lv40]]
-	[Name = Fishing Group 12, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid (Route 44), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, ニョロモ Lv10, コイキング Lv20, ニョロモ Lv20, ニョロモ Lv20, ニョロモ Lv20, ニョロモ Lv40, ニョロモ Lv40, コイキング Lv40, テッポウオ Lv40]]
-	[Name = Headbutt Trees Set 1, Rate = 0, Offset = 0,
-		Encounters = [コンパン Lv15, コンパン Lv15, ケーシィ Lv15, ケーシィ Lv15, モルフォン Lv15]]
-	[Name = Headbutt Trees Set 2, Rate = 0, Offset = 0,
-		Encounters = [コンパン Lv15, コイル Lv15, ケーシィ Lv15, ケーシィ Lv15, モルフォン Lv15]]
-	[Name = Headbutt Trees Set 3, Rate = 0, Offset = 0,
-		Encounters = [ビードル Lv10, ビードル Lv10, コクーン Lv10, タマタマ Lv10, タマタマ Lv10, スピアー Lv10]]
-	[Name = Headbutt Trees Set 4, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common), Rate = 0, Offset = 0,
+		Encounters = [コクーン Lv10, タマタマ Lv10, タマタマ Lv10, スピアー Lv10]]
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare), Rate = 0, Offset = 0,
 		Encounters = [ビードル Lv10, クヌギダマ Lv10, クヌギダマ Lv10, タマタマ Lv10, タマタマ Lv10, スピアー Lv10]]
-	[Name = Headbutt Trees Set 5, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (common), Rate = 0, Offset = 0,
 		Encounters = [オニスズメ Lv10, オニスズメ Lv10, オニスズメ Lv10, エイパム Lv10, エイパム Lv10, エイパム Lv10]]
-	[Name = Headbutt Trees Set 6, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (rare), Rate = 0, Offset = 0,
 		Encounters = [オニスズメ Lv10, へラクロス Lv10, へラクロス Lv10, エイパム Lv10, エイパム Lv10, エイパム Lv10]]
-	[Name = Headbutt Trees Set 7, Rate = 0, Offset = 0,
+	[Name = Rock Smash, Rate = 0, Offset = 0,
 		Encounters = [クラブ Lv15, ツボツボ Lv15]]
 	[Name = Bug Catching Contest, Rate = 0, Offset = 0,
 		Encounters = [キャタピー Lvs 7-18, ビードル Lvs 7-18, トランセル Lvs 9-18, コクーン Lvs 9-18, バタフりー Lvs 12-15, スピアー Lvs 12-15, コンパン Lvs 10-16, パラス Lvs 10-17, ストライク Lvs 13-14, カイロス Lvs 13-14]
@@ -1057,29 +1053,29 @@ useTimeOfDay=true
 		Encounters = [マりル Lv13, ズバット Lv15, ワンりキー Lv14, マりル Lv15, イシツブテ Lv14, コラッタ Lv16, コラッタ Lv16]]
 	[Name = スりバチやま Surfing, Rate = 10, Offset = 0,
 		Encounters = [トサキント Lv20, マりル Lv20, アズマオウ Lv20]]
-	[Name = Fishing Group 1, Rate = 0, Offset = 0,
+	[Name = Fishing Shore, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, クラブ Lv10, コイキング Lv20, クラブ Lv20, クラブ Lv20, クラブ Lv40, クラブ Lv40, キングラー Lv40]]
-	[Name = Fishing Group 2, Rate = 0, Offset = 0,
+	[Name = Fishing Ocean, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, メノクラゲ Lv10, コイキング Lv20, メノクラゲ Lv20, チョンチー Lv20, チョンチー Lv40, ドククラゲ Lv40, ランターン Lv40]]
-	[Name = Fishing Group 3, Rate = 0, Offset = 0,
+	[Name = Fishing Lake, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, トサキント Lv10, コイキング Lv20, トサキント Lv20, トサキント Lv20, トサキント Lv40, コイキング Lv40, アズマオウ Lv40]]
-	[Name = Fishing Group 4, Rate = 0, Offset = 0,
+	[Name = Fishing Pond, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, ニョロモ Lv10, コイキング Lv20, ニョロモ Lv20, ニョロモ Lv20, ニョロモ Lv40, コイキング Lv40, ニョロモ Lv40]]
-	[Name = Fishing Group 5, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 1 (Ice Path, Dragon's Den), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv20, コイキング Lv20, コイキング Lv20, コイキング Lv40, コイキング Lv40, ハクりュー Lv40]]
-	[Name = Fishing Group 6, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish Swarm (Route 32), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv5, コイキング Lv5, ハりーセン Lv5, コイキング Lv20, ハりーセン Lv20, ハりーセン Lv20, ハりーセン Lv40, ハりーセン Lv40, ハりーセン Lv40]]
-	[Name = Fishing Group 7, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid Swarm (Route 44), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, テッポウオ Lv10, コイキング Lv20, テッポウオ Lv20, テッポウオ Lv20, テッポウオ Lv40, テッポウオ Lv40, テッポウオ Lv40]]
-	[Name = Fishing Group 8, Rate = 0, Offset = 0,
+	[Name = Fishing Gyarados (Lake of Rage, Fuchsia City), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv20, コイキング Lv20, コイキング Lv20, コイキング Lv40, コイキング Lv40, コイキング Lv40]]
-	[Name = Fishing Group 9, Rate = 0, Offset = 0,
+	[Name = Fishing Dratini 2 (Route 45), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, コイキング Lv10, ハクりュー Lv10]]
-	[Name = Fishing Group 10, Rate = 0, Offset = 0,
+	[Name = Fishing Whirl Islands, Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, クラブ Lv10, コイキング Lv20, クラブ Lv20, クラブ Lv20, クラブ Lv40, キングラー Lv40, シードラ Lv40]]
-	[Name = Fishing Group 11, Rate = 0, Offset = 0,
+	[Name = Fishing Qwilfish (Routes 32, 12, 13), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, メノクラゲ Lv10, コイキング Lv20, メノクラゲ Lv20, メノクラゲ Lv20, メノクラゲ Lv40, コイキング Lv40, ハりーセン Lv40]]
-	[Name = Fishing Group 12, Rate = 0, Offset = 0,
+	[Name = Fishing Remoraid (Route 44), Rate = 0, Offset = 0,
 		Encounters = [コイキング Lv10, コイキング Lv10, ニョロモ Lv10, コイキング Lv20, ニョロモ Lv20, ニョロモ Lv20, ニョロモ Lv40, コイキング Lv40, テッポウオ Lv40]]
 	[Name = Time-Specific Fishing 1, Rate = 0, Offset = 0,
 		Encounters = [サニーゴ Lv20, ヒトデマン Lv20, サニーゴ Lv40, ヒトデマン Lv40]]
@@ -1103,19 +1099,15 @@ useTimeOfDay=true
 		Encounters = [タッツー Lv20, タッツー Lv20, タッツー Lv40, タッツー Lv40]]
 	[Name = Time-Specific Fishing 11, Rate = 0, Offset = 0,
 		Encounters = [メノクラゲ Lv20, メノクラゲ Lv20, メノクラゲ Lv40, メノクラゲ Lv40]]
-	[Name = Headbutt Trees Set 1, Rate = 0, Offset = 0,
-		Encounters = [コンパン Lv15, コンパン Lv15, ケーシィ Lv15, ケーシィ Lv15, モルフォン Lv15]]
-	[Name = Headbutt Trees Set 2, Rate = 0, Offset = 0,
-		Encounters = [コンパン Lv15, コイル Lv15, ケーシィ Lv15, ケーシィ Lv15, モルフォン Lv15]]
-	[Name = Headbutt Trees Set 3, Rate = 0, Offset = 0,
-		Encounters = [ビードル Lv10, ビードル Lv10, コクーン Lv10, タマタマ Lv10, タマタマ Lv10, スピアー Lv10]]
-	[Name = Headbutt Trees Set 4, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (common), Rate = 0, Offset = 0,
+		Encounters = [コクーン Lv10, タマタマ Lv10, タマタマ Lv10, スピアー Lv10]]
+	[Name = Headbutt (Routes 34-39, Azalea Town, Ilex Forest, Routes 26-27) (rare), Rate = 0, Offset = 0,
 		Encounters = [ビードル Lv10, クヌギダマ Lv10, クヌギダマ Lv10, タマタマ Lv10, タマタマ Lv10, スピアー Lv10]]
-	[Name = Headbutt Trees Set 5, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (common), Rate = 0, Offset = 0,
 		Encounters = [オニスズメ Lv10, オニスズメ Lv10, オニスズメ Lv10, エイパム Lv10, エイパム Lv10, エイパム Lv10]]
-	[Name = Headbutt Trees Set 6, Rate = 0, Offset = 0,
+	[Name = Headbutt (Routes 29-33, 42-46) (rare), Rate = 0, Offset = 0,
 		Encounters = [オニスズメ Lv10, へラクロス Lv10, へラクロス Lv10, エイパム Lv10, エイパム Lv10, エイパム Lv10]]
-	[Name = Headbutt Trees Set 7, Rate = 0, Offset = 0,
+	[Name = Rock Smash, Rate = 0, Offset = 0,
 		Encounters = [クラブ Lv15, ツボツボ Lv15]]
 	[Name = Bug Catching Contest, Rate = 0, Offset = 0,
 		Encounters = [キャタピー Lvs 7-18, ビードル Lvs 7-18, トランセル Lvs 9-18, コクーン Lvs 9-18, バタフりー Lvs 12-15, スピアー Lvs 12-15, コンパン Lvs 10-16, パラス Lvs 10-17, ストライク Lvs 13-14, カイロス Lvs 13-14]

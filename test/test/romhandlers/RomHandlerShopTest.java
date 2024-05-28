@@ -3,6 +3,7 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.ItemList;
 import com.dabomstew.pkrandom.pokemon.Shop;
+import com.dabomstew.pkrandom.randomizers.ItemRandomizer;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -20,6 +21,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopItemsAreNotEmpty(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasShopSupport());
         assertFalse(romHandler.getShopItems().isEmpty());
     }
 
@@ -27,11 +29,12 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopItemsDoNotChangeWithGetAndSet(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasShopSupport());
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
-        System.out.println(toStringWithNames(shopItems));
+        System.out.println("Before: " + toStringWithNames(shopItems));
         Map<Integer, Shop> before = new HashMap<>(shopItems);
         romHandler.setShopItems(shopItems);
-        System.out.println(toStringWithNames(romHandler.getShopItems()));
+        System.out.println("After: " + toStringWithNames(romHandler.getShopItems()));
         assertEquals(before, romHandler.getShopItems());
     }
 
@@ -39,7 +42,8 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopItemsCanBeRandomizedAndGetAndSet(String romName) {
         loadROM(romName);
-        romHandler.randomizeShopItems(new Settings());
+        assumeTrue(romHandler.hasShopSupport());
+        new ItemRandomizer(romHandler, new Settings(), RND).randomizeShopItems();
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         Map<Integer, Shop> before = new HashMap<>(shopItems);
         romHandler.setShopItems(shopItems);
@@ -50,6 +54,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void shopsHaveNames(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasShopSupport());
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         for (Shop shop : shopItems.values()) {
             assertNotNull(shop.name);
@@ -60,6 +65,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void mainGameShopsExist(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasShopSupport());
         boolean hasMainGameShops = false;
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
         for (Shop shop : shopItems.values()) {
@@ -76,6 +82,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void regularShopItemsIsNotEmpty(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasShopSupport());
         assertFalse(romHandler.getRegularShopItems().isEmpty());
     }
 
@@ -83,6 +90,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
     @MethodSource("getRomNames")
     public void opShopItemsIsNotEmpty(String romName) {
         loadROM(romName);
+        assumeTrue(romHandler.hasShopSupport());
         assertFalse(romHandler.getOPShopItems().isEmpty());
     }
 
@@ -94,7 +102,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setBanBadRandomShopItems(true);
-        romHandler.randomizeShopItems(s);
+        new ItemRandomizer(romHandler, s, RND).randomizeShopItems();
 
         ItemList nonBad = romHandler.getNonBadItems();
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
@@ -114,7 +122,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setBanRegularShopItems(true);
-        romHandler.randomizeShopItems(s);
+        new ItemRandomizer(romHandler, s, RND).randomizeShopItems();
 
         List<Integer> regularShop = romHandler.getRegularShopItems();
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
@@ -134,7 +142,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setBanOPShopItems(true);
-        romHandler.randomizeShopItems(s);
+        new ItemRandomizer(romHandler, s, RND).randomizeShopItems();
 
         List<Integer> opShop = romHandler.getOPShopItems();
         Map<Integer, Shop> shopItems = romHandler.getShopItems();
@@ -154,7 +162,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setGuaranteeEvolutionItems(true);
-        romHandler.randomizeShopItems(s);
+        new ItemRandomizer(romHandler, s, RND).randomizeShopItems();
 
         List<Integer> evoItems = romHandler.getEvolutionItems();
         Map<Integer, Boolean> placed = new HashMap<>();
@@ -185,7 +193,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
 
         Settings s = new Settings();
         s.setGuaranteeXItems(true);
-        romHandler.randomizeShopItems(s);
+        new ItemRandomizer(romHandler, s, RND).randomizeShopItems();
 
         List<Integer> xItems = romHandler.getXItems();
         Map<Integer, Boolean> placed = new HashMap<>();
@@ -217,7 +225,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
         Settings s = new Settings();
         s.setGuaranteeEvolutionItems(true);
         s.setGuaranteeXItems(true);
-        romHandler.randomizeShopItems(s);
+        new ItemRandomizer(romHandler, s, RND).randomizeShopItems();
 
         List<Integer> evoItems = romHandler.getEvolutionItems();
         Map<Integer, Boolean> placedEvo = new HashMap<>();
@@ -258,7 +266,7 @@ public class RomHandlerShopTest extends RomHandlerTest {
             sb.append(entry.getKey());
             sb.append(" -> ");
             sb.append(toStringWithNames(entry.getValue()));
-            sb.append("/n");
+            sb.append("\n");
         }
         sb.append("}\n");
         return sb.toString();

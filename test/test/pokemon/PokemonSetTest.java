@@ -4,11 +4,13 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Executable;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PokemonSetTest {
 
@@ -88,4 +90,44 @@ public class PokemonSetTest {
         assertTrue(count[b.getNumber()] > 0);
     }
 
+    @Test
+    public void unmodifiableSetCopiesElementsWhenInitiated() {
+        Pokemon a = new Pokemon(0);
+        a.setName("A");
+        Pokemon b = new Pokemon(1);
+        b.setName("B");
+        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a, b));
+        System.out.println(pokes);
+        assertEquals(pokes, Set.of(a, b));
+    }
+
+    @Test
+    public void unmodifiableSetThrowsWhenAdding() {
+        Pokemon a = new Pokemon(0);
+        a.setName("A");
+        Pokemon b = new Pokemon(1);
+        b.setName("B");
+        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a));
+        assertThrows(UnsupportedOperationException.class, () -> {pokes.add(b);});
+    }
+
+    @Test
+    public void unmodifiableSetThrowsWhenRemoving() {
+        Pokemon a = new Pokemon(0);
+        a.setName("A");
+        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a));
+        assertThrows(UnsupportedOperationException.class, () -> {pokes.remove(a);});
+    }
+
+    @Test
+    public void unmodifiableSetThrowsWhenRemovingThroughIterator() {
+        Pokemon a = new Pokemon(0);
+        a.setName("A");
+        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a));
+        assertThrows(UnsupportedOperationException.class, () -> {
+            Iterator<Pokemon> it = pokes.iterator();
+            it.next();
+            it.remove();
+        });
+    }
 }

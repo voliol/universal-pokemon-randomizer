@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen5RomHandler.java - randomizer handler for B/W/B2/W2.               --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -24,49 +22,43 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.Graphics;
+import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.DSStaticPokemon;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen5RomEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.InFileEntry;
+import compressors.DSDecmp;
+import pptxt.PPTxtHandler;
+
+import javax.naming.OperationNotSupportedException;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.dabomstew.pkrandom.*;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
-import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.pokemon.*;
-import pptxt.PPTxtHandler;
-
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.palettes.Gen3to5PaletteHandler;
-import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.graphics.palettes.PaletteHandler;
-import com.dabomstew.pkrandom.newnds.NARCArchive;
-import compressors.DSDecmp;
-
+/**
+ * {@link RomHandler} for Black, White, Black 2, White 2.
+ */
 public class Gen5RomHandler extends AbstractDSRomHandler {
 
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen5RomHandler create(Random random, PrintStream logStream) {
-            return new Gen5RomHandler(random, logStream);
+        public Gen5RomHandler create() {
+            return new Gen5RomHandler();
         }
 
         public boolean isLoadable(String filename) {
             return detectNDSRomInner(getROMCodeFromFile(filename), getVersionFromFile(filename));
         }
-    }
-
-    public Gen5RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen5RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
     }
 
     private static List<Gen5RomEntry> roms;
@@ -82,9 +74,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-    
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM
     private Pokemon[] pokes;
@@ -141,25 +130,25 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             arm9 = readARM9();
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         try {
             stringsNarc = readNARC(romEntry.getFile("TextStrings"));
             storyTextNarc = readNARC(romEntry.getFile("TextStory"));
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         try {
             scriptNarc = readNARC(romEntry.getFile("Scripts"));
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         if (romEntry.getRomType() == Gen5Constants.Type_BW2) {
             try {
                 shopNarc = readNARC(romEntry.getFile("ShopItems"));
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         }
         loadPokemonStats();
@@ -187,12 +176,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             computeCRC32sForRom();
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
-        
-        // Having this in the constructor would be preferred, 
-        // but getPaletteFilesID() depends on the romEntry, which isn't loaded then...
-        this.paletteHandler = new Gen3to5PaletteHandler(random, getPaletteFilesID());
 
         // If there are tweaks for expanding the ARM9, do it here to keep it simple.
         boolean shouldExtendARM9 = romEntry.hasTweakFile("ShedinjaEvolutionTweak") || romEntry.hasTweakFile("NewIndexToMusicTweak");
@@ -211,8 +196,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(i), formeMappings);
-                // Name?
                 pokes[i].setName(pokeNames[i]);
+                pokes[i].setGeneration(generationOf(pokes[i]));
             }
 
             int i = Gen5Constants.pokemonCount + 1;
@@ -225,13 +210,29 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 pokes[i].setFormeNumber(fi.formeNumber);
                 pokes[i].setFormeSpriteIndex(fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.getRomType()));
                 pokes[i].setFormeSuffix(Gen5Constants.getFormeSuffix(k,romEntry.getRomType()));
+                pokes[i].setGeneration(generationOf(pokes[i]));
                 i = i + 1;
             }
             populateEvolutions();
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
+    }
 
+    private int generationOf(Pokemon pk) {
+        if (pk.getBaseForme() != null) {
+            return pk.getBaseForme().getGeneration();
+        }
+        if (pk.getNumber() >= Species.victini) {
+            return 5;
+        } else if (pk.getNumber() >= Species.turtwig) {
+            return 4;
+        } else if (pk.getNumber() >= Species.treecko) {
+            return 3;
+        } else if (pk.getNumber() >= Species.chikorita) {
+            return 2;
+        }
+        return 1;
     }
 
     private void loadMoves() {
@@ -339,7 +340,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
     }
@@ -382,6 +383,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.setDarkGrassHeldItem(readWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset));
         }
 
+        pkmn.setGenderRatio(stats[Gen5Constants.bsGenderRatioOffset] & 0xFF);
+
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
             int firstFormeOffset = readWord(stats, Gen5Constants.bsFormeOffset);
@@ -421,19 +424,19 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             writeARM9(arm9);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         try {
             writeNARC(romEntry.getFile("TextStrings"), stringsNarc);
             writeNARC(romEntry.getFile("TextStory"), storyTextNarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         try {
             writeNARC(romEntry.getFile("Scripts"), scriptNarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -458,7 +461,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             this.writeNARC(romEntry.getFile("MoveData"), moveNarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
     }
@@ -483,7 +486,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             this.writeNARC(romEntry.getFile("PokemonStats"), pokeNarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         writeEvolutions();
@@ -646,7 +649,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 this.writeOverlay(romEntry.getIntValue("StarterCryOvlNumber"), starterCryOverlay);
             }
         } catch (IOException  ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
         // Fix text depending on version
         if (romEntry.getRomType() == Gen5Constants.Type_BW) {
@@ -696,11 +699,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public int starterCount() {
         return 3;
-    }
-
-    @Override
-    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        return GlobalConstants.getStatChanges(generation);
     }
 
     @Override
@@ -757,7 +755,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             Gen5Constants.tagEncounterAreas(encounterAreas, romEntry.getRomType(), useTimeOfDay);
             return encounterAreas;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -887,7 +885,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //                 habitatNARC);
 //            }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
     }
@@ -1082,7 +1080,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             loadedWildMapNames = true;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
     }
@@ -1205,7 +1203,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 Gen5Constants.setMultiBattleStatusBW2(allTrainers, isBlack2);
             }
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
         return allTrainers;
     }
@@ -1345,13 +1343,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 this.writeNARC(romEntry.getFile("DriftveilPokemon"), driftveil);
             }
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
     }
 
     @Override
-    public void setDoubleBattleMode() {
-        super.setDoubleBattleMode();
+    public void makeDoubleBattleModePossible() {
         try {
             NARCArchive trainerTextBoxes = readNARC(romEntry.getFile("TrainerTextBoxes"));
             byte[] data = trainerTextBoxes.files.get(0);
@@ -1384,7 +1381,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     fieldOverlay[offset] = 2;
                     fieldOverlay[offset+2] = 0x18;
                 } else {
-                    throw new RandomizationException("Double Battle Mode not supported for this game");
+                    throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
                 }
 
                 String doubleBattleLimitPrefix = romEntry.getStringValue("DoubleBattleLimitPrefix");
@@ -1395,7 +1392,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     writeWord(fieldOverlay, offset, 0x46C0);           // nop
                     writeWord(fieldOverlay, offset+2, 0x46C0);  // nop
                 } else {
-                    throw new RandomizationException("Double Battle Mode not supported for this game");
+                    throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
                 }
 
                 String doubleBattleGetPointerPrefix = romEntry.getStringValue("DoubleBattleGetPointerPrefix");
@@ -1411,7 +1408,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     writeWord(fieldOverlay, offset + 0xA, beqToSingleTrainer);
                     writeWord(fieldOverlay, offset + 8, 0x2800);
                 } else {
-                    throw new RandomizationException("Double Battle Mode not supported for this game");
+                    throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
                 }
 
                 writeOverlay(romEntry.getIntValue("FieldOvlNumber"), fieldOverlay);
@@ -1429,11 +1426,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 offset += textBoxChoicePrefix.length() / 2;
                 arm9[offset-4] = 2;
             } else {
-                throw new RandomizationException("Double Battle Mode not supported for this game");
+                throw new OperationNotSupportedException("Double Battle Mode not supported for this game");
             }
 
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
+        } catch (OperationNotSupportedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -1466,7 +1465,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 movesets.put(pkmn.getNumber(), learnt);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return movesets;
     }
@@ -1499,7 +1498,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Save
             this.writeNARC(romEntry.getFile("PokemonMovesets"), movesLearnt);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
     }
@@ -1521,7 +1520,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 eggMoves.put(pkmn.getNumber(), moves);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return eggMoves;
     }
@@ -1541,7 +1540,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Save
             this.writeNARC(romEntry.getFile("EggMoves"), eggMovesNarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -1768,7 +1767,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 sp.add(se);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         // BW2 hidden grotto encounters
@@ -1815,7 +1814,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     }
                 }
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         }
         hiddenHollowCounted = true;
@@ -1838,7 +1837,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     sp.add(se);
                 }
             } catch (Exception e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         }
 
@@ -1883,7 +1882,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             this.writeNARC(romEntry.getFile("MapFiles"), mapNARC);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         // BW2 hidden grotto encounters
@@ -1897,7 +1896,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             for (int group = 0; group < 4; group++) {
                                 StaticEncounter se = statics.next();
                                 writeWord(hhEntry, version * 78 + raritySlot * 26 + group * 2, se.pkmn.getNumber());
-                                int genderRatio = this.random.nextInt(101);
+                                // genderRatio here is a percentage from 0-100;
+                                // this value overrides the genderRatio of the species.
+                                // The vanilla grottoes have some variance in genderRatios, but for simplicity's sake
+                                // we just set all Pokémon to 30% female, unless they are always female/male/genderless.
+                                int genderRatio = switch (se.pkmn.getGenderRatio()) {
+                                    case 0xFE -> 100; // female
+                                    case 0x00, 0xFF -> 0; // male, genderless
+                                    default -> 30;
+                                };
                                 hhEntry[version * 78 + raritySlot * 26 + 16 + group] = (byte) genderRatio;
                                 hhEntry[version * 78 + raritySlot * 26 + 20 + group] = (byte) se.forme; // forme
                                 hhEntry[version * 78 + raritySlot * 26 + 12 + group] = (byte) se.level;
@@ -1917,7 +1924,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
                 this.writeNARC(romEntry.getFile("HiddenHollows"), hhNARC);
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         }
 
@@ -1930,7 +1937,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 roamer.setLevel(this, roamerEncounter.level);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
 
         // In Black/White, the game has multiple hardcoded checks for Reshiram/Zekrom's species
@@ -1943,7 +1950,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 int boxLegendarySpecies = staticPokemon.get(boxLegendaryIndex).pkmn.getNumber();
                 fixBoxLegendaryBW1(boxLegendarySpecies);
             } catch (IOException e) {
-                throw new RandomizerIOException(e);
+                throw new RomIOException(e);
             }
         }
 
@@ -2107,7 +2114,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private void removeFreeLuckyEgg() {
         int scriptFileGifts = romEntry.getIntValue("LuckyEggScriptOffset");
         int setVarGift = Gen5Constants.hiddenItemSetVarCommand;
-        int mulchIndex = this.random.nextInt(4);
 
         byte[] itemScripts = scriptNarc.files.get(scriptFileGifts);
         int offset = 0;
@@ -2133,7 +2139,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     int item = readWord(itemScripts, offsetInFile + 4);
                     if (command == setVarGift && variable == Gen5Constants.hiddenItemVarSet && item == Items.luckyEgg) {
 
-                        writeWord(itemScripts, offsetInFile + 4, Gen5Constants.mulchIndices[mulchIndex]);
+                        writeWord(itemScripts, offsetInFile + 4, Items.gooeyMulch);
                         lookingForEggs--;
                     }
                 }
@@ -2175,7 +2181,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeOverlay(romEntry.getIntValue("FieldOvlNumber"), fieldOverlay);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2211,7 +2217,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             return typeTable;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2243,7 +2249,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2279,7 +2285,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeOverlay(romEntry.getIntValue("LowHealthMusicOvlNumber"), lowHealthMusicOverlay);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2303,7 +2309,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeOverlay(romEntry.getIntValue("BattleOvlNumber"), battleOverlay);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2317,7 +2323,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             FileFunctions.applyPatch(data, patchName);
             return true;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2496,7 +2502,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 mtMoves.add(readWord(mtFile, baseOffset + i * bytesPer));
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return mtMoves;
     }
@@ -2519,7 +2525,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             writeOverlay(romEntry.getIntValue("MoveTutorOvlNumber"), mtFile);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2678,7 +2684,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2710,7 +2716,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             writeNARC(romEntry.getFile("PokemonEvolutions"), evoNARC);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2925,7 +2931,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return true;
     }
 
@@ -3079,9 +3085,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
+    public boolean setIntroPokemon(Pokemon pk) {
         try {
-            int introPokemon = randomPokemon().getNumber();
+            int introPokemon = pk.getNumber();
+            // Assume alt formes can't be used. I haven't actually tested this, but it seemed like the safer guess.
+            if (pk.getBaseForme() != null) {
+                return false;
+            }
             byte[] introGraphicOverlay = readOverlay(romEntry.getIntValue("IntroGraphicOvlNumber"));
             int offset = find(introGraphicOverlay, Gen5Constants.introGraphicPrefix);
             if (offset > 0) {
@@ -3135,8 +3145,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
+        return true;
     }
 
     @Override
@@ -3463,7 +3474,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 trades.add(trade);
             }
         } catch (Exception ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
 
         return trades;
@@ -3528,7 +3539,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         } catch (IOException ex) {
-            throw new RandomizerIOException(ex);
+            throw new RomIOException(ex);
         }
     }
 
@@ -3559,7 +3570,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {
@@ -3589,7 +3600,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // finish up
             writeNARC(romEntry.getFile("BabyPokemon"), babyNARC);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3663,7 +3674,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             });
             return shopItemsMap;
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3710,7 +3721,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeOverlay(romEntry.getIntValue("ShopItemOvlNumber"), shopItemOverlay);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3723,7 +3734,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             writeNARC(romEntry.getFile("ItemData"),itemPriceNarc);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3767,7 +3778,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
         return pickupItems;
     }
@@ -3785,7 +3796,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeOverlay(romEntry.getIntValue("PickupOvlNumber"), battleOverlay);
             }
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -3927,6 +3938,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return calculatePokemonNormalPaletteIndex(i) + 1; 
     }
 
+    @Override
+    protected Collection<Integer> getGraphicalFormePokes() {
+        // TODO
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected void loadGraphicalFormePokemonPalettes(Pokemon pk) {
+        // TODO
+    }
+
+    @Override
+    protected void saveGraphicalFormePokemonPalettes(Pokemon pk) {
+        // TODO
+    }
+
     // TODO: remove
     @Override
     protected BufferedImage ripOtherPoke(int i, NARCArchive pokeGraphicsNARC) {
@@ -3934,63 +3961,86 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-	public BufferedImage getPokemonImage(Pokemon pk, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny,
-			boolean transparentBackground, boolean includePalette) {
-		
-		int spriteIndex = pk.getNumber() * 20;
-		if (back) {
-			spriteIndex += 9;
-		}
-		byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
-		byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
-		
-		Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-		int[] convPalette = palette.toARGB();
-		if (transparentBackground) {
-			convPalette[0] = 0;
-		}
-
-		// Output to 64x144 tiled image, then unscramble to a 96x96
-		BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, convPalette, 48, 64, 144, 4);
-		bim = unscramblePokemonSprite(bim);
-
-		if (includePalette) {
-			for (int j = 0; j < 16; j++) {
-				bim.setRGB(j, 0, convPalette[j]);
-			}
-		}
-
-		return bim;
-	}
-
-    // TODO: remove
-    @Override
-    public BufferedImage getPokemonImage(int number, NARCArchive pokeGraphicsNARC, boolean back, boolean shiny, boolean transparentBackground, boolean includePalette) {
-        return null;
+    public Gen5PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen5PokemonImageGetter(pk);
     }
 
-    private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
-		BufferedImage unscrambled = new BufferedImage(96, 96, BufferedImage.TYPE_BYTE_INDEXED,
-				(IndexColorModel) bim.getColorModel());
-		Graphics g = unscrambled.getGraphics();
-		g.drawImage(bim, 0, 0, 64, 64, 0, 0, 64, 64, null);
-		g.drawImage(bim, 64, 0, 96, 8, 0, 64, 32, 72, null);
-		g.drawImage(bim, 64, 8, 96, 16, 32, 64, 64, 72, null);
-		g.drawImage(bim, 64, 16, 96, 24, 0, 72, 32, 80, null);
-		g.drawImage(bim, 64, 24, 96, 32, 32, 72, 64, 80, null);
-		g.drawImage(bim, 64, 32, 96, 40, 0, 80, 32, 88, null);
-		g.drawImage(bim, 64, 40, 96, 48, 32, 80, 64, 88, null);
-		g.drawImage(bim, 64, 48, 96, 56, 0, 88, 32, 96, null);
-		g.drawImage(bim, 64, 56, 96, 64, 32, 88, 64, 96, null);
-		g.drawImage(bim, 0, 64, 64, 96, 0, 96, 64, 128, null);
-		g.drawImage(bim, 64, 64, 96, 72, 0, 128, 32, 136, null);
-		g.drawImage(bim, 64, 72, 96, 80, 32, 128, 64, 136, null);
-		g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
-		g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
-		return unscrambled;
-	}
+    public class Gen5PokemonImageGetter extends DSPokemonImageGetter {
+
+        // TODO: getting the full animation sheets
+        // These are 64x144 pixel images, stored 2 files after their respective non-animated image.
+        // They are LZ11-compressed, and has what Tinke calls a "lineal" image pattern, as opposed to
+        // the common "horizontal" one.
+        // Methods for reading the "lineal" images are needed.
+
+        public Gen5PokemonImageGetter(Pokemon pk) {
+            super(pk);
+        }
+
+        @Override
+        public BufferedImage get() {
+            beforeGet();
+
+            int spriteIndex = pk.getNumber() * 20;
+
+            if (hasGenderedImages() && gender == FEMALE) {
+                spriteIndex++;
+            }
+            if (back) {
+                spriteIndex += 9;
+            }
+            byte[] compressedPic = pokeGraphicsNARC.files.get(spriteIndex);
+            byte[] uncompressedPic = DSDecmp.Decompress(compressedPic);
+
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            int[] convPalette = palette.toARGB();
+            if (transparentBackground) {
+                convPalette[0] = 0;
+            }
+
+            // Output to 64x144 tiled image, then unscramble to a 96x96
+            BufferedImage bim = GFXFunctions.drawTiledImage(uncompressedPic, convPalette, 48, 64, 144, 4);
+            bim = unscramblePokemonSprite(bim);
+
+            if (includePalette) {
+                for (int j = 0; j < 16; j++) {
+                    bim.setRGB(j, 0, convPalette[j]);
+                }
+            }
+
+            return bim;
+        }
+
+        private BufferedImage unscramblePokemonSprite(BufferedImage bim) {
+            BufferedImage unscrambled = new BufferedImage(96, 96, BufferedImage.TYPE_BYTE_INDEXED,
+                    (IndexColorModel) bim.getColorModel());
+            Graphics g = unscrambled.getGraphics();
+            g.drawImage(bim, 0, 0, 64, 64, 0, 0, 64, 64, null);
+            g.drawImage(bim, 64, 0, 96, 8, 0, 64, 32, 72, null);
+            g.drawImage(bim, 64, 8, 96, 16, 32, 64, 64, 72, null);
+            g.drawImage(bim, 64, 16, 96, 24, 0, 72, 32, 80, null);
+            g.drawImage(bim, 64, 24, 96, 32, 32, 72, 64, 80, null);
+            g.drawImage(bim, 64, 32, 96, 40, 0, 80, 32, 88, null);
+            g.drawImage(bim, 64, 40, 96, 48, 32, 80, 64, 88, null);
+            g.drawImage(bim, 64, 48, 96, 56, 0, 88, 32, 96, null);
+            g.drawImage(bim, 64, 56, 96, 64, 32, 88, 64, 96, null);
+            g.drawImage(bim, 0, 64, 64, 96, 0, 96, 64, 128, null);
+            g.drawImage(bim, 64, 64, 96, 72, 0, 128, 32, 136, null);
+            g.drawImage(bim, 64, 72, 96, 80, 32, 128, 64, 136, null);
+            g.drawImage(bim, 64, 80, 96, 88, 0, 136, 32, 144, null);
+            g.drawImage(bim, 64, 88, 96, 96, 32, 136, 64, 144, null);
+            return unscrambled;
+        }
+
+        @Override
+        public boolean hasGenderedImages() {
+            int imageIndex = pk.getNumber() * 20 + 1;
+            byte[] imageData = pokeGraphicsNARC.files.get(imageIndex);
+            return imageData.length != 0;
+        }
+    }
     
-    private String getPaletteFilesID() {
+    public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen5Constants.Type_BW -> "BW";
             case Gen5Constants.Type_BW2 ->
@@ -3998,11 +4048,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     "BW";
             default -> null;
         };
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

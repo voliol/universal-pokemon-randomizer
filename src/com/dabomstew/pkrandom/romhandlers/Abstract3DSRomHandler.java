@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Abstract3DSRomHandler.java - a base class for 3DS rom handlers        --*/
-/*--                              which standardises common 3DS functions.  --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Pokemon and any associated names and the like are                     --*/
 /*--  trademark and (C) Nintendo 1996-2020.                                 --*/
@@ -29,7 +26,7 @@ import com.dabomstew.pkrandom.ctr.GARCArchive;
 import com.dabomstew.pkrandom.ctr.NCCH;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -43,15 +40,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * An abstract base class for 3DS {@link RomHandler}s, which standardises common 3DS functions.
+ */
 public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 
 	private NCCH baseRom;
 	private NCCH gameUpdate;
 	private String loadedFN;
-
-	public Abstract3DSRomHandler(Random random, PrintStream logStream) {
-		super(random, logStream);
-	}
 
 	@Override
 	public boolean loadRom(String filename) {
@@ -67,7 +63,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 				throw new EncryptedROMException(filename);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		loadedFN = filename;
 		this.loadedROM(productCode, titleId);
@@ -94,7 +90,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			if (e.getMessage().contains("Access is denied")) {
 				throw new CannotWriteToLocationException("The randomizer cannot write to this location: " + filename);
 			} else {
-				throw new RandomizerIOException(e);
+				throw new RomIOException(e);
 			}
 		}
 		return true;
@@ -105,7 +101,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		try {
 			baseRom.saveAsLayeredFS(filename);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		return true;
 	}
@@ -131,7 +127,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 				System.out.println("Game Update: Supplied unexpected version " + version);
 			}
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 		this.loadedROM(baseRom.getProductCode(), baseRom.getTitleId());
 		return true;
@@ -263,7 +259,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			fis.close();
 			return new String(productCode, StandardCharsets.UTF_8).trim();
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -280,7 +276,7 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 			reverseArray(programId);
 			return bytesToHex(programId);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
@@ -363,37 +359,46 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
 		try {
 			pokeGraphicsGARC = readGARC(GARCPath, false);
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 
-		for (Pokemon pk : getPokemonSet()) {
-			BufferedImage icon = getPokemonIcon(pk, pokeGraphicsGARC, false, true);
+		for (int i = 1; i < pokeGraphicsGARC.files.size(); i++) {
+			BufferedImage icon = getPokemonIcon(i, pokeGraphicsGARC, false, true);
 			bims.add(icon);
 		}
 		return bims;
 	}
 
-	@Override
-	public final BufferedImage getMascotImage() {
-		// uncomment to dump all Pokemon images to a folder
-//		try {
-//			dumpAllPokemonImages();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+	public int getIconGARCSize() {
 		try {
-			Pokemon pk = randomPokemon();
 			String GARCPath = getGARCPath("PokemonGraphics");
 			GARCArchive pokeGraphicsGARC = readGARC(GARCPath, false);
-
-			return getPokemonIcon(pk, pokeGraphicsGARC, true, false);
+			return pokeGraphicsGARC.files.size();
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RomIOException(e);
 		}
 	}
 
-	public abstract BufferedImage getPokemonIcon(Pokemon pk, GARCArchive pokeGraphicsGARC,
-			boolean transparentBackground, boolean includePalette);
+	public BufferedImage getPokemonIcon(int iconIndex) {
+		try {
+			String GARCPath = getGARCPath("PokemonGraphics");
+			GARCArchive pokeGraphicsGARC = readGARC(GARCPath, false);
+
+			return getPokemonIcon(iconIndex, pokeGraphicsGARC, true, false);
+		} catch (IOException e) {
+			throw new RomIOException(e);
+		}
+	}
+
+	public abstract BufferedImage getPokemonIcon(int pkIndex, GARCArchive pokeGraphicsGARC,
+												 boolean transparentBackground, boolean includePalette);
+
+
+	public PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+		// No PokemonImageGetter for the 3DS games for now, in part because they can only get icons,
+		// and in part because there's no code to get the icon(s) of a specific Pokemon.
+		throw new UnsupportedOperationException();
+	}
 
 	// because RomEntry is an inner class it can't be accessed here 
 	// (or can it in ZX?), so an abstract method is needed.

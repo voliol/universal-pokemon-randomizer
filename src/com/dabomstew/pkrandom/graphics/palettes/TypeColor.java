@@ -33,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.pokemon.Type;
 
 /**
@@ -64,7 +64,7 @@ public class TypeColor extends Color {
 				try {
 					type = Type.valueOf(token.replaceAll("[\\[\\]]", ""));
 				} catch (IllegalArgumentException e) {
-					throw new RandomizerIOException(e);
+					throw new RuntimeException(e);
 				}
 			}
 
@@ -85,7 +85,7 @@ public class TypeColor extends Color {
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			fileString = br.lines().collect(Collectors.joining());
 		} catch (IOException e) {
-			throw new RandomizerIOException(e);
+			throw new RuntimeException(e);
 		}
 		return fileString;
 	}

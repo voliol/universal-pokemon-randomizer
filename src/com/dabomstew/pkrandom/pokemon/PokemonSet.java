@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -57,6 +58,72 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 			}
 		}
 		return results;
+	}
+
+	/**
+	 * Returns an unmodifiable PokemonSet with all the elements in the source Collection.
+	 */
+	public static PokemonSet<Pokemon> unmodifiable(Collection<Pokemon> source) {
+		return new UnmodifiablePokemonSet<>(source);
+	}
+
+	/**
+	 * Just what it sounds like, a {@link PokemonSet} which throws {@link UnsupportedOperationException}
+	 * whenever modifications are attempted.
+	 */
+	private static class UnmodifiablePokemonSet<T extends Pokemon> extends PokemonSet<T> {
+		private final boolean unmodifiable;
+
+		public UnmodifiablePokemonSet(Collection<? extends T> original) {
+			super(original);
+			unmodifiable = true; // since you can't use the super constructor if add() is always impossible
+		}
+
+		@Override
+		public boolean add(T pk) {
+			if (unmodifiable) {
+				throw new UnsupportedOperationException();
+			} else {
+				return super.add(pk);
+			}
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void clear() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean removeIf(Predicate<? super T> filter) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Iterator<T> iterator() {
+			return new Iterator<T>() {
+				private final Iterator<? extends T> inner = UnmodifiablePokemonSet.super.iterator();
+
+				@Override
+				public boolean hasNext() {
+					return inner.hasNext();
+				}
+
+				@Override
+				public T next() {
+					return inner.next();
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
 	}
 
 	private ArrayList<T> randomPickableFrom = new ArrayList<>();
@@ -152,31 +219,6 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		});
 	}
 
-	/**
-	 * Filters so that a Pokemon is only included if its number is within the
-	 * range.<br>
-	 * Note that alternate formes have different numbers than the base form.
-	 *
-	 * @param start The lower end of the range, inclusive.
-	 * @param end   The upper end of the range, inclusive.
-	 */
-	public PokemonSet<T> filterFromNumberRange(int start, int end) {
-		return filter(pk -> start <= pk.getNumber() && pk.getNumber() <= end);
-	}
-
-	/**
-	 * Filters so that a Pokémon is only included if its *base* number is within
-	 * the range.<br>
-	 * Note this means any alternate forms of a Pokemon with a valid number are
-	 * included.
-	 *
-	 * @param start The lower end of the range, inclusive.
-	 * @param end   The upper end of the range, inclusive.
-	 */
-	public PokemonSet<T> filterFromBaseNumberRange(int start, int end) {
-		return filter(pk -> start <= pk.getBaseNumber() && pk.getBaseNumber() <= end);
-	}
-
 	public PokemonSet<T> filterByType(Type type) {
 		return filter(pk -> pk.getPrimaryType() == type || pk.getSecondaryType() == type);
 	}
@@ -217,6 +259,9 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 		return addAll((Collection<? extends T>) relatives);
 	}
 
+	/**
+	 * Returns a random element, or null if the PokemonSet is empty.
+	 */
 	public T getRandom(Random random) {
 		if (size() == 0) {
 			return null;
@@ -263,6 +308,98 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 			innerIterator.remove();
 			recentlyRemoved.add(current);
 		}
+	}
+
+	/**
+	 * Returns the type theme of this PokemonSet, using their original (pre-randomization) types.
+	 * Compare with {@link #getTypeTheme()}<br>
+	 * Returns null if there is no shared type/theme, or this is empty.<br>
+	 * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal
+	 * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
+	 */
+	public Type getOriginalTypeTheme() {
+		if (this.isEmpty()) {
+			return null;
+		}
+
+		Type theme = null;
+
+		Iterator<T> iter = iterator();
+		Pokemon pk = iter.next();
+		Type primary = pk.getOriginalPrimaryType();
+		Type secondary = pk.getOriginalSecondaryType();
+		while (iter.hasNext()) {
+			pk = iter.next();
+			if(secondary != null) {
+				if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
+					secondary = null;
+				}
+			}
+			if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+				primary = secondary;
+				secondary = null;
+			}
+			if (primary == null) {
+				break; //no type is shared, no need to look at the remaining pokemon
+			}
+		}
+		if (primary != null) {
+			//we have a type theme!
+			if(primary == Type.NORMAL && secondary != null) {
+				//Bird override
+				//(Normal is less significant than other types, for example, Flying)
+				theme = secondary;
+			} else {
+				theme = primary;
+			}
+		}
+		return theme;
+	}
+
+	/**
+	 * Returns the type theme of this PokemonSet, using their types current (possible post-randomization) types.
+	 * Compare with {@link #getOriginalTypeTheme()}<br>
+	 * Returns null if there is no shared type/theme, or this is empty.<br>
+	 * Primary types are prioritized if all Pokemon share both types, unless the primary type is Normal
+	 * (E.g. Falkner's team of all Normal/Flying), in which case it returns the secondary type.
+	 */
+	public Type getTypeTheme() {
+		if (this.isEmpty()) {
+			return null;
+		}
+
+		Type theme = null;
+
+		Iterator<T> iter =this.iterator();
+		Pokemon pk = iter.next();
+		Type primary = pk.getPrimaryType();
+		Type secondary = pk.getSecondaryType();
+		while (iter.hasNext()) {
+			pk = iter.next();
+			if(secondary != null) {
+				if (secondary != pk.getPrimaryType() && secondary != pk.getSecondaryType()) {
+					secondary = null;
+				}
+			}
+			if (primary != pk.getPrimaryType() && primary != pk.getSecondaryType()) {
+				primary = secondary;
+				secondary = null;
+			}
+			if (primary == null) {
+				break; //no type is shared, no need to look at the remaining pokemon
+			}
+		}
+		if (primary != null) {
+			//we have a type theme!
+			if(primary == Type.NORMAL && secondary != null) {
+				//Bird override
+				//(Normal is less significant than other types, for example, Flying)
+				theme = secondary;
+			} else {
+				theme = primary;
+			}
+		}
+		return theme;
 	}
 
 }

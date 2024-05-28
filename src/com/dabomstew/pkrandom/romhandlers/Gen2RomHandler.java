@@ -1,8 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  Gen2RomHandler.java - randomizer handler for G/S/C.                   --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -25,30 +23,36 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.*;
+import com.dabomstew.pkrandom.constants.*;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
+import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.graphics.packs.Gen2PlayerCharacterGraphics;
 import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
-import com.dabomstew.pkrandom.graphics.palettes.*;
-import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.romhandlers.romentries.*;
-import com.dabomstew.pkrandom.constants.*;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
-import com.dabomstew.pkrandom.graphics.images.GBCImage;
+import com.dabomstew.pkrandom.graphics.palettes.Color;
+import com.dabomstew.pkrandom.graphics.palettes.Gen2SpritePaletteID;
+import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.romentries.GBCTMTextEntry;
+import com.dabomstew.pkrandom.romhandlers.romentries.Gen2RomEntry;
 import compressors.Gen2Cmp;
 import compressors.Gen2Decmp;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
+/**
+ * {@link RomHandler} for Gold, Silver, Crystal.
+ */
 public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     public static class Factory extends RomHandler.Factory {
 
         @Override
-        public Gen2RomHandler create(Random random, PrintStream logStream) {
-            return new Gen2RomHandler(random, logStream);
+        public Gen2RomHandler create() {
+            return new Gen2RomHandler();
         }
 
         public boolean isLoadable(String filename) {
@@ -60,15 +64,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             // nope
             return loaded.length != 0 && detectRomInner(loaded, (int) fileLength);
         }
-    }
-
-    public Gen2RomHandler(Random random) {
-        super(random, null);
-    }
-
-    public Gen2RomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
-        this.paletteHandler = new Gen2PaletteHandler(random);
     }
 
     private static List<Gen2RomEntry> roms;
@@ -84,9 +79,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             throw new RuntimeException("Could not read Rom Entries.", e);
         }
     }
-
-    // Sub-handlers
-    private PaletteHandler paletteHandler;
 
     // This ROM's data
     private Gen2RomEntry romEntry;
@@ -217,8 +209,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (int i = 1; i <= Gen2Constants.pokemonCount; i++) {
             pokes[i] = new Pokemon(i);
             loadBasicPokeStats(pokes[i], offs + (i - 1) * Gen2Constants.baseStatsEntrySize);
-            // Name?
             pokes[i].setName(pokeNames[i]);
+            pokes[i].setGeneration(pokes[i].getNumber() >= Species.chikorita ? 2 : 1);
         }
         this.pokemonList = Arrays.asList(pokes);
     }
@@ -640,11 +632,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean hasMultiplePlayerCharacters() {
         return romEntry.isCrystal();
-    }
-
-    @Override
-    public Map<Integer, StatChange> getUpdatedPokemonStats(int generation) {
-        return GlobalConstants.getStatChanges(generation);
     }
 
     @Override
@@ -1959,7 +1946,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean hasShopRandomization() {
+    public boolean hasShopSupport() {
         return true;
     }
 
@@ -2001,7 +1988,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             shop.items.add((int) rom[offset++] & 0xFF);
         }
         if (rom[offset] != Gen2Constants.shopItemsTerminator) {
-            throw new RandomizerIOException("Invalid shop data");
+            throw new RomIOException("Invalid shop data");
         }
         return shop;
     }
@@ -2013,7 +2000,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         for (Map.Entry<Integer, Shop> entry : shopItems.entrySet()) {
             int shopNum = entry.getKey();
             Shop shop = entry.getValue();
-            new GBCDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
+            new SameBankDataRewriter<Shop>().rewriteData(tableOffset + shopNum * 2, shop, this::shopToBytes,
                     this::lengthOfShopAt);
         }
     }
@@ -2217,31 +2204,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             applyFastestTextPatch();
         } else if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
-        } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
-            randomizeCatchingTutorial();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
             allowedItems.banSingles(Gen2Items.luckyEgg);
             nonBadItems.banSingles(Gen2Items.luckyEgg);
         } else if (tweak == MiscTweak.REUSABLE_TMS) {
             applyReusableTMsPatch();
         }
-    }
-
-    private void randomizeCatchingTutorial() {
-        if (romEntry.getArrayValue("CatchingTutorialOffsets").length != 0) {
-            // Pick a pokemon
-            int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
-            while (pokemon == Species.unown) {
-                // Unown is banned
-                pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
-            }
-
-            int[] offsets = romEntry.getArrayValue("CatchingTutorialOffsets");
-            for (int offset : offsets) {
-                writeByte(offset, (byte) pokemon);
-            }
-        }
-
     }
 
     private void applyBWEXPPatch() {
@@ -2252,7 +2220,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         try {
             FileFunctions.applyPatch(rom, patchName);
         } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            throw new RomIOException(e);
         }
     }
 
@@ -2277,6 +2245,22 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
         writeByte(offset++, GBConstants.gbZ80Jump);
         writeByte(offset, (byte) jumpLength);
+    }
+
+    @Override
+    public boolean setCatchingTutorial(Pokemon opponent, Pokemon player) {
+        if (romEntry.getArrayValue("CatchingTutorialOffsets").length != 0) {
+            // Unown is banned
+            if (opponent.getNumber() == Species.unown) {
+                return false;
+            }
+
+            int[] offsets = romEntry.getArrayValue("CatchingTutorialOffsets");
+            for (int offset : offsets) {
+                writeByte(offset, (byte) opponent.getNumber());
+            }
+        }
+        return true;
     }
 
     @Override
@@ -2384,19 +2368,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void randomizeIntroPokemon() {
-        // Intro sprite
-
-        // Pick a pokemon
-        int pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
-        while (pokemon == Species.unown) {
-            // Unown is banned
-            pokemon = this.random.nextInt(Gen2Constants.pokemonCount) + 1;
+    public boolean setIntroPokemon(Pokemon pk) {
+        if (pk.getNumber() == Species.unown) {
+            return false;
         }
-
-        writeByte(romEntry.getIntValue("IntroSpriteOffset"), (byte) pokemon);
-        writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) pokemon);
-
+        writeByte(romEntry.getIntValue("IntroSpriteOffset"), (byte) pk.getNumber());
+        writeByte(romEntry.getIntValue("IntroCryOffset"), (byte) pk.getNumber());
+        return true;
     }
 
     @Override
@@ -2758,7 +2736,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        PokemonSet<Pokemon> pokemonIncluded = this.restrictedPokemon;
+        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {
@@ -2865,7 +2843,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void loadPokemonPalettes() {
-        // TODO: sort out when "palette" is shortened to "pal"
         int palOffset = romEntry.getIntValue("PokemonPalettes") + 8;
         for (Pokemon pk : getPokemonSet()) {
             int num = pk.getNumber() - 1;
@@ -2875,7 +2852,6 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
             int shinyPaletteOffset = palOffset + num * 8 + 4;
             pk.setShinyPalette(read2ColorPalette(shinyPaletteOffset));
-
         }
     }
 
@@ -3245,49 +3221,83 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public BufferedImage getPokemonImage(Pokemon pk, boolean back, boolean shiny, boolean transparentBackground,
-                                         boolean includePalette) {
+    public Gen2PokemonImageGetter createPokemonImageGetter(Pokemon pk) {
+        return new Gen2PokemonImageGetter(pk);
+    }
 
-        int pointerOffset = getPokemonImagePointerOffset(pk, back);
+    public class Gen2PokemonImageGetter extends GBPokemonImageGetter {
 
-        int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
-        int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
-
-        byte[] data;
-        try {
-            data = readPokemonOrTrainerImageData(pointerOffset, width, height);
-        } catch (Exception e) {
-            return null;
+        public Gen2PokemonImageGetter(Pokemon pk) {
+            super(pk);
         }
 
-        // White and black are always in the palettes at positions 0 and 3, 
-        // so only the middle colors are stored and need to be read.
-        Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
-        palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
-
-        BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
-
-        if (transparentBackground) {
-            bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
+        @Override
+        public int getGraphicalFormeAmount() {
+            return pk.getNumber() == Species.unown ? Gen2Constants.unownFormeCount : 1;
         }
-        if (includePalette) {
-            for (int j = 0; j < palette.size(); j++) {
-                bim.setRGB(j, 0, palette.get(j).toARGB());
+
+        @Override
+        public BufferedImage get() {
+
+            int pointerOffset = getPokemonImagePointerOffset(pk, back);
+
+            int width = back ? 6 : pk.getFrontImageDimensions() & 0x0F;
+            int height = back ? 6 : (pk.getFrontImageDimensions() >> 4) & 0x0F;
+
+            byte[] data;
+            try {
+                data = readPokemonOrTrainerImageData(pointerOffset, width, height);
+            } catch (Exception e) {
+                return null;
+            }
+
+            // White and black are always in the palettes at positions 0 and 3,
+            // so only the middle colors are stored and need to be read.
+            Palette palette = shiny ? pk.getShinyPalette() : pk.getNormalPalette();
+            palette = new Palette(new Color[] {Color.WHITE, palette.get(0), palette.get(1), Color.BLACK});
+
+            BufferedImage bim = new GBCImage.Builder(width, height, palette, data).columnMode(true).build();
+
+            if (transparentBackground) {
+                bim = GFXFunctions.pseudoTransparent(bim, palette.get(0).toARGB());
+            }
+            if (includePalette) {
+                for (int j = 0; j < palette.size(); j++) {
+                    bim.setRGB(j, 0, palette.get(j).toARGB());
+                }
+            }
+
+            return bim;
+        }
+
+        @Override
+        public BufferedImage getFull() {
+            if (pk.getNumber() == Species.unown) {
+                setIncludePalette(true);
+
+                BufferedImage[] normal = new BufferedImage[Gen2Constants.unownFormeCount*2];
+                BufferedImage[] shiny = new BufferedImage[Gen2Constants.unownFormeCount*2];
+                for (int i = 0; i < Gen2Constants.unownFormeCount; i++) {
+                    setGraphicalForme(i);
+
+                    normal[i*2] = get();
+                    normal[i*2 + 1] = setBack(true).get();
+                    shiny[i*2 + 1] = setShiny(true).get();
+                    shiny[i*2] = setBack(false).get();
+                    setShiny(false);
+                }
+                return GFXFunctions.stitchToGrid(new BufferedImage[][] { normal, shiny });
+
+            } else {
+                return super.getFull();
             }
         }
-
-        return bim;
     }
 
     private byte[] readPokemonOrTrainerImageData(int pointerOffset, int imageWidth, int imageHeight) {
         int imageOffset = readPokemonOrTrainerImagePointer(pointerOffset);
         byte[] data = Gen2Decmp.decompress(rom, imageOffset);
         return Arrays.copyOf(data, imageWidth * imageHeight * 16);
-    }
-
-    @Override
-    public PaletteHandler getPaletteHandler() {
-        return paletteHandler;
     }
 
     @Override

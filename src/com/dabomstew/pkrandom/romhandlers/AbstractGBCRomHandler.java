@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  AbstractGBCRomHandler.java - an extension of AbstractGBRomHandler     --*/
-/*--                               used for Gen 1 and Gen 2.                --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -25,23 +22,26 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.constants.GBConstants;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import com.dabomstew.pkrandom.gbspace.BankDividedFreedSpace;
 import com.dabomstew.pkrandom.graphics.images.GBCImage;
 import com.dabomstew.pkrandom.romhandlers.romentries.AbstractGBCRomEntry;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
+/**
+ * An extension of {@link AbstractGBRomHandler} used for Gen 1 and Gen 2.
+ */
 public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     private String[] tb;
@@ -49,10 +49,6 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
     private int longestTableToken;
 
     private BankDividedFreedSpace freedSpace;
-
-    public AbstractGBCRomHandler(Random random, PrintStream logStream) {
-        super(random, logStream);
-    }
 
     @Override
     protected void midLoadingSetUp() {
@@ -370,7 +366,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
         } while (isRomSpaceUsed(foundOffset, length));
 
         if (foundOffset == -1) {
-            throw new RandomizerIOException("Bank 0x" + Integer.toHexString(bank) + " full. Can't find " + length +
+            throw new RomIOException("Bank 0x" + Integer.toHexString(bank) + " full. Can't find " + length +
                     " free bytes anywhere.");
         }
         return foundOffset;

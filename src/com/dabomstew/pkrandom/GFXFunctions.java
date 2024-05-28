@@ -269,7 +269,7 @@ public class GFXFunctions {
 //						data[next] = (byte) bim.getData().getSample(tileX * tileWidth + xT, tileY * tileHeight + yT, 0);
 //					}
 
-					// TODO: reconcile that 4bpp has the later pixel first, but 1 bpp has them in
+					// T ODO: reconcile that 4bpp has the later pixel first, but 1 bpp has them in
 					// order
 
 					// 4 bpp
