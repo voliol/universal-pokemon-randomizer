@@ -57,6 +57,15 @@ public class Gen7Constants {
             Species.graveler, Species.golem, Species.grimer, Species.muk, Species.exeggutor, Species.marowak
     );
 
+    private static final List<Integer> speciesWithTotemForms = Arrays.asList(
+            // Raticate-Alolan and Marowak-Alolan being here depends on the USUM formes that share their SM species IDs,
+            // (Oricorio-Pom-Pom and Geodude-Alolan) not having cosmetic alt formes of their own.
+            // Wishiwashi is also excluded, since it seems to simply not have a totem forme.
+            Species.gumshoos, Species.vikavolt, Species.lurantis, Species.salazzle, Species.kommoO, Species.araquanid,
+            Species.togedemaru, Species.ribombee, Species.SMFormes.raticateA, Species.USUMFormes.raticateA,
+            Species.SMFormes.marowakA, Species.USUMFormes.marowakA
+    );
+
     private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
     private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
 
@@ -547,163 +556,75 @@ public class Gen7Constants {
         }
     }
 
-    private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
-        Map<Integer,Map<Integer,String>> map = new HashMap<>();
+    private static Map<Integer, Map<Integer, String>> setupFormeSuffixesByBaseForme() {
+        Map<Integer, Map<Integer, String>> map = new HashMap<>();
 
-        Map<Integer,String> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,"-Attack");
-        deoxysMap.put(2,"-Defense");
-        deoxysMap.put(3,"-Speed");
-        map.put(Species.deoxys, deoxysMap);
+        putFormSuffixes(map, Species.pikachu,
+                // the last one is Partner Cap because it is only in USUM, but unsure which is which of the others
+                "-InACap", "-InACap", "-InACap", "-InACap", "-InACap", "-InACap", "-PartnerCap"
+        );
 
-        Map<Integer,String> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,"-Sandy");
-        wormadamMap.put(2,"-Trash");
-        map.put(Species.wormadam, wormadamMap);
+        putFormSuffixes(map, Species.castform, "-Sunny", "-Rainy", "-Snowy");
+        putFormSuffixes(map, Species.kyogre, "-Primal");
+        putFormSuffixes(map, Species.groudon, "-Primal");
+        putFormSuffixes(map, Species.rayquaza, "-Mega"); // the other megas are put using stones
+        putFormSuffixes(map, Species.deoxys, "-Attack", "-Defense", "-Speed");
 
-        Map<Integer,String> shayminMap = new HashMap<>();
-        shayminMap.put(1,"-Sky");
-        map.put(Species.shaymin, shayminMap);
+        putFormSuffixes(map, Species.wormadam, "-Sandy", "-Trash");
+        putFormSuffixes(map, Species.shaymin, "-Sky");
+        putFormSuffixes(map, Species.giratina, "-Origin");
+        putFormSuffixes(map, Species.rotom, "-Heat", "-Wash", "-Frost", "-Fan", "-Mow");
 
-        Map<Integer,String> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,"-Origin");
-        map.put(Species.giratina, giratinaMap);
+        putFormSuffixes(map, Species.basculin, "-Blue");
+        putFormSuffixes(map, Species.darmanitan, "-Zen");
+        putFormSuffixes(map, Species.tornadus, "-Therian");
+        putFormSuffixes(map, Species.thundurus, "-Therian");
+        putFormSuffixes(map, Species.landorus, "-Therian");
+        putFormSuffixes(map, Species.kyurem, "-White", "-Black");
+        putFormSuffixes(map, Species.keldeo, "-Resolute");
+        putFormSuffixes(map, Species.meloetta, "-Pirouette");
 
-        Map<Integer,String> rotomMap = new HashMap<>();
-        rotomMap.put(1,"-Heat");
-        rotomMap.put(2,"-Wash");
-        rotomMap.put(3,"-Frost");
-        rotomMap.put(4,"-Fan");
-        rotomMap.put(5,"-Mow");
-        map.put(Species.rotom, rotomMap);
+        putFormSuffixes(map, Species.greninja, "-BattleBond", "-Ash");
+        putFormSuffixes(map, Species.meowstic, "-F");
+        putFormSuffixes(map, Species.aegislash, "-Blade");
+        putFormSuffixes(map, Species.pumpkaboo, "-M", "-L", "-XL");
+        putFormSuffixes(map, Species.gourgeist, "-M", "-L", "-XL");
+        putFormSuffixes(map, Species.floette, "", "", "", "", "-Eternal"); // first 4 are just colors
+        putFormSuffixes(map, Species.zygarde, "-10%", "-10%-PowerConstruct", "-PowerConstruct", "-Complete");
+        putFormSuffixes(map, Species.hoopa, "-Unbound");
 
-        Map<Integer,String> castformMap = new HashMap<>();
-        castformMap.put(1,"-Sunny");
-        castformMap.put(2,"-Rainy");
-        castformMap.put(3,"-Snowy");
-        map.put(Species.castform, castformMap);
+        putFormSuffixes(map, Species.oricorio, "-Pom-Pom", "-Pa'u", "-Sensu");
+        putFormSuffixes(map, Species.lycanroc, "-Midnight", "-Dusk");
+        putFormSuffixes(map, Species.wishiwashi, "-School");
+        putFormSuffixes(map, Species.minior, "", "", "", "", "", "", "-Core"); // first 6 are just colors
+        putFormSuffixes(map, Species.necrozma, "-DuskMane", "-DawnWings", "-Ultra");
+        putFormSuffixes(map, Species.magearna, "-OGColors");
 
-        Map<Integer,String> basculinMap = new HashMap<>();
-        basculinMap.put(1,"-Blue");
-        map.put(Species.basculin, basculinMap);
-
-        Map<Integer,String> darmanitanMap = new HashMap<>();
-        darmanitanMap.put(1,"-Zen");
-        map.put(Species.darmanitan, darmanitanMap);
-
-        Map<Integer,String> meloettaMap = new HashMap<>();
-        meloettaMap.put(1,"-Pirouette");
-        map.put(Species.meloetta, meloettaMap);
-
-        Map<Integer,String> kyuremMap = new HashMap<>();
-        kyuremMap.put(1,"-White");
-        kyuremMap.put(2,"-Black");
-        map.put(Species.kyurem, kyuremMap);
-
-        Map<Integer,String> tornadusMap = new HashMap<>();
-        tornadusMap.put(1,"-Therian");
-        map.put(Species.tornadus, tornadusMap);
-
-        Map<Integer,String> thundurusMap = new HashMap<>();
-        thundurusMap.put(1,"-Therian");
-        map.put(Species.thundurus, thundurusMap);
-
-        Map<Integer,String> landorusMap = new HashMap<>();
-        landorusMap.put(1,"-Therian");
-        map.put(Species.landorus, landorusMap);
-
-        Map<Integer,String> meowsticMap = new HashMap<>();
-        meowsticMap.put(1,"-F");
-        map.put(Species.meowstic, meowsticMap);
-
-        Map<Integer,String> aegislashMap = new HashMap<>();
-        aegislashMap.put(1,"-Blade");
-        map.put(Species.aegislash, aegislashMap);
-
-        Map<Integer,String> pumpkabooMap = new HashMap<>();
-        pumpkabooMap.put(1,"-M");
-        pumpkabooMap.put(2,"-L");
-        pumpkabooMap.put(3,"-XL");
-        map.put(Species.pumpkaboo, pumpkabooMap);
-
-        Map<Integer,String> gourgeistMap = new HashMap<>();
-        gourgeistMap.put(1,"-M");
-        gourgeistMap.put(2,"-L");
-        gourgeistMap.put(3,"-XL");
-        map.put(Species.gourgeist, gourgeistMap);
-
-        Map<Integer,String> floetteMap = new HashMap<>();
-        floetteMap.put(5,"-Eternal");
-        map.put(Species.floette, floetteMap);
-
-        Map<Integer,String> kyogreMap = new HashMap<>();
-        kyogreMap.put(1,"-Primal");
-        map.put(Species.kyogre, kyogreMap);
-
-        Map<Integer,String> groudonMap = new HashMap<>();
-        groudonMap.put(1,"-Primal");
-        map.put(Species.groudon, groudonMap);
-
-        Map<Integer,String> rayquazaMap = new HashMap<>();
-        rayquazaMap.put(1,"-Mega");
-        map.put(Species.rayquaza, rayquazaMap);
-
-        Map<Integer,String> hoopaMap = new HashMap<>();
-        hoopaMap.put(1,"-Unbound");
-        map.put(Species.hoopa, hoopaMap);
-
-        for (Integer species: Gen6Constants.speciesToMegaStoneORAS.keySet()) {
-            Map<Integer,String> megaMap = new HashMap<>();
+        for (Integer species : Gen6Constants.speciesToMegaStoneORAS.keySet()) {
             if (species == Species.charizard || species == Species.mewtwo) {
-                megaMap.put(1,"-Mega-X");
-                megaMap.put(2,"-Mega-Y");
+                putFormSuffixes(map, species, "-Mega-X", "-Mega-Y");
             } else {
-                megaMap.put(1,"-Mega");
+                putFormSuffixes(map, species, "-Mega");
             }
-            map.put(species,megaMap);
         }
 
-        Map<Integer,String> wishiwashiMap = new HashMap<>();
-        wishiwashiMap.put(1,"-School");
-        map.put(Species.wishiwashi, wishiwashiMap);
-
-        Map<Integer,String> oricorioMap = new HashMap<>();
-        oricorioMap.put(1,"-Pom-Pom");
-        oricorioMap.put(2,"-Pa'u");
-        oricorioMap.put(3,"-Sensu");
-        map.put(Species.oricorio, oricorioMap);
-
-        Map<Integer,String> lycanrocMap = new HashMap<>();
-        lycanrocMap.put(1,"-Midnight");
-        lycanrocMap.put(2,"-Dusk");
-        map.put(Species.lycanroc, lycanrocMap);
-
-        for (int species: speciesWithAlolanForms) {
-            Map<Integer,String> alolanMap = new HashMap<>();
-            alolanMap.put(1,"-Alolan");
-            map.put(species, alolanMap);
+        for (int species : speciesWithAlolanForms) {
+            putFormSuffixes(map, species, "-Alolan");
         }
 
-        Map<Integer,String> greninjaMap = new HashMap<>();
-        greninjaMap.put(2,"-Ash");
-        map.put(Species.greninja, greninjaMap);
-
-        Map<Integer,String> zygardeMap = new HashMap<>();
-        zygardeMap.put(1,"-10%");
-        zygardeMap.put(4,"-Complete");
-        map.put(Species.zygarde, zygardeMap);
-
-        Map<Integer,String> miniorMap = new HashMap<>();
-        miniorMap.put(7,"-Core");
-        map.put(Species.minior, miniorMap);
-
-        Map<Integer,String> necrozmaMap = new HashMap<>();
-        necrozmaMap.put(1,"-DuskMane");
-        necrozmaMap.put(2,"-DawnWings");
-        necrozmaMap.put(3,"-Ultra");
-        map.put(Species.necrozma, necrozmaMap);
+        for (int species : speciesWithTotemForms) {
+            putFormSuffixes(map, species, "-Totem");
+        }
 
         return map;
+    }
+
+    private static void putFormSuffixes(Map<Integer, Map<Integer, String>> map, int species, String... suffixes) {
+        Map<Integer, String> speciesMap = new HashMap<>();
+        for (int i = 0; i < suffixes.length; i++) {
+            speciesMap.put(i + 1, suffixes[i]);
+        }
+        map.put(species, speciesMap);
     }
 
     private static Map<Integer,String> setupDummyFormeSuffixes() {
@@ -728,15 +649,13 @@ public class Gen7Constants {
             Species.SMFormes.gourgeistCosmetic3,
             Species.SMFormes.floetteCosmetic1, Species.SMFormes.floetteCosmetic2,
             Species.SMFormes.floetteCosmetic3, Species.SMFormes.floetteCosmetic4,
-            Species.SMFormes.raticateACosmetic1,
+            Species.SMFormes.raticateATotem,
             Species.SMFormes.mimikyuCosmetic1, Species.SMFormes.mimikyuCosmetic2, Species.SMFormes.mimikyuCosmetic3,
-            Species.SMFormes.gumshoosCosmetic1,
-            Species.SMFormes.vikavoltCosmetic1,
-            Species.SMFormes.lurantisCosmetic1,
-            Species.SMFormes.salazzleCosmetic1,
-            Species.SMFormes.kommoOCosmetic1,
-            Species.SMFormes.greninjaCosmetic1,
-            Species.SMFormes.zygarde10Cosmetic1, Species.SMFormes.zygardeCosmetic1,
+            Species.SMFormes.gumshoosTotem,
+            Species.SMFormes.vikavoltTotem,
+            Species.SMFormes.lurantisTotem,
+            Species.SMFormes.salazzleTotem,
+            Species.SMFormes.kommoOTotem,
             Species.SMFormes.miniorCosmetic1, Species.SMFormes.miniorCosmetic2, Species.SMFormes.miniorCosmetic3,
             Species.SMFormes.miniorCosmetic4, Species.SMFormes.miniorCosmetic5, Species.SMFormes.miniorCosmetic6,
             Species.SMFormes.miniorCCosmetic1, Species.SMFormes.miniorCCosmetic2, Species.SMFormes.miniorCCosmetic3,
@@ -762,19 +681,17 @@ public class Gen7Constants {
             Species.USUMFormes.gourgeistCosmetic3,
             Species.USUMFormes.floetteCosmetic1, Species.USUMFormes.floetteCosmetic2,
             Species.USUMFormes.floetteCosmetic3, Species.USUMFormes.floetteCosmetic4,
-            Species.USUMFormes.raticateACosmetic1,
-            Species.USUMFormes.marowakACosmetic1,
+            Species.USUMFormes.raticateATotem,
+            Species.USUMFormes.marowakATotem,
             Species.USUMFormes.mimikyuCosmetic1, Species.USUMFormes.mimikyuCosmetic2, Species.USUMFormes.mimikyuCosmetic3,
-            Species.USUMFormes.gumshoosCosmetic1,
-            Species.USUMFormes.vikavoltCosmetic1,
-            Species.USUMFormes.lurantisCosmetic1,
-            Species.USUMFormes.salazzleCosmetic1,
-            Species.USUMFormes.kommoOCosmetic1,
-            Species.USUMFormes.araquanidCosmetic1,
-            Species.USUMFormes.togedemaruCosmetic1,
-            Species.USUMFormes.ribombeeCosmetic1,
-            Species.USUMFormes.greninjaCosmetic1,
-            Species.USUMFormes.zygarde10Cosmetic1, Species.USUMFormes.zygardeCosmetic1,
+            Species.USUMFormes.gumshoosTotem,
+            Species.USUMFormes.vikavoltTotem,
+            Species.USUMFormes.lurantisTotem,
+            Species.USUMFormes.salazzleTotem,
+            Species.USUMFormes.kommoOTotem,
+            Species.USUMFormes.araquanidTotem,
+            Species.USUMFormes.togedemaruTotem,
+            Species.USUMFormes.ribombeeTotem,
             Species.USUMFormes.miniorCosmetic1, Species.USUMFormes.miniorCosmetic2, Species.USUMFormes.miniorCosmetic3,
             Species.USUMFormes.miniorCosmetic4, Species.USUMFormes.miniorCosmetic5, Species.USUMFormes.miniorCosmetic6,
             Species.USUMFormes.miniorCCosmetic1, Species.USUMFormes.miniorCCosmetic2, Species.USUMFormes.miniorCCosmetic3,
@@ -782,8 +699,7 @@ public class Gen7Constants {
             Species.USUMFormes.magearnaCosmetic1,
             Species.USUMFormes.pikachuCosmetic1, Species.USUMFormes.pikachuCosmetic2, Species.USUMFormes.pikachuCosmetic3,
             Species.USUMFormes.pikachuCosmetic4, Species.USUMFormes.pikachuCosmetic5, Species.USUMFormes.pikachuCosmetic6,
-            Species.USUMFormes.pikachuCosmetic7, // Pikachu With Funny Hats
-            Species.USUMFormes.rockruffCosmetic1
+            Species.USUMFormes.pikachuCosmetic7 // Pikachu With Funny Hats
     );
 
     public static List<Integer> getActuallyCosmeticForms(int romType) {
@@ -796,9 +712,6 @@ public class Gen7Constants {
 
     private static final List<Integer> ignoreFormsSM = Arrays.asList(
             Species.SMFormes.cherrimCosmetic1,
-            Species.SMFormes.greninjaCosmetic1,
-            Species.SMFormes.zygarde10Cosmetic1,
-            Species.SMFormes.zygardeCosmetic1,
             Species.SMFormes.miniorCosmetic1,
             Species.SMFormes.miniorCosmetic2,
             Species.SMFormes.miniorCosmetic3,
@@ -811,9 +724,6 @@ public class Gen7Constants {
 
     private static final List<Integer> ignoreFormsUSUM = Arrays.asList(
             Species.USUMFormes.cherrimCosmetic1,
-            Species.USUMFormes.greninjaCosmetic1,
-            Species.USUMFormes.zygarde10Cosmetic1,
-            Species.USUMFormes.zygardeCosmetic1,
             Species.USUMFormes.miniorCosmetic1,
             Species.USUMFormes.miniorCosmetic2,
             Species.USUMFormes.miniorCosmetic3,
@@ -821,8 +731,7 @@ public class Gen7Constants {
             Species.USUMFormes.miniorCosmetic5,
             Species.USUMFormes.miniorCosmetic6,
             Species.USUMFormes.mimikyuCosmetic1,
-            Species.USUMFormes.mimikyuCosmetic3,
-            Species.USUMFormes.rockruffCosmetic1
+            Species.USUMFormes.mimikyuCosmetic3
     );
 
     public static List<Integer> getIgnoreForms(int romType) {
@@ -848,12 +757,10 @@ public class Gen7Constants {
         Map<Integer,Integer> map = new HashMap<>();
         if (romType == Type_SM) {
             map.put(Species.SMFormes.raticateA,1); // 1 form (Totem)
-            map.put(Species.SMFormes.zygarde10,1); // 1 form (Power Construct)
             map.put(Species.SMFormes.miniorC,6); // 6 forms (colors)
         } else {
             map.put(Species.USUMFormes.raticateA,1); // 1 form (Totem)
             map.put(Species.USUMFormes.marowakA,1); // 1 form (Totem)
-            map.put(Species.USUMFormes.zygarde10,1); // 1 form (Power Construct)
             map.put(Species.USUMFormes.miniorC,6); // 6 forms (colors)
         }
 

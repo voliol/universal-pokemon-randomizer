@@ -1181,7 +1181,7 @@ public class Species {
         public static final int lycanrocM = 907;
         public static final int rattataA = 908;
         public static final int raticateA = 909;
-        public static final int raticateACosmetic1 = 910;
+        public static final int raticateATotem = 910;
         public static final int raichuA = 911;
         public static final int sandshrewA = 912;
         public static final int sandslashA = 913;
@@ -1196,11 +1196,11 @@ public class Species {
         public static final int mukA = 922;
         public static final int exeggutorA = 923;
         public static final int marowakA = 924;
-        public static final int greninjaCosmetic1 = 925;
+        public static final int greninjaBattleBond = 925;
         public static final int greninjaA = 926;
         public static final int zygarde10 = 927;
-        public static final int zygarde10Cosmetic1 = 928;
-        public static final int zygardeCosmetic1 = 929;
+        public static final int zygarde10PowerConstruct = 928;
+        public static final int zygardePowerConstruct = 929;
         public static final int zygardeC = 930;
         public static final int miniorCosmetic1 = 931;
         public static final int miniorCosmetic2 = 932;
@@ -1227,11 +1227,11 @@ public class Species {
         public static final int pikachuCosmetic4 = 953;
         public static final int pikachuCosmetic5 = 954;
         public static final int pikachuCosmetic6 = 955;
-        public static final int gumshoosCosmetic1 = 956;
-        public static final int vikavoltCosmetic1 = 957;
-        public static final int lurantisCosmetic1 = 958;
-        public static final int salazzleCosmetic1 = 959;
-        public static final int kommoOCosmetic1 = 960;
+        public static final int gumshoosTotem = 956;
+        public static final int vikavoltTotem = 957;
+        public static final int lurantisTotem = 958;
+        public static final int salazzleTotem = 959;
+        public static final int kommoOTotem = 960;
     }
 
     public static final class USUMFormes {
@@ -1343,7 +1343,7 @@ public class Species {
         public static final int lycanrocD = 913;
         public static final int rattataA = 914;
         public static final int raticateA = 915;
-        public static final int raticateACosmetic1 = 916;
+        public static final int raticateATotem = 916;
         public static final int raichuA = 917;
         public static final int sandshrewA = 918;
         public static final int sandslashA = 919;
@@ -1358,12 +1358,12 @@ public class Species {
         public static final int mukA = 928;
         public static final int exeggutorA = 929;
         public static final int marowakA = 930;
-        public static final int marowakACosmetic1 = 931;
-        public static final int greninjaCosmetic1 = 932;
+        public static final int marowakATotem = 931;
+        public static final int greninjaBattleBond = 932;
         public static final int greninjaA = 933;
         public static final int zygarde10 = 934;
-        public static final int zygarde10Cosmetic1 = 935;
-        public static final int zygardeCosmetic1 = 936;
+        public static final int zygarde10PowerConstruct = 935;
+        public static final int zygardePowerConstruct = 936;
         public static final int zygardeC = 937;
         public static final int miniorCosmetic1 = 938;
         public static final int miniorCosmetic2 = 939;
@@ -1391,18 +1391,18 @@ public class Species {
         public static final int pikachuCosmetic5 = 961;
         public static final int pikachuCosmetic6 = 962;
         public static final int pikachuCosmetic7 = 963;
-        public static final int gumshoosCosmetic1 = 964;
-        public static final int vikavoltCosmetic1 = 965;
-        public static final int lurantisCosmetic1 = 966;
-        public static final int salazzleCosmetic1 = 967;
-        public static final int kommoOCosmetic1 = 968;
+        public static final int gumshoosTotem = 964;
+        public static final int vikavoltTotem = 965;
+        public static final int lurantisTotem = 966;
+        public static final int salazzleTotem = 967;
+        public static final int kommoOTotem = 968;
         public static final int necrozmaDM = 969;
         public static final int necrozmaDW = 970;
         public static final int necrozmaU = 971;
-        public static final int araquanidCosmetic1 = 972;
-        public static final int togedemaruCosmetic1 = 973;
-        public static final int ribombeeCosmetic1 = 974;
-        public static final int rockruffCosmetic1 = 975;
+        public static final int araquanidTotem = 972;
+        public static final int togedemaruTotem = 973;
+        public static final int ribombeeTotem = 974;
+        public static final int rockruffOwnTempo = 975;
 
     }
 }

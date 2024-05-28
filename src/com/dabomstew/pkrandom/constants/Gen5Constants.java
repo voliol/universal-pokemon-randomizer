@@ -680,6 +680,7 @@ public class Gen5Constants {
             formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset,"-Pirouette");
             formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset,"-White");
             formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset,"-Black");
+            formeSuffixes.put(Species.Gen5Formes.keldeoCosmetic1 + bw2formeOffset,"-Resolute");
             formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset,"-Therian");
             formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset,"-Therian");
             formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset,"-Therian");

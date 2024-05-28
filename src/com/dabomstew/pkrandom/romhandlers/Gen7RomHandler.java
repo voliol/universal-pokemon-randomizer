@@ -209,11 +209,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 pokes[i].setName(pokeNames[realBaseForme]);
                 pokes[i].setBaseForme(pokes[fi.baseForme]);
                 pokes[i].setFormeNumber(fi.formeNumber);
-                if (pokes[i].isActuallyCosmetic()) {
-                    pokes[i].setFormeSuffix(pokes[i].getBaseForme().getFormeSuffix());
-                } else {
-                    pokes[i].setFormeSuffix(Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber));
-                }
+                pokes[i].setFormeSuffix(pokes[i].getBaseForme().getFormeSuffix()  // temporary while we figure out how formes (should) work
+                        + Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber));
                 if (realBaseForme == prevSpecies) {
                     formNum++;
                     currentMap.put(formNum,i);

@@ -732,7 +732,7 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.meloettaP,"-Pirouette");
         formeSuffixes.put(Species.Gen6Formes.kyuremW,"-White");
         formeSuffixes.put(Species.Gen6Formes.kyuremB,"-Black");
-        formeSuffixes.put(Species.Gen6Formes.keldeoCosmetic1,"-R");
+        formeSuffixes.put(Species.Gen6Formes.keldeoCosmetic1,"-Resolute");
         formeSuffixes.put(Species.Gen6Formes.tornadusT,"-Therian");
         formeSuffixes.put(Species.Gen6Formes.thundurusT,"-Therian");
         formeSuffixes.put(Species.Gen6Formes.landorusT,"-Therian");
@@ -793,7 +793,12 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.kyogreP,"-Primal");
         formeSuffixes.put(Species.Gen6Formes.groudonP,"-Primal");
         formeSuffixes.put(Species.Gen6Formes.rayquazaMega,"-Mega");
-        // 815 - 820 Cosplay Pikachu
+        formeSuffixes.put(Species.Gen6Formes.pikachuCosmetic1,"-Cosplay");
+        formeSuffixes.put(Species.Gen6Formes.pikachuCosmetic2,"-Cosplay");
+        formeSuffixes.put(Species.Gen6Formes.pikachuCosmetic3,"-Cosplay");
+        formeSuffixes.put(Species.Gen6Formes.pikachuCosmetic4,"-Cosplay");
+        formeSuffixes.put(Species.Gen6Formes.pikachuCosmetic5,"-Cosplay");
+        formeSuffixes.put(Species.Gen6Formes.pikachuCosmetic6,"-Cosplay");
         formeSuffixes.put(Species.Gen6Formes.hoopaU,"-Unbound");
         formeSuffixes.put(Species.Gen6Formes.cameruptMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.lopunnyMega,"-Mega");
