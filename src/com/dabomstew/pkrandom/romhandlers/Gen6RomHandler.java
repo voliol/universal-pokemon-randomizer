@@ -216,7 +216,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (pk.getFormeSuffix().startsWith("-Mega") || pk.getFormeSuffix().equals("-Primal")) {
             return 6;
         }
-        if (pk.getBaseForme() != null) {
+        if (pk.isAltForme()) {
             if (pk.getBaseNumber() == Species.pikachu) {
                 return 6; // contest pikachu
             }
@@ -284,7 +284,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 if (firstFormeOffset != 0) {
                     for (int i = 1; i < formeCount; i++) {
                         altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-                        if (Gen6Constants.actuallyCosmeticForms.contains(firstFormeOffset+i-1)) {
+                        if (Gen6Constants.cosmeticForms.contains(firstFormeOffset+i-1)) {
                             if (pkmn.getNumber() != Species.pikachu && pkmn.getNumber() != Species.cherrim) { // No Pikachu/Cherrim
                                 pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
                             }
@@ -299,8 +299,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     }
                 }
             } else {
-                if (Gen6Constants.actuallyCosmeticForms.contains(pkmn.getNumber())) {
-                    pkmn.setActuallyCosmetic(true);
+                if (Gen6Constants.cosmeticForms.contains(pkmn.getNumber())) {
+                    pkmn.setCosmeticForme(true);
                 }
             }
         }
@@ -339,7 +339,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
                         if (!pk.getEvolutionsFrom().contains(evol)) {
                             pk.getEvolutionsFrom().add(evol);
-                            if (!pk.isActuallyCosmetic()) pokes[species].getEvolutionsTo().add(evol);
+                            if (!pk.isCosmeticForme()) pokes[species].getEvolutionsTo().add(evol);
                         }
                     }
                 }
@@ -2867,7 +2867,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public PokemonSet<Pokemon> getBannedForStaticPokemon() {
-        return new PokemonSet<>(Gen6Constants.actuallyCosmeticForms
+        return new PokemonSet<>(Gen6Constants.cosmeticForms
                 .stream()
                 .filter(index -> index < Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.getRomType()))
                 .map(index -> pokes[index])

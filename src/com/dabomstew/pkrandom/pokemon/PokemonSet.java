@@ -1,7 +1,6 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -224,7 +223,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	}
 
 	public PokemonSet<T> filterCosmetic() {
-		return filter(Pokemon::isActuallyCosmetic);
+		return filter(Pokemon::isCosmeticForme);
 	}
 
 	@Override

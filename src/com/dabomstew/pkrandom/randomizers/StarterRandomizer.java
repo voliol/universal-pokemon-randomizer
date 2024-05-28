@@ -43,7 +43,7 @@ public class StarterRandomizer extends Randomizer {
             if (banIrregularAltFormes) {
                 choosable.removeAll(romHandler.getIrregularFormes());
             }
-            choosable.removeIf(Pokemon::isActuallyCosmetic);
+            choosable.removeIf(Pokemon::isCosmeticForme);
         } else {
             choosable = new PokemonSet<>(noLegendaries ? rPokeService.getNonLegendaries(false) : rPokeService.getAll(false));
         }
@@ -53,7 +53,7 @@ public class StarterRandomizer extends Randomizer {
         if (useCustomStarters) {
             List<Pokemon> romPokemon = romHandler.getPokemonInclFormes()
                     .stream()
-                    .filter(pk -> pk == null || !pk.isActuallyCosmetic())
+                    .filter(pk -> pk == null || !pk.isCosmeticForme())
                     .toList();
 
             for (int customStarter : customStarters) {

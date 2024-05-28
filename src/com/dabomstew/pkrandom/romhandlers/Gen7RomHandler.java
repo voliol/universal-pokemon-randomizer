@@ -205,7 +205,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
                 FormeInfo fi = formeMappings.get(k);
-                int realBaseForme = pokes[fi.baseForme].getBaseForme() == null ? fi.baseForme : pokes[fi.baseForme].getBaseForme().getNumber();
+                int realBaseForme = pokes[fi.baseForme].isAltForme() ? pokes[fi.baseForme].getBaseForme().getNumber() : fi.baseForme;
                 pokes[i].setName(pokeNames[realBaseForme]);
                 pokes[i].setBaseForme(pokes[fi.baseForme]);
                 pokes[i].setFormeNumber(fi.formeNumber);
@@ -244,7 +244,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         if (pk.getFormeSuffix().startsWith("-Mega") || pk.getFormeSuffix().equals("-Primal")) {
             return 6;
         }
-        if (pk.getBaseForme() != null) {
+        if (pk.isAltForme()) {
             if (pk.getBaseNumber() == Species.pikachu) {
                 return 6; // contest pikachu
             }
@@ -321,7 +321,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     for (int i = 1; i < formeCount; i++) {
                         if (j == 0 || j > jMax) {
                             altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-                            if (Gen7Constants.getActuallyCosmeticForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) {
+                            if (Gen7Constants.getCosmeticForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) {
                                 if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) { // Skip ignored forms (identical or confusing cosmetic forms)
                                     pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
                                     pkmn.getRealCosmeticFormNumbers().add(i);
@@ -349,8 +349,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
                     pkmn.setCosmeticForms(Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).getOrDefault(pkmn.getNumber(),0));
                 }
-                if (Gen7Constants.getActuallyCosmeticForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
-                    pkmn.setActuallyCosmetic(true);
+                if (Gen7Constants.getCosmeticForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
+                    pkmn.setCosmeticForme(true);
                 }
             }
         }
@@ -428,14 +428,14 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             default:
                                 break;
                         }
-                        if (pk.getBaseForme() != null && pk.getBaseForme().getNumber() == Species.rockruff && pk.getFormeNumber() > 0) {
+                        if (pk.isAltForme() && pk.getBaseForme().getNumber() == Species.rockruff && pk.getFormeNumber() > 0) {
                             evol.setFrom(pk.getBaseForme());
                             pk.getBaseForme().getEvolutionsFrom().add(evol);
                             pokes[absolutePokeNumByBaseForme.get(species).get(evol.getForme())].getEvolutionsTo().add(evol);
                         }
                         if (!pk.getEvolutionsFrom().contains(evol)) {
                             pk.getEvolutionsFrom().add(evol);
-                            if (!pk.isActuallyCosmetic()) {
+                            if (!pk.isCosmeticForme()) {
                                 if (evol.getForme() > 0) {
                                     // The forme number for the evolution might represent an actual alt forme, or it
                                     // might simply represent a cosmetic forme. If it represents an actual alt forme,
@@ -970,7 +970,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
         int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.getNumber(),dummyAbsolutePokeNums).getOrDefault(forme,0);
-        return pokeNum != 0 ? !pokes[pokeNum].isActuallyCosmetic() ? pokes[pokeNum] : pokes[pokeNum].getBaseForme() : pk;
+        return pokeNum != 0 ? !pokes[pokeNum].isCosmeticForme() ? pokes[pokeNum] : pokes[pokeNum].getBaseForme() : pk;
     }
 
 	@Override

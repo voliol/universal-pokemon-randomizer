@@ -39,7 +39,7 @@ public class Gen6Constants {
     private static final int xyFormeCount = 77, orasFormeCount = 104;
     private static final int orasformeMovesetOffset = 35;
 
-    public static final List<Integer> actuallyCosmeticForms = Arrays.asList(
+    public static final List<Integer> cosmeticForms = Arrays.asList(
             Species.Gen6Formes.cherrimCosmetic1,
             Species.Gen6Formes.keldeoCosmetic1,
             Species.Gen6Formes.furfrouCosmetic1, Species.Gen6Formes.furfrouCosmetic2,

@@ -220,7 +220,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private int generationOf(Pokemon pk) {
-        if (pk.getBaseForme() != null) {
+        if (pk.isAltForme()) {
             return pk.getBaseForme().getGeneration();
         }
         if (pk.getNumber() >= Species.victini) {
@@ -403,7 +403,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     pkmn.setCosmeticForms(formeCount);
                 }
                 if (pkmn.getNumber() == Species.Gen5Formes.keldeoCosmetic1) {
-                    pkmn.setActuallyCosmetic(true);
+                    pkmn.setCosmeticForme(true);
                 }
             }
         }
@@ -3089,7 +3089,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             int introPokemon = pk.getNumber();
             // Assume alt formes can't be used. I haven't actually tested this, but it seemed like the safer guess.
-            if (pk.getBaseForme() != null) {
+            if (pk.isAltForme()) {
                 return false;
             }
             byte[] introGraphicOverlay = readOverlay(romEntry.getIntValue("IntroGraphicOvlNumber"));
@@ -3208,7 +3208,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // In Gen 5, alt formes for Trainer Pokemon use the base forme's ability
         Pokemon pkmn = tp.pokemon;
-        while (pkmn.getBaseForme() != null) {
+        while (pkmn.isAltForme()) {
             pkmn = pkmn.getBaseForme();
         }
 

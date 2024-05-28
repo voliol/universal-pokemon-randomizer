@@ -61,7 +61,7 @@ public class Pokemon implements Comparable<Pokemon> {
     private int formeNumber = 0;
     private int cosmeticForms = 0;
     private int formeSpriteIndex = 0;
-    private boolean actuallyCosmetic = false;
+    private boolean cosmetic = false;
     private List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
     private int generation = -1;
@@ -417,12 +417,16 @@ public class Pokemon implements Comparable<Pokemon> {
         this.formeSpriteIndex = formeSpriteIndex;
     }
 
-    public boolean isActuallyCosmetic() {
-        return actuallyCosmetic;
+    public boolean isAltForme() {
+        return this.baseForme != null;
     }
 
-    public void setActuallyCosmetic(boolean actuallyCosmetic) {
-        this.actuallyCosmetic = actuallyCosmetic;
+    public boolean isCosmeticForme() {
+        return cosmetic;
+    }
+
+    public void setCosmeticForme(boolean cosmeticForme) {
+        this.cosmetic = cosmeticForme;
     }
 
     public List<Integer> getRealCosmeticFormNumbers() {

@@ -85,11 +85,11 @@ public class StaticPokemonRandomizer extends Randomizer {
         if (swapLegendaries) {
             PokemonSet<Pokemon> legendariesLeft = new PokemonSet<>(rPokeService.getLegendaries(allowAltFormes));
             if (allowAltFormes) {
-                legendariesLeft = legendariesLeft.filter(pk -> !pk.isActuallyCosmetic());
+                legendariesLeft = legendariesLeft.filter(pk -> !pk.isCosmeticForme());
             }
             PokemonSet<Pokemon> nonlegsLeft = new PokemonSet<>(rPokeService.getNonLegendaries(allowAltFormes));
             if (allowAltFormes) {
-                nonlegsLeft = nonlegsLeft.filter(pk -> !pk.isActuallyCosmetic());
+                nonlegsLeft = nonlegsLeft.filter(pk -> !pk.isCosmeticForme());
             }
             PokemonSet<Pokemon> ultraBeastsLeft = new PokemonSet<>(rPokeService.getUltrabeasts(false));
             legendariesLeft.removeAll(banned);
@@ -158,7 +158,7 @@ public class StaticPokemonRandomizer extends Randomizer {
             }
         } else if (similarStrength) {
             PokemonSet<Pokemon> listInclFormesExclCosmetics = rPokeService.getAll(true)
-                    .filter(pk -> !pk.isActuallyCosmetic());
+                    .filter(pk -> !pk.isCosmeticForme());
             PokemonSet<Pokemon> pokemonLeft = new PokemonSet<>(!allowAltFormes ?
                     rPokeService.getAll(false) : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
@@ -248,7 +248,7 @@ public class StaticPokemonRandomizer extends Randomizer {
             }
         } else { // Completely random
             PokemonSet<Pokemon> listInclFormesExclCosmetics = rPokeService.getAll(true)
-                    .filter(pk -> !pk.isActuallyCosmetic());
+                    .filter(pk -> !pk.isCosmeticForme());
             PokemonSet<Pokemon> pokemonLeft = new PokemonSet<>(!allowAltFormes ?
                     rPokeService.getAll(false) : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
@@ -335,7 +335,7 @@ public class StaticPokemonRandomizer extends Randomizer {
         }
 
         PokemonSet<Pokemon> listInclFormesExclCosmetics = rPokeService.getAll(true).filter(
-                pk -> !pk.isActuallyCosmetic());
+                pk -> !pk.isCosmeticForme());
         PokemonSet<Pokemon> pokemonLeft = new PokemonSet<>(!allowAltFormes ?
                 rPokeService.getAll(false) : listInclFormesExclCosmetics);
         pokemonLeft.removeAll(banned);

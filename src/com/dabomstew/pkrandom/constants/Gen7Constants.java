@@ -594,6 +594,7 @@ public class Gen7Constants {
         putFormSuffixes(map, Species.hoopa, "-Unbound");
 
         putFormSuffixes(map, Species.oricorio, "-Pom-Pom", "-Pa'u", "-Sensu");
+        putFormSuffixes(map, Species.rockruff, "-OwnTempo");
         putFormSuffixes(map, Species.lycanroc, "-Midnight", "-Dusk");
         putFormSuffixes(map, Species.wishiwashi, "-School");
         putFormSuffixes(map, Species.minior, "", "", "", "", "", "", "-Core"); // first 6 are just colors
@@ -633,7 +634,7 @@ public class Gen7Constants {
         return m;
     }
 
-    private static final List<Integer> actuallyCosmeticFormsSM = Arrays.asList(
+    private static final List<Integer> cosmeticFormsSM = Arrays.asList(
             Species.SMFormes.cherrimCosmetic1,
             Species.SMFormes.shellosCosmetic1,
             Species.SMFormes.gastrodonCosmetic1,
@@ -665,7 +666,7 @@ public class Gen7Constants {
             Species.SMFormes.pikachuCosmetic4, Species.SMFormes.pikachuCosmetic5, Species.SMFormes.pikachuCosmetic6 // Pikachu With Funny Hats
     );
 
-    private static final List<Integer> actuallyCosmeticFormsUSUM = Arrays.asList(
+    private static final List<Integer> cosmeticFormsUSUM = Arrays.asList(
             Species.USUMFormes.cherrimCosmetic1,
             Species.USUMFormes.shellosCosmetic1,
             Species.USUMFormes.gastrodonCosmetic1,
@@ -702,11 +703,11 @@ public class Gen7Constants {
             Species.USUMFormes.pikachuCosmetic7 // Pikachu With Funny Hats
     );
 
-    public static List<Integer> getActuallyCosmeticForms(int romType) {
+    public static List<Integer> getCosmeticForms(int romType) {
         if (romType == Type_SM) {
-            return actuallyCosmeticFormsSM;
+            return cosmeticFormsSM;
         } else {
-            return actuallyCosmeticFormsUSUM;
+            return cosmeticFormsUSUM;
         }
     }
 

@@ -48,7 +48,7 @@ public class PokemonTypeRandomizer extends Randomizer {
         });
 
         for (Pokemon pk : allPokes) {
-            if (pk != null && pk.isActuallyCosmetic()) {
+            if (pk != null && pk.isCosmeticForme()) {
                 pk.setPrimaryType(pk.getBaseForme().getPrimaryType());
                 pk.setSecondaryType(pk.getBaseForme().getSecondaryType());
             }

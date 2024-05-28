@@ -734,7 +734,7 @@ public class GameRandomizer {
         List<Pokemon> pkmnList = romHandler.getPokemonInclFormes();
         int i = 1;
         for (Pokemon pkmn : pkmnList) {
-            if (pkmn == null || pkmn.isActuallyCosmetic()) {
+            if (pkmn == null || pkmn.isCosmeticForme()) {
                 continue;
             }
             StringBuilder evoStr = new StringBuilder();
@@ -853,7 +853,7 @@ public class GameRandomizer {
         log.println("--Randomized Evolutions--");
         List<Pokemon> allPokes = romHandler.getPokemonInclFormes();
         for (Pokemon pk : allPokes) {
-            if (pk != null && !pk.isActuallyCosmetic()) {
+            if (pk != null && !pk.isCosmeticForme()) {
                 int numEvos = pk.getEvolutionsFrom().size();
                 if (numEvos > 0) {
                     StringBuilder evoStr = new StringBuilder(pk.getEvolutionsFrom().get(0).getTo().fullName());
@@ -918,7 +918,7 @@ public class GameRandomizer {
             log.println();
             int i = 0;
             for (Pokemon pkmn : allPokes) {
-                if (pkmn != null && !pkmn.isActuallyCosmetic()) {
+                if (pkmn != null && !pkmn.isCosmeticForme()) {
                     i++;
                     String typeString = pkmn.getPrimaryType() == null ? "???" : pkmn.getPrimaryType().toString();
                     if (pkmn.getSecondaryType() != null) {
@@ -988,7 +988,7 @@ public class GameRandomizer {
         int tmCount = romHandler.getTMCount();
         for (Map.Entry<Pokemon, boolean[]> entry : compat.entrySet()) {
             Pokemon pkmn = entry.getKey();
-            if (pkmn.isActuallyCosmetic()) continue;
+            if (pkmn.isCosmeticForme()) continue;
             boolean[] flags = entry.getValue();
 
             String nameSpFormat = "%-14s";
