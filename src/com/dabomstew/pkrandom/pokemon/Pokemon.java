@@ -26,6 +26,7 @@ package com.dabomstew.pkrandom.pokemon;
 
 import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
+import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +35,21 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Represents a Pokémon species or forme.
+ * Represents a Pokémon species (base forme) or alt forme, with relevant attributes such as base stats,
+ * {@link Type}s, {@link Evolution}s, etc. etc...<br>
+ * Each Pokemon is identified by a number, which is normally the same as its National Pokédex number,
+ * unless the Pokemon is an alt forme.
+ * <br><br>
+ * An alt forme is a variation of a base forme, which differs in some characteristic but still shares a slot
+ * in the game's Pokédex. See
+ * <a href=https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_with_form_differences>the Bulbapedia article</a>
+ * on the topic. It should be noted though, that this class requires that all Pokemon are either "base" or "alt" formes,
+ * even when there is no obvious distinction. Pokemon like Wormadam, Basculin and Florges thus have one of their
+ * formes chosen as the base and the others are then considered alt formes.
+ * <br><br>
+ * If alt forme only differs from the base form in its appearance, it is "cosmetic". Note it is up to the provider of
+ * Pokemon objects (normally a {@link RomHandler}) to decide which, if any, cosmetic forms are represented as Pokemon
+ * objects. E.g. Unown's and Arceus' forms are usually not.
  */
 public class Pokemon implements Comparable<Pokemon> {
 
