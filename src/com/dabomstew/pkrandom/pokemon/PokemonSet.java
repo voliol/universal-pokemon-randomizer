@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
+
 import java.util.*;
 
 /**
@@ -10,6 +12,7 @@ public class PokemonSet implements Set<Pokemon> {
 
     private HashSet<Pokemon> internalSet;
     private EnumMap<Type, HashSet<Pokemon>> typeMap;
+    ArrayList<Pokemon> randomCache = null;
 
     /**
      * Creates an empty PokemonSet.
@@ -561,10 +564,78 @@ public class PokemonSet implements Set<Pokemon> {
         return validEvoLines;
     }
 
+    /**
+     * Chooses a random Pokemon from the set.
+     * A slow function - as much as possible, do any checks and eliminations BEFORE calling this.
+     * @param random A seeded random number generator.
+     * @return A random Pokemon from the set.
+     */
+    public Pokemon randomPokemon(Random random) {
+        if(this.isEmpty()) {
+            throw new IllegalStateException("Tried to choose a random member of an empty set!");
+        }
+
+        int choice = random.nextInt(this.size());
+        int i = 0;
+        for(Pokemon pokemon : this) {
+            if(i == choice) {
+                return pokemon;
+            }
+            i++;
+        }
+
+        //this should never be reached
+        throw new RuntimeException("I don't know how, but PokemonSet.randomPokemon iterated through the whole set without finding its choice.");
+    }
+
+    /**
+     * Chooses a random Pokemon from the set.
+     * Faster than randomPokemon only if choosing 3-5+ Pokemon without
+     * changing the set (adding or removing Pokemon), except with this method.
+     * @param random A seeded random number generator.
+     * @param removeChoice Whether to remove the chosen Pokemon from the set.
+     * @return A random Pokemon from the set.
+     */
+    public Pokemon randomPokemonCached(Random random, boolean removeChoice) {
+        if(this.isEmpty()) {
+            throw new IllegalStateException("Tried to choose a random member of an empty set!");
+        }
+
+        if(randomCache == null) {
+            randomCache = new ArrayList(this);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            int choice = random.nextInt(randomCache.size());
+            Pokemon p = randomCache.get(choice);
+            if(p != null) {
+                continue;
+            }
+            if(removeChoice) {
+                removeKeepingCache(choice);
+            }
+            return p;
+        }
+
+        //If we reach this point, we've hit null five times. That probably means that most of the set is null.
+        //(Or we had bad luck, but hey; either way, this will fix it.)
+        randomCache = new ArrayList<>(this);
+        int choice = random.nextInt(randomCache.size());
+        Pokemon p = randomCache.get(choice);
+        if(p == null) {
+            throw new IllegalStateException("This shouldn't be possible, but there was a null value in a fresh cache?");
+        }
+        if(removeChoice) {
+            removeKeepingCache(choice);
+        }
+        return p;
+    }
+
     public boolean add(Pokemon pokemon) {
         if(internalSet.contains(pokemon)) {
             return false;
         }
+        randomCache = null;
         internalSet.add(pokemon);
 
         addToType(pokemon, pokemon.primaryType);
@@ -588,6 +659,7 @@ public class PokemonSet implements Set<Pokemon> {
         if(!(o instanceof Pokemon)) {
             return false;
         }
+        randomCache = null;
         Pokemon pokemon = (Pokemon) o;
         if(!internalSet.contains(pokemon)) {
             return false;
@@ -599,6 +671,38 @@ public class PokemonSet implements Set<Pokemon> {
             typeMap.get(pokemon.secondaryType).remove(pokemon);
         }
         return true;
+    }
+
+    /**
+     * Removes the Pokemon at position index in the internal cache from both the cache and the set.
+     * @param index The index of the Pokemon to remove.
+     */
+    private void removeKeepingCache(int index) {
+        if(randomCache == null) {
+            throw new IllegalStateException("PokemonSet's internal remove called when cache not present!");
+        }
+
+        if(index < 0 || index > randomCache.size()) {
+            throw new IndexOutOfBoundsException("PokemonSet's internal remove called with bad index: " + index);
+        }
+
+        Pokemon p = randomCache.get(index);
+        if(p == null) {
+            throw new IllegalArgumentException("PokemonSet's internal remove called on already removed index: " + index);
+        }
+
+        if(!internalSet.contains(p)) {
+            throw new IllegalArgumentException("PokemonSet's internal remove called on Pokemon in the cache but not the set!");
+        }
+
+        randomCache.set(index, null);
+        //The whole point of the cache is to prevent iterating over large portions of the set,
+        //so we don't want to remove() from it.
+        internalSet.remove(p);
+        typeMap.get(p.primaryType).remove(p);
+        if(p.secondaryType != null) {
+            typeMap.get(p.secondaryType).remove(p);
+        }
     }
 
     public boolean addAll(Collection<? extends Pokemon> c) {
