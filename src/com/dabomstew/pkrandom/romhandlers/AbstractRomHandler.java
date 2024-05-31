@@ -1008,7 +1008,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         //iterate over areas
         for (EncounterSet area : scrambledEncounters) {
             PokemonSet inArea = pokemonInArea(area);
-            Map<Pokemon, Pokemon> areaMap = new TreeMap<>();
+            Map<Pokemon, Pokemon> areaMap = new HashMap<>();
 
             Type areaTheme = null;
             if(keepThemes) {
@@ -1022,17 +1022,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             // generate pickable list (for all algorithms except keepPrimary,
             // as it has a different pool per-Pokemon)
             PokemonSet pickablePokemon = null;
-            if(areaTheme == null && !keepPrimary) {
-                pickablePokemon = new PokemonSet(activeWildSet);
-            } else {
-                pickablePokemon = activeWildSet.getPokemonOfType(areaTheme);
+            if(!keepPrimary) {
+                pickablePokemon = getAvailablePokemonForArea(area, activeWildSet, areaTheme);
             }
-            if(!area.bannedPokemon.isEmpty() && pickablePokemon != null) {
-                pickablePokemon.removeAll(area.bannedPokemon);
-            }
-
-            //this is only relevant for keepPrimary, but it needs to be declared in this scope.
-            List<Pokemon> usedPks = new ArrayList<>();
 
             //iterate over Pokemon in area to generate map
             for (Pokemon areaPk : inArea) {
@@ -1045,28 +1037,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //generate pickable list for keepPrimary
                 if(keepPrimary) {
                     typeToChoose = areaPk.originalPrimaryType;
-                    pickablePokemon = activeWildSet.getPokemonOfType(typeToChoose);
-                    pickablePokemon.removeAll(usedPks);
-                    if (! area.bannedPokemon.isEmpty()) {
-                        pickablePokemon.removeAll(area.bannedPokemon);
-                    }
+                    pickablePokemon = getAvailablePokemonForArea(area, activeWildSet, typeToChoose, areaMap.values());
                 }
-
 
                 //handle empty pickable lists
                 if(pickablePokemon.isEmpty()) {
+
+                    //reset if fully empty
                     if(activeWildSet.isEmpty()) {
                         activeWildSet = fullWildSet;
                     }
 
-                    if(typeToChoose == null) {
-                        pickablePokemon = fullWildSet;
-                    } else {
-                        pickablePokemon = fullWildSet.getPokemonOfType(typeToChoose);
-                    }
+                    pickablePokemon = getAvailablePokemonForArea(area, fullWildSet, typeToChoose, areaMap.values());
 
                     if(pickablePokemon.isEmpty()) {
-                        String message = "No wild Pokemon";
+                        String message = "Insufficient wild Pokemon";
                         if(typeToChoose != null) {
                             message += " of type " + typeToChoose;
                         }
@@ -1087,7 +1072,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 //add to map & remove from pickable
                 areaMap.put(areaPk, picked);
                 pickablePokemon.remove(picked);
-                usedPks.add(picked); //this being for keepPrimary without catchEmAll
                 if(catchEmAll) {
                     activeWildSet.remove(picked);
                 }
@@ -1800,6 +1784,47 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         return primaryCount > secondaryCount ? primaryType : secondaryType;
+    }
+
+    /**
+     * Narrows the set of available Pokemon down to a set suitable for a single area.
+     * @param area The EncounterSet of the area in question.
+     * @param pokemonPool The PokemonSet to choose Pokemon from.
+     * @param type The type of Pokemon to choose, or null for all types.
+     * @param additionalBanned Pokemon that should be excluded from the set for reasons
+     *                         other than being on the area's ban list.
+     * @return The set of available Pokemon for the area.
+     */
+    private PokemonSet getAvailablePokemonForArea(EncounterSet area, PokemonSet pokemonPool, Type type,
+                                                  Collection<Pokemon> additionalBanned) {
+        PokemonSet availablePokemon = getAvailablePokemonForArea(area, pokemonPool, type);
+
+        if(additionalBanned != null) {
+            availablePokemon.removeAll(additionalBanned);
+        }
+
+        return availablePokemon;
+    }
+
+    /**
+     * Narrows the set of available Pokemon down to a set suitable for a single area.
+     * @param area The EncounterSet of the area in question.
+     * @param pokemonPool The PokemonSet to choose Pokemon from.
+     * @param type The type of Pokemon to choose, or null for all types.
+     * @return The set of available Pokemon for the area.
+     */
+    private PokemonSet getAvailablePokemonForArea(EncounterSet area, PokemonSet pokemonPool, Type type) {
+        PokemonSet availablePokemon;
+
+        if(type == null) {
+            availablePokemon = new PokemonSet(pokemonPool);
+        } else {
+            availablePokemon = pokemonPool.getPokemonOfType(type);
+        }
+
+        availablePokemon.removeAll(area.bannedPokemon);
+
+        return availablePokemon;
     }
 
     /**
