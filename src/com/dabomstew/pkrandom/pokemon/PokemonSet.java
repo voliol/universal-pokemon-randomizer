@@ -34,13 +34,26 @@ public class PokemonSet implements Set<Pokemon> {
     /**
      * Returns every Pokemon in this set which has the given type.
      * @param type The type to match.
-     * @return a PokemonSet containing every Pokemon of the given type.
+     * @return a new PokemonSet containing every Pokemon of the given type.
      */
     public PokemonSet getPokemonOfType(Type type) {
         if(typeMap.get(type) == null) {
             return new PokemonSet();
         } else {
             return new PokemonSet(typeMap.get(type));
+        }
+    }
+
+    /**
+     * Returns the number of Pokemon in this set which have the given type.
+     * @param type The type to count Pokemon of.
+     * @return The number of Pokemon of the given type.
+     */
+    public int getCountOfType(Type type) {
+        if(typeMap.get(type) == null) {
+            return 0;
+        } else {
+            return typeMap.get(type).size();
         }
     }
 
@@ -562,6 +575,85 @@ public class PokemonSet implements Set<Pokemon> {
         }
 
         return validEvoLines;
+    }
+
+    /**
+     * Finds if all Pokemon in this set share a type.
+     * If two types are shared, will return the primary type of an arbitrary Pokemon in the set,
+     * unless that type is Normal; in this case will return the secondary type.
+     * @return The Type shared by all the pokemon, or null if none was shared.
+     */
+    public Type findSharedType() {
+        if(this.isEmpty()) {
+            return null;
+        }
+        Iterator<Pokemon> itor = this.iterator();
+        Pokemon poke = itor.next();
+
+        Type primary = poke.primaryType;
+        Type secondary = poke.secondaryType;
+        //we already sorted all the Pokemon by type, so we can take a shortcut
+        if(typeMap.get(primary).size() == this.size()) {
+            //primary is a theme!
+            if(primary != Type.NORMAL) {
+                return primary;
+            } else {
+                //check if secondary is also a theme,
+                //because Normal is less significant than, say, Flying.
+                if(typeMap.get(secondary).size() == this.size()) {
+                    //secondary IS a theme!
+                    return secondary;
+                } else {
+                    return primary;
+                }
+            }
+        }
+        //primary wasn't a theme. is secondary?
+        if(typeMap.get(secondary).size() == this.size()) {
+            //secondary IS a theme!
+            return secondary;
+        } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * Finds if all Pokemon in this set shared a type before randomization.
+     * If two types were shared, will return the original primary type
+     * of an arbitrary Pokemon in the set, unless that type is Normal;
+     * in this case will return the secondary type.
+     * @return The Type shared by all the pokemon, or null if none was shared.
+     */
+    public Type findOriginalSharedType() {
+        if(this.isEmpty()) {
+            return null;
+        }
+        Iterator<Pokemon> itor = this.iterator();
+        Pokemon poke = itor.next();
+        Type primary = poke.originalPrimaryType;
+        Type secondary = poke.originalSecondaryType;
+
+        while(itor.hasNext()) {
+            poke = itor.next();
+            if(secondary != null) {
+                if (secondary != poke.originalPrimaryType && secondary != poke.originalSecondaryType) {
+                    secondary = null;
+                }
+            }
+            if (primary != poke.originalPrimaryType && primary != poke.originalSecondaryType) {
+                primary = secondary;
+                secondary = null;
+            }
+            if (primary == null) {
+                return null; //we've determined there's no type theme, no need to run through the rest of the set.
+            }
+        }
+        if(primary == Type.NORMAL && secondary != null) {
+            return secondary;
+        } else {
+            return primary;
+        }
     }
 
     /**
