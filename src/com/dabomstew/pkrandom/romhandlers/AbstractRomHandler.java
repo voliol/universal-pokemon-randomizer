@@ -1125,6 +1125,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
 
+    /**
+     * Iterates over every wild Pokemon encounter in the game,
+     * increasing their levels as appropriate for the current settings.
+     * @param settings The current settings.
+     */
     @Override
     public void onlyChangeWildLevels(Settings settings) {
         int levelModifier = getWildLevelModifier(settings);
@@ -1141,78 +1146,36 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    /**
+     * After running Area 1-to-1, randomizes wild Pokemon further,
+     * maximizing the amount that can be added to any location without
+     * crashing the DexNav.
+     * Only applies to Omega Ruby and Alpha Sapphire.
+     * @param collapsedEncounters The set of encounters, with those belonging to
+     *                           the same area collapsed into one EncounterSet.
+     * @param settings The current settings.
+     */
     private void enhanceRandomEncountersORAS(List<EncounterSet> collapsedEncounters, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
         boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
-        boolean noLegendaries = settings.isBlockWildLegendaries();
-        boolean allowAltFormes = settings.isAllowWildAltFormes();
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-        boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
 
-        List<Pokemon> banned = this.bannedForWildEncounters();
-        if (!abilitiesAreRandomized) {
-            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
-            banned.addAll(abilityDependentFormes);
-        }
-        if (banIrregularAltFormes) {
-            banned.addAll(getIrregularFormes());
-        }
-
-        // similar refactor to random
-        // get list of all allowable wilds
-        List<Pokemon> allPokes;
-        if (allowAltFormes) {
-            allPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes) : new ArrayList<>(
-                    mainPokemonListInclFormes);
-            allPokes.removeIf(o -> ((Pokemon) o).actuallyCosmetic);
-        } else {
-            allPokes = noLegendaries ? new ArrayList<>(noLegendaryList) : new ArrayList<>(
-                    mainPokemonList);
-        }
-        allPokes.removeAll(banned);
-        List<Pokemon> initialPokes = new ArrayList<>(allPokes);
+        //get Pokemon pools
+        PokemonSet fullWildPool = getWildPokemonPool(settings);
+        PokemonSet activeWildPool = new PokemonSet(fullWildPool);
+        PokemonSet bannedSet = getWildPokemonBannedSet(settings);
 
         Map<Integer, List<EncounterSet>> zonesToEncounters = mapZonesToEncounters(collapsedEncounters);
+        //I'm not sure if there's a reason these aren't shuffled. For now I'll leave them alone.
 
         if(catchEmAll) {
             //remove the ones already assigned to encounters
             //(this was not done previously but. it should have been)
             for (List<EncounterSet> encountersInZone : zonesToEncounters.values()) {
                 for (EncounterSet area : encountersInZone) {
-                    allPokes.removeAll(area.encounters);
-                }
-            }
-        }
-
-        //if types matter, then get a typemap.
-        Map<Type, List<Pokemon>> typeListMap = new EnumMap<>(Type.class);
-        Map<Type, List<Pokemon>> initialTypeLists = new EnumMap<>(Type.class);
-        if (typeThemed || keepPrimary) {
-            for (Type type : Type.values()) {
-                if(typeInGame(type)) {
-                    typeListMap.put(type, new ArrayList<>());
-                    initialTypeLists.put(type, new ArrayList<>());
-                }
-            }
-            //we could use the pokemonOfType method
-            //however, that would make us iterate once per type.
-            //iterating once over the whole list is much more efficient.
-            for (Pokemon poke : allPokes) {
-                typeListMap.get(poke.primaryType).add(poke);
-                if(poke.secondaryType != null) {
-                    typeListMap.get(poke.secondaryType).add(poke);
-                }
-            }
-
-            if (catchEmAll) {
-                //make another list from initials
-                for (Pokemon poke : initialPokes) {
-                    initialTypeLists.get(poke.primaryType).add(poke);
-                    if (poke.secondaryType != null) {
-                        initialTypeLists.get(poke.secondaryType).add(poke);
-                    }
+                    activeWildPool.removeAll(pokemonInArea(area));
                 }
             }
         }
@@ -1221,40 +1184,29 @@ public abstract class AbstractRomHandler implements RomHandler {
             int currentAreaIndex = -1;
             List<EncounterSet> nonRockSmashAreas = new ArrayList<>();
             Map<Integer, List<Integer>> areasAndEncountersToRandomize = new TreeMap<>();
-            // Since Rock Smash Pokemon do not show up on DexNav, they can be fully randomized
+
+
+            // Iterate over areas
             for (EncounterSet area : encountersInZone) {
+                // Since Rock Smash Pokemon do not show up on DexNav, they can be fully randomized
                 if (area.displayName.contains("Rock Smash")) {
 
-                    //step 1: generate pickable list (for all algorithms except keepPrimary,
-                    // as it has a different pool per-Pokemon)
-                    List<Pokemon> pickablePokemon;
-                    if(typeThemed) {
-                        int iterLoops = 0;
-                        pickablePokemon = null;
-                        Type areaTheme = getTypeForArea(area); //try to use the already established theme first
-                        while (pickablePokemon == null && iterLoops < 10000) {
-                            pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
-                            if (!area.bannedPokemon.isEmpty()) {
-                                pickablePokemon.removeAll(area.bannedPokemon);
-                            }
-                            if (pickablePokemon.size() < area.encounters.size()) {
-                                // Can't use this type for this area
-                                pickablePokemon = null;
-                            }
-                            iterLoops++;
-                            areaTheme = randomType();
+                    Type areaTheme = null;
+                    if(typeThemed || keepThemes) {
+                        // try to use the theme already established
+                        areaTheme = pokemonInArea(area).findSharedType();
+
+                        if(areaTheme == null || fullWildPool.getCountOfType(areaTheme) == 0) {
+                            generateTypeForArea(activeWildPool, fullWildPool, 1);
                         }
-                        if (pickablePokemon == null) {
-                            throw new RandomizationException("Could not randomize an area in a reasonable amount of attempts.");
-                        }
-                    } else {
-                        pickablePokemon = new ArrayList<>(allPokes);
-                        if (! area.bannedPokemon.isEmpty()) {
-                            pickablePokemon.removeAll(area.bannedPokemon);
-                        }
+                        // this was previously area.encounters.size(),
+                        // but there's no reason we can't have repeats.
                     }
 
-                    //step 2: iterate over encounters
+                    // get available Pokemon
+                    PokemonSet availablePool = getAvailablePokemonForArea(area, activeWildPool, areaTheme);
+
+                    // iterate over encounters
                     for (Encounter enc : area.encounters) {
 
                         if (catchEmAll && !doesAnotherEncounterWithSamePokemonExistInArea(enc, area)) {
@@ -1262,78 +1214,62 @@ public abstract class AbstractRomHandler implements RomHandler {
                             continue;
                         }
 
-                        //step 1 again: generate pickable list for keepPrimary
+                        if(availablePool.isEmpty()) {
+                            // reset the active pool ONLY if it's entirely empty.
+                            if(activeWildPool.isEmpty()) {
+                                activeWildPool = new PokemonSet(fullWildPool);
+                            }
+
+                            availablePool = getAvailablePokemonForArea(area, fullWildPool, areaTheme);
+
+                            if(availablePool.isEmpty()) {
+                                String message = "No wild Pokemon";
+                                if(areaTheme != null) {
+                                    message += " of type " + areaTheme;
+                                }
+                                message += " available for area " + area.displayName + "!";
+                                throw new RandomizationException(message);
+                            }
+                        }
+
+                        // get type-narrowed list for keep primary
+                        PokemonSet finalPokemonPool;
                         if(keepPrimary) {
-                            pickablePokemon = new ArrayList<>(typeListMap.get(enc.pokemon.originalPrimaryType));
-                            if (! area.bannedPokemon.isEmpty()) {
-                                pickablePokemon.removeAll(area.bannedPokemon);
-                            }
-                        }
+                            Type typeToChoose = enc.pokemon.originalPrimaryType;
+                            finalPokemonPool = availablePool.getPokemonOfType(typeToChoose);
 
-                        //step 3: handle empty pickable lists
-                        //(should only occur with catchEmAll)
-                        if(pickablePokemon.isEmpty()) {
-                            if( keepPrimary ) {
-                                pickablePokemon = new ArrayList<>(initialTypeLists.get(enc.pokemon.originalPrimaryType));
-                                if(typeListMap.get(enc.pokemon.originalPrimaryType).isEmpty()) {
-                                    //restart only if empty
-                                    typeListMap.put(enc.pokemon.originalPrimaryType, new ArrayList<>(pickablePokemon));
-                                }
-                                if (!area.bannedPokemon.isEmpty()) {
-                                    pickablePokemon.removeAll(area.bannedPokemon);
-                                }
-                                if (pickablePokemon.isEmpty()) {
-                                    throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon with type "
-                                            + enc.pokemon.originalPrimaryType.toString());
-                                }
-                            } else if (typeThemed) {
-                                //this shouldn't happen in the current implementation
-                                //since the list size is checked before finalizing its use
-                                throw new RandomizationException("ERROR: Type Themed size check failed??");
-                            } else {
-                                //use the initial list instead
-                                pickablePokemon = new ArrayList<>(initialPokes);
-                                if(allPokes.isEmpty()) {
-                                    //restart fully if the current list is empty
-                                    //(rather than containing only banned pokemon)
-                                    allPokes = new ArrayList<>(pickablePokemon);
-                                }
-                                if (!area.bannedPokemon.isEmpty()) {
-                                    pickablePokemon.removeAll(area.bannedPokemon);
-                                }
-                                if (pickablePokemon.isEmpty()) {
-                                    throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
+                            //pull from broader pool if there's none of the right type in the narrow pool
+                            if (finalPokemonPool.isEmpty()) {
+                                finalPokemonPool = getAvailablePokemonForArea(area, fullWildPool, typeToChoose);
+                                if (finalPokemonPool.isEmpty()) {
+                                    throw new RandomizationException("Unable to replace a wild Pokemon of type "
+                                            + typeToChoose + "!");
                                 }
                             }
+                        } else {
+                            finalPokemonPool = availablePool;
                         }
 
-                        //step 4: Choose a Pokemon from the pickable list
+                        // Choose a Pokemon from the pickable list
                         Pokemon picked;
                         if(usePowerLevels) {
-                            picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
+                            picked = pickWildPowerLvlReplacement(finalPokemonPool, enc.pokemon, Math.min(5, finalPokemonPool.size() / 4),
                                     false, null, 100);
                         } else {
-                            int pickedNum = this.random.nextInt(pickablePokemon.size());
-                            picked = pickablePokemon.get(pickedNum);
+                            picked = finalPokemonPool.randomPokemon(this.random);
                         }
 
-                        //step 5: assign to encounter, remove from pickable if using catchEmAll
+                        // assign to encounter, remove from pickable if using catchEmAll
                         enc.pokemon = picked;
                         setFormeForEncounter(enc, enc.pokemon);
                         if(catchEmAll) {
-                            pickablePokemon.remove(picked);
-                            if(keepPrimary || typeThemed) {
-                                typeListMap.get(picked.primaryType).remove(picked);
-                                if(picked.secondaryType != null) {
-                                    typeListMap.get(picked.secondaryType).remove(picked);
-                                }
-                            } else {
-                                allPokes.remove(picked);
-                            }
+                            availablePool.remove(picked);
+                            activeWildPool.remove(picked);
                         }
                     }
 
                 } else {
+                    //put non-Rock Smash encounters in a queue to randomize piecemeal later
                     currentAreaIndex++;
                     nonRockSmashAreas.add(area);
                     List<Integer> encounterIndices = new ArrayList<>();
@@ -1347,6 +1283,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Now, randomize non-Rock Smash Pokemon until we hit the threshold for DexNav
             int crashThreshold = computeDexNavCrashThreshold(encountersInZone);
             while (crashThreshold < 18 && areasAndEncountersToRandomize.size() > 0) {
+
+                // Pull a random encounter from the list (...I think)
+                // Does this an encounter at a time so the randomized encounters will be (somewhat) distributed
                 Set<Integer> areaIndices = areasAndEncountersToRandomize.keySet();
                 int areaIndex = areaIndices.stream().skip(this.random.nextInt(areaIndices.size())).findFirst().orElse(-1);
                 List<Integer> encounterIndices = areasAndEncountersToRandomize.get(areaIndex);
@@ -1360,91 +1299,55 @@ public abstract class AbstractRomHandler implements RomHandler {
                     continue;
                 }
 
-                List<Pokemon> pickablePokemon;
+                Type typeToChoose = null;
+                if(typeThemed || keepThemes) {
+                    // try to use the theme already established
+                    typeToChoose = pokemonInArea(area).findSharedType();
 
-                //step 1: generate list
-                //in this context, all algorithms generate lists per-pokemon.
-                //this is not the most efficient, but probably doesn't matter.
-                if(typeThemed) {
-                    Type areaTheme = getTypeForArea(area); //we already have a theme, so
-                    pickablePokemon = new ArrayList<>(typeListMap.get(areaTheme));
-                    if (!area.bannedPokemon.isEmpty()) {
-                        pickablePokemon.removeAll(area.bannedPokemon);
+                    if(typeToChoose == null || fullWildPool.getCountOfType(typeToChoose) == 0) {
+                        generateTypeForArea(activeWildPool, fullWildPool, 1);
                     }
-                } else if(keepPrimary) {
-                    pickablePokemon = new ArrayList<>(typeListMap.get(enc.pokemon.originalPrimaryType));
-                    if (! area.bannedPokemon.isEmpty()) {
-                        pickablePokemon.removeAll(area.bannedPokemon);
+                    //we DEFINITELY only need one in this context
+                } else if (keepPrimary) {
+                    typeToChoose = enc.pokemon.originalPrimaryType;
+                }
+
+                // get available Pokemon
+                PokemonSet availablePool = getAvailablePokemonForArea(area, activeWildPool, typeToChoose);
+
+                // handle empty pool
+                if(availablePool.isEmpty()) {
+                    if(activeWildPool.isEmpty()) {
+                        activeWildPool = new PokemonSet(fullWildPool);
                     }
-                } else {
-                    pickablePokemon = new ArrayList<>(allPokes);
-                    if (! area.bannedPokemon.isEmpty()) {
-                        pickablePokemon.removeAll(area.bannedPokemon);
+
+                    availablePool = getAvailablePokemonForArea(area, fullWildPool, typeToChoose);
+
+                    if(availablePool.isEmpty()) {
+                        String message = "No wild Pokemon";
+                        if(typeToChoose != null) {
+                            message += " of type " + typeToChoose;
+                        }
+                        message += " available for area " + area.displayName + "!";
+                        throw new RandomizationException(message);
                     }
                 }
 
-                //step 2: handle empty pickable lists
-                //(should only occur with catchEmAll)
-                if(pickablePokemon.isEmpty()) {
-                    if( keepPrimary ) {
-                        pickablePokemon = new ArrayList<>(initialTypeLists.get(enc.pokemon.originalPrimaryType));
-                        if(typeListMap.get(enc.pokemon.originalPrimaryType).isEmpty()) {
-                            //restart only if empty
-                            typeListMap.put(enc.pokemon.originalPrimaryType, new ArrayList<>(pickablePokemon));
-                        }
-                        if (!area.bannedPokemon.isEmpty()) {
-                            pickablePokemon.removeAll(area.bannedPokemon);
-                        }
-                        if (pickablePokemon.isEmpty()) {
-                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon with type "
-                                    + enc.pokemon.originalPrimaryType.toString());
-                        }
-                    } else if (typeThemed) {
-                        //this shouldn't happen in the current implementation,
-                        //since there's nothing that should remove pokemon from the list when using type-themed
-                        //(and therefore, there's no handling for it besides the error)
-                        throw new RandomizationException("ERROR: ran out of Pokemon with type "
-                                + enc.pokemon.originalPrimaryType.toString());
-                    } else {
-                        //use the initial list instead
-                        pickablePokemon = new ArrayList<>(initialPokes);
-                        if(allPokes.isEmpty()) {
-                            //restart fully only if the current list is empty
-                            //(rather than containing only banned pokemon)
-                            allPokes = new ArrayList<>(pickablePokemon);
-                        }
-                        if (!area.bannedPokemon.isEmpty()) {
-                            pickablePokemon.removeAll(area.bannedPokemon);
-                        }
-                        if (pickablePokemon.isEmpty()) {
-                            throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
-                        }
-                    }
-                }
-
-                //step 3: Choose a Pokemon from the pickable list
+                // Choose a Pokemon from the pool
                 Pokemon picked;
                 if(usePowerLevels) {
-                    picked = pickWildPowerLvlReplacement(pickablePokemon, enc.pokemon, Math.min(5, pickablePokemon.size() / 4),
-                            false, null, 100);
+                    picked = pickWildPowerLvlReplacement(availablePool, enc.pokemon,
+                            Math.min(5, availablePool.size() / 4), false, 100);
                 } else {
-                    int pickedNum = this.random.nextInt(pickablePokemon.size());
-                    picked = pickablePokemon.get(pickedNum);
+                    picked = availablePool.randomPokemon(this.random);
                 }
 
-                //step 4: assign to encounter; remove from pickable if using catchEmAll
+                // assign to encounter; remove from pickable if using catchEmAll
                 enc.pokemon = picked;
                 setFormeForEncounter(enc, enc.pokemon);
                 if(catchEmAll) {
-                    pickablePokemon.remove(picked);
-                    if(keepPrimary || typeThemed) {
-                        typeListMap.get(picked.primaryType).remove(picked);
-                        if(picked.secondaryType != null) {
-                            typeListMap.get(picked.secondaryType).remove(picked);
-                        }
-                    } else {
-                        allPokes.remove(picked);
-                    }
+                    activeWildPool.remove(picked);
+                    //availablePool doesn't matter, as it'll be regenerated with the next Pokemon anyway.
                 }
 
                 crashThreshold = computeDexNavCrashThreshold(encountersInZone);
@@ -1724,6 +1627,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         return canPick.randomPokemon(this.random);
     }
 
+    /**
+     * Checks if there is an encounter in the given area that uses the same pokemon as
+     * the given encounter, other than the given encounter.
+     * @param enc The encounter to check against.
+     * @param area The area to check for encounters.
+     * @return True if another encounter uses the same Pokemon, false otherwise.
+     */
     private boolean doesAnotherEncounterWithSamePokemonExistInArea(Encounter enc, EncounterSet area) {
         for (Encounter encounterToCheck : area.encounters) {
             if (enc != encounterToCheck && enc.pokemon == encounterToCheck.pokemon) {
@@ -1733,6 +1643,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         return false;
     }
 
+    /**
+     * Combines areas to prevent the game from crashing due to too many different Pokemon
+     * after area 1-to-1 randomization.
+     * Only applies to Omega Ruby and Alpha Sapphire.
+     * @param currentEncounters The original set of areas in the ROM.
+     * @return The collapsed set of areas.
+     */
     private List<EncounterSet> collapseAreasORAS(List<EncounterSet> currentEncounters) {
         List<EncounterSet> output = new ArrayList<>();
         Map<Integer, List<EncounterSet>> zonesToEncounters = mapZonesToEncounters(currentEncounters);
@@ -1788,6 +1705,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         return output;
     }
 
+    /**
+     * Calculates the load on the DexNav.
+     * It will crash if the load is above 18.
+     * @param encountersInZone The list of all areas in the zone.
+     * @return A number representing the load on the DexNav.
+     */
     private int computeDexNavCrashThreshold(List<EncounterSet> encountersInZone) {
         int crashThreshold = 0;
         for (EncounterSet area : encountersInZone) {
@@ -1807,6 +1730,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         return crashThreshold;
     }
 
+    /**
+     * Given an encounter for a given Pokemon, sets it to a random cosmetic form,
+     * if there are multiple.
+     * @param enc The encounter to be set. WARNING: PARAMETER CHANGED.
+     * @param pk The Pokemon in the encounter.
+     */
     private void setFormeForEncounter(Encounter enc, Pokemon pk) {
         boolean checkCosmetics = true;
         enc.formeNumber = 0;
