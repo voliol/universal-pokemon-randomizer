@@ -600,7 +600,7 @@ public class PokemonSet implements Set<Pokemon> {
             } else {
                 //check if secondary is also a theme,
                 //because Normal is less significant than, say, Flying.
-                if(typeMap.get(secondary).size() == this.size()) {
+                if(secondary != null && typeMap.get(secondary).size() == this.size()) {
                     //secondary IS a theme!
                     return secondary;
                 } else {
@@ -609,7 +609,7 @@ public class PokemonSet implements Set<Pokemon> {
             }
         }
         //primary wasn't a theme. is secondary?
-        if(typeMap.get(secondary).size() == this.size()) {
+        if(secondary != null && typeMap.get(secondary).size() == this.size()) {
             //secondary IS a theme!
             return secondary;
         } else {

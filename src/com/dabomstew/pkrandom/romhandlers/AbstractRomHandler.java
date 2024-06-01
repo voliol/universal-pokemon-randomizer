@@ -719,10 +719,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
-        boolean noTyping = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.NONE;
-        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
+        boolean randomThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
-        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES
+                || keepPrimary;
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
 
         int levelModifier = getWildLevelModifier(settings);
@@ -754,7 +754,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Type areaTheme;
             if(keepThemes) {
                 areaTheme = pokemonInArea(area).findOriginalSharedType();
-            } else if (typeThemed) {
+            } else if (randomThemes) {
                 areaTheme = generateTypeForArea(activeWildSet, fullWildSet, 1);
             } else {
                 areaTheme = null;
@@ -793,7 +793,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 //find type for keepPrimary
                 PokemonSet finalPokemonPool;
-                if(keepPrimary) {
+                if(keepPrimary && areaTheme == null) {
                     Type typeToChoose = enc.pokemon.originalPrimaryType;
                     finalPokemonPool = availablePokemon.getPokemonOfType(typeToChoose);
 
@@ -870,10 +870,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void area1to1EncountersImpl(List<EncounterSet> currentEncounters, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
-        boolean noTyping = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.NONE;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
-        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
-        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
+        boolean randomThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES
+                || keepPrimary;
 
         int levelModifier = getWildLevelModifier(settings);
 
@@ -899,7 +899,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Type areaTheme;
             if(keepThemes) {
                 areaTheme = inArea.findOriginalSharedType();
-            } else if (typeThemed) {
+            } else if (randomThemes) {
                 areaTheme = this.generateTypeForArea(activeWildSet, fullWildSet, inArea.size());
             } else {
                 areaTheme = null;
@@ -937,7 +937,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 //find type for keepPrimary
                 PokemonSet finalPokemonPool;
-                if(keepPrimary) {
+                if(keepPrimary && areaTheme == null) {
                     Type typeToChoose = areaPk.originalPrimaryType;
                     finalPokemonPool = availablePokemon.getPokemonOfType(typeToChoose);
 
@@ -1002,7 +1002,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
-        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES
+                || keepPrimary;
 
         int levelModifier = getWildLevelModifier(settings);
 
@@ -1185,9 +1186,11 @@ public abstract class AbstractRomHandler implements RomHandler {
     private void enhanceRandomEncountersORAS(List<EncounterSet> collapsedEncounters, Settings settings) {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
-        boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
-        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
+        boolean randomThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES
+                || keepPrimary;
+
 
         //get Pokemon pools
         PokemonSet fullWildPool = getWildPokemonPool(settings);
@@ -1219,15 +1222,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (area.displayName.contains("Rock Smash")) {
 
                     Type areaTheme = null;
-                    if(typeThemed || keepThemes) {
+                    if(randomThemes || keepThemes) {
                         // try to use the theme already established
                         areaTheme = pokemonInArea(area).findSharedType();
 
-                        if(areaTheme == null || fullWildPool.getCountOfType(areaTheme) == 0) {
+                        if(randomThemes && (areaTheme == null || fullWildPool.getCountOfType(areaTheme) == 0)) {
+                            //bad theme - get a new one
                             generateTypeForArea(activeWildPool, fullWildPool, 1);
+                        } else if (keepThemes && fullWildPool.getCountOfType(areaTheme) == 0) {
+                            //can't find (or use) the theme - just drop it.
+                            areaTheme = null;
                         }
-                        // this was previously area.encounters.size(),
-                        // but there's no reason we can't have repeats.
                     }
 
                     // get available Pokemon
@@ -1261,7 +1266,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                         // get type-narrowed list for keep primary
                         PokemonSet finalPokemonPool;
-                        if(keepPrimary) {
+                        if(keepPrimary && areaTheme == null) {
                             Type typeToChoose = enc.pokemon.originalPrimaryType;
                             finalPokemonPool = availablePool.getPokemonOfType(typeToChoose);
 
@@ -1309,13 +1314,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Now, randomize non-Rock Smash Pokemon until we hit the threshold for DexNav
             int crashThreshold = computeDexNavCrashThreshold(encountersInZone);
-            while (crashThreshold < 18 && areasAndEncountersToRandomize.size() > 0) {
+            while (crashThreshold < 18 && !areasAndEncountersToRandomize.isEmpty()) {
 
-                // Pull a random encounter from the list (...I think)
-                // Does this an encounter at a time so the randomized encounters will be (somewhat) distributed
+                // find a random area from the zone
                 Set<Integer> areaIndices = areasAndEncountersToRandomize.keySet();
                 int areaIndex = areaIndices.stream().skip(this.random.nextInt(areaIndices.size())).findFirst().orElse(-1);
                 List<Integer> encounterIndices = areasAndEncountersToRandomize.get(areaIndex);
+
+                //then, a random encounter from the area
                 int indexInListOfEncounterIndices = this.random.nextInt(encounterIndices.size());
                 int randomEncounterIndex = encounterIndices.get(indexInListOfEncounterIndices);
                 EncounterSet area = nonRockSmashAreas.get(areaIndex);
@@ -1323,19 +1329,27 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 if (catchEmAll && !doesAnotherEncounterWithSamePokemonExistInArea(enc, area)) {
                     // we want to keep at least one of each encounter previously chosen
+                    encounterIndices.remove(indexInListOfEncounterIndices);
+                    if (encounterIndices.size() == 0) {
+                        areasAndEncountersToRandomize.remove(areaIndex);
+                    }
                     continue;
                 }
 
                 Type typeToChoose = null;
-                if(typeThemed || keepThemes) {
+                if(randomThemes || keepThemes) {
                     // try to use the theme already established
                     typeToChoose = pokemonInArea(area).findSharedType();
 
-                    if(typeToChoose == null || fullWildPool.getCountOfType(typeToChoose) == 0) {
+                    if(randomThemes && (typeToChoose == null || fullWildPool.getCountOfType(typeToChoose) == 0)) {
+                        //no theme or bad theme - get a new one
                         generateTypeForArea(activeWildPool, fullWildPool, 1);
+                    } else if (keepThemes && fullWildPool.getCountOfType(typeToChoose) == 0) {
+                        //can't use the theme - better to drop it than make one up.
+                        typeToChoose = null;
                     }
-                    //we DEFINITELY only need one in this context
-                } else if (keepPrimary) {
+                }
+                if (keepPrimary && typeToChoose == null) {
                     typeToChoose = enc.pokemon.originalPrimaryType;
                 }
 
