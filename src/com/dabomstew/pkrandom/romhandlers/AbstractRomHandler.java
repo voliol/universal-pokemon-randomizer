@@ -1254,7 +1254,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         Pokemon picked;
                         if(usePowerLevels) {
                             picked = pickWildPowerLvlReplacement(finalPokemonPool, enc.pokemon, Math.min(5, finalPokemonPool.size() / 4),
-                                    false, null, 100);
+                                    false, 100);
                         } else {
                             picked = finalPokemonPool.randomPokemon(this.random);
                         }
