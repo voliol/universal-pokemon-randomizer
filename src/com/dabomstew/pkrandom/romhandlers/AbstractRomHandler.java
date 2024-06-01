@@ -1010,21 +1010,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             PokemonSet inArea = pokemonInArea(area);
             Map<Pokemon, Pokemon> areaMap = new HashMap<>();
 
-            Type areaTheme = null;
+            Type areaTheme;
             if(keepThemes) {
                 areaTheme = inArea.findOriginalSharedType();
             } else if (typeThemed) {
                 areaTheme = this.generateTypeForArea(activeWildSet, fullWildSet, inArea.size());
+            } else {
+                areaTheme = null;
             }
-            Type typeToChoose = areaTheme; //used if we need to reset the pickable list
-            //(Actually, we could just use areaTheme for this now, but we'll want a different variable later)
 
-            // generate pickable list (for all algorithms except keepPrimary,
-            // as it has a different pool per-Pokemon)
-            PokemonSet pickablePokemon = null;
-            if(!keepPrimary) {
-                pickablePokemon = getAvailablePokemonForArea(area, activeWildSet, areaTheme);
-            }
+            // generate pickable list
+            PokemonSet availablePokemon = getAvailablePokemonForArea(area, activeWildSet, areaTheme);
 
             //iterate over Pokemon in area to generate map
             for (Pokemon areaPk : inArea) {
@@ -1034,44 +1030,55 @@ public abstract class AbstractRomHandler implements RomHandler {
                     continue;
                 }
 
-                //generate pickable list for keepPrimary
-                if(keepPrimary) {
-                    typeToChoose = areaPk.originalPrimaryType;
-                    pickablePokemon = getAvailablePokemonForArea(area, activeWildSet, typeToChoose, areaMap.values());
-                }
-
-                //handle empty pickable lists
-                if(pickablePokemon.isEmpty()) {
-
+                //handle empty available list
+                if(availablePokemon.isEmpty()) {
                     //reset if fully empty
                     if(activeWildSet.isEmpty()) {
-                        activeWildSet = fullWildSet;
+                        activeWildSet = new PokemonSet(fullWildSet);
                     }
 
-                    pickablePokemon = getAvailablePokemonForArea(area, fullWildSet, typeToChoose, areaMap.values());
+                    availablePokemon = getAvailablePokemonForArea(area, fullWildSet, areaTheme, areaMap.values());
 
-                    if(pickablePokemon.isEmpty()) {
+                    if(availablePokemon.isEmpty()) {
                         String message = "Insufficient wild Pokemon";
-                        if(typeToChoose != null) {
-                            message += " of type " + typeToChoose;
+                        if(areaTheme != null) {
+                            message += " of type " + areaTheme;
                         }
                         message += " available!";
                         throw new RandomizationException(message);
                     }
                 }
 
+                //find type for keepPrimary
+                PokemonSet finalPokemonPool;
+                if(keepPrimary) {
+                    Type typeToChoose = areaPk.originalPrimaryType;
+                    finalPokemonPool = availablePokemon.getPokemonOfType(typeToChoose);
+
+                    //pull from broader pool if there's none of the right type in the narrow pool
+                    if (finalPokemonPool.isEmpty()) {
+                        finalPokemonPool = getAvailablePokemonForArea(area, fullWildSet, typeToChoose);
+                        if (finalPokemonPool.isEmpty()) {
+                            throw new RandomizationException("Unable to replace a wild Pokemon of type "
+                                    + typeToChoose + "!");
+                        }
+                    }
+                } else {
+                    finalPokemonPool = availablePokemon;
+                }
+
                 //Choose a Pokemon from the pickable list
                 Pokemon picked;
                 if(usePowerLevels) {
-                    picked = pickWildPowerLvlReplacement(pickablePokemon, areaPk, Math.min(5, pickablePokemon.size() / 4),
+                    picked = pickWildPowerLvlReplacement(finalPokemonPool, areaPk, Math.min(5, finalPokemonPool.size() / 4),
                             false, 100);
                 } else {
-                    picked = pickablePokemon.randomPokemon(random);
+                    picked = finalPokemonPool.randomPokemon(random);
                 }
 
                 //add to map & remove from pickable
                 areaMap.put(areaPk, picked);
-                pickablePokemon.remove(picked);
+                finalPokemonPool.remove(picked);
                 if(catchEmAll) {
                     activeWildSet.remove(picked);
                 }
@@ -1693,19 +1700,19 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     /**
      * Chooses a random type for this area.
-     * Tries to ensure there are at least areaSize Pokemon of the chosen type in the primary set;
+     * Tries to ensure there are at least minimumPokemon Pokemon of the chosen type in the primary set;
      * if no types fulfill that condition, instead ensures it for the backup set.
      * In this case, prefers types that have at least one Pokemon in the primary set
      * over those that do not.
      * Throws a RandomizationException if the backup set does not have at least one type with
-     * at least areaSize Pokemon.
+     * at least minimumPokemon Pokemon.
      * @param primarySet The first set to attempt to ensure sufficient Pokemon from.
      * @param backupSet The set to use for ensuring if no type has sufficient Pokemon in the primary set.
-     * @param areaSize The number of Pokemon to ensure are present.
-     * @return A Type with at least areaSize Pokemon in it in the backup set.
+     * @param minimumPokemon The number of Pokemon to ensure are present.
+     * @return A Type with at least the given minimum number of Pokemon in it in the backup set.
      */
-    private Type generateTypeForArea(PokemonSet primarySet, PokemonSet backupSet, int areaSize) {
-        Type chosenType = generateTypeForArea(primarySet, areaSize);
+    private Type generateTypeForArea(PokemonSet primarySet, PokemonSet backupSet, int minimumPokemon) {
+        Type chosenType = generateTypeForArea(primarySet, minimumPokemon);
         if(chosenType != null) {
             return chosenType;
         }
@@ -1714,7 +1721,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Type> types = this.typesInGame();
         Collections.shuffle(types, random);
         for(Type type : types) {
-            if(backupSet.getCountOfType(type) >= areaSize) {
+            if(backupSet.getCountOfType(type) >= minimumPokemon) {
                 if(primarySet.getCountOfType(type) != 0) {
                     return type;
                 } else {
@@ -1725,7 +1732,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         if(chosenType == null) {
-            throw new RandomizationException("No type had enough Pokemon (" + areaSize + ") to theme area!");
+            throw new RandomizationException("No type had enough Pokemon (" + minimumPokemon + ") to theme area!");
         } else {
             return chosenType;
         }
