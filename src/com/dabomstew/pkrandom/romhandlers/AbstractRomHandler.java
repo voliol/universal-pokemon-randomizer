@@ -719,12 +719,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
         boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
-        boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
-        int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
-        boolean allowAltFormes = settings.isAllowWildAltFormes();
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-        boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
+
+        int levelModifier = getWildLevelModifier(settings);
 
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -736,7 +733,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             return;
         }
 
-        // New: randomize the order encounter sets are randomized in.
+        // Randomize the order encounter sets are randomized in.
         // Leads to less predictable results for various modifiers.
         // Need to keep the original ordering around for saving though.
         List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
@@ -762,7 +759,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             //generate available pool
             PokemonSet availablePokemon = getAvailablePokemonForArea(area, activeWildSet, areaTheme);
 
-            //step 5: iterate over encounters
+            //iterate over encounters
             for (Encounter enc : area.encounters) {
                 // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
                 // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
@@ -832,11 +829,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 // apply level scaling if needed
-                adjustEncounterLevel(enc, settings);
+                adjustEncounterLevel(enc, levelModifier);
             }
         }
 
-        //assign encounters to ROM
+        //assign randomized encounters to ROM
         setEncounters(useTimeOfDay, currentEncounters);
     }
 
@@ -864,7 +861,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean typeThemed = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS;
         boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
 
-
+        int levelModifier = getWildLevelModifier(settings);
 
         // Randomize the order encounter sets are randomized in.
         // Leads to less predictable results for various modifiers.
@@ -964,7 +961,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             for (Encounter enc : area.encounters) {
 
                 //apply level scaling if needed
-                adjustEncounterLevel(enc, settings);
+                adjustEncounterLevel(enc, levelModifier);
 
                 // In Catch 'Em All mode, don't randomize encounters for Pokemon that are banned for
                 // wild encounters. Otherwise, it may be impossible to obtain this Pokemon unless it
@@ -1189,15 +1186,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void onlyChangeWildLevels(Settings settings) {
-        int levelModifier = settings.getWildLevelModifier();
+        int levelModifier = getWildLevelModifier(settings);
 
         List<EncounterSet> currentEncounters = this.getEncounters(true);
 
         if (levelModifier != 0) {
             for (EncounterSet area : currentEncounters) {
                 for (Encounter enc : area.encounters) {
-                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
-                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+                    adjustEncounterLevel(enc, levelModifier);
                 }
             }
             setEncounters(true, currentEncounters);
@@ -1710,13 +1706,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     /**
-     * Adjusts the levels of an encounter as appropriate given the current settings.
-     * @param enc The encounter to adjust the levels of. WARNING: PARAMETER MODIFIED.
+     * Extracts the wild pokemon level modifier from the current settings.
      * @param settings The current settings.
+     * @return The level modifier for wild Pokemon.
      */
-    private void adjustEncounterLevel(Encounter enc, Settings settings) {
-        int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
+    private int getWildLevelModifier(Settings settings) {
+        return settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
+    }
 
+    /**
+     * Adjusts the levels of an encounter according to the modifier given.
+     * @param enc The encounter to adjust the levels of. WARNING: PARAMETER MODIFIED.
+     * @param levelModifier The percentage to increase the levels of the encounter.
+     */
+    private void adjustEncounterLevel(Encounter enc, int levelModifier) {
         if (levelModifier != 0) {
             enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
             enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
