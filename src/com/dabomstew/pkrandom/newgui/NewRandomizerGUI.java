@@ -3667,14 +3667,6 @@ public class NewRandomizerGUI {
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
         }
 
-        if (wpARCatchEmAllModeRadioButton.isSelected()) {
-            wpTRNoneRadioButton.setSelected(true);
-            wpTRNoneRadioButton.setEnabled(false);
-            wpTRKeepPrimaryRadioButton.setEnabled(false);
-            wpTRThemedAreasRadioButton.setEnabled(false);
-            wpTRKeepThemesRadioButton.setEnabled(false);
-        }
-
         if (wpUnchangedRadioButton.isSelected()) {
             wpUseTimeBasedEncountersCheckBox.setEnabled(false);
             wpUseTimeBasedEncountersCheckBox.setSelected(false);
