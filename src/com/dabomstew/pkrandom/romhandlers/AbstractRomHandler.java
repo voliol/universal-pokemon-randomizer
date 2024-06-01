@@ -1005,117 +1005,135 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         int levelModifier = getWildLevelModifier(settings);
 
-        // Randomize the order encounter sets are randomized in.
-        // Leads to less predictable results for various modifiers.
-        // Need to keep the original ordering around for saving though.
+        //order doesn't matter, here, since we're not performing any randomization yet.
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
-        List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
-        Collections.shuffle(scrambledEncounters, this.random);
+        //List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
+        //Collections.shuffle(scrambledEncounters, this.random);
+
+        /**
+         * A class which stores some information about the areas a Pokemon was found in,
+         * in order to allow us to use this information later.
+         */
+        class RandomizationInformation {
+            Set<Type> possibleThemes; //For later use.
+            PokemonSet bannedPokemon;
+            Pokemon pokemon;
+
+            RandomizationInformation(Pokemon pk, Collection<Pokemon> banned) {
+                possibleThemes = EnumSet.noneOf(Type.class);
+                bannedPokemon = new PokemonSet(banned);
+                pokemon = pk;
+            }
+
+            /**
+             * Gets the type of this Pokemon's area theming.
+             * If there are two themes, it will default to the primary type.
+             * If there are no themes, it will default to the primary only if defaultToPrimary is true;
+             * otherwise, it will default to null.
+             * @param defaultToPrimary Whether the type should default to the Pokemon's primary type
+             *                         if there are no themes.
+             * @return The type that should be used, or null for any type.
+             */
+            Type getType(boolean defaultToPrimary) {
+                int themeCount = possibleThemes.size();
+                if(themeCount == 0) {
+                    if(defaultToPrimary) {
+                        return pokemon.originalPrimaryType;
+                    } else {
+                        return null;
+                    }
+                } else if(themeCount == 1) {
+                    return possibleThemes.iterator().next();
+                } else if(themeCount == 2) {
+                    return pokemon.originalPrimaryType;
+                } else {
+                    throw new IllegalStateException("Too many themes for one Pokemon!");
+                }
+            }
+        }
 
         // Get the pools of allowed and banned wild Pokemon.
         PokemonSet fullWildPool = getWildPokemonPool(settings);
         PokemonSet activeWildPool = new PokemonSet(fullWildPool);
         PokemonSet bannedSet = getWildPokemonBannedSet(settings);
 
-        // Initialize map
+        // Initialize maps
+        Map<Pokemon, RandomizationInformation> infoMap = new HashMap<>();
         Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
-        // Iterate over areas
-        for (EncounterSet area : scrambledEncounters) {
-            Set<Pokemon> inArea = pokemonInArea(area);
+        //Iterate over areas to obtain list of source Pokemon
+        for (EncounterSet area : currentEncounters) {
+            PokemonSet inArea = pokemonInArea(area);
+            //area theme determination goes here.
 
-            //generate available set
-            PokemonSet availablePool = getAvailablePokemonForArea(area, activeWildPool, null);
-
-            //iterate over Pokemon in area to add to map
-            for (Pokemon areaPk : inArea) {
-                if (translateMap.containsKey(areaPk)) {
-                    //this pokemon already has a map entry
-                    continue;
-                }
-                if (bannedSet.contains(areaPk)) {
-                    //banned pokemon should be mapped to themselves
-                    //(that's confusingly named, btw.)
-                    translateMap.put(areaPk, areaPk);
+            for (Pokemon areaPK : inArea) {
+                if (bannedSet.contains(areaPK)) {
+                    //banned Pokemon should be mapped to themselves
+                    translateMap.put(areaPK, areaPK);
                     continue;
                 }
 
-                //check for empty pool
-                if(availablePool.isEmpty()) {
-                    if(activeWildPool.isEmpty()) {
-                        activeWildPool = new PokemonSet(fullWildPool);
-                    }
-
-                    availablePool = getAvailablePokemonForArea(area, fullWildPool, null);
-
-                    if(availablePool.isEmpty()) {
-                        throw new RandomizationException("No wild Pokemon found for area " + area.displayName + "!");
-                    }
-                }
-
-                //get typed pool for keepPrimary
-                PokemonSet finalPokemonPool;
-                if(keepPrimary) {
-                    Type typeToChoose = areaPk.originalPrimaryType;
-                    finalPokemonPool = availablePool.getPokemonOfType(typeToChoose);
-
-                    //pull from broader pool if there's none of the right type in the narrow pool
-                    if (finalPokemonPool.isEmpty()) {
-                        finalPokemonPool = getAvailablePokemonForArea(area, fullWildPool, typeToChoose);
-                        if (finalPokemonPool.isEmpty()) {
-                            throw new RandomizationException("Unable to replace a wild Pokemon of type "
-                                    + typeToChoose + "!");
-                        }
-                    }
+                if (infoMap.containsKey(areaPK)) {
+                    RandomizationInformation info = infoMap.get(areaPK);
+                    info.bannedPokemon.addAll(area.bannedPokemon);
                 } else {
-                    finalPokemonPool = availablePool;
+                    RandomizationInformation info = new RandomizationInformation(areaPK, area.bannedPokemon);
+                    infoMap.put(areaPK, info);
                 }
-
-                //Choose a Pokemon from the pickable list
-                //a minor change has occurred here: neither attempts to prevent assigning the same pokemon
-                //i feel that the chance is low enough it's not worth worrying about
-                //and that one pokemon the same is not the end of the world.
-                //however it IS a change so it probably should be returned to its previous state if pulling this branch.
-                //(Might make it an option.)
-                Pokemon picked;
-                if(usePowerLevels) {
-                    picked = pickWildPowerLvlReplacement(finalPokemonPool, areaPk, Math.min(5, finalPokemonPool.size() / 4),
-                            false, 100);
-                } else {
-                    picked = finalPokemonPool.randomPokemon(this.random);
-                }
-
-                //add to map & remove from pickable - both temporary and permanent versions
-                translateMap.put(areaPk, picked);
-                availablePool.remove(picked);
-                activeWildPool.remove(picked);
-
             }
+        }
+
+        //shuffle list of Pokemon with info in preparation for randomization
+        List<RandomizationInformation> infoList = new ArrayList<>(infoMap.values());
+        Collections.shuffle(infoList, this.random);
+
+        //Iterate over Pokemon (with info attached)
+        for (RandomizationInformation info : infoList) {
+            //generate available set
+            PokemonSet availablePool = getAvailablePokemon(activeWildPool, info.getType(keepPrimary), info.bannedPokemon);
+
+            //check for empty pool
+            if(availablePool.isEmpty()) {
+                if(activeWildPool.isEmpty()) {
+                    activeWildPool = new PokemonSet(fullWildPool);
+                }
+
+                availablePool = getAvailablePokemon(fullWildPool, info.getType(keepPrimary), info.bannedPokemon);
+
+                if(availablePool.isEmpty()) {
+                    throw new RandomizationException("No wild Pokemon found to replace " + info.pokemon + "!");
+                }
+            }
+
+            Pokemon picked;
+            if(usePowerLevels) {
+                picked = pickWildPowerLvlReplacement(availablePool, info.pokemon, Math.min(5, availablePool.size() / 4),
+                        false, 100);
+            } else {
+                picked = availablePool.randomPokemon(this.random);
+            }
+
+            //add to map & remove from pickable
+            translateMap.put(info.pokemon, picked);
+            activeWildPool.remove(picked);
+        }
+
+        // Iterate over areas again
+        for (EncounterSet area : currentEncounters) {
 
             //assign encounters using map
             for (Encounter enc : area.encounters) {
-                // Apply the map
-                enc.pokemon = translateMap.get(enc.pokemon);
-                if (area.bannedPokemon.contains(enc.pokemon)) {
-                    // can't use the mapped pokemon, so switch in another valid pokemon.
-                    Type typeToChoose = null;
-                    if(keepPrimary) {
-                        typeToChoose = enc.pokemon.originalPrimaryType;
-                    }
-                    PokemonSet replacementPool = getAvailablePokemonForArea(area, fullWildPool, typeToChoose);
-                    if (replacementPool.size() == 0) {
-                        throw new RandomizationException("ERROR: Couldn't replace a wild Pokemon!");
-                    }
+                Pokemon replacement = translateMap.get(enc.pokemon);
 
-                    if (usePowerLevels) {
-                        enc.pokemon = pickWildPowerLvlReplacement(replacementPool, enc.pokemon,
-                                Math.min(5, replacementPool.size() / 4), false, 100);
-                    } else {
-                        enc.pokemon = replacementPool.randomPokemon(this.random);
-                    }
+                if (area.bannedPokemon.contains(replacement)) {
+                    // This should never happen, since we already checked all the areas' banned Pokemon.
+                    throw new RuntimeException("Chose a banned Pokemon " + replacement +
+                            " as replacement for " + enc.pokemon + "?! (Shouldn't be possible)");
                 }
-                setFormeForEncounter(enc, enc.pokemon);
 
+                // Finalize the encounter
+                enc.pokemon = translateMap.get(enc.pokemon);
+                setFormeForEncounter(enc, enc.pokemon);
                 adjustEncounterLevel(enc, levelModifier);
             }
         }
@@ -1477,6 +1495,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * attempts to determine what the type theme was for a partially generated area.
      * Can probably use PokemonSet.findSharedType instead.
+     * TODO: ensure that works correctly
      * @param area
      * @return
      */
@@ -1545,6 +1564,27 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         availablePokemon.removeAll(area.bannedPokemon);
+
+        return availablePokemon;
+    }
+
+    /**
+     * Narrows the set of available Pokemon down to a set that fulfills the given conditions.
+     * @param pokemonPool The PokemonSet to choose from.
+     * @param type The type of Pokemon to include, or null for all types.
+     * @param banned A collection of Pokemon to not include.
+     * @return A PokemonSet narrowed down as specified.
+     */
+    private PokemonSet getAvailablePokemon(PokemonSet pokemonPool, Type type, Set<Pokemon> banned) {
+        PokemonSet availablePokemon;
+
+        if(type == null) {
+            availablePokemon = new PokemonSet(pokemonPool);
+        } else {
+            availablePokemon = pokemonPool.getPokemonOfType(type);
+        }
+
+        availablePokemon.removeAll(banned);
 
         return availablePokemon;
     }
