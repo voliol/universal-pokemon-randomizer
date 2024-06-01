@@ -47,7 +47,12 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<Integer> realCosmeticFormNumbers = new ArrayList<>();
 
     public Type primaryType, secondaryType;
+
+    //best practices says these should be private with a public get,
+    //but I can't be arsed.
+    //(If it was C#, I would, but...)
     public Type originalPrimaryType, originalSecondaryType;
+    public PokemonSet originalEvolvedForms, originalPreEvolvedForms;
 
     public int hp, attack, defense, spatk, spdef, speed, special;
 
@@ -220,6 +225,63 @@ public class Pokemon implements Comparable<Pokemon> {
             base = base.baseForme;
         }
         return base.number;
+    }
+
+    /**
+     * Gets all Pokemon that this Pokemon can evolve into.
+     * @return a PokemonSet containing all possible evolved forms of this Pokemon.
+     */
+    public PokemonSet getAllEvolvedPokemon() {
+        PokemonSet evolvedPokemon = new PokemonSet();
+        for(Evolution evo : evolutionsFrom) {
+            evolvedPokemon.add(evo.to);
+        }
+        return evolvedPokemon;
+    }
+
+    /**
+     * Gets all Pokemon that can evolve into this Pokemon.
+     * @return a PokemonSet containing all pre-evolved forms of this Pokemon.
+     */
+    public PokemonSet getAllPreEvolvedPokemon() {
+        PokemonSet evolvedPokemon = new PokemonSet();
+        for(Evolution evo : evolutionsTo) {
+            evolvedPokemon.add(evo.from);
+        }
+        return evolvedPokemon;
+    }
+
+    /**
+     * Gets all Pokemon that this Pokemon is related to by evolution.
+     * @return a PokemonSet containing all Pokemon this Pokemon is related to (including itself)
+     */
+    public PokemonSet getAllRelatedPokemon() {
+        PokemonSet family = new PokemonSet();
+        family.addFamily(this);
+        return family;
+    }
+
+    /**
+     * Gets all Pokemon that this Pokemon was related to by evolution before randomization.
+     * @return a PokemonSet containing all Pokemon this Pokemon was related to (including itself)
+     */
+    public PokemonSet getAllOriginallyRelatedPokemon() {
+        PokemonSet family = new PokemonSet();
+        family.addOriginalFamily(this);
+        return family;
+    }
+
+    /**
+     * Saves certain pieces of data that can be randomized, but that
+     * we want to know the original version of for later randomization.
+     * Currently: Types, evolutions.
+     * Must be called before randomizing any of this data.
+     */
+    public void saveOriginalData() {
+        originalPrimaryType = primaryType;
+        originalSecondaryType = secondaryType;
+        originalEvolvedForms = getAllEvolvedPokemon();
+        originalPreEvolvedForms = getAllPreEvolvedPokemon();
     }
 
     public void copyBaseFormeBaseStats(Pokemon baseForme) {

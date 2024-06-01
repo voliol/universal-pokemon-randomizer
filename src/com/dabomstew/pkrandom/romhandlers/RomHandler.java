@@ -26,7 +26,6 @@ package com.dabomstew.pkrandom.romhandlers;
 /*----------------------------------------------------------------------------*/
 
 import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
@@ -226,7 +225,7 @@ public interface RomHandler {
 
     boolean hasWildAltFormes();
 
-    List<Pokemon> bannedForWildEncounters();
+    PokemonSet bannedForWildEncounters();
 
     void randomizeWildHeldItems(Settings settings);
 

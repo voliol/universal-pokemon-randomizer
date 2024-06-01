@@ -1631,9 +1631,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public List<Pokemon> bannedForWildEncounters() {
+    public PokemonSet bannedForWildEncounters() {
         // Ban Unown because they don't show up unless you complete a puzzle in the Ruins of Alph.
-        return new ArrayList<>(Collections.singletonList(pokes[Species.unown]));
+        return new PokemonSet(Collections.singletonList(pokes[Species.unown]));
     }
 
     @Override
