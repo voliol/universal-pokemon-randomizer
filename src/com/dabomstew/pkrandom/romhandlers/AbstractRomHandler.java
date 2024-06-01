@@ -1002,13 +1002,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
         boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES;
 
         int levelModifier = getWildLevelModifier(settings);
-
-        //order doesn't matter, here, since we're not performing any randomization yet.
-        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
-        //List<EncounterSet> scrambledEncounters = new ArrayList<>(currentEncounters);
-        //Collections.shuffle(scrambledEncounters, this.random);
 
         /**
          * A class which stores some information about the areas a Pokemon was found in,
@@ -1061,24 +1057,37 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<Pokemon, RandomizationInformation> infoMap = new HashMap<>();
         Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
+        //order doesn't matter, here, since we're not randomizing by area.
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+
         //Iterate over areas to obtain list of source Pokemon
         for (EncounterSet area : currentEncounters) {
             PokemonSet inArea = pokemonInArea(area);
-            //area theme determination goes here.
+            Type areaTheme = null;
+            if(keepThemes) {
+                areaTheme = inArea.findOriginalSharedType();
+            }
 
             for (Pokemon areaPK : inArea) {
                 if (bannedSet.contains(areaPK)) {
-                    //banned Pokemon should be mapped to themselves
+                    //banned Pokemon are not randomized, but mapped to themselves.
                     translateMap.put(areaPK, areaPK);
                     continue;
                 }
 
+                //get or create the info
+                RandomizationInformation info;
                 if (infoMap.containsKey(areaPK)) {
-                    RandomizationInformation info = infoMap.get(areaPK);
+                    info = infoMap.get(areaPK);
                     info.bannedPokemon.addAll(area.bannedPokemon);
                 } else {
-                    RandomizationInformation info = new RandomizationInformation(areaPK, area.bannedPokemon);
+                    info = new RandomizationInformation(areaPK, area.bannedPokemon);
                     infoMap.put(areaPK, info);
+                }
+
+                //add theme if applicable
+                if(areaTheme != null) {
+                    info.possibleThemes.add(areaTheme);
                 }
             }
         }

@@ -3642,7 +3642,7 @@ public class NewRandomizerGUI {
             if (wpARCatchEmAllModeRadioButton.isSelected()) {
                 wpARNoneRadioButton.setSelected(true);
             }
-            if(wpTRThemedAreasRadioButton.isSelected() || wpTRKeepThemesRadioButton.isSelected()) {
+            if(wpTRThemedAreasRadioButton.isSelected()) {
                 wpTRNoneRadioButton.setSelected(true);
             }
             wpARNoneRadioButton.setEnabled(true);
@@ -3651,7 +3651,7 @@ public class NewRandomizerGUI {
             wpTRNoneRadioButton.setEnabled(true);
             wpTRKeepPrimaryRadioButton.setEnabled(true);
             wpTRThemedAreasRadioButton.setEnabled(false);
-            wpTRKeepThemesRadioButton.setEnabled(false);
+            wpTRKeepThemesRadioButton.setEnabled(true);
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
         } else {
             //is set to "unchanged"
