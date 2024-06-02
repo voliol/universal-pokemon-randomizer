@@ -1949,23 +1949,6 @@ public class Gen4Constants {
             822, 837, 844 //headbutt trees - mixed
     };
 
-    public static String[] hgssPostGameEncounterNames = new String[] {
-            "Pallet Town", "Viridian City", "Pewter City", "Cerulean City", "Vermilion City", "Lavender Town",
-            "Celadon City", "Fuchsia City", "Saffron City", //Kanto cities
-            "Route 1 ", "Route 2 ", "Route 3 ", "Route 4 ", "Route 5 ",
-            "Route 6 ", "Route 7 ", "Route 8 ", "Route 9 ", "Route 10",
-            "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",
-            "Route 16", "Route 17", "Route 18", "Route 19", "Route 20",
-            "Route 21", "Route 22", "Route 23", "Route 24", "Route 25", //Kanto routes
-            "Cinnabar Island", "Cerulean Cave", "DIGLETT’s Cave", "Rock Tunnel",
-            "Seafoam Islands", "Viridian Forest", "Mt. Moon", //other Kanto locations
-            "Route 28", "Mt. Silver", //Johto but post-game
-            "Cliff Cave Rock Smash", //oddly specific
-            "Super Rod", "Swarm", "Radio", //post-game techniques
-            "Post-National Dex", //for bug-catching contest
-            "Safari Zone" //seem to be unused? unclear
-    };
-
     public static void tagTrainersDP(List<Trainer> trs) {
         // Gym Trainers
         tag(trs, "GYM1", 0xf4, 0xf5);
