@@ -1007,55 +1007,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         int levelModifier = getWildLevelModifier(settings);
 
-        /**
-         * A class which stores some information about the areas a Pokemon was found in,
-         * in order to allow us to use this information later.
-         */
-        class RandomizationInformation {
-            Set<Type> possibleThemes; //For later use.
-            PokemonSet bannedPokemon;
-            Pokemon pokemon;
-
-            RandomizationInformation(Pokemon pk, Collection<Pokemon> banned) {
-                possibleThemes = EnumSet.noneOf(Type.class);
-                bannedPokemon = new PokemonSet(banned);
-                pokemon = pk;
-            }
-
-            /**
-             * Gets the type of this Pokemon's area theming.
-             * If there are two themes, it will default to the primary type.
-             * If there are no themes, it will default to the primary only if defaultToPrimary is true;
-             * otherwise, it will default to null.
-             * @param defaultToPrimary Whether the type should default to the Pokemon's primary type
-             *                         if there are no themes.
-             * @return The type that should be used, or null for any type.
-             */
-            Type getType(boolean defaultToPrimary) {
-                int themeCount = possibleThemes.size();
-                if(themeCount == 0) {
-                    if(defaultToPrimary) {
-                        return pokemon.originalPrimaryType;
-                    } else {
-                        return null;
-                    }
-                } else if(themeCount == 1) {
-                    return possibleThemes.iterator().next();
-                } else if(themeCount == 2) {
-                    return pokemon.originalPrimaryType;
-                } else {
-                    throw new IllegalStateException("Too many themes for one Pokemon!");
-                }
-            }
-        }
-
         // Get the pools of allowed and banned wild Pokemon.
         PokemonSet fullWildPool = getWildPokemonPool(settings);
         PokemonSet activeWildPool = new PokemonSet(fullWildPool);
         PokemonSet bannedSet = getWildPokemonBannedSet(settings);
 
         // Initialize maps
-        Map<Pokemon, RandomizationInformation> infoMap = new HashMap<>();
+        Map<Pokemon, globalWildRandomizationInformation> infoMap = new HashMap<>();
         Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
         //order doesn't matter, here, since we're not randomizing by area.
@@ -1077,12 +1035,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 //get or create the info
-                RandomizationInformation info;
+                globalWildRandomizationInformation info;
                 if (infoMap.containsKey(areaPK)) {
                     info = infoMap.get(areaPK);
-                    info.bannedPokemon.addAll(area.bannedPokemon);
+                    info.bannedForReplacement.addAll(area.bannedPokemon);
                 } else {
-                    info = new RandomizationInformation(areaPK, area.bannedPokemon);
+                    info = new globalWildRandomizationInformation(areaPK, area.bannedPokemon);
                     infoMap.put(areaPK, info);
                 }
 
@@ -1094,13 +1052,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         //shuffle list of Pokemon with info in preparation for randomization
-        List<RandomizationInformation> infoList = new ArrayList<>(infoMap.values());
+        List<globalWildRandomizationInformation> infoList = new ArrayList<>(infoMap.values());
         Collections.shuffle(infoList, this.random);
 
         //Iterate over Pokemon (with info attached)
-        for (RandomizationInformation info : infoList) {
+        for (globalWildRandomizationInformation info : infoList) {
             //generate available set
-            PokemonSet availablePool = getAvailablePokemon(activeWildPool, info.getType(keepPrimary), info.bannedPokemon);
+            PokemonSet availablePool = getAvailablePokemon(activeWildPool, info.getType(keepPrimary), info.bannedForReplacement);
 
             //check for empty pool
             if(availablePool.isEmpty()) {
@@ -1108,7 +1066,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     activeWildPool = new PokemonSet(fullWildPool);
                 }
 
-                availablePool = getAvailablePokemon(fullWildPool, info.getType(keepPrimary), info.bannedPokemon);
+                availablePool = getAvailablePokemon(fullWildPool, info.getType(keepPrimary), info.bannedForReplacement);
 
                 if(availablePool.isEmpty()) {
                     throw new RandomizationException("No wild Pokemon found to replace " + info.pokemon + "!");
@@ -1153,11 +1111,106 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
 
-    /**
-     * Iterates over every wild Pokemon encounter in the game,
-     * increasing their levels as appropriate for the current settings.
-     * @param settings The current settings.
-     */
+    @Override
+    public void gameFamilyToFamilyEncounters(Settings settings) {
+        boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
+        boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        boolean keepPrimary = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_PRIMARY;
+        boolean keepThemes = settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES
+                || keepPrimary;
+
+        int levelModifier = getWildLevelModifier(settings);
+
+        // Get the pools of allowed and banned wild Pokemon.
+        PokemonSet fullWildPool = getWildPokemonPool(settings);
+        PokemonSet activeWildPool = new PokemonSet(fullWildPool);
+        PokemonSet bannedSet = getWildPokemonBannedSet(settings);
+
+        // Initialize maps
+        Map<Pokemon, globalWildRandomizationInformation> infoMap = new HashMap<>();
+        PokemonSet pokemonToRandomize = new PokemonSet();
+        Map<Pokemon, Pokemon> translateMap = new HashMap<>();
+
+        //order doesn't matter, here, since we're not randomizing by area.
+        List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
+
+        //Iterate over areas to obtain list of source Pokemon
+        for (EncounterSet area : currentEncounters) {
+            PokemonSet inArea = pokemonInArea(area);
+            Type areaTheme = null;
+            if(keepThemes) {
+                areaTheme = inArea.findOriginalSharedType();
+            }
+
+            for (Pokemon areaPK : inArea) {
+                if (bannedSet.contains(areaPK)) {
+                    //banned Pokemon are not randomized, but mapped to themselves.
+                    translateMap.put(areaPK, areaPK);
+                    continue;
+                }
+
+                //get or create the info
+                globalWildRandomizationInformation info;
+                if (infoMap.containsKey(areaPK)) {
+                    info = infoMap.get(areaPK);
+                    info.bannedForReplacement.addAll(area.bannedPokemon);
+                } else {
+                    info = new globalWildRandomizationInformation(areaPK, area.bannedPokemon);
+                    infoMap.put(areaPK, info);
+                }
+
+                //add to family collator
+                pokemonToRandomize.add(areaPK);
+
+                //add theme if applicable
+                if(areaTheme != null) {
+                    info.possibleThemes.add(areaTheme);
+                }
+            }
+        }
+
+        //start with most restrictive families so we don't run out
+        //first, 3-long without gap
+        randomizeEncountersFamilyToFamilyOfLength(3, false, pokemonToRandomize, activeWildPool,
+                 fullWildPool, infoMap, keepPrimary, usePowerLevels, translateMap);
+        //3 long with missing middle (unlikely, but worth putting)
+        randomizeEncountersFamilyToFamilyOfLength(3, true, pokemonToRandomize, activeWildPool,
+                fullWildPool, infoMap, keepPrimary, usePowerLevels, translateMap);
+        //2 long
+        randomizeEncountersFamilyToFamilyOfLength(2, false, pokemonToRandomize, activeWildPool,
+                fullWildPool, infoMap, keepPrimary, usePowerLevels, translateMap);
+        //1 long
+        randomizeEncountersFamilyToFamilyOfLength(1, false, pokemonToRandomize, activeWildPool,
+                fullWildPool, infoMap, keepPrimary, usePowerLevels, translateMap);
+        //and we have our full map!
+
+        // Iterate over areas again
+        for (EncounterSet area : currentEncounters) {
+
+            //assign encounters using map
+            for (Encounter enc : area.encounters) {
+                Pokemon replacement = translateMap.get(enc.pokemon);
+
+                if (area.bannedPokemon.contains(replacement)) {
+                    // This should never happen, since we already checked all the areas' banned Pokemon.
+                    throw new RuntimeException("Chose a banned Pokemon " + replacement +
+                            " as replacement for " + enc.pokemon + "?! (Shouldn't be possible)");
+                }
+
+                // Finalize the encounter
+                enc.pokemon = translateMap.get(enc.pokemon);
+                setFormeForEncounter(enc, enc.pokemon);
+                adjustEncounterLevel(enc, levelModifier);
+            }
+        }
+
+        //assign randomized encounters to ROM
+        setEncounters(useTimeOfDay, currentEncounters);
+
+    }
+
+
+
     @Override
     public void onlyChangeWildLevels(Settings settings) {
         int levelModifier = getWildLevelModifier(settings);
@@ -1610,6 +1663,177 @@ public abstract class AbstractRomHandler implements RomHandler {
         availablePokemon.removeAll(banned);
 
         return availablePokemon;
+    }
+
+    /**
+     * Narrows the given pool of Pokemon down to one that is compatible with the given Pokemon
+     * and the portion of its evolutionary family given. Uses the post-randomization evolutions
+     * of the pool, and pre-randomization evolutions of the family.
+     * @param pokemonPool The pool of Pokemon to choose from.
+     * @param match The Pokemon to make a pool for.
+     * @param family The portion of the given Pokemon's family to consider.
+     * @param infoMap A Map containing information about the compatibily of each member of the
+     *                given family.
+     * @param type The type of Pokemon to include, or null for all types.
+     * @return A PokemonSet narrowed down as specified.
+     */
+    private PokemonSet getAvailablePokemon(PokemonSet pokemonPool, Pokemon match, PokemonSet family,
+                                           Map<Pokemon, globalWildRandomizationInformation> infoMap,
+                                           Type type) {
+        PokemonSet availablePool;
+        if(type == null) {
+            availablePool = new PokemonSet(pokemonPool);
+        } else {
+            availablePool = pokemonPool.getPokemonOfType(type);
+        }
+
+        int before = family.getNumberOriginalEvoStagesBefore(match);
+        int after = family.getNumberOriginalEvoStagesAfter(match);
+        availablePool = availablePool.getAllAtFamilyPosition(before, after);
+
+        for(Pokemon pokemon : family) {
+            int relation = match.getOriginalRelation(pokemon);
+            //find every Pokemon related to
+            PokemonSet sameRelations = pokemonPool.getAllRelativesAtPositionSameBranch(availablePool, relation);
+
+            sameRelations.removeAll(infoMap.get(pokemon).bannedForReplacement);
+
+            availablePool.retainAllFamilies(sameRelations);
+        }
+
+        return availablePool;
+    }
+
+    /**
+     * A class which stores some information about the areas a Pokemon was found in,
+     * in order to allow us to use this information later.
+     */
+    private class globalWildRandomizationInformation {
+        Set<Type> possibleThemes;
+        PokemonSet bannedForReplacement;
+        Pokemon pokemon;
+
+        /**
+         * Creates a new RandomizationInformation with the given data.
+         * @param pk The Pokemon this RandomizationInformation is about.
+         * @param banned All Pokemon that are banned in at least one area this
+         *               Pokemon occurs in.
+         */
+        globalWildRandomizationInformation(Pokemon pk, Collection<Pokemon> banned) {
+            possibleThemes = EnumSet.noneOf(Type.class);
+            bannedForReplacement = new PokemonSet(banned);
+            pokemon = pk;
+        }
+
+        /**
+         * Gets the type of this Pokemon's area theming.
+         * If there are two themes, it will default to the primary type.
+         * If there are no themes, it will default to the primary only if defaultToPrimary is true;
+         * otherwise, it will default to null.
+         * @param defaultToPrimary Whether the type should default to the Pokemon's primary type
+         *                         if there are no themes.
+         * @return The type that should be used, or null for any type.
+         */
+        Type getType(boolean defaultToPrimary) {
+            int themeCount = possibleThemes.size();
+            if(themeCount == 0) {
+                if(defaultToPrimary) {
+                    return pokemon.originalPrimaryType;
+                } else {
+                    return null;
+                }
+            } else if(themeCount == 1) {
+                return possibleThemes.iterator().next();
+            } else if(themeCount == 2) {
+                return pokemon.originalPrimaryType;
+            } else {
+                throw new IllegalStateException("Too many themes for one Pokemon!");
+            }
+        }
+    }
+
+    /**
+     * Helper function for Global Family-To-Family.
+     * Given a set of Pokemon and some pools, does th actual work of randomizing all families of the
+     * specified parameters.
+     * @param length The length of the evolutionary families.
+     * @param allowGaps Whether the evolutionary families should allow gaps.
+     * @param pokemonToRandomize The set of Pokemon to randomize.  WARNING: parameter modified.
+     * @param activePool The main pool to use. WARNING: parameter modified.
+     * @param backupPool The pool to use if no matches can be found in the main pool.
+     * @param infoMap The Map containing the info about how to randomize.
+     * @param defaultToPrimary Whether the primary type should be used if no themes are provided.
+     * @param usePowerLevels Whether to use similar-strength Pokemon.
+     * @param translateMap The map to add the replacement mapping to. WARNING: Parameter modified!
+     */
+    private void randomizeEncountersFamilyToFamilyOfLength(int length, boolean allowGaps, PokemonSet pokemonToRandomize,
+                                                           PokemonSet activePool, PokemonSet backupPool,
+                                                           Map<Pokemon, globalWildRandomizationInformation> infoMap,
+                                                           boolean defaultToPrimary, boolean usePowerLevels,
+                                                           Map<Pokemon, Pokemon> translateMap) {
+
+        PokemonSet familyPool = activePool.getEvoLinesAtLeastLength(length, allowGaps);
+        PokemonSet familiesToRandomize = pokemonToRandomize.getOriginalEvoLinesAtLeastLength(length, allowGaps);
+
+        while (!familiesToRandomize.isEmpty()) {
+            Pokemon toRandomize = familiesToRandomize.randomPokemon(this.random);
+
+            PokemonSet availablePool = getAvailablePokemon(familyPool, toRandomize,
+                    familiesToRandomize.getFamily(toRandomize), infoMap,
+                    infoMap.get(toRandomize).getType(defaultToPrimary));
+
+            //check for empty pool
+            if(availablePool.isEmpty()) {
+                if(activePool.isEmpty()) {
+                    activePool.addAll(backupPool);
+                }
+
+                availablePool = getAvailablePokemon(backupPool, toRandomize,
+                        familiesToRandomize.getFamily(toRandomize), infoMap,
+                        infoMap.get(toRandomize).getType(defaultToPrimary));
+
+                if(availablePool.isEmpty()) {
+                    throw new RandomizationException("No Pokemon with suitable family found to replace " + toRandomize + "!");
+                }
+            }
+
+            Pokemon picked;
+            if(usePowerLevels) {
+                picked = pickWildPowerLvlReplacement(availablePool, toRandomize, Math.min(5, availablePool.size() / 4),
+                        false, 100);
+            } else {
+                picked = availablePool.randomPokemon(this.random);
+            }
+
+            //add to map
+            translateMap.put(toRandomize, picked);
+            //and, add the rest of the family too
+            for(Pokemon relative : familiesToRandomize.getFamily(toRandomize)) {
+                int relation = toRandomize.getRelation(relative);
+                PokemonSet replaceCandidates = backupPool.getRelativesAtPositionSameBranch(picked, relation);
+                boolean replaced = false;
+                while(!replaced && !replaceCandidates.isEmpty()) {
+                    Pokemon relativeReplacement = replaceCandidates.randomPokemon(this.random);
+                    replaceCandidates.remove(relativeReplacement);
+
+                    if(!infoMap.get(relative).bannedForReplacement.contains(relativeReplacement)) {
+                        //it works
+                        translateMap.put(relative, relativeReplacement);
+                        replaced = true;
+                    }
+                }
+
+                if(!replaced) {
+                    throw new RuntimeException("Chosen Pokemon does not have correct family. This shouldn't happen.");
+                }
+            }
+
+            familiesToRandomize.removeFamily(toRandomize);
+            familyPool.removeFamily(picked);
+            activePool.removeFamily(picked);
+
+        }
+
     }
 
     /**
