@@ -209,14 +209,42 @@ public interface RomHandler {
     // Wild Pokemon
     // ============
 
+    /**
+     * Extracts wild Pokemon encounters from the ROM.
+     * @param useTimeOfDay Whether to use time-based encounters (including seasons). If the game does
+     *                     not have time-based encounters, this parameter is ignored.
+     * @return A List of EncounterSets representing every wild Pokemon encounter in the game.
+     */
     List<EncounterSet> getEncounters(boolean useTimeOfDay);
 
+    /**
+     * Assigns the given encounters to the ROM.
+     * @param useTimeOfDay Whether to use time based encounters (including seasons). If the game does not
+     *                     have time based encounters, this parameter is ignored.
+     * @param encounters The encounters to assign to ROM. Recommended that you use a modified set of
+     *                   encounter from getEncounters().
+     * @throws java.util.NoSuchElementException if the list of encounters is not sufficiently long.
+     */
     void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
 
+    /**
+     * Randomizes wild Pokemon, adding as many different Pokemon to each area as possible.
+     * @param settings The current settings.
+     */
     void randomEncounters(Settings settings);
 
+    /**
+     * Randomizes wild Pokemon, ensuring that for each area in the game,
+     * each Pokemon originally present is replaced by exactly one new Pokemon.
+     * @param settings The current settings.
+     */
     void area1to1Encounters(Settings settings);
 
+    /**
+     * Randomizes wild Pokemon, ensuring that each Pokemon in the original game
+     * is replaced by the same random Pokemon in each area it occurs.
+     * @param settings The current settings.
+     */
     void game1to1Encounters(Settings settings);
 
     /**
@@ -226,8 +254,18 @@ public interface RomHandler {
      * @param settings The current settings.
      */
     void gameFamilyToFamilyEncounters(Settings settings);
+    
+    /**
+     * Iterates over every wild Pokemon encounter in the game,
+     * increasing their levels as appropriate for the current settings.
+     * @param settings The current settings.
+     */
     void onlyChangeWildLevels(Settings settings);
 
+    /**
+     * Whether the ROM has usable time-based (e.g. time of day) encounters or not.
+     * @return true if the ROM has these encounters, false otherwise.
+     */
     boolean hasTimeBasedEncounters();
 
     boolean hasWildAltFormes();

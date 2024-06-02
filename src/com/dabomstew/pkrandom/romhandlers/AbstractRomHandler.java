@@ -710,10 +710,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     //Wild Pokemon randomization mains:
 
-    /**
-     * Randomizes wild Pokemon, adding as many different Pokemon to each area as possible.
-     * @param settings The current settings.
-     */
     @Override
     public void randomEncounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
@@ -841,11 +837,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         setEncounters(useTimeOfDay, currentEncounters);
     }
 
-    /**
-     * Randomizes wild Pokemon, ensuring that for each area in the game,
-     * each Pokemon originally present is replaced by exactly one new Pokemon.
-     * @param settings The current settings.
-     */
     @Override
     public void area1to1Encounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
@@ -992,11 +983,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
 
-    /**
-     * Randomizes wild Pokemon, ensuring that each Pokemon in the original game
-     * is replaced by the same random Pokemon in each area it occurs.
-     * @param settings The current settings.
-     */
     @Override
     public void game1to1Encounters(Settings settings) {
         boolean useTimeOfDay = settings.isUseTimeBasedEncounters();
