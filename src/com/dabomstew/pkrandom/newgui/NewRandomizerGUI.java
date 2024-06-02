@@ -2554,7 +2554,7 @@ public class NewRandomizerGUI {
         wpTRKeepThemesRadioButton.setSelected(false);
         wpUseTimeBasedEncountersCheckBox.setVisible(true);
         wpUseTimeBasedEncountersCheckBox.setEnabled(false);
-        wpUseTimeBasedEncountersCheckBox.setSelected(false);
+        wpUseTimeBasedEncountersCheckBox.setSelected(true);
         wpDontUseLegendariesCheckBox.setVisible(true);
         wpDontUseLegendariesCheckBox.setEnabled(false);
         wpDontUseLegendariesCheckBox.setSelected(false);
@@ -3016,6 +3016,7 @@ public class NewRandomizerGUI {
             wpTRNoneRadioButton.setSelected(true);
 
             wpUseTimeBasedEncountersCheckBox.setVisible(romHandler.hasTimeBasedEncounters());
+            wpUseTimeBasedEncountersCheckBox.setSelected(true);
             wpSetMinimumCatchRateCheckBox.setEnabled(true);
             wpRandomizeHeldItemsCheckBox.setEnabled(true);
             wpRandomizeHeldItemsCheckBox.setVisible(pokemonGeneration != 1);
@@ -3676,7 +3677,7 @@ public class NewRandomizerGUI {
 
         if (wpUnchangedRadioButton.isSelected()) {
             wpUseTimeBasedEncountersCheckBox.setEnabled(false);
-            wpUseTimeBasedEncountersCheckBox.setSelected(false);
+            wpUseTimeBasedEncountersCheckBox.setSelected(true);
             wpDontUseLegendariesCheckBox.setEnabled(false);
             wpDontUseLegendariesCheckBox.setSelected(false);
             wpAllowAltFormesCheckBox.setEnabled(false);
