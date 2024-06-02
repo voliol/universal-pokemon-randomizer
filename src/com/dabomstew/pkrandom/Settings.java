@@ -204,7 +204,7 @@ public class Settings {
     private boolean betterTrainerMovesets;
 
     public enum WildPokemonMod {
-        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
+        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING, FAMILY_MAPPING
     }
 
     public enum WildPokemonRestrictionMod {
@@ -438,7 +438,8 @@ public class Settings {
                 wildPokemonMod == WildPokemonMod.RANDOM,
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING,
-                false, false, false, false));
+                wildPokemonMod == WildPokemonMod.FAMILY_MAPPING,
+                false, false, false));
 
         // 16 wild pokemon (restriction)
         out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
@@ -737,7 +738,8 @@ public class Settings {
         settings.setWildPokemonMod(restoreEnum(WildPokemonMod.class, data[15], 0, // UNCHANGED
                 1, // RANDOM
                 2, // AREA_MAPPING
-                3  // GLOBAL_MAPPING
+                3, // GLOBAL_MAPPING
+                4 // FAMILY_MAPPING
         ));
         settings.setWildPokemonRestrictionMod(restoreEnum(WildPokemonRestrictionMod.class, data[16], 0, // NONE
                 1, // SIMILAR_STRENGTH

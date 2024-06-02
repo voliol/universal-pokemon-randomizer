@@ -219,6 +219,13 @@ public interface RomHandler {
 
     void game1to1Encounters(Settings settings);
 
+    /**
+     * Randomizes wild Pokemon, ensuring that each Pokemon in the original game
+     * and its evolutionary family is replaced by a new evolutionary family
+     * in each place they occur.
+     * @param settings The current settings.
+     */
+    void gameFamilyToFamilyEncounters(Settings settings);
     void onlyChangeWildLevels(Settings settings);
 
     boolean hasTimeBasedEncounters();

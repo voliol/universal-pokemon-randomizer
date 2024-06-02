@@ -108,8 +108,8 @@ public class PokemonSet implements Set<Pokemon> {
             if(added) {
                 changed = true;
             }
-            toCheck.addAll(checking.originalEvolvedForms);
-            toCheck.addAll(checking.originalPreEvolvedForms);
+            toCheck.addAll(checking.getOriginalEvolvedForms());
+            toCheck.addAll(checking.getOriginalPreEvolvedForms());
         }
 
         return changed;
@@ -167,8 +167,8 @@ public class PokemonSet implements Set<Pokemon> {
             if(removed) {
                 changed = true;
             }
-            toCheck.addAll(checking.originalEvolvedForms);
-            toCheck.addAll(checking.originalPreEvolvedForms);
+            toCheck.addAll(checking.getOriginalEvolvedForms());
+            toCheck.addAll(checking.getOriginalPreEvolvedForms());
         }
 
         return changed;
@@ -225,8 +225,8 @@ public class PokemonSet implements Set<Pokemon> {
             if(this.contains(checking)) {
                 family.add(checking);
             }
-            toCheck.addAll(checking.originalEvolvedForms);
-            toCheck.addAll(checking.originalPreEvolvedForms);
+            toCheck.addAll(checking.getOriginalEvolvedForms());
+            toCheck.addAll(checking.getOriginalPreEvolvedForms());
         }
 
         return family;
@@ -281,6 +281,65 @@ public class PokemonSet implements Set<Pokemon> {
         PokemonSet allWithFamilies = this.getAllWithOriginalFamilies();
         boolean changed = this.addAll(allWithFamilies);
         return changed;
+    }
+
+    /**
+     * Adds to this set all Pokemon in the given set and their full evolutionary families.
+     * @param source The set to add Pokemon and families from.
+     * @return True if any Pokemon were added, false otherwise.
+     */
+    public boolean addAllFamilies(PokemonSet source) {
+        boolean anyChanged = false;
+        for(Pokemon poke : source) {
+            boolean changed = this.addFamily(poke);
+            if(changed) {
+                anyChanged = true;
+            }
+        }
+
+        return anyChanged;
+    }
+
+    /**
+     * Adds to this set all Pokemon in the given set and their full evolutionary families,
+     * before randomization.
+     * @param source The set to add Pokemon and families from.
+     * @return True if any Pokemon were added, false otherwise.
+     */
+    public boolean addAllOriginalFamilies(PokemonSet source) {
+        boolean anyChanged = false;
+        for(Pokemon poke : source) {
+            boolean changed = this.addOriginalFamily(poke);
+            if(changed) {
+                anyChanged = true;
+            }
+        }
+
+        return anyChanged;
+    }
+
+    /**
+     * Removes from this set all Pokemon that are neither contained within the given set nor
+     * an evolutionary relative of a Pokemon that is.
+     * @param source The set to keep Pokemon and families from.
+     * @return True if any Pokemon were removes, false otherwise.
+     */
+    public boolean retainAllFamilies(PokemonSet source) {
+        PokemonSet families = source.getAllWithFamilies();
+
+        return this.retainAll(families);
+    }
+
+    /**
+     * Removes from this set all Pokemon that are neither contained within the given set nor
+     * an evolutionary relative, before randomization, of a Pokemon that is.
+     * @param source The set to keep Pokemon and families from.
+     * @return True if any Pokemon were removes, false otherwise.
+     */
+    public boolean retainAllOriginalFamilies(PokemonSet source) {
+        PokemonSet families = source.getAllWithOriginalFamilies();
+
+        return this.retainAll(families);
     }
 
     /**
@@ -357,7 +416,7 @@ public class PokemonSet implements Set<Pokemon> {
      * @return A PokemonSet containing all direct evolutions of the given Pokemon in this set.
      */
     public PokemonSet getOriginalEvolutions(Pokemon pokemon) {
-        PokemonSet evolvedPokemon = pokemon.originalEvolvedForms;
+        PokemonSet evolvedPokemon = pokemon.getOriginalEvolvedForms();
         evolvedPokemon.retainAll(this);
         return evolvedPokemon;
     }
@@ -382,7 +441,7 @@ public class PokemonSet implements Set<Pokemon> {
     public PokemonSet getOriginalPreEvolutions(Pokemon pokemon) {
         //I *think* there are no cases of merged evolution? But... better not to assume that.
         //There are certainly forms—e.g., Burmy to Mothim.
-        PokemonSet preEvolvedPokemon = pokemon.originalPreEvolvedForms;
+        PokemonSet preEvolvedPokemon = pokemon.getOriginalPreEvolvedForms();
         preEvolvedPokemon.retainAll(this);
         return preEvolvedPokemon;
     }
@@ -409,7 +468,7 @@ public class PokemonSet implements Set<Pokemon> {
      * @return true if this set contains at least one evolved form of the given Pokemon, false otherwise.
      */
     public boolean hasOriginalEvolutions(Pokemon pokemon) {
-        PokemonSet evolvedPokemon = pokemon.originalEvolvedForms;
+        PokemonSet evolvedPokemon = pokemon.getOriginalPreEvolvedForms();
         for (Pokemon evo : evolvedPokemon) {
             if(this.contains(evo)) {
                 return true;
@@ -440,7 +499,7 @@ public class PokemonSet implements Set<Pokemon> {
      * @return true if this set contains at least one pre-evolved form of the given Pokemon, false otherwise.
      */
     public boolean hasOriginalPreEvolutions(Pokemon pokemon) {
-        PokemonSet preEvolvedPokemon = pokemon.originalPreEvolvedForms;
+        PokemonSet preEvolvedPokemon = pokemon.getOriginalPreEvolvedForms();
         for (Pokemon prevo : preEvolvedPokemon) {
             if(this.contains(prevo)) {
                 return true;
@@ -450,7 +509,7 @@ public class PokemonSet implements Set<Pokemon> {
     }
 
     /**
-     * Returns all Pokemon in this set that no other Pokemon in this set evolves into.
+     * Returns all Pokemon in this set that no other Pokemon in this set evolves directly into.
      * @return A PokemonSet containing all Pokemon that no other Pokemon in this set evolves into.
      */
     public PokemonSet getAllFirstInLine() {
@@ -465,7 +524,7 @@ public class PokemonSet implements Set<Pokemon> {
 
     /**
      * Returns all Pokemon in this set that no other Pokemon in this set
-     * could evolve into before randomization.
+     * could evolve directly into before randomization.
      * @return A PokemonSet containing all Pokemon that no other Pokemon in this set evolves into.
      */
     public PokemonSet getAllOriginalFirstInLine() {
@@ -500,7 +559,7 @@ public class PokemonSet implements Set<Pokemon> {
     public PokemonSet getAllOriginalBasicPokemon() {
         PokemonSet basics = new PokemonSet();
         for(Pokemon pokemon : this) {
-            if(pokemon.originalPreEvolvedForms.isEmpty()) {
+            if(pokemon.getOriginalPreEvolvedForms().isEmpty()) {
                 basics.add(pokemon);
             }
         }
@@ -512,9 +571,10 @@ public class PokemonSet implements Set<Pokemon> {
      * within this set.
      * In the case of branching evolutions, only branches of the correct length will be included.
      * @param length the number of Pokemon required in the evolutionary line. 1 to 3.
+     * @param allowGaps If length is 3, whether to allow lines with the middle Pokemon missing.
      * @return a PokemonSet containing all valid Pokemon.
      */
-    public PokemonSet getEvoLinesAtLeastLength(int length) {
+    public PokemonSet getEvoLinesAtLeastLength(int length, boolean allowGaps) {
         if(length > 3 || length < 1) {
             throw new IllegalArgumentException("Invalid evolutionary line length.");
         }
@@ -537,19 +597,28 @@ public class PokemonSet implements Set<Pokemon> {
                     validEvoLines.add(secondEvo);
                 }
             }
+            if(allowGaps && length == 3) {
+                for(Pokemon missingEvo : basic.getAllEvolvedPokemon()) {
+                    for(Pokemon secondEvo : this.getOriginalEvolutions(missingEvo)) {
+                        validEvoLines.add(basic);
+                        validEvoLines.add(secondEvo);
+                    }
+                }
+            }
         }
 
         return validEvoLines;
     }
 
     /**
-     * Returns all Pokemon for which uninterrupted evolutionary lines (before randomization)
+     * Returns all Pokemon for which evolutionary lines (before randomization)
      * of at least the given length are contained within this set.
      * In the case of branching evolutions, only branches of the correct length will be included.
      * @param length the number of Pokemon required in the evolutionary line. 1 to 3.
+     * @param allowGaps If length is 3, whether to allow lines with the middle Pokemon missing.
      * @return a PokemonSet containing all valid Pokemon.
      */
-    public PokemonSet getOriginalEvoLinesAtLeastLength(int length) {
+    public PokemonSet getOriginalEvoLinesAtLeastLength(int length, boolean allowGaps) {
         if(length > 3 || length < 1) {
             throw new IllegalArgumentException("Invalid evolutionary line length.");
         }
@@ -572,9 +641,227 @@ public class PokemonSet implements Set<Pokemon> {
                     validEvoLines.add(secondEvo);
                 }
             }
+            if(allowGaps && length == 3) {
+                for(Pokemon missingEvo : basic.getOriginalEvolvedForms()) {
+                    for(Pokemon secondEvo : this.getOriginalEvolutions(missingEvo)) {
+                        validEvoLines.add(basic);
+                        validEvoLines.add(secondEvo);
+                    }
+                }
+            }
         }
 
         return validEvoLines;
+    }
+
+    /**
+     * Gets all Pokemon in the set which have at least the specified number of evolution stages
+     * before and after them.
+     * @param before The number of stages before this Pokemon. 0 to 2.
+     * @param after The number of stages after this Pokemon. 0 to 2.
+     * @return A PokemonSet containing all Pokemon in the specified position.
+     */
+    public PokemonSet getAllAtFamilyPosition(int before, int after) {
+        if (before < 0 || after < 0 || before > 2 || after > 2) {
+            throw new IllegalArgumentException("Number of evolutions must be between 0 and 2!");
+        }
+
+        PokemonSet results = new PokemonSet();
+        for(Pokemon pokemon : this) {
+            if(getNumberEvoStagesBefore(pokemon) >= before
+                    && getNumberEvoStagesAfter(pokemon) >= after){
+                results.add(pokemon);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Gets all Pokemon in the set which had at least the specified number of evolution stages
+     * before and after them before randomization.
+     * @param before The number of stages before this Pokemon. 0 to 2.
+     * @param after The number of stages after this Pokemon. 0 to 2.
+     * @return A PokemonSet containing all Pokemon in the specified position.
+     */
+    public PokemonSet getAllAtOriginalFamilyPosition(int before, int after) {
+        if (before < 0 || after < 0 || before > 2 || after > 2) {
+            throw new IllegalArgumentException("Number of evolutions must be between 0 and 2!");
+        }
+
+        PokemonSet results = new PokemonSet();
+        for(Pokemon pokemon : this) {
+            if(getNumberOriginalEvoStagesBefore(pokemon) >= before
+                    && getNumberOriginalEvoStagesAfter(pokemon) >= after){
+                results.add(pokemon);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Finds the largest number of evolutionary steps contained in this set that could evolve into
+     * the given Pokemon.
+     * For example, a Pokemon which has both a basic and a once-evolved Pokemon that can evolve into
+     * it would return 2 (for the once-evolved Pokemon).
+     * Has no protection for cycles - if the Pokemon can evolve into itself, this will count as 2.
+     * @param pokemon The Pokemon to find the evolutionary count for.
+     * @return The number of Pokemon in the longest line before this Pokemon. Max 2.
+     */
+    public int getNumberEvoStagesBefore(Pokemon pokemon) {
+        int numStages = 0;
+        PokemonSet currentStage = new PokemonSet();
+        currentStage.add(pokemon);
+
+
+        while(!currentStage.isEmpty()) {
+            PokemonSet previousStage = new PokemonSet();
+            for(Pokemon poke : currentStage) {
+                previousStage.addAll(this.getPreEvolutions(poke));
+            }
+            if(!previousStage.isEmpty()) {
+                numStages++;
+                if(numStages >= 2) {
+                    return 2;
+                }
+            }
+            currentStage = previousStage;
+        }
+
+        return numStages;
+    }
+
+    /**
+     * Finds the largest number of evolutionary steps contained in this set that the given Pokemon
+     * can evolve into.
+     * For example, a Pokemon which evolves into two Pokemon, one of which can evolve again,
+     * would return 2 (for the Pokemon which can evolve again.)
+     * Has no protection for cycles - if the Pokemon can evolve into itself, this will count as 2.
+     * @param pokemon The Pokemon to find the evolutionary count for.
+     * @return The number of Pokemon in the longest line after this Pokemon. Max 2.
+     */
+    public int getNumberEvoStagesAfter(Pokemon pokemon) {
+        int numStages = 0;
+        PokemonSet currentStage = new PokemonSet();
+        currentStage.add(pokemon);
+
+
+        while(!currentStage.isEmpty()) {
+            PokemonSet nextStage = new PokemonSet();
+            for(Pokemon poke : currentStage) {
+                nextStage.addAll(this.getEvolutions(poke));
+            }
+            if(!nextStage.isEmpty()) {
+                numStages++;
+                if(numStages >= 2) {
+                    return 2;
+                }
+            }
+            currentStage = nextStage;
+        }
+
+        return numStages;
+    }
+
+    /**
+     * Finds the largest number of evolutionary steps contained in this set that could evolve into
+     * the given Pokemon before randomization.
+     * For example, a Pokemon which has both a basic and a once-evolved Pokemon that can evolve into
+     * it would return 2 (for the once-evolved Pokemon).
+     * @param pokemon The Pokemon to find the evolutionary count for.
+     * @return The number of Pokemon in the longest line before this Pokemon. Max 2.
+     */
+    public int getNumberOriginalEvoStagesBefore(Pokemon pokemon) {
+        int numStages = 0;
+        PokemonSet currentStage = new PokemonSet();
+        currentStage.add(pokemon);
+
+
+        while(!currentStage.isEmpty()) {
+            PokemonSet previousStage = new PokemonSet();
+            for(Pokemon poke : currentStage) {
+                previousStage.addAll(this.getOriginalPreEvolutions(poke));
+            }
+            if(!previousStage.isEmpty()) {
+                numStages++;
+                if(numStages >= 2) {
+                    return 2;
+                }
+            }
+            currentStage = previousStage;
+        }
+
+        return numStages;
+    }
+
+    /**
+     * Finds the largest number of evolutionary steps contained in this set that the given Pokemon
+     * can evolve into.
+     * For example, a Pokemon which evolves into two Pokemon, one of which can evolve again,
+     * would return 2 (for the Pokemon which can evolve again.)
+     * @param pokemon The Pokemon to find the evolutionary count for.
+     * @return The number of Pokemon in the longest line after this Pokemon. Max 2.
+     */
+    public int getNumberOriginalEvoStagesAfter(Pokemon pokemon) {
+        int numStages = 0;
+        PokemonSet currentStage = new PokemonSet();
+        currentStage.add(pokemon);
+
+
+        while(!currentStage.isEmpty()) {
+            PokemonSet nextStage = new PokemonSet();
+            for(Pokemon poke : currentStage) {
+                nextStage.addAll(this.getOriginalEvolutions(poke));
+            }
+            if(!nextStage.isEmpty()) {
+                numStages++;
+                if(numStages >= 2) {
+                    return 2;
+                }
+            }
+            currentStage = nextStage;
+        }
+
+        return numStages;
+    }
+
+    /**
+     * Gets all Pokemon related to the given one by the given number of evolutions (or
+     * pre-evolutions, if position is negative) which are contained in the set.
+     * Does not include those on different branches.
+     * @param base The Pokemon to find relatives of.
+     * @param relation The relative position to find.
+     * @return A PokemonSet including all Pokemon at this relative position, or an empty set if
+     *         there are none.
+     */
+    public PokemonSet getRelativesAtPositionSameBranch(Pokemon base, int relation) {
+        PokemonSet relatives = base.getRelativesAtPositionSameBranch(relation);
+        relatives.retainAll(this);
+        return relatives;
+    }
+
+    //this should have three counterparts (atPosition, originalAtPosition, originalAtPositionSameBranch)
+    //buuuut I am too fuckin' tired to make them right now
+
+    /**
+     * Gets all Pokemon related to any Pokemon in the given set by the given number of evolutions (or
+     * pre-evolutions, if position is negative) which are contained in this set.
+     * Does not include those on different branches.
+     * @param bases The set to find relatives of the Pokemon in.
+     * @param relation The relative position to find.
+     * @return A PokemonSet including all Pokemon at this relative position, or an empty set if
+     *         there are none.
+     */
+    public PokemonSet getAllRelativesAtPositionSameBranch(PokemonSet bases, int relation) {
+        PokemonSet sameRelations = new PokemonSet();
+        for(Pokemon base : bases) {
+            sameRelations.addAll(base.getRelativesAtPositionSameBranch(relation));
+        }
+
+        sameRelations.retainAll(this);
+
+        return sameRelations;
     }
 
     /**
@@ -616,7 +903,6 @@ public class PokemonSet implements Set<Pokemon> {
             return null;
         }
     }
-
 
     /**
      * Finds if all Pokemon in this set shared a type before randomization.
@@ -810,9 +1096,11 @@ public class PokemonSet implements Set<Pokemon> {
 
     public boolean retainAll(Collection<?> c) {
         boolean changed = false;
-        for(Pokemon pokemon : this) {
+        Iterator<Pokemon> itor = this.iterator();
+        while(itor.hasNext()) {
+            Pokemon pokemon = itor.next();
             if(!c.contains(pokemon)) {
-                remove(pokemon);
+                itor.remove();
                 changed = true;
             }
         }

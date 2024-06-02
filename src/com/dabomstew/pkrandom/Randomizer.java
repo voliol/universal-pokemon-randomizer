@@ -689,6 +689,10 @@ public class Randomizer {
                 romHandler.game1to1Encounters(settings);
                 wildsChanged = true;
                 break;
+            case FAMILY_MAPPING:
+                romHandler.gameFamilyToFamilyEncounters(settings);
+                wildsChanged = true;
+                break;
             default:
                 if (settings.isWildLevelsModified()) {
                     romHandler.onlyChangeWildLevels(settings);
