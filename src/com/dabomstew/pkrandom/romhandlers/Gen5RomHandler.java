@@ -208,9 +208,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 FormeInfo fi = formeMappings.get(k);
 
                 Pokemon baseForme = pokes[fi.baseForme];
-                baseForme.addAltForme(pokes[i]);
-                pokes[i].setName(baseForme.getName());
-                pokes[i].setFormeSuffix(Gen5Constants.getFormeSuffix(k, romEntry.getRomType()));
+                baseForme.addAltForme(pokes[i], Gen5Constants.getFormeSuffix(k, romEntry.getRomType()));
 
                 pokes[i].setFormeSpriteIndex(fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.getRomType()));
                 pokes[i].setGeneration(generationOf(pokes[i]));

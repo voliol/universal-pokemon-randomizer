@@ -386,7 +386,7 @@ public class Pokemon implements Comparable<Pokemon> {
         this.formeSuffix = formeSuffix;
     }
 
-    public void addAltForme(Pokemon forme) {
+    public void addAltForme(Pokemon forme, String formeSuffix) {
         if (forme.equals(this)) {
             throw new IllegalArgumentException("Pokemon can't be its own forme!");
         }
@@ -395,6 +395,7 @@ public class Pokemon implements Comparable<Pokemon> {
         }
         altFormes.add(forme);
         forme.name = name;
+        forme.formeSuffix = formeSuffix;
         forme.baseForme = this;
         forme.formeNumber = altFormes.size();
     }

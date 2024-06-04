@@ -628,9 +628,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				pokes[i] = new Pokemon(i);
 				loadBasicPokeStats(pokes[i], pokeNarc.files.get(k));
 				Pokemon baseForme = pokes[Gen4Constants.formeMappings.get(k)];
-				baseForme.addAltForme(pokes[i]);
-				pokes[i].setName(baseForme.getName());
-				pokes[i].setFormeSuffix(Gen4Constants.formeSuffixes.get(k));
+				baseForme.addAltForme(pokes[i], Gen4Constants.formeSuffixes.get(k));
 				pokes[i].setGeneration(generationOf(pokes[i]));
 				i++;
 			}

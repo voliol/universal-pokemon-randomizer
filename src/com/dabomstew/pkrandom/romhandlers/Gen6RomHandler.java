@@ -74,7 +74,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     // This ROM
     private Pokemon[] pokes;
-    private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    // it's important formeMappings is a TreeMap because we want to iterate through it in order
+    private final TreeMap<Integer, Integer> formeMappings = new TreeMap<>();
     private Map<Integer,Map<Integer,Integer>> absolutePokeNumByBaseForme;
     private Map<Integer,Integer> dummyAbsolutePokeNums;
     private List<Pokemon> pokemonList;
@@ -166,7 +167,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             pokes = new Pokemon[Gen6Constants.pokemonCount + formeCount + 1];
             for (int i = 1; i <= Gen6Constants.pokemonCount; i++) {
                 pokes[i] = new Pokemon(i);
-                loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
+                loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0));
                 pokes[i].setName(pokeNames[i]);
                 pokes[i].setGeneration(generationOf(pokes[i]));
             }
@@ -181,20 +182,19 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             Map<Integer,Integer> currentMap = new HashMap<>();
             for (int k: formeMappings.keySet()) {
                 pokes[i] = new Pokemon(i);
-                loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
-                FormeInfo fi = formeMappings.get(k);
-                pokes[i].setName(pokeNames[fi.baseForme]);
-                pokes[i].setBaseForme(pokes[fi.baseForme]);
-                pokes[i].setFormeNumber(fi.formeNumber);
-                pokes[i].setFormeSuffix(Gen6Constants.formeSuffixes.getOrDefault(k,""));
-                if (fi.baseForme == prevSpecies) {
+                loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0));
+
+                Pokemon baseForme = pokes[formeMappings.get(k)];
+                baseForme.addAltForme(pokes[i], Gen6Constants.formeSuffixes.getOrDefault(k,""));
+
+                if (baseForme.getNumber() == prevSpecies) {
                     formNum++;
                     currentMap.put(formNum,i);
                 } else {
                     if (prevSpecies != 0) {
                         absolutePokeNumByBaseForme.put(prevSpecies,currentMap);
                     }
-                    prevSpecies = fi.baseForme;
+                    prevSpecies = baseForme.getNumber();
                     formNum = 1;
                     currentMap = new HashMap<>();
                     currentMap.put(formNum,i);
@@ -236,7 +236,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         return 1;
     }
 
-    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
+    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats) {
         pkmn.setHp(stats[Gen6Constants.bsHPOffset] & 0xFF);
         pkmn.setAttack(stats[Gen6Constants.bsAttackOffset] & 0xFF);
         pkmn.setDefense(stats[Gen6Constants.bsDefenseOffset] & 0xFF);
@@ -279,12 +279,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            if (!altFormes.containsKey(pkmn.getNumber())) {
-                int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
-                if (firstFormeOffset != 0) {
+            if (!formeMappings.containsKey(pkmn.getNumber())) { // alt formes don't get to have alt formes of their own
+                System.out.println(pkmn);
+                System.out.println("visited: " + formeMappings.containsKey(pkmn.getNumber()));
+                int firstForme = FileFunctions.read2ByteInt(stats, Gen6Constants.bsFormeOffset);
+                System.out.println("firstForme: " + firstForme);
+                if (firstForme != 0) {
                     for (int i = 1; i < formeCount; i++) {
-                        altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,FileFunctions.read2ByteInt(stats,Gen6Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-                        if (Gen6Constants.cosmeticForms.contains(firstFormeOffset+i-1)) {
+                        formeMappings.put(firstForme + i - 1, pkmn.getNumber()); // Assumes that formes are in memory in the same order as their numbers
+                        if (Gen6Constants.cosmeticForms.contains(firstForme + i - 1)) {
                             if (pkmn.getNumber() != Species.pikachu && pkmn.getNumber() != Species.cherrim) { // No Pikachu/Cherrim
                                 pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
                             }
@@ -3925,7 +3928,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
         return true;
     }
-    
+
     @Override
     public String getGARCPath(String fileName) {
         return romEntry.getFile(fileName);
