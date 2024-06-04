@@ -463,7 +463,8 @@ public class Gen4Constants {
             Items.razorClaw, Items.razorFang);
 
     public static final Map<Integer,String> formeSuffixes = setupFormeSuffixes();
-    public static final Map<Integer,FormeInfo> formeMappings = setupFormeMappings();
+    // it's important formeMappings is a TreeMap because we want to iterate through it in order
+    public static final TreeMap<Integer, Integer> formeMappings = setupFormeMappings();
     public static final Map<Integer,Integer> cosmeticForms = setupCosmeticForms();
 
     private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
@@ -1560,21 +1561,21 @@ public class Gen4Constants {
         return formeSuffixes;
     }
 
-    private static Map<Integer,FormeInfo> setupFormeMappings() {
-        Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    private static TreeMap<Integer, Integer> setupFormeMappings() {
+        TreeMap<Integer, Integer> formeMappings = new TreeMap<>();
 
-        formeMappings.put(Species.Gen4Formes.deoxysA + formeOffset,new FormeInfo(Species.deoxys,1, 0));
-        formeMappings.put(Species.Gen4Formes.deoxysD + formeOffset,new FormeInfo(Species.deoxys,2, 0));
-        formeMappings.put(Species.Gen4Formes.deoxysS + formeOffset,new FormeInfo(Species.deoxys,3, 0));
-        formeMappings.put(Species.Gen4Formes.wormadamS + formeOffset,new FormeInfo(Species.wormadam,1, 0));
-        formeMappings.put(Species.Gen4Formes.wormadamT + formeOffset,new FormeInfo(Species.wormadam,2, 0));
-        formeMappings.put(Species.Gen4Formes.giratinaO + formeOffset,new FormeInfo(Species.giratina,1, 0));
-        formeMappings.put(Species.Gen4Formes.shayminS + formeOffset,new FormeInfo(Species.shaymin,1, 0));
-        formeMappings.put(Species.Gen4Formes.rotomH + formeOffset,new FormeInfo(Species.rotom,1, 0));
-        formeMappings.put(Species.Gen4Formes.rotomW + formeOffset,new FormeInfo(Species.rotom,2, 0));
-        formeMappings.put(Species.Gen4Formes.rotomFr + formeOffset,new FormeInfo(Species.rotom,3, 0));
-        formeMappings.put(Species.Gen4Formes.rotomFa + formeOffset,new FormeInfo(Species.rotom,4, 0));
-        formeMappings.put(Species.Gen4Formes.rotomM + formeOffset,new FormeInfo(Species.rotom,5, 0));
+        formeMappings.put(Species.Gen4Formes.deoxysA + formeOffset, Species.deoxys);
+        formeMappings.put(Species.Gen4Formes.deoxysD + formeOffset, Species.deoxys);
+        formeMappings.put(Species.Gen4Formes.deoxysS + formeOffset,Species.deoxys);
+        formeMappings.put(Species.Gen4Formes.wormadamT + formeOffset, Species.wormadam);
+        formeMappings.put(Species.Gen4Formes.wormadamS + formeOffset, Species.wormadam);
+        formeMappings.put(Species.Gen4Formes.giratinaO + formeOffset, Species.giratina);
+        formeMappings.put(Species.Gen4Formes.shayminS + formeOffset,Species.shaymin);
+        formeMappings.put(Species.Gen4Formes.rotomH + formeOffset, Species.rotom);
+        formeMappings.put(Species.Gen4Formes.rotomW + formeOffset, Species.rotom);
+        formeMappings.put(Species.Gen4Formes.rotomFr + formeOffset, Species.rotom);
+        formeMappings.put(Species.Gen4Formes.rotomFa + formeOffset, Species.rotom);
+        formeMappings.put(Species.Gen4Formes.rotomM + formeOffset, Species.rotom);
 
         return formeMappings;
     }

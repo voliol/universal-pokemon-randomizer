@@ -324,7 +324,7 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         for (Pokemon pk : romHandler.getPokemonSetInclFormes()) {
             if (pk.getBaseForme() != null) {
                 System.out.println(pk.getBaseForme().fullName() + " " + pk.getFormeNumber() + " " + pk.getFormeSuffix()
-                        + (pk.isActuallyCosmetic() ? " (cosmetic)" : ""));
+                        + (pk.isCosmeticForme() ? " (cosmetic)" : ""));
                 altFormes.add(pk);
             }
         }

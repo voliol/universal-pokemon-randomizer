@@ -57,6 +57,7 @@ public class Pokemon implements Comparable<Pokemon> {
     private final int number;
 
     private String formeSuffix = "";
+    private List<Pokemon> altFormes = new ArrayList<>();
     private Pokemon baseForme = null;
     private int formeNumber = 0;
     private int cosmeticForms = 0;
@@ -383,6 +384,26 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public void setFormeSuffix(String formeSuffix) {
         this.formeSuffix = formeSuffix;
+    }
+
+    public void addAltForme(Pokemon forme) {
+        if (forme.equals(this)) {
+            throw new IllegalArgumentException("Pokemon can't be its own forme!");
+        }
+        if (forme.isAltForme()) {
+            throw new IllegalArgumentException("Can't add something which is already another Pokemon's alt forme");
+        }
+        altFormes.add(forme);
+        forme.name = name;
+        forme.baseForme = this;
+        forme.formeNumber = altFormes.size();
+    }
+
+    /**
+     * Returns an unmodifiable list containing each alt forme.
+     */
+    public List<Pokemon> getAltFormes() {
+        return Collections.unmodifiableList(altFormes);
     }
 
     public Pokemon getBaseForme() {

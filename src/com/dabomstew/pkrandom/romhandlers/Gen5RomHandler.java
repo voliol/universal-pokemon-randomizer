@@ -77,7 +77,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     // This ROM
     private Pokemon[] pokes;
-    private Map<Integer, FormeInfo> formeMappings = new TreeMap<>();
+    // it's important formeMappings is a TreeMap because we want to iterate through it in order
+    private final TreeMap<Integer, FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
     private Move[] moves;
@@ -99,7 +100,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private long actualArm9CRC32;
     private Map<Integer, Long> actualOverlayCRC32s;
     private Map<String, Long> actualFileCRC32s;
-    
+
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
 
     @Override
@@ -165,7 +166,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         else if (romEntry.getRomType() == Gen5Constants.Type_BW2) {
             shopNames = Gen5Constants.bw2ShopNames;
         }
-        
+
         loadedWildMapNames = false;
 
         allowedItems = Gen5Constants.allowedItems.copy();
@@ -195,7 +196,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pokes = new Pokemon[Gen5Constants.pokemonCount + formeCount + 1];
             for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
                 pokes[i] = new Pokemon(i);
-                loadBasicPokeStats(pokes[i], pokeNarc.files.get(i), formeMappings);
+                loadBasicPokeStats(pokes[i], pokeNarc.files.get(i));
                 pokes[i].setName(pokeNames[i]);
                 pokes[i].setGeneration(generationOf(pokes[i]));
             }
@@ -203,15 +204,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             int i = Gen5Constants.pokemonCount + 1;
             for (int k: formeMappings.keySet()) {
                 pokes[i] = new Pokemon(i);
-                loadBasicPokeStats(pokes[i], pokeNarc.files.get(k), formeMappings);
+                loadBasicPokeStats(pokes[i], pokeNarc.files.get(k));
                 FormeInfo fi = formeMappings.get(k);
-                pokes[i].setName(pokeNames[fi.baseForme]);
-                pokes[i].setBaseForme(pokes[fi.baseForme]);
-                pokes[i].setFormeNumber(fi.formeNumber);
+
+                Pokemon baseForme = pokes[fi.baseForme];
+                baseForme.addAltForme(pokes[i]);
+                pokes[i].setName(baseForme.getName());
+                pokes[i].setFormeSuffix(Gen5Constants.getFormeSuffix(k, romEntry.getRomType()));
+
                 pokes[i].setFormeSpriteIndex(fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.getRomType()));
-                pokes[i].setFormeSuffix(Gen5Constants.getFormeSuffix(k,romEntry.getRomType()));
                 pokes[i].setGeneration(generationOf(pokes[i]));
-                i = i + 1;
+                i++;
             }
             populateEvolutions();
         } catch (IOException e) {
@@ -345,7 +348,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
+    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats) {
         pkmn.setHp(stats[Gen5Constants.bsHPOffset] & 0xFF);
         pkmn.setAttack(stats[Gen5Constants.bsAttackOffset] & 0xFF);
         pkmn.setDefense(stats[Gen5Constants.bsDefenseOffset] & 0xFF);
@@ -385,12 +388,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         pkmn.setGenderRatio(stats[Gen5Constants.bsGenderRatioOffset] & 0xFF);
 
+        // Each stat block has a formeCount, which defaults to 1,
+        // and a firstForme value, the id/number of the first forme.
+        // If firstForme == 0, we consider all formes to be cosmetic,
+        // otherwise we save the formes to load later (which come consecutively after firstForme).
+        // For whatever reason, we also consider Keldeo Resolute to be cosmetic??? (I did not write this code, okay)
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            int firstFormeOffset = readWord(stats, Gen5Constants.bsFormeOffset);
-            if (firstFormeOffset != 0) {
+            int firstForme = readWord(stats, Gen5Constants.bsFormeOffset);
+            if (firstForme != 0) {
                 for (int i = 1; i < formeCount; i++) {
-                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,readWord(stats,Gen5Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                    formeMappings.put(firstForme + i - 1, new FormeInfo(pkmn.getNumber(), i, readWord(stats, Gen5Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                     if (pkmn.getNumber() == Species.keldeo) {
                         pkmn.setCosmeticForms(formeCount);
                     }
@@ -3180,7 +3188,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public String[] getItemNames() {
         return itemNames.toArray(new String[0]);
     }
-    
+
     @Override
     public String abilityName(int number) {
         return abilityNames.get(number);
@@ -3929,13 +3937,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         return items;
     }
-    
+
     protected int calculatePokemonNormalPaletteIndex(int i) {
         return i * 20 + 18;
     }
-    
+
     protected int calculatePokemonShinyPaletteIndex(int i) {
-        return calculatePokemonNormalPaletteIndex(i) + 1; 
+        return calculatePokemonNormalPaletteIndex(i) + 1;
     }
 
     @Override
@@ -4039,7 +4047,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return imageData.length != 0;
         }
     }
-    
+
     public String getPaletteFilesID() {
         return switch (romEntry.getRomType()) {
             case Gen5Constants.Type_BW -> "BW";
@@ -4054,5 +4062,5 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public Gen5RomEntry getRomEntry() {
         return romEntry;
     }
-    
+
 }
