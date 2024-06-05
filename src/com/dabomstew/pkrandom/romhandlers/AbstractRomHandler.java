@@ -2333,6 +2333,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             List<TrainerPokemon> trainerPokemonList = new ArrayList<>(t.pokemon);
             if (keepTypeThemes || keepThemeOrPrimaryTypes) {
+if ((keepTypeThemes || keepThemeOrPrimaryTypes) && typeForTrainer == null) {
                 //determine if this trainer has a type theme
                 Pokemon poke = trainerPokemonList.get(0).pokemon;
                 Type primary = poke.originalPrimaryType;
