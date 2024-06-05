@@ -1897,7 +1897,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            if (keepTypeThemes) {
+            if (keepTypeThemes && typeForTrainer == null) {
                 //determine if this trainer has a type theme
                 Pokemon poke = trainerPokemonList.get(0).pokemon;
                 Type primary = poke.originalPrimaryType;
