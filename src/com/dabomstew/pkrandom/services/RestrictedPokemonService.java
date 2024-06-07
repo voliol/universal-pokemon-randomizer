@@ -112,7 +112,7 @@ public class RestrictedPokemonService {
     public PokemonSet<Pokemon> getAbilityDependentFormes() {
         PokemonSet<Pokemon> abilityDependentFormes = new PokemonSet<>();
         for (Pokemon pk : allInclAltFormes) {
-            if (pk.getBaseForme() != null) {
+            if (pk.isAltForme()) {
                 if (pk.getBaseNumber() == Species.castform) {
                     // All alternate Castform formes
                     abilityDependentFormes.add(pk);
@@ -134,7 +134,7 @@ public class RestrictedPokemonService {
     public PokemonSet<Pokemon> getBannedFormesForPlayerPokemon() {
         PokemonSet<Pokemon> bannedFormes = new PokemonSet<>();
         for (Pokemon pk : allInclAltFormes) {
-            if (pk.getBaseForme() != null) {
+            if (pk.isAltForme()) {
                 if (pk.getBaseNumber() == Species.giratina) {
                     // Giratina-O is banned because it reverts back to Altered Forme if
                     // equipped with any item that isn't the Griseous Orb.
@@ -219,7 +219,7 @@ public class RestrictedPokemonService {
 
     private static void addFromGen(PokemonSet<Pokemon> allInclAltFormes, PokemonSet<Pokemon> allNonRestricted, int gen) {
         allInclAltFormes.addAll(allNonRestricted.filter(pk -> {
-            Pokemon baseForme = pk.getBaseForme() == null ? pk : pk.getBaseForme();
+            Pokemon baseForme = pk.isAltForme() ? pk.getBaseForme() : pk;
             return baseForme.getGeneration() == gen;
         }));
     }

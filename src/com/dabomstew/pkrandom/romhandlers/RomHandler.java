@@ -114,6 +114,7 @@ public interface RomHandler {
 
     List<MegaEvolution> getMegaEvolutions();
 
+    // TODO: make unnecessary; just the Pokemon class' methods should be used instead
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
 
     PokemonSet<Pokemon> getIrregularFormes();

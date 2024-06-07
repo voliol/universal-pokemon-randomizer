@@ -187,7 +187,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             System.out.println(area.getDisplayName() + ":");
             System.out.println(area);
             for (Encounter enc : area) {
-                if (enc.getPokemon().getBaseForme() != null) {
+                if (enc.getPokemon().isAltForme()) {
                     System.out.println(enc.getPokemon());
                     hasAltFormes = true;
                     break;

@@ -167,15 +167,8 @@ public class Gen5Constants {
     private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
     private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
 
-    private static final Map<Integer,Map<Integer,Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
-    private static final Map<Integer,Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
-
     public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
         return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
-    }
-
-    public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
-        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
     }
 
     private static final List<Integer> bw1IrregularFormes = Arrays.asList(
@@ -764,85 +757,6 @@ public class Gen5Constants {
     private static Map<Integer,String> setupDummyFormeSuffixes() {
         Map<Integer,String> m = new HashMap<>();
         m.put(0,"");
-        return m;
-    }
-
-    private static Map<Integer,Map<Integer,Integer>> setupAbsolutePokeNumsByBaseForme() {
-
-        Map<Integer,Map<Integer,Integer>> map = new HashMap<>();
-
-        Map<Integer,Integer> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,Species.Gen5Formes.deoxysA);
-        deoxysMap.put(2,Species.Gen5Formes.deoxysD);
-        deoxysMap.put(3,Species.Gen5Formes.deoxysS);
-        map.put(Species.deoxys, deoxysMap);
-
-        Map<Integer,Integer> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,Species.Gen5Formes.wormadamS);
-        wormadamMap.put(2,Species.Gen5Formes.wormadamT);
-        map.put(Species.wormadam, wormadamMap);
-
-        Map<Integer,Integer> shayminMap = new HashMap<>();
-        shayminMap.put(1,Species.Gen5Formes.shayminS);
-        map.put(Species.shaymin, shayminMap);
-
-        Map<Integer,Integer> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,Species.Gen5Formes.giratinaO);
-        map.put(Species.giratina, giratinaMap);
-
-        Map<Integer,Integer> rotomMap = new HashMap<>();
-        rotomMap.put(1,Species.Gen5Formes.rotomH);
-        rotomMap.put(2,Species.Gen5Formes.rotomW);
-        rotomMap.put(3,Species.Gen5Formes.rotomFr);
-        rotomMap.put(4,Species.Gen5Formes.rotomFa);
-        rotomMap.put(5,Species.Gen5Formes.rotomM);
-        map.put(Species.rotom, rotomMap);
-
-        Map<Integer,Integer> castformMap = new HashMap<>();
-        castformMap.put(1,Species.Gen5Formes.castformSu);
-        castformMap.put(2,Species.Gen5Formes.castformR);
-        castformMap.put(3,Species.Gen5Formes.castformSn);
-        map.put(Species.castform, castformMap);
-
-        Map<Integer,Integer> basculinMap = new HashMap<>();
-        basculinMap.put(1,Species.Gen5Formes.basculinB);
-        map.put(Species.basculin, basculinMap);
-
-        Map<Integer,Integer> darmanitanMap = new HashMap<>();
-        darmanitanMap.put(1,Species.Gen5Formes.darmanitanZ);
-        map.put(Species.darmanitan, darmanitanMap);
-
-        Map<Integer,Integer> meloettaMap = new HashMap<>();
-        meloettaMap.put(1,Species.Gen5Formes.meloettaP);
-        map.put(Species.meloetta, meloettaMap);
-
-        Map<Integer,Integer> kyuremMap = new HashMap<>();
-        kyuremMap.put(1,Species.Gen5Formes.kyuremW);
-        kyuremMap.put(2,Species.Gen5Formes.kyuremB);
-        map.put(Species.kyurem, kyuremMap);
-
-        Map<Integer,Integer> keldeoMap = new HashMap<>();
-        keldeoMap.put(1,Species.Gen5Formes.keldeoCosmetic1);
-        map.put(Species.keldeo, keldeoMap);
-
-        Map<Integer,Integer> tornadusMap = new HashMap<>();
-        tornadusMap.put(1,Species.Gen5Formes.tornadusT);
-        map.put(Species.tornadus, tornadusMap);
-
-        Map<Integer,Integer> thundurusMap = new HashMap<>();
-        thundurusMap.put(1,Species.Gen5Formes.thundurusT);
-        map.put(Species.thundurus, thundurusMap);
-
-        Map<Integer,Integer> landorusMap = new HashMap<>();
-        landorusMap.put(1,Species.Gen5Formes.landorusT);
-        map.put(Species.landorus, landorusMap);
-
-        return map;
-    }
-
-    private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
-        Map<Integer,Integer> m = new HashMap<>();
-        m.put(255,0);
         return m;
     }
 

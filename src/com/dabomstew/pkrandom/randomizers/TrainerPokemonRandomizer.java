@@ -716,16 +716,16 @@ public class TrainerPokemonRandomizer extends Randomizer {
         boolean checkCosmetics = true;
         tp.formeSuffix = "";
         tp.forme = 0;
-        if (pk.getFormeNumber() > 0) {
+        if (pk.isAltForme()) {
             tp.forme = pk.getFormeNumber();
             tp.formeSuffix = pk.getFormeSuffix();
             tp.pokemon = pk.getBaseForme();
             checkCosmetics = false;
         }
-        if (checkCosmetics && tp.pokemon.getCosmeticForms() > 0) {
-            tp.forme = tp.pokemon.getCosmeticFormNumber(random.nextInt(tp.pokemon.getCosmeticForms()));
-        } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
-            tp.forme += pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticForms()));
+        if (checkCosmetics && tp.pokemon.getCosmeticFormCount() > 0) {
+            tp.forme = tp.pokemon.getCosmeticFormNumber(random.nextInt(tp.pokemon.getCosmeticFormCount()));
+        } else if (!checkCosmetics && pk.getCosmeticFormCount() > 0) {
+            tp.forme += pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticFormCount()));
         }
     }
 

@@ -202,14 +202,14 @@ public class EvolutionRandomizer extends Randomizer {
 
         private void pickCosmeticForme(Pokemon picked, Evolution newEvo) {
             boolean checkCosmetics = true;
-            if (picked.getFormeNumber() > 0) {
+            if (picked.isAltForme()) {
                 newEvo.setForme(picked.getFormeNumber());
                 checkCosmetics = false;
             }
-            if (checkCosmetics && newEvo.getTo().getCosmeticForms() > 0) {
-                newEvo.setForme(newEvo.getTo().getCosmeticFormNumber(random.nextInt(newEvo.getTo().getCosmeticForms())));
-            } else if (!checkCosmetics && picked.getCosmeticForms() > 0) {
-                newEvo.setForme(newEvo.getForme() + picked.getCosmeticFormNumber(random.nextInt(picked.getCosmeticForms())));
+            if (checkCosmetics && newEvo.getTo().getCosmeticFormCount() > 0) {
+                newEvo.setForme(newEvo.getTo().getCosmeticFormNumber(random.nextInt(newEvo.getTo().getCosmeticFormCount())));
+            } else if (!checkCosmetics && picked.getCosmeticFormCount() > 0) {
+                newEvo.setForme(newEvo.getForme() + picked.getCosmeticFormNumber(random.nextInt(picked.getCosmeticFormCount())));
             }
         }
 

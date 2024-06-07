@@ -289,7 +289,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         formeMappings.put(firstForme + i - 1, pkmn.getNumber()); // Assumes that formes are in memory in the same order as their numbers
                         if (Gen6Constants.cosmeticForms.contains(firstForme + i - 1)) {
                             if (pkmn.getNumber() != Species.pikachu && pkmn.getNumber() != Species.cherrim) { // No Pikachu/Cherrim
-                                pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
+                                pkmn.setCosmeticFormCount(pkmn.getCosmeticFormCount() + 1);
                             }
                         }
                     }
@@ -298,7 +298,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         // Reason for exclusions:
                         // Arceus/Genesect: to avoid confusion
                         // Xerneas: Should be handled automatically?
-                        pkmn.setCosmeticForms(formeCount);
+                        pkmn.setCosmeticFormCount(formeCount);
                     }
                 }
             } else {
@@ -884,8 +884,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-        int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.getNumber(),dummyAbsolutePokeNums).getOrDefault(forme,0);
-        return pokeNum != 0 ? pokes[pokeNum] : pk;
+        return pk.getAltFormes().size() > forme ? pk.getAltFormes().get(forme - 1) : pk;
     }
 
 	@Override
@@ -918,7 +917,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(staticCRO,offset+i*size);
                 Pokemon pokemon = pokes[species];
                 int forme = staticCRO[offset+i*size + 4];
-                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -965,7 +964,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
                 StaticEncounter newStatic = new StaticEncounter();
                 Pokemon starter = starterIter.next();
-                if (starter.getFormeNumber() > 0) {
+                if (starter.isAltForme()) {
                     newStatic.forme = starter.getFormeNumber();
                     starter = starter.getBaseForme();
                 }
@@ -1329,7 +1328,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 // rather act as indicators for what forme should appear when encountered:
                 // 30 = Spawn the cosmetic forme specific to the user's region (Scatterbug line)
                 // 31 = Spawn *any* cosmetic forme with equal probability (Unown Mirage Cave)
-                if (forme <= baseForme.getCosmeticForms() || forme == 30 || forme == 31) {
+                if (forme <= baseForme.getCosmeticFormCount() || forme == 30 || forme == 31) {
                     e.setPokemon(pokes[species]);
                 } else {
                     int speciesWithForme = absolutePokeNumByBaseForme
@@ -2065,7 +2064,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(staticCRO,offset+i*size);
                 Pokemon pokemon = pokes[species];
                 int forme = staticCRO[offset+i*size + 2];
-                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -2094,7 +2093,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(staticCRO,offset+i*size);
                 Pokemon pokemon = pokes[species];
                 int forme = staticCRO[offset+i*size + 4];
-                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -2175,7 +2174,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         int level = FileFunctions.readFullInt(code, offset + 8);
         StaticEncounter se = new StaticEncounter();
         Pokemon pokemon = pokes[species];
-        if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+        if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
             int speciesWithForme = absolutePokeNumByBaseForme
                     .getOrDefault(species, dummyAbsolutePokeNums)
                     .getOrDefault(forme, 0);
@@ -3221,7 +3220,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             int introPokemonNum = pk.getNumber();
             int introPokemonForme = 0;
-            if (pk.getFormeNumber() > 0) {
+            if (pk.isAltForme()) {
                 introPokemonForme = pk.getFormeNumber();
                 introPokemonNum = pk.getBaseForme().getNumber();
             }

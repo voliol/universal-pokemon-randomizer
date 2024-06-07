@@ -695,7 +695,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		int cosmeticForms = Gen4Constants.cosmeticForms.getOrDefault(pkmn.getNumber(), 0);
 		if (cosmeticForms > 0 && romEntry.getRomType() != Gen4Constants.Type_DP) {
-			pkmn.setCosmeticForms(cosmeticForms);
+			pkmn.setCosmeticFormCount(cosmeticForms);
 		}
 	}
 
@@ -854,8 +854,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 	@Override
 	public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-		int pokeNum = Gen4Constants.getAbsolutePokeNumByBaseForme(pk.getNumber(), forme);
-		return pokeNum != 0 ? pokes[pokeNum] : pk;
+		return pk.getAltFormes().size() > forme ? pk.getAltFormes().get(forme - 1) : pk;
 	}
 
 	@Override

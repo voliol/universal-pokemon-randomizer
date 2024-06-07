@@ -75,7 +75,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     // This ROM
     private Pokemon[] pokes;
-    private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    private final TreeMap<Integer, Integer> formeMappings = new TreeMap<>();
     private Map<Integer,Map<Integer,Integer>> absolutePokeNumByBaseForme;
     private Map<Integer,Integer> dummyAbsolutePokeNums;
     private List<Pokemon> pokemonList;
@@ -188,7 +188,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             pokes = new Pokemon[pokemonCount + formeCount + 1];
             for (int i = 1; i <= pokemonCount; i++) {
                 pokes[i] = new Pokemon(i);
-                loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0),formeMappings);
+                loadBasicPokeStats(pokes[i],pokeGarc.files.get(i).get(0));
                 pokes[i].setName(pokeNames[i]);
                 pokes[i].setGeneration(generationOf(pokes[i]));
             }
@@ -203,14 +203,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             Map<Integer,Integer> currentMap = new HashMap<>();
             for (int k: formeMappings.keySet()) {
                 pokes[i] = new Pokemon(i);
-                loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0),formeMappings);
-                FormeInfo fi = formeMappings.get(k);
-                int realBaseForme = pokes[fi.baseForme].isAltForme() ? pokes[fi.baseForme].getBaseForme().getNumber() : fi.baseForme;
-                pokes[i].setName(pokeNames[realBaseForme]);
-                pokes[i].setBaseForme(pokes[fi.baseForme]);
-                pokes[i].setFormeNumber(fi.formeNumber);
-                pokes[i].setFormeSuffix(pokes[i].getBaseForme().getFormeSuffix()  // temporary while we figure out how formes (should) work
-                        + Gen7Constants.getFormeSuffixByBaseForme(fi.baseForme,fi.formeNumber));
+                loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0));
+                Pokemon baseForme = pokes[formeMappings.get(k)];
+                baseForme.addAltForme(pokes[i], Gen7Constants.getFormeSuffixByBaseForme(baseForme.getNumber(), baseForme.getAltFormes().size() + 1));
+
+                int realBaseForme = baseForme.isAltForme() ? baseForme.getBaseForme().getNumber() : baseForme.getNumber();
                 if (realBaseForme == prevSpecies) {
                     formNum++;
                     currentMap.put(formNum,i);
@@ -266,7 +263,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         return 1;
     }
 
-    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
+    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats) {
         pkmn.setHp(stats[Gen7Constants.bsHPOffset] & 0xFF);
         pkmn.setAttack(stats[Gen7Constants.bsAttackOffset] & 0xFF);
         pkmn.setDefense(stats[Gen7Constants.bsDefenseOffset] & 0xFF);
@@ -311,30 +308,30 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         int formeCount = stats[Gen7Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
-            if (!altFormes.containsKey(pkmn.getNumber())) {
-                int firstFormeOffset = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
-                if (firstFormeOffset != 0) {
+            if (!formeMappings.containsKey(pkmn.getNumber())) {
+                int firstForme = FileFunctions.read2ByteInt(stats, Gen7Constants.bsFormeOffset);
+                if (firstForme != 0) {
                     int j = 0;
                     int jMax = 0;
                     int theAltForme = 0;
                     Set<Integer> altFormesWithCosmeticForms = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).keySet();
                     for (int i = 1; i < formeCount; i++) {
                         if (j == 0 || j > jMax) {
-                            altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.getNumber(),i,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
-                            if (Gen7Constants.getCosmeticForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) {
-                                if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(firstFormeOffset+i-1)) { // Skip ignored forms (identical or confusing cosmetic forms)
-                                    pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1);
+                            formeMappings.put(firstForme + i - 1, pkmn.getNumber()); // Assumes that formes are in memory in the same order as their numbers
+                            if (Gen7Constants.getCosmeticForms(romEntry.getRomType()).contains(firstForme + i - 1)) {
+                                if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(firstForme + i - 1)) { // Skip ignored forms (identical or confusing cosmetic forms)
+                                    pkmn.setCosmeticFormCount(pkmn.getCosmeticFormCount() + 1);
                                     pkmn.getRealCosmeticFormNumbers().add(i);
                                 }
                             }
                         } else {
-                            altFormes.put(firstFormeOffset + i - 1,new FormeInfo(theAltForme,j,FileFunctions.read2ByteInt(stats,Gen7Constants.bsFormeSpriteOffset)));
+                            formeMappings.put(firstForme + i - 1, theAltForme);
                             j++;
                         }
-                        if (altFormesWithCosmeticForms.contains(firstFormeOffset + i - 1)) {
+                        if (altFormesWithCosmeticForms.contains(firstForme + i - 1)) {
                             j = 1;
-                            jMax = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).get(firstFormeOffset + i - 1);
-                            theAltForme = firstFormeOffset + i - 1;
+                            jMax = Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).get(firstForme + i - 1);
+                            theAltForme = firstForme + i - 1;
                         }
                     }
                 } else {
@@ -342,12 +339,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         // Reason for exclusions:
                         // Arceus/Genesect/Silvally: to avoid confusion
                         // Xerneas: Should be handled automatically?
-                        pkmn.setCosmeticForms(formeCount);
+                        pkmn.setCosmeticFormCount(formeCount);
                     }
                 }
             } else {
                 if (!Gen7Constants.getIgnoreForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
-                    pkmn.setCosmeticForms(Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).getOrDefault(pkmn.getNumber(),0));
+                    pkmn.setCosmeticFormCount(Gen7Constants.getAltFormesWithCosmeticForms(romEntry.getRomType()).getOrDefault(pkmn.getNumber(), 0));
                 }
                 if (Gen7Constants.getCosmeticForms(romEntry.getRomType()).contains(pkmn.getNumber())) {
                     pkmn.setCosmeticForme(true);
@@ -362,7 +359,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         // the base form to the realCosmeticFormNumbers here if that list was populated above.
         if (pkmn.getRealCosmeticFormNumbers().size() > 0) {
             pkmn.getRealCosmeticFormNumbers().add(0);
-            pkmn.setCosmeticForms(pkmn.getCosmeticForms() + 1); // getCosmeticForms++;
+            pkmn.setCosmeticFormCount(pkmn.getCosmeticFormCount() + 1); // getCosmeticForms++;
         }
     }
 
@@ -428,7 +425,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             default:
                                 break;
                         }
-                        if (pk.isAltForme() && pk.getBaseForme().getNumber() == Species.rockruff && pk.getFormeNumber() > 0) {
+                        if (pk.isAltForme() && pk.getBaseForme().getNumber() == Species.rockruff && pk.isAltForme()) {
                             evol.setFrom(pk.getBaseForme());
                             pk.getBaseForme().getEvolutionsFrom().add(evol);
                             pokes[absolutePokeNumByBaseForme.get(species).get(evol.getForme())].getEvolutionsTo().add(evol);
@@ -997,7 +994,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(giftsFile, offset);
                 Pokemon pokemon = pokes[species];
                 int forme = giftsFile[offset + 2];
-                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -1026,7 +1023,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int offset = i * 0x14;
                 Pokemon starter = newStarters.get(i);
                 int forme = 0;
-                if (starter.getFormeNumber() > 0) {
+                if (starter.isAltForme()) {
                     forme = starter.getFormeNumber();
                     starter = starter.getBaseForme();
                 }
@@ -1242,7 +1239,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         // If the forme is purely cosmetic, just use the base forme as the Pokemon
         // for this encounter (the cosmetic forme will be stored in the encounter).
-        if (forme <= pokemon.getCosmeticForms() || forme == 30 || forme == 31) {
+        if (forme <= pokemon.getCosmeticFormCount() || forme == 30 || forme == 31) {
             return pokemon;
         } else {
             int speciesWithForme = absolutePokeNumByBaseForme
@@ -1878,7 +1875,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
                 Pokemon pokemon = pokes[species];
                 int forme = staticEncountersFile[offset + 2];
-                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -1918,7 +1915,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             for (int i: totemIndices) {
                 int offset = i * 0x38;
                 TotemPokemon totem = totemIter.next();
-                if (totem.pkmn.getFormeNumber() > 0) {
+                if (totem.pkmn.isAltForme()) {
                     totem.forme = totem.pkmn.getFormeNumber();
                     totem.pkmn = totem.pkmn.getBaseForme();
                 }
@@ -1940,7 +1937,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 for (Integer allyIndex: totem.allies.keySet()) {
                     offset = allyIndex * 0x38;
                     StaticEncounter ally = totem.allies.get(allyIndex);
-                    if (ally.pkmn.getFormeNumber() > 0) {
+                    if (ally.pkmn.isAltForme()) {
                         ally.forme = ally.pkmn.getFormeNumber();
                         ally.pkmn = ally.pkmn.getBaseForme();
                     }
@@ -1986,7 +1983,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int species = FileFunctions.read2ByteInt(giftsFile, offset);
                 Pokemon pokemon = pokes[species];
                 int forme = giftsFile[offset + 2];
-                if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(species, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -2024,7 +2021,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         int species = FileFunctions.read2ByteInt(staticEncountersFile, offset);
         Pokemon pokemon = pokes[species];
         int forme = staticEncountersFile[offset + 2];
-        if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+        if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
             int speciesWithForme = absolutePokeNumByBaseForme
                     .getOrDefault(species, dummyAbsolutePokeNums)
                     .getOrDefault(forme, 0);
@@ -2089,7 +2086,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
             StaticEncounter lowLevelAssembly = new StaticEncounter();
             Pokemon pokemon = pokes[species];
-            if (forme > pokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+            if (forme > pokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                 int speciesWithForme = absolutePokeNumByBaseForme
                         .getOrDefault(species, dummyAbsolutePokeNums)
                         .getOrDefault(forme, 0);
@@ -3153,7 +3150,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Pokemon givenPokemon = pokes[givenSpecies];
                 Pokemon requestedPokemon = pokes[requestedSpecies];
                 int forme = tradesFile[offset + 4];
-                if (forme > givenPokemon.getCosmeticForms() && forme != 30 && forme != 31) {
+                if (forme > givenPokemon.getCosmeticFormCount() && forme != 30 && forme != 31) {
                     int speciesWithForme = absolutePokeNumByBaseForme
                             .getOrDefault(givenSpecies, dummyAbsolutePokeNums)
                             .getOrDefault(forme, 0);
@@ -3194,7 +3191,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int offset = i * 0x34;
                 Pokemon givenPokemon = trade.givenPokemon;
                 int forme = 0;
-                if (givenPokemon.getFormeNumber() > 0) {
+                if (givenPokemon.isAltForme()) {
                     forme = givenPokemon.getFormeNumber();
                     givenPokemon = givenPokemon.getBaseForme();
                 }

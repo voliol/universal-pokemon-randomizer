@@ -470,15 +470,8 @@ public class Gen4Constants {
     private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
     private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
 
-    private static final Map<Integer,Map<Integer,Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
-    private static final Map<Integer,Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
-
     public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
         return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
-    }
-
-    public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
-        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
     }
 
     public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
@@ -1626,45 +1619,6 @@ public class Gen4Constants {
     private static Map<Integer,String> setupDummyFormeSuffixes() {
         Map<Integer,String> m = new HashMap<>();
         m.put(0,"");
-        return m;
-    }
-
-    private static Map<Integer,Map<Integer,Integer>> setupAbsolutePokeNumsByBaseForme() {
-        Map<Integer,Map<Integer,Integer>> map = new HashMap<>();
-
-        Map<Integer,Integer> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,Species.Gen4Formes.deoxysA);
-        deoxysMap.put(2,Species.Gen4Formes.deoxysD);
-        deoxysMap.put(3,Species.Gen4Formes.deoxysS);
-        map.put(Species.deoxys, deoxysMap);
-
-        Map<Integer,Integer> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,Species.Gen4Formes.wormadamS);
-        wormadamMap.put(2,Species.Gen4Formes.wormadamT);
-        map.put(Species.wormadam, wormadamMap);
-
-        Map<Integer,Integer> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,Species.Gen4Formes.giratinaO);
-        map.put(Species.giratina, giratinaMap);
-
-        Map<Integer,Integer> shayminMap = new HashMap<>();
-        shayminMap.put(1,Species.Gen4Formes.shayminS);
-        map.put(Species.shaymin, shayminMap);
-
-        Map<Integer,Integer> rotomMap = new HashMap<>();
-        rotomMap.put(1,Species.Gen4Formes.rotomH);
-        rotomMap.put(2,Species.Gen4Formes.rotomW);
-        rotomMap.put(3,Species.Gen4Formes.rotomFr);
-        rotomMap.put(4,Species.Gen4Formes.rotomFa);
-        rotomMap.put(5,Species.Gen4Formes.rotomM);
-        map.put(Species.rotom, rotomMap);
-
-        return map;
-    }
-
-    private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
-        Map<Integer,Integer> m = new HashMap<>();
-        m.put(255,0);
         return m;
     }
 

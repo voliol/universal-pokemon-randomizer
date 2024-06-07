@@ -187,9 +187,9 @@ public class StaticPokemonRandomizer extends Randomizer {
                     }
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
                 } else {
-                    boolean limitBST = oldPK.getBaseForme() == null ?
-                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getNumber()) :
-                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getBaseForme().getNumber());
+                    boolean limitBST = oldPK.isAltForme() ?
+                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getBaseForme().getNumber()) :
+                            limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getNumber());
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
                         PokemonSet<Pokemon> megaEvoPokemonLeft = rPokeService.getMegaEvolutions()
                                 .stream()
@@ -466,15 +466,15 @@ public class StaticPokemonRandomizer extends Randomizer {
         boolean checkCosmetics = true;
         Pokemon newPK = pk;
         int newForme = 0;
-        if (pk.getFormeNumber() > 0) {
+        if (pk.isAltForme()) {
             newForme = pk.getFormeNumber();
             newPK = pk.getBaseForme();
             checkCosmetics = false;
         }
-        if (checkCosmetics && pk.getCosmeticForms() > 0) {
-            newForme = pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticForms()));
-        } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
-            newForme += pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticForms()));
+        if (checkCosmetics && pk.getCosmeticFormCount() > 0) {
+            newForme = pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticFormCount()));
+        } else if (!checkCosmetics && pk.getCosmeticFormCount() > 0) {
+            newForme += pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticFormCount()));
         }
         newStatic.pkmn = newPK;
         newStatic.forme = newForme;
@@ -543,15 +543,15 @@ public class StaticPokemonRandomizer extends Randomizer {
     private void setFormeForStaticEncounter(StaticEncounter newStatic, Pokemon pk) {
         boolean checkCosmetics = true;
         newStatic.forme = 0;
-        if (pk.getFormeNumber() > 0) {
+        if (pk.isAltForme()) {
             newStatic.forme = pk.getFormeNumber();
             newStatic.pkmn = pk.getBaseForme();
             checkCosmetics = false;
         }
-        if (checkCosmetics && newStatic.pkmn.getCosmeticForms() > 0) {
-            newStatic.forme = newStatic.pkmn.getCosmeticFormNumber(random.nextInt(newStatic.pkmn.getCosmeticForms()));
-        } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
-            newStatic.forme += pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticForms()));
+        if (checkCosmetics && newStatic.pkmn.getCosmeticFormCount() > 0) {
+            newStatic.forme = newStatic.pkmn.getCosmeticFormNumber(random.nextInt(newStatic.pkmn.getCosmeticFormCount()));
+        } else if (!checkCosmetics && pk.getCosmeticFormCount() > 0) {
+            newStatic.forme += pk.getCosmeticFormNumber(random.nextInt(pk.getCosmeticFormCount()));
         }
     }
 

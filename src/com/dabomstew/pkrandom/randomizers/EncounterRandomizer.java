@@ -458,15 +458,15 @@ public class EncounterRandomizer extends Randomizer {
     private void setFormeForEncounter(Encounter enc, Pokemon pk) {
         boolean checkCosmetics = true;
         enc.setFormeNumber(0);
-        if (enc.getPokemon().getFormeNumber() > 0) {
+        if (enc.getPokemon().isAltForme()) {
             enc.setFormeNumber(enc.getPokemon().getFormeNumber());
             enc.setPokemon(enc.getPokemon().getBaseForme());
             checkCosmetics = false;
         }
-        if (checkCosmetics && enc.getPokemon().getCosmeticForms() > 0) {
-            enc.setFormeNumber(enc.getPokemon().getCosmeticFormNumber(this.random.nextInt(enc.getPokemon().getCosmeticForms())));
-        } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
-            enc.setFormeNumber(enc.getFormeNumber() + pk.getCosmeticFormNumber(this.random.nextInt(pk.getCosmeticForms())));
+        if (checkCosmetics && enc.getPokemon().getCosmeticFormCount() > 0) {
+            enc.setFormeNumber(enc.getPokemon().getCosmeticFormNumber(this.random.nextInt(enc.getPokemon().getCosmeticFormCount())));
+        } else if (!checkCosmetics && pk.getCosmeticFormCount() > 0) {
+            enc.setFormeNumber(enc.getFormeNumber() + pk.getCosmeticFormNumber(this.random.nextInt(pk.getCosmeticFormCount())));
         }
     }
 

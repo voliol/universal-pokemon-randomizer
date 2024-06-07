@@ -60,7 +60,7 @@ public class Pokemon implements Comparable<Pokemon> {
     private List<Pokemon> altFormes = new ArrayList<>();
     private Pokemon baseForme = null;
     private int formeNumber = 0;
-    private int cosmeticForms = 0;
+    private int cosmeticFormCount = 0;
     private int formeSpriteIndex = 0;
     private boolean cosmetic = false;
     private List<Integer> realCosmeticFormNumbers = new ArrayList<>();
@@ -395,7 +395,7 @@ public class Pokemon implements Comparable<Pokemon> {
         }
         altFormes.add(forme);
         forme.name = name;
-        forme.formeSuffix = formeSuffix;
+        forme.formeSuffix = this.formeSuffix + formeSuffix;
         forme.baseForme = this;
         forme.formeNumber = altFormes.size();
     }
@@ -411,24 +411,16 @@ public class Pokemon implements Comparable<Pokemon> {
         return baseForme;
     }
 
-    public void setBaseForme(Pokemon baseForme) {
-        this.baseForme = baseForme;
-    }
-
     public int getFormeNumber() {
         return formeNumber;
     }
 
-    public void setFormeNumber(int formeNumber) {
-        this.formeNumber = formeNumber;
+    public int getCosmeticFormCount() {
+        return cosmeticFormCount;
     }
 
-    public int getCosmeticForms() {
-        return cosmeticForms;
-    }
-
-    public void setCosmeticForms(int cosmeticForms) {
-        this.cosmeticForms = cosmeticForms;
+    public void setCosmeticFormCount(int cosmeticFormCount) {
+        this.cosmeticFormCount = cosmeticFormCount;
     }
 
     public int getFormeSpriteIndex() {

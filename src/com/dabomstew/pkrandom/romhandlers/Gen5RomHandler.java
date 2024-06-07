@@ -398,7 +398,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (int i = 1; i < formeCount; i++) {
                     formeMappings.put(firstForme + i - 1, new FormeInfo(pkmn.getNumber(), i, readWord(stats, Gen5Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                     if (pkmn.getNumber() == Species.keldeo) {
-                        pkmn.setCosmeticForms(formeCount);
+                        pkmn.setCosmeticFormCount(formeCount);
                     }
                 }
             } else {
@@ -406,7 +406,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     // Reason for exclusions:
                     // Cherrim/Arceus/Genesect: to avoid confusion
                     // Deerling/Sawsbuck: handled automatically in gen 5
-                    pkmn.setCosmeticForms(formeCount);
+                    pkmn.setCosmeticFormCount(formeCount);
                 }
                 if (pkmn.getNumber() == Species.Gen5Formes.keldeoCosmetic1) {
                     pkmn.setCosmeticForme(true);
@@ -554,8 +554,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-        int pokeNum = Gen5Constants.getAbsolutePokeNumByBaseForme(pk.getNumber(),forme);
-        return pokeNum != 0 ? pokes[pokeNum] : pk;
+        return pk.getAltFormes().size() > forme ? pk.getAltFormes().get(forme - 1) : pk;
     }
 
 	@Override
@@ -797,15 +796,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             int species = readWord(data, offset + i * 4) & 0x7FF;
             int forme = readWord(data, offset + i * 4) >> 11;
             Pokemon baseForme = pokes[species];
-            if (forme <= baseForme.getCosmeticForms() || forme == 30 || forme == 31) {
+            if (forme <= baseForme.getCosmeticFormCount() || forme == 30 || forme == 31) {
                 enc.setPokemon(pokes[species]);
             } else {
-                int speciesWithForme = Gen5Constants.getAbsolutePokeNumByBaseForme(species,forme);
-                if (speciesWithForme == 0) {
-                    enc.setPokemon(pokes[species]); // Failsafe
-                } else {
-                    enc.setPokemon(pokes[speciesWithForme]);
-                }
+                enc.setPokemon(getAltFormeOfPokemon(baseForme, forme));
             }
             enc.setFormeNumber(forme);
             enc.setLevel(data[offset + 2 + i * 4] & 0xFF);
