@@ -1005,37 +1005,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         //order doesn't matter, here, since we're not randomizing by area.
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
-        //Iterate over areas to obtain list of source Pokemon
-        for (EncounterSet area : currentEncounters) {
-            PokemonSet inArea = pokemonInArea(area);
-            Type areaTheme = null;
-            if(keepThemes) {
-                areaTheme = inArea.findOriginalSharedType();
-            }
-
-            for (Pokemon areaPK : inArea) {
-                if (bannedSet.contains(areaPK)) {
-                    //banned Pokemon are not randomized, but mapped to themselves.
-                    translateMap.put(areaPK, areaPK);
-                    continue;
-                }
-
-                //get or create the info
-                globalWildRandomizationInformation info;
-                if (infoMap.containsKey(areaPK)) {
-                    info = infoMap.get(areaPK);
-                    info.bannedForReplacement.addAll(area.bannedPokemon);
-                } else {
-                    info = new globalWildRandomizationInformation(areaPK, area.bannedPokemon);
-                    infoMap.put(areaPK, info);
-                }
-
-                //add theme if applicable
-                if(areaTheme != null) {
-                    info.possibleThemes.add(areaTheme);
-                }
-            }
-        }
+        //Get list of source Pokemon & relevant info
+        populateGlobalInfoMap(currentEncounters, keepThemes, bannedSet, translateMap, infoMap, null);
 
         //shuffle list of Pokemon with info in preparation for randomization
         List<globalWildRandomizationInformation> infoList = new ArrayList<>(infoMap.values());
@@ -1120,40 +1091,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         //order doesn't matter, here, since we're not randomizing by area.
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
-        //Iterate over areas to obtain list of source Pokemon
-        for (EncounterSet area : currentEncounters) {
-            PokemonSet inArea = pokemonInArea(area);
-            Type areaTheme = null;
-            if(keepThemes) {
-                areaTheme = inArea.findOriginalSharedType();
-            }
-
-            for (Pokemon areaPK : inArea) {
-                if (bannedSet.contains(areaPK)) {
-                    //banned Pokemon are not randomized, but mapped to themselves.
-                    translateMap.put(areaPK, areaPK);
-                    continue;
-                }
-
-                //get or create the info
-                globalWildRandomizationInformation info;
-                if (infoMap.containsKey(areaPK)) {
-                    info = infoMap.get(areaPK);
-                    info.bannedForReplacement.addAll(area.bannedPokemon);
-                } else {
-                    info = new globalWildRandomizationInformation(areaPK, area.bannedPokemon);
-                    infoMap.put(areaPK, info);
-                }
-
-                //add to family collator
-                pokemonToRandomize.add(areaPK);
-
-                //add theme if applicable
-                if(areaTheme != null) {
-                    info.possibleThemes.add(areaTheme);
-                }
-            }
-        }
+        populateGlobalInfoMap(currentEncounters, keepThemes, bannedSet, translateMap, infoMap, pokemonToRandomize);
 
         //start with most restrictive families so we don't run out
         //first, 3-long without gap
@@ -1195,6 +1133,60 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
 
+    /**
+     * Given a list of EncounterSets, populates a map of globalWildRandomizationInformation for each of them.
+     * Optionally also populates
+     * @param currentEncounters
+     * @param keepThemes Whether to include area themes in the RandomizationInfos.
+     * @param bannedSet The list of Pokemon that should not be included in the map.
+     * @param infoMap
+     * @param addAllPokemonTo A PokemonSet to populate with the list of Pokemon, or null.
+     */
+    private void populateGlobalInfoMap(List<EncounterSet> currentEncounters, boolean keepThemes, PokemonSet bannedSet,
+                                       Map<Pokemon, Pokemon> translateMap,
+                                       Map<Pokemon, globalWildRandomizationInformation> infoMap,
+                                       PokemonSet addAllPokemonTo) {
+
+        //Iterate over areas to obtain list of source Pokemon
+        for (EncounterSet area : currentEncounters) {
+            PokemonSet inArea = pokemonInArea(area);
+            Type areaTheme = null;
+            if(keepThemes && inArea.size() > 1) {
+                //If there's only one pokemon, it's unlikely to be visibly a theme.
+                //It's a little arbitrary, but... better than having swarms screw up
+                //the themes that are obvious and we care about.
+                areaTheme = inArea.findOriginalSharedType();
+            }
+
+            for (Pokemon areaPK : inArea) {
+                if (bannedSet.contains(areaPK)) {
+                    //banned Pokemon are not randomized, but mapped to themselves.
+                    translateMap.put(areaPK, areaPK);
+                    continue;
+                }
+
+                //get or create the info
+                globalWildRandomizationInformation info;
+                if (infoMap.containsKey(areaPK)) {
+                    info = infoMap.get(areaPK);
+                    info.bannedForReplacement.addAll(area.bannedPokemon);
+                } else {
+                    info = new globalWildRandomizationInformation(areaPK, area.bannedPokemon);
+                    infoMap.put(areaPK, info);
+                }
+
+                //add to family collator
+                if(addAllPokemonTo != null) {
+                    addAllPokemonTo.add(areaPK);
+                }
+
+                //add theme if applicable
+                if(areaTheme != null) {
+                    info.possibleThemes.add(areaTheme);
+                }
+            }
+        }
+    }
 
 
     @Override
@@ -1795,8 +1787,15 @@ public abstract class AbstractRomHandler implements RomHandler {
             translateMap.put(toRandomize, picked);
             //and, add the rest of the family too
             for(Pokemon relative : familiesToRandomize.getFamily(toRandomize)) {
+                if(relative == toRandomize) {
+                    continue;
+                }
                 int relation = toRandomize.getRelation(relative);
                 PokemonSet replaceCandidates = backupPool.getRelativesAtPositionSameBranch(picked, relation);
+                //We want to pull from the whole pool, not just the available pool (as that contains only the replacements
+                // for toRandomize). backupPool is guaranteed to always have the family in question, activePool isn't,
+                // so we use backupPool.
+
                 boolean replaced = false;
                 while(!replaced && !replaceCandidates.isEmpty()) {
                     Pokemon relativeReplacement = replaceCandidates.randomPokemon(this.random);
@@ -1814,7 +1813,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            familiesToRandomize.removeFamily(toRandomize);
+            familiesToRandomize.removeOriginalFamily(toRandomize);
+            pokemonToRandomize.removeOriginalFamily(toRandomize);
             familyPool.removeFamily(picked);
             activePool.removeFamily(picked);
 
