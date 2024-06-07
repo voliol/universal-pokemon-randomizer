@@ -205,7 +205,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 pokes[i] = new Pokemon(i);
                 loadBasicPokeStats(pokes[i], pokeGarc.files.get(k).get(0));
                 Pokemon baseForme = pokes[formeMappings.get(k)];
-                baseForme.addAltForme(pokes[i], Gen7Constants.getFormeSuffixByBaseForme(baseForme.getNumber(), baseForme.getAltFormes().size() + 1));
+                baseForme.addAltForme(pokes[i], Gen7Constants.formeSuffixesByBaseForme);
 
                 int realBaseForme = baseForme.isAltForme() ? baseForme.getBaseForme().getNumber() : baseForme.getNumber();
                 if (realBaseForme == prevSpecies) {
@@ -3191,7 +3191,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int offset = i * 0x34;
                 Pokemon givenPokemon = trade.givenPokemon;
                 int forme = 0;
-                if (givenPokemon.isAltForme()) {
+                if (givenPokemon.getFormeNumber() > 0) {
                     forme = givenPokemon.getFormeNumber();
                     givenPokemon = givenPokemon.getBaseForme();
                 }

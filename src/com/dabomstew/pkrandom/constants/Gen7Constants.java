@@ -66,11 +66,10 @@ public class Gen7Constants {
             Species.SMFormes.marowakA, Species.USUMFormes.marowakA
     );
 
-    private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
-    private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
+    public static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
 
     public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
-        return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
+        return formeSuffixesByBaseForme.getOrDefault(baseForme, Map.of(0, "")).getOrDefault(formNum,"");
     }
 
     public static List<Integer> getIrregularFormes(int romType) {
@@ -626,12 +625,6 @@ public class Gen7Constants {
             speciesMap.put(i + 1, suffixes[i]);
         }
         map.put(species, speciesMap);
-    }
-
-    private static Map<Integer,String> setupDummyFormeSuffixes() {
-        Map<Integer,String> m = new HashMap<>();
-        m.put(0,"");
-        return m;
     }
 
     private static final List<Integer> cosmeticFormsSM = Arrays.asList(

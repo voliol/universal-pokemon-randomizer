@@ -28,11 +28,7 @@ import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Represents a Pokémon species (base forme) or alt forme, with relevant attributes such as base stats,
@@ -382,8 +378,10 @@ public class Pokemon implements Comparable<Pokemon> {
         return formeSuffix;
     }
 
-    public void setFormeSuffix(String formeSuffix) {
-        this.formeSuffix = formeSuffix;
+    public void addAltForme(Pokemon forme, Map<Integer, Map<Integer,String>> formeSuffixesByBaseForme) {
+        String formeSuffix = formeSuffixesByBaseForme.getOrDefault(number, Map.of(0, ""))
+                .getOrDefault(altFormes.size() + 1,"");
+        addAltForme(forme, formeSuffix);
     }
 
     public void addAltForme(Pokemon forme, String formeSuffix) {
