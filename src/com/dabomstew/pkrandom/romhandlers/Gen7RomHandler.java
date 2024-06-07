@@ -75,6 +75,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     // This ROM
     private Pokemon[] pokes;
+    // it's important formeMappings is a TreeMap because we want to iterate through it in order
     private final TreeMap<Integer, Integer> formeMappings = new TreeMap<>();
     private Map<Integer,Map<Integer,Integer>> absolutePokeNumByBaseForme;
     private Map<Integer,Integer> dummyAbsolutePokeNums;
@@ -966,6 +967,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        // TODO: what's up with this?
         int pokeNum = absolutePokeNumByBaseForme.getOrDefault(pk.getNumber(),dummyAbsolutePokeNums).getOrDefault(forme,0);
         return pokeNum != 0 ? !pokes[pokeNum].isCosmeticForme() ? pokes[pokeNum] : pokes[pokeNum].getBaseForme() : pk;
     }
