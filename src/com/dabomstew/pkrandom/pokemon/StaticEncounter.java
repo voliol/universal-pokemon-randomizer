@@ -66,6 +66,7 @@ public class StaticEncounter {
         this.resetMoves = original.resetMoves;
         this.restrictedPool = original.restrictedPool;
         this.restrictedList = new ArrayList<>(original.restrictedList);
+        this.linkedEncounters = new ArrayList<>(original.linkedEncounters.size());
         for (StaticEncounter oldLinked : original.linkedEncounters) {
             StaticEncounter newLinked = new StaticEncounter();
             newLinked.pkmn = oldLinked.pkmn;

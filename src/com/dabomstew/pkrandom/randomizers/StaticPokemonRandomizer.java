@@ -126,7 +126,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                         newPK = getRestrictedStaticPokemon(ultraBeastsPool, ultraBeastsLeft, old);
                     } else {
                         newPK = ultraBeastsLeft.getRandom(random);
-                        rPokeService.getUltrabeasts(false).remove(newPK);
+                        ultraBeastsLeft.remove(newPK);
                     }
 
                     setPokemonAndFormeForStaticEncounter(newStatic, newPK);
