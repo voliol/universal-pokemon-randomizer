@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.newnds;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -9,8 +10,7 @@ import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.RomFunctions;
 
-import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
-import com.dabomstew.pkrandom.exceptions.RandomizerIOException;
+import com.dabomstew.pkrandom.exceptions.RomIOException;
 import cuecompressors.BLZCoder;
 
 /*----------------------------------------------------------------------------*/
@@ -105,7 +105,7 @@ public class NDSRom {
 
         byte[] sig = new byte[4];
         baseRom.readFully(sig);
-        this.romCode = new String(sig, "US-ASCII");
+        this.romCode = new String(sig, StandardCharsets.US_ASCII);
 
         baseRom.seek(0x1E);
         this.version = baseRom.readByte();
@@ -530,7 +530,7 @@ public class NDSRom {
                     if (foundOffsets.size() == 1) {
                         arm9_szoffset = foundOffsets.get(0);
                     } else {
-                        throw new RandomizerIOException("Could not read ARM9 size offset. May be a bad ROM.");
+                        throw new RomIOException("Could not read ARM9 size offset. May be a bad ROM.");
                     }
                 }
             }
@@ -613,7 +613,7 @@ public class NDSRom {
             int namelen = control & 0x7F;
             byte[] rawname = new byte[namelen];
             baseRom.readFully(rawname);
-            String name = new String(rawname, "US-ASCII");
+            String name = new String(rawname, StandardCharsets.US_ASCII);
             if ((control & 0x80) > 0x00) {
                 // sub-directory
                 int subDirectoryID = readFromFile(baseRom, 2);

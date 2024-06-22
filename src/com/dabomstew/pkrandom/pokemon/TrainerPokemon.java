@@ -58,7 +58,7 @@ public class TrainerPokemon {
     public boolean resetMoves = false;
 
     public String toString() {
-        String s = pokemon.name + formeSuffix;
+        String s = pokemon.getName() + formeSuffix;
         if (heldItem != 0) {
             // This can be filled in with the actual name when written to the log.
             s += "@%s";
@@ -69,7 +69,7 @@ public class TrainerPokemon {
 
     public boolean canMegaEvolve() {
         if (heldItem != 0) {
-            for (MegaEvolution mega: pokemon.megaEvolutionsFrom) {
+            for (MegaEvolution mega: pokemon.getMegaEvolutionsFrom()) {
                 if (mega.argument == heldItem) {
                     return true;
                 }

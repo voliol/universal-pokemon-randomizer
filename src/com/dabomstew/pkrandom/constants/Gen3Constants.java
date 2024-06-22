@@ -24,14 +24,13 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.pokemon.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
 
 public class Gen3Constants {
 
@@ -49,32 +48,33 @@ public class Gen3Constants {
 
     public static final int pokemonCount = 386;
 
-    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000";
-
-    public static final String mapBanksPointerPrefix = "80180068890B091808687047";
+    public static final int unownFormeCount = 28, unownBIndex = 413;
 
     public static final String rsPokemonNamesPointerSuffix = "30B50025084CC8F7";
 
-    public static final String frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000";
+    // These pointer prefixes aren't used despite being accurate to all vanilla ROMs. Using them to search was slow
+    // enough to become annoying when unit testing, compared to having the offsets they dug out in the RomEntry .ini files.
+    // They remain here in case you want to fill a new RomEntry (for a ROM hack).
+    @SuppressWarnings("unused")
+    public static final String wildPokemonPointerPrefix = "0348048009E00000FFFF0000",
+            mapBanksPointerPrefix = "80180068890B091808687047",
+            frlgMapLabelsPointerPrefix = "AC470000AE470000B0470000",
+            rseMapLabelsPointerPrefix = "C078288030BC01BC00470000",
+            pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
 
-    public static final String rseMapLabelsPointerPrefix = "C078288030BC01BC00470000";
+    // pointer block 1
+    public static final int pokemonFrontImagesPointer = 0x128, pokemonBackImagesPointer = 0x12C,
+    		pokemonNormalPalettesPointer = 0x130, pokemonShinyPalettesPointer = 0x134,
+    		pokemonIconSpritesPointer = 0x138, pokemonIconPalettesPointer = 0x13C,
+    		pokemonNamesPointer = 0x144, moveNamesPointer = 0x148, decorationNamesPointer = 0x14C;
 
-    public static final String pokedexOrderPointerPrefix = "0448814208D0481C0004000C05E00000";
-
-    public static final String rsFrontSpritesPointerPrefix = "05E0";
-
-    public static final String rsFrontSpritesPointerSuffix = "1068191C";
-
-    public static final String rsPokemonPalettesPointerPrefix = "04D90148006817E0";
-
-    public static final String rsPokemonPalettesPointerSuffix = "080C064A11404840";
+    // pointer block 2
+    public static final int pokemonStatsPointer = 0x1BC, abilityNamesPointer = 0x1C0, 
+    		abilityDescriptionsPointer = 0x1C4, itemDataPointer = 0x1C8, moveDataPointer = 0x1CC,
+    		ballSpritesPointer = 0x1D0, ballPalettesPointer = 0x1D4;    
 
     private static final String runningShoesCheckPrefixRS = "0440002C1DD08620", runningShoesCheckPrefixFRLG = "02200540002D29D0",
             runningShoesCheckPrefixE = "0640002E1BD08C20";
-
-    public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
-            efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
-            efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;
 
     public static final byte[] emptyPokemonSig = new byte[] { 0x32, (byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32,
             0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00, (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F,
@@ -87,14 +87,14 @@ public class Gen3Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
             bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23;
 
-    public static final int textTerminator = 0xFF, textVariable = 0xFD;
+    public static final byte textTerminator = (byte) 0xFF, textVariable = (byte) 0xFD, textPadding = (byte) 0x00;
 
     public static final byte freeSpaceByte = (byte) 0xFF;
 
+    public static final int unusedSpaceChunkLength = 0x100, unusedSpaceFrontMargin = 0x10;
+
     public static final int rseStarter2Offset = 2, rseStarter3Offset = 4, frlgStarter2Offset = 515,
             frlgStarter3Offset = 461, frlgStarterRepeatOffset = 5;
-
-    public static final int frlgBaseStarter1 = 1, frlgBaseStarter2 = 4, frlgBaseStarter3 = 7;
 
     public static final int frlgStarterItemsOffset = 218;
 
@@ -106,6 +106,9 @@ public class Gen3Constants {
     public static final Type[] typeTable = constructTypeTable();
 
     public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
+
+    public static final byte[] vanillaMovesLearntTerminator = new byte[] {(byte) 0xFF, (byte) 0xFF},
+            jamboMovesLearntTerminator = new byte[] {0x00, 0x00, (byte) 0xFF};
 
     public static final int tmCount = 50, hmCount = 8;
 
@@ -134,11 +137,15 @@ public class Gen3Constants {
 
     public static final String rsPokedexScriptIdentifier = "326629010803";
 
+    public static final int rsNatDexScriptLength = 44;
+
     public static final String rsNatDexScriptPart1 = "31720167";
 
     public static final String rsNatDexScriptPart2 = "32662901082B00801102006B02021103016B020211DABE4E020211675A6A02022A008003";
 
     public static final String frlgPokedexScriptIdentifier = "292908258101";
+
+    public static final int frlgNatDexScriptLength = 10;
 
     public static final String frlgNatDexScript = "292908258101256F0103";
 
@@ -158,6 +165,8 @@ public class Gen3Constants {
 
     public static final String ePokedexScriptIdentifier = "3229610825F00129E40816CD40010003";
 
+    public static final int eNatDexScriptLength = 27;
+
     public static final String eNatDexScriptPart1 = "31720167";
 
     public static final String eNatDexScriptPart2 = "3229610825F00129E40825F30116CD40010003";
@@ -173,6 +182,37 @@ public class Gen3Constants {
     public static final int cacophonyIndex = 76, airLockIndex = 77, highestAbilityIndex = 77;
 
     public static final int emMeteorFallsStevenIndex = 804;
+
+    public static String rseGetName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Brendan";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "May";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. RSE only has two playable characters, Brendan and May.");
+        }
+    }
+
+    public static String frlgGetName(Settings.PlayerCharacterMod playerCharacter) {
+        if (playerCharacter == Settings.PlayerCharacterMod.PC1) {
+            return "Red";
+        } else if (playerCharacter == Settings.PlayerCharacterMod.PC2){
+            return "Leaf";
+        } else {
+            throw new IllegalArgumentException("Invalid enum. FRLG only has two playable characters, Red and Leaf.");
+        }
+    }
+
+    public static final int emBrendanFrontImageIndex = 71, frlgRedFrontImageIndex = 135;
+
+    public static final int rsTrainerFrontPalettesOffset = 0x298, emTrainerFrontPalettesOffset = 0x2E8,
+            frlgTrainerFrontPalettesOffset = 0x4A0,
+            rsTrainerBackPalettesOffset = 0x18, emTrainerBackPalettesOffset = 0x40,
+            frlgTrainerBackPalettesOffset = 0x30;
+
+    public static final int brendanMapIconPaletteOffset = -0x20, mayMapIconImageOffset = 0xA0,
+            mayMapIconPaletteOffset = 0x80, redMapIconPalettePointerOffset = 0xC4,
+            leafMapIconImagePointerOffset = -0x30, leafMapIconPalettePointerOffset = 0xE0;
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
@@ -241,7 +281,7 @@ public class Gen3Constants {
 
     public static final List<Integer> frlgEarlyRequiredHMMoves = Collections.singletonList(Moves.cut);
 
-    private static List<String> rsShopNames = Arrays.asList(
+    private static final List<String> rsShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -268,7 +308,7 @@ public class Gen3Constants {
             "Pokémon League Poké Mart"
     );
 
-    private static List<String> frlgShopNames = Arrays.asList(
+    private static final List<String> frlgShopNames = Arrays.asList(
             "Trainer Tower Poké Mart",
             "Two Island Market Stall (Initial)",
             "Two Island Market Stall (After Saving Lostelle)",
@@ -294,7 +334,7 @@ public class Gen3Constants {
             "Six Island Poké Mart"
     );
 
-    private static List<String> emShopNames = Arrays.asList(
+    private static final List<String> emShopNames = Arrays.asList(
             "Slateport Vitamins",
             "Slateport TMs",
             "Oldale Poké Mart (Before Pokédex)",
@@ -383,22 +423,22 @@ public class Gen3Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>();
-        map.put(Type.BUG, Arrays.asList(Gen3Items.silverPowder));
-        map.put(Type.DARK, Arrays.asList(Gen3Items.blackGlasses));
-        map.put(Type.DRAGON, Arrays.asList(Gen3Items.dragonFang));
-        map.put(Type.ELECTRIC, Arrays.asList(Gen3Items.magnet));
-        map.put(Type.FIGHTING, Arrays.asList(Gen3Items.blackBelt));
-        map.put(Type.FIRE, Arrays.asList(Gen3Items.charcoal));
-        map.put(Type.FLYING, Arrays.asList(Gen3Items.sharpBeak));
-        map.put(Type.GHOST, Arrays.asList(Gen3Items.spellTag));
-        map.put(Type.GRASS, Arrays.asList(Gen3Items.miracleSeed));
-        map.put(Type.GROUND, Arrays.asList(Gen3Items.softSand));
-        map.put(Type.ICE, Arrays.asList(Gen3Items.neverMeltIce));
-        map.put(Type.NORMAL, Arrays.asList(Gen3Items.silkScarf));
-        map.put(Type.POISON, Arrays.asList(Gen3Items.poisonBarb));
-        map.put(Type.PSYCHIC, Arrays.asList(Gen3Items.twistedSpoon));
-        map.put(Type.ROCK, Arrays.asList(Gen3Items.hardStone));
-        map.put(Type.STEEL, Arrays.asList(Gen3Items.metalCoat));
+        map.put(Type.BUG, List.of(Gen3Items.silverPowder));
+        map.put(Type.DARK, List.of(Gen3Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Gen3Items.dragonFang));
+        map.put(Type.ELECTRIC, List.of(Gen3Items.magnet));
+        map.put(Type.FIGHTING, List.of(Gen3Items.blackBelt));
+        map.put(Type.FIRE, List.of(Gen3Items.charcoal));
+        map.put(Type.FLYING, List.of(Gen3Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Gen3Items.spellTag));
+        map.put(Type.GRASS, List.of(Gen3Items.miracleSeed));
+        map.put(Type.GROUND, List.of(Gen3Items.softSand));
+        map.put(Type.ICE, List.of(Gen3Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Gen3Items.silkScarf));
+        map.put(Type.POISON, List.of(Gen3Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Gen3Items.twistedSpoon));
+        map.put(Type.ROCK, List.of(Gen3Items.hardStone));
+        map.put(Type.STEEL, List.of(Gen3Items.metalCoat));
         map.put(Type.WATER, Arrays.asList(Gen3Items.mysticWater, Gen3Items.seaIncense));
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
@@ -408,15 +448,15 @@ public class Gen3Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.latias, Arrays.asList(Gen3Items.soulDew));
-        map.put(Species.latios, Arrays.asList(Gen3Items.soulDew));
+        map.put(Species.latias, List.of(Gen3Items.soulDew));
+        map.put(Species.latios, List.of(Gen3Items.soulDew));
         map.put(Species.clamperl, Arrays.asList(Gen3Items.deepSeaTooth, Gen3Items.deepSeaScale));
-        map.put(Species.pikachu, Arrays.asList(Gen3Items.lightBall));
-        map.put(Species.chansey, Arrays.asList(Gen3Items.luckyPunch));
-        map.put(Species.ditto, Arrays.asList(Gen3Items.metalPowder));
-        map.put(Species.cubone, Arrays.asList(Gen3Items.thickClub));
-        map.put(Species.marowak, Arrays.asList(Gen3Items.thickClub));
-        map.put(Species.farfetchd, Arrays.asList(Gen3Items.stick));
+        map.put(Species.pikachu, List.of(Gen3Items.lightBall));
+        map.put(Species.chansey, List.of(Gen3Items.luckyPunch));
+        map.put(Species.ditto, List.of(Gen3Items.metalPowder));
+        map.put(Species.cubone, List.of(Gen3Items.thickClub));
+        map.put(Species.marowak, List.of(Gen3Items.thickClub));
+        map.put(Species.farfetchd, List.of(Gen3Items.stick));
         return Collections.unmodifiableMap(map);
     }
 
@@ -486,6 +526,32 @@ public class Gen3Constants {
         }
     }
 
+    public static final int nonNeutralEffectivenessCount = 110;
+
+    private static final EvolutionType[] evolutionTypeTable = new EvolutionType[] {
+            EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT, EvolutionType.LEVEL,
+            EvolutionType.TRADE, EvolutionType.TRADE_ITEM, EvolutionType.STONE, EvolutionType.LEVEL_ATTACK_HIGHER,
+            EvolutionType.LEVEL_ATK_DEF_SAME, EvolutionType.LEVEL_DEFENSE_HIGHER, EvolutionType.LEVEL_LOW_PV,
+            EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_CREATE_EXTRA, EvolutionType.LEVEL_IS_EXTRA,
+            EvolutionType.LEVEL_HIGH_BEAUTY
+    };
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        for (int i = 0; i < evolutionTypeTable.length; i++) {
+            if (evolutionType == evolutionTypeTable[i]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        if (index == -1) {
+            return EvolutionType.NONE;
+        }
+        return evolutionTypeTable[index - 1];
+    }
+
     public static ItemList allowedItems, nonBadItemsRSE, nonBadItemsFRLG;
     public static List<Integer> regularShopItems, opShopItems;
 
@@ -538,16 +604,16 @@ public class Gen3Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall,Gen3Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion,Gen3Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel,Gen3Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall, Gen3Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion, Gen3Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel, Gen3Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Gen3Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom,Gen3Items.bigMushroom).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl,Gen3Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom, Gen3Items.bigMushroom).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl, Gen3Items.nugget).boxed().toList());
         opShopItems.add(Gen3Items.luckyEgg);
     }
 
@@ -558,43 +624,6 @@ public class Gen3Constants {
             return nonBadItemsRSE;
         }
     }
-
-    public static int[] rsPostGameEncounterAreas = new int[] {
-            81, 82, 83, //SKY PILLAR
-            153 //Mirage Island - technically not post-game, but not exactly part of the game either
-    };
-
-    public static int[] emPostGameEncounterAreas = new int[] {
-            174, 177, 178, //SKY PILLAR
-            199, 200, 201, 202, 203, 204, 205, 206, 207, //ALTERING CAVE
-            196, //DESERT UNDERPASS
-            95, //Mirage Island - technically not post-game, but hardly "local" since it almost never exists
-    };
-
-    public static int[] frlgPostGameEncounterAreas = new int[] {
-            33, 34, 35, 36, 37, 38, 39, 40, 41, 42, //CERULEAN CAVE
-            118, //THREE ISLE PORT
-            214, 215, //FOUR ISLAND
-            82, 83, 84, 85, 86, 87, 88, 89, //ICEFALL CAVE
-            216, 217, //FIVE ISLAND
-            119, 120, //RESORT GORGEOUS
-            91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, //LOST CAVE
-            121, 122, //WATER LABYRINTH
-            123, 124, 125, //FIVE ISLE MEADOW
-            126, 127, 128, //MEMORIAL PILLAR
-            133, 134, 135, //WATER PATH
-            136, 137, 138, //RUIN VALLEY
-            131, 132, //GREEN PATH
-            90, //PATTERN BUSH
-            129, 130, //OUTCAST ISLAND
-            218, 219, 220, 221, 222, 223, 224, 225, 226, //ALTERING CAVE
-            144, 145, //TANOBY RUINS
-            0, 1, 2, 3, 4, 5, 6, //the Tanoby Chambers
-            142, 143, //SEVAULT CANYON
-            141, //CANYON ENTRANCE
-            139, 140, //TRAINER TOWER
-    };
-
 
     public static void trainerTagsRS(List<Trainer> trs, int romType) {
         // Gym Trainers
@@ -920,8 +949,9 @@ public class Gen3Constants {
         // 572 + 573: Double Battle with Sailor Brenden and Battle Girl Lilith
         // 721 + 730: Double Battle with Team Magma Grunts in Team Magma Hideout
         // 848 + 850: Double Battle with Psychic Mariela and Gentleman Everett
+        // 855: Steven from the Double Battle in Mossdeep Space Center
         setMultiBattleStatus(trs, Trainer.MultiBattleStatus.ALWAYS, 25, 105, 237, 397, 404, 504, 505, 508, 514,
-                569, 572, 573, 654, 721, 730, 734, 848, 850
+                569, 572, 573, 654, 721, 730, 734, 848, 850, 855
         );
 
         // 1 + 124: Potential Double Battle with Hiker Sawyer and Beauty Melissa
@@ -1032,6 +1062,330 @@ public class Gen3Constants {
                 allTrainers.get(num - 1).multiBattleStatus = status;
             }
         }
+    }
+
+    private static final int[] rsPostGameEncounterAreas = new int[] {
+            81, 82, 83, //SKY PILLAR
+            153 //Mirage Island - technically not post-game, but not exactly part of the game either
+    };
+
+    private static final int[] emPostGameEncounterAreas = new int[] {
+            174, 177, 178, //SKY PILLAR
+            199, 200, 201, 202, 203, 204, 205, 206, 207, //ALTERING CAVE
+            196, //DESERT UNDERPASS
+            95, //Mirage Island - technically not post-game, but hardly "local" since it almost never exists
+    };
+
+    private static final int[] frlgPostGameEncounterAreas = new int[] {
+            33, 34, 35, 36, 37, 38, 39, 40, 41, 42, //CERULEAN CAVE
+            118, //THREE ISLE PORT
+            214, 215, //FOUR ISLAND
+            82, 83, 84, 85, 86, 87, 88, 89, //ICEFALL CAVE
+            216, 217, //FIVE ISLAND
+            119, 120, //RESORT GORGEOUS
+            91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, //LOST CAVE
+            121, 122, //WATER LABYRINTH
+            123, 124, 125, //FIVE ISLE MEADOW
+            126, 127, 128, //MEMORIAL PILLAR
+            133, 134, 135, //WATER PATH
+            136, 137, 138, //RUIN VALLEY
+            131, 132, //GREEN PATH
+            90, //PATTERN BUSH
+            129, 130, //OUTCAST ISLAND
+            218, 219, 220, 221, 222, 223, 224, 225, 226, //ALTERING CAVE
+            144, 145, //TANOBY RUINS
+            0, 1, 2, 3, 4, 5, 6, //the Tanoby Chambers
+            142, 143, //SEVAULT CANYON
+            141, //CANYON ENTRANCE
+            139, 140, //TRAINER TOWER
+    };
+
+    public static final List<String> locationTagsRS = List.of(
+            "PETALBURG CITY", "PETALBURG CITY",
+            "SLATEPORT CITY", "SLATEPORT CITY",
+            "LILYCOVE CITY", "LILYCOVE CITY",
+            "MOSSDEEP CITY", "MOSSDEEP CITY",
+            "SOOTOPOLIS CITY", "SOOTOPOLIS CITY",
+            "EVER GRANDE CITY", "EVER GRANDE CITY",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "RUSTURF TUNNEL",
+            "GRANITE CAVE", "GRANITE CAVE", "GRANITE CAVE", "GRANITE CAVE", "GRANITE CAVE",
+            "PETALBURG WOODS",
+            "JAGGED PASS",
+            "FIERY PATH",
+            "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN",
+            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
+            "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE",
+            "SHOAL CAVE", "SHOAL CAVE",
+            "NEW MAUVILLE", "NEW MAUVILLE",
+            "ABANDONED SHIP", "ABANDONED SHIP", "ABANDONED SHIP", "ABANDONED SHIP",
+            "SKY PILLAR", "SKY PILLAR", "SKY PILLAR",
+            "ROUTE 101",
+            "ROUTE 102", "ROUTE 102", "ROUTE 102",
+            "ROUTE 103", "ROUTE 103", "ROUTE 103",
+            "ROUTE 104", "ROUTE 104", "ROUTE 104",
+            "ROUTE 105", "ROUTE 105",
+            "ROUTE 106", "ROUTE 106",
+            "ROUTE 107", "ROUTE 107",
+            "ROUTE 108", "ROUTE 108",
+            "ROUTE 109", "ROUTE 109",
+            "ROUTE 110", "ROUTE 110", "ROUTE 110",
+            "ROUTE 111", "ROUTE 111", "ROUTE 111", "ROUTE 111",
+            "ROUTE 112",
+            "ROUTE 113",
+            "ROUTE 114", "ROUTE 114", "ROUTE 114", "ROUTE 114",
+            "ROUTE 115", "ROUTE 115", "ROUTE 115",
+            "ROUTE 116",
+            "ROUTE 117", "ROUTE 117", "ROUTE 117",
+            "ROUTE 118", "ROUTE 118", "ROUTE 118",
+            "ROUTE 119", "ROUTE 119", "ROUTE 119",
+            "ROUTE 120", "ROUTE 120", "ROUTE 120",
+            "ROUTE 121", "ROUTE 121", "ROUTE 121",
+            "ROUTE 122", "ROUTE 122",
+            "ROUTE 123", "ROUTE 123", "ROUTE 123",
+            "ROUTE 124", "ROUTE 124",
+            "ROUTE 125", "ROUTE 125",
+            "ROUTE 126", "ROUTE 126",
+            "ROUTE 127", "ROUTE 127",
+            "ROUTE 128", "ROUTE 128",
+            "ROUTE 129", "ROUTE 129",
+            "ROUTE 130", "ROUTE 130", "ROUTE 130",
+            "ROUTE 131", "ROUTE 131",
+            "ROUTE 132", "ROUTE 132",
+            "ROUTE 133", "ROUTE 133",
+            "ROUTE 134", "ROUTE 134",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "SAFARI ZONE", "SAFARI ZONE",
+            "DEWFORD TOWN", "DEWFORD TOWN",
+            "PACIFIDLOG TOWN", "PACIFIDLOG TOWN",
+            "UNDERWATER", "UNDERWATER"
+    );
+
+    public static final List<String> locationTagsEm = List.of(
+            "ROUTE 101",
+            "ROUTE 102", "ROUTE 102", "ROUTE 102",
+            "ROUTE 103", "ROUTE 103", "ROUTE 103",
+            "ROUTE 104", "ROUTE 104", "ROUTE 104",
+            "ROUTE 105", "ROUTE 105",
+            "ROUTE 110", "ROUTE 110", "ROUTE 110",
+            "ROUTE 111", "ROUTE 111", "ROUTE 111", "ROUTE 111",
+            "ROUTE 112",
+            "ROUTE 113",
+            "ROUTE 114", "ROUTE 114", "ROUTE 114", "ROUTE 114",
+            "ROUTE 116",
+            "ROUTE 117", "ROUTE 117", "ROUTE 117",
+            "ROUTE 118", "ROUTE 118", "ROUTE 118",
+            "ROUTE 124", "ROUTE 124",
+            "PETALBURG WOODS",
+            "RUSTURF TUNNEL",
+            "GRANITE CAVE", "GRANITE CAVE",
+            "MT. PYRE",
+            "VICTORY ROAD",
+            "SAFARI ZONE",
+            "UNDERWATER",
+            "ABANDONED SHIP", "ABANDONED SHIP",
+            "GRANITE CAVE", "GRANITE CAVE",
+            "FIERY PATH",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "JAGGED PASS",
+            "ROUTE 106", "ROUTE 106",
+            "ROUTE 107", "ROUTE 107",
+            "ROUTE 108", "ROUTE 108",
+            "ROUTE 109", "ROUTE 109",
+            "ROUTE 115", "ROUTE 115", "ROUTE 115",
+            "NEW MAUVILLE",
+            "ROUTE 119", "ROUTE 119", "ROUTE 119",
+            "ROUTE 120", "ROUTE 120", "ROUTE 120",
+            "ROUTE 121", "ROUTE 121", "ROUTE 121",
+            "ROUTE 122", "ROUTE 122",
+            "ROUTE 123", "ROUTE 123", "ROUTE 123",
+            "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE", "MT. PYRE",
+            "GRANITE CAVE",
+            "ROUTE 125", "ROUTE 125",
+            "ROUTE 126", "ROUTE 126",
+            "ROUTE 127", "ROUTE 127",
+            "ROUTE 128", "ROUTE 128",
+            "ROUTE 129", "ROUTE 129",
+            "ROUTE 130", "ROUTE 130", "ROUTE 130",
+            "ROUTE 131", "ROUTE 131",
+            "ROUTE 132", "ROUTE 132",
+            "ROUTE 133", "ROUTE 133",
+            "ROUTE 134", "ROUTE 134",
+            "ABANDONED SHIP", "ABANDONED SHIP",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN", "SEAFLOOR CAVERN",
+            "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN", "CAVE OF ORIGIN",
+            "NEW MAUVILLE",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "SAFARI ZONE",
+            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "METEOR FALLS", "METEOR FALLS", "METEOR FALLS",
+            "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE", "SHOAL CAVE",
+            "SHOAL CAVE",
+            "LILYCOVE CITY", "LILYCOVE CITY",
+            "DEWFORD TOWN", "DEWFORD TOWN",
+            "SLATEPORT CITY", "SLATEPORT CITY",
+            "MOSSDEEP CITY", "MOSSDEEP CITY",
+            "PACIFIDLOG TOWN", "PACIFIDLOG TOWN",
+            "EVER GRANDE CITY", "EVER GRANDE CITY",
+            "PETALBURG CITY", "PETALBURG CITY",
+            "UNDERWATER",
+            "SHOAL CAVE",
+            "SKY PILLAR",
+            "SOOTOPOLIS CITY", "SOOTOPOLIS CITY",
+            "SKY PILLAR", "SKY PILLAR",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT", "MAGMA HIDEOUT",
+            "MAGMA HIDEOUT", "MAGMA HIDEOUT",
+            "MIRAGE TOWER", "MIRAGE TOWER", "MIRAGE TOWER", "MIRAGE TOWER",
+            "DESERT UNDERPASS",
+            "ARTISAN CAVE", "ARTISAN CAVE",
+            "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE",
+            "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE",
+            "METEOR FALLS"
+    );
+
+    public static final List<String> locationTagsFRLG = List.of(
+            "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS",
+            "TANOBY CHAMBERS", "TANOBY CHAMBERS",
+            "VIRIDIAN FOREST",
+            "MT. MOON", "MT. MOON", "MT. MOON",
+            "S.S. ANNE", "S.S. ANNE",
+            "DIGLETT'S CAVE",
+            "VICTORY ROAD", "VICTORY ROAD", "VICTORY ROAD",
+            "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION", "POKEMON MANSION",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE",
+            "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE",
+            "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE", "CERULEAN CAVE",
+            "ROCK TUNNEL", "ROCK TUNNEL", "ROCK TUNNEL",
+            "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS",
+            "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS", "SEAFOAM ISLANDS",
+            "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER", "POKEMON TOWER",
+            "POWER PLANT",
+            "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER",
+            "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER", "MT. EMBER",
+            "MT. EMBER", "MT. EMBER",
+            "BERRY FOREST", "BERRY FOREST", "BERRY FOREST",
+            "ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE","ICEFALL CAVE",
+            "ICEFALL CAVE",
+            "PATTERN BUSH",
+            "LOST CAVE", "LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE",
+            "LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE","LOST CAVE",
+            "KINDLE ROAD","KINDLE ROAD","KINDLE ROAD","KINDLE ROAD",
+            "TREASURE BEACH","TREASURE BEACH","TREASURE BEACH",
+            "CAPE BRINK","CAPE BRINK","CAPE BRINK",
+            "BOND BRIDGE", "BOND BRIDGE", "BOND BRIDGE",
+            "THREE ISLE PORT",
+            "RESORT GORGEOUS", "RESORT GORGEOUS",
+            "WATER LABYRINTH", "WATER LABYRINTH",
+            "FIVE ISLE MEADOW","FIVE ISLE MEADOW","FIVE ISLE MEADOW",
+            "MEMORIAL PILLAR","MEMORIAL PILLAR","MEMORIAL PILLAR",
+            "OUTCAST ISLAND","OUTCAST ISLAND",
+            "GREEN PATH", "GREEN PATH",
+            "WATER PATH", "WATER PATH", "WATER PATH",
+            "RUIN VALLEY","RUIN VALLEY","RUIN VALLEY",
+            "TRAINER TOWER", "TRAINER TOWER",
+            "CANYON ENTRANCE",
+            "SEVAULT CANYON", "SEVAULT CANYON",
+            "TANOBY RUINS", "TANOBY RUINS",
+            "ROUTE 1",
+            "ROUTE 2",
+            "ROUTE 3",
+            "ROUTE 4", "ROUTE 4", "ROUTE 4",
+            "ROUTE 5",
+            "ROUTE 6", "ROUTE 6", "ROUTE 6",
+            "ROUTE 7",
+            "ROUTE 8",
+            "ROUTE 9",
+            "ROUTE 10", "ROUTE 10", "ROUTE 10",
+            "ROUTE 11", "ROUTE 11", "ROUTE 11",
+            "ROUTE 12", "ROUTE 12", "ROUTE 12",
+            "ROUTE 13", "ROUTE 13", "ROUTE 13",
+            "ROUTE 14",
+            "ROUTE 15",
+            "ROUTE 16",
+            "ROUTE 17",
+            "ROUTE 18",
+            "ROUTE 19", "ROUTE 19",
+            "ROUTE 20", "ROUTE 20",
+            "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21", "ROUTE 21",
+            "ROUTE 22", "ROUTE 22", "ROUTE 22",
+            "ROUTE 23", "ROUTE 23", "ROUTE 23",
+            "ROUTE 24", "ROUTE 24", "ROUTE 24",
+            "ROUTE 25", "ROUTE 25", "ROUTE 25",
+            "PALLET TOWN", "PALLET TOWN",
+            "VIRIDIAN CITY", "VIRIDIAN CITY",
+            "CERULEAN CITY", "CERULEAN CITY",
+            "VERMILION CITY", "VERMILION CITY",
+            "CELADON CITY", "CELADON CITY",
+            "FUCHSIA CITY", "FUCHSIA CITY",
+            "CINNABAR ISLAND", "CINNABAR ISLAND",
+            "ONE ISLAND", "ONE ISLAND",
+            "FOUR ISLAND", "FOUR ISLAND",
+            "FIVE ISLAND", "FIVE ISLAND",
+            "ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE",
+            "ALTERING CAVE","ALTERING CAVE","ALTERING CAVE"
+    );
+
+    public static final List<String> locationTagsTraverseOrderRSE = List.of("ROUTE 101", "ROUTE 103",
+            "ROUTE 102", "PETALBURG CITY", "ROUTE 104", "PETALBURG WOODS", "ROUTE 116", "RUSTURF TUNNEL",
+            "DEWFORD TOWN", "GRANITE CAVE", "ROUTE 109", "SLATEPORT CITY", "ROUTE 110", "ALTERING CAVE",
+            "MAUVILLE CITY", "NEW MAUVILLE", "ROUTE 117", "ROUTE 111", "MIRAGE TOWER", "ROUTE 112", "FIERY PATH",
+            "ROUTE 113", "ROUTE 114", "METEOR FALLS", "ROUTE 115", "JAGGED PASS", "ROUTE 118", "ROUTE 119", "ROUTE 120",
+            "ROUTE 121", "SAFARI ZONE", "LILYCOVE CITY", "ROUTE 122", "MT. PYRE", "ROUTE 123", "MAGMA HIDEOUT",
+            "ROUTE 124", "MOSSDEEP CITY", "UNDERWATER", "ROUTE 125", "SHOAL CAVE", "ROUTE 127", "ROUTE 128",
+            "SEAFLOOR CAVERN", "ROUTE 126", "SOOTOPOLIS CITY", "CAVE OF ORIGIN", "ROUTE 129", "ROUTE 130", "ROUTE 131",
+            "PACIFIDLOG TOWN", "ROUTE 132", "ROUTE 133", "ROUTE 134", "ROUTE 105", "ROUTE 106", "ROUTE 107",
+            "ROUTE 108", "ABANDONED SHIP", "EVER GRANDE CITY", "VICTORY ROAD", "SKY PILLAR", "DESERT UNDERPASS",
+            "ARTISAN CAVE");
+
+    public static final List<String> locationTagsTraverseOrderFRLG = List.of("PALLET TOWN", "ROUTE 1",
+            "VIRIDIAN CITY", "ROUTE 22", "ROUTE 2", "VIRIDIAN FOREST", "ROUTE 3", "MT. MOON", "ROUTE 4",
+            "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "ROUTE 6", "VERMILION CITY", "S.S. ANNE", "ROUTE 11",
+            "DIGLETT'S CAVE", "ROUTE 9", "ROUTE 10", "ROCK TUNNEL", "ROUTE 8", "ROUTE 7", "CELADON CITY",
+            "POKEMON TOWER", "ROUTE 16", "ROUTE 17", "ROUTE 18", "FUCHSIA CITY", "SAFARI ZONE", "ROUTE 15", "ROUTE 14",
+            "ROUTE 13", "ROUTE 12", "POWER PLANT", "ROUTE 19", "ROUTE 20", "SEAFOAM ISLANDS", "CINNABAR ISLAND",
+            "POKEMON MANSION", "ROUTE 21", "ONE ISLAND", "TREASURE BEACH", "THREE ISLE PORT", "BOND BRIDGE",
+            "BERRY FOREST", "CAPE BRINK", "KINDLE ROAD", "MT. EMBER", "ROUTE 23", "VICTORY ROAD", "FOUR ISLAND",
+            "ICEFALL CAVE", "WATER PATH", "GREEN PATH", "PATTERN BUSH", "RUIN VALLEY", "OUTCAST ISLAND",
+            "ALTERING CAVE", "FIVE ISLAND", "FIVE ISLE MEADOW", "MEMORIAL PILLAR", "WATER LABYRINTH", "RESORT GORGEOUS",
+            "LOST CAVE", "TRAINER TOWER", "CANYON ENTRANCE", "SEVAULT CANYON", "TANOBY RUINS", "TANOBY CHAMBERS",
+            "CERULEAN CAVE");
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType) {
+        List<String> locationTags = switch (romType) {
+            case 0, 1 -> locationTagsRS;
+            case 2 -> locationTagsEm;
+            case 3 -> locationTagsFRLG;
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        int[] postGameAreas = switch (romType) {
+            case 0, 1 -> rsPostGameEncounterAreas;
+            case 2 -> emPostGameEncounterAreas;
+            case 3 -> frlgPostGameEncounterAreas;
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, locationTags, postGameAreas);
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {

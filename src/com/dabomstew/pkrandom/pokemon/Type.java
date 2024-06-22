@@ -30,21 +30,11 @@ import java.util.List;
 import java.util.Random;
 
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 
 public enum Type {
 
-    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY,
-    GAS(true), WOOD(true), ABNORMAL(true), WIND(true), SOUND(true), LIGHT(true), TRI(true);
-
-    public boolean isHackOnly;
-
-    Type() {
-        this.isHackOnly = false;
-    }
-
-    Type(boolean isHackOnly) {
-        this.isHackOnly = isHackOnly;
-    }
+    NORMAL, FIGHTING, FLYING, GRASS, WATER, FIRE, ROCK, GROUND, PSYCHIC, BUG, DRAGON, ELECTRIC, GHOST, POISON, ICE, STEEL, DARK, FAIRY;
 
     public int toInt() {
         return this.ordinal();
@@ -66,21 +56,25 @@ public enum Type {
     public static final List<Type> GEN2THROUGH5 = Collections.unmodifiableList(Arrays.asList(values()).subList(0, DARK.ordinal()+1));
     public static final List<Type> GEN6PLUS = Collections.unmodifiableList(Arrays.asList(values()).subList(0, FAIRY.ordinal()+1));
 
+    /**
+     * Gets all types of a given generation. This method is not formally deprecated, but please use
+     * {@link TypeTable#getTypes()} instead with possible. That way, your code will have better longevity.
+     * TypeTable#getTypes() will eventually support custom types, this will not.
+     */
     public static List<Type> getAllTypes(int generation) {
-        switch (generation) {
-            case 1:
-                return GEN1;
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                return GEN2THROUGH5;
-            default:
-                return GEN6PLUS;
-        }
+        return switch (generation) {
+            case 1 -> GEN1;
+            case 2, 3, 4, 5 -> GEN2THROUGH5;
+            default -> GEN6PLUS;
+        };
     }
 
+    /**
+     * Deprecated for {@link AbstractRomHandler#randomType()}
+     */
+    @Deprecated
     public static Type randomType(Random random) {
+        System.out.println("Type.getAllTypes() is deprecated. Please use AbstractRomHandler#randomType() instead.");
         return VALUES.get(random.nextInt(SIZE));
     }
 

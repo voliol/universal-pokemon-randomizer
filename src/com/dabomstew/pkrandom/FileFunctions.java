@@ -28,6 +28,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +88,16 @@ public class FileFunctions {
                 return new FileInputStream(fh);
             }
         }
-        return FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/config/" + filename);
+
+        String resourcePath = "/com/dabomstew/pkrandom/config/" + filename;
+        InputStream is = FileFunctions.class.getResourceAsStream(resourcePath);
+        if (is == null) {
+            // FileNotFoundException is not strictly correct, I think? I believe IOException might be what should
+            // really be used, but this should do as a quickfix.
+            throw new FileNotFoundException("Could not find resource " + resourcePath);
+        }
+        return is;
+
     }
 
     public static CustomNamesSet getCustomNames() throws IOException {
@@ -218,20 +228,16 @@ public class FileFunctions {
     }
 
     private static int getFileChecksum(InputStream stream) {
-        try {
-            Scanner sc = new Scanner(stream, "UTF-8");
-            CRC32 checksum = new CRC32();
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine().trim();
-                if (!line.isEmpty()) {
-                    checksum.update(line.getBytes("UTF-8"));
-                }
+        Scanner sc = new Scanner(stream, StandardCharsets.UTF_8);
+        CRC32 checksum = new CRC32();
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine().trim();
+            if (!line.isEmpty()) {
+                checksum.update(line.getBytes(StandardCharsets.UTF_8));
             }
-            sc.close();
-            return (int) checksum.getValue();
-        } catch (IOException e) {
-            return 0;
         }
+        sc.close();
+        return (int) checksum.getValue();
     }
 
     public static boolean checkOtherCRC(byte[] data, int byteIndex, int switchIndex, String filename, int offsetInData) {
@@ -257,6 +263,7 @@ public class FileFunctions {
     }
 
     private static byte[] getCodeTweakFile(String filename) throws IOException {
+        System.out.println(filename);
         InputStream is = FileFunctions.class.getResourceAsStream("/com/dabomstew/pkrandom/patches/" + filename);
         byte[] buf = readFullyIntoBuffer(is, is.available());
         is.close();

@@ -23,10 +23,7 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,7 +51,7 @@ public class Gen7Constants {
 
     public static final int evolutionMethodCount = 42;
 
-    private static List<Integer> speciesWithAlolanForms = Arrays.asList(
+    private static final List<Integer> speciesWithAlolanForms = Arrays.asList(
             Species.rattata, Species.raticate, Species.raichu, Species.sandshrew, Species.sandslash, Species.vulpix,
             Species.ninetales, Species.diglett, Species.dugtrio, Species.meowth, Species.persian, Species.geodude,
             Species.graveler, Species.golem, Species.grimer, Species.muk, Species.exeggutor, Species.marowak
@@ -77,7 +74,7 @@ public class Gen7Constants {
     }
 
     public static final List<Integer> irregularFormesSM = Arrays.asList(
-            Species.SMFormes.castformF, Species.SMFormes.castformW, Species.SMFormes.castformI,
+            Species.SMFormes.castformSu, Species.SMFormes.castformR, Species.SMFormes.castformSn,
             Species.SMFormes.darmanitanZ,
             Species.SMFormes.meloettaP,
             Species.SMFormes.kyuremW,
@@ -138,7 +135,7 @@ public class Gen7Constants {
     );
 
     public static final List<Integer> irregularFormesUSUM = Arrays.asList(
-            Species.USUMFormes.castformF, Species.USUMFormes.castformW, Species.USUMFormes.castformI,
+            Species.USUMFormes.castformSu, Species.USUMFormes.castformR, Species.USUMFormes.castformSn,
             Species.USUMFormes.darmanitanZ,
             Species.USUMFormes.meloettaP,
             Species.USUMFormes.kyuremW,
@@ -258,26 +255,52 @@ public class Gen7Constants {
     private static final List<Boolean> relevantEncounterFilesSM = setupRelevantEncounterFiles(Type_SM);
     private static final List<Boolean> relevantEncounterFilesUSUM = setupRelevantEncounterFiles(Type_USUM);
 
-    public static final List<Integer> heldZCrystals = Arrays.asList(
-            Items.normaliumZHeld, // Normal
-            Items.fightiniumZHeld, // Fighting
-            Items.flyiniumZHeld, // Flying
-            Items.poisoniumZHeld, // Poison
-            Items.groundiumZHeld, // Ground
-            Items.rockiumZHeld, // Rock
-            Items.buginiumZHeld, // Bug
-            Items.ghostiumZHeld, // Ghost
-            Items.steeliumZHeld, // Steel
-            Items.firiumZHeld, // Fire
-            Items.wateriumZHeld, // Water
-            Items.grassiumZHeld, // Grass
-            Items.electriumZHeld, // Electric
-            Items.psychiumZHeld, // Psychic
-            Items.iciumZHeld, // Ice
-            Items.dragoniumZHeld, // Dragon
-            Items.darkiniumZHeld, // Dark
-            Items.fairiumZHeld  // Fairy
-    );
+    public static final Map<Type, Integer> heldZCrystalsByType = initHeldZCrystalsByType();
+
+    private static Map<Type, Integer> initHeldZCrystalsByType() {
+        Map<Type, Integer> map = new EnumMap<>(Type.class);
+        map.put(Type.NORMAL, Items.normaliumZHeld);
+        map.put(Type.FIGHTING, Items.fightiniumZHeld);
+        map.put(Type.FLYING, Items.flyiniumZHeld);
+        map.put(Type.POISON, Items.poisoniumZHeld);
+        map.put(Type.GROUND, Items.groundiumZHeld);
+        map.put(Type.ROCK, Items.rockiumZHeld);
+        map.put(Type.BUG, Items.buginiumZHeld);
+        map.put(Type.GHOST, Items.ghostiumZHeld);
+        map.put(Type.STEEL, Items.steeliumZHeld);
+        map.put(Type.FIRE, Items.firiumZHeld);
+        map.put(Type.WATER, Items.wateriumZHeld);
+        map.put(Type.GRASS, Items.grassiumZHeld);
+        map.put(Type.ELECTRIC, Items.electriumZHeld);
+        map.put(Type.PSYCHIC, Items.psychiumZHeld);
+        map.put(Type.ICE, Items.iciumZHeld);
+        map.put(Type.DRAGON, Items.dragoniumZHeld);
+        map.put(Type.DARK, Items.darkiniumZHeld);
+        map.put(Type.FAIRY, Items.fairiumZHeld);
+        return Collections.unmodifiableMap(map);
+    }
+
+
+//    Arrays.asList(
+//            Items.normaliumZHeld, // Normal
+//            Items.fightiniumZHeld, // Fighting
+//            Items.flyiniumZHeld, // Flying
+//            Items.poisoniumZHeld, // Poison
+//            Items.groundiumZHeld, // Ground
+//            Items.rockiumZHeld, // Rock
+//            Items.buginiumZHeld, // Bug
+//            Items.ghostiumZHeld, // Ghost
+//            Items.steeliumZHeld, // Steel
+//            Items.firiumZHeld, // Fire
+//            Items.wateriumZHeld, // Water
+//            Items.grassiumZHeld, // Grass
+//            Items.electriumZHeld, // Electric
+//            Items.psychiumZHeld, // Psychic
+//            Items.iciumZHeld, // Ice
+//            Items.dragoniumZHeld, // Dragon
+//            Items.darkiniumZHeld, // Dark
+//            Items.fairiumZHeld  // Fairy
+//    );
 
     public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
 
@@ -371,7 +394,7 @@ public class Gen7Constants {
 
     private static List<Integer> initializeGeneralPurposeItems() {
         List<Integer> list = new ArrayList<>(Gen6Constants.generalPurposeItems);
-        list.addAll(Arrays.asList(Items.protectivePads));
+        list.add(Items.protectivePads);
         return Collections.unmodifiableList(list);
     }
 
@@ -379,21 +402,21 @@ public class Gen7Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen6Constants.moveBoostingItems);
-        map.put(Moves.electricTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.grassyTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.mistyTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.psychicTerrain, Arrays.asList(Items.terrainExtender));
-        map.put(Moves.strengthSap, Arrays.asList(Items.bigRoot));
+        map.put(Moves.electricTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.grassyTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.mistyTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.psychicTerrain, List.of(Items.terrainExtender));
+        map.put(Moves.strengthSap, List.of(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
     public static final Map<Integer, List<Integer>> abilityBoostingItems = initializeAbilityBoostingItems();
 
     private static Map<Integer, List<Integer>> initializeAbilityBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen6Constants.abilityBoostingItems);
-        map.put(Abilities.electricSurge, Arrays.asList(Items.terrainExtender));
-        map.put(Abilities.grassySurge, Arrays.asList(Items.terrainExtender));
-        map.put(Abilities.mistySurge, Arrays.asList(Items.terrainExtender));
-        map.put(Abilities.psychicSurge, Arrays.asList(Items.terrainExtender));
+        map.put(Abilities.electricSurge, List.of(Items.terrainExtender));
+        map.put(Abilities.grassySurge, List.of(Items.terrainExtender));
+        map.put(Abilities.mistySurge, List.of(Items.terrainExtender));
+        map.put(Abilities.psychicSurge, List.of(Items.terrainExtender));
         return Collections.unmodifiableMap(map);
     }
 
@@ -528,65 +551,65 @@ public class Gen7Constants {
         Map<Integer,Map<Integer,String>> map = new HashMap<>();
 
         Map<Integer,String> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,"-A");
-        deoxysMap.put(2,"-D");
-        deoxysMap.put(3,"-S");
+        deoxysMap.put(1,"-Attack");
+        deoxysMap.put(2,"-Defense");
+        deoxysMap.put(3,"-Speed");
         map.put(Species.deoxys, deoxysMap);
 
         Map<Integer,String> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,"-S");
-        wormadamMap.put(2,"-T");
+        wormadamMap.put(1,"-Sandy");
+        wormadamMap.put(2,"-Trash");
         map.put(Species.wormadam, wormadamMap);
 
         Map<Integer,String> shayminMap = new HashMap<>();
-        shayminMap.put(1,"-S");
+        shayminMap.put(1,"-Sky");
         map.put(Species.shaymin, shayminMap);
 
         Map<Integer,String> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,"-O");
+        giratinaMap.put(1,"-Origin");
         map.put(Species.giratina, giratinaMap);
 
         Map<Integer,String> rotomMap = new HashMap<>();
-        rotomMap.put(1,"-H");
-        rotomMap.put(2,"-W");
-        rotomMap.put(3,"-Fr");
-        rotomMap.put(4,"-Fa");
-        rotomMap.put(5,"-M");
+        rotomMap.put(1,"-Heat");
+        rotomMap.put(2,"-Wash");
+        rotomMap.put(3,"-Frost");
+        rotomMap.put(4,"-Fan");
+        rotomMap.put(5,"-Mow");
         map.put(Species.rotom, rotomMap);
 
         Map<Integer,String> castformMap = new HashMap<>();
-        castformMap.put(1,"-F");
-        castformMap.put(2,"-W");
-        castformMap.put(3,"-I");
+        castformMap.put(1,"-Sunny");
+        castformMap.put(2,"-Rainy");
+        castformMap.put(3,"-Snowy");
         map.put(Species.castform, castformMap);
 
         Map<Integer,String> basculinMap = new HashMap<>();
-        basculinMap.put(1,"-B");
+        basculinMap.put(1,"-Blue");
         map.put(Species.basculin, basculinMap);
 
         Map<Integer,String> darmanitanMap = new HashMap<>();
-        darmanitanMap.put(1,"-Z");
+        darmanitanMap.put(1,"-Zen");
         map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer,String> meloettaMap = new HashMap<>();
-        meloettaMap.put(1,"-P");
+        meloettaMap.put(1,"-Pirouette");
         map.put(Species.meloetta, meloettaMap);
 
         Map<Integer,String> kyuremMap = new HashMap<>();
-        kyuremMap.put(1,"-W");
-        kyuremMap.put(2,"-B");
+        kyuremMap.put(1,"-White");
+        kyuremMap.put(2,"-Black");
         map.put(Species.kyurem, kyuremMap);
 
         Map<Integer,String> tornadusMap = new HashMap<>();
-        tornadusMap.put(1,"-T");
+        tornadusMap.put(1,"-Therian");
         map.put(Species.tornadus, tornadusMap);
 
         Map<Integer,String> thundurusMap = new HashMap<>();
-        thundurusMap.put(1,"-T");
+        thundurusMap.put(1,"-Therian");
         map.put(Species.thundurus, thundurusMap);
 
         Map<Integer,String> landorusMap = new HashMap<>();
-        landorusMap.put(1,"-T");
+        landorusMap.put(1,"-Therian");
         map.put(Species.landorus, landorusMap);
 
         Map<Integer,String> meowsticMap = new HashMap<>();
@@ -594,7 +617,7 @@ public class Gen7Constants {
         map.put(Species.meowstic, meowsticMap);
 
         Map<Integer,String> aegislashMap = new HashMap<>();
-        aegislashMap.put(1,"-B");
+        aegislashMap.put(1,"-Blade");
         map.put(Species.aegislash, aegislashMap);
 
         Map<Integer,String> pumpkabooMap = new HashMap<>();
@@ -610,15 +633,15 @@ public class Gen7Constants {
         map.put(Species.gourgeist, gourgeistMap);
 
         Map<Integer,String> floetteMap = new HashMap<>();
-        floetteMap.put(5,"-E");
+        floetteMap.put(5,"-Eternal");
         map.put(Species.floette, floetteMap);
 
         Map<Integer,String> kyogreMap = new HashMap<>();
-        kyogreMap.put(1,"-P");
+        kyogreMap.put(1,"-Primal");
         map.put(Species.kyogre, kyogreMap);
 
         Map<Integer,String> groudonMap = new HashMap<>();
-        groudonMap.put(1,"-P");
+        groudonMap.put(1,"-Primal");
         map.put(Species.groudon, groudonMap);
 
         Map<Integer,String> rayquazaMap = new HashMap<>();
@@ -626,7 +649,7 @@ public class Gen7Constants {
         map.put(Species.rayquaza, rayquazaMap);
 
         Map<Integer,String> hoopaMap = new HashMap<>();
-        hoopaMap.put(1,"-U");
+        hoopaMap.put(1,"-Unbound");
         map.put(Species.hoopa, hoopaMap);
 
         for (Integer species: Gen6Constants.speciesToMegaStoneORAS.keySet()) {
@@ -641,43 +664,43 @@ public class Gen7Constants {
         }
 
         Map<Integer,String> wishiwashiMap = new HashMap<>();
-        wishiwashiMap.put(1,"-S");
+        wishiwashiMap.put(1,"-School");
         map.put(Species.wishiwashi, wishiwashiMap);
 
         Map<Integer,String> oricorioMap = new HashMap<>();
-        oricorioMap.put(1,"-E");
-        oricorioMap.put(2,"-P");
-        oricorioMap.put(3,"-G");
+        oricorioMap.put(1,"-Pom-Pom");
+        oricorioMap.put(2,"-Pa'u");
+        oricorioMap.put(3,"-Sensu");
         map.put(Species.oricorio, oricorioMap);
 
         Map<Integer,String> lycanrocMap = new HashMap<>();
-        lycanrocMap.put(1,"-M");
-        lycanrocMap.put(2,"-D");
+        lycanrocMap.put(1,"-Midnight");
+        lycanrocMap.put(2,"-Dusk");
         map.put(Species.lycanroc, lycanrocMap);
 
         for (int species: speciesWithAlolanForms) {
             Map<Integer,String> alolanMap = new HashMap<>();
-            alolanMap.put(1,"-A");
+            alolanMap.put(1,"-Alolan");
             map.put(species, alolanMap);
         }
 
         Map<Integer,String> greninjaMap = new HashMap<>();
-        greninjaMap.put(2,"-A");
+        greninjaMap.put(2,"-Ash");
         map.put(Species.greninja, greninjaMap);
 
         Map<Integer,String> zygardeMap = new HashMap<>();
-        zygardeMap.put(1,"-10");
-        zygardeMap.put(4,"-C");
+        zygardeMap.put(1,"-10%");
+        zygardeMap.put(4,"-Complete");
         map.put(Species.zygarde, zygardeMap);
 
         Map<Integer,String> miniorMap = new HashMap<>();
-        miniorMap.put(7,"-C");
+        miniorMap.put(7,"-Core");
         map.put(Species.minior, miniorMap);
 
         Map<Integer,String> necrozmaMap = new HashMap<>();
-        necrozmaMap.put(1,"-DM");
-        necrozmaMap.put(2,"-DW");
-        necrozmaMap.put(3,"-U");
+        necrozmaMap.put(1,"-DuskMane");
+        necrozmaMap.put(2,"-DawnWings");
+        necrozmaMap.put(3,"-Ultra");
         map.put(Species.necrozma, necrozmaMap);
 
         return map;
@@ -689,7 +712,7 @@ public class Gen7Constants {
         return m;
     }
 
-    private static List<Integer> actuallyCosmeticFormsSM = Arrays.asList(
+    private static final List<Integer> actuallyCosmeticFormsSM = Arrays.asList(
             Species.SMFormes.cherrimCosmetic1,
             Species.SMFormes.shellosCosmetic1,
             Species.SMFormes.gastrodonCosmetic1,
@@ -723,7 +746,7 @@ public class Gen7Constants {
             Species.SMFormes.pikachuCosmetic4, Species.SMFormes.pikachuCosmetic5, Species.SMFormes.pikachuCosmetic6 // Pikachu With Funny Hats
     );
 
-    private static List<Integer> actuallyCosmeticFormsUSUM = Arrays.asList(
+    private static final List<Integer> actuallyCosmeticFormsUSUM = Arrays.asList(
             Species.USUMFormes.cherrimCosmetic1,
             Species.USUMFormes.shellosCosmetic1,
             Species.USUMFormes.gastrodonCosmetic1,
@@ -771,7 +794,7 @@ public class Gen7Constants {
         }
     }
 
-    private static List<Integer> ignoreFormsSM = Arrays.asList(
+    private static final List<Integer> ignoreFormsSM = Arrays.asList(
             Species.SMFormes.cherrimCosmetic1,
             Species.SMFormes.greninjaCosmetic1,
             Species.SMFormes.zygarde10Cosmetic1,
@@ -786,7 +809,7 @@ public class Gen7Constants {
             Species.SMFormes.mimikyuCosmetic3
     );
 
-    private static List<Integer> ignoreFormsUSUM = Arrays.asList(
+    private static final List<Integer> ignoreFormsUSUM = Arrays.asList(
             Species.USUMFormes.cherrimCosmetic1,
             Species.USUMFormes.greninjaCosmetic1,
             Species.USUMFormes.zygarde10Cosmetic1,
@@ -810,8 +833,8 @@ public class Gen7Constants {
         }
     }
 
-    private static Map<Integer,Integer> altFormesWithCosmeticFormsSM = setupAltFormesWithCosmeticForms(Type_SM);
-    private static Map<Integer,Integer> altFormesWithCosmeticFormsUSUM = setupAltFormesWithCosmeticForms(Type_USUM);
+    private static final Map<Integer,Integer> altFormesWithCosmeticFormsSM = setupAltFormesWithCosmeticForms(Type_SM);
+    private static final Map<Integer,Integer> altFormesWithCosmeticFormsUSUM = setupAltFormesWithCosmeticForms(Type_USUM);
 
     public static Map<Integer,Integer> getAltFormesWithCosmeticForms(int romType) {
         if (romType == Type_SM) {
@@ -904,6 +927,38 @@ public class Gen7Constants {
             default:
                 return 0; // normal by default
         }
+    }
+
+    private static final EvolutionType[] evolutionTypeTable = new EvolutionType[] {
+            EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT, EvolutionType.LEVEL,
+            EvolutionType.TRADE, EvolutionType.TRADE_ITEM, EvolutionType.TRADE_SPECIAL, EvolutionType.STONE,
+            EvolutionType.LEVEL_ATTACK_HIGHER, EvolutionType.LEVEL_ATK_DEF_SAME, EvolutionType.LEVEL_DEFENSE_HIGHER,
+            EvolutionType.LEVEL_LOW_PV, EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_CREATE_EXTRA,
+            EvolutionType.LEVEL_IS_EXTRA, EvolutionType.LEVEL_HIGH_BEAUTY, EvolutionType.STONE_MALE_ONLY,
+            EvolutionType.STONE_FEMALE_ONLY, EvolutionType.LEVEL_ITEM_DAY, EvolutionType.LEVEL_ITEM_NIGHT,
+            EvolutionType.LEVEL_WITH_MOVE, EvolutionType.LEVEL_WITH_OTHER, EvolutionType.LEVEL_MALE_ONLY,
+            EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_ELECTRIFIED_AREA, EvolutionType.LEVEL_MOSS_ROCK,
+            EvolutionType.LEVEL_ICY_ROCK, EvolutionType.LEVEL_UPSIDE_DOWN, EvolutionType.FAIRY_AFFECTION,
+            EvolutionType.LEVEL_WITH_DARK, EvolutionType.LEVEL_RAIN, EvolutionType.LEVEL_DAY, EvolutionType.LEVEL_NIGHT,
+            EvolutionType.LEVEL_FEMALE_ESPURR, EvolutionType.NONE, EvolutionType.LEVEL_GAME,
+            EvolutionType.LEVEL_DAY_GAME, EvolutionType.LEVEL_NIGHT_GAME, EvolutionType.LEVEL_SNOWY,
+            EvolutionType.LEVEL_DUSK, EvolutionType.LEVEL_NIGHT_ULTRA, EvolutionType.STONE_ULTRA
+    };
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        for (int i = 0; i < evolutionTypeTable.length; i++) {
+            if (evolutionType == evolutionTypeTable[i]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        if (index == -1) {
+            return EvolutionType.NONE;
+        }
+        return evolutionTypeTable[index - 1];
     }
 
     private static List<Boolean> setupRelevantEncounterFiles(int romType) {
@@ -1031,9 +1086,9 @@ public class Gen7Constants {
 
         regularShopItemsSM = new ArrayList<>();
 
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
         regularShopItemsSM.add(Items.honey);
         regularShopItemsSM.add(Items.adrenalineOrb);
 
@@ -1047,12 +1102,12 @@ public class Gen7Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
     }
 
     public static ItemList getAllowedItems(int romType) {
@@ -1080,63 +1135,6 @@ public class Gen7Constants {
             return requiredFieldTMsUSUM.stream().distinct().collect(Collectors.toList());
         }
     }
-
-    public static int[] smPostGameEncounterAreasTOD = new int[] {
-            664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, //Poni Grove
-            678, 679, 680, 681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691,
-            692, 693, 694, 695, 696, 697, 698, 699, 700, 701, 702, 703, 704, 705,
-            706, 707, 708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719,
-            720, 721, 722, 723, //Poni Plains
-            724, 725, //Poni Coast
-            740, 741, 742, 743, 744, 745, 746, 747, 748, 749, 750, 751, //Poni Meadow
-            726, 727, 728, 729, 730, 731, 732, 733, 734, 735, 736, 737, 738, 739, //Poni Gauntlet
-            782, 783, 784, 785, //Resolution Cave
-            786, 787, 788, 789, 790, 791, 792, 793, 586, 587, 588, 589, 590, 591,
-            592, 593, 594, 595, 572, 573, 550, 551, 552, 553, 466, 467, 380, 381,
-            384, 385, 388, 389, 390, 391, 364, 365, 246, 247, 186, 187, 174, 175,
-            146, 147, 116, 117, 48, 49, 50, 51 //apparently unused (various areas)
-    };
-
-    public static int[] smPostGameEncounterAreasNoTOD = new int[] {
-            332, 333, 334, 335, 336, 337, 338, //Poni Grove
-            339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352,
-            353, 354, 355, 356, 357, 358, 359, 360, 361, //Poni Plains
-            362, //Poni Coast
-            370, 371, 372, 373, 374, 375, //Poni Meadow
-            363, 364, 365, 366, 367, 368, 369, //Poni Gauntlet
-            391, 392, //Resolution Cave
-            24, 25, 58, 73, 87, 93, 123, 182, 190, 192, 194, 195, 233, 275, 276,
-            286, 293, 294, 295, 296, 297, 393, 394, 395, 396 //apparently unused (various areas)
-    };
-
-    public static int[] usumPostGameEncounterAreasTOD = new int[] {
-            668, 669, 670, 671, 672, 673, 674, 675, 676, 677, 678, 679, 680, 681, //Poni Grove
-            682, 683, 684, 685, 686, 687, 688, 689, 690, 691, 692, 693, 694, 695,
-            696, 697, 698, 699, 700, 701, 702, 703, 704, 705, 706, 707, 708, 709,
-            710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 720, 721, 722, 723,
-            724, 725, 726, 727, //Poni Plains
-            728, 729, //Poni Coast
-            744, 745, 746, 747, 748, 749, 750, 751, 752, 753, 754, 755, //Poni Meadow
-            730, 731, 732, 733, 734, 735, 736, 737, 738, 739, 740, 741, 742, 743, //Poni Gauntlet
-            786, 787, 788, 789, //Resolution Cave
-            34, 35, 50, 51, 52, 53, 62, 63, 64, 65, 124, 125, 156, 157, 184, 185,
-            196, 197, 378, 379, 394, 395, 398, 399, 402, 403, 404, 405, 472, 473,
-            558, 559, 560, 561, 580, 581, 592, 593, 594, 595, 596, 597, 598, 599,
-            602, 603, //apparently unused (various areas)
-    };
-
-    public static int[] usumPostGameEncounterAreasNoTOD = new int[] {
-            334, 335, 336, 337, 338, 339, 340, //Poni Grove
-            341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354,
-            355, 356, 357, 358, 359, 360, 361, 362, 363, //Poni Plains
-            364, //Poni Coast
-            372, 373, 374, 375, 376, 377, //Poni Meadow
-            365, 366, 367, 368, 369, 370, 371, //Poni Gauntlet
-            393, 394, //Resolution Cave
-            17, 25, 26, 31, 32, 62, 78, 92, 98, 189, 197, 199, 201, 202, 236, 279,
-            280, 290, 296, 297, 298, 299, 301, //apparently unused (various areas)
-    };
-
 
     public static void tagTrainersSM(List<Trainer> trs) {
 
@@ -1360,6 +1358,80 @@ public class Gen7Constants {
         allTrainers.get(217 - 1).forceStarterPosition = 0;
         allTrainers.get(218 - 1).forceStarterPosition = 0;
         allTrainers.get(219 - 1).forceStarterPosition = 0;
+    }
+
+    public static int[] smPostGameEncounterAreasTOD = new int[] {
+            664, 665, 666, 667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, //Poni Grove
+            678, 679, 680, 681, 682, 683, 684, 685, 686, 687, 688, 689, 690, 691,
+            692, 693, 694, 695, 696, 697, 698, 699, 700, 701, 702, 703, 704, 705,
+            706, 707, 708, 709, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719,
+            720, 721, 722, 723, //Poni Plains
+            724, 725, //Poni Coast
+            740, 741, 742, 743, 744, 745, 746, 747, 748, 749, 750, 751, //Poni Meadow
+            726, 727, 728, 729, 730, 731, 732, 733, 734, 735, 736, 737, 738, 739, //Poni Gauntlet
+            782, 783, 784, 785, //Resolution Cave
+            786, 787, 788, 789, 790, 791, 792, 793, 586, 587, 588, 589, 590, 591,
+            592, 593, 594, 595, 572, 573, 550, 551, 552, 553, 466, 467, 380, 381,
+            384, 385, 388, 389, 390, 391, 364, 365, 246, 247, 186, 187, 174, 175,
+            146, 147, 116, 117, 48, 49, 50, 51 //apparently unused (various areas)
+    };
+
+    public static int[] smPostGameEncounterAreasNoTOD = new int[] {
+            332, 333, 334, 335, 336, 337, 338, //Poni Grove
+            339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352,
+            353, 354, 355, 356, 357, 358, 359, 360, 361, //Poni Plains
+            362, //Poni Coast
+            370, 371, 372, 373, 374, 375, //Poni Meadow
+            363, 364, 365, 366, 367, 368, 369, //Poni Gauntlet
+            391, 392, //Resolution Cave
+            24, 25, 58, 73, 87, 93, 123, 182, 190, 192, 194, 195, 233, 275, 276,
+            286, 293, 294, 295, 296, 297, 393, 394, 395, 396 //apparently unused (various areas)
+    };
+
+    public static int[] usumPostGameEncounterAreasTOD = new int[] {
+            668, 669, 670, 671, 672, 673, 674, 675, 676, 677, 678, 679, 680, 681, //Poni Grove
+            682, 683, 684, 685, 686, 687, 688, 689, 690, 691, 692, 693, 694, 695,
+            696, 697, 698, 699, 700, 701, 702, 703, 704, 705, 706, 707, 708, 709,
+            710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 720, 721, 722, 723,
+            724, 725, 726, 727, //Poni Plains
+            728, 729, //Poni Coast
+            744, 745, 746, 747, 748, 749, 750, 751, 752, 753, 754, 755, //Poni Meadow
+            730, 731, 732, 733, 734, 735, 736, 737, 738, 739, 740, 741, 742, 743, //Poni Gauntlet
+            786, 787, 788, 789, //Resolution Cave
+            34, 35, 50, 51, 52, 53, 62, 63, 64, 65, 124, 125, 156, 157, 184, 185,
+            196, 197, 378, 379, 394, 395, 398, 399, 402, 403, 404, 405, 472, 473,
+            558, 559, 560, 561, 580, 581, 592, 593, 594, 595, 596, 597, 598, 599,
+            602, 603, //apparently unused (various areas)
+    };
+
+    public static int[] usumPostGameEncounterAreasNoTOD = new int[] {
+            334, 335, 336, 337, 338, 339, 340, //Poni Grove
+            341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354,
+            355, 356, 357, 358, 359, 360, 361, 362, 363, //Poni Plains
+            364, //Poni Coast
+            372, 373, 374, 375, 376, 377, //Poni Meadow
+            365, 366, 367, 368, 369, 370, 371, //Poni Gauntlet
+            393, 394, //Resolution Cave
+            17, 25, 26, 31, 32, 62, 78, 92, 98, 189, 197, 199, 201, 202, 236, 279,
+            280, 290, 296, 297, 298, 299, 301, //apparently unused (various areas)
+    };
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, int[] postGameAreas) {
+        // since I'm not supporting Gen 6+ in the V branch, this lacks location tagging
+        // there's nothing stopping you from adding them like in earlier Gens, just hasn't been done already
+        // --voliol
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
+        int[] postGameAreas = switch (romType) {
+            case Type_SM -> (useTimeOfDay ? smPostGameEncounterAreasTOD : smPostGameEncounterAreasNoTOD);
+            case Type_USUM -> (useTimeOfDay ? usumPostGameEncounterAreasTOD : usumPostGameEncounterAreasNoTOD);
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, postGameAreas);
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {

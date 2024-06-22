@@ -1,9 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 /*----------------------------------------------------------------------------*/
-/*--  RomHandler.java - defines the functionality that each randomization   --*/
-/*--                    handler must implement.                             --*/
-/*--                                                                        --*/
 /*--  Part of "Universal Pokemon Randomizer ZX" by the UPR-ZX team          --*/
 /*--  Originally part of "Universal Pokemon Randomizer" by Dabomstew        --*/
 /*--  Pokemon and any associated names and the like are                     --*/
@@ -25,6 +22,13 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.MiscTweak;
+import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
+import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.services.RestrictedPokemonService;
+import com.dabomstew.pkrandom.services.TypeService;
+
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
 import java.util.List;
@@ -32,18 +36,32 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.dabomstew.pkrandom.MiscTweak;
-import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.*;
-
+/**
+ * Responsible for direct handling a Rom/game file, and the data therein.
+ * <br><br>
+ * After a Rom has been loaded with {@link #loadRom(String)}, a number of data types reflecting the contents of the
+ * Rom can be acquired through getters (e.g. {@link #getPokemon()}, {@link #getStarters()}, {@link #getTrainers()}).
+ * Most of the corresponding data also have setters which update the contents of the Rom (e.g.
+ * {@link #setStarters(List)}, {@link #setTrainers(List)}), but some (most notably the {@link Pokemon} data from
+ * {@link #getPokemon()}) are instead updated simply by editing the object returned by the setter.
+ * An edited Rom can be saved with {@link #saveRom(String, long, boolean)}.
+ * <br><br>
+ * Some methods giving extra context to the main data are also provided (e.g. {@link #hasRivalFinalBattle()},
+ * {@link #hasPhysicalSpecialSplit()}, {@link #abilitiesPerPokemon()}).
+ * <br><br>
+ * Though given a Rom, the RomHandler might not be able to get/set all kinds of data. Either because the Rom itself
+ * does not support the data type (there are no Starter held items in Red), or because the RomHandler itself does not
+ * implement it. For these non-universal data types, boolean methods are provided to report which ones are supported
+ * (e.g. {@link #supportsStarterHeldItems()}, {@link #hasShopSupport()}, {@link #canChangeStaticPokemon()}).
+ * <br><br>
+ * Finally, the RomHandler is responsible for giving general info about the Rom (e.g. {@link #getROMName()},
+ * {@link #getROMType()}, {@link #printRomDiagnostics(PrintStream)}), and the loading process (e.g.
+ * {@link #loadedFilename()}, {@link #hasGameUpdateLoaded()}).
+ */
 public interface RomHandler {
 
     abstract class Factory {
-        public RomHandler create(Random random) {
-            return create(random, null);
-        }
-
-        public abstract RomHandler create(Random random, PrintStream log);
+        public abstract RomHandler create();
 
         public abstract boolean isLoadable(String filename);
     }
@@ -53,10 +71,8 @@ public interface RomHandler {
     // =======================
 
     boolean loadRom(String filename);
-
-    boolean saveRomFile(String filename, long seed);
-
-    boolean saveRomDirectory(String filename);
+    
+    boolean saveRom(String filename, long seed, boolean saveAsDirectory);
 
     String loadedFilename();
 
@@ -76,8 +92,6 @@ public interface RomHandler {
     // Log methods
     // ===========
 
-    void setLog(PrintStream logStream);
-
     void printRomDiagnostics(PrintStream logStream);
 
     boolean isRomValid();
@@ -92,19 +106,23 @@ public interface RomHandler {
 
     List<Pokemon> getPokemonInclFormes();
 
-    List<Pokemon> getAltFormes();
+    PokemonSet<Pokemon> getAltFormes();
+    
+    PokemonSet<Pokemon> getPokemonSet();
+    
+    PokemonSet<Pokemon> getPokemonSetInclFormes();
 
     List<MegaEvolution> getMegaEvolutions();
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
 
-    List<Pokemon> getIrregularFormes();
+    PokemonSet<Pokemon> getIrregularFormes();
+
+    RestrictedPokemonService getRestrictedPokemonService();
 
     // ==================================
     // Methods to set up Gen Restrictions
     // ==================================
-
-    void setPokemonPool(Settings settings);
 
     void removeEvosForPokemonPool();
 
@@ -120,70 +138,13 @@ public interface RomHandler {
 
     int starterCount();
 
-    void generateStarters(Settings settings);
-
-    List<Pokemon> getPickedStarters();
+    boolean hasStarterTypeTriangleSupport();
 
     boolean supportsStarterHeldItems();
 
     List<Integer> getStarterHeldItems();
 
     void setStarterHeldItems(List<Integer> items);
-
-    void randomizeStarterHeldItems(Settings settings);
-
-    // =======================
-    // Pokemon Base Statistics
-    // =======================
-
-    // Run the stats shuffler on each Pokemon.
-    void shufflePokemonStats(Settings settings);
-
-    // Randomize stats following evolutions for proportions or not (see
-    // tooltips)
-    void randomizePokemonStats(Settings settings);
-
-    // Update base stats to specified generation
-    void updatePokemonStats(Settings settings);
-
-    Map<Integer,StatChange> getUpdatedPokemonStats(int generation);
-
-    void standardizeEXPCurves(Settings settings);
-
-    // ====================================
-    // Methods for selecting random Pokemon
-    // ====================================
-
-    // Give a random Pokemon who's in this game
-    Pokemon randomPokemon();
-
-    Pokemon randomPokemonInclFormes();
-
-    // Give a random non-legendary Pokemon who's in this game
-    // Business rules for who's legendary are in Pokemon class
-    Pokemon randomNonLegendaryPokemon();
-
-    // Give a random legendary Pokemon who's in this game
-    // Business rules for who's legendary are in Pokemon class
-    Pokemon randomLegendaryPokemon();
-
-    // Give a random Pokemon who has 2 evolution stages
-    // Should make a good starter Pokemon
-    Pokemon random2EvosPokemon(boolean allowAltFormes);
-
-    // =============
-    // Pokemon Types
-    // =============
-
-    // return a random type valid in this game.
-    Type randomType();
-
-    boolean typeInGame(Type type);
-
-    // randomize Pokemon types, with a switch on whether evolutions
-    // should follow the same types or not.
-    // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
-    void randomizePokemonTypes(Settings settings);
 
     // =================
     // Pokemon Abilities
@@ -194,8 +155,6 @@ public interface RomHandler {
     int highestAbilityIndex();
 
     String abilityName(int number);
-
-    void randomizeAbilities(Settings settings);
 
     Map<Integer,List<Integer>> getAbilityVariations();
 
@@ -209,74 +168,28 @@ public interface RomHandler {
     // Wild Pokemon
     // ============
 
-    /**
-     * Extracts wild Pokemon encounters from the ROM.
-     * @param useTimeOfDay Whether to use time-based encounters (including seasons). If the game does
-     *                     not have time-based encounters, this parameter is ignored.
-     * @return A List of EncounterSets representing every wild Pokemon encounter in the game.
-     */
-    List<EncounterSet> getEncounters(boolean useTimeOfDay);
+    List<EncounterArea> getEncounters(boolean useTimeOfDay);
 
     /**
-     * Assigns the given encounters to the ROM.
-     * @param useTimeOfDay Whether to use time based encounters (including seasons). If the game does not
-     *                     have time based encounters, this parameter is ignored.
-     * @param encounters The encounters to assign to ROM. Recommended that you use a modified set of
-     *                   encounter from getEncounters().
-     * @throws java.util.NoSuchElementException if the list of encounters is not sufficiently long.
+     * Returns a list identical to {@link #getEncounters(boolean)}, except it is sorted according to when in the game
+     * the player is expected to go to the location of each {@link EncounterArea}.<br>
+     * E.g. {@link EncounterArea}s at early routes come early, and victory road and post-game locations ones are at
+     * the end.<br>
+     * (if the order has been implemented; the default implementation does not sort)
      */
-    void setEncounters(boolean useTimeOfDay, List<EncounterSet> encounters);
+    List<EncounterArea> getSortedEncounters(boolean useTimeOfDay);
 
-    /**
-     * Randomizes wild Pokemon, adding as many different Pokemon to each area as possible.
-     * @param settings The current settings.
-     */
-    void randomEncounters(Settings settings);
+    PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay);
 
-    /**
-     * Randomizes wild Pokemon, ensuring that for each area in the game,
-     * each Pokemon originally present is replaced by exactly one new Pokemon.
-     * @param settings The current settings.
-     */
-    void area1to1Encounters(Settings settings);
+    void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
-    /**
-     * Randomizes wild Pokemon, ensuring that each Pokemon in the original game
-     * is replaced by the same random Pokemon in each area it occurs.
-     * @param settings The current settings.
-     */
-    void game1to1Encounters(Settings settings);
+    boolean hasEncounterLocations();
 
-    /**
-     * Randomizes wild Pokemon, ensuring that each Pokemon in the original game
-     * and its evolutionary family is replaced by a new evolutionary family
-     * in each place they occur.
-     * @param settings The current settings.
-     */
-    void gameFamilyToFamilyEncounters(Settings settings);
-    
-    /**
-     * Iterates over every wild Pokemon encounter in the game,
-     * increasing their levels as appropriate for the current settings.
-     * @param settings The current settings.
-     */
-    void onlyChangeWildLevels(Settings settings);
-
-    /**
-     * Whether the ROM has usable time-based (e.g. time of day) encounters or not.
-     * @return true if the ROM has these encounters, false otherwise.
-     */
     boolean hasTimeBasedEncounters();
 
     boolean hasWildAltFormes();
 
-    PokemonSet bannedForWildEncounters();
-
-    void randomizeWildHeldItems(Settings settings);
-
-    void changeCatchRates(Settings settings);
-
-    void minimumCatchRate(int rateNonLegendary, int rateLegendary);
+    PokemonSet<Pokemon> getBannedForWildEncounters();
 
     void enableGuaranteedPokemonCatching();
 
@@ -288,13 +201,26 @@ public interface RomHandler {
 
     List<Integer> getMainPlaythroughTrainers();
 
+    /**
+     * Returns a list of the indices (in the main trainer list via {@link #getTrainers()}) of the trainers
+     * consisting of the non-rematch Elite 4 challenge, including the Champion (or Ghetsis in BW1). <br>
+     * If isChallengeMode is true, it returns the indexes for the Challenge Mode e4+champion (only in BW2).
+     */
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
-    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
+    void setTrainers(List<Trainer> trainerData);
 
-    void randomizeTrainerPokes(Settings settings);
+    boolean canAddPokemonToBossTrainers();
 
-    void randomizeTrainerHeldItems(Settings settings);
+    boolean canAddPokemonToImportantTrainers();
+
+    boolean canAddPokemonToRegularTrainers();
+
+    boolean canAddHeldItemsToBossTrainers();
+
+    boolean canAddHeldItemsToImportantTrainers();
+
+    boolean canAddHeldItemsToRegularTrainers();
 
     List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves);
 
@@ -302,47 +228,20 @@ public interface RomHandler {
 
     List<Integer> getAllHeldItems();
 
-    void rivalCarriesStarter();
-
     boolean hasRivalFinalBattle();
 
-    void forceFullyEvolvedTrainerPokes(Settings settings);
-
-    void onlyChangeTrainerLevels(Settings settings);
-
-    void addTrainerPokemon(Settings settings);
-
-    void doubleBattleMode();
-
-    List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
-
-    void pickTrainerMovesets(Settings settings);
+    void makeDoubleBattleModePossible();
 
     // =========
     // Move Data
     // =========
 
-    void randomizeMovePowers();
-
-    void randomizeMovePPs();
-
-    void randomizeMoveAccuracies();
-
-    void randomizeMoveTypes();
-
     boolean hasPhysicalSpecialSplit();
-
-    void randomizeMoveCategory();
-
-    void updateMoves(Settings settings);
-
-    // stuff for printing move changes
-    void initMoveUpdates();
-
-    Map<Integer, boolean[]> getMoveUpdates();
 
     // return all the moves valid in this game.
     List<Move> getMoves();
+
+    int getPerfectAccuracy();
 
     // ================
     // Pokemon Movesets
@@ -358,14 +257,6 @@ public interface RomHandler {
 
     void setEggMoves(Map<Integer, List<Integer>> eggMoves);
 
-    void randomizeMovesLearnt(Settings settings);
-
-    void randomizeEggMoves(Settings settings);
-
-    void orderDamagingMovesByDamage();
-
-    void metronomeOnlyMode();
-
     boolean supportsFourStartingMoves();
 
     // ==============
@@ -376,17 +267,13 @@ public interface RomHandler {
 
     boolean setStaticPokemon(List<StaticEncounter> staticPokemon);
 
-    void randomizeStaticPokemon(Settings settings);
-
     boolean canChangeStaticPokemon();
 
     boolean hasStaticAltFormes();
 
-    List<Pokemon> bannedForStaticPokemon();
+    PokemonSet<Pokemon> getBannedForStaticPokemon();
 
     boolean forceSwapStaticMegaEvos();
-
-    void onlyChangeStaticLevels(Settings settings);
 
     boolean hasMainGameLegendaries();
 
@@ -402,11 +289,11 @@ public interface RomHandler {
     // Totem Pokemon
     // =============
 
+    boolean hasTotemPokemon();
+
     List<TotemPokemon> getTotemPokemon();
 
     void setTotemPokemon(List<TotemPokemon> totemPokemon);
-
-    void randomizeTotemPokemon(Settings settings);
 
     // =========
     // TMs & HMs
@@ -418,8 +305,6 @@ public interface RomHandler {
 
     void setTMMoves(List<Integer> moveIndexes);
 
-    void randomizeTMMoves(Settings settings);
-
     int getTMCount();
 
     int getHMCount();
@@ -427,7 +312,7 @@ public interface RomHandler {
     /**
      * Get TM/HM compatibility data from this rom. The result should contain a
      * boolean array for each Pokemon indexed as such:
-     * 
+     * <br>
      * 0: blank (false) / 1 - (getTMCount()) : TM compatibility /
      * (getTMCount()+1) - (getTMCount()+getHMCount()) - HM compatibility
      * 
@@ -438,21 +323,9 @@ public interface RomHandler {
 
     void setTMHMCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    void randomizeTMHMCompatibility(Settings settings);
-
-    void fullTMHMCompatibility();
-
-    void ensureTMCompatSanity();
-
-    void ensureTMEvolutionSanity();
-
-    void fullHMCompatibility();
-
     // ===========
     // Move Tutors
     // ===========
-
-    void copyTMCompatibilityToCosmeticFormes();
 
     boolean hasMoveTutors();
 
@@ -460,25 +333,13 @@ public interface RomHandler {
 
     void setMoveTutorMoves(List<Integer> moves);
 
-    void randomizeMoveTutorMoves(Settings settings);
-
     Map<Pokemon, boolean[]> getMoveTutorCompatibility();
 
     void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);
 
-    void randomizeMoveTutorCompatibility(Settings settings);
-
-    void fullMoveTutorCompatibility();
-
-    void ensureMoveTutorCompatSanity();
-
-    void ensureMoveTutorEvolutionSanity();
-
     // =============
     // Trainer Names
     // =============
-
-    void copyMoveTutorCompatibilityToCosmeticFormes();
 
     boolean canChangeTrainerText();
 
@@ -502,8 +363,6 @@ public interface RomHandler {
     // Only needed if above mode is "MAX LENGTH WITH CLASS"
     List<Integer> getTCNameLengthsByTrainer();
 
-    void randomizeTrainerNames(Settings settings);
-
     // ===============
     // Trainer Classes
     // ===============
@@ -515,8 +374,6 @@ public interface RomHandler {
     boolean fixedTrainerClassNamesLength();
 
     int maxTrainerClassNameLength();
-
-    void randomizeTrainerClassNames(Settings settings);
 
     List<Integer> getDoublesTrainerClasses();
 
@@ -558,27 +415,17 @@ public interface RomHandler {
 
     void setRegularFieldItems(List<Integer> items);
 
-    // Randomizer methods
-
-    void shuffleFieldItems();
-
-    void randomizeFieldItems(Settings settings);
-
     // ============
     // Special Shops
     // =============
 
-    boolean hasShopRandomization();
-
-    void shuffleShopItems();
-
-    void randomizeShopItems(Settings settings);
+    boolean hasShopSupport();
 
     Map<Integer, Shop> getShopItems();
 
     void setShopItems(Map<Integer, Shop> shopItems);
 
-    void setShopPrices();
+    void setBalancedShopPrices();
 
     // ============
     // Pickup Items
@@ -588,8 +435,6 @@ public interface RomHandler {
 
     void setPickupItems(List<PickupItem> pickupItems);
 
-    void randomizePickupItems(Settings settings);
-
     // ==============
     // In-Game Trades
     // ==============
@@ -597,8 +442,6 @@ public interface RomHandler {
     List<IngameTrade> getIngameTrades();
 
     void setIngameTrades(List<IngameTrade> trades);
-
-    void randomizeIngameTrades(Settings settings);
 
     boolean hasDVs();
 
@@ -624,10 +467,6 @@ public interface RomHandler {
 
     Set<EvolutionUpdate> getTimeBasedEvoUpdates();
 
-    void randomizeEvolutions(Settings settings);
-
-    void randomizeEvolutionsEveryLevel(Settings settings);
-
     // In the earlier games, alt formes use the same evolutions as the base forme.
     // In later games, this was changed so that alt formes can have unique evolutions
     // compared to the base forme.
@@ -649,16 +488,23 @@ public interface RomHandler {
     // (excluding Gameshark codes or early drink in RBY)
     List<Integer> getEarlyRequiredHMMoves();
 
-
     // ====
     // Misc
     // ====
 
     boolean isYellow();
 
+    boolean isORAS();
+
+    boolean isUSUM();
+
+    boolean hasMultiplePlayerCharacters();
+
     String getROMName();
 
     String getROMCode();
+
+    int getROMType();
 
     String getSupportLevel();
 
@@ -666,9 +512,10 @@ public interface RomHandler {
 
     int internalStringLength(String string);
 
-    void randomizeIntroPokemon();
-
-    BufferedImage getMascotImage();
+    /**
+     * Sets the Pokemon shown in the intro. Returns false if pk is not a valid intro Pokemon.
+     */
+    boolean setIntroPokemon(Pokemon pk);
 
     int generationOfPokemon();
 
@@ -680,13 +527,14 @@ public interface RomHandler {
 
     int miscTweaksAvailable();
 
-    void applyMiscTweaks(Settings settings);
-
     void applyMiscTweak(MiscTweak tweak);
 
-    boolean isEffectivenessUpdated();
+    /**
+     * Sets the Pokemon shown in the catching tutorial. Returns false if the Pokemon are not valid catching tutorial Pokemon.
+     */
+    boolean setCatchingTutorial(Pokemon opponent, Pokemon player);
 
-    void renderPlacementHistory();
+    void setPCPotionItem(int itemID);
 
     // ==========================
     // Misc forme-related methods
@@ -694,9 +542,48 @@ public interface RomHandler {
 
     boolean hasFunctionalFormes();
 
-    List<Pokemon> getAbilityDependentFormes();
+    PokemonSet<Pokemon> getBannedFormesForTrainerPokemon();
+    
+    // ========
+    // Graphics
+    // ========
 
-    List<Pokemon> getBannedFormesForPlayerPokemon();
+    boolean hasPokemonPaletteSupport();
 
-    List<Pokemon> getBannedFormesForTrainerPokemon();
+    boolean pokemonPaletteSupportIsPartial();
+
+    boolean hasCustomPlayerGraphicsSupport();
+
+    void setCustomPlayerGraphics(GraphicsPack playerGraphics, Settings.PlayerCharacterMod toReplace);
+
+    /**
+     * Returns whether {@link #createPokemonImageGetter(Pokemon)} is implemented or not.
+     */
+    boolean hasPokemonImageGetter();
+
+    PokemonImageGetter createPokemonImageGetter(Pokemon pk);
+
+    // Kind of strange this is a responsibility for the romHandler, when the resources are so specific to the
+    // randomizer parts, and the goal is to keep those separate. Still, it works for now.
+    /**
+     * Returns an identifier for resource files related to this ROM, used when randomizing palettes.
+     */
+    String getPaletteFilesID();
+
+    void dumpAllPokemonImages();
+
+    List<BufferedImage> getAllPokemonImages();
+
+    // ======
+    // Types
+    // ======
+
+    TypeService getTypeService();
+
+    TypeTable getTypeTable();
+
+    void setTypeTable(TypeTable typeTable);
+
+    boolean hasTypeEffectivenessSupport();
+
 }

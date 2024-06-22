@@ -29,10 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.dabomstew.pkrandom.pokemon.ItemList;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
-import com.dabomstew.pkrandom.pokemon.Trainer;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 
 public class Gen5Constants {
 
@@ -51,8 +48,9 @@ public class Gen5Constants {
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
-            bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
-            bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
+            bsDarkGrassHeldItemOffset = 16, bsGenderRatioOffset = 18, bsGrowthCurveOffset = 21,
+            bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26,
+            bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
             bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
     public static final byte[] bw1NewStarterScript = { 0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
@@ -139,8 +137,6 @@ public class Gen5Constants {
 
     public static final int scriptListTerminator = 0xFD13;
 
-    public static final int[] mulchIndices = {Items.growthMulch, Items.dampMulch, Items.stableMulch, Items.gooeyMulch};
-
     public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
             MoveCategory.SPECIAL };
 
@@ -183,21 +179,21 @@ public class Gen5Constants {
     }
 
     private static final List<Integer> bw1IrregularFormes = Arrays.asList(
-            Species.Gen5Formes.castformF, Species.Gen5Formes.castformW, Species.Gen5Formes.castformI,
+            Species.Gen5Formes.castformSu, Species.Gen5Formes.castformR, Species.Gen5Formes.castformSn,
             Species.Gen5Formes.darmanitanZ,
             Species.Gen5Formes.meloettaP
     );
 
     private static final List<Integer> bw2IrregularFormes = Arrays.asList(
-            Species.Gen5Formes.castformF, Species.Gen5Formes.castformW, Species.Gen5Formes.castformI,
+            Species.Gen5Formes.castformSu, Species.Gen5Formes.castformR, Species.Gen5Formes.castformSn,
             Species.Gen5Formes.darmanitanZ,
             Species.Gen5Formes.meloettaP,
             Species.Gen5Formes.kyuremW,
             Species.Gen5Formes.kyuremB
     );
 
-    public static final List<Integer> emptyPlaythroughTrainers = Arrays.asList(new Integer[] { });
-    
+    public static final List<Integer> emptyPlaythroughTrainers = List.of();
+
     public static final List<Integer> bw1MainPlaythroughTrainers = Arrays.asList(
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -263,7 +259,7 @@ public class Gen5Constants {
             71, 72, 73, 74, 75, 76, 77);
 
     public static final int normalTrainerNameLength = 813, normalTrainerClassLength = 236;
-    
+
 //    public static final Map<Integer, String> bw1ShopIndex = new HashMap<Integer, String>() {1:"Check"};
 
     public static final List<Integer> bw1MainGameShops = Arrays.asList(
@@ -301,7 +297,7 @@ public class Gen5Constants {
     public static final List<Integer> bw2MainGameShops = Arrays.asList(
             9, 11, 14, 15, 16, 18, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31
     );
-    
+
     public static final List<String> bw2ShopNames = Arrays.asList(
             "Primary 0 Badges",
             "Primary 1 Badges",
@@ -342,7 +338,7 @@ public class Gen5Constants {
             Items.ovalStone, Items.kingsRock, Items.deepSeaTooth, Items.deepSeaScale, Items.metalCoat, Items.dragonScale,
             Items.upgrade, Items.protector, Items.electirizer, Items.magmarizer, Items.dubiousDisc, Items.reaperCloth,
             Items.razorClaw, Items.razorFang, Items.prismScale);
-    
+
     public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(2, 3, 5, 6, 9, 12, 13, 19,
             22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47, 50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90,
             91, 92, 93);
@@ -456,7 +452,7 @@ public class Gen5Constants {
         map.put(Moves.whirlpool, Arrays.asList(Items.gripClaw, Items.bindingBand));
         map.put(Moves.wrap, Arrays.asList(Items.gripClaw, Items.bindingBand));
 
-        map.put(Moves.hornLeech, Arrays.asList(Items.bigRoot));
+        map.put(Moves.hornLeech, List.of(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
 
@@ -467,7 +463,7 @@ public class Gen5Constants {
     public static final Map<Type, Integer> weaknessReducingBerries = Gen4Constants.weaknessReducingBerries;
 
     private static Type[] constructTypeTable() {
-        Type[] table = new Type[256];
+        Type[] table = new Type[0x11];
         table[0x00] = Type.NORMAL;
         table[0x01] = Type.FIGHTING;
         table[0x02] = Type.FLYING;
@@ -530,6 +526,34 @@ public class Gen5Constants {
         default:
             return 0; // normal by default
         }
+    }
+
+    private static final EvolutionType[] evolutionTypeTable = new EvolutionType[] {
+            EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT, EvolutionType.LEVEL,
+            EvolutionType.TRADE, EvolutionType.TRADE_ITEM, EvolutionType.TRADE_SPECIAL, EvolutionType.STONE,
+            EvolutionType.LEVEL_ATTACK_HIGHER, EvolutionType.LEVEL_ATK_DEF_SAME, EvolutionType.LEVEL_DEFENSE_HIGHER,
+            EvolutionType.LEVEL_LOW_PV, EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_CREATE_EXTRA,
+            EvolutionType.LEVEL_IS_EXTRA, EvolutionType.LEVEL_HIGH_BEAUTY, EvolutionType.STONE_MALE_ONLY,
+            EvolutionType.STONE_FEMALE_ONLY, EvolutionType.LEVEL_ITEM_DAY, EvolutionType.LEVEL_ITEM_NIGHT,
+            EvolutionType.LEVEL_WITH_MOVE, EvolutionType.LEVEL_WITH_OTHER, EvolutionType.LEVEL_MALE_ONLY,
+            EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_ELECTRIFIED_AREA, EvolutionType.LEVEL_MOSS_ROCK,
+            EvolutionType.LEVEL_ICY_ROCK
+    };
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        for (int i = 0; i < evolutionTypeTable.length; i++) {
+            if (evolutionType == evolutionTypeTable[i]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        if (index == -1) {
+            return EvolutionType.NONE;
+        }
+        return evolutionTypeTable[index - 1];
     }
 
     public static int getAreaDataEntryLength(int romType) {
@@ -617,48 +641,48 @@ public class Gen5Constants {
     private static Map<Integer,String> setupFormeSuffixes(int gameVersion) {
         Map<Integer,String> formeSuffixes = new HashMap<>();
         if (gameVersion == Gen5Constants.Type_BW) {
-            formeSuffixes.put(Species.Gen5Formes.deoxysA,"-A");
-            formeSuffixes.put(Species.Gen5Formes.deoxysD,"-D");
-            formeSuffixes.put(Species.Gen5Formes.deoxysS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamT,"-T");
-            formeSuffixes.put(Species.Gen5Formes.shayminS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.giratinaO,"-O");
-            formeSuffixes.put(Species.Gen5Formes.rotomH,"-H");
-            formeSuffixes.put(Species.Gen5Formes.rotomW,"-W");
-            formeSuffixes.put(Species.Gen5Formes.rotomFr,"-Fr");
-            formeSuffixes.put(Species.Gen5Formes.rotomFa,"-Fa");
-            formeSuffixes.put(Species.Gen5Formes.rotomM,"-M");
-            formeSuffixes.put(Species.Gen5Formes.castformF,"-F");
-            formeSuffixes.put(Species.Gen5Formes.castformW,"-W");
-            formeSuffixes.put(Species.Gen5Formes.castformI,"-I");
-            formeSuffixes.put(Species.Gen5Formes.basculinB,"-B");
-            formeSuffixes.put(Species.Gen5Formes.darmanitanZ,"-Z");
-            formeSuffixes.put(Species.Gen5Formes.meloettaP,"-P");
+            formeSuffixes.put(Species.Gen5Formes.deoxysA,"-Attack");
+            formeSuffixes.put(Species.Gen5Formes.deoxysD,"-Defense");
+            formeSuffixes.put(Species.Gen5Formes.deoxysS,"-Speed");
+            formeSuffixes.put(Species.Gen5Formes.wormadamS,"-Sandy");
+            formeSuffixes.put(Species.Gen5Formes.wormadamT,"-Trash");
+            formeSuffixes.put(Species.Gen5Formes.shayminS,"-Sky");
+            formeSuffixes.put(Species.Gen5Formes.giratinaO,"-Origin");
+            formeSuffixes.put(Species.Gen5Formes.rotomH,"-Heat");
+            formeSuffixes.put(Species.Gen5Formes.rotomW,"-Wash");
+            formeSuffixes.put(Species.Gen5Formes.rotomFr,"-Frost");
+            formeSuffixes.put(Species.Gen5Formes.rotomFa,"-Fan");
+            formeSuffixes.put(Species.Gen5Formes.rotomM,"-Mow");
+            formeSuffixes.put(Species.Gen5Formes.castformSu,"-Sunny");
+            formeSuffixes.put(Species.Gen5Formes.castformR,"-Rainy");
+            formeSuffixes.put(Species.Gen5Formes.castformSn,"-Snowy");
+            formeSuffixes.put(Species.Gen5Formes.basculinB,"-Blue");
+            formeSuffixes.put(Species.Gen5Formes.darmanitanZ,"-Zen");
+            formeSuffixes.put(Species.Gen5Formes.meloettaP,"-Pirouette");
         } else if (gameVersion == Gen5Constants.Type_BW2) {
-            formeSuffixes.put(Species.Gen5Formes.deoxysA + bw2formeOffset,"-A");
-            formeSuffixes.put(Species.Gen5Formes.deoxysD + bw2formeOffset,"-D");
-            formeSuffixes.put(Species.Gen5Formes.deoxysS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.shayminS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.giratinaO + bw2formeOffset,"-O");
-            formeSuffixes.put(Species.Gen5Formes.rotomH + bw2formeOffset,"-H");
-            formeSuffixes.put(Species.Gen5Formes.rotomW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.rotomFr + bw2formeOffset,"-Fr");
-            formeSuffixes.put(Species.Gen5Formes.rotomFa + bw2formeOffset,"-Fa");
-            formeSuffixes.put(Species.Gen5Formes.rotomM + bw2formeOffset,"-M");
-            formeSuffixes.put(Species.Gen5Formes.castformF + bw2formeOffset,"-F");
-            formeSuffixes.put(Species.Gen5Formes.castformW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.castformI + bw2formeOffset,"-I");
-            formeSuffixes.put(Species.Gen5Formes.basculinB + bw2formeOffset,"-B");
-            formeSuffixes.put(Species.Gen5Formes.darmanitanZ + bw2formeOffset,"-Z");
-            formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset,"-P");
-            formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset,"-B");
-            formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset,"-T");
+            formeSuffixes.put(Species.Gen5Formes.deoxysA + bw2formeOffset,"-Attack");
+            formeSuffixes.put(Species.Gen5Formes.deoxysD + bw2formeOffset,"-Defense");
+            formeSuffixes.put(Species.Gen5Formes.deoxysS + bw2formeOffset,"-Speed");
+            formeSuffixes.put(Species.Gen5Formes.wormadamS + bw2formeOffset,"-Sandy");
+            formeSuffixes.put(Species.Gen5Formes.wormadamT + bw2formeOffset,"-Trash");
+            formeSuffixes.put(Species.Gen5Formes.shayminS + bw2formeOffset,"-Sky");
+            formeSuffixes.put(Species.Gen5Formes.giratinaO + bw2formeOffset,"-Origin");
+            formeSuffixes.put(Species.Gen5Formes.rotomH + bw2formeOffset,"-Heat");
+            formeSuffixes.put(Species.Gen5Formes.rotomW + bw2formeOffset,"-Wash");
+            formeSuffixes.put(Species.Gen5Formes.rotomFr + bw2formeOffset,"-Frost");
+            formeSuffixes.put(Species.Gen5Formes.rotomFa + bw2formeOffset,"-Fan");
+            formeSuffixes.put(Species.Gen5Formes.rotomM + bw2formeOffset,"-Mow");
+            formeSuffixes.put(Species.Gen5Formes.castformSu + bw2formeOffset,"-Sunny");
+            formeSuffixes.put(Species.Gen5Formes.castformR + bw2formeOffset,"-Rainy");
+            formeSuffixes.put(Species.Gen5Formes.castformSn + bw2formeOffset,"-Snowy");
+            formeSuffixes.put(Species.Gen5Formes.basculinB + bw2formeOffset,"-Blue");
+            formeSuffixes.put(Species.Gen5Formes.darmanitanZ + bw2formeOffset,"-Zen");
+            formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset,"-Pirouette");
+            formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset,"-White");
+            formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset,"-Black");
+            formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset,"-Therian");
+            formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset,"-Therian");
+            formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset,"-Therian");
         }
 
         return formeSuffixes;
@@ -717,7 +741,7 @@ public class Gen5Constants {
         kyuremMap.put(2,"-B");
         map.put(Species.kyurem, kyuremMap);
 
-        Map<Integer,String> keldeoMap = new HashMap();
+        Map<Integer,String> keldeoMap = new HashMap<>();
         keldeoMap.put(1,"-R");
         map.put(Species.keldeo, keldeoMap);
 
@@ -774,9 +798,9 @@ public class Gen5Constants {
         map.put(Species.rotom, rotomMap);
 
         Map<Integer,Integer> castformMap = new HashMap<>();
-        castformMap.put(1,Species.Gen5Formes.castformF);
-        castformMap.put(2,Species.Gen5Formes.castformW);
-        castformMap.put(3,Species.Gen5Formes.castformI);
+        castformMap.put(1,Species.Gen5Formes.castformSu);
+        castformMap.put(2,Species.Gen5Formes.castformR);
+        castformMap.put(3,Species.Gen5Formes.castformSn);
         map.put(Species.castform, castformMap);
 
         Map<Integer,Integer> basculinMap = new HashMap<>();
@@ -868,9 +892,9 @@ public class Gen5Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
@@ -879,13 +903,13 @@ public class Gen5Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
     }
 
     public static ItemList getNonBadItems(int romType) {
@@ -1647,7 +1671,7 @@ public class Gen5Constants {
         12,
         54,
     };
-    
+
     private static final int[] bw2WildFileToAreaMap = {
         2,
         4,
@@ -1709,118 +1733,6 @@ public class Gen5Constants {
         52,
         68,
     };
-
-    public static int[] bwPostGameEncounterAreasTOD = new int[] {
-            369, 370, 371, 372, 373, 374, 375, 376, 377, 378, //Challenger's Cave
-            409, 410, 411, 412, 413, 414, 415, //Abundant Shrine
-            193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, //Giant Chasm
-            385, 386, 387, 388, 389, 390, 391, //Route 11
-            392, 393, 394, //Route 12
-            395, 396, 397, 398, 399, 400, 401, //Route 13
-            402, 403, 404, 405, 406, 407, 408, //Route 14
-            416, 417, 418, //Route 15
-            436, 437, 438, 439, //Undella Town
-            234, 235, 236, 237, 238, 239, 240, //Village Bridge
-            217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, //Undella Bay
-            241, //Marvelous Bridge
-            2, 3, 6, 7, 11, 12, 16, 17, 21, 22, 25, 26, 39, 40, 129, 130, 136, 137, 143, 144,
-            150, 151, 159, 160, 173, 174, 215, 216, 247, 248, 256, 257, 262, 263, 268, 269, 273,
-            274, 283, 284, 290, 291, 297, 298, 304, 305, 331, 332, 336, 337, 341, 342, 345, 346,
-            350, 351, 355, 356, 360, 361, 364, 365, 427, 428, 434, 435, 442, 443, //Fishing. Yes, all fishing.
-            28, 30, //Dreamyard black grass
-            49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, //Relic Castle bottom floors
-
-            //Thankfully, White Forest is a special zone for encounters,
-            //so does not create an encounter number mismatch between Black and White
-    };
-
-    public static int[] bwPostGameEncounterAreasNoTOD = new int[] {
-            233, 234, 235, 236, 237, 238, 239, 240, 241, 242, //Challenger's Cave
-            273, 274, 275, 276, 277, 278, 279, //Abundant Shrine
-            127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, //Giant Chasm
-            249, 250, 251, 252, 253, 254, 255, //Route 11
-            256, 257, 258, //Route 12
-            259, 260, 261, 262, 263, 264, 265, //Route 13
-            266, 267, 268, 269, 270, 271, 272, //Route 14
-            280, 281, 282, //Route 15
-            300, 301, 302, 303, //Undella Town
-            156, 157, 158, 159, 160, 161, 162, //Village Bridge
-            151, 152, 153, 154, //Undella Bay
-            163, //Marvelous Bridge
-            2, 3, 6, 7, 11, 12, 25, 26, 84, 85, 93, 94, 107, 108, 149, 150, 169, 170, 178, 179, 184,
-            185, 190, 191, 195, 196, 205, 206, 223, 224, 228, 229, 291, 292, 298, 299, 306, 307, //Fishing
-            14, 16, //Dreamyard black grass
-            35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, //Relic Castle bottom floors
-    };
-
-    public static int[] b2w2PostGameEncounterAreasTOD = new int[] {
-            477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493,
-            494, 495, //Moor of Icirrus
-            317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, //Clay Tunnel
-            331, 332, 333, 334, 335, 336, //Underground Ruins
-            42, 43, 44, 45, 46, 47, 48, 49, 50, 51, //Pinwheel Forest
-            187, 188, 189, 190, 191, 192, //P2 Laboratory
-            383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, //Wellspring Cave
-            367, 368, 369, 370, 371, 372, 373, //Route 1
-            374, 375, //Route 2
-            376, 377, 378, 379, 380, 381, 382, //Route 3
-            458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474,
-            475, 476, //Route 8
-            530, 531, 532, //Route 15
-            602, 603, 604, 605, //Route 17
-            543, 544, 545, 546, 547, 548, 549, //Route 18
-            7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, //Icirrus City
-            0, 1, 2, 3, //Striaton City
-            366, //Marvelous Bridge
-            100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
-            117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133,
-            134, 135, 136, 137, 138, //Dragonspiral Tower
-            68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
-            89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, //Twist Mountain
-            38, 39, 40, 41, //Dreamyard
-            351, 352, 353, 354, 355, 356, 357, //Nature Preserve
-            337, 338, //Rock Peak Chamber
-            339, 340, //Iceberg Chamber
-            341, 342, //Iron Chamber
-            28, 29, 32, 33, 36, 37, 148, 149, 160, 161, 165, 166, 170, 171, 175, 176, 180, 181,
-            185, 186, 195, 196, 199, 200, 203, 204, 207, 208, 211, 212, 217, 218, 223, 224, 268,
-            269, 278, 279, 286, 287, 296, 297, 303, 304, 313, 314, 347, 348, 364, 365, 398, 399,
-            403, 404, 413, 414, 420, 421, 427, 428, 434, 435, 504, 505, 514, 515, 521, 522, 528,
-            529, 541, 542, 554, 555, 561, 562, 568, 569, 575, 576, 582, 583, 589, 590, 596, 597,
-            600, 601, 608, 609, //Fishing
-    };
-
-    public static int[] b2w2PostGameEncounterAreasNoTOD = new int[] {
-            355, 356, 357, 358, 359, //Moor of Icirrus
-            239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, //Clay Tunnel
-            253, 254, 255, 256, 257, 258, //Underground Ruins
-            28, 29, 30, 31, 32, 33, 34, 35, 36, 37, //Pinwheel Forest
-            121, 122, 123, 124, 125, 126, //P2 Laboratory
-            305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, //Wellspring Cave
-            289, 290, 291, 292, 293, 294, 295, //Route 1
-            296, 297, //Route 2
-            298, 299, 300, 301, 302, 303, 304, //Route 3
-            350, 351, 352, 353, 354, //Route 8
-            394, 395, 396, //Route 15
-            445, 446, 447, 448, //Route 17
-            407, 408, 409, 410, 411, 412, 413, //Route 18
-            7, 8, 9, 10, 11, //Icirrus City
-            0, 1, 2, 3, //Striaton City
-            288, //Marvelous Bridge
-            62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, //Dragonspiral Tower
-            54, 55, 56, 57, 58, 59, 60, 61, //Twist Mountain
-            24, 25, 26, 27, //Dreamyard
-            273, 274, 275, 276, 277, 278, 279, //Nature Preserve
-            259, 260, //Rock Peak Chamber
-            261, 262, //Iceberg Chamber
-            263, 264, //Iron Chamber
-            14, 15, 18, 19, 22, 23, 82, 83, 94, 95, 99, 100, 104, 105, 109, 110, 114,
-            115, 119, 120, 129, 130, 133, 134, 139, 140, 145, 146, 190, 191, 200, 201,
-            208, 209, 218, 219, 225, 226, 235, 236, 269, 270, 286, 287, 320, 321, 325,
-            326, 335, 336, 368, 369, 378, 379, 385, 386, 392, 393, 405, 406, 418, 419,
-            425, 426, 432, 433, 439, 440, 443, 444, 451, 452, //Fishing
-    };
-
 
     public static void tagTrainersBW(List<Trainer> trs) {
         // We use different Gym IDs to cheat the system for the 3 n00bs
@@ -2102,5 +2014,412 @@ public class Gen5Constants {
             }
         }
     }
+
+    private static final int[] bwPostGameEncounterAreasTOD = new int[] {
+            369, 370, 371, 372, 373, 374, 375, 376, 377, 378, //Challenger's Cave
+            409, 410, 411, 412, 413, 414, 415, //Abundant Shrine
+            193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, //Giant Chasm
+            385, 386, 387, 388, 389, 390, 391, //Route 11
+            392, 393, 394, //Route 12
+            395, 396, 397, 398, 399, 400, 401, //Route 13
+            402, 403, 404, 405, 406, 407, 408, //Route 14
+            416, 417, 418, //Route 15
+            436, 437, 438, 439, //Undella Town
+            234, 235, 236, 237, 238, 239, 240, //Village Bridge
+            217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, //Undella Bay
+            241, //Marvelous Bridge
+            2, 3, 6, 7, 11, 12, 16, 17, 21, 22, 25, 26, 39, 40, 129, 130, 136, 137, 143, 144,
+            150, 151, 159, 160, 173, 174, 215, 216, 247, 248, 256, 257, 262, 263, 268, 269, 273,
+            274, 283, 284, 290, 291, 297, 298, 304, 305, 331, 332, 336, 337, 341, 342, 345, 346,
+            350, 351, 355, 356, 360, 361, 364, 365, 427, 428, 434, 435, 442, 443, //Fishing. Yes, all fishing.
+            28, 30, //Dreamyard black grass
+            49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, //Relic Castle bottom floors
+
+            //Thankfully, White Forest is a special zone for encounters,
+            //so does not create an encounter number mismatch between Black and White
+    };
+
+    private static final int[] bwPostGameEncounterAreasNoTOD = new int[] {
+            233, 234, 235, 236, 237, 238, 239, 240, 241, 242, //Challenger's Cave
+            273, 274, 275, 276, 277, 278, 279, //Abundant Shrine
+            127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, //Giant Chasm
+            249, 250, 251, 252, 253, 254, 255, //Route 11
+            256, 257, 258, //Route 12
+            259, 260, 261, 262, 263, 264, 265, //Route 13
+            266, 267, 268, 269, 270, 271, 272, //Route 14
+            280, 281, 282, //Route 15
+            300, 301, 302, 303, //Undella Town
+            156, 157, 158, 159, 160, 161, 162, //Village Bridge
+            151, 152, 153, 154, //Undella Bay
+            163, //Marvelous Bridge
+            2, 3, 6, 7, 11, 12, 25, 26, 84, 85, 93, 94, 107, 108, 149, 150, 169, 170, 178, 179, 184,
+            185, 190, 191, 195, 196, 205, 206, 223, 224, 228, 229, 291, 292, 298, 299, 306, 307, //Fishing
+            14, 16, //Dreamyard black grass
+            35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, //Relic Castle bottom floors
+    };
+
+    private static final int[] b2w2PostGameEncounterAreasTOD = new int[] {
+            477, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493,
+            494, 495, //Moor of Icirrus
+            317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, //Clay Tunnel
+            331, 332, 333, 334, 335, 336, //Underground Ruins
+            42, 43, 44, 45, 46, 47, 48, 49, 50, 51, //Pinwheel Forest
+            187, 188, 189, 190, 191, 192, //P2 Laboratory
+            383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, //Wellspring Cave
+            367, 368, 369, 370, 371, 372, 373, //Route 1
+            374, 375, //Route 2
+            376, 377, 378, 379, 380, 381, 382, //Route 3
+            458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474,
+            475, 476, //Route 8
+            530, 531, 532, //Route 15
+            602, 603, 604, 605, //Route 17
+            543, 544, 545, 546, 547, 548, 549, //Route 18
+            7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, //Icirrus City
+            0, 1, 2, 3, //Striaton City
+            366, //Marvelous Bridge
+            100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+            117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133,
+            134, 135, 136, 137, 138, //Dragonspiral Tower
+            68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
+            89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, //Twist Mountain
+            38, 39, 40, 41, //Dreamyard
+            351, 352, 353, 354, 355, 356, 357, //Nature Preserve
+            337, 338, //Rock Peak Chamber
+            339, 340, //Iceberg Chamber
+            341, 342, //Iron Chamber
+            28, 29, 32, 33, 36, 37, 148, 149, 160, 161, 165, 166, 170, 171, 175, 176, 180, 181,
+            185, 186, 195, 196, 199, 200, 203, 204, 207, 208, 211, 212, 217, 218, 223, 224, 268,
+            269, 278, 279, 286, 287, 296, 297, 303, 304, 313, 314, 347, 348, 364, 365, 398, 399,
+            403, 404, 413, 414, 420, 421, 427, 428, 434, 435, 504, 505, 514, 515, 521, 522, 528,
+            529, 541, 542, 554, 555, 561, 562, 568, 569, 575, 576, 582, 583, 589, 590, 596, 597,
+            600, 601, 608, 609, //Fishing
+    };
+
+    private static final int[] b2w2PostGameEncounterAreasNoTOD = new int[] {
+            355, 356, 357, 358, 359, //Moor of Icirrus
+            239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, //Clay Tunnel
+            253, 254, 255, 256, 257, 258, //Underground Ruins
+            28, 29, 30, 31, 32, 33, 34, 35, 36, 37, //Pinwheel Forest
+            121, 122, 123, 124, 125, 126, //P2 Laboratory
+            305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, //Wellspring Cave
+            289, 290, 291, 292, 293, 294, 295, //Route 1
+            296, 297, //Route 2
+            298, 299, 300, 301, 302, 303, 304, //Route 3
+            350, 351, 352, 353, 354, //Route 8
+            394, 395, 396, //Route 15
+            445, 446, 447, 448, //Route 17
+            407, 408, 409, 410, 411, 412, 413, //Route 18
+            7, 8, 9, 10, 11, //Icirrus City
+            0, 1, 2, 3, //Striaton City
+            288, //Marvelous Bridge
+            62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, //Dragonspiral Tower
+            54, 55, 56, 57, 58, 59, 60, 61, //Twist Mountain
+            24, 25, 26, 27, //Dreamyard
+            273, 274, 275, 276, 277, 278, 279, //Nature Preserve
+            259, 260, //Rock Peak Chamber
+            261, 262, //Iceberg Chamber
+            263, 264, //Iron Chamber
+            14, 15, 18, 19, 22, 23, 82, 83, 94, 95, 99, 100, 104, 105, 109, 110, 114,
+            115, 119, 120, 129, 130, 133, 134, 139, 140, 145, 146, 190, 191, 200, 201,
+            208, 209, 218, 219, 225, 226, 235, 236, 269, 270, 286, 287, 320, 321, 325,
+            326, 335, 336, 368, 369, 378, 379, 385, 386, 392, 393, 405, 406, 418, 419,
+            425, 426, 432, 433, 439, 440, 443, 444, 451, 452, //Fishing
+    };
+
+    private static final List<String> locationTagsNoTimeBW = initLocationTagsNoTimeBW();
+
+    private static List<String> initLocationTagsNoTimeBW() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 4, "DRIFTVEIL CITY");
+        addCopies(tags, 5, "ICIRRUS CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 31, "RELIC CASTLE");
+        addCopies(tags, 3, "COLD STORAGE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 8, "TWIST MOUNTAIN");
+        addCopies(tags, 11, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 39, "VICTORY ROAD");
+        addCopies(tags, 18, "GIANT CHASM");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 4, "UNDELLA BAY");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 5, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 7, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 5, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 10, "CHALLENGER'S CAVE");
+        addCopies(tags, 6, "ROUTE 10");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeBW = initLocationTagsUseTimeBW();
+
+    private static List<String> initLocationTagsUseTimeBW() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 4, "DRIFTVEIL CITY");
+        addCopies(tags, 19, "ICIRRUS CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 31, "RELIC CASTLE");
+        addCopies(tags, 3, "COLD STORAGE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 32, "TWIST MOUNTAIN");
+        addCopies(tags, 39, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 39, "VICTORY ROAD");
+        addCopies(tags, 18, "GIANT CHASM");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 16, "UNDELLA BAY");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 5, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 28, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 12, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 19, "ROUTE 8");
+        addCopies(tags, 19, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 10, "CHALLENGER'S CAVE");
+        addCopies(tags, 6, "ROUTE 10");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsNoTimeBW2 = initLocationTagsNoTimeBW2();
+
+    private static List<String> initLocationTagsNoTimeBW2() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 3, "CASTELIA CITY");
+        addCopies(tags, 5, "ICIRRUS CITY");
+        addCopies(tags, 4, "ASPERTIA CITY");
+        addCopies(tags, 4, "VIRBANK CITY");
+        addCopies(tags, 4, "HUMILAU CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 8, "RELIC CASTLE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 8, "TWIST MOUNTAIN");
+        addCopies(tags, 11, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 2, "VICTORY ROAD");
+        addCopies(tags, 21, "GIANT CHASM");
+        addCopies(tags, 25, "CASTELIA SEWERS");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 4, "UNDELLA BAY");
+        addCopies(tags, 10, "FLOCCESY RANCH");
+        addCopies(tags, 9, "VIRBANK COMPLEX");
+        addCopies(tags, 27, "REVERSAL MOUNTAIN");
+        addCopies(tags, 10, "STRANGE HOUSE");
+        addCopies(tags, 42, "VICTORY ROAD");
+        addCopies(tags, 10, "RELIC PASSAGE");
+        addCopies(tags, 26, "CLAY TUNNEL");
+        addCopies(tags, 8, "SEASIDE CAVE");
+        addCopies(tags, 7, "NATURE PRESERVE");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 10, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 7, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 3, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 5, "ROUTE 8");
+        addCopies(tags, 5, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 6, "ROUTE 19");
+        addCopies(tags, 7, "ROUTE 20");
+        addCopies(tags, 7, "ROUTE 22");
+        addCopies(tags, 7, "ROUTE 23");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        addCopies(tags, 4, "ROUTE 21");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> locationTagsUseTimeBW2 = initLocationTagsUseTimeBW2();
+
+    private static List<String> initLocationTagsUseTimeBW2() {
+        List<String> tags = new ArrayList<>();
+        addCopies(tags, 4, "STRIATON CITY");
+        addCopies(tags, 3, "CASTELIA CITY");
+        addCopies(tags, 19, "ICIRRUS CITY");
+        addCopies(tags, 4, "ASPERTIA CITY");
+        addCopies(tags, 4, "VIRBANK CITY");
+        addCopies(tags, 4, "HUMILAU CITY");
+        addCopies(tags, 4, "DREAMYARD");
+        addCopies(tags, 10, "PINWHEEL FOREST");
+        addCopies(tags, 2, "DESERT RESORT");
+        addCopies(tags, 8, "RELIC CASTLE");
+        addCopies(tags, 6, "CHARGESTONE CAVE");
+        addCopies(tags, 32, "TWIST MOUNTAIN");
+        addCopies(tags, 39, "DRAGONSPIRAL TOWER");
+        addCopies(tags, 2, "VICTORY ROAD");
+        addCopies(tags, 21, "GIANT CHASM");
+        addCopies(tags, 25, "CASTELIA SEWERS");
+        addCopies(tags, 6, "P2 LABORATORY");
+        addCopies(tags, 16, "UNDELLA BAY");
+        addCopies(tags, 10, "FLOCCESY RANCH");
+        addCopies(tags, 9, "VIRBANK COMPLEX");
+        addCopies(tags, 27, "REVERSAL MOUNTAIN");
+        addCopies(tags, 10, "STRANGE HOUSE");
+        addCopies(tags, 42, "VICTORY ROAD");
+        addCopies(tags, 10, "RELIC PASSAGE");
+        addCopies(tags, 26, "CLAY TUNNEL");
+        addCopies(tags, 8, "SEASIDE CAVE");
+        addCopies(tags, 7, "NATURE PRESERVE");
+        addCopies(tags, 1, "DRIFTVEIL DRAWBRIDGE");
+        addCopies(tags, 7, "VILLAGE BRIDGE");
+        addCopies(tags, 1, "MARVELOUS BRIDGE");
+        addCopies(tags, 7, "ROUTE 1");
+        addCopies(tags, 2, "ROUTE 2");
+        addCopies(tags, 7, "ROUTE 3");
+        addCopies(tags, 12, "WELLSPRING CAVE");
+        addCopies(tags, 10, "ROUTE 4");
+        addCopies(tags, 3, "ROUTE 5");
+        addCopies(tags, 28, "ROUTE 6");
+        addCopies(tags, 6, "MISTRALTON CAVE");
+        addCopies(tags, 12, "ROUTE 7");
+        addCopies(tags, 4, "CELESTIAL TOWER");
+        addCopies(tags, 19, "ROUTE 8");
+        addCopies(tags, 19, "MOOR OF ICIRRUS");
+        addCopies(tags, 3, "ROUTE 9");
+        addCopies(tags, 7, "ROUTE 11");
+        addCopies(tags, 3, "ROUTE 12");
+        addCopies(tags, 7, "ROUTE 13");
+        addCopies(tags, 7, "ROUTE 14");
+        addCopies(tags, 7, "ABUNDANT SHRINE");
+        addCopies(tags, 3, "ROUTE 15");
+        addCopies(tags, 3, "ROUTE 16");
+        addCopies(tags, 7, "LOSTLORN FOREST");
+        addCopies(tags, 7, "ROUTE 18");
+        addCopies(tags, 6, "ROUTE 19");
+        addCopies(tags, 28, "ROUTE 20");
+        addCopies(tags, 7, "ROUTE 22");
+        addCopies(tags, 7, "ROUTE 23");
+        addCopies(tags, 4, "UNDELLA TOWN");
+        addCopies(tags, 4, "ROUTE 17");
+        addCopies(tags, 4, "ROUTE 21");
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static void addCopies(List<String> list, int n, String s) {
+        list.addAll(Collections.nCopies(n, s));
+    }
+
+    /**
+     * Based on
+     * <a href=https://bulbapedia.bulbagarden.net/wiki/Appendix:Black_and_White_walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrderBW = List.of(
+            "ROUTE 1", "ROUTE 2", "STRIATON CITY", "DREAMYARD", "ROUTE 3", "WELLSPRING CAVE",
+            "PINWHEEL FOREST", "CASTELIA CITY", "ROUTE 4", "DESERT RESORT", "ROUTE 5", "RELIC CASTLE", "ROUTE 5",
+            "DRIFTVEIL DRAWBRIDGE", "DRIFTVEIL CITY", "COLD STORAGE", "ROUTE 6", "CHARGESTONE CAVE", "ROUTE 7",
+            "CELESTIAL TOWER", "ROUTE 17", "ROUTE 18", "P2 LABORATORY", "MISTRALTON CAVE", "TWIST MOUNTAIN",
+            "ICIRRUS CITY", "DRAGONSPIRAL TOWER", "ROUTE 8", "MOOR OF ICIRRUS", "ROUTE 9", "ROUTE 10", "VICTORY ROAD",
+            "CHALLENGER'S CAVE", "ROUTE 11", "VILLAGE BRIDGE", "ROUTE 12", "ROUTE 13", "GIANT CHASM",
+            "UNDELLA TOWN", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 15", "MARVELOUS BRIDGE", "ROUTE 16",
+            "LOSTLORN FOREST"
+    );
+
+    /**
+     * Same order as the in-game Pokédex Habitat List.
+     */
+    public static final List<String> locationTagsTraverseOrderBW2 = List.of(
+            "ASPERTIA CITY", "ROUTE 19", "ROUTE 20", "FLOCCESY RANCH", "VIRBANK CITY", "VIRBANK COMPLEX",
+            "CASTELIA CITY", "CASTELIA SEWERS", "ROUTE 4", "DESERT RESORT", "RELIC CASTLE", "ROUTE 5", "ROUTE 16",
+            "LOSTLORN FOREST", "DRIFTVEIL DRAWBRIDGE", "ROUTE 6", "RELIC PASSAGE", "CLAY TUNNEL", "MISTRALTON CAVE",
+            "CHARGESTONE CAVE", "ROUTE 7", "CELESTIAL TOWER", "REVERSAL MOUNTAIN", "STRANGE HOUSE", "UNDELLA TOWN",
+            "ROUTE 13", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 12", "VILLAGE BRIDGE", "ROUTE 11",
+            "ROUTE 9", "SEASIDE CAVE", "ROUTE 21", "ROUTE 15", "MARVELOUS BRIDGE", "HUMILAU CITY", "ROUTE 22",
+            "GIANT CHASM", "ROUTE 23", "VICTORY ROAD", "ROUTE 8", "MOOR OF ICIRRUS", "ICIRRUS CITY",
+            "DRAGONSPIRAL TOWER", "TWIST MOUNTAIN", "PINWHEEL FOREST", "ROUTE 3", "WELLSPRING CAVE", "STRIATON CITY",
+            "DREAMYARD", "ROUTE 2", "ROUTE 1", "ROUTE 17", "ROUTE 18", "P2 LABORATORY",
+            "NATURE PRESERVE"
+    );
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
+        if (encounterAreas.size() != locationTags.size()) {
+            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+        }
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+        }
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
+        List<String> locationTags = switch (romType) {
+            case 0 -> (useTimeOfDay ? locationTagsUseTimeBW : locationTagsNoTimeBW);
+            case 1 -> (useTimeOfDay ? locationTagsUseTimeBW2 : locationTagsNoTimeBW2);
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        int[] postGameAreas = switch (romType) {
+            case 0 -> (useTimeOfDay ? bwPostGameEncounterAreasTOD : bwPostGameEncounterAreasNoTOD);
+            case 1 -> (useTimeOfDay ? b2w2PostGameEncounterAreasTOD : b2w2PostGameEncounterAreasNoTOD);
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, locationTags, postGameAreas);
+    }
+
 
 }

@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class StaticEncounter {
     public Pokemon pkmn;
@@ -55,43 +56,86 @@ public class StaticEncounter {
         this.linkedEncounters = new ArrayList<>();
     }
 
+    public StaticEncounter(StaticEncounter original) {
+        this.pkmn = original.pkmn;
+        this.forme = original.forme;
+        this.level = original.level;
+        this.maxLevel = original.maxLevel;
+        this.heldItem = original.heldItem;
+        this.isEgg = original.isEgg;
+        this.resetMoves = original.resetMoves;
+        this.restrictedPool = original.restrictedPool;
+        this.restrictedList = new ArrayList<>(original.restrictedList);
+        this.linkedEncounters = new ArrayList<>(original.linkedEncounters.size());
+        for (StaticEncounter oldLinked : original.linkedEncounters) {
+            StaticEncounter newLinked = new StaticEncounter();
+            newLinked.pkmn = oldLinked.pkmn;
+            newLinked.level = oldLinked.level;
+            newLinked.maxLevel = oldLinked.maxLevel;
+            newLinked.heldItem = oldLinked.heldItem;
+            newLinked.isEgg = oldLinked.isEgg;
+            newLinked.resetMoves = oldLinked.resetMoves;
+            this.linkedEncounters.add(newLinked);
+        }
+    }
+
+    public boolean canMegaEvolve() {
+        if (heldItem != 0) {
+            for (MegaEvolution mega: pkmn.getMegaEvolutionsFrom()) {
+                if (mega.argument == heldItem) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return this.toString(true);
     }
 
     public String toString(boolean printLevel) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(pkmn == null ? null : pkmn.fullName());
         if (isEgg) {
-            return pkmn.fullName() + " (egg)";
-        }
-        else if (!printLevel) {
-            return pkmn.fullName();
-        }
-        StringBuilder levelStringBuilder = new StringBuilder("Lv" + level);
-        if (maxLevel > 0) {
-            levelStringBuilder.append("-").append(maxLevel);
-        }
-        boolean needToDisplayLinkedLevels = false;
-        for (int i = 0; i < linkedEncounters.size(); i++) {
-            if (level != linkedEncounters.get(i).level) {
-                needToDisplayLinkedLevels = true;
+            sb.append(" (egg)");
+        } else if (printLevel) {
+            StringBuilder levelStringBuilder = new StringBuilder("Lv" + level);
+            if (maxLevel > 0) {
+                levelStringBuilder.append("-").append(maxLevel);
             }
-        }
-        if (needToDisplayLinkedLevels) {
-            for (int i = 0; i < linkedEncounters.size(); i++) {
-                levelStringBuilder.append(" / ").append("Lv").append(linkedEncounters.get(i).level);
-            }
-        }
-        return pkmn.fullName() + ", " + levelStringBuilder.toString();
-    }
-
-    public boolean canMegaEvolve() {
-        if (heldItem != 0) {
-            for (MegaEvolution mega: pkmn.megaEvolutionsFrom) {
-                if (mega.argument == heldItem) {
-                    return true;
+            boolean needToDisplayLinkedLevels = false;
+            for (StaticEncounter linkedEncounter : linkedEncounters) {
+                if (level != linkedEncounter.level) {
+                    needToDisplayLinkedLevels = true;
+                    break;
                 }
             }
+            if (needToDisplayLinkedLevels) {
+                for (StaticEncounter linkedEncounter : linkedEncounters) {
+                    levelStringBuilder.append(" / ").append("Lv").append(linkedEncounter.level);
+                }
+            }
+            sb.append(" ");
+            sb.append(levelStringBuilder);
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pkmn, level);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof StaticEncounter other) {
+            return Objects.equals(other.pkmn, pkmn) && other.forme == forme && other.level == level
+                    && other.maxLevel == maxLevel && other.isEgg == isEgg && other.resetMoves == resetMoves
+                    && other.restrictedPool == restrictedPool && Objects.equals(other.restrictedList, restrictedList)
+                    && Objects.equals(other.linkedEncounters, linkedEncounters);
         }
         return false;
     }

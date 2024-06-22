@@ -24,8 +24,11 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
+// this is a misnomer, it's more of a weird set
 public class ItemList {
 
     private boolean[] items;
@@ -103,4 +106,38 @@ public class ItemList {
         return other;
     }
 
+    // The ItemList class serves some purpose, and ought to be decently efficient, but working with it is also
+    // kind of a pain, being a nonstandard type not implementing e.g. size().
+    // Some time it should be looked over whether it is needed at all, but until then the below three methods exist,
+    // so you can essentially bypass it and work with normal Sets instead.
+
+    public Set<Integer> getItemSet() {
+        Set<Integer> itemSet = new HashSet<>();
+        for (int itemID = 0; itemID < items.length; itemID++) {
+            if (items[itemID]) {
+                itemSet.add(itemID);
+            }
+        }
+        return itemSet;
+    }
+
+    public Set<Integer> getNonTMSet() {
+        Set<Integer> nonTMSet = new HashSet<>();
+        for (int itemID = 0; itemID < items.length; itemID++) {
+            if (items[itemID] && !tms[itemID]) {
+                nonTMSet.add(itemID);
+            }
+        }
+        return nonTMSet;
+    }
+
+    public Set<Integer> getTMSet() {
+        Set<Integer> tmSet = new HashSet<>();
+        for (int itemID = 0; itemID < items.length; itemID++) {
+            if (tms[itemID]) {
+                tmSet.add(itemID);
+            }
+        }
+        return tmSet;
+    }
 }

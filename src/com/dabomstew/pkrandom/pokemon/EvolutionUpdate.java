@@ -2,13 +2,14 @@ package com.dabomstew.pkrandom.pokemon;
 
 public class EvolutionUpdate implements Comparable<EvolutionUpdate> {
 
-    private Pokemon from, to;
-    private String fromName, toName;
-    private EvolutionType type;
-    private String extraInfo;
-    private boolean condensed;
-    private boolean additional;
-
+    private final Pokemon from;
+    private final Pokemon to;
+    private final String fromName;
+    private final String toName;
+    private final EvolutionType type;
+    private final String extraInfo;
+    private final boolean condensed;
+    private final boolean additional;
 
     public EvolutionUpdate(Pokemon from, Pokemon to, EvolutionType type, String extraInfo, boolean condensed, boolean additional) {
         this.from = from;
@@ -39,11 +40,11 @@ public class EvolutionUpdate implements Comparable<EvolutionUpdate> {
 
     @Override
     public int compareTo(EvolutionUpdate o) {
-        if (this.from.number < o.from.number) {
+        if (this.from.getNumber() < o.from.getNumber()) {
             return -1;
-        } else if (this.from.number > o.from.number) {
+        } else if (this.from.getNumber() > o.from.getNumber()) {
             return 1;
-        } else return Integer.compare(this.to.number, o.to.number);
+        } else return Integer.compare(this.to.getNumber(), o.to.getNumber());
     }
 
     @Override

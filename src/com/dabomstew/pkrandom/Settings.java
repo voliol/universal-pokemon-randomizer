@@ -32,10 +32,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import com.dabomstew.pkrandom.graphics.packs.GraphicsPack;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
@@ -143,6 +145,8 @@ public class Settings {
     private boolean evosMaxThreeStages;
     private boolean evosForceChange;
     private boolean evosAllowAltFormes;
+    private boolean evosForceGrowth;
+    private boolean evosNoConvergence;
 
     // Move data
     private boolean randomizeMovePowers;
@@ -204,19 +208,17 @@ public class Settings {
     private boolean betterTrainerMovesets;
 
     public enum WildPokemonMod {
-        UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING, FAMILY_MAPPING
-    }
-
-    public enum WildPokemonRestrictionMod {
-        NONE, SIMILAR_STRENGTH, CATCH_EM_ALL
+        UNCHANGED, RANDOM, AREA_MAPPING, LOCATION_MAPPING, GLOBAL_MAPPING, FAMILY_MAPPING
     }
     
     public enum WildPokemonTypeMod {
-        NONE, THEMED_AREAS, KEEP_PRIMARY, KEEP_THEMES
+        NONE, THEMED_AREAS, KEEP_PRIMARY
     }
 
     private WildPokemonMod wildPokemonMod = WildPokemonMod.UNCHANGED;
-    private WildPokemonRestrictionMod wildPokemonRestrictionMod = WildPokemonRestrictionMod.NONE;
+    private boolean keepWildTypeThemes;
+    private boolean similarStrengthEncounters;
+    private boolean catchEmAllEncounters;
     private WildPokemonTypeMod wildPokemonTypeMod = WildPokemonTypeMod.NONE;
     private boolean useTimeBasedEncounters;
     private boolean blockWildLegendaries = true;
@@ -334,9 +336,38 @@ public class Settings {
     private PickupItemsMod pickupItemsMod = PickupItemsMod.UNCHANGED;
     private boolean banBadRandomPickupItems;
 
+    public enum TypeEffectivenessMod {
+        UNCHANGED, RANDOM, RANDOM_BALANCED, KEEP_IDENTITIES, INVERSE
+    }
+
+    private TypeEffectivenessMod typeEffectivenessMod = TypeEffectivenessMod.UNCHANGED;
+    private boolean inverseTypesRandomImmunities;
+    private boolean updateTypeEffectiveness;
+
+    public enum PokemonPalettesMod {
+        UNCHANGED, RANDOM
+    }
+
+    private PokemonPalettesMod pokemonPalettesMod = PokemonPalettesMod.UNCHANGED;
+    private boolean pokemonPalettesFollowTypes;
+    private boolean pokemonPalettesFollowEvolutions;
+    private boolean pokemonPalettesShinyFromNormal;
+
+    public enum CustomPlayerGraphicsMod {
+        UNCHANGED, RANDOM
+    }
+
+    public enum PlayerCharacterMod {
+        PC1, PC2
+    }
+
+    private CustomPlayerGraphicsMod customPlayerGraphicsMod; // TODO: save/load from the settings file
+    private GraphicsPack customPlayerGraphics;
+    private PlayerCharacterMod customPlayerGraphicsCharacterMod;
+
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {
-        byte[] settings = toString().getBytes("UTF-8");
+        byte[] settings = toString().getBytes(StandardCharsets.UTF_8);
         ByteBuffer buf = ByteBuffer.allocate(settings.length + 8);
         buf.putInt(VERSION);
         buf.putInt(settings.length);
@@ -364,7 +395,7 @@ public class Settings {
         }
         int length = ByteBuffer.wrap(lengthBytes).getInt();
         byte[] buffer = FileFunctions.readFullyIntoBuffer(in, length);
-        String settings = new String(buffer, "UTF-8");
+        String settings = new String(buffer, StandardCharsets.UTF_8);
         boolean oldUpdate = false;
 
         if (version < VERSION) {
@@ -407,9 +438,9 @@ public class Settings {
                 startersMod == StartersMod.RANDOM_BASIC));
 
         // 5 - 10: dropdowns
-        write2ByteInt(out, customStarters[0] - 1);
-        write2ByteInt(out, customStarters[1] - 1);
-        write2ByteInt(out, customStarters[2] - 1);
+        write2ByteInt(out, customStarters[0]);
+        write2ByteInt(out, customStarters[1]);
+        write2ByteInt(out, customStarters[2]);
 
         // 11 movesets
         out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
@@ -439,19 +470,19 @@ public class Settings {
                 wildPokemonMod == WildPokemonMod.AREA_MAPPING,
                 wildPokemonMod == WildPokemonMod.GLOBAL_MAPPING,
                 wildPokemonMod == WildPokemonMod.FAMILY_MAPPING,
-                false, false, false));
+                wildPokemonMod == WildPokemonMod.LOCATION_MAPPING, false, false));
 
         // 16 wild pokemon (restriction)
-        out.write(makeByteSelected(wildPokemonRestrictionMod == WildPokemonRestrictionMod.NONE,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH,
-                wildPokemonRestrictionMod == WildPokemonRestrictionMod.CATCH_EM_ALL,
+        out.write(makeByteSelected(false,
+                similarStrengthEncounters,
+                catchEmAllEncounters,
                 false, false, false, false, false));
 
         // 17 wild pokemon (types)
         out.write(makeByteSelected(wildPokemonTypeMod == WildPokemonTypeMod.NONE,
                 wildPokemonTypeMod == WildPokemonTypeMod.KEEP_PRIMARY,
                 wildPokemonTypeMod == WildPokemonTypeMod.THEMED_AREAS,
-                wildPokemonTypeMod == WildPokemonTypeMod.KEEP_THEMES,
+                keepWildTypeThemes,
                 false, false, false, false));
 
         // 18 wild pokemon (various)
@@ -506,7 +537,7 @@ public class Settings {
         out.write(makeByteSelected(randomizeMovePowers, randomizeMoveAccuracies, randomizeMovePPs, randomizeMoveTypes,
                 randomizeMoveCategory, correctStaticMusic));
 
-        // 28 evolutions
+        // 28 evolutions 1
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
                 evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosAllowAltFormes,
                 evolutionsMod == EvolutionsMod.RANDOM_EVERY_LEVEL));
@@ -629,9 +660,27 @@ public class Settings {
         } else {
             out.write(0);
         }
+        
+        // 55 Pokémon palette randomization
+        out.write(makeByteSelected(pokemonPalettesMod == PokemonPalettesMod.UNCHANGED,
+                pokemonPalettesMod == PokemonPalettesMod.RANDOM,
+                pokemonPalettesFollowTypes,
+                pokemonPalettesFollowEvolutions,
+                pokemonPalettesShinyFromNormal));
+
+        // 56 Type effectiveness
+        out.write(makeByteSelected(typeEffectivenessMod == TypeEffectivenessMod.UNCHANGED,
+                typeEffectivenessMod == TypeEffectivenessMod.RANDOM,
+                typeEffectivenessMod == TypeEffectivenessMod.RANDOM_BALANCED,
+                typeEffectivenessMod == TypeEffectivenessMod.KEEP_IDENTITIES,
+                typeEffectivenessMod == TypeEffectivenessMod.INVERSE,
+                inverseTypesRandomImmunities, updateTypeEffectiveness));
+
+        // 57 evolutions 2
+        out.write(makeByteSelected(evosForceGrowth, evosNoConvergence));
 
         try {
-            byte[] romName = this.romName.getBytes("US-ASCII");
+            byte[] romName = this.romName.getBytes(StandardCharsets.US_ASCII);
             out.write(romName.length);
             out.write(romName);
         } catch (IOException e) {
@@ -706,8 +755,8 @@ public class Settings {
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
         settings.setAllowStarterAltFormes(restoreState(data[4],6));
 
-        settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
-                FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
+        settings.setCustomStarters(new int[]{FileFunctions.read2ByteInt(data, 5),
+                FileFunctions.read2ByteInt(data, 7), FileFunctions.read2ByteInt(data, 9)});
 
         settings.setMovesetsMod(restoreEnum(MovesetsMod.class, data[11], 2, // UNCHANGED
                 1, // RANDOM_PREFER_SAME_TYPE
@@ -739,12 +788,11 @@ public class Settings {
                 1, // RANDOM
                 2, // AREA_MAPPING
                 3, // GLOBAL_MAPPING
-                4 // FAMILY_MAPPING
+                4, // FAMILY_MAPPING
+                5 //LOCATION_MAPPING
         ));
-        settings.setWildPokemonRestrictionMod(restoreEnum(WildPokemonRestrictionMod.class, data[16], 0, // NONE
-                1, // SIMILAR_STRENGTH
-                2  // CATCH_EM_ALL
-        ));
+        settings.setSimilarStrengthEncounters(restoreState(data[16], 1));
+        settings.setCatchEmAllEncounters(restoreState(data[16], 2));
         settings.setWildPokemonTypeMod(restoreEnum(WildPokemonTypeMod.class, data[17], 0, // NONE
                 2, // THEMED_AREAS
                 1, // KEEP_PRIMARY
@@ -928,7 +976,15 @@ public class Settings {
         settings.setEliteFourUniquePokemonNumber(data[52] & 0x7);
         settings.setMinimumCatchRateLevel(((data[52] & 0x38) >> 3) + 1);
 
-        settings.setStartersTypeMod(restoreEnum(StartersTypeMod.class, data[53], 0, //NONE
+        settings.setPokemonPalettesMod(restoreEnum(PokemonPalettesMod.class, data[51],
+                0, // UNCHANGED
+                1 // RANDOM
+        ));
+        settings.setPokemonPalettesFollowTypes(restoreState(data[51], 2));
+        settings.setPokemonPalettesFollowEvolutions(restoreState(data[51], 3));
+        settings.setPokemonPalettesShinyFromNormal(restoreState(data[51], 4));
+
+        settings.setStartersTypeMod(restoreEnum(StartersTypeMod.class, data[52], 0, //NONE
                 1, //FIRE_WATER_GRASS
                 2, //TRIANGLE
                 3, //UNIQUE
@@ -944,14 +1000,23 @@ public class Settings {
             settings.setStartersSingleType(Type.fromInt((data[54] & 0x1F) - 1));
         }
 
+        settings.setKeepWildTypeThemes(restoreState(data[54], 0));
+
+        settings.setTypeEffectivenessMod(restoreEnum(TypeEffectivenessMod.class, data[55], 0, // UNCHANGED
+                1, // RANDOM
+                2, // RANDOM_BALANCED
+                3, // KEEP_IDENTITIES
+                4  // REVERSE
+        ));
+        settings.setInverseTypesRandomImmunities(restoreState(data[55], 5));
+        settings.setUpdateTypeEffectiveness(restoreState(data[55], 6));
+
+        settings.setEvosForceGrowth(restoreState(data[56], 0));
+        settings.setEvosNoConvergence(restoreState(data[56], 1));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
-        try {
-            String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
-            settings.setRomName(romName);
-        } catch (Exception e) {
-            int x = 1; //dummy statement
-        }
+        String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, StandardCharsets.US_ASCII);
+        settings.setRomName(romName);
 
         return settings;
     }
@@ -1083,7 +1148,7 @@ public class Settings {
             this.setRandomizeMoveCategory(false);
         }
 
-        if (!rh.hasShopRandomization()) {
+        if (!rh.hasShopSupport()) {
             this.setShopItemsMod(ShopItemsMod.UNCHANGED);
         }
 
@@ -1190,14 +1255,6 @@ public class Settings {
         this.removeTimeBasedEvolutions = removeTimeBasedEvolutions;
     }
 
-    public boolean isEvosAllowAltFormes() {
-        return evosAllowAltFormes;
-    }
-
-    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
-        this.evosAllowAltFormes = evosAllowAltFormes;
-    }
-
     public boolean isRaceMode() {
         return raceMode;
     }
@@ -1240,7 +1297,7 @@ public class Settings {
         setBaseStatisticsMod(getEnum(BaseStatisticsMod.class, bools));
     }
 
-    private void setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
+    public void setBaseStatisticsMod(BaseStatisticsMod baseStatisticsMod) {
         this.baseStatisticsMod = baseStatisticsMod;
     }
 
@@ -1285,7 +1342,7 @@ public class Settings {
         setExpCurveMod(getEnum(ExpCurveMod.class, bools));
     }
 
-    private void setExpCurveMod(ExpCurveMod expCurveMod) {
+    public void setExpCurveMod(ExpCurveMod expCurveMod) {
         this.expCurveMod = expCurveMod;
     }
 
@@ -1321,7 +1378,7 @@ public class Settings {
         setAbilitiesMod(getEnum(AbilitiesMod.class, bools));
     }
 
-    private void setAbilitiesMod(AbilitiesMod abilitiesMod) {
+    public void setAbilitiesMod(AbilitiesMod abilitiesMod) {
         this.abilitiesMod = abilitiesMod;
     }
 
@@ -1395,7 +1452,7 @@ public class Settings {
         setStartersMod(getEnum(StartersMod.class, bools));
     }
 
-    private void setStartersMod(StartersMod startersMod) {
+    public void setStartersMod(StartersMod startersMod) {
         this.startersMod = startersMod;
     }
 
@@ -1407,7 +1464,7 @@ public class Settings {
         setStartersTypeMod(getEnum(StartersTypeMod.class, bools));
     }
 
-    private void setStartersTypeMod(StartersTypeMod startersTypeMod) {
+    public void setStartersTypeMod(StartersTypeMod startersTypeMod) {
         this.startersTypeMod = startersTypeMod;
     }
 
@@ -1484,7 +1541,7 @@ public class Settings {
         setTypesMod(getEnum(TypesMod.class, bools));
     }
 
-    private void setTypesMod(TypesMod typesMod) {
+    public void setTypesMod(TypesMod typesMod) {
         this.typesMod = typesMod;
     }
 
@@ -1504,7 +1561,7 @@ public class Settings {
         setEvolutionsMod(getEnum(EvolutionsMod.class, bools));
     }
 
-    private void setEvolutionsMod(EvolutionsMod evolutionsMod) {
+    public void setEvolutionsMod(EvolutionsMod evolutionsMod) {
         this.evolutionsMod = evolutionsMod;
     }
 
@@ -1538,6 +1595,30 @@ public class Settings {
 
     public void setEvosForceChange(boolean evosForceChange) {
         this.evosForceChange = evosForceChange;
+    }
+
+    public boolean isEvosAllowAltFormes() {
+        return evosAllowAltFormes;
+    }
+
+    public void setEvosAllowAltFormes(boolean evosAllowAltFormes) {
+        this.evosAllowAltFormes = evosAllowAltFormes;
+    }
+
+    public boolean isEvosForceGrowth() {
+        return evosForceGrowth;
+    }
+
+    public void setEvosForceGrowth(boolean evosForceGrowth) {
+        this.evosForceGrowth = evosForceGrowth;
+    }
+
+    public boolean isEvosNoConvergence() {
+        return evosNoConvergence;
+    }
+
+    public void setEvosNoConvergence(boolean evosNoConvergence) {
+        this.evosNoConvergence = evosNoConvergence;
     }
 
     public boolean isRandomizeMovePowers() {
@@ -1588,7 +1669,7 @@ public class Settings {
         setMovesetsMod(getEnum(MovesetsMod.class, bools));
     }
 
-    private void setMovesetsMod(MovesetsMod movesetsMod) {
+    public void setMovesetsMod(MovesetsMod movesetsMod) {
         this.movesetsMod = movesetsMod;
     }
 
@@ -1656,7 +1737,7 @@ public class Settings {
         setTrainersMod(getEnum(TrainersMod.class, bools));
     }
 
-    private void setTrainersMod(TrainersMod trainersMod) {
+    public void setTrainersMod(TrainersMod trainersMod) {
         this.trainersMod = trainersMod;
     }
 
@@ -1904,20 +1985,32 @@ public class Settings {
         setWildPokemonMod(getEnum(WildPokemonMod.class, bools));
     }
 
-    private void setWildPokemonMod(WildPokemonMod wildPokemonMod) {
+    public void setWildPokemonMod(WildPokemonMod wildPokemonMod) {
         this.wildPokemonMod = wildPokemonMod;
     }
 
-    public WildPokemonRestrictionMod getWildPokemonRestrictionMod() {
-        return wildPokemonRestrictionMod;
+    public boolean isKeepWildTypeThemes() {
+        return keepWildTypeThemes;
     }
 
-    public void setWildPokemonRestrictionMod(boolean... bools) {
-        setWildPokemonRestrictionMod(getEnum(WildPokemonRestrictionMod.class, bools));
+    public void setKeepWildTypeThemes(boolean keepWildTypeThemes) {
+        this.keepWildTypeThemes = keepWildTypeThemes;
     }
 
-    private void setWildPokemonRestrictionMod(WildPokemonRestrictionMod wildPokemonRestrictionMod) {
-        this.wildPokemonRestrictionMod = wildPokemonRestrictionMod;
+    public boolean isSimilarStrengthEncounters() {
+        return similarStrengthEncounters;
+    }
+
+    public void setSimilarStrengthEncounters(boolean similarStrengthEncounters) {
+        this.similarStrengthEncounters = similarStrengthEncounters;
+    }
+
+    public boolean isCatchEmAllEncounters() {
+        return catchEmAllEncounters;
+    }
+
+    public void setCatchEmAllEncounters(boolean catchEmAllEncounters) {
+        this.catchEmAllEncounters = catchEmAllEncounters;
     }
 
     public WildPokemonTypeMod getWildPokemonTypeMod() {
@@ -1928,7 +2021,7 @@ public class Settings {
         setWildPokemonTypeMod(getEnum(WildPokemonTypeMod.class, bools));
     }
 
-    private void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
+    public void setWildPokemonTypeMod(WildPokemonTypeMod wildPokemonTypeMod) {
         this.wildPokemonTypeMod = wildPokemonTypeMod;
     }
 
@@ -2020,7 +2113,7 @@ public class Settings {
         setStaticPokemonMod(getEnum(StaticPokemonMod.class, bools));
     }
 
-    private void setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
+    public void setStaticPokemonMod(StaticPokemonMod staticPokemonMod) {
         this.staticPokemonMod = staticPokemonMod;
     }
 
@@ -2089,7 +2182,7 @@ public class Settings {
         setTotemPokemonMod(getEnum(TotemPokemonMod.class, bools));
     }
 
-    private void setTotemPokemonMod(TotemPokemonMod totemPokemonMod) {
+    public void setTotemPokemonMod(TotemPokemonMod totemPokemonMod) {
         this.totemPokemonMod = totemPokemonMod;
     }
 
@@ -2101,7 +2194,7 @@ public class Settings {
         setAllyPokemonMod(getEnum(AllyPokemonMod.class, bools));
     }
 
-    private void setAllyPokemonMod(AllyPokemonMod allyPokemonMod) {
+    public void setAllyPokemonMod(AllyPokemonMod allyPokemonMod) {
         this.allyPokemonMod = allyPokemonMod;
     }
 
@@ -2113,7 +2206,7 @@ public class Settings {
         setAuraMod(getEnum(AuraMod.class, bools));
     }
 
-    private void setAuraMod(AuraMod auraMod) {
+    public void setAuraMod(AuraMod auraMod) {
         this.auraMod = auraMod;
     }
 
@@ -2157,7 +2250,7 @@ public class Settings {
         setTmsMod(getEnum(TMsMod.class, bools));
     }
 
-    private void setTmsMod(TMsMod tmsMod) {
+    public void setTmsMod(TMsMod tmsMod) {
         this.tmsMod = tmsMod;
     }
 
@@ -2217,7 +2310,7 @@ public class Settings {
         setTmsHmsCompatibilityMod(getEnum(TMsHMsCompatibilityMod.class, bools));
     }
 
-    private void setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
+    public void setTmsHmsCompatibilityMod(TMsHMsCompatibilityMod tmsHmsCompatibilityMod) {
         this.tmsHmsCompatibilityMod = tmsHmsCompatibilityMod;
     }
 
@@ -2237,7 +2330,7 @@ public class Settings {
         setMoveTutorMovesMod(getEnum(MoveTutorMovesMod.class, bools));
     }
 
-    private void setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
+    public void setMoveTutorMovesMod(MoveTutorMovesMod moveTutorMovesMod) {
         this.moveTutorMovesMod = moveTutorMovesMod;
     }
 
@@ -2289,7 +2382,7 @@ public class Settings {
         setMoveTutorsCompatibilityMod(getEnum(MoveTutorsCompatibilityMod.class, bools));
     }
 
-    private void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
+    public void setMoveTutorsCompatibilityMod(MoveTutorsCompatibilityMod moveTutorsCompatibilityMod) {
         this.moveTutorsCompatibilityMod = moveTutorsCompatibilityMod;
     }
 
@@ -2309,7 +2402,7 @@ public class Settings {
         setInGameTradesMod(getEnum(InGameTradesMod.class, bools));
     }
 
-    private void setInGameTradesMod(InGameTradesMod inGameTradesMod) {
+    public void setInGameTradesMod(InGameTradesMod inGameTradesMod) {
         this.inGameTradesMod = inGameTradesMod;
     }
 
@@ -2353,7 +2446,7 @@ public class Settings {
         setFieldItemsMod(getEnum(FieldItemsMod.class, bools));
     }
 
-    private void setFieldItemsMod(FieldItemsMod fieldItemsMod) {
+    public void setFieldItemsMod(FieldItemsMod fieldItemsMod) {
         this.fieldItemsMod = fieldItemsMod;
     }
 
@@ -2374,7 +2467,7 @@ public class Settings {
         setShopItemsMod(getEnum(ShopItemsMod.class, bools));
     }
 
-    private void setShopItemsMod(ShopItemsMod shopItemsMod) {
+    public void setShopItemsMod(ShopItemsMod shopItemsMod) {
         this.shopItemsMod = shopItemsMod;
     }
 
@@ -2434,7 +2527,7 @@ public class Settings {
         setPickupItemsMod(getEnum(PickupItemsMod.class, bools));
     }
 
-    private void setPickupItemsMod(PickupItemsMod pickupItemsMod) {
+    public void setPickupItemsMod(PickupItemsMod pickupItemsMod) {
         this.pickupItemsMod = pickupItemsMod;
     }
 
@@ -2446,7 +2539,103 @@ public class Settings {
         this.banBadRandomPickupItems = banBadRandomPickupItems;
     }
 
-    private static int makeByteSelected(boolean... bools) {
+    public TypeEffectivenessMod getTypeEffectivenessMod() {
+        return typeEffectivenessMod;
+    }
+
+    public void setTypeEffectivenessMod(boolean... bools) {
+        setTypeEffectivenessMod(getEnum(TypeEffectivenessMod.class, bools));
+    }
+
+    public void setTypeEffectivenessMod(TypeEffectivenessMod typeEffectivenessMod) {
+        this.typeEffectivenessMod = typeEffectivenessMod;
+    }
+
+    public boolean isInverseTypesRandomImmunities() {
+        return inverseTypesRandomImmunities;
+    }
+
+    public void setInverseTypesRandomImmunities(boolean inverseTypesRandomImmunities) {
+        this.inverseTypesRandomImmunities = inverseTypesRandomImmunities;
+    }
+
+    public boolean isUpdateTypeEffectiveness() {
+        return updateTypeEffectiveness;
+    }
+
+    public void setUpdateTypeEffectiveness(boolean updateTypeEffectiveness) {
+        this.updateTypeEffectiveness = updateTypeEffectiveness;
+    }
+
+    public PokemonPalettesMod getPokemonPalettesMod() {
+    	return pokemonPalettesMod;
+    }
+
+    public void setPokemonPalettesMod(boolean... bools) {
+        setPokemonPalettesMod(getEnum(PokemonPalettesMod.class, bools));
+    }
+    
+    public void setPokemonPalettesMod(PokemonPalettesMod pokemonPalettesMod) {
+    	this.pokemonPalettesMod = pokemonPalettesMod;
+    }
+
+    public boolean isPokemonPalettesFollowTypes() {
+		return pokemonPalettesFollowTypes;
+	}
+
+	public void setPokemonPalettesFollowTypes(boolean pokemonPalettesFollowTypes) {
+		this.pokemonPalettesFollowTypes = pokemonPalettesFollowTypes;
+	}
+
+	public boolean isPokemonPalettesFollowEvolutions() {
+		return pokemonPalettesFollowEvolutions;
+	}
+
+	public void setPokemonPalettesFollowEvolutions(boolean pokemonPalettesFollowEvolutions) {
+		this.pokemonPalettesFollowEvolutions = pokemonPalettesFollowEvolutions;
+	}
+
+	public boolean isPokemonPalettesShinyFromNormal() {
+		return pokemonPalettesShinyFromNormal;
+	}
+
+	public void setPokemonPalettesShinyFromNormal(boolean pokemonPalettesShinyFromNormal) {
+		this.pokemonPalettesShinyFromNormal = pokemonPalettesShinyFromNormal;
+	}
+
+    public CustomPlayerGraphicsMod getCustomPlayerGraphicsMod() {
+        return customPlayerGraphicsMod;
+    }
+
+    public void setCustomPlayerGraphicsMod(boolean... bools) {
+        setCustomPlayerGraphicsMod(getEnum(CustomPlayerGraphicsMod.class, bools));
+    }
+
+    public void setCustomPlayerGraphicsMod(CustomPlayerGraphicsMod customPlayerGraphicsMod) {
+        this.customPlayerGraphicsMod = customPlayerGraphicsMod;
+    }
+
+    public GraphicsPack getCustomPlayerGraphics() {
+        return customPlayerGraphics;
+    }
+
+    public void setCustomPlayerGraphics(GraphicsPack customPlayerGraphics) {
+        this.customPlayerGraphics = customPlayerGraphics;
+    }
+
+    public PlayerCharacterMod getCustomPlayerGraphicsCharacterMod() {
+        return customPlayerGraphicsCharacterMod;
+    }
+
+    public void setCustomPlayerGraphicsCharacterMod(boolean... bools) {
+        setCustomPlayerGraphicsCharacterMod(getEnum(PlayerCharacterMod.class, bools));
+    }
+
+    public void setCustomPlayerGraphicsCharacterMod(PlayerCharacterMod playerCharacterMod) {
+        this.customPlayerGraphicsCharacterMod = playerCharacterMod;
+    }
+
+	private static int makeByteSelected(boolean... bools) {
         if (bools.length > 8) {
             throw new IllegalArgumentException("Can't set more than 8 bits in a byte!");
         }

@@ -78,7 +78,7 @@ public class Gen6Constants {
     }
 
     private static final List<Integer> xyIrregularFormes = Arrays.asList(
-            Species.Gen6Formes.castformF, Species.Gen6Formes.castformW, Species.Gen6Formes.castformI,
+            Species.Gen6Formes.castformSu, Species.Gen6Formes.castformR, Species.Gen6Formes.castformSn,
             Species.Gen6Formes.darmanitanZ,
             Species.Gen6Formes.meloettaP,
             Species.Gen6Formes.kyuremW,
@@ -115,7 +115,7 @@ public class Gen6Constants {
     );
 
     private static final List<Integer> orasIrregularFormes = Arrays.asList(
-            Species.Gen6Formes.castformF, Species.Gen6Formes.castformW, Species.Gen6Formes.castformI,
+            Species.Gen6Formes.castformSu, Species.Gen6Formes.castformR, Species.Gen6Formes.castformSn,
             Species.Gen6Formes.darmanitanZ,
             Species.Gen6Formes.meloettaP,
             Species.Gen6Formes.kyuremW,
@@ -403,7 +403,7 @@ public class Gen6Constants {
 
     private static List<Integer> initializeGeneralPurposeItems() {
         List<Integer> list = new ArrayList<>(Gen5Constants.generalPurposeItems);
-        list.addAll(Arrays.asList(Items.safetyGoggles));
+        list.add(Items.safetyGoggles);
         return Collections.unmodifiableList(list);
     }
 
@@ -427,7 +427,7 @@ public class Gen6Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>(Gen5Constants.typeBoostingItems);
-        map.put(Type.FAIRY, Arrays.asList(Items.pixiePlate));
+        map.put(Type.FAIRY, List.of(Items.pixiePlate));
         return Collections.unmodifiableMap(map);
     }
 
@@ -435,10 +435,10 @@ public class Gen6Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen5Constants.moveBoostingItems);
-        map.put(Moves.drainingKiss, Arrays.asList(Items.bigRoot));
+        map.put(Moves.drainingKiss, List.of(Items.bigRoot));
         map.put(Moves.infestation, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.oblivionWing, Arrays.asList(Items.bigRoot));
-        map.put(Moves.parabolicCharge, Arrays.asList(Items.bigRoot));
+        map.put(Moves.oblivionWing, List.of(Items.bigRoot));
+        map.put(Moves.parabolicCharge, List.of(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
 
@@ -447,10 +447,10 @@ public class Gen6Constants {
     private static Map<Integer, List<Integer>> initializeAbilityBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen5Constants.abilityBoostingItems);
         // Weather from abilities changed in Gen VI, so these items become relevant.
-        map.put(Abilities.drizzle, Arrays.asList(Items.dampRock));
-        map.put(Abilities.drought, Arrays.asList(Items.heatRock));
-        map.put(Abilities.sandStream, Arrays.asList(Items.smoothRock));
-        map.put(Abilities.snowWarning, Arrays.asList(Items.icyRock));
+        map.put(Abilities.drizzle, List.of(Items.dampRock));
+        map.put(Abilities.drought, List.of(Items.heatRock));
+        map.put(Abilities.sandStream, List.of(Items.smoothRock));
+        map.put(Abilities.snowWarning, List.of(Items.icyRock));
         return Collections.unmodifiableMap(map);
     }
 
@@ -672,6 +672,36 @@ public class Gen6Constants {
         }
     }
 
+    private static final EvolutionType[] evolutionTypeTable = new EvolutionType[] {
+            EvolutionType.HAPPINESS, EvolutionType.HAPPINESS_DAY, EvolutionType.HAPPINESS_NIGHT, EvolutionType.LEVEL,
+            EvolutionType.TRADE, EvolutionType.TRADE_ITEM, EvolutionType.TRADE_SPECIAL, EvolutionType.STONE,
+            EvolutionType.LEVEL_ATTACK_HIGHER, EvolutionType.LEVEL_ATK_DEF_SAME, EvolutionType.LEVEL_DEFENSE_HIGHER,
+            EvolutionType.LEVEL_LOW_PV, EvolutionType.LEVEL_HIGH_PV, EvolutionType.LEVEL_CREATE_EXTRA,
+            EvolutionType.LEVEL_IS_EXTRA, EvolutionType.LEVEL_HIGH_BEAUTY, EvolutionType.STONE_MALE_ONLY,
+            EvolutionType.STONE_FEMALE_ONLY, EvolutionType.LEVEL_ITEM_DAY, EvolutionType.LEVEL_ITEM_NIGHT,
+            EvolutionType.LEVEL_WITH_MOVE, EvolutionType.LEVEL_WITH_OTHER, EvolutionType.LEVEL_MALE_ONLY,
+            EvolutionType.LEVEL_FEMALE_ONLY, EvolutionType.LEVEL_ELECTRIFIED_AREA, EvolutionType.LEVEL_MOSS_ROCK,
+            EvolutionType.LEVEL_ICY_ROCK, EvolutionType.LEVEL_UPSIDE_DOWN, EvolutionType.FAIRY_AFFECTION,
+            EvolutionType.LEVEL_WITH_DARK, EvolutionType.LEVEL_RAIN, EvolutionType.LEVEL_DAY, EvolutionType.LEVEL_NIGHT,
+            EvolutionType.LEVEL_FEMALE_ESPURR,
+    };
+
+    public static int evolutionTypeToIndex(EvolutionType evolutionType) {
+        for (int i = 0; i < evolutionTypeTable.length; i++) {
+            if (evolutionType == evolutionTypeTable[i]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    public static EvolutionType evolutionTypeFromIndex(int index) {
+        if (index == -1) {
+            return EvolutionType.NONE;
+        }
+        return evolutionTypeTable[index - 1];
+    }
+
     public static String getSaveLoadFormeReversionPrefix(int romType) {
         if (romType == Type_XY) {
             return saveLoadFormeReversionPrefixXY;
@@ -682,30 +712,30 @@ public class Gen6Constants {
 
     private static Map<Integer,String> setupFormeSuffixes() {
         Map<Integer,String> formeSuffixes = new HashMap<>();
-        formeSuffixes.put(Species.Gen6Formes.deoxysA,"-A");
-        formeSuffixes.put(Species.Gen6Formes.deoxysD,"-D");
-        formeSuffixes.put(Species.Gen6Formes.deoxysS,"-S");
-        formeSuffixes.put(Species.Gen6Formes.wormadamS,"-S");
-        formeSuffixes.put(Species.Gen6Formes.wormadamT,"-T");
-        formeSuffixes.put(Species.Gen6Formes.shayminS,"-S");
-        formeSuffixes.put(Species.Gen6Formes.giratinaO,"-O");
-        formeSuffixes.put(Species.Gen6Formes.rotomH,"-H");
-        formeSuffixes.put(Species.Gen6Formes.rotomW,"-W");
-        formeSuffixes.put(Species.Gen6Formes.rotomFr,"-Fr");
-        formeSuffixes.put(Species.Gen6Formes.rotomFa,"-Fa");
-        formeSuffixes.put(Species.Gen6Formes.rotomM,"-M");
-        formeSuffixes.put(Species.Gen6Formes.castformF,"-F");
-        formeSuffixes.put(Species.Gen6Formes.castformW,"-W");
-        formeSuffixes.put(Species.Gen6Formes.castformI,"-I");
-        formeSuffixes.put(Species.Gen6Formes.basculinB,"-B");
-        formeSuffixes.put(Species.Gen6Formes.darmanitanZ,"-Z");
-        formeSuffixes.put(Species.Gen6Formes.meloettaP,"-P");
-        formeSuffixes.put(Species.Gen6Formes.kyuremW,"-W");
-        formeSuffixes.put(Species.Gen6Formes.kyuremB,"-B");
+        formeSuffixes.put(Species.Gen6Formes.deoxysA,"-Attack");
+        formeSuffixes.put(Species.Gen6Formes.deoxysD,"-Defense");
+        formeSuffixes.put(Species.Gen6Formes.deoxysS,"-Speed");
+        formeSuffixes.put(Species.Gen6Formes.wormadamS,"-Sandy");
+        formeSuffixes.put(Species.Gen6Formes.wormadamT,"-Trash");
+        formeSuffixes.put(Species.Gen6Formes.shayminS,"-Sky");
+        formeSuffixes.put(Species.Gen6Formes.giratinaO,"-Origin");
+        formeSuffixes.put(Species.Gen6Formes.rotomH,"-Heat");
+        formeSuffixes.put(Species.Gen6Formes.rotomW,"-Wash");
+        formeSuffixes.put(Species.Gen6Formes.rotomFr,"-Frost");
+        formeSuffixes.put(Species.Gen6Formes.rotomFa,"-Fan");
+        formeSuffixes.put(Species.Gen6Formes.rotomM,"-Mow");
+        formeSuffixes.put(Species.Gen6Formes.castformSu,"-Sunny");
+        formeSuffixes.put(Species.Gen6Formes.castformR,"-Rainy");
+        formeSuffixes.put(Species.Gen6Formes.castformSn,"-Snowy");
+        formeSuffixes.put(Species.Gen6Formes.basculinB,"-Blue");
+        formeSuffixes.put(Species.Gen6Formes.darmanitanZ,"-Zen");
+        formeSuffixes.put(Species.Gen6Formes.meloettaP,"-Pirouette");
+        formeSuffixes.put(Species.Gen6Formes.kyuremW,"-White");
+        formeSuffixes.put(Species.Gen6Formes.kyuremB,"-Black");
         formeSuffixes.put(Species.Gen6Formes.keldeoCosmetic1,"-R");
-        formeSuffixes.put(Species.Gen6Formes.tornadusT,"-T");
-        formeSuffixes.put(Species.Gen6Formes.thundurusT,"-T");
-        formeSuffixes.put(Species.Gen6Formes.landorusT,"-T");
+        formeSuffixes.put(Species.Gen6Formes.tornadusT,"-Therian");
+        formeSuffixes.put(Species.Gen6Formes.thundurusT,"-Therian");
+        formeSuffixes.put(Species.Gen6Formes.landorusT,"-Therian");
         formeSuffixes.put(Species.Gen6Formes.gengarMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.meowsticF,"-F");
         // 749 - 757 Furfrou
@@ -727,7 +757,7 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.aerodactylMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.lucarioMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.abomasnowMega,"-Mega");
-        formeSuffixes.put(Species.Gen6Formes.aegislashB,"-B");
+        formeSuffixes.put(Species.Gen6Formes.aegislashB,"-Blade");
         formeSuffixes.put(Species.Gen6Formes.blastoiseMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.kangaskhanMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.gyaradosMega,"-Mega");
@@ -746,7 +776,7 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.gourgeistCosmetic2,"-L");
         formeSuffixes.put(Species.Gen6Formes.gourgeistCosmetic3,"-XL");
         // 794 - 797 Floette
-        formeSuffixes.put(Species.Gen6Formes.floetteE,"-E");
+        formeSuffixes.put(Species.Gen6Formes.floetteE,"-Eternal");
         formeSuffixes.put(Species.Gen6Formes.swampertMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.sceptileMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.sableyeMega,"-Mega");
@@ -760,11 +790,11 @@ public class Gen6Constants {
         formeSuffixes.put(Species.Gen6Formes.glalieMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.diancieMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.metagrossMega,"-Mega");
-        formeSuffixes.put(Species.Gen6Formes.kyogreP,"-P");
-        formeSuffixes.put(Species.Gen6Formes.groudonP,"-P");
+        formeSuffixes.put(Species.Gen6Formes.kyogreP,"-Primal");
+        formeSuffixes.put(Species.Gen6Formes.groudonP,"-Primal");
         formeSuffixes.put(Species.Gen6Formes.rayquazaMega,"-Mega");
-        // 815 - 820 contest Pikachu
-        formeSuffixes.put(Species.Gen6Formes.hoopaU,"-U");
+        // 815 - 820 Cosplay Pikachu
+        formeSuffixes.put(Species.Gen6Formes.hoopaU,"-Unbound");
         formeSuffixes.put(Species.Gen6Formes.cameruptMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.lopunnyMega,"-Mega");
         formeSuffixes.put(Species.Gen6Formes.salamenceMega,"-Mega");
@@ -974,9 +1004,9 @@ public class Gen6Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
 
         opShopItems = new ArrayList<>();
 
@@ -985,13 +1015,13 @@ public class Gen6Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
     }
 
     public static ItemList getAllowedItems(int romType) {
@@ -1076,21 +1106,6 @@ public class Gen6Constants {
         return map;
     }
 
-    public static int[] xyPostGameEncounterAreas = null; //there are none
-
-    public static int[] orasPostGameEncounterAreas = new int[] {
-            585, 586, 587, 588, //Sky Pillar
-            609, 610, 611, 612, //Battle Resort
-            589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603,
-            604, 605, 606, 607, 608, 657, 658, 659, 660, 661, 662, 663, 664, 665, 666,
-            667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, //Mirage spots
-            34, 39, 48, 57, 66, 74, 79, 84, 89, 94, 100, 109, 119, 124, 129, 134, 144,
-            153, 158, 168, 210, 214, 227, 232, 237, 242, 247, 252, 257, 262, 267, 272,
-            277, 289, 298, 307, 316, 330, 335, 340, 346, 351, 356, 377, 382, 494, 499,
-            504, 510, 515, 524, 615, 625, 635, 645, 679, //DexNav Foreign Encounter
-            //Technically, neither mirage spots nor Dexnav foreign encounters are post-game.
-            //however, they don't really qualify as "local" either, which is the actual use case.
-    };
     public static void tagTrainersXY(List<Trainer> trs) {
 
         // Gym Trainers
@@ -1316,6 +1331,40 @@ public class Gen6Constants {
         map.put(0, "Route 6 Rustling Bush Encounter");
         map.put(3, "Route 18 Rustling Bush Encounter");
         return map;
+    }
+
+    private static final int[] xyPostGameEncounterAreas = new int[0]; //there are none
+
+    private static final int[] orasPostGameEncounterAreas = new int[] {
+            585, 586, 587, 588, //Sky Pillar
+            609, 610, 611, 612, //Battle Resort
+            589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 602, 603,
+            604, 605, 606, 607, 608, 657, 658, 659, 660, 661, 662, 663, 664, 665, 666,
+            667, 668, 669, 670, 671, 672, 673, 674, 675, 676, 677, //Mirage spots
+            34, 39, 48, 57, 66, 74, 79, 84, 89, 94, 100, 109, 119, 124, 129, 134, 144,
+            153, 158, 168, 210, 214, 227, 232, 237, 242, 247, 252, 257, 262, 267, 272,
+            277, 289, 298, 307, 316, 330, 335, 340, 346, 351, 356, 377, 382, 494, 499,
+            504, 510, 515, 524, 615, 625, 635, 645, 679, //DexNav Foreign Encounter
+            //Technically, neither mirage spots nor Dexnav foreign encounters are post-game.
+            //however, they don't really qualify as "local" either, which is the actual use case.
+    };
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, int[] postGameAreas) {
+        // since I'm not supporting Gen 6+ in the V branch, this lacks location tagging
+        // there's nothing stopping you from adding them like in earlier Gens, just hasn't been done already
+        // --voliol
+        for (int areaIndex : postGameAreas) {
+            encounterAreas.get(areaIndex).setPostGame(true);
+        }
+    }
+
+    public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType) {
+        int[] postGameAreas = switch (romType) {
+            case Type_XY -> xyPostGameEncounterAreas;
+            case Type_ORAS -> orasPostGameEncounterAreas;
+            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
+        };
+        tagEncounterAreas(encounterAreas, postGameAreas);
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
