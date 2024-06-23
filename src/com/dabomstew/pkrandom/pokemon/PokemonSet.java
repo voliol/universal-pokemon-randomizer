@@ -364,8 +364,8 @@ public class PokemonSet extends GenericPokemonSet<Pokemon> {
      * Finds the longest evolutionary line in this set that the given Pokemon belongs to. <br>
      * If the pokemon is in an evolutionary cycle, it will count each pokemon in the cycle,
      * including itself, once.
-     * @param pokemon
-     * @param useOriginal
+     * @param pokemon The Pokemon to find an evolutionary line for.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @return The number of Pokemon in the longest evolutionary line, including itself.
      */
     public int getLongestEvoLine(Pokemon pokemon, boolean useOriginal) {
@@ -472,8 +472,7 @@ public class PokemonSet extends GenericPokemonSet<Pokemon> {
      */
     public boolean addFullFamilies(boolean useOriginal) {
         PokemonSet allWithFamilies = this.buildFullFamilies(useOriginal);
-        boolean changed = this.addAll(allWithFamilies);
-        return changed;
+        return this.addAll(allWithFamilies);
     }
 
     /**
