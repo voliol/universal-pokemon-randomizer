@@ -72,7 +72,7 @@ public class Gen1PaletteRandomizer extends PaletteRandomizer {
 		boolean evolutionSanity = settings.isPokemonPalettesFollowEvolutions();
 
 		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() ->
-				new PokemonSet<>(romHandler.getPokemonSet(), new Gen1Pokemon(0)));
+				new PokemonSet<>(romHandler.getPokemonSet(), Gen1Pokemon.class));
 		cueh.apply(evolutionSanity, true, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
 	}
 

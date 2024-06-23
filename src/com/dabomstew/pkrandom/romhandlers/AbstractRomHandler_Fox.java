@@ -791,7 +791,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 PokemonSet finalPokemonPool;
                 if(keepPrimary && areaTheme == null) {
                     Type typeToChoose = enc.pokemon.originalPrimaryType;
-                    finalPokemonPool = availablePokemon.getPokemonOfType(typeToChoose);
+                    finalPokemonPool = availablePokemon.filterByType(typeToChoose);
 
                     //pull from broader pool if there's none of the right type in the narrow pool
                     if (finalPokemonPool.isEmpty()) {
@@ -817,7 +817,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 false, 100);
                     }
                 } else {
-                    picked = finalPokemonPool.randomPokemon(this.random);
+                    picked = finalPokemonPool.getRandomPokemon(this.random);
                 }
 
                 //assign to encounter, remove from available if using catchEmAll
@@ -930,7 +930,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 PokemonSet finalPokemonPool;
                 if(keepPrimary && areaTheme == null) {
                     Type typeToChoose = areaPk.originalPrimaryType;
-                    finalPokemonPool = availablePokemon.getPokemonOfType(typeToChoose);
+                    finalPokemonPool = availablePokemon.filterByType(typeToChoose);
 
                     //pull from broader pool if there's none of the right type in the narrow pool
                     if (finalPokemonPool.isEmpty()) {
@@ -950,7 +950,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     picked = pickWildPowerLvlReplacement(finalPokemonPool, areaPk, Math.min(5, finalPokemonPool.size() / 4),
                             false, 100);
                 } else {
-                    picked = finalPokemonPool.randomPokemon(random);
+                    picked = finalPokemonPool.getRandomPokemon(random);
                 }
 
                 //add to map & remove from pickable
@@ -1035,7 +1035,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 picked = pickWildPowerLvlReplacement(availablePool, info.pokemon, Math.min(5, availablePool.size() / 4),
                         false, 100);
             } else {
-                picked = availablePool.randomPokemon(this.random);
+                picked = availablePool.getRandomPokemon(this.random);
             }
 
             //add to map & remove from pickable
@@ -1299,7 +1299,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         PokemonSet finalPokemonPool;
                         if(keepPrimary && areaTheme == null) {
                             Type typeToChoose = enc.pokemon.originalPrimaryType;
-                            finalPokemonPool = availablePool.getPokemonOfType(typeToChoose);
+                            finalPokemonPool = availablePool.filterByType(typeToChoose);
 
                             //pull from broader pool if there's none of the right type in the narrow pool
                             if (finalPokemonPool.isEmpty()) {
@@ -1319,7 +1319,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             picked = pickWildPowerLvlReplacement(finalPokemonPool, enc.pokemon, Math.min(5, finalPokemonPool.size() / 4),
                                     false, 100);
                         } else {
-                            picked = finalPokemonPool.randomPokemon(this.random);
+                            picked = finalPokemonPool.getRandomPokemon(this.random);
                         }
 
                         // assign to encounter, remove from pickable if using catchEmAll
@@ -1411,7 +1411,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     picked = pickWildPowerLvlReplacement(availablePool, enc.pokemon,
                             Math.min(5, availablePool.size() / 4), false, 100);
                 } else {
-                    picked = availablePool.randomPokemon(this.random);
+                    picked = availablePool.getRandomPokemon(this.random);
                 }
 
                 // assign to encounter; remove from pickable if using catchEmAll
@@ -1614,7 +1614,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if(type == null) {
             availablePokemon = new PokemonSet(pokemonPool);
         } else {
-            availablePokemon = pokemonPool.getPokemonOfType(type);
+            availablePokemon = pokemonPool.filterByType(type);
         }
 
         availablePokemon.removeAll(area.bannedPokemon);
@@ -1635,7 +1635,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if(type == null) {
             availablePokemon = new PokemonSet(pokemonPool);
         } else {
-            availablePokemon = pokemonPool.getPokemonOfType(type);
+            availablePokemon = pokemonPool.filterByType(type);
         }
 
         availablePokemon.removeAll(banned);
@@ -1662,21 +1662,22 @@ public abstract class AbstractRomHandler implements RomHandler {
         if(type == null) {
             availablePool = new PokemonSet(pokemonPool);
         } else {
-            availablePool = pokemonPool.getPokemonOfType(type);
+            availablePool = pokemonPool.filterByType(type);
         }
 
-        int before = family.getNumberOriginalEvoStagesBefore(match);
-        int after = family.getNumberOriginalEvoStagesAfter(match);
-        availablePool = availablePool.getAllAtFamilyPosition(before, after);
+        int before = family.getNumberEvoStagesBefore(match, true);
+        int after = family.getNumberEvoStagesAfter(match, true);
+        availablePool = availablePool.filterHasEvoStages(before, after, false);
 
         for(Pokemon pokemon : family) {
-            int relation = match.getOriginalRelation(pokemon);
+            int relation = match.getRelation(pokemon, true);
             //find every Pokemon related to
-            PokemonSet sameRelations = pokemonPool.getAllRelativesAtPositionSameBranch(availablePool, relation);
+            PokemonSet sameRelations = pokemonPool.filterBuiltSet(p ->
+                    p.getRelativesAtPositionSameBranch(relation, false));
 
             sameRelations.removeAll(infoMap.get(pokemon).bannedForReplacement);
 
-            availablePool.retainAllFamilies(sameRelations);
+            availablePool.retainAllFamilies(sameRelations, false);
         }
 
         return availablePool;
@@ -1750,11 +1751,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                                                            boolean defaultToPrimary, boolean usePowerLevels,
                                                            Map<Pokemon, Pokemon> translateMap) {
 
-        PokemonSet familyPool = activePool.getEvoLinesAtLeastLength(length, allowGaps);
+        PokemonSet familyPool = activePool.filterEvoLinesAtLeastLength(length, allowGaps);
         PokemonSet familiesToRandomize = pokemonToRandomize.getOriginalEvoLinesAtLeastLength(length, allowGaps);
 
         while (!familiesToRandomize.isEmpty()) {
-            Pokemon toRandomize = familiesToRandomize.randomPokemon(this.random);
+            Pokemon toRandomize = familiesToRandomize.getRandomPokemon(this.random);
 
             PokemonSet availablePool = getAvailablePokemon(familyPool, toRandomize,
                     familiesToRandomize.getFamily(toRandomize), infoMap,
@@ -1780,7 +1781,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 picked = pickWildPowerLvlReplacement(availablePool, toRandomize, Math.min(5, availablePool.size() / 4),
                         false, 100);
             } else {
-                picked = availablePool.randomPokemon(this.random);
+                picked = availablePool.getRandomPokemon(this.random);
             }
 
             //add to map
@@ -1791,14 +1792,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                     continue;
                 }
                 int relation = toRandomize.getRelation(relative);
-                PokemonSet replaceCandidates = backupPool.getRelativesAtPositionSameBranch(picked, relation);
+                PokemonSet replaceCandidates = picked.getRelativesAtPositionSameBranch(relation, false);
+                replaceCandidates.retainAll(backupPool);
                 //We want to pull from the whole pool, not just the available pool (as that contains only the replacements
                 // for toRandomize). backupPool is guaranteed to always have the family in question, activePool isn't,
                 // so we use backupPool.
 
                 boolean replaced = false;
                 while(!replaced && !replaceCandidates.isEmpty()) {
-                    Pokemon relativeReplacement = replaceCandidates.randomPokemon(this.random);
+                    Pokemon relativeReplacement = replaceCandidates.getRandomPokemon(this.random);
                     replaceCandidates.remove(relativeReplacement);
 
                     if(!infoMap.get(relative).bannedForReplacement.contains(relativeReplacement)) {
@@ -1879,7 +1881,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if(minimumPool >= realPool.size()) {
             //minimum pool is whole pool
-            return pokemonPool.randomPokemon(this.random);
+            return pokemonPool.getRandomPokemon(this.random);
         }
         // start with within 10% and add 5% either direction until the pool is big enough
         int balancedBST = bstBalanceLevel * 10 + 250;
@@ -1897,7 +1899,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             minTarget -= currentBST / 20;
             maxTarget += currentBST / 20;
         }
-        return canPick.randomPokemon(this.random);
+        return canPick.getRandomPokemon(this.random);
     }
 
     /**

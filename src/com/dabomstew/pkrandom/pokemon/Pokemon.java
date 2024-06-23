@@ -48,9 +48,6 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private int generation = -1;
 
-    //best practices says these should be private with a public get,
-    //but I can't be arsed.
-    //(If it was C#, I would, but...)
     private PokemonSet originalEvolvedForms, originalPreEvolvedForms;
 
     private Type primaryType;
@@ -251,76 +248,80 @@ public class Pokemon implements Comparable<Pokemon> {
         return base.number;
     }
 
+    //Evolutionary Relatives functions
+
     /**
      * Gets all Pokemon that this Pokemon can evolve directly into.
+     * Does not include Mega Evolution.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @return A PokemonSet containing all possible evolved forms of this Pokemon.
      */
-    public PokemonSet getAllEvolvedPokemon() {
-        PokemonSet evolvedPokemon = new PokemonSet();
-        for(Evolution evo : evolutionsFrom) {
-            evolvedPokemon.add(evo.to);
+    public PokemonSet getEvolvedPokemon(boolean useOriginal) {
+        if(useOriginal) {
+            return new PokemonSet(this.originalEvolvedForms);
+        } else {
+            PokemonSet evolvedPokemon = new PokemonSet();
+            for (Evolution evo : evolutionsFrom) {
+                evolvedPokemon.add(evo.getTo());
+            }
+            return evolvedPokemon;
         }
-        return evolvedPokemon;
     }
 
     /**
      * Gets all Pokemon that can evolve directly into this Pokemon.
+     * Does not include Mega Evolution.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @return A PokemonSet containing all pre-evolved forms of this Pokemon.
      */
-    public PokemonSet getAllPreEvolvedPokemon() {
-        PokemonSet evolvedPokemon = new PokemonSet();
-        for(Evolution evo : evolutionsTo) {
-            evolvedPokemon.add(evo.from);
+    public PokemonSet getPreEvolvedPokemon(boolean useOriginal) {
+        if(useOriginal) {
+            return new PokemonSet(this.originalPreEvolvedForms);
+        } else {
+            PokemonSet evolvedPokemon = new PokemonSet();
+            for (Evolution evo : evolutionsTo) {
+                evolvedPokemon.add(evo.getFrom());
+            }
+            return evolvedPokemon;
         }
-        return evolvedPokemon;
-    }
-
-    /**
-     * Gets all Pokemon that this Pokemon could evolve directly into before randomization.
-     * @return A PokemonSet containing all possible evolved forms of this Pokemon.
-     */
-    public PokemonSet getOriginalEvolvedForms() {
-        return new PokemonSet(this.originalEvolvedForms);
-    }
-
-    /**
-     * Gets all Pokemon that could evolve directly into this Pokemon before randomization.
-     * @return A PokemonSet containing all pre-evolved forms of this Pokemon.
-     */
-    public PokemonSet getOriginalPreEvolvedForms() {
-        return new PokemonSet(this.originalPreEvolvedForms);
     }
 
     /**
      * Gets all Pokemon that this Pokemon is related to by evolution.
+     * Does not include Mega Evolution.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @return a PokemonSet containing all Pokemon this Pokemon is related to (including itself)
      */
-    public PokemonSet getAllRelatedPokemon() {
+    public PokemonSet getFamily(boolean useOriginal) {
         PokemonSet family = new PokemonSet();
-        family.addFamily(this);
-        return family;
-    }
 
-    /**
-     * Gets all Pokemon that this Pokemon was related to by evolution before randomization.
-     * @return a PokemonSet containing all Pokemon this Pokemon was related to (including itself)
-     */
-    public PokemonSet getAllOriginallyRelatedPokemon() {
-        PokemonSet family = new PokemonSet();
-        family.addOriginalFamily(this);
+        Queue<Pokemon> toAdd = new ArrayDeque<>();
+        toAdd.add(this);
+        while(!toAdd.isEmpty()) {
+            Pokemon adding = toAdd.remove();
+            if(family.contains(adding)) {
+                continue;
+            }
+            family.add(adding);
+
+            toAdd.addAll(adding.getEvolvedPokemon(useOriginal));
+            toAdd.addAll(adding.getPreEvolvedPokemon(useOriginal));
+        }
+
         return family;
     }
 
     /**
      * Gets the relative position of the given Pokemon in the evolutionary family.
-     * If the family is a cycle, will return the closest path. This is not necessarily
-     * the lowest absolute value.
+     * If the family is a cycle, will return the closest path. This is usually, but
+     * not always, the lowest absolute value.
      * @return A number indicating the relative position of the given Pokemon.
      *         For example, if the given Pokemon evolves directly into this Pokemon,
      *         the number will be -1.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @throws IllegalArgumentException if the Pokemon are not related.
      */
-    public int getRelation(Pokemon relative) {
+    public int getRelation(Pokemon relative, boolean useOriginal) {
         Queue<Pair<Pokemon, Integer>> toCheck = new ArrayDeque<>();
         PokemonSet checked = new PokemonSet();
         toCheck.add(new Pair<>(this, 0));
@@ -338,48 +339,10 @@ public class Pokemon implements Comparable<Pokemon> {
                 return currentPosition;
             }
 
-            for(Pokemon evo : currentPokemon.getAllEvolvedPokemon()) {
+            for(Pokemon evo : currentPokemon.getEvolvedPokemon(useOriginal)) {
                 toCheck.add(new Pair<>(evo, currentPosition + 1));
             }
-            for(Pokemon evo : currentPokemon.getAllPreEvolvedPokemon()) {
-                toCheck.add(new Pair<>(evo, currentPosition - 1));
-            }
-        }
-
-        throw new IllegalArgumentException("Cannot find relation of a non-related Pokemon!");
-    }
-
-    /**
-     * Gets the relative position of the given Pokemon in the evolutionary family, as
-     * it was before randomization. If the family is a cycle, will return the closest
-     * path. (This is not necessarily the lowest absolute value.)
-     * @return A number indicating the relative position of the given Pokemon.
-     *         For example, if the given Pokemon evolved directly into this Pokemon,
-     *         the number will be -1.
-     * @throws IllegalArgumentException if the Pokemon are not related.
-     */
-    public int getOriginalRelation(Pokemon relative) {
-        Queue<Pair<Pokemon, Integer>> toCheck = new ArrayDeque<>();
-        PokemonSet checked = new PokemonSet();
-        toCheck.add(new Pair<>(this, 0));
-
-        while(!toCheck.isEmpty()) {
-            Pair<Pokemon, Integer> current = toCheck.remove();
-            Pokemon currentPokemon = current.getKey();
-            int currentPosition = current.getValue();
-            if(checked.contains(currentPokemon)) {
-                continue;
-            }
-            checked.add(currentPokemon);
-
-            if(currentPokemon == relative) {
-                return currentPosition;
-            }
-
-            for(Pokemon evo : currentPokemon.originalEvolvedForms) {
-                toCheck.add(new Pair<>(evo, currentPosition + 1));
-            }
-            for(Pokemon evo : currentPokemon.originalPreEvolvedForms) {
+            for(Pokemon evo : currentPokemon.getPreEvolvedPokemon(useOriginal)) {
                 toCheck.add(new Pair<>(evo, currentPosition - 1));
             }
         }
@@ -392,10 +355,11 @@ public class Pokemon implements Comparable<Pokemon> {
      * from this Pokemon, including those on different branches.
      * For example, a value of +1 on a Cascoon would give both Dustox and Beautifly.
      * @param position The relative position to find.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @return A PokemonSet including all Pokemon at this relative position, or an empty set if
      *         there are none.
      */
-    public PokemonSet getRelativesAtPosition(int position) {
+    public PokemonSet getRelativesAtPosition(int position, boolean useOriginal) {
         Queue<Pair<Pokemon, Integer>> toCheck = new ArrayDeque<>();
         PokemonSet checked = new PokemonSet();
         PokemonSet relatives = new PokemonSet();
@@ -414,48 +378,10 @@ public class Pokemon implements Comparable<Pokemon> {
                 relatives.add(currentPokemon);
             }
 
-            for(Pokemon evo : currentPokemon.getAllEvolvedPokemon()) {
+            for(Pokemon evo : currentPokemon.getEvolvedPokemon(useOriginal)) {
                 toCheck.add(new Pair<>(evo, currentPosition + 1));
             }
-            for(Pokemon evo : currentPokemon.getAllPreEvolvedPokemon()) {
-                toCheck.add(new Pair<>(evo, currentPosition - 1));
-            }
-        }
-
-        return relatives;
-    }
-
-    /**
-     * Gets all Pokemon related to this one before randomization that were at the given relative
-     * position, evolution-wise, from this Pokemon, including those on different branches.
-     * For example, a value of +1 on a Cascoon would give both Dustox and Beautifly.
-     * @param position The relative position to find.
-     * @return A PokemonSet including all Pokemon at this relative position, or an empty set if
-     *         there are none.
-     */
-    public PokemonSet getOriginalRelativesAtPosition(int position) {
-        Queue<Pair<Pokemon, Integer>> toCheck = new ArrayDeque<>();
-        PokemonSet checked = new PokemonSet();
-        PokemonSet relatives = new PokemonSet();
-        toCheck.add(new Pair<>(this, 0));
-
-        while(!toCheck.isEmpty()) {
-            Pair<Pokemon, Integer> current = toCheck.remove();
-            Pokemon currentPokemon = current.getKey();
-            int currentPosition = current.getValue();
-            if(checked.contains(currentPokemon)) {
-                continue;
-            }
-            checked.add(currentPokemon);
-
-            if(currentPosition == position) {
-                relatives.add(currentPokemon);
-            }
-
-            for(Pokemon evo : currentPokemon.getOriginalEvolvedForms()) {
-                toCheck.add(new Pair<>(evo, currentPosition + 1));
-            }
-            for(Pokemon evo : currentPokemon.getOriginalPreEvolvedForms()) {
+            for(Pokemon evo : currentPokemon.getPreEvolvedPokemon(useOriginal)) {
                 toCheck.add(new Pair<>(evo, currentPosition - 1));
             }
         }
@@ -468,10 +394,11 @@ public class Pokemon implements Comparable<Pokemon> {
      * if position is negative).
      * Does not include those on different branches.
      * @param position The relative position to find.
+     * @param useOriginal Whether to use the evolution data from before randomization.
      * @return A PokemonSet including all Pokemon at this relative position, or an empty set if
      *         there are none.
      */
-    public PokemonSet getRelativesAtPositionSameBranch(int position) {
+    public PokemonSet getRelativesAtPositionSameBranch(int position, boolean useOriginal) {
         PokemonSet currentStage = new PokemonSet();
         currentStage.add(this);
 
@@ -484,37 +411,8 @@ public class Pokemon implements Comparable<Pokemon> {
         for(int i = 0; i != position; i += step) {
             PokemonSet nextStage = new PokemonSet();
             for(Pokemon poke : currentStage) {
-                nextStage.addAll(position > 0 ? poke.getAllEvolvedPokemon() : poke.getAllPreEvolvedPokemon());
-            }
-
-            currentStage = nextStage;
-        }
-
-        return currentStage;
-    }
-
-    /**
-     * Gets all Pokemon related to this one by the given number of evolutions (or pre-evolutions,
-     * if position is negative) before evolutions.
-     * Does not include those on different branches.
-     * @param position The relative position to find.
-     * @return A PokemonSet including all Pokemon at this relative position, or an empty set if
-     *         there are none.
-     */
-    public PokemonSet getOriginalRelativesAtPositionSameBranch(int position) {
-        PokemonSet currentStage = new PokemonSet();
-        currentStage.add(this);
-
-        if(position == 0) {
-            return currentStage;
-        }
-
-        int step = position > 0 ? 1 : -1;
-
-        for(int i = 0; i != position; i += step) {
-            PokemonSet nextStage = new PokemonSet();
-            for(Pokemon poke : currentStage) {
-                nextStage.addAll(position > 0 ? poke.getOriginalEvolvedForms() : poke.getOriginalPreEvolvedForms());
+                nextStage.addAll(position > 0 ? poke.getEvolvedPokemon(useOriginal)
+                        : poke.getPreEvolvedPokemon(useOriginal));
             }
 
             currentStage = nextStage;
@@ -532,8 +430,8 @@ public class Pokemon implements Comparable<Pokemon> {
     public void saveOriginalData() {
         originalPrimaryType = primaryType;
         originalSecondaryType = secondaryType;
-        originalEvolvedForms = getAllEvolvedPokemon();
-        originalPreEvolvedForms = getAllPreEvolvedPokemon();
+        originalEvolvedForms = getEvolvedPokemon(false);
+        originalPreEvolvedForms = getPreEvolvedPokemon(false);
     }
 
     public void copyBaseFormeBaseStats(Pokemon baseForme) {

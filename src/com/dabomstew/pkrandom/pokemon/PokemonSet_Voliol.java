@@ -10,7 +10,7 @@ import java.util.function.Predicate;
  * {@link List}{@literal <Pokemon>} in cases where order does not matter, but
  * avoiding element duplication does. <br>
  * <br>
- * You can create a clone of any PokemonSet by using it as an constructor
+ * You can create a clone of any PokemonSet by using it as a constructor
  * parameter. The "filter" methods also return new PokemonSet objects. <br>
  * <br>
  * For more complex operations, use .stream() and finally collect it into a new
@@ -144,6 +144,7 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	 * Create a PokemonSet from an existing collection with the same generic type or
 	 * a subclass of it.
 	 */
+	//Is this not redundant? The Collection version already does this...?
 	public PokemonSet(PokemonSet<? extends T> pokemonSet) {
 		addAll(pokemonSet);
 	}
@@ -160,13 +161,13 @@ public class PokemonSet<T extends Pokemon> extends HashSet<T> {
 	 */
 	// This might indeed be against the point of having generics...
 	@SuppressWarnings("unchecked")
-	public PokemonSet(PokemonSet<?> pokemonSet, T example) {
+	public PokemonSet(PokemonSet<?> pokemonSet, Class<? extends Pokemon> type) {
 		for (Pokemon pk : pokemonSet) {
-			if (example.getClass().isInstance(pk)) {
+			if (type.isInstance(pk)) {
 				add((T) pk);
 			} else {
 				throw new ClassCastException("Can't cast " + pk + " of class " + pk.getClass()  + " to " +
-						example.getClass() + ".");
+						type + ".");
 			}
 		}
 	}

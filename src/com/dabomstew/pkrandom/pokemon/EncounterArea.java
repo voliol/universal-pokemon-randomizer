@@ -130,4 +130,18 @@ public class EncounterArea extends ArrayList<Encounter> {
     public String toString() {
         return "Encounters [Name = " + displayName + ", Rate = " + rate + ", Encounters = " + super.toString() + "]";
     }
+
+    //Helper functions
+
+    /**
+     * Creates a PokemonSet with all Pokemon that can be found in this area.
+     * @return A PokemonSet containing all Pokemon that can be encountered in this area.
+     */
+    public PokemonSet getPokemonInArea() {
+        PokemonSet pokemonSet = new PokemonSet();
+        for (Encounter enc : this) {
+            pokemonSet.add(enc.getPokemon());
+        }
+        return pokemonSet;
+    }
 }
