@@ -1264,8 +1264,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getAltFormes() {
-        return new PokemonSet<>();
+    public PokemonSet getAltFormes() {
+        return new PokemonSet();
     }
 
     @Override
@@ -1279,8 +1279,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getIrregularFormes() {
-        return new PokemonSet<>();
+    public PokemonSet getIrregularFormes() {
+        return new PokemonSet();
     }
 
     @Override
@@ -1524,9 +1524,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedForWildEncounters() {
+    public PokemonSet getBannedForWildEncounters() {
         // Ban Unown because they don't show up unless you complete a puzzle in the Ruins of Alph.
-        return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
+        return new PokemonSet(Collections.singletonList(pokes[Species.unown]));
     }
 
     @Override
@@ -1535,8 +1535,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
-        return new PokemonSet<>(Collections.singletonList(pokes[Species.unown]));
+    public PokemonSet getBannedForStaticPokemon() {
+        return new PokemonSet(Collections.singletonList(pokes[Species.unown]));
     }
 
     @Override
@@ -2741,7 +2741,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeEvosForPokemonPool() {
-        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
+        PokemonSet pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

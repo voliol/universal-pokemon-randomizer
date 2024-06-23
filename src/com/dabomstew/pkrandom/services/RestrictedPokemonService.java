@@ -28,22 +28,22 @@ public class RestrictedPokemonService {
 
     private boolean restrictionsSet;
 
-    private PokemonSet<Pokemon> all;
-    private PokemonSet<Pokemon> allInclAltFormes;
-    private PokemonSet<Pokemon> nonLegendaries;
-    private PokemonSet<Pokemon> nonLegendariesInclAltFormes;
-    private PokemonSet<Pokemon> legendaries;
-    private PokemonSet<Pokemon> legendariesInclAltFormes;
-    private PokemonSet<Pokemon> ultraBeasts;
-    private PokemonSet<Pokemon> ultraBeastsInclAltFormes;
+    private PokemonSet all;
+    private PokemonSet allInclAltFormes;
+    private PokemonSet nonLegendaries;
+    private PokemonSet nonLegendariesInclAltFormes;
+    private PokemonSet legendaries;
+    private PokemonSet legendariesInclAltFormes;
+    private PokemonSet ultraBeasts;
+    private PokemonSet ultraBeastsInclAltFormes;
     private Set<MegaEvolution> megaEvolutions;
 
     public RestrictedPokemonService(RomHandler romHandler) {
         this.romHandler = romHandler;
     }
 
-    public PokemonSet<Pokemon> getPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
-        PokemonSet<Pokemon> allowedPokes = new PokemonSet<>();
+    public PokemonSet getPokemon(boolean noLegendaries, boolean allowAltFormes, boolean allowCosmeticFormes) {
+        PokemonSet allowedPokes = new PokemonSet();
         allowedPokes.addAll(noLegendaries ? getNonLegendaries(allowAltFormes) : getAll(allowAltFormes));
         if (allowAltFormes && !allowCosmeticFormes) {
             allowedPokes.removeIf(Pokemon::isActuallyCosmetic);
@@ -61,7 +61,7 @@ public class RestrictedPokemonService {
     /**
      * Returns an unmodifiable {@link PokemonSet} containing all Pokemon that follow the restrictions.
      */
-    public PokemonSet<Pokemon> getAll(boolean includeAltFormes) {
+    public PokemonSet getAll(boolean includeAltFormes) {
         if (!restrictionsSet) {
             throw new IllegalStateException("Restrictions not set.");
         }
@@ -71,7 +71,7 @@ public class RestrictedPokemonService {
     /**
      * Returns an unmodifiable {@link PokemonSet} containing all non-legendary Pokemon that follow the restrictions.
      */
-    public PokemonSet<Pokemon> getNonLegendaries(boolean includeAltFormes) {
+    public PokemonSet getNonLegendaries(boolean includeAltFormes) {
         if (!restrictionsSet) {
             throw new IllegalStateException("Restrictions not set.");
         }
@@ -81,7 +81,7 @@ public class RestrictedPokemonService {
     /**
      * Returns an unmodifiable {@link PokemonSet} containing all legendary Pokemon that follow the restrictions.
      */
-    public PokemonSet<Pokemon> getLegendaries(boolean includeAltFormes) {
+    public PokemonSet getLegendaries(boolean includeAltFormes) {
         if (!restrictionsSet) {
             throw new IllegalStateException("Restrictions not set.");
         }
@@ -92,7 +92,7 @@ public class RestrictedPokemonService {
      * Returns an unmodifiable {@link PokemonSet} containing all ultra beasts that follow the restrictions.
      * Does NOT contain the legendary ultra beasts.
      */
-    public PokemonSet<Pokemon> getUltrabeasts(boolean includeAltFormes) {
+    public PokemonSet getUltrabeasts(boolean includeAltFormes) {
         if (!restrictionsSet) {
             throw new IllegalStateException("Restrictions not set.");
         }
@@ -109,8 +109,8 @@ public class RestrictedPokemonService {
         return megaEvolutions;
     }
 
-    public PokemonSet<Pokemon> getAbilityDependentFormes() {
-        PokemonSet<Pokemon> abilityDependentFormes = new PokemonSet<>();
+    public PokemonSet getAbilityDependentFormes() {
+        PokemonSet abilityDependentFormes = new PokemonSet();
         for (Pokemon pk : allInclAltFormes) {
             if (pk.getBaseForme() != null) {
                 if (pk.getBaseNumber() == Species.castform) {
@@ -131,8 +131,8 @@ public class RestrictedPokemonService {
         return abilityDependentFormes;
     }
 
-    public PokemonSet<Pokemon> getBannedFormesForPlayerPokemon() {
-        PokemonSet<Pokemon> bannedFormes = new PokemonSet<>();
+    public PokemonSet getBannedFormesForPlayerPokemon() {
+        PokemonSet bannedFormes = new PokemonSet();
         for (Pokemon pk : allInclAltFormes) {
             if (pk.getBaseForme() != null) {
                 if (pk.getBaseNumber() == Species.giratina) {
@@ -176,16 +176,16 @@ public class RestrictedPokemonService {
         nonLegendariesInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(pk -> !pk.isLegendary()));
         legendariesInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(Pokemon::isLegendary));
         ultraBeastsInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(Pokemon::isUltraBeast));
-        PokemonSet<Pokemon> altFormes = romHandler.getAltFormes();
+        PokemonSet altFormes = romHandler.getAltFormes();
         all = PokemonSet.unmodifiable(allInclAltFormes.filter(pk -> !altFormes.contains(pk)));
         nonLegendaries = PokemonSet.unmodifiable(nonLegendariesInclAltFormes.filter(pk -> !altFormes.contains(pk)));
         legendaries = PokemonSet.unmodifiable(legendariesInclAltFormes.filter(pk -> !altFormes.contains(pk)));
         ultraBeasts = PokemonSet.unmodifiable(ultraBeastsInclAltFormes.filter(pk -> !altFormes.contains(pk)));
     }
 
-    private PokemonSet<Pokemon> allInclAltFormesFromRestrictions(GenRestrictions restrictions) {
-        PokemonSet<Pokemon> allInclAltFormes = new PokemonSet<>();
-        PokemonSet<Pokemon> allNonRestricted = romHandler.getPokemonSetInclFormes();
+    private PokemonSet allInclAltFormesFromRestrictions(GenRestrictions restrictions) {
+        PokemonSet allInclAltFormes = new PokemonSet();
+        PokemonSet allNonRestricted = romHandler.getPokemonSetInclFormes();
 
         if (restrictions.allow_gen1) {
             addFromGen(allInclAltFormes, allNonRestricted, 1);
@@ -217,7 +217,7 @@ public class RestrictedPokemonService {
         return allInclAltFormes;
     }
 
-    private static void addFromGen(PokemonSet<Pokemon> allInclAltFormes, PokemonSet<Pokemon> allNonRestricted, int gen) {
+    private static void addFromGen(PokemonSet allInclAltFormes, PokemonSet allNonRestricted, int gen) {
         allInclAltFormes.addAll(allNonRestricted.filter(pk -> {
             Pokemon baseForme = pk.getBaseForme() == null ? pk : pk.getBaseForme();
             return baseForme.getGeneration() == gen;

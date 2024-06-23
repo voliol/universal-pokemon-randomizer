@@ -535,9 +535,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
 	@Override
-	public PokemonSet<Pokemon> getAltFormes() {
+	public PokemonSet getAltFormes() {
 		int formeCount = Gen5Constants.getFormeCount(romEntry.getRomType());
-		return new PokemonSet<>(pokemonListInclFormes.subList(Gen5Constants.pokemonCount + 1,
+		return new PokemonSet(pokemonListInclFormes.subList(Gen5Constants.pokemonCount + 1,
 				Gen5Constants.pokemonCount + formeCount + 1));
 	}
 
@@ -553,7 +553,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
 	@Override
-	public PokemonSet<Pokemon> getIrregularFormes() {
+	public PokemonSet getIrregularFormes() {
 		return Gen5Constants.getIrregularFormes(romEntry.getRomType())
 				.stream().map(i -> pokes[i])
 				.collect(Collectors.toCollection(PokemonSet::new));
@@ -3578,7 +3578,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
+        PokemonSet pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

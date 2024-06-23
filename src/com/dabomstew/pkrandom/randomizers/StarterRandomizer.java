@@ -33,10 +33,10 @@ public class StarterRandomizer extends Randomizer {
         int[] customStarters = settings.getCustomStarters();
         int starterCount = romHandler.starterCount();
 
-        PokemonSet<Pokemon> choosable;
+        PokemonSet choosable;
 
         if (allowAltFormes) {
-            choosable = new PokemonSet<>(noLegendaries ? rPokeService.getNonLegendaries(true) : rPokeService.getAll(true));
+            choosable = new PokemonSet(noLegendaries ? rPokeService.getNonLegendaries(true) : rPokeService.getAll(true));
             if (abilitiesUnchanged) {
                 choosable.removeAll(rPokeService.getAbilityDependentFormes());
             }
@@ -45,7 +45,7 @@ public class StarterRandomizer extends Randomizer {
             }
             choosable.removeIf(Pokemon::isActuallyCosmetic);
         } else {
-            choosable = new PokemonSet<>(noLegendaries ? rPokeService.getNonLegendaries(false) : rPokeService.getAll(false));
+            choosable = new PokemonSet(noLegendaries ? rPokeService.getNonLegendaries(false) : rPokeService.getAll(false));
         }
 
         List<Pokemon> pickedStarters = new ArrayList<>();

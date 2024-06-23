@@ -868,9 +868,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
 	@Override
-	public PokemonSet<Pokemon> getAltFormes() {
+	public PokemonSet getAltFormes() {
 		int formeCount = Gen6Constants.getFormeCount(romEntry.getRomType());
-		return new PokemonSet<>(pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1,
+		return new PokemonSet(pokemonListInclFormes.subList(Gen6Constants.pokemonCount + 1,
 				Gen6Constants.pokemonCount + formeCount + 1));
 	}
 
@@ -886,7 +886,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
 	@Override
-	public PokemonSet<Pokemon> getIrregularFormes() {
+	public PokemonSet getIrregularFormes() {
 		return Gen6Constants.getIrregularFormes(romEntry.getRomType())
 				.stream().map(i -> pokes[i])
 				.collect(Collectors.toCollection(PokemonSet::new));
@@ -2875,8 +2875,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
-        return new PokemonSet<>(Gen6Constants.actuallyCosmeticForms
+    public PokemonSet getBannedForStaticPokemon() {
+        return new PokemonSet(Gen6Constants.actuallyCosmeticForms
                 .stream()
                 .filter(index -> index < Gen6Constants.pokemonCount + Gen6Constants.getFormeCount(romEntry.getRomType()))
                 .map(index -> pokes[index])
@@ -3689,7 +3689,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(true);
+        PokemonSet pokemonIncluded = rPokeService.getAll(true);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

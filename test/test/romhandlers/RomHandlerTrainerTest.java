@@ -461,7 +461,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setTrainersUseLocalPokemon(true);
         new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
-        PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
+        PokemonSet localWithRelatives = new PokemonSet();
         for (EncounterArea area : romHandler.getEncounters(true)) {
             for (Pokemon pk : PokemonSet.inArea(area)) {
                 if (!localWithRelatives.contains(pk)) {
@@ -470,8 +470,8 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
             }
         }
 
-        PokemonSet<Pokemon> all = romHandler.getPokemonSet();
-        PokemonSet<Pokemon> nonLocal = new PokemonSet<>(all);
+        PokemonSet all = romHandler.getPokemonSet();
+        PokemonSet nonLocal = new PokemonSet(all);
         nonLocal.removeAll(localWithRelatives);
 
         for (Trainer tr : romHandler.getTrainers()) {
@@ -501,12 +501,12 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         s.setEliteFourUniquePokemonNumber(wantedNonLocal); // should be at least 4 non-local Pokemon in each game
         new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
-        PokemonSet<Pokemon> localWithRelatives = new PokemonSet<>();
+        PokemonSet localWithRelatives = new PokemonSet();
         romHandler.getMainGameWildPokemon(true)
                 .forEach(pk -> localWithRelatives.addAll(PokemonSet.related(pk)));
 
-        PokemonSet<Pokemon> all = romHandler.getPokemonSet();
-        PokemonSet<Pokemon> nonLocal = new PokemonSet<>(all);
+        PokemonSet all = romHandler.getPokemonSet();
+        PokemonSet nonLocal = new PokemonSet(all);
         nonLocal.removeAll(localWithRelatives);
 
         List<Integer> eliteFourIndices = romHandler.getEliteFourTrainers(false);

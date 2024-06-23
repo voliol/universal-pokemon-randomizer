@@ -24,7 +24,7 @@ public class PokemonSetTest {
         a.setName("A");
         Pokemon b = new Pokemon(1);
         b.setName("B");
-        PokemonSet<Pokemon> pokes = new PokemonSet<>();
+        PokemonSet pokes = new PokemonSet();
         pokes.add(a);
         for (int i = 0; i < 1000; i++) {
             pokes.add(b);
@@ -49,7 +49,7 @@ public class PokemonSetTest {
         b.setName("B");
         Pokemon c = new Pokemon(2);
         c.setName("C");
-        PokemonSet<Pokemon> pokes = new PokemonSet<>();
+        PokemonSet pokes = new PokemonSet();
         pokes.add(a);
         pokes.add(b);
         pokes.add(c);
@@ -73,7 +73,7 @@ public class PokemonSetTest {
         b.setName("B");
         Pokemon c = new Pokemon(2);
         c.setName("C");
-        PokemonSet<Pokemon> pokes = new PokemonSet<>();
+        PokemonSet pokes = new PokemonSet();
         pokes.add(a);
         pokes.add(b);
         pokes.add(c);
@@ -96,7 +96,7 @@ public class PokemonSetTest {
         a.setName("A");
         Pokemon b = new Pokemon(1);
         b.setName("B");
-        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a, b));
+        PokemonSet pokes = PokemonSet.unmodifiable(Set.of(a, b));
         System.out.println(pokes);
         assertEquals(pokes, Set.of(a, b));
     }
@@ -107,7 +107,7 @@ public class PokemonSetTest {
         a.setName("A");
         Pokemon b = new Pokemon(1);
         b.setName("B");
-        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a));
+        PokemonSet pokes = PokemonSet.unmodifiable(Set.of(a));
         assertThrows(UnsupportedOperationException.class, () -> {pokes.add(b);});
     }
 
@@ -115,7 +115,7 @@ public class PokemonSetTest {
     public void unmodifiableSetThrowsWhenRemoving() {
         Pokemon a = new Pokemon(0);
         a.setName("A");
-        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a));
+        PokemonSet pokes = PokemonSet.unmodifiable(Set.of(a));
         assertThrows(UnsupportedOperationException.class, () -> {pokes.remove(a);});
     }
 
@@ -123,7 +123,7 @@ public class PokemonSetTest {
     public void unmodifiableSetThrowsWhenRemovingThroughIterator() {
         Pokemon a = new Pokemon(0);
         a.setName("A");
-        PokemonSet<Pokemon> pokes = PokemonSet.unmodifiable(Set.of(a));
+        PokemonSet pokes = PokemonSet.unmodifiable(Set.of(a));
         assertThrows(UnsupportedOperationException.class, () -> {
             Iterator<Pokemon> it = pokes.iterator();
             it.next();

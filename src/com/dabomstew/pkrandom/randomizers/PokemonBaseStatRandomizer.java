@@ -66,7 +66,7 @@ public class PokemonBaseStatRandomizer extends Randomizer {
         Settings.ExpCurveMod mod = settings.getExpCurveMod();
         ExpCurve expCurve = settings.getSelectedEXPCurve();
 
-        PokemonSet<Pokemon> pokes = romHandler.getPokemonSetInclFormes();
+        PokemonSet pokes = romHandler.getPokemonSetInclFormes();
         switch (mod) {
             case LEGENDARIES:
                 for (Pokemon pk : pokes) {

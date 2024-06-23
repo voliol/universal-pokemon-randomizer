@@ -959,10 +959,10 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
 	@Override
-	public PokemonSet<Pokemon> getAltFormes() {
+	public PokemonSet getAltFormes() {
 		int formeCount = Gen7Constants.getFormeCount(romEntry.getRomType());
 		int pokemonCount = Gen7Constants.getPokemonCount(romEntry.getRomType());
-		return new PokemonSet<>(pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1));
+		return new PokemonSet(pokemonListInclFormes.subList(pokemonCount + 1, pokemonCount + formeCount + 1));
 	}
 
     @Override
@@ -977,7 +977,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
 	@Override
-	public PokemonSet<Pokemon> getIrregularFormes() {
+	public PokemonSet getIrregularFormes() {
 		return Gen7Constants.getIrregularFormes(romEntry.getRomType())
 				.stream().map(i -> pokes[i])
 				.collect(Collectors.toCollection(PokemonSet::new));
@@ -3263,7 +3263,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void removeEvosForPokemonPool() {
         // slightly more complicated than gen2/3
         // we have to update a "baby table" too
-        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(true);
+        PokemonSet pokemonIncluded = rPokeService.getAll(true);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

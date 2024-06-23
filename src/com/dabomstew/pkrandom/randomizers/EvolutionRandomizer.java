@@ -41,9 +41,9 @@ public class EvolutionRandomizer extends Randomizer {
                                      boolean evolveEveryLevel) {
         rPokeService.setRestrictions(settings);
 
-        PokemonSet<Pokemon> pokemonPool = rPokeService.getPokemon(false,
+        PokemonSet pokemonPool = rPokeService.getPokemon(false,
                 romHandler.altFormesCanHaveDifferentEvolutions(), false);
-        PokemonSet<Pokemon> banned = new PokemonSet<>(rPokeService.getBannedFormesForPlayerPokemon());
+        PokemonSet banned = new PokemonSet(rPokeService.getBannedFormesForPlayerPokemon());
         if (!abilitiesAreRandomized) {
             banned.addAll(rPokeService.getAbilityDependentFormes());
         }
@@ -69,12 +69,12 @@ public class EvolutionRandomizer extends Randomizer {
         private final boolean forceGrowth;
         private final boolean evolveEveryLevel;
 
-        private final PokemonSet<Pokemon> pokemonPool;
-        private final PokemonSet<Pokemon> banned;
+        private final PokemonSet pokemonPool;
+        private final PokemonSet banned;
 
         private Map<Pokemon, List<Evolution>> allOriginalEvos;
 
-        public InnerRandomizer(PokemonSet<Pokemon> pokemonPool, PokemonSet<Pokemon> banned,
+        public InnerRandomizer(PokemonSet pokemonPool, PokemonSet banned,
                                    boolean similarStrength, boolean sameType,
                                    boolean limitToThreeStages, boolean noConvergence,
                                    boolean forceChange, boolean forceGrowth,
@@ -120,7 +120,7 @@ public class EvolutionRandomizer extends Randomizer {
             for (Pokemon from : pokemonPool) {
                 List<Evolution> originalEvos = getOriginalEvos(from);
                 for (Evolution evo : originalEvos) {
-                    PokemonSet<Pokemon> possible = findPossibleReplacements(from, evo);
+                    PokemonSet possible = findPossibleReplacements(from, evo);
                     if (possible.isEmpty()) {
                         return false;
                     }
@@ -161,7 +161,7 @@ public class EvolutionRandomizer extends Randomizer {
             }
         }
 
-        private Pokemon pickEvoPowerLvlReplacement(PokemonSet<Pokemon> pokemonPool, Pokemon current) {
+        private Pokemon pickEvoPowerLvlReplacement(PokemonSet pokemonPool, Pokemon current) {
             if (pokemonPool.isEmpty()) {
                 throw new IllegalArgumentException("empty pokemonPool");
             }
@@ -213,7 +213,7 @@ public class EvolutionRandomizer extends Randomizer {
             }
         }
 
-        private PokemonSet<Pokemon> findPossibleReplacements(Pokemon from, Evolution evo) {
+        private PokemonSet findPossibleReplacements(Pokemon from, Evolution evo) {
             List<Predicate<Pokemon>> filters = new ArrayList<>();
             filters.add(to -> !banned.contains(to));
             filters.add(to -> !to.equals(from));

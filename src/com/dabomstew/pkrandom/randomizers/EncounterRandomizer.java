@@ -71,8 +71,8 @@ public class EncounterRandomizer extends Randomizer {
 
         List<EncounterArea> encounterAreas = romHandler.getEncounters(useTimeOfDay);
 
-        PokemonSet<Pokemon> banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
-        PokemonSet<Pokemon> allowed = new PokemonSet<>(rPokeService.getPokemon(noLegendaries, allowAltFormes, false));
+        PokemonSet banned = getBannedForWildEncounters(banIrregularAltFormes, abilitiesAreRandomized);
+        PokemonSet allowed = new PokemonSet(rPokeService.getPokemon(noLegendaries, allowAltFormes, false));
         allowed.removeAll(banned);
 
         InnerRandomizer ir = new InnerRandomizer(allowed, banned,
@@ -88,13 +88,13 @@ public class EncounterRandomizer extends Randomizer {
         romHandler.setEncounters(useTimeOfDay, encounterAreas);
     }
 
-    private PokemonSet<Pokemon> getBannedForWildEncounters(boolean banIrregularAltFormes,
+    private PokemonSet getBannedForWildEncounters(boolean banIrregularAltFormes,
                                                            boolean abilitiesAreRandomized) {
-        PokemonSet<Pokemon> banned = new PokemonSet<>();
+        PokemonSet banned = new PokemonSet();
         banned.addAll(romHandler.getBannedForWildEncounters());
         banned.addAll(rPokeService.getBannedFormesForPlayerPokemon());
         if (!abilitiesAreRandomized) {
-            PokemonSet<Pokemon> abilityDependentFormes = rPokeService.getAbilityDependentFormes();
+            PokemonSet abilityDependentFormes = rPokeService.getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
         }
         if (banIrregularAltFormes) {
@@ -125,19 +125,17 @@ public class EncounterRandomizer extends Randomizer {
         private boolean map1to1;
         private boolean useLocations;
 
-        private final PokemonSet<Pokemon> allowed;
-        private final PokemonSet<Pokemon> banned;
-        private Map<Type, PokemonSet<Pokemon>> allowedByType;
+        private final PokemonSet allowed;
+        private final PokemonSet banned;
 
-        private PokemonSet<Pokemon> remaining;
-        private Map<Type, PokemonSet<Pokemon>> remainingByType;
+        private PokemonSet remaining;
 
         private Type areaType;
-        private PokemonSet<Pokemon> allowedForArea;
+        private PokemonSet allowedForArea;
         private Map<Pokemon, Pokemon> areaMap;
-        private PokemonSet<Pokemon> allowedForReplacement;
+        private PokemonSet allowedForReplacement;
 
-        public InnerRandomizer(PokemonSet<Pokemon> allowed, PokemonSet<Pokemon> banned,
+        public InnerRandomizer(PokemonSet allowed, PokemonSet banned,
                                boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
                                boolean catchEmAll, boolean similarStrength, boolean balanceShakingGrass) {
             if ((randomTypeThemes || keepTypeThemes) && keepPrimaryType) {
@@ -163,11 +161,11 @@ public class EncounterRandomizer extends Randomizer {
         }
 
         private void refillRemainingPokemon() {
-            remaining = new PokemonSet<>(allowed);
+            remaining = new PokemonSet(allowed);
             if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
                 remainingByType = new EnumMap<>(Type.class);
                 for (Type t : typeService.getTypes()) {
-                    remainingByType.put(t, new PokemonSet<>(allowedByType.get(t)));
+                    remainingByType.put(t, new PokemonSet(allowedByType.get(t)));
                 }
             }
         }
@@ -273,7 +271,7 @@ public class EncounterRandomizer extends Randomizer {
                 // The implementation below supports multiple banned Pokemon of the same type in the same area,
                 // because why not?
                 if (catchEmAll) {
-                    PokemonSet<Pokemon> bannedInArea = new PokemonSet<>(banned);
+                    PokemonSet bannedInArea = new PokemonSet(banned);
                     bannedInArea.retainAll(PokemonSet.inArea(area));
                     Type themeOfBanned = bannedInArea.getTypeTheme();
                     if (themeOfBanned != null) {
@@ -285,7 +283,7 @@ public class EncounterRandomizer extends Randomizer {
         }
 
         private Type pickRandomAreaType() {
-            Map<Type, PokemonSet<Pokemon>> byType = catchEmAll ? remainingByType : allowedByType;
+            Map<Type, PokemonSet> byType = catchEmAll ? remainingByType : allowedByType;
             Type areaType;
             do {
                 areaType = typeService.randomType(random);
@@ -293,7 +291,7 @@ public class EncounterRandomizer extends Randomizer {
             return areaType;
         }
 
-        private PokemonSet<Pokemon> setupAllowedForArea() {
+        private PokemonSet setupAllowedForArea() {
             if (areaType != null) {
                 return catchEmAll && !remainingByType.get(areaType).isEmpty()
                         ? remainingByType.get(areaType) : allowedByType.get(areaType);
@@ -315,7 +313,7 @@ public class EncounterRandomizer extends Randomizer {
             }
         }
 
-        private PokemonSet<Pokemon> getAllowedReplacementPreservePrimaryType(Encounter enc) {
+        private PokemonSet getAllowedReplacementPreservePrimaryType(Encounter enc) {
             Pokemon current = enc.getPokemon();
             Type primaryType = current.getPrimaryType();
             return catchEmAll && !remainingByType.get(primaryType).isEmpty()
@@ -391,10 +389,10 @@ public class EncounterRandomizer extends Randomizer {
         // quite different functionally from the other random encounter methods,
         // but still grouped in this inner class due to conceptual cohesion
         public void game1to1Encounters(List<EncounterArea> encounterAreas) {
-            remaining = new PokemonSet<>(allowed);
+            remaining = new PokemonSet(allowed);
             Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
-            PokemonSet<Pokemon> extant = new PokemonSet<>();
+            PokemonSet extant = new PokemonSet();
             encounterAreas.forEach(area -> area.forEach(enc -> extant.add(enc.getPokemon())));
             // shuffle to not give certain Pokémon priority when picking replacements
             // matters for similar strength
@@ -429,7 +427,7 @@ public class EncounterRandomizer extends Randomizer {
             return replacement;
         }
 
-        private Pokemon pickWildPowerLvlReplacement(PokemonSet<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
+        private Pokemon pickWildPowerLvlReplacement(PokemonSet pokemonPool, Pokemon current, boolean banSamePokemon,
                                                     int bstBalanceLevel) {
             // start with within 10% and add 5% either direction till we find
             // something
@@ -437,7 +435,7 @@ public class EncounterRandomizer extends Randomizer {
             int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
             int minTarget = currentBST - currentBST / 10;
             int maxTarget = currentBST + currentBST / 10;
-            PokemonSet<Pokemon> canPick = new PokemonSet<>();
+            PokemonSet canPick = new PokemonSet();
             int expandRounds = 0;
             while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
                 for (Pokemon pk : pokemonPool) {

@@ -843,9 +843,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public PokemonSet<Pokemon> getAltFormes() {
+	public PokemonSet getAltFormes() {
 		int formeCount = Gen4Constants.getFormeCount(romEntry.getRomType());
-		return new PokemonSet<>(pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1,
+		return new PokemonSet(pokemonListInclFormes.subList(Gen4Constants.pokemonCount + 1,
 				Gen4Constants.pokemonCount + formeCount + 1));
 	}
 
@@ -861,8 +861,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	@Override
-	public PokemonSet<Pokemon> getIrregularFormes() {
-		return new PokemonSet<>();
+	public PokemonSet getIrregularFormes() {
+		return new PokemonSet();
 	}
 
 	@Override
@@ -2835,15 +2835,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	
 
     @Override
-    public PokemonSet<Pokemon> getBannedForWildEncounters() {
+    public PokemonSet getBannedForWildEncounters() {
         // Ban Unown in DPPt because you can't get certain letters outside of Solaceon Ruins.
         // Ban Unown in HGSS because they don't show up unless you complete a puzzle in the Ruins of Alph.
         return new PokemonSet(Collections.singletonList(pokes[Species.unown]));
     }
 
 	@Override
-	public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
-		PokemonSet<Pokemon> banned = new PokemonSet<>();
+	public PokemonSet getBannedFormesForTrainerPokemon() {
+		PokemonSet banned = new PokemonSet();
 		if (romEntry.getRomType() != Gen4Constants.Type_DP) {
 			Pokemon giratinaOrigin = this.getAltFormeOfPokemon(pokes[Species.giratina], 1);
 			if (giratinaOrigin != null) {
@@ -4998,7 +4998,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	public void removeEvosForPokemonPool() {
 		// slightly more complicated than gen2/3
 		// we have to update a "baby table" too
-		PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
+		PokemonSet pokemonIncluded = rPokeService.getAll(false);
 		Set<Evolution> keepEvos = new HashSet<>();
 		for (Pokemon pk : pokes) {
 			if (pk != null) {

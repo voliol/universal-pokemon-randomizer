@@ -1061,8 +1061,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getAltFormes() {
-        return new PokemonSet<>();
+    public PokemonSet getAltFormes() {
+        return new PokemonSet();
     }
 
     @Override
@@ -1076,8 +1076,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getIrregularFormes() {
-        return new PokemonSet<>();
+    public PokemonSet getIrregularFormes() {
+        return new PokemonSet();
     }
 
     @Override

@@ -20,7 +20,7 @@ public class PokemonTypeRandomizer extends Randomizer {
         boolean megaEvolutionSanity = settings.isTypesFollowMegaEvolutions();
         boolean dualTypeOnly = settings.isDualTypeOnly();
 
-        PokemonSet<Pokemon> allPokes = romHandler.getPokemonSetInclFormes();
+        PokemonSet allPokes = romHandler.getPokemonSetInclFormes();
         copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
             // Step 1: Basic or Excluded From Copying Pokemon
             // A Basic/EFC pokemon has a 35% chance of a second type if

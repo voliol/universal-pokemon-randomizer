@@ -68,12 +68,12 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getPokemonSet() {
+    public PokemonSet getPokemonSet() {
         return PokemonSet.unmodifiable(getPokemon());
     }
 
     @Override
-    public PokemonSet<Pokemon> getPokemonSetInclFormes() {
+    public PokemonSet getPokemonSetInclFormes() {
         return PokemonSet.unmodifiable(getPokemonInclFormes());
     }
 
@@ -83,8 +83,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedForWildEncounters() {
-        return new PokemonSet<>();
+    public PokemonSet getBannedForWildEncounters() {
+        return new PokemonSet();
     }
 
     @Override
@@ -103,8 +103,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
 
-    public PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay) {
-        PokemonSet<Pokemon> wildPokemon = new PokemonSet<>();
+    public PokemonSet getMainGameWildPokemon(boolean useTimeOfDay) {
+        PokemonSet wildPokemon = new PokemonSet();
         List<EncounterArea> areas = this.getEncounters(useTimeOfDay);
 
         for (EncounterArea area : areas) {
@@ -329,8 +329,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedForStaticPokemon() {
-        return new PokemonSet<>();
+    public PokemonSet getBannedForStaticPokemon() {
+        return new PokemonSet();
     }
 
     @Override
@@ -466,8 +466,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedFormesForTrainerPokemon() {
-        return new PokemonSet<>();
+    public PokemonSet getBannedFormesForTrainerPokemon() {
+        return new PokemonSet();
     }
 
     @Override

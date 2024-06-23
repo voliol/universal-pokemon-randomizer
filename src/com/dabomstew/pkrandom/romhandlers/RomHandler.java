@@ -106,17 +106,17 @@ public interface RomHandler {
 
     List<Pokemon> getPokemonInclFormes();
 
-    PokemonSet<Pokemon> getAltFormes();
+    PokemonSet getAltFormes();
     
-    PokemonSet<Pokemon> getPokemonSet();
+    PokemonSet getPokemonSet();
     
-    PokemonSet<Pokemon> getPokemonSetInclFormes();
+    PokemonSet getPokemonSetInclFormes();
 
     List<MegaEvolution> getMegaEvolutions();
 
     Pokemon getAltFormeOfPokemon(Pokemon pk, int forme);
 
-    PokemonSet<Pokemon> getIrregularFormes();
+    PokemonSet getIrregularFormes();
 
     RestrictedPokemonService getRestrictedPokemonService();
 
@@ -179,7 +179,7 @@ public interface RomHandler {
      */
     List<EncounterArea> getSortedEncounters(boolean useTimeOfDay);
 
-    PokemonSet<Pokemon> getMainGameWildPokemon(boolean useTimeOfDay);
+    PokemonSet getMainGameWildPokemon(boolean useTimeOfDay);
 
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
 
@@ -189,7 +189,7 @@ public interface RomHandler {
 
     boolean hasWildAltFormes();
 
-    PokemonSet<Pokemon> getBannedForWildEncounters();
+    PokemonSet getBannedForWildEncounters();
 
     void enableGuaranteedPokemonCatching();
 
@@ -271,7 +271,7 @@ public interface RomHandler {
 
     boolean hasStaticAltFormes();
 
-    PokemonSet<Pokemon> getBannedForStaticPokemon();
+    PokemonSet getBannedForStaticPokemon();
 
     boolean forceSwapStaticMegaEvos();
 
@@ -542,7 +542,7 @@ public interface RomHandler {
 
     boolean hasFunctionalFormes();
 
-    PokemonSet<Pokemon> getBannedFormesForTrainerPokemon();
+    PokemonSet getBannedFormesForTrainerPokemon();
     
     // ========
     // Graphics

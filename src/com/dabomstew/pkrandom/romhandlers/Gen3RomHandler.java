@@ -1521,8 +1521,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getBannedForWildEncounters() {
-        PokemonSet<Pokemon> banned = new PokemonSet<>();
+    public PokemonSet getBannedForWildEncounters() {
+        PokemonSet banned = new PokemonSet();
         if (romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             // Ban Unown in FRLG because the game crashes if it is encountered outside of Tanoby Ruins.
             // See GenerateWildMon in wild_encounter.c in pokefirered
@@ -1842,8 +1842,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getAltFormes() {
-        return new PokemonSet<>();
+    public PokemonSet getAltFormes() {
+        return new PokemonSet();
     }
 
     @Override
@@ -1857,8 +1857,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public PokemonSet<Pokemon> getIrregularFormes() {
-        return new PokemonSet<>();
+    public PokemonSet getIrregularFormes() {
+        return new PokemonSet();
     }
 
     @Override
@@ -3763,7 +3763,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     //TODO: this is identical to the Gen 2 implementation => merge (?)
     public void removeEvosForPokemonPool() {
-        PokemonSet<Pokemon> pokemonIncluded = rPokeService.getAll(false);
+        PokemonSet pokemonIncluded = rPokeService.getAll(false);
         Set<Evolution> keepEvos = new HashSet<>();
         for (Pokemon pk : pokes) {
             if (pk != null) {

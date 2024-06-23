@@ -65,10 +65,10 @@ public class StaticPokemonRandomizer extends Randomizer {
         List<StaticEncounter> currentStaticPokemon = romHandler.getStaticPokemon();
         List<StaticEncounter> replacements = new ArrayList<>();
 
-        PokemonSet<Pokemon> banned = romHandler.getBannedForStaticPokemon();
+        PokemonSet banned = romHandler.getBannedForStaticPokemon();
         banned.addAll(rPokeService.getBannedFormesForPlayerPokemon());
         if (!abilitiesAreRandomized) {
-            PokemonSet<Pokemon> abilityDependentFormes = rPokeService.getAbilityDependentFormes();
+            PokemonSet abilityDependentFormes = rPokeService.getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
         }
         if (banIrregularAltFormes) {
@@ -83,23 +83,23 @@ public class StaticPokemonRandomizer extends Randomizer {
         }
 
         if (swapLegendaries) {
-            PokemonSet<Pokemon> legendariesLeft = new PokemonSet<>(rPokeService.getLegendaries(allowAltFormes));
+            PokemonSet legendariesLeft = new PokemonSet(rPokeService.getLegendaries(allowAltFormes));
             if (allowAltFormes) {
                 legendariesLeft = legendariesLeft.filter(pk -> !pk.isActuallyCosmetic());
             }
-            PokemonSet<Pokemon> nonlegsLeft = new PokemonSet<>(rPokeService.getNonLegendaries(allowAltFormes));
+            PokemonSet nonlegsLeft = new PokemonSet(rPokeService.getNonLegendaries(allowAltFormes));
             if (allowAltFormes) {
                 nonlegsLeft = nonlegsLeft.filter(pk -> !pk.isActuallyCosmetic());
             }
-            PokemonSet<Pokemon> ultraBeastsLeft = new PokemonSet<>(rPokeService.getUltrabeasts(false));
+            PokemonSet ultraBeastsLeft = new PokemonSet(rPokeService.getUltrabeasts(false));
             legendariesLeft.removeAll(banned);
             nonlegsLeft.removeAll(banned);
             ultraBeastsLeft.removeAll(banned);
 
             // Full pools for easier refilling later
-            PokemonSet<Pokemon> legendariesPool = new PokemonSet<>(legendariesLeft);
-            PokemonSet<Pokemon> nonlegsPool = new PokemonSet<>(nonlegsLeft);
-            PokemonSet<Pokemon> ultraBeastsPool = new PokemonSet<>(ultraBeastsLeft);
+            PokemonSet legendariesPool = new PokemonSet(legendariesLeft);
+            PokemonSet nonlegsPool = new PokemonSet(nonlegsLeft);
+            PokemonSet ultraBeastsPool = new PokemonSet(ultraBeastsLeft);
 
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
@@ -157,13 +157,13 @@ public class StaticPokemonRandomizer extends Randomizer {
                 }
             }
         } else if (similarStrength) {
-            PokemonSet<Pokemon> listInclFormesExclCosmetics = rPokeService.getAll(true)
+            PokemonSet listInclFormesExclCosmetics = rPokeService.getAll(true)
                     .filter(pk -> !pk.isActuallyCosmetic());
-            PokemonSet<Pokemon> pokemonLeft = new PokemonSet<>(!allowAltFormes ?
+            PokemonSet pokemonLeft = new PokemonSet(!allowAltFormes ?
                     rPokeService.getAll(false) : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
 
-            PokemonSet<Pokemon> pokemonPool = new PokemonSet<>(pokemonLeft);
+            PokemonSet pokemonPool = new PokemonSet(pokemonLeft);
 
             List<Integer> mainGameLegendaries = romHandler.getMainGameLegendaries();
             for (StaticEncounter old : currentStaticPokemon) {
@@ -191,7 +191,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                             limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getNumber()) :
                             limitMainGameLegendaries && mainGameLegendaries.contains(oldPK.getBaseForme().getNumber());
                     if (reallySwapMegaEvos && old.canMegaEvolve()) {
-                        PokemonSet<Pokemon> megaEvoPokemonLeft = rPokeService.getMegaEvolutions()
+                        PokemonSet megaEvoPokemonLeft = rPokeService.getMegaEvolutions()
                                 .stream()
                                 .filter(mega -> mega.method == 1)
                                 .map(mega -> mega.from)
@@ -216,7 +216,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                                 .argument;
                     } else {
                         if (old.restrictedPool) {
-                            PokemonSet<Pokemon> restrictedPool = pokemonLeft
+                            PokemonSet restrictedPool = pokemonLeft
                                     .filter(pk -> old.restrictedList.contains(pk));
                             if (restrictedPool.isEmpty()) {
                                 restrictedPool = pokemonPool.filter(pk -> old.restrictedList.contains(pk));
@@ -247,13 +247,13 @@ public class StaticPokemonRandomizer extends Randomizer {
                 }
             }
         } else { // Completely random
-            PokemonSet<Pokemon> listInclFormesExclCosmetics = rPokeService.getAll(true)
+            PokemonSet listInclFormesExclCosmetics = rPokeService.getAll(true)
                     .filter(pk -> !pk.isActuallyCosmetic());
-            PokemonSet<Pokemon> pokemonLeft = new PokemonSet<>(!allowAltFormes ?
+            PokemonSet pokemonLeft = new PokemonSet(!allowAltFormes ?
                     rPokeService.getAll(false) : listInclFormesExclCosmetics);
             pokemonLeft.removeAll(banned);
 
-            PokemonSet<Pokemon> pokemonPool = new PokemonSet<>(pokemonLeft);
+            PokemonSet pokemonPool = new PokemonSet(pokemonLeft);
 
             for (StaticEncounter old : currentStaticPokemon) {
                 StaticEncounter newStatic = cloneStaticEncounter(old);
@@ -325,18 +325,18 @@ public class StaticPokemonRandomizer extends Randomizer {
 
         List<TotemPokemon> currentTotemPokemon = romHandler.getTotemPokemon();
         List<TotemPokemon> replacements = new ArrayList<>();
-        PokemonSet<Pokemon> banned = romHandler.getBannedForStaticPokemon();
+        PokemonSet banned = romHandler.getBannedForStaticPokemon();
         if (!abilitiesAreRandomized) {
-            PokemonSet<Pokemon> abilityDependentFormes = rPokeService.getAbilityDependentFormes();
+            PokemonSet abilityDependentFormes = rPokeService.getAbilityDependentFormes();
             banned.addAll(abilityDependentFormes);
         }
         if (banIrregularAltFormes) {
             banned.addAll(romHandler.getIrregularFormes());
         }
 
-        PokemonSet<Pokemon> listInclFormesExclCosmetics = rPokeService.getAll(true).filter(
+        PokemonSet listInclFormesExclCosmetics = rPokeService.getAll(true).filter(
                 pk -> !pk.isActuallyCosmetic());
-        PokemonSet<Pokemon> pokemonLeft = new PokemonSet<>(!allowAltFormes ?
+        PokemonSet pokemonLeft = new PokemonSet(!allowAltFormes ?
                 rPokeService.getAll(false) : listInclFormesExclCosmetics);
         pokemonLeft.removeAll(banned);
 
@@ -484,9 +484,9 @@ public class StaticPokemonRandomizer extends Randomizer {
         }
     }
 
-    private Pokemon getRestrictedStaticPokemon(PokemonSet<Pokemon> fullList, PokemonSet<Pokemon> pokemonLeft,
+    private Pokemon getRestrictedStaticPokemon(PokemonSet fullList, PokemonSet pokemonLeft,
                                                StaticEncounter old) {
-        PokemonSet<Pokemon> restrictedPool = pokemonLeft.filter(pk -> old.restrictedList.contains(pk));
+        PokemonSet restrictedPool = pokemonLeft.filter(pk -> old.restrictedList.contains(pk));
         if (restrictedPool.isEmpty()) {
             restrictedPool = fullList.filter(pk -> old.restrictedList.contains(pk));
         }
@@ -495,17 +495,17 @@ public class StaticPokemonRandomizer extends Randomizer {
         return newPK;
     }
 
-    private Pokemon getMegaEvoPokemon(PokemonSet<Pokemon> fullList, PokemonSet<Pokemon> pokemonLeft,
+    private Pokemon getMegaEvoPokemon(PokemonSet fullList, PokemonSet pokemonLeft,
                                       StaticEncounter newStatic) {
         Set<MegaEvolution> megaEvos = rPokeService.getMegaEvolutions();
-        PokemonSet<Pokemon> megaEvoPokemon = megaEvos
+        PokemonSet megaEvoPokemon = megaEvos
                 .stream()
                 .filter(mega -> mega.method == 1)
                 .map(mega -> mega.from)
                 .collect(Collectors.toCollection(PokemonSet::new));
-        PokemonSet<Pokemon> megaEvoPokemonLeft = new PokemonSet<>(megaEvoPokemon).filter(pokemonLeft::contains);
+        PokemonSet megaEvoPokemonLeft = new PokemonSet(megaEvoPokemon).filter(pokemonLeft::contains);
         if (megaEvoPokemonLeft.isEmpty()) {
-            megaEvoPokemonLeft = new PokemonSet<>(megaEvoPokemon).filter(fullList::contains);
+            megaEvoPokemonLeft = new PokemonSet(megaEvoPokemon).filter(fullList::contains);
         }
 
         Pokemon newPK = megaEvoPokemonLeft.getRandom(random);
@@ -517,14 +517,14 @@ public class StaticPokemonRandomizer extends Randomizer {
         return newPK;
     }
 
-    private Pokemon pickStaticPowerLvlReplacement(PokemonSet<Pokemon> pokemonPool, Pokemon current,
+    private Pokemon pickStaticPowerLvlReplacement(PokemonSet pokemonPool, Pokemon current,
                                                   boolean banSamePokemon, boolean limitBST) {
         // start with within 10% and add 5% either direction till we find
         // something
         int currentBST = current.bstForPowerLevels();
         int minTarget = limitBST ? currentBST - currentBST / 5 : currentBST - currentBST / 10;
         int maxTarget = limitBST ? currentBST : currentBST + currentBST / 10;
-        PokemonSet<Pokemon> canPick = new PokemonSet<>();
+        PokemonSet canPick = new PokemonSet();
         int expandRounds = 0;
         while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
             for (Pokemon pk : pokemonPool) {
