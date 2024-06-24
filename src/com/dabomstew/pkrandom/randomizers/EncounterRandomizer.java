@@ -125,11 +125,11 @@ public class EncounterRandomizer extends Randomizer {
         private boolean map1to1;
         private boolean useLocations;
 
-        private Map<Type, PokemonSet<Pokemon>> allowedByType;
+        private Map<Type, PokemonSet> allowedByType;
         private final PokemonSet allowed;
         private final PokemonSet banned;
 
-        private Map<Type, PokemonSet<Pokemon>> remainingByType;
+        private Map<Type, PokemonSet> remainingByType;
         private PokemonSet remaining;
 
         private Type areaType;
