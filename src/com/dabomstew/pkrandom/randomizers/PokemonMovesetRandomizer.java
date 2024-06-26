@@ -103,10 +103,10 @@ public class PokemonMovesetRandomizer extends Randomizer {
                 Type typeOfMove = null;
                 if (typeThemed) {
                     double picked = random.nextDouble();
-                    if ((pkmn.getPrimaryType() == Type.NORMAL && pkmn.getSecondaryType() != null) ||
-                            (pkmn.getSecondaryType() == Type.NORMAL)) {
+                    if ((pkmn.getPrimaryType(false) == Type.NORMAL && pkmn.getSecondaryType(false) != null) ||
+                            (pkmn.getSecondaryType(false) == Type.NORMAL)) {
 
-                        Type otherType = pkmn.getPrimaryType() == Type.NORMAL ? pkmn.getSecondaryType() : pkmn.getPrimaryType();
+                        Type otherType = pkmn.getPrimaryType(false) == Type.NORMAL ? pkmn.getSecondaryType(false) : pkmn.getPrimaryType(false);
 
                         // Normal/OTHER: 10% normal, 30% other, 60% random
                         if (picked < 0.1) {
@@ -115,18 +115,18 @@ public class PokemonMovesetRandomizer extends Randomizer {
                             typeOfMove = otherType;
                         }
                         // else random
-                    } else if (pkmn.getSecondaryType() != null) {
+                    } else if (pkmn.getSecondaryType(false) != null) {
                         // Primary/Secondary: 20% primary, 20% secondary, 60% random
                         if (picked < 0.2) {
-                            typeOfMove = pkmn.getPrimaryType();
+                            typeOfMove = pkmn.getPrimaryType(false);
                         } else if (picked < 0.4) {
-                            typeOfMove = pkmn.getSecondaryType();
+                            typeOfMove = pkmn.getSecondaryType(false);
                         }
                         // else random
                     } else {
                         // Primary/None: 40% primary, 60% random
                         if (picked < 0.4) {
-                            typeOfMove = pkmn.getPrimaryType();
+                            typeOfMove = pkmn.getPrimaryType(false);
                         }
                         // else random
                     }
@@ -242,10 +242,10 @@ public class PokemonMovesetRandomizer extends Randomizer {
                 Type typeOfMove = null;
                 if (typeThemed) {
                     double picked = random.nextDouble();
-                    if ((pkmn.getPrimaryType() == Type.NORMAL && pkmn.getSecondaryType() != null) ||
-                            (pkmn.getSecondaryType() == Type.NORMAL)) {
+                    if ((pkmn.getPrimaryType(false) == Type.NORMAL && pkmn.getSecondaryType(false) != null) ||
+                            (pkmn.getSecondaryType(false) == Type.NORMAL)) {
 
-                        Type otherType = pkmn.getPrimaryType() == Type.NORMAL ? pkmn.getSecondaryType() : pkmn.getPrimaryType();
+                        Type otherType = pkmn.getPrimaryType(false) == Type.NORMAL ? pkmn.getSecondaryType(false) : pkmn.getPrimaryType(false);
 
                         // Normal/OTHER: 10% normal, 30% other, 60% random
                         if (picked < 0.1) {
@@ -254,18 +254,18 @@ public class PokemonMovesetRandomizer extends Randomizer {
                             typeOfMove = otherType;
                         }
                         // else random
-                    } else if (pkmn.getSecondaryType() != null) {
+                    } else if (pkmn.getSecondaryType(false) != null) {
                         // Primary/Secondary: 20% primary, 20% secondary, 60% random
                         if (picked < 0.2) {
-                            typeOfMove = pkmn.getPrimaryType();
+                            typeOfMove = pkmn.getPrimaryType(false);
                         } else if (picked < 0.4) {
-                            typeOfMove = pkmn.getSecondaryType();
+                            typeOfMove = pkmn.getSecondaryType(false);
                         }
                         // else random
                     } else {
                         // Primary/None: 40% primary, 60% random
                         if (picked < 0.4) {
-                            typeOfMove = pkmn.getPrimaryType();
+                            typeOfMove = pkmn.getPrimaryType(false);
                         }
                         // else random
                     }

@@ -111,11 +111,11 @@ public class TypeBaseColorList {
 			} else {
 
 				if (!hasSamePrimaryTypeAsPrevo()) {
-					moveFirstColorOfType(0, pokemon.getPrimaryType());
+					moveFirstColorOfType(0, pokemon.getPrimaryType(false));
 				}
 
 				if (!hasSameSecondaryTypeAsPrevo()) {
-					Type moveType = pokemon.getSecondaryType() != null ? pokemon.getSecondaryType() : pokemon.getPrimaryType();
+					Type moveType = pokemon.getSecondaryType(false) != null ? pokemon.getSecondaryType(false) : pokemon.getPrimaryType(false);
 					moveFirstColorOfType(1, moveType);
 				}
 			}
@@ -123,15 +123,15 @@ public class TypeBaseColorList {
 	}
 
 	private void moveTypeColorsToStart() {
-		moveFirstColorOfType(0, pokemon.getPrimaryType());
+		moveFirstColorOfType(0, pokemon.getPrimaryType(false));
 
-		Type moveType = pokemon.getSecondaryType() != null ? pokemon.getSecondaryType() : pokemon.getPrimaryType();
+		Type moveType = pokemon.getSecondaryType(false) != null ? pokemon.getSecondaryType(false) : pokemon.getPrimaryType(false);
 		moveFirstColorOfType(1, moveType);
 
-		moveFirstColorOfType(2, pokemon.getPrimaryType());
+		moveFirstColorOfType(2, pokemon.getPrimaryType(false));
 
-		if (pokemon.getSecondaryType() != null) {
-			moveFirstColorOfType(3, pokemon.getSecondaryType());
+		if (pokemon.getSecondaryType(false) != null) {
+			moveFirstColorOfType(3, pokemon.getSecondaryType(false));
 		}
 	}
 
@@ -189,11 +189,11 @@ public class TypeBaseColorList {
 	}
 
 	private boolean hasSamePrimaryTypeAsPrevo() {
-		return pokemon.getPrimaryType() == prevo.pokemon.getPrimaryType();
+		return pokemon.getPrimaryType(false) == prevo.pokemon.getPrimaryType(false);
 	}
 
 	private boolean hasSameSecondaryTypeAsPrevo() {
-		return pokemon.getSecondaryType() == prevo.pokemon.getSecondaryType();
+		return pokemon.getSecondaryType(false) == prevo.pokemon.getSecondaryType(false);
 	}
 
 	@Override

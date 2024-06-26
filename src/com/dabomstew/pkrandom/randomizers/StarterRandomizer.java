@@ -74,7 +74,7 @@ public class StarterRandomizer extends Randomizer {
         }
 
         if (noDualTypes) {
-            choosable.removeIf(p -> p.getSecondaryType() != null);
+            choosable.removeIf(p -> p.getSecondaryType(false) != null);
         }
         if (basicOnly) {
             choosable.removeIf(p -> !p.getEvolutionsTo().isEmpty());
@@ -115,9 +115,9 @@ public class StarterRandomizer extends Randomizer {
                 Pokemon picked = choosable.getRandom(random);
                 pickedStarters.add(picked);
                 choosable.remove(picked);
-                choosable.removeIf(p -> (p.getPrimaryType() == picked.getPrimaryType() || p.getSecondaryType() == picked.getPrimaryType()));
-                if (picked.getSecondaryType() != null) {
-                    choosable.removeIf(p -> (p.getPrimaryType() == picked.getSecondaryType() || p.getSecondaryType() == picked.getSecondaryType()));
+                choosable.removeIf(p -> (p.getPrimaryType(false) == picked.getPrimaryType(false) || p.getSecondaryType(false) == picked.getPrimaryType(false)));
+                if (picked.getSecondaryType(false) != null) {
+                    choosable.removeIf(p -> (p.getPrimaryType(false) == picked.getSecondaryType(false) || p.getSecondaryType(false) == picked.getSecondaryType(false)));
                     //probably could combine these into one removeIf—it would be more efficient, even—but it's not worth it.
                 }
             }
@@ -129,9 +129,9 @@ public class StarterRandomizer extends Randomizer {
                 typeListMap.put(type, new ArrayList<>());
             }
             for (Pokemon poke : choosable) {
-                typeListMap.get(poke.getPrimaryType()).add(poke);
-                if (poke.getSecondaryType() != null) {
-                    typeListMap.get(poke.getSecondaryType()).add(poke);
+                typeListMap.get(poke.getPrimaryType(false)).add(poke);
+                if (poke.getSecondaryType(false) != null) {
+                    typeListMap.get(poke.getSecondaryType(false)).add(poke);
                 }
             }
 
@@ -159,10 +159,10 @@ public class StarterRandomizer extends Randomizer {
                             Pokemon picked = typeList.get(random.nextInt(typeList.size()));
                             typeList.remove(picked);
                             Type otherType;
-                            if (picked.getPrimaryType() == type) {
-                                otherType = picked.getSecondaryType();
+                            if (picked.getPrimaryType(false) == type) {
+                                otherType = picked.getSecondaryType(false);
                             } else {
-                                otherType = picked.getPrimaryType();
+                                otherType = picked.getPrimaryType(false);
                             }
                             if (!triangle.contains(otherType)) {
                                 //this pokemon works
@@ -195,10 +195,10 @@ public class StarterRandomizer extends Randomizer {
                     Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
                     typeList.remove(picked);
                     Type otherType;
-                    if (picked.getPrimaryType() == Type.FIRE) {
-                        otherType = picked.getSecondaryType();
+                    if (picked.getPrimaryType(false) == Type.FIRE) {
+                        otherType = picked.getSecondaryType(false);
                     } else {
-                        otherType = picked.getPrimaryType();
+                        otherType = picked.getPrimaryType(false);
                     }
                     if (otherType != Type.WATER && otherType != Type.GRASS) {
                         //this pokemon works
@@ -218,10 +218,10 @@ public class StarterRandomizer extends Randomizer {
                     Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
                     typeList.remove(picked);
                     Type otherType;
-                    if (picked.getPrimaryType() == Type.WATER) {
-                        otherType = picked.getSecondaryType();
+                    if (picked.getPrimaryType(false) == Type.WATER) {
+                        otherType = picked.getSecondaryType(false);
                     } else {
-                        otherType = picked.getPrimaryType();
+                        otherType = picked.getPrimaryType(false);
                     }
                     if (otherType != Type.FIRE && otherType != Type.GRASS) {
                         //this pokemon works
@@ -241,10 +241,10 @@ public class StarterRandomizer extends Randomizer {
                     Pokemon picked = typeList.get(this.random.nextInt(typeList.size()));
                     typeList.remove(picked);
                     Type otherType;
-                    if (picked.getPrimaryType() == Type.GRASS) {
-                        otherType = picked.getSecondaryType();
+                    if (picked.getPrimaryType(false) == Type.GRASS) {
+                        otherType = picked.getSecondaryType(false);
                     } else {
-                        otherType = picked.getPrimaryType();
+                        otherType = picked.getPrimaryType(false);
                     }
                     if (otherType != Type.FIRE && otherType != Type.WATER) {
                         //this pokemon works

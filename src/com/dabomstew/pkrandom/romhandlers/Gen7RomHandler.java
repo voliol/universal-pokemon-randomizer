@@ -280,7 +280,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         pkmn.setPrimaryType(Gen7Constants.typeTable[stats[Gen7Constants.bsPrimaryTypeOffset] & 0xFF]);
         pkmn.setSecondaryType(Gen7Constants.typeTable[stats[Gen7Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
-        if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+        if (pkmn.getSecondaryType(false) == pkmn.getPrimaryType(false)) {
             pkmn.setSecondaryType(null);
         }
         pkmn.setCatchRate(stats[Gen7Constants.bsCatchRateOffset] & 0xFF);
@@ -691,11 +691,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         stats[Gen7Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
         stats[Gen7Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
         stats[Gen7Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
-        stats[Gen7Constants.bsPrimaryTypeOffset] = Gen7Constants.typeToByte(pkmn.getPrimaryType());
-        if (pkmn.getSecondaryType() == null) {
+        stats[Gen7Constants.bsPrimaryTypeOffset] = Gen7Constants.typeToByte(pkmn.getPrimaryType(false));
+        if (pkmn.getSecondaryType(false) == null) {
             stats[Gen7Constants.bsSecondaryTypeOffset] = stats[Gen7Constants.bsPrimaryTypeOffset];
         } else {
-            stats[Gen7Constants.bsSecondaryTypeOffset] = Gen7Constants.typeToByte(pkmn.getSecondaryType());
+            stats[Gen7Constants.bsSecondaryTypeOffset] = Gen7Constants.typeToByte(pkmn.getSecondaryType(false));
         }
         stats[Gen7Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
         stats[Gen7Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
@@ -1064,7 +1064,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int optionOffset = i + 14;
                 Pokemon starter = newStarters.get(i);
                 String confirmationText = String.format("So, you wanna go with the %s-type Pokémon\\n%s?[VAR 0114(0005)]",
-                        starter.getPrimaryType().camelCase(), starter.getName());
+                        starter.getPrimaryType(false).camelCase(), starter.getName());
                 String optionText = starter.getName();
                 starterText.set(confirmationOffset, confirmationText);
                 starterText.set(optionOffset, optionText);
@@ -1081,11 +1081,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int confirmationOffset = i + 4;
                 int flavorOffset = i + 35;
                 Pokemon starter = newStarters.get(i);
-                String optionText = String.format("The %s-type %s", starter.getPrimaryType().camelCase(), starter.getName());
+                String optionText = String.format("The %s-type %s", starter.getPrimaryType(false).camelCase(), starter.getName());
                 String confirmationText = String.format("Will you choose the %s-type Pokémon\\n%s?[VAR 0114(0008)]",
-                        starter.getPrimaryType().camelCase(), starter.getName());
+                        starter.getPrimaryType(false).camelCase(), starter.getName());
                 String flavorSubstring = starterText.get(flavorOffset).substring(starterText.get(flavorOffset).indexOf("\\n"));
-                String flavorText = String.format("The %s-type %s", starter.getPrimaryType().camelCase(), starter.getName()) + flavorSubstring;
+                String flavorText = String.format("The %s-type %s", starter.getPrimaryType(false).camelCase(), starter.getName()) + flavorSubstring;
                 starterText.set(optionOffset, optionText);
                 starterText.set(confirmationOffset, confirmationText);
                 starterText.set(flavorOffset, flavorText);
@@ -3583,7 +3583,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         if (numDamagingMoves >= 2) {
             items.add(Items.assaultVest);
         }
-        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
+        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(false), tp.pokemon.getSecondaryType(false));
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen7Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {
@@ -3612,7 +3612,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             if (Gen7Constants.abilityBoostingItems.containsKey(ability)) {
                 items.addAll(Gen7Constants.abilityBoostingItems.get(ability));
             }
-            if (tp.pokemon.getPrimaryType() == Type.POISON || tp.pokemon.getSecondaryType() == Type.POISON) {
+            if (tp.pokemon.getPrimaryType(false) == Type.POISON || tp.pokemon.getSecondaryType(false) == Type.POISON) {
                 items.add(Items.blackSludge);
             }
             List<Integer> speciesItems = Gen7Constants.speciesBoostingItems.get(tp.pokemon.getNumber());

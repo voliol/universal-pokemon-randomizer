@@ -9,9 +9,9 @@ import java.util.function.Predicate;
  * Automatically sorts by type and has other helper functions.
  */
 public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
-
-    private EnumMap<Type, HashSet<T>> typeMap = new EnumMap<>(Type.class);
-    ArrayList<T> randomCache = null;
+    private ArrayList<T> randomCache = null;
+    private static final double CACHE_RESET_FACTOR = 0.5;
+    //How much of the cache must consist of removed Pokemon before resetting
 
     /**
      * Creates an empty GenericPokemonSet.
@@ -38,56 +38,7 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
         randomCache = null;
         super.add(pokemon);
 
-        addToType(pokemon, pokemon.getPrimaryType());
-        if(pokemon.getSecondaryType() != null) {
-            addToType(pokemon, pokemon.getSecondaryType());
-        }
-
         return true;
-    }
-
-    /**
-     * Internal. Adds the given Pokemon to the typeMap in the given Type.
-     * @param pokemon The Pokemon to add.
-     * @param type The Type to add to.
-     */
-    private void addToType(T pokemon, Type type) {
-        HashSet<T> typeSet = typeMap.get(type);
-        if(typeSet == null) {
-            typeSet = new HashSet<>();
-            typeMap.put(type, typeSet);
-        }
-        typeSet.add(pokemon);
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        if(!(o instanceof Pokemon)) {
-            return false;
-        }
-        Pokemon pokemon = (Pokemon) o;
-        if(!this.contains(pokemon)) {
-            return false;
-        }
-        randomCache = null;
-
-        super.remove(pokemon);
-        removalSecondaryTasks(pokemon);
-
-        return true;
-    }
-
-    /**
-     * Secondary tasks that need to be done after a Pokemon is removed from the set.
-     * Guaranteed to be called at least once per removal, but might be called more than once.
-     * (Depending on how hashSet's iterator is implemented.)
-     * @param pokemon The Pokemon that was removed.
-     */
-    private void removalSecondaryTasks(Pokemon pokemon){
-        typeMap.get(pokemon.getPrimaryType()).remove(pokemon);
-        if(pokemon.getSecondaryType() != null) {
-            typeMap.get(pokemon.getSecondaryType()).remove(pokemon);
-        }
     }
 
     //I'm not certain that I need to override the "xAll" functions—but I'm not
@@ -106,46 +57,9 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
-        return this.removeIf(p -> !c.contains(p));
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        boolean changed = false;
-        for (Object o : c) {
-            boolean removed = this.remove(o);
-            if (removed) {
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    @Override
-    public boolean removeIf(Predicate<? super T> test) {
-        boolean changed = false;
-        Iterator<T> itor = this.iterator();
-        while(itor.hasNext()) {
-            T pokemon = itor.next();
-            if(test.test(pokemon)) {
-                itor.remove();
-                changed = true;
-            }
-        }
-        return changed;
-    }
-
-    @Override
     public void clear() {
         super.clear();
-        typeMap = new EnumMap<>(Type.class);
         randomCache = null;
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        return new PokemonSetIterator();
     }
 
     /**
@@ -271,27 +185,47 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
     /**
      * Returns every Pokemon in this set which has the given type.
      * @param type The type to match.
+     * @param useOriginal Whether to use type data from before randomization.
      * @return a new PokemonSet containing every Pokemon of the given type.
      */
-    public GenericPokemonSet<T> filterByType(Type type) {
-        if(typeMap.get(type) == null) {
-            return new GenericPokemonSet<>();
-        } else {
-            return new GenericPokemonSet<>(typeMap.get(type));
-        }
+    public GenericPokemonSet<T> filterByType(Type type, boolean useOriginal) {
+        return this.filter(p -> p.hasType(type, useOriginal));
     }
 
     /**
-     * Returns the number of Pokemon in this set which have the given type.
-     * @param type The type to count Pokemon of.
-     * @return The number of Pokemon of the given type.
+     * Sorts all Pokemon in this set by type.
+     * Significantly faster than calling filterByType for each type.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return A Map of Pokemon sorted by type. <br>
+     * WARNING: types with no Pokemon will contain null rather than an empty set!
      */
-    public int getCountOfType(Type type) {
-        if(typeMap.get(type) == null) {
-            return 0;
-        } else {
-            return typeMap.get(type).size();
+    public Map<Type, GenericPokemonSet<T>> sortByType(boolean useOriginal) {
+        Map<Type, GenericPokemonSet<T>> typeMap = new EnumMap<>(Type.class);
+
+        for(T poke : this) {
+            addToTypeMap(typeMap, poke.getPrimaryType(useOriginal), poke);
+            if(poke.hasSecondaryType(useOriginal)) {
+                addToTypeMap(typeMap, poke.getSecondaryType(useOriginal), poke);
+            }
         }
+
+        return typeMap;
+    }
+
+    /**
+     * Adds the given pokemon to the given map, creating a new GenericPokemonSet if needed.
+     * @param type The type to add the Pokemon to.
+     * @param pokemon The Pokemon to add.
+     */
+    private void addToTypeMap(Map<Type, GenericPokemonSet<T>> map, Type type, T pokemon) {
+        GenericPokemonSet<T> typeList = map.get(type);
+
+        if(typeList == null) {
+            typeList = new GenericPokemonSet<>();
+            map.put(type, typeList);
+        }
+
+        typeList.add(pokemon);
     }
 
     /**
@@ -301,79 +235,23 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
      * @param useOriginal Whether to use type data from before randomization.
      * @return The Type shared by all the pokemon, or null if none was shared.
      */
-    public Type findSharedType(boolean useOriginal) {
-        if(useOriginal) {
-            return findOriginalSharedType();
-        } else {
-            return findNewSharedType();
-        }
-    }
-
-    /**
-     * Finds if all Pokemon in this set share a type post-randomization.
-     * If two types are shared, will return the primary type of an arbitrary Pokemon in the set,
-     * unless that type is Normal; in this case will return the secondary type.
-     * @return The Type shared by all the pokemon, or null if none was shared.
-     */
-    private Type findNewSharedType() {
+    public Type getSharedType(boolean useOriginal) {
         if(this.isEmpty()) {
             return null;
         }
         Iterator<T> itor = this.iterator();
         T poke = itor.next();
-
-        Type primary = poke.getPrimaryType();
-        Type secondary = poke.getSecondaryType();
-
-        //we already sorted all the Pokemon by type, so we can take a shortcut
-        if(typeMap.get(primary).size() == this.size()) {
-            //primary is a theme!
-            if(primary != Type.NORMAL) {
-                return primary;
-            } else {
-                //check if secondary is also a theme,
-                //because Normal is less significant than, say, Flying.
-                if(secondary != null && typeMap.get(secondary).size() == this.size()) {
-                    //secondary IS a theme!
-                    return secondary;
-                } else {
-                    return primary;
-                }
-            }
-        }
-        //primary wasn't a theme. is secondary?
-        if(secondary != null && typeMap.get(secondary).size() == this.size()) {
-            //secondary IS a theme!
-            return secondary;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Finds if all Pokemon in this set shared a type before randomization.
-     * If two types were shared, will return the original primary type
-     * of an arbitrary Pokemon in the set, unless that type is Normal;
-     * in this case will return the secondary type.
-     * @return The Type shared by all the pokemon, or null if none was shared.
-     */
-    private Type findOriginalSharedType() {
-        if(this.isEmpty()) {
-            return null;
-        }
-        Iterator<T> itor = this.iterator();
-        T poke = itor.next();
-        Type primary = poke.getOriginalPrimaryType();
-        Type secondary = poke.getOriginalSecondaryType();
+        Type primary = poke.getPrimaryType(useOriginal);
+        Type secondary = poke.getSecondaryType(useOriginal);
 
         while(itor.hasNext()) {
             poke = itor.next();
             if(secondary != null) {
-                if (secondary != poke.getOriginalPrimaryType() && secondary != poke.getOriginalSecondaryType()) {
+                if (!poke.hasType(secondary, useOriginal)) {
                     secondary = null;
                 }
             }
-            if (primary != poke.getOriginalPrimaryType() && primary != poke.getOriginalSecondaryType()) {
+            if (!poke.hasType(primary, useOriginal)) {
                 primary = secondary;
                 secondary = null;
             }
@@ -391,115 +269,44 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
 
     //End Type Zone
 
-    //Randomization Zone
+    //Various Functions
 
     /**
      * Chooses a random Pokemon from the set.
-     * A slow function - as much as possible, do any checks and eliminations BEFORE calling this.
-     * @param random A seeded random number generator.
-     * @return A random Pokemon from the set.
-     * @throws IllegalStateException if the set is empty.
-     */
-    public T getRandomPokemon(Random random) {
-        if(this.isEmpty()) {
-            throw new IllegalStateException("Tried to choose a random member of an empty set!");
-        }
-
-        int choice = random.nextInt(this.size());
-        int i = 0;
-        for(T pokemon : this) {
-            if(i == choice) {
-                return pokemon;
-            }
-            i++;
-        }
-
-        //this should never be reached
-        throw new RuntimeException("I don't know how, but PokemonSet.randomPokemon iterated through the whole set without finding its choice.");
-    }
-
-    /**
-     * Chooses a random Pokemon from the set.
-     * Faster than randomPokemon only if choosing 3-5+ Pokemon without
-     * changing the set (adding or removing Pokemon), except with this method.
      * @param random A seeded random number generator.
      * @param removeChoice Whether to remove the chosen Pokemon from the set.
      * @return A random Pokemon from the set.
      * @throws IllegalStateException if the set is empty.
      */
-    public T randomPokemonCached(Random random, boolean removeChoice) {
+    public T getRandomPokemon(Random random, boolean removeChoice) {
         if(this.isEmpty()) {
             throw new IllegalStateException("Tried to choose a random member of an empty set!");
         }
 
+        //make sure cache state is good
         if(randomCache == null) {
             randomCache = new ArrayList<>(this);
         }
+        if((double) this.size() / (double) randomCache.size() > CACHE_RESET_FACTOR)
+        {
+            randomCache = new ArrayList<>(this);
+        }
 
-        for (int i = 0; i < 5; i++) {
+        //ok, we should be good to randomize
+        while(true) {
             int choice = random.nextInt(randomCache.size());
-            T p = randomCache.get(choice);
-            if(p == null) {
+            T poke = randomCache.get(choice);
+            if(!this.contains(poke)) {
                 continue;
             }
+
             if(removeChoice) {
-                removeKeepingCache(choice);
+                this.remove(poke);
             }
-            return p;
+            return poke;
         }
 
-        //If we reach this point, we've hit null five times. That probably means that most of the set is null.
-        //(Or we had bad luck, but hey; either way, this will fix it.)
-        randomCache = new ArrayList<>(this);
-        int choice = random.nextInt(randomCache.size());
-        T p = randomCache.get(choice);
-        if(p == null) {
-            throw new RuntimeException("This shouldn't be possible, but there was a null value in a fresh cache?");
-        }
-        if(removeChoice) {
-            removeKeepingCache(choice);
-        }
-        return p;
     }
-
-    /**
-     * Removes the Pokemon at position index in the internal cache from both the cache and the set.
-     * @param index The index of the Pokemon to remove.
-     * @throws IllegalStateException if there is no cache.
-     * @throws IndexOutOfBoundsException if the index is not within the cache's bounds.
-     * @throws IllegalArgumentException if cache[index] is null.
-     */
-    private void removeKeepingCache(int index) {
-        if(randomCache == null) {
-            throw new IllegalStateException("PokemonSet's internal remove called when cache not present!");
-        }
-
-        if(index < 0 || index > randomCache.size()) {
-            throw new IndexOutOfBoundsException("PokemonSet's internal remove called with bad index: " + index);
-        }
-
-        T p = randomCache.get(index);
-        if(p == null) {
-            throw new IllegalArgumentException("PokemonSet's internal remove called on already removed index: " + index);
-        }
-
-        if(!this.contains(p)) {
-            throw new RuntimeException("PokemonSet's internal remove called on Pokemon in the cache but not the set!");
-        }
-
-        randomCache.set(index, null);
-        //The whole point of the cache is to prevent iterating over large portions of the set,
-        //so we don't want to remove() from it.
-        this.remove(p);
-        typeMap.get(p.getPrimaryType()).remove(p);
-        if(p.getSecondaryType() != null) {
-            typeMap.get(p.getSecondaryType()).remove(p);
-        }
-    }
-
-    //End Randomization Zone
-
-    //Various Functions
 
     /**
      * Returns all Pokemon in the set which are cosmetic formes.
@@ -520,34 +327,6 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
     //End Various Functions
 
     //Subclasses
-
-
-    /**
-     * A custom {@link Iterator} which allows us to do our necessary secondary tasks
-     * when removing a Pokemon.
-     */
-    //May or may not be necessary, but better to assume it is.
-    private class PokemonSetIterator implements Iterator<T> {
-        private final Iterator<T> innerIterator = GenericPokemonSet.super.iterator();
-        private T current;
-
-        @Override
-        public boolean hasNext() {
-            return innerIterator.hasNext();
-        }
-
-        @Override
-        public T next() {
-            current = innerIterator.next();
-            return current;
-        }
-
-        @Override
-        public void remove() {
-            innerIterator.remove();
-            removalSecondaryTasks(current);
-        }
-    }
 
     /**
      * Returns an unmodifiable PokemonSet with all the elements in the source Collection.

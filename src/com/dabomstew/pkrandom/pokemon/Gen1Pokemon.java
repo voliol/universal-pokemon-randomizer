@@ -147,8 +147,8 @@ public class Gen1Pokemon extends Pokemon {
 
     @Override
     public String toString() {
-        return "Pokemon [name=" + getName() + ", number=" + getNumber() + ", primaryType=" + getPrimaryType() + ", secondaryType="
-                + getSecondaryType() + ", hp=" + getHp() + ", attack=" + getAttack() + ", defense=" + getDefense() + ", special=" + getSpecial()
+        return "Pokemon [name=" + getName() + ", number=" + getNumber() + ", primaryType=" + getPrimaryType(false) + ", secondaryType="
+                + getSecondaryType(false) + ", hp=" + getHp() + ", attack=" + getAttack() + ", defense=" + getDefense() + ", special=" + getSpecial()
                 + ", speed=" + getSpeed() + "]";
     }
 

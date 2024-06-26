@@ -999,7 +999,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         pkmn.setPrimaryType(Gen3Constants.typeTable[rom[offset + Gen3Constants.bsPrimaryTypeOffset] & 0xFF]);
         pkmn.setSecondaryType(Gen3Constants.typeTable[rom[offset + Gen3Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
-        if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+        if (pkmn.getSecondaryType(false) == pkmn.getPrimaryType(false)) {
             pkmn.setSecondaryType(null);
         }
         pkmn.setCatchRate(rom[offset + Gen3Constants.bsCatchRateOffset] & 0xFF);
@@ -1034,9 +1034,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         writeByte(offset + Gen3Constants.bsSpeedOffset, (byte) pkmn.getSpeed());
         writeByte(offset + Gen3Constants.bsSpAtkOffset, (byte) pkmn.getSpatk());
         writeByte(offset + Gen3Constants.bsSpDefOffset, (byte) pkmn.getSpdef());
-        writeByte(offset + Gen3Constants.bsPrimaryTypeOffset, Gen3Constants.typeToByte(pkmn.getPrimaryType()));
+        writeByte(offset + Gen3Constants.bsPrimaryTypeOffset, Gen3Constants.typeToByte(pkmn.getPrimaryType(false)));
         writeByte(offset + Gen3Constants.bsSecondaryTypeOffset, Gen3Constants.typeToByte(
-                pkmn.getSecondaryType() == null ? pkmn.getPrimaryType() : pkmn.getSecondaryType()
+                pkmn.getSecondaryType(false) == null ? pkmn.getPrimaryType(false) : pkmn.getSecondaryType(false)
         ));
         writeByte(offset + Gen3Constants.bsCatchRateOffset, (byte) pkmn.getCatchRate());
         writeByte(offset + Gen3Constants.bsGrowthCurveOffset, pkmn.getGrowthCurve().toByte());
@@ -1280,9 +1280,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void writeStarterText(List<Pokemon> starters) {
         writeEventText(romEntry.getStarterTexts(), id -> {
             Pokemon starter = starters.get(id);
-            Type t = starter.getPrimaryType();
-            if (t == Type.NORMAL && starter.getSecondaryType() != null) {
-                t = starter.getSecondaryType();
+            Type t = starter.getPrimaryType(false);
+            if (t == Type.NORMAL && starter.getSecondaryType(false) != null) {
+                t = starter.getSecondaryType(false);
             }
             return new String[] {starter.getName(), t.toString()};
             }, new String[] {"[starter]", "[type]"}, "Starter");

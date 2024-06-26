@@ -94,10 +94,10 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
                 double probability = 0.25;
                 if (preferSameType) {
                     probability = 0.1;
-                    if (evTo.getPrimaryType().equals(mv.type)
-                            && !evTo.getPrimaryType().equals(evFrom.getPrimaryType()) && !evTo.getPrimaryType().equals(evFrom.getSecondaryType())
-                            || evTo.getSecondaryType() != null && evTo.getSecondaryType().equals(mv.type)
-                            && !evTo.getSecondaryType().equals(evFrom.getSecondaryType()) && !evTo.getSecondaryType().equals(evFrom.getPrimaryType())) {
+                    if (evTo.getPrimaryType(false).equals(mv.type)
+                            && !evTo.getPrimaryType(false).equals(evFrom.getPrimaryType(false)) && !evTo.getPrimaryType(false).equals(evFrom.getSecondaryType(false))
+                            || evTo.getSecondaryType(false) != null && evTo.getSecondaryType(false).equals(mv.type)
+                            && !evTo.getSecondaryType(false).equals(evFrom.getSecondaryType(false)) && !evTo.getSecondaryType(false).equals(evFrom.getPrimaryType(false))) {
                         probability = 0.9;
                     }
                 }
@@ -113,8 +113,8 @@ public class TMHMTutorCompatibilityRandomizer extends Randomizer {
                                                    boolean preferSameType) {
         double probability = 0.5;
         if (preferSameType) {
-            if (pkmn.getPrimaryType().equals(mv.type)
-                    || (pkmn.getSecondaryType() != null && pkmn.getSecondaryType().equals(mv.type))) {
+            if (pkmn.getPrimaryType(false).equals(mv.type)
+                    || (pkmn.getSecondaryType(false) != null && pkmn.getSecondaryType(false).equals(mv.type))) {
                 probability = 0.9;
             } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
                 probability = 0.5;

@@ -667,7 +667,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		pkmn.setPrimaryType(Gen4Constants.typeTable[stats[Gen4Constants.bsPrimaryTypeOffset] & 0xFF]);
 		pkmn.setSecondaryType(Gen4Constants.typeTable[stats[Gen4Constants.bsSecondaryTypeOffset] & 0xFF]);
 		// Only one type?
-		if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+		if (pkmn.getSecondaryType(false) == pkmn.getPrimaryType(false)) {
 			pkmn.setSecondaryType(null);
 		}
 		pkmn.setCatchRate(stats[Gen4Constants.bsCatchRateOffset] & 0xFF);
@@ -810,11 +810,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		stats[Gen4Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
 		stats[Gen4Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
 		stats[Gen4Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
-		stats[Gen4Constants.bsPrimaryTypeOffset] = Gen4Constants.typeToByte(pkmn.getPrimaryType());
-		if (pkmn.getSecondaryType() == null) {
+		stats[Gen4Constants.bsPrimaryTypeOffset] = Gen4Constants.typeToByte(pkmn.getPrimaryType(false));
+		if (pkmn.getSecondaryType(false) == null) {
 			stats[Gen4Constants.bsSecondaryTypeOffset] = stats[Gen4Constants.bsPrimaryTypeOffset];
 		} else {
-			stats[Gen4Constants.bsSecondaryTypeOffset] = Gen4Constants.typeToByte(pkmn.getSecondaryType());
+			stats[Gen4Constants.bsSecondaryTypeOffset] = Gen4Constants.typeToByte(pkmn.getSecondaryType(false));
 		}
 		stats[Gen4Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
 		stats[Gen4Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
@@ -951,11 +951,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					Pokemon newStarter = newStarters.get(i);
 					int color = (i == 0) ? 3 : i;
 					String newStarterDesc = "Professor Elm: " + intros[i] + " \\vFF00\\z000" + color
-							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType().camelCase()
+							+ newStarter.getName() + "\\vFF00\\z0000,\\nthe " + newStarter.getPrimaryType(false).camelCase()
 							+ "-type Pok????�mon?";
 					spStrings.set(i + 1, newStarterDesc);
 					String altStarterDesc = "\\vFF00\\z000" + color + newStarter.getName() + "\\vFF00\\z0000, the "
-							+ newStarter.getPrimaryType().camelCase() + "-type Pok????�mon, is\\nin this Pok????� Ball!";
+							+ newStarter.getPrimaryType(false).camelCase() + "-type Pok????�mon, is\\nin this Pok????� Ball!";
 					spStrings.set(i + 4, altStarterDesc);
 				}
 				setStrings(romEntry.getIntValue("StarterScreenTextOffset"), spStrings);
@@ -3412,7 +3412,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 		double strength = m.power * m.hitCount * m.hitratio;
 		strength *= m.category == MoveCategory.PHYSICAL ? pk.getAttack() : pk.getSpatk();
-		if (m.type == pk.getPrimaryType() || m.type == pk.getSecondaryType()) {
+		if (m.type == pk.getPrimaryType(false) || m.type == pk.getSecondaryType(false)) {
 			strength *= Gen4Constants.stabMultiplier;
 		}
 		return strength;
@@ -5551,7 +5551,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				items.addAll(Gen4Constants.moveBoostingItems.get(moveIdx));
 			}
 		}
-		Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
+		Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(false), tp.pokemon.getSecondaryType(false));
 		for (Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
 			Integer berry = Gen4Constants.weaknessReducingBerries.get(entry.getKey());
 			if (entry.getValue() == Effectiveness.DOUBLE) {
@@ -5575,7 +5575,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			if (Gen4Constants.abilityBoostingItems.containsKey(ability)) {
 				items.addAll(Gen4Constants.abilityBoostingItems.get(ability));
 			}
-			if (tp.pokemon.getPrimaryType() == Type.POISON || tp.pokemon.getSecondaryType() == Type.POISON) {
+			if (tp.pokemon.getPrimaryType(false) == Type.POISON || tp.pokemon.getSecondaryType(false) == Type.POISON) {
 				items.add(Items.blackSludge);
 			}
 			List<Integer> speciesItems = Gen4Constants.speciesBoostingItems.get(tp.pokemon.getNumber());

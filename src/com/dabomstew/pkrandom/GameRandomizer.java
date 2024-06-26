@@ -877,9 +877,9 @@ public class GameRandomizer {
             log.println("NUM|NAME      |TYPE             |  HP| ATK| DEF| SPE|SPEC");
             for (Pokemon pkmn : allPokes) {
                 if (pkmn != null) {
-                    String typeString = pkmn.getPrimaryType() == null ? "???" : pkmn.getPrimaryType().toString();
-                    if (pkmn.getSecondaryType() != null) {
-                        typeString += "/" + pkmn.getSecondaryType().toString();
+                    String typeString = pkmn.getPrimaryType(false) == null ? "???" : pkmn.getPrimaryType(false).toString();
+                    if (pkmn.getSecondaryType(false) != null) {
+                        typeString += "/" + pkmn.getSecondaryType(false).toString();
                     }
                     log.printf("%3d|%-10s|%-17s|%4d|%4d|%4d|%4d|%4d" + NEWLINE, pkmn.getNumber(), pkmn.fullName(), typeString,
                             pkmn.getHp(), pkmn.getAttack(), pkmn.getDefense(), pkmn.getSpeed(), pkmn.getSpecial());
@@ -916,9 +916,9 @@ public class GameRandomizer {
             for (Pokemon pkmn : allPokes) {
                 if (pkmn != null && !pkmn.isActuallyCosmetic()) {
                     i++;
-                    String typeString = pkmn.getPrimaryType() == null ? "???" : pkmn.getPrimaryType().toString();
-                    if (pkmn.getSecondaryType() != null) {
-                        typeString += "/" + pkmn.getSecondaryType().toString();
+                    String typeString = pkmn.getPrimaryType(false) == null ? "???" : pkmn.getPrimaryType(false).toString();
+                    if (pkmn.getSecondaryType(false) != null) {
+                        typeString += "/" + pkmn.getSecondaryType(false).toString();
                     }
                     log.printf("%3d|" + nameSpFormat + "|%-17s|%4d|%4d|%4d|%4d|%4d|%4d", i, pkmn.fullName(), typeString,
                             pkmn.getHp(), pkmn.getAttack(), pkmn.getDefense(), pkmn.getSpatk(), pkmn.getSpdef(), pkmn.getSpeed());

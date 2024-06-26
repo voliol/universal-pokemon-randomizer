@@ -34,10 +34,10 @@ public class PokemonTypeRandomizer extends Randomizer {
                 assignRandomSecondaryType(pk, 0.5, dualTypeOnly);
             }
         }, (evFrom, evTo, toMonIsFinalEvo) -> {
-            evTo.setPrimaryType(evFrom.getPrimaryType());
-            evTo.setSecondaryType(evFrom.getSecondaryType());
+            evTo.setPrimaryType(evFrom.getPrimaryType(false));
+            evTo.setSecondaryType(evFrom.getSecondaryType(false));
 
-            if (evTo.getSecondaryType() == null) {
+            if (evTo.getSecondaryType(false) == null) {
                 double chance = toMonIsFinalEvo ? 0.25 : 0.15;
                 assignRandomSecondaryType(evTo, chance, dualTypeOnly);
             }
@@ -49,8 +49,8 @@ public class PokemonTypeRandomizer extends Randomizer {
 
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.isActuallyCosmetic()) {
-                pk.setPrimaryType(pk.getBaseForme().getPrimaryType());
-                pk.setSecondaryType(pk.getBaseForme().getSecondaryType());
+                pk.setPrimaryType(pk.getBaseForme().getPrimaryType(false));
+                pk.setSecondaryType(pk.getBaseForme().getSecondaryType(false));
             }
         }
 
@@ -58,13 +58,13 @@ public class PokemonTypeRandomizer extends Randomizer {
             List<MegaEvolution> allMegaEvos = romHandler.getMegaEvolutions();
             for (MegaEvolution megaEvo: allMegaEvos) {
                 if (megaEvo.from.getMegaEvolutionsFrom().size() > 1) continue;
-                megaEvo.to.setPrimaryType(megaEvo.from.getPrimaryType());
-                megaEvo.to.setSecondaryType(megaEvo.from.getSecondaryType());
+                megaEvo.to.setPrimaryType(megaEvo.from.getPrimaryType(false));
+                megaEvo.to.setSecondaryType(megaEvo.from.getSecondaryType(false));
 
-                if (megaEvo.to.getSecondaryType() == null) {
+                if (megaEvo.to.getSecondaryType(false) == null) {
                     if (random.nextDouble() < 0.25) {
                         megaEvo.to.setSecondaryType(typeService.randomType(random));
-                        while (megaEvo.to.getSecondaryType() == megaEvo.to.getPrimaryType()) {
+                        while (megaEvo.to.getSecondaryType(false) == megaEvo.to.getPrimaryType(false)) {
                             megaEvo.to.setSecondaryType(typeService.randomType(random));
                         }
                     }
@@ -77,7 +77,7 @@ public class PokemonTypeRandomizer extends Randomizer {
     private void assignRandomSecondaryType(Pokemon pk, double chance, boolean dualTypeOnly) {
         if (random.nextDouble() < chance || dualTypeOnly) {
             pk.setSecondaryType(typeService.randomType(random));
-            while (pk.getSecondaryType() == pk.getPrimaryType()) {
+            while (pk.getSecondaryType(false) == pk.getPrimaryType(false)) {
                 pk.setSecondaryType(typeService.randomType(random));
             }
         }

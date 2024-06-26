@@ -542,7 +542,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pkmn.setPrimaryType(Gen2Constants.typeTable[rom[offset + Gen2Constants.bsPrimaryTypeOffset] & 0xFF]);
         pkmn.setSecondaryType(Gen2Constants.typeTable[rom[offset + Gen2Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
-        if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+        if (pkmn.getSecondaryType(false) == pkmn.getPrimaryType(false)) {
             pkmn.setSecondaryType(null);
         }
         pkmn.setCatchRate(rom[offset + Gen2Constants.bsCatchRateOffset] & 0xFF);
@@ -562,9 +562,9 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         writeByte(offset + Gen2Constants.bsSpeedOffset, (byte) pkmn.getSpeed());
         writeByte(offset + Gen2Constants.bsSpAtkOffset, (byte) pkmn.getSpatk());
         writeByte(offset + Gen2Constants.bsSpDefOffset, (byte) pkmn.getDefense());
-        writeByte(offset + Gen2Constants.bsPrimaryTypeOffset, Gen2Constants.typeToByte(pkmn.getPrimaryType()));
-        byte secondaryTypeByte = pkmn.getSecondaryType() == null ? rom[offset + Gen2Constants.bsPrimaryTypeOffset]
-                : Gen2Constants.typeToByte(pkmn.getSecondaryType());
+        writeByte(offset + Gen2Constants.bsPrimaryTypeOffset, Gen2Constants.typeToByte(pkmn.getPrimaryType(false)));
+        byte secondaryTypeByte = pkmn.getSecondaryType(false) == null ? rom[offset + Gen2Constants.bsPrimaryTypeOffset]
+                : Gen2Constants.typeToByte(pkmn.getSecondaryType(false));
         writeByte(offset + Gen2Constants.bsSecondaryTypeOffset, secondaryTypeByte);
         writeByte(offset + Gen2Constants.bsCatchRateOffset, (byte) pkmn.getCatchRate());
 

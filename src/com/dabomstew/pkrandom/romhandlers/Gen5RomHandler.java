@@ -356,7 +356,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pkmn.setPrimaryType(Gen5Constants.typeTable[stats[Gen5Constants.bsPrimaryTypeOffset] & 0xFF]);
         pkmn.setSecondaryType(Gen5Constants.typeTable[stats[Gen5Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
-        if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+        if (pkmn.getSecondaryType(false) == pkmn.getPrimaryType(false)) {
             pkmn.setSecondaryType(null);
         }
         pkmn.setCatchRate(stats[Gen5Constants.bsCatchRateOffset] & 0xFF);
@@ -499,11 +499,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         stats[Gen5Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
         stats[Gen5Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
         stats[Gen5Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
-        stats[Gen5Constants.bsPrimaryTypeOffset] = Gen5Constants.typeToByte(pkmn.getPrimaryType());
-        if (pkmn.getSecondaryType() == null) {
+        stats[Gen5Constants.bsPrimaryTypeOffset] = Gen5Constants.typeToByte(pkmn.getPrimaryType(false));
+        if (pkmn.getSecondaryType(false) == null) {
             stats[Gen5Constants.bsSecondaryTypeOffset] = stats[Gen5Constants.bsPrimaryTypeOffset];
         } else {
-            stats[Gen5Constants.bsSecondaryTypeOffset] = Gen5Constants.typeToByte(pkmn.getSecondaryType());
+            stats[Gen5Constants.bsSecondaryTypeOffset] = Gen5Constants.typeToByte(pkmn.getSecondaryType(false));
         }
         stats[Gen5Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
         stats[Gen5Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
@@ -656,7 +656,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             List<String> yourHouseStrings = getStrings(true, romEntry.getIntValue("StarterLocationTextOffset"));
             for (int i = 0; i < 3; i++) {
                 yourHouseStrings.set(Gen5Constants.bw1StarterTextOffset - i,
-                        "\\xF000\\xBD02\\x0000The " + newStarters.get(i).getPrimaryType().camelCase()
+                        "\\xF000\\xBD02\\x0000The " + newStarters.get(i).getPrimaryType(false).camelCase()
                                 + "-type Pok\\x00E9mon\\xFFFE\\xF000\\xBD02\\x0000" + newStarters.get(i).getName());
             }
             // Update what the friends say
@@ -676,7 +676,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             List<String> starterTownStrings = getStrings(true, romEntry.getIntValue("StarterLocationTextOffset"));
             for (int i = 0; i < 3; i++) {
                 starterTownStrings.set(Gen5Constants.bw2StarterTextOffset - i, "\\xF000\\xBD02\\x0000The "
-                        + newStarters.get(i).getPrimaryType().camelCase()
+                        + newStarters.get(i).getPrimaryType(false).camelCase()
                         + "-type Pok\\x00E9mon\\xFFFE\\xF000\\xBD02\\x0000" + newStarters.get(i).getName());
             }
             // Update what the rival says
@@ -3894,7 +3894,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 items.addAll(Gen5Constants.moveBoostingItems.get(moveIdx));
             }
         }
-        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
+        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(false), tp.pokemon.getSecondaryType(false));
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen5Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {
@@ -3920,7 +3920,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (Gen5Constants.abilityBoostingItems.containsKey(ability)) {
                 items.addAll(Gen5Constants.abilityBoostingItems.get(ability));
             }
-            if (tp.pokemon.getPrimaryType() == Type.POISON || tp.pokemon.getSecondaryType() == Type.POISON) {
+            if (tp.pokemon.getPrimaryType(false) == Type.POISON || tp.pokemon.getSecondaryType(false) == Type.POISON) {
                 items.add(Items.blackSludge);
             }
             List<Integer> speciesItems = Gen5Constants.speciesBoostingItems.get(tp.pokemon.getNumber());

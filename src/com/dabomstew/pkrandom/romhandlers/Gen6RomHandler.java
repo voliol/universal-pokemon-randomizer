@@ -247,7 +247,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         pkmn.setPrimaryType(Gen6Constants.typeTable[stats[Gen6Constants.bsPrimaryTypeOffset] & 0xFF]);
         pkmn.setSecondaryType(Gen6Constants.typeTable[stats[Gen6Constants.bsSecondaryTypeOffset] & 0xFF]);
         // Only one type?
-        if (pkmn.getSecondaryType() == pkmn.getPrimaryType()) {
+        if (pkmn.getSecondaryType(false) == pkmn.getPrimaryType(false)) {
             pkmn.setSecondaryType(null);
         }
         pkmn.setCatchRate(stats[Gen6Constants.bsCatchRateOffset] & 0xFF);
@@ -620,11 +620,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         stats[Gen6Constants.bsSpeedOffset] = (byte) pkmn.getSpeed();
         stats[Gen6Constants.bsSpAtkOffset] = (byte) pkmn.getSpatk();
         stats[Gen6Constants.bsSpDefOffset] = (byte) pkmn.getSpdef();
-        stats[Gen6Constants.bsPrimaryTypeOffset] = Gen6Constants.typeToByte(pkmn.getPrimaryType());
-        if (pkmn.getSecondaryType() == null) {
+        stats[Gen6Constants.bsPrimaryTypeOffset] = Gen6Constants.typeToByte(pkmn.getPrimaryType(false));
+        if (pkmn.getSecondaryType(false) == null) {
             stats[Gen6Constants.bsSecondaryTypeOffset] = stats[Gen6Constants.bsPrimaryTypeOffset];
         } else {
-            stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.getSecondaryType());
+            stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.getSecondaryType(false));
         }
         stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.getCatchRate();
         stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.getGrowthCurve().toByte();
@@ -4030,7 +4030,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (numDamagingMoves >= 2) {
             items.add(Items.assaultVest);
         }
-        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(), tp.pokemon.getSecondaryType());
+        Map<Type, Effectiveness> byType = getTypeTable().against(tp.pokemon.getPrimaryType(false), tp.pokemon.getSecondaryType(false));
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen6Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {
@@ -4056,7 +4056,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             if (Gen6Constants.abilityBoostingItems.containsKey(ability)) {
                 items.addAll(Gen6Constants.abilityBoostingItems.get(ability));
             }
-            if (tp.pokemon.getPrimaryType() == Type.POISON || tp.pokemon.getSecondaryType() == Type.POISON) {
+            if (tp.pokemon.getPrimaryType(false) == Type.POISON || tp.pokemon.getSecondaryType(false) == Type.POISON) {
                 items.add(Items.blackSludge);
             }
             List<Integer> speciesItems = Gen6Constants.speciesBoostingItems.get(tp.pokemon.getNumber());

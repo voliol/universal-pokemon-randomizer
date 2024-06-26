@@ -89,7 +89,7 @@ public class Gen1PaletteRandomizer extends PaletteRandomizer {
 
 		@Override
 		public void applyTo(Gen1Pokemon pk) {
-			pk.setPaletteID(typeSanity ? getRandomPaletteID(pk.getPrimaryType()) : getRandomPaletteID());
+			pk.setPaletteID(typeSanity ? getRandomPaletteID(pk.getPrimaryType(false)) : getRandomPaletteID());
 		}
 
 	}
@@ -99,10 +99,10 @@ public class Gen1PaletteRandomizer extends PaletteRandomizer {
 		@Override
 		public void applyTo(Gen1Pokemon evFrom, Gen1Pokemon evTo, boolean toMonIsFinalEvo) {
 			SGBPaletteID newPaletteID;
-			if (typeSanity && !evTo.getPrimaryType().equals(evFrom.getPrimaryType())) {
-				SGBPaletteID[] typeIDs = TYPE_PALETTE_IDS.get(evTo.getPrimaryType());
+			if (typeSanity && !evTo.getPrimaryType(false).equals(evFrom.getPrimaryType(false))) {
+				SGBPaletteID[] typeIDs = TYPE_PALETTE_IDS.get(evTo.getPrimaryType(false));
 				newPaletteID = contains(typeIDs, evFrom.getPaletteID()) ? evFrom.getPaletteID()
-						: getRandomPaletteID(evTo.getPrimaryType());
+						: getRandomPaletteID(evTo.getPrimaryType(false));
 
 			} else {
 				newPaletteID = evFrom.getPaletteID();

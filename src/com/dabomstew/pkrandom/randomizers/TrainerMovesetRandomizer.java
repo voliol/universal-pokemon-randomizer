@@ -64,7 +64,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
 
                 List<Move> stabMoves = new ArrayList<>(movesAtLevel)
                         .stream()
-                        .filter(mv -> mv.type == pk.getPrimaryType() && mv.category != MoveCategory.STATUS)
+                        .filter(mv -> mv.type == pk.getPrimaryType(false) && mv.category != MoveCategory.STATUS)
                         .collect(Collectors.toList());
                 Collections.shuffle(stabMoves, random);
 
@@ -73,10 +73,10 @@ public class TrainerMovesetRandomizer extends Randomizer {
                     movesAtLevel.add(stabMoves.get(j));
                 }
 
-                if (pk.getSecondaryType() != null) {
+                if (pk.getSecondaryType(false) != null) {
                     stabMoves = new ArrayList<>(movesAtLevel)
                             .stream()
-                            .filter(mv -> mv.type == pk.getSecondaryType() && mv.category != MoveCategory.STATUS)
+                            .filter(mv -> mv.type == pk.getSecondaryType(false) && mv.category != MoveCategory.STATUS)
                             .collect(Collectors.toList());
                     Collections.shuffle(stabMoves, random);
 
@@ -90,8 +90,8 @@ public class TrainerMovesetRandomizer extends Randomizer {
 
                 List<Move> abilityMoveSynergyList = MoveSynergy.getHardAbilityMoveSynergy(
                         romHandler.getAbilityForTrainerPokemon(tp),
-                        pk.getPrimaryType(),
-                        pk.getSecondaryType(),
+                        pk.getPrimaryType(false),
+                        pk.getSecondaryType(false),
                         movesAtLevel,
                         romHandler.generationOfPokemon(),
                         romHandler.getPerfectAccuracy());
@@ -106,8 +106,8 @@ public class TrainerMovesetRandomizer extends Randomizer {
                 List<Move> softAbilityMoveSynergyList = MoveSynergy.getSoftAbilityMoveSynergy(
                         romHandler.getAbilityForTrainerPokemon(tp),
                         movesAtLevel,
-                        pk.getPrimaryType(),
-                        pk.getSecondaryType());
+                        pk.getPrimaryType(false),
+                        pk.getSecondaryType(false));
 
                 Collections.shuffle(softAbilityMoveSynergyList, random);
                 for (int i = 0; i < softAbilityMoveBias * softAbilityMoveSynergyList.size(); i++) {

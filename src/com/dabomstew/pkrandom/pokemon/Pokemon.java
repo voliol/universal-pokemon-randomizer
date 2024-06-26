@@ -424,12 +424,12 @@ public class Pokemon implements Comparable<Pokemon> {
     /**
      * Saves certain pieces of data that can be randomized, but that
      * we want to know the original version of for later randomization.
-     * Currently: Types, evolutions.
+     * Currently: Evolutions. (Types are done elsewhere.)
      * Must be called before randomizing any of this data.
      */
     public void saveOriginalData() {
-        originalPrimaryType = primaryType;
-        originalSecondaryType = secondaryType;
+        //originalPrimaryType = primaryType;
+        //originalSecondaryType = secondaryType;
         originalEvolvedForms = getEvolvedPokemon(false);
         originalPreEvolvedForms = getPreEvolvedPokemon(false);
     }
@@ -614,14 +614,23 @@ public class Pokemon implements Comparable<Pokemon> {
         this.generation = generation;
     }
 
-    public Type getPrimaryType() {
-        return primaryType;
+    /**
+     * Returns the Pokemon's secondary type. If it has no secondary type, it will return null.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return The Pokemon's secondary type.
+     */
+    public Type getPrimaryType(boolean useOriginal) {
+        if(useOriginal) {
+            return originalPrimaryType;
+        } else {
+            return primaryType;
+        }
     }
 
     /**
      * Sets the primary type.<br>
      * The first time this method is called, it also sets the "original" primary type,
-     * which can be retrieved with {@link #getOriginalPrimaryType()}.
+     * which can be retrieved with {@link #getPrimaryType(boolean)}.
      */
     public void setPrimaryType(Type primaryType) {
         this.primaryType = primaryType;
@@ -631,14 +640,23 @@ public class Pokemon implements Comparable<Pokemon> {
         }
     }
 
-    public Type getSecondaryType() {
-        return secondaryType;
+    /**
+     * Returns the Pokemon's secondary type. If it has no secondary type, it will return null.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return The Pokemon's secondary type.
+     */
+    public Type getSecondaryType(boolean useOriginal) {
+        if(useOriginal) {
+            return originalSecondaryType;
+        } else {
+            return secondaryType;
+        }
     }
 
     /**
      * Sets the secondary type.<br>
      * The first time this method is called, it also sets the "original" secondary type,
-     * which can be retrieved with {@link #getOriginalSecondaryType()}.
+     * which can be retrieved with {@link #getSecondaryType(boolean)}.
      * For this reason, it is important to use this method when initializing a Pokemon's types,
      * even if the "null" value used to represent no secondary type is technically the internal state of the
      * secondaryType attribute before being set.
@@ -651,21 +669,32 @@ public class Pokemon implements Comparable<Pokemon> {
         }
     }
 
-    public Type getOriginalPrimaryType() {
-        return originalPrimaryType;
+    /**
+     * Checks whether either of the Pokemon's types are the given type.
+     * @param type The type to check against.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return True if the Pokemon has the given type, false otherwise.
+     */
+    public boolean hasType(Type type, boolean useOriginal) {
+        return getPrimaryType(useOriginal) == type || getSecondaryType(useOriginal) == type;
     }
 
-    public Type getOriginalSecondaryType() {
-        return originalSecondaryType;
+    /**
+     * Checks whether the Pokemon has a secondary type.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return True if the Pokemon has a secondary type, false otherwise.
+     */
+    public boolean hasSecondaryType(boolean useOriginal) {
+        return this.getSecondaryType(useOriginal) != null;
     }
 
     /**
      * Returns true if this shares any {@link Type} with the given Pokemon.
      */
     public boolean hasSharedType(Pokemon other) {
-        return getPrimaryType().equals(other.getPrimaryType()) || getPrimaryType().equals(other.getSecondaryType())
-                || (getSecondaryType() != null &&
-                (getSecondaryType().equals(other.getPrimaryType()) || getSecondaryType().equals(other.getSecondaryType())));
+        return getPrimaryType(false).equals(other.getPrimaryType(false)) || getPrimaryType(false).equals(other.getSecondaryType(false))
+                || (getSecondaryType(false) != null &&
+                (getSecondaryType(false).equals(other.getPrimaryType(false)) || getSecondaryType(false).equals(other.getSecondaryType(false))));
     }
 
     public int getHp() {
