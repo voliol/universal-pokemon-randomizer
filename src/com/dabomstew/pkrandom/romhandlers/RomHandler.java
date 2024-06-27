@@ -179,6 +179,11 @@ public interface RomHandler {
      */
     List<EncounterArea> getSortedEncounters(boolean useTimeOfDay);
 
+    /**
+     *
+     * @param useTimeOfDay
+     * @return A new PokemonSet containing all wild Pokemon found in the main game.
+     */
     PokemonSet getMainGameWildPokemon(boolean useTimeOfDay);
 
     void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounters);
@@ -207,6 +212,8 @@ public interface RomHandler {
      * If isChallengeMode is true, it returns the indexes for the Challenge Mode e4+champion (only in BW2).
      */
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
+
+    Map<String, Type> getGymAndEliteTypeThemes();
 
     void setTrainers(List<Trainer> trainerData);
 

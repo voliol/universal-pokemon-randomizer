@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class TrainerPokemonRandomizer extends Randomizer {
 
-    private Map<Type, PokemonSet> cachedReplacements;
+    private Map<Type, GenericPokemonSet<Pokemon>> cachedByType;
     private PokemonSet cachedAll;
     private PokemonSet banned = new PokemonSet();
     private final PokemonSet usedAsUnique = new PokemonSet();
@@ -43,6 +43,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
     }
 
     public void randomizeTrainerPokes() {
+        //TODO: this method direly needs a refactor to despaghettify
         boolean usePowerLevels = settings.isTrainersUsePokemonOfSimilarStrength();
         boolean weightByFrequency = settings.isTrainersMatchTypingDistribution();
         boolean useLocalPokemon = settings.isTrainersUseLocalPokemon();
@@ -52,6 +53,9 @@ public class TrainerPokemonRandomizer extends Randomizer {
         boolean isTypeThemed = settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED;
         boolean isTypeThemedEliteFourGymOnly = settings.getTrainersMod() == Settings.TrainersMod.TYPE_THEMED_ELITE4_GYMS;
         boolean keepTypeThemes = settings.getTrainersMod() == Settings.TrainersMod.KEEP_THEMED;
+        boolean keepThemeOrPrimaryTypes = settings.getTrainersMod() == Settings.TrainersMod.KEEP_THEME_OR_PRIMARY;
+        boolean hasAnyTypeTheme = isTypeThemed || isTypeThemedEliteFourGymOnly || keepTypeThemes
+                || keepThemeOrPrimaryTypes;
         boolean distributionSetting = settings.getTrainersMod() == Settings.TrainersMod.DISTRIBUTED;
         boolean mainPlaythroughSetting = settings.getTrainersMod() == Settings.TrainersMod.MAINPLAYTHROUGH;
         boolean includeFormes = settings.isAllowTrainerAlternateFormes();
@@ -66,16 +70,14 @@ public class TrainerPokemonRandomizer extends Randomizer {
         boolean rivalCarriesStarter = settings.isRivalCarriesStarterThroughout();
 
         // Set up Pokemon pool
-        cachedReplacements = new TreeMap<>();
-        cachedAll = new PokemonSet(rPokeService.getPokemon(noLegendaries, includeFormes, false));
+        cachedByType = new TreeMap<>();
+        cachedAll = rPokeService.getPokemon(noLegendaries, includeFormes, false);
 
         if (useLocalPokemon) {
-            PokemonSet localWithRelatives = new PokemonSet();
-            for (Pokemon pk : romHandler.getMainGameWildPokemon(settings.isUseTimeBasedEncounters())) {
-                if (!localWithRelatives.contains(pk)) {
-                    localWithRelatives.addAll(PokemonSet.related(pk));
-                }
-            }
+            PokemonSet localWithRelatives =
+                    romHandler.getMainGameWildPokemon(settings.isUseTimeBasedEncounters())
+                    .buildFullFamilies(false);
+
             cachedAll.retainAll(localWithRelatives);
         }
 
@@ -89,12 +91,21 @@ public class TrainerPokemonRandomizer extends Randomizer {
         }
         cachedAll.removeAll(banned);
 
+        PokemonSet wonderGuardPokemon = null;
+        if(noEarlyWonderGuard) {
+            wonderGuardPokemon = cachedAll.filter(pk -> pk.getAbility1() == Abilities.wonderGuard
+                    || pk.getAbility2() == Abilities.wonderGuard
+                    || pk.getAbility3() == Abilities.wonderGuard);
+        }
+
         List<Trainer> currentTrainers = romHandler.getTrainers();
 
         // Type Themed related
         Map<Trainer, Type> trainerTypes = new TreeMap<>();
         Set<Type> usedUberTypes = new TreeSet<>();
-        if (isTypeThemed || isTypeThemedEliteFourGymOnly) {
+        if (hasAnyTypeTheme) {
+            cachedByType = cachedAll.sortByType(false);
+
             typeWeightings = new TreeMap<>();
             totalTypeWeighting = 0;
             // Construct groupings for types
@@ -126,34 +137,51 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 }
             }
 
-            // Give a type to each group
-            // Gym & elite types have to be unique
-            // So do uber types, including the type we pick for champion
-            Set<Type> usedGymTypes = new TreeSet<>();
-            Set<Type> usedEliteTypes = new TreeSet<>();
-            for (String group : groups.keySet()) {
-                List<Trainer> trainersInGroup = groups.get(group);
-                // Shuffle ordering within group to promote randomness
-                Collections.shuffle(trainersInGroup, random);
-                Type typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
-                if (group.startsWith("GYM")) {
-                    while (usedGymTypes.contains(typeForGroup)) {
-                        typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+
+            if(keepTypeThemes || keepThemeOrPrimaryTypes) {
+                Map<String, Type> originalThemes = romHandler.getGymAndEliteTypeThemes();
+
+                for (String group : groups.keySet()) {
+                    if (!originalThemes.containsKey(group)) {
+                        continue;
                     }
-                    usedGymTypes.add(typeForGroup);
-                }
-                if (group.startsWith("ELITE")) {
-                    while (usedEliteTypes.contains(typeForGroup)) {
-                        typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                    Type groupType = originalThemes.get(group);
+                    List<Trainer> trainersInGroup = groups.get(group);
+                    for (Trainer t : trainersInGroup) {
+                        trainerTypes.put(t, groupType);
                     }
-                    usedEliteTypes.add(typeForGroup);
-                }
-                if (group.equals("CHAMPION")) {
-                    usedUberTypes.add(typeForGroup);
                 }
 
-                for (Trainer t : trainersInGroup) {
-                    trainerTypes.put(t, typeForGroup);
+            } else {
+                // Give a random type to each group
+                // Gym & elite types have to be unique
+                // So do uber types, including the type we pick for champion
+                Set<Type> usedGymTypes = new TreeSet<>();
+                Set<Type> usedEliteTypes = new TreeSet<>();
+                for (String group : groups.keySet()) {
+                    List<Trainer> trainersInGroup = groups.get(group);
+                    // Shuffle ordering within group to promote randomness
+                    Collections.shuffle(trainersInGroup, random);
+                    Type typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                    if (group.startsWith("GYM")) {
+                        while (usedGymTypes.contains(typeForGroup)) {
+                            typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                        }
+                        usedGymTypes.add(typeForGroup);
+                    }
+                    if (group.startsWith("ELITE")) {
+                        while (usedEliteTypes.contains(typeForGroup)) {
+                            typeForGroup = pickType(weightByFrequency, noLegendaries, includeFormes);
+                        }
+                        usedEliteTypes.add(typeForGroup);
+                    }
+                    if (group.equals("CHAMPION")) {
+                        usedUberTypes.add(typeForGroup);
+                    }
+
+                    for (Trainer t : trainersInGroup) {
+                        trainerTypes.put(t, typeForGroup);
+                    }
                 }
             }
         }
@@ -171,7 +199,6 @@ public class TrainerPokemonRandomizer extends Randomizer {
         boolean illegalEvoChains = false;
         List<Integer> eliteFourIndices = romHandler.getEliteFourTrainers(forceChallengeMode);
         PokemonSet eliteFourExceptions = null;
-        PokemonSet nonEliteFourExceptions = null;
         if (eliteFourUniquePokemon) {
             // Sort Elite Four Trainers to the start of the list
             scrambledTrainers.sort((t1, t2) ->
@@ -186,7 +213,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
 
                     // If the final boss is a rival/friend, the fully evolved starters will be unique
                     if (romHandler.hasRivalFinalBattle()) {
-                        cachedAll.removeAll(getFinalEvos(starter));
+                        usedAsUnique.addAll(getFinalEvos(starter));
                         if (illegalEvoChains) {
                             illegalIfEvolved.add(starter);
                             setEvoChainAsIllegal(starter, illegalIfEvolved, true);
@@ -200,8 +227,6 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 eliteFourExceptions = new PokemonSet(rPokeService.getPokemon(noLegendaries, includeFormes, false));
                 eliteFourExceptions.removeAll(banned);
                 eliteFourExceptions.removeAll(cachedAll); // i.e. retains only non-local pokes
-
-                nonEliteFourExceptions = cachedAll;
             }
         }
 
@@ -231,15 +256,17 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 }
             }
 
-            PokemonSet evolvesIntoTheWrongType = new PokemonSet();
+            if ((keepTypeThemes || keepThemeOrPrimaryTypes) && typeForTrainer == null ) {
+                PokemonSet trainerPokemonSpecies = t.pokemon.stream().map(tp -> tp.pokemon)
+                        .collect(Collectors.toCollection(PokemonSet::new));
+                typeForTrainer = trainerPokemonSpecies.getSharedType(true);
+            }
+
+            GenericPokemonSet<Pokemon> evolvesIntoTheWrongType = null;
             if (typeForTrainer != null) {
-                PokemonSet pokemonOfType = rPokeService.getPokemon(noLegendaries, includeFormes, false)
-                        .filterByType(typeForTrainer);
-                for (Pokemon pk : pokemonOfType) {
-                    if (!pokemonOfType.contains(fullyEvolve(pk, t.index))) {
-                        evolvesIntoTheWrongType.add(pk);
-                    }
-                }
+                GenericPokemonSet<Pokemon> pokemonOfType = cachedAll.filterByType(typeForTrainer, false);
+                evolvesIntoTheWrongType = pokemonOfType.filter(pk ->
+                        !pokemonOfType.contains(fullyEvolve(pk, t.index)));
             }
 
             List<TrainerPokemon> trainerPokemonList = new ArrayList<>(t.pokemon);
@@ -259,18 +286,13 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 }
             }
 
-            if (keepTypeThemes) {
-                PokemonSet trainerPokemonSpecies = trainerPokemonList.stream().map(tp -> tp.pokemon)
-                        .collect(Collectors.toCollection(PokemonSet::new));
-                typeForTrainer = trainerPokemonSpecies.getOriginalTypeTheme();
-            }
-
             for (TrainerPokemon tp : trainerPokemonList) {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
                 boolean eliteFourSetUniquePokemon =
                         eliteFourTrackPokemon && eliteFourUniquePokemonNumber > trainerPokemonList.indexOf(tp);
                 boolean willForceEvolve = forceFullyEvolved && tp.level >= forceFullyEvolvedLevel;
+                PokemonSet cacheReplacement = null;
 
                 Pokemon oldPK = tp.pokemon;
                 if (tp.forme > 0) {
@@ -283,26 +305,30 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 }
                 if (eliteFourSetUniquePokemon) {
                     banned.addAll(bannedFromUnique);
-                    if (useLocalPokemon) {
-                        cachedAll = eliteFourExceptions;
-                        banned.addAll(nonEliteFourExceptions);
-                    }
+                    cacheReplacement = eliteFourExceptions;
                 }
                 if (willForceEvolve) {
-                    banned.addAll(evolvesIntoTheWrongType);
+                    if (keepThemeOrPrimaryTypes && typeForTrainer == null) {
+                        GenericPokemonSet<Pokemon> pokemonOfType =
+                                cachedByType.get(oldPK.getPrimaryType(true));
+                        evolvesIntoTheWrongType = pokemonOfType.filter(pk ->
+                                !pokemonOfType.contains(fullyEvolve(pk, t.index)));
+                    }
+                    if(evolvesIntoTheWrongType != null) {
+                        banned.addAll(evolvesIntoTheWrongType);
+                    }
+                }
+                if(!wgAllowed) {
+                    banned.addAll(wonderGuardPokemon);
                 }
 
                 Pokemon newPK = pickTrainerPokeReplacement(
                         oldPK,
                         usePowerLevels,
                         typeForTrainer,
-                        noLegendaries,
-                        wgAllowed,
                         distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
                         swapThisMegaEvo,
-                        abilitiesAreRandomized,
-                        includeFormes,
-                        banIrregularAltFormes
+                        cacheReplacement
                 );
 
                 // Chosen Pokemon is locked in past here
@@ -329,11 +355,6 @@ public class TrainerPokemonRandomizer extends Randomizer {
                             if (illegalEvoChains) {
                                 setEvoChainAsIllegal(actualPK, illegalIfEvolved, willForceEvolve);
                             }
-                        }
-
-                        if (useLocalPokemon) {
-                            // return to normal list
-                            cachedAll = nonEliteFourExceptions;
                         }
                     }
                     if (eliteFourTrackPokemon) {
@@ -370,12 +391,17 @@ public class TrainerPokemonRandomizer extends Randomizer {
 
 
     private Pokemon pickTrainerPokeReplacement(Pokemon current, boolean usePowerLevels, Type type,
-                                               boolean noLegendaries, boolean wonderGuardAllowed,
                                                boolean usePlacementHistory, boolean swapMegaEvos,
-                                               boolean abilitiesAreRandomized, boolean allowAltFormes,
-                                               boolean banIrregularAltFormes) {
-        PokemonSet pickFrom;
-        PokemonSet withoutBannedPokemon;
+                                               PokemonSet useInsteadOfCached) {
+        PokemonSet cacheOrReplacement;
+        if(useInsteadOfCached == null) {
+            cacheOrReplacement = cachedAll;
+        } else {
+            cacheOrReplacement = useInsteadOfCached;
+        }
+
+        GenericPokemonSet<Pokemon> pickFrom;
+        GenericPokemonSet<Pokemon> withoutBannedPokemon;
 
         if (swapMegaEvos) {
             pickFrom = rPokeService.getMegaEvolutions()
@@ -384,7 +410,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
                     .map(mega -> mega.from)
                     .collect(Collectors.toCollection(PokemonSet::new));
         } else {
-            pickFrom = cachedAll;
+            pickFrom = cacheOrReplacement;
         }
 
         if (usePlacementHistory) {
@@ -392,36 +418,52 @@ public class TrainerPokemonRandomizer extends Randomizer {
             double placementAverage = getPlacementAverage();
             pickFrom = pickFrom.filter(pk -> getPlacementHistory(pk) < placementAverage * 2);
             if (pickFrom.isEmpty()) {
-                pickFrom = cachedAll;
+                pickFrom = cacheOrReplacement;
             }
-        } else if (type != null && cachedReplacements != null) {
+        } else if (type != null && cachedByType != null) {
             // "Type Themed" settings
-            if (!cachedReplacements.containsKey(type)) {
-                PokemonSet pokemonOfType = rPokeService.getPokemon(noLegendaries, allowAltFormes, false)
-                        .filterByType(type);
-                pokemonOfType.removeAll(rPokeService.getBannedFormesForPlayerPokemon());
-                if (!abilitiesAreRandomized) {
-                    PokemonSet abilityDependentFormes = rPokeService.getAbilityDependentFormes();
-                    pokemonOfType.removeAll(abilityDependentFormes);
-                }
-                if (banIrregularAltFormes) {
-                    romHandler.getIrregularFormes().forEach(pokemonOfType::remove);
-                }
-                cachedReplacements.put(type, pokemonOfType);
-            }
-            if (swapMegaEvos) {
-                pickFrom = cachedReplacements.get(type).filter(pickFrom::contains);
-                if (pickFrom.isEmpty()) {
-                    pickFrom = cachedReplacements.get(type);
+            GenericPokemonSet<Pokemon> pokemonOfType;
+
+            if(useInsteadOfCached == null) {
+                if (!cachedByType.containsKey(type)) {
+                    throw new RandomizationException("No Pokemon of type " + type + " available for trainers!");
+                } else {
+                    pokemonOfType = cachedByType.get(type);
                 }
             } else {
-                pickFrom = cachedReplacements.get(type);
+                //not using the cache, so don't use the cached-by-type set
+                pokemonOfType = useInsteadOfCached.filterByType(type);
             }
+
+            if (swapMegaEvos) {
+                pickFrom = pokemonOfType.filter(pickFrom::contains);
+                if (pickFrom.isEmpty()) {
+                    pickFrom = pokemonOfType;
+                }
+            } else {
+                pickFrom = pokemonOfType;
+            }
+        }
+
+        if(pickFrom.isEmpty() && useInsteadOfCached != null) {
+            //the cache replacement has no valid Pokemon
+            //recurse using the cache
+            return pickTrainerPokeReplacement(current, usePowerLevels, type,
+                    usePlacementHistory, swapMegaEvos, null);
         }
 
         withoutBannedPokemon = pickFrom.filter(pk -> !banned.contains(pk));
         if (!withoutBannedPokemon.isEmpty()) {
             pickFrom = withoutBannedPokemon;
+        } else if(useInsteadOfCached != null) {
+            //rather than using banned pokemon from the provided set,
+            //see if we can get a non-banned pokemon from the cache
+            Pokemon cachePick = pickTrainerPokeReplacement(current, usePowerLevels, type,
+                    usePlacementHistory, swapMegaEvos, null);
+            if(withoutBannedPokemon.contains(cachePick)) {
+                return cachePick;
+            }
+            //if we didn't... well, if it's banned anyway, it might as well be from the substitution set
         }
 
         if (usePowerLevels) {
@@ -435,9 +477,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
             while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 2)) {
                 for (Pokemon pk : pickFrom) {
                     if (pk.bstForPowerLevels() >= minTarget
-                            && pk.bstForPowerLevels() <= maxTarget
-                            && (wonderGuardAllowed || (pk.getAbility1() != Abilities.wonderGuard
-                            && pk.getAbility2() != Abilities.wonderGuard && pk.getAbility3() != Abilities.wonderGuard))) {
+                            && pk.bstForPowerLevels() <= maxTarget) {
                         canPick.add(pk);
                     }
                 }
@@ -450,28 +490,18 @@ public class TrainerPokemonRandomizer extends Randomizer {
             // is actually below the current average placement
             // if not, re-roll
 
-            Pokemon chosenPokemon = canPick.getRandom(random);
+            Pokemon chosenPokemon = canPick.getRandomPokemon(random, false);
             if (usePlacementHistory) {
                 double placementAverage = getPlacementAverage();
                 PokemonSet filteredPickList = canPick.filter(pk -> getPlacementHistory(pk) < placementAverage);
                 if (filteredPickList.isEmpty()) {
                     filteredPickList = canPick;
                 }
-                chosenPokemon = filteredPickList.getRandom(random);
+                chosenPokemon = filteredPickList.getRandomPokemon(random, false);
             }
             return chosenPokemon;
         } else {
-            if (wonderGuardAllowed) {
-                return pickFrom.getRandom(random);
-            } else {
-                Pokemon pk = pickFrom.getRandom(random);
-                while (pk.getAbility1() == Abilities.wonderGuard
-                        || pk.getAbility2() == Abilities.wonderGuard
-                        || pk.getAbility3() == Abilities.wonderGuard) {
-                    pk = pickFrom.getRandom(random);
-                }
-                return pk;
-            }
+            return pickFrom.getRandomPokemon(random, false);
         }
     }
 
