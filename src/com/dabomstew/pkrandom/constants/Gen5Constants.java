@@ -2015,6 +2015,8 @@ public class Gen5Constants {
         }
     }
 
+    //TODO: unify with location tag system
+    //(Applies to all gens & lists)
     private static final int[] bwPostGameEncounterAreasTOD = new int[] {
             369, 370, 371, 372, 373, 374, 375, 376, 377, 378, //Challenger's Cave
             409, 410, 411, 412, 413, 414, 415, //Abundant Shrine

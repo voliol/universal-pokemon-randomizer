@@ -432,6 +432,8 @@ public class PokemonMovesetRandomizer extends Randomizer {
     }
 
     // Note that this is slow and somewhat hacky.
+    // TODO: add to PokemonSet, hopefully in a less hacky way.
+    // (The non-hacky way might be to make it a TreeSet.)
     private Pokemon findPokemonInPoolWithSpeciesID(Collection<Pokemon> pokemonPool, int speciesID) {
         for (Pokemon pk : pokemonPool) {
             if (pk.getNumber() == speciesID) {

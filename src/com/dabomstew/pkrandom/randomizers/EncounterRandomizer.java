@@ -263,7 +263,7 @@ public class EncounterRandomizer extends Randomizer {
         private Type pickAreaType(EncounterArea area) {
             Type picked = null;
             if (keepTypeThemes) {
-                picked = PokemonSet.inArea(area).getOriginalTypeTheme();
+                picked = area.getPokemonInArea().getSharedType(true);
             }
             if (randomTypeThemes && picked == null) {
                 picked = pickRandomAreaType();
@@ -274,8 +274,8 @@ public class EncounterRandomizer extends Randomizer {
                 // because why not?
                 if (catchEmAll) {
                     PokemonSet bannedInArea = new PokemonSet(banned);
-                    bannedInArea.retainAll(PokemonSet.inArea(area));
-                    Type themeOfBanned = bannedInArea.getTypeTheme();
+                    bannedInArea.retainAll(area.getPokemonInArea());
+                    Type themeOfBanned = bannedInArea.getSharedType(false);
                     if (themeOfBanned != null) {
                         picked = themeOfBanned;
                     }
@@ -290,6 +290,7 @@ public class EncounterRandomizer extends Randomizer {
             do {
                 areaType = typeService.randomType(random);
             } while (byType.get(areaType).isEmpty());
+            //TODO: ensure loop terminates
             return areaType;
         }
 
@@ -305,6 +306,7 @@ public class EncounterRandomizer extends Randomizer {
         private Pokemon pickReplacement(Encounter enc) {
             allowedForReplacement = allowedForArea;
             if (keepPrimaryType) {
+                //TODO: have keepThemes override keepPrimary rather than the opposite
                 allowedForReplacement = getAllowedReplacementPreservePrimaryType(enc);
             }
 
@@ -315,9 +317,11 @@ public class EncounterRandomizer extends Randomizer {
             }
         }
 
+
         private PokemonSet getAllowedReplacementPreservePrimaryType(Encounter enc) {
+            //TODO: ensure this works correctly with area bans
             Pokemon current = enc.getPokemon();
-            Type primaryType = current.getPrimaryType();
+            Type primaryType = current.getPrimaryType(true);
             return catchEmAll && !remainingByType.get(primaryType).isEmpty()
                     ? remainingByType.get(primaryType) : allowedByType.get(primaryType);
         }
@@ -341,7 +345,7 @@ public class EncounterRandomizer extends Randomizer {
                         pickWildPowerLvlReplacement(allowedForReplacement, current, false,
                                 100);
             } else {
-                replacement = allowedForReplacement.getRandom(random);
+                replacement = allowedForReplacement.getRandomPokemon(random);
             }
             return replacement;
         }
@@ -364,9 +368,9 @@ public class EncounterRandomizer extends Randomizer {
         private void removeFromRemaining(Pokemon replacement) {
             remaining.remove(replacement);
             if (areaType != null || keepPrimaryType) {
-                remainingByType.get(replacement.getPrimaryType()).remove(replacement);
-                if (replacement.getSecondaryType() != null) {
-                    remainingByType.get(replacement.getSecondaryType()).remove(replacement);
+                remainingByType.get(replacement.getPrimaryType(false)).remove(replacement);
+                if (replacement.getSecondaryType(false) != null) {
+                    remainingByType.get(replacement.getSecondaryType(false)).remove(replacement);
                 }
             }
         }
@@ -418,11 +422,11 @@ public class EncounterRandomizer extends Randomizer {
         private Pokemon pickGame1to1Replacement(Pokemon current) {
             Pokemon replacement = similarStrength ?
                     pickWildPowerLvlReplacement(remaining, current, true, 100) :
-                    remaining.getRandom(random);
+                    remaining.getRandomPokemon(random);
             // In case it runs out of unique Pokémon, picks something already mapped to.
             // Shouldn't happen unless restrictions are really harsh, normally [#allowed Pokémon] > [#Pokémon which appear in the wild]
             if (replacement == null) {
-                replacement = allowed.getRandom(random);
+                replacement = allowed.getRandomPokemon(random);
             } else {
                 remaining.remove(replacement);
             }
@@ -451,7 +455,7 @@ public class EncounterRandomizer extends Randomizer {
                 maxTarget += currentBST / 20;
                 expandRounds++;
             }
-            return canPick.getRandom(random);
+            return canPick.getRandomPokemon(random);
         }
     }
 
