@@ -48,7 +48,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     private int generation = -1;
 
-    private PokemonSet<Pokemon> originalEvolvedForms, originalPreEvolvedForms;
+    private PokemonSet originalEvolvedForms, originalPreEvolvedForms;
 
     private Type primaryType;
     private Type secondaryType;
@@ -256,11 +256,11 @@ public class Pokemon implements Comparable<Pokemon> {
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return A PokemonSet containing all possible evolved forms of this Pokemon.
      */
-    public PokemonSet<Pokemon> getEvolvedPokemon(boolean useOriginal) {
+    public PokemonSet getEvolvedPokemon(boolean useOriginal) {
         if(useOriginal) {
-            return new PokemonSet<>(this.originalEvolvedForms);
+            return new PokemonSet(this.originalEvolvedForms);
         } else {
-            PokemonSet<Pokemon> evolvedPokemon = new PokemonSet<>();
+            PokemonSet evolvedPokemon = new PokemonSet();
             for (Evolution evo : evolutionsFrom) {
                 evolvedPokemon.add(evo.getTo());
             }
@@ -274,11 +274,11 @@ public class Pokemon implements Comparable<Pokemon> {
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return A PokemonSet containing all pre-evolved forms of this Pokemon.
      */
-    public PokemonSet<Pokemon> getPreEvolvedPokemon(boolean useOriginal) {
+    public PokemonSet getPreEvolvedPokemon(boolean useOriginal) {
         if(useOriginal) {
-            return new PokemonSet<>(this.originalPreEvolvedForms);
+            return new PokemonSet(this.originalPreEvolvedForms);
         } else {
-            PokemonSet<Pokemon> evolvedPokemon = new PokemonSet<>();
+            PokemonSet evolvedPokemon = new PokemonSet();
             for (Evolution evo : evolutionsTo) {
                 evolvedPokemon.add(evo.getFrom());
             }
@@ -292,8 +292,8 @@ public class Pokemon implements Comparable<Pokemon> {
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return a PokemonSet containing all Pokemon this Pokemon is related to (including itself)
      */
-    public PokemonSet<Pokemon> getFamily(boolean useOriginal) {
-        PokemonSet<Pokemon> family = new PokemonSet<>();
+    public PokemonSet getFamily(boolean useOriginal) {
+        PokemonSet family = new PokemonSet();
 
         Queue<Pokemon> toAdd = new ArrayDeque<>();
         toAdd.add(this);

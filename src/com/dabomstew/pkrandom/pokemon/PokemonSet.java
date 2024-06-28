@@ -6,62 +6,270 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * An extension of {@link GenericPokemonSet} instantiated to Pokemon.
+ * An extension of {@link PokemonSet} instantiated to Pokemon.
  * Adds various evolution-related functions.
  */
-public class PokemonSet extends GenericPokemonSet<Pokemon> {
+public class PokemonSet extends HashSet<Pokemon> {
 
-    public PokemonSet(){
+    /**
+     * Creates an empty PokemonSet.
+     */
+    public PokemonSet() {
         super();
     }
 
+    /**
+     * Creates a new PokemonSet containing every Pokemon in the given Collection.
+     * @param cloneFrom the Collection to copy from.
+     */
     public PokemonSet(Collection<? extends Pokemon> cloneFrom) {
         super(cloneFrom);
     }
 
-    //Pass-through methods
-    //This seems a non-ideal solution, but it's better than copying the code?
+    private ArrayList<Pokemon> randomCache = null;
+    
+    private static final double CACHE_RESET_FACTOR = 0.5;
+    //How much of the cache must consist of removed Pokemon before resetting
+
+    //Basic functions
+
     @Override
+    public boolean add(Pokemon pokemon) {
+        if(this.contains(pokemon) || pokemon == null) {
+            return false;
+        }
+        randomCache = null;
+        super.add(pokemon);
+
+        return true;
+    }
+
+    //I'm not certain that I need to override addAll—but I'm not
+    //certain that I don't, either.
+    @Override
+    public boolean addAll(Collection<? extends Pokemon> c) {
+        boolean changed = false;
+        for (Pokemon pokemon : c) {
+            boolean added = this.add(pokemon);
+            if(added) {
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        randomCache = null;
+    }
+
+    /**
+     * Returns the subset of this set for which the predicate function returns true.
+     * @param predicate The function to test Pokemon against.
+     * @return A PokemonSet containing every Pokemon in this set for which predicate returns true.
+     */
     public PokemonSet filter(Predicate<? super Pokemon> predicate) {
-        return new PokemonSet(super.filter(predicate));
+        PokemonSet filtered = new PokemonSet();
+        for (Pokemon pk : this) {
+            if (predicate.test(pk)) {
+                filtered.add(pk);
+            }
+        }
+        return filtered;
     }
 
-    @Override
-    public PokemonSet buildSet(Function<? super Pokemon, Collection<Pokemon>> function) {
-        return new PokemonSet(super.buildSet(function));
-    }
+    //BuildSet variants
 
-    @Override
+    /**
+     * Builds a new set by running the given function on each Pokemon in this set,
+     * and adding its return value to the new set.
+     * @param function The function to run on each Pokemon in this set.
+     * @return The PokemonSet containing all Pokemon returned after running the given function.
+     */
     public PokemonSet buildSetSingle(Function<? super Pokemon, Pokemon> function) {
-        return new PokemonSet(super.buildSetSingle(function));
+        PokemonSet newSet = new PokemonSet();
+
+        for(Pokemon pokemon : this) {
+            newSet.add(function.apply(pokemon));
+        }
+
+        return newSet;
     }
 
-    @Override
+    /**
+     * Builds a new set by running the given function on each Pokemon in this set,
+     * and adding its return value to the new set.
+     * @param function The function to run on each Pokemon in this set.
+     * @return The PokemonSet containing all Pokemon returned after running the given function.
+     */
+    public PokemonSet buildSet(Function<? super Pokemon, Collection<Pokemon>> function) {
+        PokemonSet newSet = new PokemonSet();
+
+        for(Pokemon pokemon : this) {
+            newSet.addAll(function.apply(pokemon));
+        }
+
+        return newSet;
+    }
+
+    /**
+     * Builds a new set by running the given function on each Pokemon in this set,
+     * and adding its return value to the new set only if that Pokemon is contained in this set.
+     * @param function The function to run on each Pokemon in this set.
+     * @return The PokemonSet containing all Pokemon in this set returned after running the given function.
+     */
     public PokemonSet filterBuiltSetSingle(Function<? super Pokemon, Pokemon> function) {
-        return new PokemonSet(super.filterBuiltSetSingle(function));
+        PokemonSet builtSet = this.buildSetSingle(function);
+        builtSet.retainAll(this);
+        return builtSet;
     }
 
-    @Override
+    /**
+     * Builds a new set by running the given function on each Pokemon in this set,
+     * and adding its return value to the new set only if that Pokemon is contained in this set.
+     * @param function The function to run on each Pokemon in this set.
+     * @return The PokemonSet containing all Pokemon in this set returned after running the given function.
+     */
     public PokemonSet filterBuiltSet(Function<? super Pokemon, Collection<Pokemon>> function) {
-        return new PokemonSet(super.filterBuiltSet(function));
+        PokemonSet builtSet = this.buildSet(function);
+        builtSet.retainAll(this);
+        return builtSet;
     }
 
-    @Override
-    public PokemonSet filterByType(Type type) {
-        return new PokemonSet(super.filterByType(type));
+    /**
+     * Adds to this set all Pokemon that were returned by running the given function
+     * on at least one Pokemon in the set. <br>
+     * @param function The function to run on all Pokemon in the set.
+     * @return Whether any Pokemon were added to the set.
+     */
+    public boolean addBuiltSetSingle(Function<? super Pokemon, Pokemon> function) {
+        PokemonSet builtSet = this.buildSetSingle(function);
+        return this.addAll(builtSet);
     }
 
-    @Override
-    public PokemonSet filterCosmetic() {
-        return new PokemonSet(super.filterCosmetic());
+    /**
+     * Adds to this set all Pokemon that were returned by running the given function
+     * on at least one Pokemon in the set. <br>
+     * @param function The function to run on all Pokemon in the set.
+     * @return Whether any Pokemon were added to the set.
+     */
+    public boolean addBuiltSet(Function<? super Pokemon, Collection<Pokemon>> function) {
+        PokemonSet builtSet = this.buildSet(function);
+        return this.addAll(builtSet);
     }
 
-    @Override
-    public PokemonSet filterNonCosmetic() {
-        return new PokemonSet(super.filterNonCosmetic());
+    /**
+     * Removes from this set all Pokemon that were returned by running the given function
+     * on at least one Pokemon in the set. <br>
+     * @param function The function to run on all Pokemon in the set.
+     * @return Whether any Pokemon were removed from the set.
+     */
+    public boolean removeBuiltSetSingle(Function<? super Pokemon, Pokemon> function) {
+        PokemonSet builtSet = this.buildSetSingle(function);
+        return this.removeAll(builtSet);
     }
 
-    //End pass-through methods
+    /**
+     * Removes from this set all Pokemon that were returned by running the given function
+     * on at least one Pokemon in the set. <br>
+     * @param function The function to run on all Pokemon in the set.
+     * @return Whether any Pokemon were removed from the set.
+     */
+    public boolean removeBuiltSet(Function<? super Pokemon, Collection<Pokemon>> function) {
+        PokemonSet builtSet = this.buildSet(function);
+        return this.removeAll(builtSet);
+    }
+
+    //End basic functions
+
+    //Type Zone
+    /**
+     * Returns every Pokemon in this set which has the given type.
+     * @param type The type to match.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return a new PokemonSet containing every Pokemon of the given type.
+     */
+    public PokemonSet filterByType(Type type, boolean useOriginal) {
+        return this.filter(p -> p.hasType(type, useOriginal));
+    }
+
+    /**
+     * Sorts all Pokemon in this set by type.
+     * Significantly faster than calling filterByType for each type.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return A Map of Pokemon sorted by type. <br>
+     * WARNING: types with no Pokemon will contain null rather than an empty set!
+     */
+    public Map<Type, PokemonSet> sortByType(boolean useOriginal) {
+        Map<Type, PokemonSet> typeMap = new EnumMap<>(Type.class);
+
+        for(Pokemon poke : this) {
+            addToTypeMap(typeMap, poke.getPrimaryType(useOriginal), poke);
+            if(poke.hasSecondaryType(useOriginal)) {
+                addToTypeMap(typeMap, poke.getSecondaryType(useOriginal), poke);
+            }
+        }
+
+        return typeMap;
+    }
+
+    /**
+     * Adds the given pokemon to the given map, creating a new PokemonSet if needed.
+     * @param type The type to add the Pokemon to.
+     * @param pokemon The Pokemon to add.
+     */
+    private void addToTypeMap(Map<Type, PokemonSet> map, Type type, Pokemon pokemon) {
+        PokemonSet typeList = map.get(type);
+
+        if(typeList == null) {
+            typeList = new PokemonSet();
+            map.put(type, typeList);
+        }
+
+        typeList.add(pokemon);
+    }
+
+    /**
+     * Finds if all Pokemon in this set share a type.
+     * If two types are shared, will return the primary type of an arbitrary Pokemon in the set,
+     * unless that type is Normal; in this case will return the secondary type.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @return The Type shared by all the pokemon, or null if none was shared.
+     */
+    public Type getSharedType(boolean useOriginal) {
+        if(this.isEmpty()) {
+            return null;
+        }
+        Iterator<Pokemon> itor = this.iterator();
+        Pokemon poke = itor.next();
+        Type primary = poke.getPrimaryType(useOriginal);
+        Type secondary = poke.getSecondaryType(useOriginal);
+
+        while(itor.hasNext()) {
+            poke = itor.next();
+            if(secondary != null) {
+                if (!poke.hasType(secondary, useOriginal)) {
+                    secondary = null;
+                }
+            }
+            if (!poke.hasType(primary, useOriginal)) {
+                primary = secondary;
+                secondary = null;
+            }
+            if (primary == null) {
+                return null; //we've determined there's no type theme, no need to run through the rest of the set.
+            }
+        }
+
+        if(primary == Type.NORMAL && secondary != null) {
+            return secondary;
+        } else {
+            return primary;
+        }
+    }
+
+    //End Type Zone
 
     //Evolution methods
 
@@ -91,7 +299,7 @@ public class PokemonSet extends GenericPokemonSet<Pokemon> {
     }
 
     /**
-     * Checks whether this set contains any evolved forms of the given Pokemon.
+     * Checks whether this set contains any directly evolved forms of the given Pokemon.
      * @param pokemon The Pokemon to check for evolutions of.
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return true if this set contains at least one evolved form of the given Pokemon, false otherwise.
@@ -107,7 +315,7 @@ public class PokemonSet extends GenericPokemonSet<Pokemon> {
     }
 
     /**
-     * Checks whether this set contains any Pokemon that can evolve into the given Pokemon.
+     * Checks whether this set contains any Pokemon that can evolve directly into the given Pokemon.
      * @param pokemon The Pokemon to check for pre-evolutions of.
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return true if this set contains at least one pre-evolved form of the given Pokemon, false otherwise.
@@ -541,6 +749,60 @@ public class PokemonSet extends GenericPokemonSet<Pokemon> {
 
     //end evolution and family methods
 
+    //Various Functions
+
+    /**
+     * Chooses a random Pokemon from the set.
+     * @param random A seeded random number generator.
+     * @return A random Pokemon from the set.
+     * @throws IllegalStateException if the set is empty.
+     */
+    public Pokemon getRandomPokemon(Random random) {
+        if(this.isEmpty()) {
+            throw new IllegalStateException("Tried to choose a random member of an empty set!");
+        }
+
+        //make sure cache state is good
+        if(randomCache == null) {
+            randomCache = new ArrayList<>(this);
+        }
+        if((double) this.size() / (double) randomCache.size() > CACHE_RESET_FACTOR)
+        {
+            randomCache = new ArrayList<>(this);
+        }
+
+        //ok, we should be good to randomize
+        while(true) {
+            int choice = random.nextInt(randomCache.size());
+            Pokemon poke = randomCache.get(choice);
+            if(!this.contains(poke)) {
+                continue;
+            }
+            return poke;
+        }
+
+    }
+
+    /**
+     * Returns all Pokemon in the set which are cosmetic formes.
+     * @return A PokemonSet containing all Pokemon in this set which are cosmetic.
+     */
+    public PokemonSet filterCosmetic() {
+        return filter(Pokemon::isActuallyCosmetic);
+    }
+
+    /**
+     * Returns all Pokemon in the set which are not cosmetic formes.
+     * @return A PokemonSet containing all Pokemon in this set which are not cosmetic.
+     */
+    public PokemonSet filterNonCosmetic() {
+        return filter(p -> !p.isActuallyCosmetic());
+    }
+
+    //End Various Functions
+    
+    //Subclass
+    
     public static PokemonSet unmodifiable(Collection<Pokemon> source) {
         return new PokemonSet.UnmodifiablePokemonSet(source);
     }
@@ -581,4 +843,6 @@ public class PokemonSet extends GenericPokemonSet<Pokemon> {
             throw new UnmodifiableSetException();
         }
     }
+    
+    //End subclass
 }

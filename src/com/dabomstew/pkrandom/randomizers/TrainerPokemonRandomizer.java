@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class TrainerPokemonRandomizer extends Randomizer {
 
-    private Map<Type, GenericPokemonSet<Pokemon>> cachedByType;
+    private Map<Type, PokemonSet> cachedByType;
     private PokemonSet cachedAll;
     private PokemonSet banned = new PokemonSet();
     private final PokemonSet usedAsUnique = new PokemonSet();
@@ -263,9 +263,9 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 typeForTrainer = trainerPokemonSpecies.getSharedType(true);
             }
 
-            GenericPokemonSet<Pokemon> evolvesIntoTheWrongType = null;
+            PokemonSet evolvesIntoTheWrongType = null;
             if (typeForTrainer != null) {
-                GenericPokemonSet<Pokemon> pokemonOfType = cachedAll.filterByType(typeForTrainer, false);
+                PokemonSet pokemonOfType = cachedAll.filterByType(typeForTrainer, false);
                 evolvesIntoTheWrongType = pokemonOfType.filter(pk ->
                         !pokemonOfType.contains(fullyEvolve(pk, t.index)));
             }
@@ -310,7 +310,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 }
                 if (willForceEvolve) {
                     if (keepThemeOrPrimaryTypes && typeForTrainer == null) {
-                        GenericPokemonSet<Pokemon> pokemonOfType =
+                        PokemonSet pokemonOfType =
                                 cachedByType.get(oldPK.getPrimaryType(true));
                         evolvesIntoTheWrongType = pokemonOfType.filter(pk ->
                                 !pokemonOfType.contains(fullyEvolve(pk, t.index)));
@@ -401,8 +401,8 @@ public class TrainerPokemonRandomizer extends Randomizer {
             cacheOrReplacement = useInsteadOfCached;
         }
 
-        GenericPokemonSet<Pokemon> pickFrom;
-        GenericPokemonSet<Pokemon> withoutBannedPokemon;
+        PokemonSet pickFrom;
+        PokemonSet withoutBannedPokemon;
 
         if (swapMegaEvos) {
             pickFrom = rPokeService.getMegaEvolutions()
@@ -423,7 +423,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
             }
         } else if (type != null && cachedByType != null) {
             // "Type Themed" settings
-            GenericPokemonSet<Pokemon> pokemonOfType;
+            PokemonSet pokemonOfType;
 
             if(useInsteadOfCached == null) {
                 if (!cachedByType.containsKey(type)) {
@@ -433,7 +433,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 }
             } else {
                 //not using the cache, so don't use the cached-by-type set
-                pokemonOfType = useInsteadOfCached.filterByType(type);
+                pokemonOfType = useInsteadOfCached.filterByType(type, false);
             }
 
             if (swapMegaEvos) {
@@ -536,11 +536,17 @@ public class TrainerPokemonRandomizer extends Randomizer {
         }
     }
 
+    /**
+     * Determines the
+     * @param noLegendaries
+     * @param allowAltFormes
+     */
     private void initTypeWeightings(boolean noLegendaries, boolean allowAltFormes) {
         // Determine weightings
+        Map<Type, PokemonSet> pokemonByType = rPokeService
+                .getPokemon(noLegendaries, allowAltFormes, true).sortByType(false);
         for (Type t : typeService.getTypes()) {
-            PokemonSet pokemonOfType = rPokeService.getPokemon(noLegendaries, allowAltFormes, true)
-                    .filterByType(t);
+            PokemonSet pokemonOfType = pokemonByType.get(t);
             int pkWithTyping = pokemonOfType.size();
             typeWeightings.put(t, pkWithTyping);
             totalTypeWeighting += pkWithTyping;
