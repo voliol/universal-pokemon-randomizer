@@ -111,7 +111,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                         if (old.restrictedPool) {
                             newPK = getRestrictedStaticPokemon(legendariesPool, legendariesLeft, old);
                         } else {
-                            newPK = legendariesLeft.getRandom(random);
+                            newPK = legendariesLeft.getRandomPokemon(random);
                             legendariesLeft.remove(newPK);
                         }
                     }
@@ -125,7 +125,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                     if (old.restrictedPool) {
                         newPK = getRestrictedStaticPokemon(ultraBeastsPool, ultraBeastsLeft, old);
                     } else {
-                        newPK = ultraBeastsLeft.getRandom(random);
+                        newPK = ultraBeastsLeft.getRandomPokemon(random);
                         ultraBeastsLeft.remove(newPK);
                     }
 
@@ -141,7 +141,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                         if (old.restrictedPool) {
                             newPK = getRestrictedStaticPokemon(nonlegsPool, nonlegsLeft, old);
                         } else {
-                            newPK = nonlegsLeft.getRandom(random);
+                            newPK = nonlegsLeft.getRandomPokemon(random);
                             nonlegsLeft.remove(newPK);
                         }
                     }
@@ -181,7 +181,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                         if (old.restrictedPool) {
                             newPK = getRestrictedStaticPokemon(pokemonPool, pokemonLeft, old);
                         } else {
-                            newPK = pokemonLeft.getRandom(random);
+                            newPK = pokemonLeft.getRandomPokemon(random);
                             pokemonLeft.remove(newPK);
                         }
                     }
@@ -264,7 +264,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                     if (old.restrictedPool) {
                         newPK = getRestrictedStaticPokemon(pokemonPool, pokemonLeft, old);
                     } else {
-                        newPK = pokemonLeft.getRandom(random);
+                        newPK = pokemonLeft.getRandomPokemon(random);
                         pokemonLeft.remove(newPK);
                     }
                 }
@@ -357,7 +357,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                             true,
                             false);
                 } else {
-                    newPK = pokemonLeft.getRandom(random);
+                    newPK = pokemonLeft.getRandomPokemon(random);
                     pokemonLeft.remove(newPK);
                 }
 
@@ -399,7 +399,7 @@ public class StaticPokemonRandomizer extends Randomizer {
                                 true,
                                 false);
                     } else {
-                        newAllyPK = pokemonLeft.getRandom(random);
+                        newAllyPK = pokemonLeft.getRandomPokemon(random);
                         pokemonLeft.remove(newAllyPK);
                     }
 
@@ -490,7 +490,7 @@ public class StaticPokemonRandomizer extends Randomizer {
         if (restrictedPool.isEmpty()) {
             restrictedPool = fullList.filter(pk -> old.restrictedList.contains(pk));
         }
-        Pokemon newPK = restrictedPool.getRandom(random);
+        Pokemon newPK = restrictedPool.getRandomPokemon(random);
         pokemonLeft.remove(newPK);
         return newPK;
     }
@@ -508,7 +508,7 @@ public class StaticPokemonRandomizer extends Randomizer {
             megaEvoPokemonLeft = new PokemonSet(megaEvoPokemon).filter(fullList::contains);
         }
 
-        Pokemon newPK = megaEvoPokemonLeft.getRandom(random);
+        Pokemon newPK = megaEvoPokemonLeft.getRandomPokemon(random);
         pokemonLeft.remove(newPK);
         newStatic.heldItem = newPK
                 .getMegaEvolutionsFrom()
@@ -537,7 +537,7 @@ public class StaticPokemonRandomizer extends Randomizer {
             maxTarget += currentBST / 20;
             expandRounds++;
         }
-        return canPick.getRandom(random);
+        return canPick.getRandomPokemon(random);
     }
 
     private void setFormeForStaticEncounter(StaticEncounter newStatic, Pokemon pk) {

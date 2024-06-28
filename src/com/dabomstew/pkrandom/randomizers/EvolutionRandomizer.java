@@ -125,7 +125,7 @@ public class EvolutionRandomizer extends Randomizer {
                         return false;
                     }
                     Pokemon picked = similarStrength ? pickEvoPowerLvlReplacement(possible, evo.getTo())
-                            : possible.getRandom(random);
+                            : possible.getRandomPokemon(random);
 
                     Evolution newEvo = prepareNewEvolution(from, evo, picked);
                     from.getEvolutionsFrom().add(newEvo);

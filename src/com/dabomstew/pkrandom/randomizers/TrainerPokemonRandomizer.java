@@ -490,18 +490,18 @@ public class TrainerPokemonRandomizer extends Randomizer {
             // is actually below the current average placement
             // if not, re-roll
 
-            Pokemon chosenPokemon = canPick.getRandomPokemon(random, false);
+            Pokemon chosenPokemon = canPick.getRandomPokemon(random);
             if (usePlacementHistory) {
                 double placementAverage = getPlacementAverage();
                 PokemonSet filteredPickList = canPick.filter(pk -> getPlacementHistory(pk) < placementAverage);
                 if (filteredPickList.isEmpty()) {
                     filteredPickList = canPick;
                 }
-                chosenPokemon = filteredPickList.getRandomPokemon(random, false);
+                chosenPokemon = filteredPickList.getRandomPokemon(random);
             }
             return chosenPokemon;
         } else {
-            return pickFrom.getRandomPokemon(random, false);
+            return pickFrom.getRandomPokemon(random);
         }
     }
 
@@ -583,7 +583,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
             throw new RandomizationException("Random evolution called on a Pokemon without any usable evolutions.");
         }
 
-        return candidates.getRandom(random);
+        return candidates.getRandomPokemon(random);
     }
 
     private int getLevelOfStarter(List<Trainer> currentTrainers, String tag) {

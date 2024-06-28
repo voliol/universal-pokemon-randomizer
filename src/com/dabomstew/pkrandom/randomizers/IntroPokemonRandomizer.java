@@ -13,9 +13,9 @@ public class IntroPokemonRandomizer extends Randomizer {
     }
 
     public void randomizeIntroPokemon() {
-        Pokemon pk = rPokeService.getAll(true).getRandom(random);
+        Pokemon pk = rPokeService.getAll(true).getRandomPokemon(random);
         while (!romHandler.setIntroPokemon(pk)) {
-            pk = rPokeService.getAll(true).getRandom(random);
+            pk = rPokeService.getAll(true).getRandomPokemon(random);
         }
     }
 }

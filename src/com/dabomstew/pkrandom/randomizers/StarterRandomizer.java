@@ -105,14 +105,14 @@ public class StarterRandomizer extends Randomizer {
 
         if (!hasTypeRestriction) {
             while (pickedStarters.size() < starterCount) {
-                Pokemon picked = choosable.getRandom(random);
+                Pokemon picked = choosable.getRandomPokemon(random);
                 pickedStarters.add(picked);
                 choosable.remove(picked);
             }
         } else if (typeUnique) {
             //we don't actually need a type map for this one
             while (pickedStarters.size() < starterCount) {
-                Pokemon picked = choosable.getRandom(random);
+                Pokemon picked = choosable.getRandomPokemon(random);
                 pickedStarters.add(picked);
                 choosable.remove(picked);
                 choosable.removeIf(p -> (p.getPrimaryType(false) == picked.getPrimaryType(false) || p.getSecondaryType(false) == picked.getPrimaryType(false)));

@@ -274,11 +274,10 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
     /**
      * Chooses a random Pokemon from the set.
      * @param random A seeded random number generator.
-     * @param removeChoice Whether to remove the chosen Pokemon from the set.
      * @return A random Pokemon from the set.
      * @throws IllegalStateException if the set is empty.
      */
-    public T getRandomPokemon(Random random, boolean removeChoice) {
+    public T getRandomPokemon(Random random) {
         if(this.isEmpty()) {
             throw new IllegalStateException("Tried to choose a random member of an empty set!");
         }
@@ -298,10 +297,6 @@ public class GenericPokemonSet<T extends Pokemon> extends HashSet<T> {
             T poke = randomCache.get(choice);
             if(!this.contains(poke)) {
                 continue;
-            }
-
-            if(removeChoice) {
-                this.remove(poke);
             }
             return poke;
         }

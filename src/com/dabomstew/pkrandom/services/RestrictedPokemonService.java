@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * {@link RomHandler#getPokemonSetInclFormes()}.
  * <br><br>
  * This class also provides {@link #randomPokemon(Random)}, to get a random Pokemon from all allowed ones.
- * To get a random Pokemon from the other sets, use {@link PokemonSet#getRandom(Random)}.
+ * To get a random Pokemon from the other sets, use {@link PokemonSet#getRandomPokemon(Random)}.
  */
 public class RestrictedPokemonService {
 
@@ -55,7 +55,7 @@ public class RestrictedPokemonService {
      * Returns a random non-alt forme Pokemon.
      */
     public Pokemon randomPokemon(Random random) {
-        return getAll(false).getRandom(random);
+        return getAll(false).getRandomPokemon(random);
     }
 
     /**
