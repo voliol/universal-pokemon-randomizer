@@ -399,8 +399,7 @@ public class Pokemon implements Comparable<Pokemon> {
      *         there are none.
      */
     public PokemonSet getRelativesAtPositionSameBranch(int position, boolean useOriginal) {
-        PokemonSet currentStage = new PokemonSet();
-        currentStage.add(this);
+        PokemonSet currentStage = new PokemonSet(this);
 
         if(position == 0) {
             return currentStage;
@@ -420,6 +419,69 @@ public class Pokemon implements Comparable<Pokemon> {
 
         return currentStage;
     }
+
+    //TODO: improve behaviour around cycles
+    //(For these and the PokemonSet versions)
+    /**
+     * Gets the maximum number of times this Pokemon can evolve into distinct Pokemon.
+     * If an evolutionary cycle is found, will count each evolution once,
+     * including the one back to the initial Pokemon.
+     * @param useOriginal Whether to use the evolution data from before randomization.
+     * @return The highest count of evolution stages after this Pokemon.
+     */
+    public int getStagesAfter(boolean useOriginal) {
+        int stages = 0;
+        PokemonSet currentStage = new PokemonSet(this);
+        PokemonSet checked = new PokemonSet();
+
+        while(!currentStage.isEmpty()) {
+            PokemonSet nextStage = new PokemonSet();
+            for(Pokemon poke : currentStage) {
+                if(checked.contains(poke)) {
+                    continue;
+                }
+                nextStage.addAll(this.getEvolvedPokemon(useOriginal));
+                checked.add(poke);
+            }
+            if(!nextStage.isEmpty()) {
+                stages++;
+            }
+            currentStage = nextStage;
+        }
+
+        return stages;
+    }
+
+    /**
+     * Gets the maximum number of times a Pokemon can evolve into distinct Pokemon before this one.
+     * If an evolutionary cycle is found, will count each evolution once,
+     * including the one back to the initial Pokemon.
+     * @param useOriginal Whether to use the evolution data from before randomization.
+     * @return The highest count of evolutionary steps before this Pokemon.
+     */
+    public int getStagesBefore(boolean useOriginal) {
+        int stages = 0;
+        PokemonSet currentStage = new PokemonSet(this);
+        PokemonSet checked = new PokemonSet();
+
+        while(!currentStage.isEmpty()) {
+            PokemonSet previousStage = new PokemonSet();
+            for(Pokemon poke : currentStage) {
+                if(checked.contains(poke)) {
+                    continue;
+                }
+                previousStage.addAll(this.getPreEvolvedPokemon(useOriginal));
+                checked.add(poke);
+            }
+            if(!previousStage.isEmpty()) {
+                stages++;
+            }
+            currentStage = previousStage;
+        }
+
+        return stages;
+    }
+
 
     /**
      * Saves certain pieces of data that can be randomized, but that
@@ -671,11 +733,15 @@ public class Pokemon implements Comparable<Pokemon> {
 
     /**
      * Checks whether either of the Pokemon's types are the given type.
+     * If the given type is null, always returns false.
      * @param type The type to check against.
      * @param useOriginal Whether to use type data from before randomization.
      * @return True if the Pokemon has the given type, false otherwise.
      */
     public boolean hasType(Type type, boolean useOriginal) {
+        if(type == null) {
+            return false;
+        }
         return getPrimaryType(useOriginal) == type || getSecondaryType(useOriginal) == type;
     }
 

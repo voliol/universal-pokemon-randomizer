@@ -26,9 +26,20 @@ public class PokemonSet extends HashSet<Pokemon> {
         super(cloneFrom);
     }
 
+    /**
+     * Creates a PokemonSet containing only the given Pokemon.
+     * @param pokemon The Pokemon to include in the set.
+     */
+    public PokemonSet(Pokemon pokemon) {
+        super();
+        this.add(pokemon);
+    }
+
     private ArrayList<Pokemon> randomCache = null;
     
     private static final double CACHE_RESET_FACTOR = 0.5;
+
+
     //How much of the cache must consist of removed Pokemon before resetting
 
     //Basic functions
@@ -502,8 +513,8 @@ public class PokemonSet extends HashSet<Pokemon> {
      * the given Pokemon.
      * For example, a Pokemon which has both a basic and a once-evolved Pokemon that can evolve into
      * it would return 2 (for the once-evolved Pokemon).
-     * If the pokemon is in an evolutionary cycle, it will count each pokemon in the cycle,
-     * including itself, once.
+     * If an evolutionary cycle is found, will count each evolution once,
+     * including the one back to the initial Pokemon.
      * @param pokemon The Pokemon to find the evolutionary count for.
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return The number of Pokemon in the longest line before this Pokemon.
@@ -538,8 +549,8 @@ public class PokemonSet extends HashSet<Pokemon> {
      * can evolve into.<br>
      * For example, a Pokemon which evolves into two Pokemon, one of which can evolve again,
      * would return 2 (for the Pokemon which can evolve again.)<br>
-     * If the pokemon is in an evolutionary cycle, it will count each pokemon in the cycle,
-     * including itself, once.
+     * If an evolutionary cycle is found, will count each evolution once,
+     * including the one back to the initial Pokemon.
      * @param pokemon The Pokemon to find the evolutionary count for.
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return The number of Pokemon in the longest line after this Pokemon.
@@ -570,8 +581,8 @@ public class PokemonSet extends HashSet<Pokemon> {
 
     /**
      * Finds the longest evolutionary line in this set that the given Pokemon belongs to. <br>
-     * If the pokemon is in an evolutionary cycle, it will count each pokemon in the cycle,
-     * including itself, once.
+     * If an evolutionary cycle is found, will count each evolution once,
+     * including the one back to the initial Pokemon.
      * @param pokemon The Pokemon to find an evolutionary line for.
      * @param useOriginal Whether to use the evolution data from before randomization.
      * @return The number of Pokemon in the longest evolutionary line, including itself.
@@ -758,6 +769,17 @@ public class PokemonSet extends HashSet<Pokemon> {
      * @throws IllegalStateException if the set is empty.
      */
     public Pokemon getRandomPokemon(Random random) {
+        return this.getRandomPokemon(random, false);
+    }
+
+    /**
+     * Chooses a random Pokemon from the set.
+     * @param random A seeded random number generator.
+     * @param removePicked Whether to remove the Pokemon chosen.
+     * @return A random Pokemon from the set.
+     * @throws IllegalStateException if the set is empty.
+     */
+    public Pokemon getRandomPokemon(Random random, boolean removePicked) {
         if(this.isEmpty()) {
             throw new IllegalStateException("Tried to choose a random member of an empty set!");
         }
@@ -777,6 +799,10 @@ public class PokemonSet extends HashSet<Pokemon> {
             Pokemon poke = randomCache.get(choice);
             if(!this.contains(poke)) {
                 continue;
+            }
+
+            if(removePicked) {
+                this.remove(poke);
             }
             return poke;
         }
