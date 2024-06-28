@@ -1231,8 +1231,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    protected Map<String, Type> getGymAndEliteTypeThemes() {
-        if(romEntry.romType == Gen5Constants.Type_BW) {
+    public Map<String, Type> getGymAndEliteTypeThemes() {
+        if(romEntry.getRomType() == Gen5Constants.Type_BW) {
             return Gen5Constants.gymAndEliteThemesBW;
         } else {
             return Gen5Constants.gymAndEliteThemesBW2;

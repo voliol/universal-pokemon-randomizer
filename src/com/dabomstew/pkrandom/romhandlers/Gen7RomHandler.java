@@ -1549,8 +1549,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected Map<String, Type> getGymAndEliteTypeThemes() {
-        if(romEntry.romType == Gen7Constants.Type_SM) {
+    public Map<String, Type> getGymAndEliteTypeThemes() {
+        if(romEntry.getRomType() == Gen7Constants.Type_SM) {
             return Gen7Constants.gymAndEliteThemesSM;
         } else {
             return Gen7Constants.gymAndEliteThemesUSUM;

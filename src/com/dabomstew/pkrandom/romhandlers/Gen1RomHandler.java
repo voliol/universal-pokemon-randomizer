@@ -1182,14 +1182,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     (!isYellow() && tr.tag.contains("RIVAL8")) || (isYellow() && tr.tag.contains("RIVAL7")))) {
                 eliteFourIndices.add(i + 1);
             }
-    @Override
-    protected Map<String, Type> getGymAndEliteTypeThemes() {
-        return Gen1Constants.gymAndEliteThemes;
-    }
-
         }
 
         return eliteFourIndices;
+    }
+
+    @Override
+    public Map<String, Type> getGymAndEliteTypeThemes() {
+        return Gen1Constants.gymAndEliteThemes;
     }
 
     @Override

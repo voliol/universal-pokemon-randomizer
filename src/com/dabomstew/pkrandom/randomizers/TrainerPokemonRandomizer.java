@@ -150,6 +150,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
                     for (Trainer t : trainersInGroup) {
                         trainerTypes.put(t, groupType);
                     }
+                    //TODO: special case for Trio gym leaders + Type Triangle starters?
                 }
 
             } else {

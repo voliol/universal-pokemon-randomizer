@@ -1161,7 +1161,15 @@ public class Gen2Constants {
             {Gen2Items.friendBall, 300},
             {Gen2Items.moonBall, 300},
             {Gen2Items.loveBall, 300},
-    }
+
+            // misc
+            {Gen2Items.moonStone, 2100}, // same as other stones
+            {Gen2Items.rareCandy, 10000}, // same as in Gen3Constants
+            {Gen2Items.sacredAsh, 10000}, // same as in Gen3Constants
+            {Gen2Items.dragonFang, 100}, // it does nothing in Gen2 due to a bug
+            {Gen2Items.normalBox, 1000}, // arbitrary. these boxes should be unobtainable, but I'm not sure
+            {Gen2Items.gorgeousBox, 1000}
+    }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
     public static final HashMap<String, Type> gymAndEliteThemes = setupGymAndEliteThemes();
 
@@ -1189,15 +1197,7 @@ public class Gen2Constants {
         themeMap.put("GYM15", Type.FIRE); //Blaine
         //Blue has no specialty and thus is not included.
         return themeMap;
+    }
 
-            // misc
-            {Gen2Items.moonStone, 2100}, // same as other stones
-            {Gen2Items.rareCandy, 10000}, // same as in Gen3Constants
-            {Gen2Items.sacredAsh, 10000}, // same as in Gen3Constants
-            {Gen2Items.dragonFang, 100}, // it does nothing in Gen2 due to a bug
-            {Gen2Items.normalBox, 1000}, // arbitrary. these boxes should be unobtainable, but I'm not sure
-            {Gen2Items.gorgeousBox, 1000},
-
-    }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
 }

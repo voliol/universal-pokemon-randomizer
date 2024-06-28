@@ -1077,7 +1077,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    protected Map<String, Type> getGymAndEliteTypeThemes() {
+    public Map<String, Type> getGymAndEliteTypeThemes() {
         return Gen2Constants.gymAndEliteThemes;
     }
 

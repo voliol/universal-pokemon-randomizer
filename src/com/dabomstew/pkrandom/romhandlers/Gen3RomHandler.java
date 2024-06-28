@@ -1703,10 +1703,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 	}
 
     @Override
-    protected Map<String, Type> getGymAndEliteTypeThemes() {
-        if(romEntry.romType == Gen3Constants.RomType_FRLG) {
+    public Map<String, Type> getGymAndEliteTypeThemes() {
+        if(romEntry.getRomType() == Gen3Constants.RomType_FRLG) {
             return Gen3Constants.gymAndEliteThemesFRLG;
-        } else if(romEntry.romType == Gen3Constants.RomType_Em) {
+        } else if(romEntry.getRomType() == Gen3Constants.RomType_Em) {
             return Gen3Constants.gymAndEliteThemesEm;
         } else {
             return Gen3Constants.gymAndEliteThemesRS;
