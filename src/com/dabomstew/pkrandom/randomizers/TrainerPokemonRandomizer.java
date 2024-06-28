@@ -150,7 +150,6 @@ public class TrainerPokemonRandomizer extends Randomizer {
                     for (Trainer t : trainersInGroup) {
                         trainerTypes.put(t, groupType);
                     }
-                    //TODO: special case for Trio gym leaders + Type Triangle starters?
                 }
 
             } else {
@@ -537,9 +536,9 @@ public class TrainerPokemonRandomizer extends Randomizer {
     }
 
     /**
-     * Determines the
-     * @param noLegendaries
-     * @param allowAltFormes
+     * Determines the ratio of types of all usable Pokemon.
+     * @param noLegendaries Whether to include legendaries.
+     * @param allowAltFormes Whether to allow alt formes.
      */
     private void initTypeWeightings(boolean noLegendaries, boolean allowAltFormes) {
         // Determine weightings
