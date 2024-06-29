@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A 2bpp image used by a Gen 1 or Gen 2 game. The GBCImage itself is a {@link BufferedImage} with an
@@ -57,7 +58,7 @@ public class GBCImage extends TiledImage {
                 throw new IllegalArgumentException("palette.size()=" + palette.size() + " exceeds max palette size "
                         + PALETTE_SIZE + ".");
             }
-            List<Integer> colors = new ArrayList<>(Arrays.stream(palette.toARGB()).boxed().toList());
+            List<Integer> colors = new ArrayList<>(Arrays.stream(palette.toARGB()).boxed().collect(Collectors.toList()));
             colors.sort((c1, c2) -> compareColors(new Color(c1), new Color(c2)));
             Palette fixed = new Palette(DEFAULT_PALETTE);
             for (int i = 0; i < colors.size(); i++) {
@@ -245,7 +246,8 @@ public class GBCImage extends TiledImage {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof GBCImage otherImage) {
+        if (other instanceof GBCImage) {
+            GBCImage otherImage = (GBCImage) other;
             return Arrays.equals(getRasterData(), otherImage.getRasterData());
         }
         return false;

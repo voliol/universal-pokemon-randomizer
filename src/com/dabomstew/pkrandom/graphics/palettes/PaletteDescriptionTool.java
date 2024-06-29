@@ -36,7 +36,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.Serial;
 import java.util.List;
 import java.util.*;
 
@@ -50,10 +49,6 @@ import java.util.*;
  */
 public class PaletteDescriptionTool extends javax.swing.JFrame {
 
-    /**
-     * 1.0
-     */
-    @Serial
     private static final long serialVersionUID = 7741836888133659367L;
 
     private static final Settings SETTINGS = new Settings();

@@ -40,10 +40,13 @@ public class RandomColorSelector {
 	}
 
 	public static double[] defaultUpperBounds(Mode mode) {
-		return switch (mode) {
-			case HSV -> new double[]{360, 1, 1};
-			case RGB -> new double[]{255, 255, 255};
-		};
+		switch (mode) {
+			case HSV:
+				return new double[]{360, 1, 1};
+			case RGB:
+				return new double[]{255, 255, 255};
+		}
+		throw new RuntimeException("Should not get here");
 	}
 
 	private final RandomPointSelector randomPointSelector;
@@ -61,10 +64,13 @@ public class RandomColorSelector {
 
 	public Color getRandomColor() {
 		double[] point = randomPointSelector.getRandomPoint();
-		return switch (mode) {
-			case RGB -> new Color((int) point[0], (int) point[1], (int) point[2]);
-			case HSV -> Color.colorFromHSV(point[0], point[1], point[2]);
-		};
+		switch (mode) {
+			case RGB:
+				return new Color((int) point[0], (int) point[1], (int) point[2]);
+			case HSV:
+				return Color.colorFromHSV(point[0], point[1], point[2]);
+		}
+		throw new RuntimeException("Should not get here");
 	}
 	
 	public Random getRandom() {
