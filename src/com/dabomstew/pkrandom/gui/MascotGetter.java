@@ -19,8 +19,8 @@ public class MascotGetter {
     public BufferedImage getMascotImage(RomHandler romHandler) {
         if (romHandler.hasPokemonImageGetter()) {
             return getMascotUsingPIG(romHandler);
-        } else if (romHandler instanceof Abstract3DSRomHandler ab3DSRomHandler) {
-            return getMascotIcon(ab3DSRomHandler);
+        } else if (romHandler instanceof Abstract3DSRomHandler) {
+            return getMascotIcon((Abstract3DSRomHandler) romHandler);
         }
         return null;
     }
@@ -31,8 +31,8 @@ public class MascotGetter {
         if (romHandler.generationOfPokemon() != 1) {
             pig = pig.setShiny(random.nextInt(10) == 0);
         }
-        if (pig instanceof AbstractDSRomHandler.DSPokemonImageGetter dsPig) {
-            pig = dsPig.setGender(random.nextInt(2));
+        if (pig instanceof AbstractDSRomHandler.DSPokemonImageGetter) {
+            pig = ((AbstractDSRomHandler.DSPokemonImageGetter) pig).setGender(random.nextInt(2));
         }
         return pig.get();
     }

@@ -23,10 +23,12 @@ package com.dabomstew.pkrandom.randomizers;
 
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.palettes.SGBPaletteID;
-import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.cueh.BasicPokemonAction;
+import com.dabomstew.pkrandom.pokemon.cueh.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Gen1Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.cueh.EvolvedPokemonAction;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.EnumMap;
@@ -71,8 +73,8 @@ public class Gen1PaletteRandomizer extends PaletteRandomizer {
 		this.typeSanity = settings.isPokemonPalettesFollowTypes();
 		boolean evolutionSanity = settings.isPokemonPalettesFollowEvolutions();
 
-		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(() ->
-				new PokemonSet(romHandler.getPokemonSet(), Gen1Pokemon.class));
+		// has to use a separate CopyUpEvolutionsHelper which works with Gen1Pokemon
+		CopyUpEvolutionsHelper<Gen1Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler::getPokemonSet);
 		cueh.apply(evolutionSanity, true, new BasePokemonIDAction(), new EvolvedPokemonIDAction());
 	}
 
@@ -85,7 +87,7 @@ public class Gen1PaletteRandomizer extends PaletteRandomizer {
 		return typeIDs == null ? DEFAULT_PALETTE_ID : typeIDs[random.nextInt(typeIDs.length)];
 	}
 
-	private class BasePokemonIDAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Gen1Pokemon> {
+	private class BasePokemonIDAction implements BasicPokemonAction<Gen1Pokemon> {
 
 		@Override
 		public void applyTo(Gen1Pokemon pk) {
@@ -94,7 +96,7 @@ public class Gen1PaletteRandomizer extends PaletteRandomizer {
 
 	}
 
-	private class EvolvedPokemonIDAction implements CopyUpEvolutionsHelper.EvolvedPokemonAction<Gen1Pokemon> {
+	private class EvolvedPokemonIDAction implements EvolvedPokemonAction<Gen1Pokemon> {
 
 		@Override
 		public void applyTo(Gen1Pokemon evFrom, Gen1Pokemon evTo, boolean toMonIsFinalEvo) {

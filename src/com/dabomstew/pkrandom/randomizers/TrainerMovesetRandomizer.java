@@ -199,10 +199,10 @@ public class TrainerMovesetRandomizer extends Randomizer {
 
                 List<Move> physicalMoves = new ArrayList<>(movesAtLevel)
                         .stream()
-                        .filter(mv -> mv.category == MoveCategory.PHYSICAL).toList();
+                        .filter(mv -> mv.category == MoveCategory.PHYSICAL).collect(Collectors.toList());
                 List<Move> specialMoves = new ArrayList<>(movesAtLevel)
                         .stream()
-                        .filter(mv -> mv.category == MoveCategory.SPECIAL).toList();
+                        .filter(mv -> mv.category == MoveCategory.SPECIAL).collect(Collectors.toList());
 
                 if (atkSpatkRatio < 1 && specialMoves.size() > 0) {
                     atkSpatkRatio = 1 / atkSpatkRatio;
@@ -245,7 +245,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
                         List<Move> requiresOtherMove = movesAtLevel
                                 .stream()
                                 .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number))
-                                .distinct().toList();
+                                .distinct().collect(Collectors.toList());
 
                         for (Move dependentMove : requiresOtherMove) {
                             boolean hasRequiredMove = false;
@@ -389,7 +389,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
 
         List<Move> requiresOtherMove = movesAtLevel
                 .stream()
-                .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number)).toList();
+                .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number)).collect(Collectors.toList());
 
         for (Move dependentMove : requiresOtherMove) {
             if (MoveSynergy.requiresOtherMove(dependentMove, movesAtLevel).isEmpty()) {
@@ -459,7 +459,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
                                 mv.category == mv2.category &&
                                 mv.priority >= mv2.priority &&
                                 mv2.power > 0 &&
-                                mv.power * mv.hitCount > mv2.power * mv2.hitCount).toList();
+                                mv.power * mv.hitCount > mv2.power * mv2.hitCount).collect(Collectors.toList());
 //                for (Move obsoleted: obsoleteThis) {
 //                    System.out.println(obsoleted.name + " obsoleted by " + mv.name);
 //                }
@@ -479,7 +479,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
                                 otherMv.power <= 0 &&
                                 otherMv.statChangeMoveType == mv.statChangeMoveType &&
                                 (otherMv.statusType == mv.statusType ||
-                                        otherMv.statusType == StatusType.NONE)).toList()) {
+                                        otherMv.statusType == StatusType.NONE)).collect(Collectors.toList())) {
                     List<Move.StatChange> statChanges2 = new ArrayList<>();
                     for (Move.StatChange sc : mv2.statChanges) {
                         if (sc.type != StatChangeType.NONE) {
@@ -491,7 +491,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
                     }
                     List<Move.StatChange> statChanges1Filtered = statChanges1
                             .stream()
-                            .filter(sc -> !statChanges2.contains(sc)).toList();
+                            .filter(sc -> !statChanges2.contains(sc)).collect(Collectors.toList());
                     statChanges2.removeAll(statChanges1);
                     if (!statChanges1Filtered.isEmpty() && statChanges2.isEmpty()) {
                         if (!GlobalConstants.cannotBeObsoletedMoves.contains(mv2.number)) {
@@ -592,7 +592,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
                         .filter(ml -> ml.level <= tp.level)
                         .filter(ml -> this.random.nextDouble() < preEvoMoveProbability)
                         .map(ml -> moves.get(ml.move))
-                        .distinct().toList());
+                        .distinct().collect(Collectors.toList()));
             }
         }
 
@@ -643,7 +643,7 @@ public class TrainerMovesetRandomizer extends Randomizer {
                 moveSelectionPoolAtLevel.addAll(allEggMoves.get(firstEvo.getNumber())
                         .stream()
                         .filter(egm -> this.random.nextDouble() < eggMoveProbability)
-                        .map(moves::get).toList());
+                        .map(moves::get).collect(Collectors.toList()));
             }
         }
 

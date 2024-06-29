@@ -1768,7 +1768,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				Gen4Constants.locationTagsTraverseOrderHGSS : Gen4Constants.locationTagsTraverseOrderDPPt;
 		return getEncounters(useTimeOfDay).stream()
 				.sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-				.toList();
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -3372,7 +3372,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Move> posMoves = moveIDs.stream().map(moveID -> moves[moveID])
 				.distinct()
 				.sorted(Comparator.comparingDouble(m -> calculateMoveStrength(m, pk)))
-				.toList();
+				.collect(Collectors.toList());
 		return posMoves.get(posMoves.size() - 1);
 	}
 
@@ -3962,19 +3962,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					if (method >= 1 && method <= Gen4Constants.evolutionMethodCount && species >= 1) {
 						EvolutionType et = Gen4Constants.evolutionTypeFromIndex(method);
 						int extraInfo = readWord(evoEntry, evo * 6 + 2);
-						Evolution evol = new Evolution(pokes[i], pokes[species], true, et, extraInfo);
+						Evolution evol = new Evolution(pokes[i], pokes[species], et, extraInfo);
 						if (!pk.getEvolutionsFrom().contains(evol)) {
 							pk.getEvolutionsFrom().add(evol);
 							pokes[species].getEvolutionsTo().add(evol);
-						}
-					}
-				}
-				// Split evos shouldn't carry stats unless the evo is Nincada's
-				// In that case, we should have Ninjask carry stats
-				if (pk.getEvolutionsFrom().size() > 1) {
-					for (Evolution e : pk.getEvolutionsFrom()) {
-						if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
-							e.setCarryStats(false);
 						}
 					}
 				}
@@ -4143,7 +4134,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 							evo.setType(EvolutionType.LEVEL_ITEM_DAY);
 							// now add an extra evo for
 							// Level up w/ Held Item at Night
-							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.LEVEL_ITEM_NIGHT,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), EvolutionType.LEVEL_ITEM_NIGHT,
 									item);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4214,7 +4205,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						} else {
 							// Add an extra evo for Happiness at Night
 							addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.HAPPINESS_NIGHT,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), EvolutionType.HAPPINESS_NIGHT,
 									0);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4230,7 +4221,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						} else {
 							// Add an extra evo for Happiness at Day
 							addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.HAPPINESS_DAY,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), EvolutionType.HAPPINESS_DAY,
 									0);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4242,7 +4233,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 								.noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_NIGHT && e.getExtraInfo() == item)) {
 							// Add an extra evo for Level w/ Item During Night
 							addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.LEVEL_ITEM_NIGHT,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), EvolutionType.LEVEL_ITEM_NIGHT,
 									item);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4254,7 +4245,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 								.noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_DAY && e.getExtraInfo() == item)) {
 							// Add an extra evo for Level w/ Item During Day
 							addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true, EvolutionType.LEVEL_ITEM_DAY,
+							Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), EvolutionType.LEVEL_ITEM_DAY,
 									item);
 							extraEvolutions.add(extraEntry);
 						}
@@ -4277,8 +4268,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public Map<Integer, Shop> getShopItems() {
 		List<String> shopNames = Gen4Constants.getShopNames(romEntry.getRomType());
-		List<Integer> mainGameShops = Arrays.stream(romEntry.getArrayValue("MainGameShops")).boxed().toList();
-		List<Integer> skipShops = Arrays.stream(romEntry.getArrayValue("SkipShops")).boxed().toList();
+		List<Integer> mainGameShops = Arrays.stream(romEntry.getArrayValue("MainGameShops")).boxed().collect(Collectors.toList());
+		List<Integer> skipShops = Arrays.stream(romEntry.getArrayValue("SkipShops")).boxed().collect(Collectors.toList());
 		int shopCount = romEntry.getIntValue("ShopCount");
 		Map<Integer, Shop> shopItemsMap = new TreeMap<>();
 		String shopDataPrefix = romEntry.getStringValue("ShopDataPrefix");

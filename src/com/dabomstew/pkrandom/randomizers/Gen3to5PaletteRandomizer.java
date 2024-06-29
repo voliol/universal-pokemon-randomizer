@@ -24,8 +24,10 @@ package com.dabomstew.pkrandom.randomizers;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.graphics.palettes.*;
-import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.cueh.BasicPokemonAction;
+import com.dabomstew.pkrandom.pokemon.cueh.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.cueh.EvolvedPokemonAction;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.io.*;
@@ -93,8 +95,7 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 			throw new RandomizationException("Could not randomize palettes, unrecognized romtype.");
 		}
 
-		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler.getPokemonSet());
-		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
+		copyUpEvolutionsHelper.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
 		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");
 		populatePokemonPalettes(paletteDescriptions);
@@ -210,7 +211,7 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 		return "src/com/dabomstew/pkrandom/graphics/resources/" + getFileName(fileKey);
 	}
 
-	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {
+	private class BasicPokemonPaletteAction implements BasicPokemonAction<Pokemon> {
 
 		@Override
 		public void applyTo(Pokemon pk) {
@@ -225,7 +226,7 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 
 	}
 
-	private class EvolvedPokemonPaletteAction implements CopyUpEvolutionsHelper.EvolvedPokemonAction<Pokemon> {
+	private class EvolvedPokemonPaletteAction implements EvolvedPokemonAction<Pokemon> {
 
 		@Override
 		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {

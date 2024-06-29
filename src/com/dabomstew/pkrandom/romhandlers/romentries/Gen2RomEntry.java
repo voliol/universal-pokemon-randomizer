@@ -51,8 +51,12 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
                     offsets[i] = IniEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
-                    case "Species" -> speciesOffsets = offsets;
-                    case "Level" -> levelOffsets = offsets;
+                    case "Species":
+                        speciesOffsets = offsets;
+                        break;
+                    case "Level":
+                        levelOffsets = offsets;
+                        break;
                 }
             }
             // the only part which differs from Gen1RomEntryReader.parseStaticPokemon()
@@ -109,7 +113,8 @@ public class Gen2RomEntry extends AbstractGBCRomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof Gen2RomEntry gen2Other) {
+        if (other instanceof Gen2RomEntry) {
+            Gen2RomEntry gen2Other = (Gen2RomEntry) other;
             if (getIntValue("CopyStaticPokemon") == 1) {
                 staticPokemon.addAll(gen2Other.staticPokemon);
                 intValues.put("StaticPokemonSupport", 1);

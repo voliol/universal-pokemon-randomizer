@@ -192,7 +192,7 @@ public class Gen5Constants {
             Species.Gen5Formes.kyuremB
     );
 
-    public static final List<Integer> emptyPlaythroughTrainers = List.of();
+    public static final List<Integer> emptyPlaythroughTrainers = Collections.emptyList();
 
     public static final List<Integer> bw1MainPlaythroughTrainers = Arrays.asList(
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -452,7 +452,7 @@ public class Gen5Constants {
         map.put(Moves.whirlpool, Arrays.asList(Items.gripClaw, Items.bindingBand));
         map.put(Moves.wrap, Arrays.asList(Items.gripClaw, Items.bindingBand));
 
-        map.put(Moves.hornLeech, List.of(Items.bigRoot));
+        map.put(Moves.hornLeech, Collections.singletonList(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
 
@@ -892,9 +892,9 @@ public class Gen5Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
 
         opShopItems = new ArrayList<>();
 
@@ -903,13 +903,13 @@ public class Gen5Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().toList());
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
     }
 
     public static ItemList getNonBadItems(int romType) {
@@ -2370,7 +2370,7 @@ public class Gen5Constants {
      * Based on
      * <a href=https://bulbapedia.bulbagarden.net/wiki/Appendix:Black_and_White_walkthrough>this walkthrough</a>.
      */
-    public static final List<String> locationTagsTraverseOrderBW = List.of(
+    public static final List<String> locationTagsTraverseOrderBW = Collections.unmodifiableList(Arrays.asList(
             "ROUTE 1", "ROUTE 2", "STRIATON CITY", "DREAMYARD", "ROUTE 3", "WELLSPRING CAVE",
             "PINWHEEL FOREST", "CASTELIA CITY", "ROUTE 4", "DESERT RESORT", "ROUTE 5", "RELIC CASTLE", "ROUTE 5",
             "DRIFTVEIL DRAWBRIDGE", "DRIFTVEIL CITY", "COLD STORAGE", "ROUTE 6", "CHARGESTONE CAVE", "ROUTE 7",
@@ -2379,12 +2379,12 @@ public class Gen5Constants {
             "CHALLENGER'S CAVE", "ROUTE 11", "VILLAGE BRIDGE", "ROUTE 12", "ROUTE 13", "GIANT CHASM",
             "UNDELLA TOWN", "UNDELLA BAY", "ROUTE 14", "ABUNDANT SHRINE", "ROUTE 15", "MARVELOUS BRIDGE", "ROUTE 16",
             "LOSTLORN FOREST"
-    );
+    ));
 
     /**
      * Same order as the in-game Pokédex Habitat List.
      */
-    public static final List<String> locationTagsTraverseOrderBW2 = List.of(
+    public static final List<String> locationTagsTraverseOrderBW2 = Collections.unmodifiableList(Arrays.asList(
             "ASPERTIA CITY", "ROUTE 19", "ROUTE 20", "FLOCCESY RANCH", "VIRBANK CITY", "VIRBANK COMPLEX",
             "CASTELIA CITY", "CASTELIA SEWERS", "ROUTE 4", "DESERT RESORT", "RELIC CASTLE", "ROUTE 5", "ROUTE 16",
             "LOSTLORN FOREST", "DRIFTVEIL DRAWBRIDGE", "ROUTE 6", "RELIC PASSAGE", "CLAY TUNNEL", "MISTRALTON CAVE",
@@ -2395,7 +2395,7 @@ public class Gen5Constants {
             "DRAGONSPIRAL TOWER", "TWIST MOUNTAIN", "PINWHEEL FOREST", "ROUTE 3", "WELLSPRING CAVE", "STRIATON CITY",
             "DREAMYARD", "ROUTE 2", "ROUTE 1", "ROUTE 17", "ROUTE 18", "P2 LABORATORY",
             "NATURE PRESERVE"
-    );
+    ));
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
         if (encounterAreas.size() != locationTags.size()) {
@@ -2410,18 +2410,21 @@ public class Gen5Constants {
     }
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
-        List<String> locationTags = switch (romType) {
-            case 0 -> (useTimeOfDay ? locationTagsUseTimeBW : locationTagsNoTimeBW);
-            case 1 -> (useTimeOfDay ? locationTagsUseTimeBW2 : locationTagsNoTimeBW2);
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
-        int[] postGameAreas = switch (romType) {
-            case 0 -> (useTimeOfDay ? bwPostGameEncounterAreasTOD : bwPostGameEncounterAreasNoTOD);
-            case 1 -> (useTimeOfDay ? b2w2PostGameEncounterAreasTOD : b2w2PostGameEncounterAreasNoTOD);
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
+        List<String> locationTags;
+        int[] postGameAreas;
+        switch (romType) {
+            case 0:
+                locationTags = (useTimeOfDay ? locationTagsUseTimeBW : locationTagsNoTimeBW);
+                postGameAreas = (useTimeOfDay ? bwPostGameEncounterAreasTOD : bwPostGameEncounterAreasNoTOD);
+                break;
+            case 1:
+                locationTags = (useTimeOfDay ? locationTagsUseTimeBW2 : locationTagsNoTimeBW2);
+                postGameAreas = (useTimeOfDay ? b2w2PostGameEncounterAreasTOD : b2w2PostGameEncounterAreasNoTOD);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value for romType: " + romType);
+        }
         tagEncounterAreas(encounterAreas, locationTags, postGameAreas);
     }
-
 
 }

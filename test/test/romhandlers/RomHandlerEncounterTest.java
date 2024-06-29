@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -705,7 +706,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         }
         PokemonSet notCatchable = new PokemonSet(allPokes);
         notCatchable.removeAll(catchable);
-        System.out.println("Not catchable: " + notCatchable.stream().map(Pokemon::getName).toList());
+        System.out.println("Not catchable: " + notCatchable.stream().map(Pokemon::getName).collect(Collectors.toList()));
         assertTrue(notCatchable.isEmpty());
     }
 

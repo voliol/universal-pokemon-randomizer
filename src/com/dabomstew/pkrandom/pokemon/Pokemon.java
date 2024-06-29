@@ -97,11 +97,6 @@ public class Pokemon implements Comparable<Pokemon> {
 
     protected List<Integer> shuffledStatsOrder;
 
-    /** A flag to use for things like recursive stats copying.
-     * Must not rely on the state of this flag being preserved between calls.
-     **/
-    public boolean temporaryFlag;
-
     public Pokemon(int number) {
         this.number = number;
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);

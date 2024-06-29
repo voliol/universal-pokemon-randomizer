@@ -35,7 +35,7 @@ public class PokeConstants {
     }
 
     private static void evolvesTo(Pokemon from, Pokemon to, boolean carrystats) {
-        Evolution evo = new Evolution(from, to, carrystats, EvolutionType.LEVEL, 0);
+        Evolution evo = new Evolution(from, to, EvolutionType.LEVEL, 0);
         from.getEvolutionsFrom().add(evo);
         to.getEvolutionsTo().add(evo);
     }

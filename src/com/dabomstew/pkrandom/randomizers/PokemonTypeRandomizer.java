@@ -4,12 +4,20 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.MegaEvolution;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.pokemon.cueh.BasicPokemonAction;
+import com.dabomstew.pkrandom.pokemon.cueh.EvolvedPokemonAction;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.List;
 import java.util.Random;
 
 public class PokemonTypeRandomizer extends Randomizer {
+
+    // "Get Secondary Type Chance"s
+    private static final double GSTC_NO_EVO = 0.5;
+    private static final double GSTC_HAS_EVO = 0.35;
+    private static final double GSTC_MIDDLE_EVO = 0.15;
+    private static final double GSTC_FINAL_EVO = 0.25;
 
     public PokemonTypeRandomizer(RomHandler romHandler, Settings settings, Random random) {
         super(romHandler, settings, random);
@@ -20,40 +28,47 @@ public class PokemonTypeRandomizer extends Randomizer {
         boolean megaEvolutionSanity = settings.isTypesFollowMegaEvolutions();
         boolean dualTypeOnly = settings.isDualTypeOnly();
 
-        PokemonSet allPokes = romHandler.getPokemonSetInclFormes();
-        copyUpEvolutionsHelper.apply(evolutionSanity, false, pk -> {
-            // Step 1: Basic or Excluded From Copying Pokemon
-            // A Basic/EFC pokemon has a 35% chance of a second type if
-            // it has an evolution that copies type/stats, a 50% chance
-            // otherwise
+        BasicPokemonAction<Pokemon> basicAction = pk -> {
             pk.setPrimaryType(typeService.randomType(random));
             pk.setSecondaryType(null);
-            if (pk.getEvolutionsFrom().size() == 1 && pk.getEvolutionsFrom().get(0).isCarryStats()) {
-                assignRandomSecondaryType(pk, 0.35, dualTypeOnly);
-            } else {
-                assignRandomSecondaryType(pk, 0.5, dualTypeOnly);
-            }
-        }, (evFrom, evTo, toMonIsFinalEvo) -> {
+            double chance = pk.getEvolutionsFrom().size() == 1 ? GSTC_HAS_EVO : GSTC_NO_EVO;
+            assignRandomSecondaryType(pk, chance, dualTypeOnly);
+        };
+        EvolvedPokemonAction<Pokemon> evolvedAction = (evFrom, evTo, toMonIsFinalEvo) -> {
             evTo.setPrimaryType(evFrom.getPrimaryType(false));
             evTo.setSecondaryType(evFrom.getSecondaryType(false));
 
             if (evTo.getSecondaryType(false) == null) {
-                double chance = toMonIsFinalEvo ? 0.25 : 0.15;
+                double chance = toMonIsFinalEvo ? GSTC_FINAL_EVO : GSTC_MIDDLE_EVO;
                 assignRandomSecondaryType(evTo, chance, dualTypeOnly);
             }
-        }, null, pk -> {
+        };
+        BasicPokemonAction<Pokemon> noEvoAction = pk -> {
             pk.setPrimaryType(typeService.randomType(random));
             pk.setSecondaryType(null);
-            assignRandomSecondaryType(pk, 0.5, dualTypeOnly);
-        });
+            assignRandomSecondaryType(pk, GSTC_NO_EVO, dualTypeOnly);
+        };
 
+        copyUpEvolutionsHelper.apply(evolutionSanity, false, basicAction, evolvedAction,
+                null, noEvoAction);
+
+        carryTypesToAltFormes();
+
+        carryTypesToMegas(megaEvolutionSanity);
+        changesMade = true;
+    }
+
+    private void carryTypesToAltFormes() {
+        PokemonSet allPokes = romHandler.getPokemonSetInclFormes();
         for (Pokemon pk : allPokes) {
             if (pk != null && pk.isActuallyCosmetic()) {
                 pk.setPrimaryType(pk.getBaseForme().getPrimaryType(false));
                 pk.setSecondaryType(pk.getBaseForme().getSecondaryType(false));
             }
         }
+    }
 
+    private void carryTypesToMegas(boolean megaEvolutionSanity) {
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = romHandler.getMegaEvolutions();
             for (MegaEvolution megaEvo: allMegaEvos) {
@@ -71,7 +86,6 @@ public class PokemonTypeRandomizer extends Randomizer {
                 }
             }
         }
-        changesMade = true;
     }
 
     private void assignRandomSecondaryType(Pokemon pk, double chance, boolean dualTypeOnly) {

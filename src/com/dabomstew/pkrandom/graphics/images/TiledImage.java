@@ -211,7 +211,8 @@ public abstract class TiledImage extends BufferedImage {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof TiledImage otherImage) {
+        if (other instanceof TiledImage) {
+            TiledImage otherImage = (TiledImage) other;
             return Arrays.equals(getRasterData(), otherImage.getRasterData());
         }
         return false;

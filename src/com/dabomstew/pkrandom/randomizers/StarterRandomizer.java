@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class StarterRandomizer extends Randomizer {
 
@@ -126,10 +127,10 @@ public class StarterRandomizer extends Randomizer {
         List<Type> typesInOrder;
         if(romHandler.generationOfPokemon() <= 2) {
             //the order is Fire, Water, Grass
-            typesInOrder = new ArrayList<>(List.of(Type.FIRE, Type.WATER, Type.GRASS));
+            typesInOrder = Arrays.asList(Type.FIRE, Type.WATER, Type.GRASS);
         } else {
             //the order is Grass, Fire, Water
-            typesInOrder = new ArrayList<>(List.of(Type.WATER, Type.GRASS, Type.FIRE));
+            typesInOrder = Arrays.asList(Type.WATER, Type.GRASS, Type.FIRE);
         }
 
         return chooseStartersOfTypes(choosableByType, typesInOrder);
@@ -206,7 +207,7 @@ public class StarterRandomizer extends Randomizer {
                 }
             }
             if (noPick) {
-                throw new RandomizationException("No valid starter of type " + Type + " found!");
+                throw new RandomizationException("No valid starter of type " + type + " found!");
             }
         }
 
@@ -318,7 +319,7 @@ public class StarterRandomizer extends Randomizer {
         List<Pokemon> romPokemon = romHandler.getPokemonInclFormes()
                 .stream()
                 .filter(pk -> pk == null || !pk.isActuallyCosmetic())
-                .toList();
+                .collect(Collectors.toList());
 
         for (int customStarter : starterIndices) {
             if (!(customStarter == 0)) {
@@ -357,7 +358,7 @@ public class StarterRandomizer extends Randomizer {
                         // It is "reverse" direction because it's used for starter generation,
                         // and the starter list expects type triangles to be this way
                         // (it's [Fire, Water, Grass] in vanilla)
-                        List<Type> triangle = new ArrayList<>(List.of(typeThree, typeTwo, typeOne));
+                        List<Type> triangle = Arrays.asList(typeThree, typeTwo, typeOne);
                         typeTriangles.add(triangle);
                     }
                 }

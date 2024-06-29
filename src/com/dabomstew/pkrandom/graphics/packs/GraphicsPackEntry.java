@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom.graphics.packs;
 
-import com.dabomstew.pkrandom.romhandlers.romentries.Gen1RomEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.IniEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.IniEntryReader;
 

@@ -42,6 +42,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * {@link RomHandler} for Gold, Silver, Crystal.
@@ -836,7 +837,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
         return getEncounters(useTimeOfDay).stream()
                 .sorted(Comparator.comparingInt(a -> Gen2Constants.locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -1857,18 +1858,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 } else {
                     extraInfo = rom[pointer + 1] & 0xFF;
                 }
-                Evolution evo = new Evolution(pokes[i], pokes[otherPoke], true, type, extraInfo);
+                Evolution evo = new Evolution(pokes[i], pokes[otherPoke], type, extraInfo);
                 if (!pkmn.getEvolutionsFrom().contains(evo)) {
                     pkmn.getEvolutionsFrom().add(evo);
                     pokes[otherPoke].getEvolutionsTo().add(evo);
                 }
                 pointer += (method == 5 ? 4 : 3);
-            }
-            // split evos don't carry stats
-            if (pkmn.getEvolutionsFrom().size() > 1) {
-                for (Evolution e : pkmn.getEvolutionsFrom()) {
-                    e.setCarryStats(false);
-                }
             }
         }
     }

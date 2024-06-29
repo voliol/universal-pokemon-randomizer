@@ -46,10 +46,11 @@ public abstract class RomEntry extends IniEntry {
 
         @Override
         protected boolean matchesCopyFromValue(T other, String value) {
-            return switch (copyFromMode) {
-                case NAME -> value.equalsIgnoreCase(other.getName());
-                case ROMCODE -> value.equals(other.getRomCode());
-            };
+            switch (copyFromMode) {
+                case NAME : return value.equalsIgnoreCase(other.getName());
+                case ROMCODE : return value.equals(other.getRomCode());
+            }
+            throw new RuntimeException("Should not get here");
         }
 
     }

@@ -131,7 +131,8 @@ public class StaticEncounter {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof StaticEncounter other) {
+        if (o instanceof StaticEncounter) {
+            StaticEncounter other = (StaticEncounter) o;
             return Objects.equals(other.pkmn, pkmn) && other.forme == forme && other.level == level
                     && other.maxLevel == maxLevel && other.isEgg == isEgg && other.resetMoves == resetMoves
                     && other.restrictedPool == restrictedPool && Objects.equals(other.restrictedList, restrictedList)

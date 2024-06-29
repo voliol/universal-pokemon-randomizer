@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -17,7 +18,47 @@ public class MoveUpdaterTest extends UpdaterTest {
 
     // all the attributes that may be changed by MoveUpdater.
     // this must of course be updated if it gets the ability to change more attributes
-    private record MoveRecord(String name, int power, int pp, double hitratio, Type type, MoveCategory category) {
+    private static class MoveRecord{
+        String name;
+        int power;
+        int pp;
+        double hitratio;
+        Type type;
+        MoveCategory category;
+
+        MoveRecord(String name, int power, int pp, double hitratio, Type type, MoveCategory category) {
+            this.name = name;
+            this.power = power;
+            this.pp = pp;
+            this.hitratio = hitratio;
+            this.type = type;
+            this.category = category;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MoveRecord that = (MoveRecord) o;
+            return power == that.power && pp == that.pp && Double.compare(that.hitratio, hitratio) == 0 && name.equals(that.name) && type == that.type && category == that.category;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, power, pp, hitratio, type, category);
+        }
+
+        @Override
+        public String toString() {
+            return "MoveRecord{" +
+                    "name='" + name + '\'' +
+                    ", power=" + power +
+                    ", pp=" + pp +
+                    ", hitratio=" + hitratio +
+                    ", type=" + type +
+                    ", category=" + category +
+                    '}';
+        }
     }
 
     @ParameterizedTest

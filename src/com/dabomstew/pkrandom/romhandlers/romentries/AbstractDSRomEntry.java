@@ -47,9 +47,15 @@ public abstract class AbstractDSRomEntry extends RomEntry {
                     entries[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]), IniEntryReader.parseInt(parts[1]));
                 }
                 switch (segments[0]) {
-                    case "Species" -> speciesEntries = entries;
-                    case "Level" -> levelEntries = entries;
-                    case "Forme" -> formeEntries = entries;
+                    case "Species":
+                        speciesEntries = entries;
+                        break;
+                    case "Level":
+                        levelEntries = entries;
+                        break;
+                    case "Forme":
+                        formeEntries = entries;
+                        break;
                 }
             }
 
@@ -168,7 +174,8 @@ public abstract class AbstractDSRomEntry extends RomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof AbstractDSRomEntry dsOther) {
+        if (other instanceof AbstractDSRomEntry) {
+            AbstractDSRomEntry dsOther = (AbstractDSRomEntry) other;
             files.putAll(dsOther.files);
             if (isCopyStaticPokemon()) {
                 staticPokemon.addAll(dsOther.staticPokemon);

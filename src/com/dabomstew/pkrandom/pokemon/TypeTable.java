@@ -9,8 +9,9 @@ import static com.dabomstew.pkrandom.pokemon.Effectiveness.*;
  */
 public class TypeTable {
 
-    private static final List<Effectiveness> VALID_EFFECTIVENESSES = List.of(Effectiveness.ZERO, HALF,
-            NEUTRAL, DOUBLE);
+    private static final List<Effectiveness> VALID_EFFECTIVENESSES = Collections.unmodifiableList(Arrays.asList(
+            ZERO, HALF, NEUTRAL, DOUBLE
+    ));
 
     // Each TypeTable has its own mapping of Types to indexes in the map.
     // This is both so the actual table only has to be types.length^2, instead of [AllTypes]^2,
@@ -24,7 +25,7 @@ public class TypeTable {
      * @param types A list of all relevant {@link Type}s.
      */
     public TypeTable(List<Type> types) {
-        if (types.stream().distinct().toList().size() != types.size()) {
+        if (types.stream().distinct().count() != types.size()) {
             throw new IllegalArgumentException("Types must be unique");
         }
         this.types = Collections.unmodifiableList(types);
@@ -230,14 +231,15 @@ public class TypeTable {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof TypeTable other) {
+        if (o instanceof TypeTable) {
+            TypeTable other = (TypeTable) o;
             return equalTypes(other) && equalEffectivenesses(other);
         }
         return false;
     }
 
     private boolean equalTypes(TypeTable other) {
-        return Set.copyOf(other.types).equals(Set.copyOf(types));
+        return new HashSet<>(other.types).equals(new HashSet<>(types));
     }
 
     private boolean equalEffectivenesses(TypeTable other) {
@@ -272,7 +274,7 @@ public class TypeTable {
         }
 
         for (int i = 0; i < 3; i+= 3) {
-            sb.append(" ".repeat(maxNameLength + 1));
+            sb.append(new String(new char[maxNameLength]).replace("\0", " "));
             for (Type defender : types) {
                 sb.append(defender.name().length() > i ? defender.name().charAt(i) : " ");
                 sb.append(defender.name().length() > i + 1 ? defender.name().charAt(i + 1) : " ");
@@ -284,7 +286,7 @@ public class TypeTable {
 
         for (Type attacker : getTypes()) {
             sb.append(attacker.name());
-            sb.append(" ".repeat(maxNameLength - attacker.name().length()));
+            sb.append(new String(new char[maxNameLength - attacker.name().length()]).replace("\0", " "));
             for (Type defender : getTypes()) {
                 sb.append("|");
                 Effectiveness eff = getEffectiveness(attacker, defender);
@@ -318,10 +320,10 @@ public class TypeTable {
         return new TypeTable(gen6PlusTypes, gen6PlusTable);
     }
 
-    private static final List<Type> gen1Types = List.of(
+    private static final List<Type> gen1Types = Collections.unmodifiableList(Arrays.asList(
             Type.NORMAL, Type.FIGHTING, Type.FLYING, Type.GRASS, Type.WATER, Type.FIRE, Type.ROCK, Type.GROUND,
             Type.PSYCHIC, Type.BUG, Type.DRAGON, Type.ELECTRIC, Type.GHOST, Type.POISON, Type.ICE
-    );
+    ));
     private static final Effectiveness[][] gen1Table = {
             /*            NORMAL,FIGHTING, FLYING,   GRASS ,   WATER,   FIRE ,   ROCK , GROUND,  PSYCHIC,   BUG  ,  DRAGON,ELECTRIC,   GHOST , POISON,   ICE  */
             /*NORMAL */ {NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    ZERO, NEUTRAL, NEUTRAL},
@@ -341,10 +343,10 @@ public class TypeTable {
             /*ICE    */ {NEUTRAL, NEUTRAL,  DOUBLE,  DOUBLE,    HALF, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL,    HALF},
     };
 
-    private static final List<Type> gen2To5Types = List.of(
+    private static final List<Type> gen2To5Types = Collections.unmodifiableList(Arrays.asList(
             Type.NORMAL, Type.FIGHTING, Type.FLYING, Type.GRASS, Type.WATER, Type.FIRE, Type.ROCK, Type.GROUND,
             Type.PSYCHIC, Type.BUG, Type.DRAGON, Type.ELECTRIC, Type.GHOST, Type.POISON, Type.ICE, Type.STEEL, Type.DARK
-    );
+    ));
     private static final Effectiveness[][] gen2To5Table = {
         /*            NORMAL,FIGHTING, FLYING,   GRASS ,   WATER,   FIRE ,   ROCK , GROUND,  PSYCHIC,   BUG  ,  DRAGON,ELECTRIC,   GHOST , POISON,   ICE  ,  STEEL ,  DARK  */
         /*NORMAL */ {NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    ZERO, NEUTRAL, NEUTRAL,    HALF, NEUTRAL},
@@ -366,11 +368,11 @@ public class TypeTable {
         /*DARK   */ {NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL,    HALF,    HALF},
     };
 
-    private static final List<Type> gen6PlusTypes = List.of(
+    private static final List<Type> gen6PlusTypes = Collections.unmodifiableList(Arrays.asList(
             Type.NORMAL, Type.FIGHTING, Type.FLYING, Type.GRASS, Type.WATER, Type.FIRE, Type.ROCK, Type.GROUND,
             Type.PSYCHIC, Type.BUG, Type.DRAGON, Type.ELECTRIC, Type.GHOST, Type.POISON, Type.ICE, Type.STEEL,
             Type.DARK, Type.FAIRY
-    );
+    ));
     private static final Effectiveness[][] gen6PlusTable = {
             /*            NORMAL,FIGHTING, FLYING,   GRASS ,   WATER,   FIRE ,   ROCK , GROUND,  PSYCHIC,   BUG  ,  DRAGON,ELECTRIC,   GHOST , POISON,   ICE  ,  STEEL ,  DARK  , FAIRY */
             /*NORMAL */ {NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    ZERO, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL},

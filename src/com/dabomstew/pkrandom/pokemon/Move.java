@@ -26,20 +26,28 @@ package com.dabomstew.pkrandom.pokemon;
 
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 
+import java.util.Objects;
+
 public class Move {
-    public class StatChange {
+
+    public static class StatChange {
         public StatChangeType type;
         public int stages;
         public double percentChance;
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof StatChange other) {
+            if (o instanceof StatChange) {
+                StatChange other = (StatChange) o;
                 return this.type == other.type && this.stages == other.stages && this.percentChance == other.percentChance;
             }
             return false;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, stages, percentChance);
+        }
     }
 
     public String name;

@@ -24,8 +24,6 @@ package com.dabomstew.pkrandom.exceptions;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.Serial;
-
 /**
  * Generic exception for various IO errors when dealing with ROMs.
  */
@@ -42,6 +40,5 @@ public class RomIOException extends RuntimeException {
         super(text, e);
     }
 
-    @Serial
     private static final long serialVersionUID = -8174099615381353972L;
 }

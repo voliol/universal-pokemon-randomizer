@@ -423,22 +423,22 @@ public class Gen3Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>();
-        map.put(Type.BUG, List.of(Gen3Items.silverPowder));
-        map.put(Type.DARK, List.of(Gen3Items.blackGlasses));
-        map.put(Type.DRAGON, List.of(Gen3Items.dragonFang));
-        map.put(Type.ELECTRIC, List.of(Gen3Items.magnet));
-        map.put(Type.FIGHTING, List.of(Gen3Items.blackBelt));
-        map.put(Type.FIRE, List.of(Gen3Items.charcoal));
-        map.put(Type.FLYING, List.of(Gen3Items.sharpBeak));
-        map.put(Type.GHOST, List.of(Gen3Items.spellTag));
-        map.put(Type.GRASS, List.of(Gen3Items.miracleSeed));
-        map.put(Type.GROUND, List.of(Gen3Items.softSand));
-        map.put(Type.ICE, List.of(Gen3Items.neverMeltIce));
-        map.put(Type.NORMAL, List.of(Gen3Items.silkScarf));
-        map.put(Type.POISON, List.of(Gen3Items.poisonBarb));
-        map.put(Type.PSYCHIC, List.of(Gen3Items.twistedSpoon));
-        map.put(Type.ROCK, List.of(Gen3Items.hardStone));
-        map.put(Type.STEEL, List.of(Gen3Items.metalCoat));
+        map.put(Type.BUG, Collections.singletonList(Gen3Items.silverPowder));
+        map.put(Type.DARK, Collections.singletonList(Gen3Items.blackGlasses));
+        map.put(Type.DRAGON, Collections.singletonList(Gen3Items.dragonFang));
+        map.put(Type.ELECTRIC, Collections.singletonList(Gen3Items.magnet));
+        map.put(Type.FIGHTING, Collections.singletonList(Gen3Items.blackBelt));
+        map.put(Type.FIRE, Collections.singletonList(Gen3Items.charcoal));
+        map.put(Type.FLYING, Collections.singletonList(Gen3Items.sharpBeak));
+        map.put(Type.GHOST, Collections.singletonList(Gen3Items.spellTag));
+        map.put(Type.GRASS, Collections.singletonList(Gen3Items.miracleSeed));
+        map.put(Type.GROUND, Collections.singletonList(Gen3Items.softSand));
+        map.put(Type.ICE, Collections.singletonList(Gen3Items.neverMeltIce));
+        map.put(Type.NORMAL, Collections.singletonList(Gen3Items.silkScarf));
+        map.put(Type.POISON, Collections.singletonList(Gen3Items.poisonBarb));
+        map.put(Type.PSYCHIC, Collections.singletonList(Gen3Items.twistedSpoon));
+        map.put(Type.ROCK, Collections.singletonList(Gen3Items.hardStone));
+        map.put(Type.STEEL, Collections.singletonList(Gen3Items.metalCoat));
         map.put(Type.WATER, Arrays.asList(Gen3Items.mysticWater, Gen3Items.seaIncense));
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
@@ -448,15 +448,15 @@ public class Gen3Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.latias, List.of(Gen3Items.soulDew));
-        map.put(Species.latios, List.of(Gen3Items.soulDew));
+        map.put(Species.latias, Collections.singletonList(Gen3Items.soulDew));
+        map.put(Species.latios, Collections.singletonList(Gen3Items.soulDew));
         map.put(Species.clamperl, Arrays.asList(Gen3Items.deepSeaTooth, Gen3Items.deepSeaScale));
-        map.put(Species.pikachu, List.of(Gen3Items.lightBall));
-        map.put(Species.chansey, List.of(Gen3Items.luckyPunch));
-        map.put(Species.ditto, List.of(Gen3Items.metalPowder));
-        map.put(Species.cubone, List.of(Gen3Items.thickClub));
-        map.put(Species.marowak, List.of(Gen3Items.thickClub));
-        map.put(Species.farfetchd, List.of(Gen3Items.stick));
+        map.put(Species.pikachu, Collections.singletonList(Gen3Items.lightBall));
+        map.put(Species.chansey, Collections.singletonList(Gen3Items.luckyPunch));
+        map.put(Species.ditto, Collections.singletonList(Gen3Items.metalPowder));
+        map.put(Species.cubone, Collections.singletonList(Gen3Items.thickClub));
+        map.put(Species.marowak, Collections.singletonList(Gen3Items.thickClub));
+        map.put(Species.farfetchd, Collections.singletonList(Gen3Items.stick));
         return Collections.unmodifiableMap(map);
     }
 
@@ -604,16 +604,16 @@ public class Gen3Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall, Gen3Items.pokeBall).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion, Gen3Items.revive).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel, Gen3Items.repel).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall, Gen3Items.pokeBall).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion, Gen3Items.revive).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel, Gen3Items.repel).boxed().collect(Collectors.toList()));
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Gen3Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom, Gen3Items.bigMushroom).boxed().toList());
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl, Gen3Items.nugget).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom, Gen3Items.bigMushroom).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl, Gen3Items.nugget).boxed().collect(Collectors.toList()));
         opShopItems.add(Gen3Items.luckyEgg);
     }
 
@@ -1100,7 +1100,7 @@ public class Gen3Constants {
             139, 140, //TRAINER TOWER
     };
 
-    public static final List<String> locationTagsRS = List.of(
+    public static final List<String> locationTagsRS = Collections.unmodifiableList(Arrays.asList(
             "PETALBURG CITY", "PETALBURG CITY",
             "SLATEPORT CITY", "SLATEPORT CITY",
             "LILYCOVE CITY", "LILYCOVE CITY",
@@ -1164,9 +1164,9 @@ public class Gen3Constants {
             "DEWFORD TOWN", "DEWFORD TOWN",
             "PACIFIDLOG TOWN", "PACIFIDLOG TOWN",
             "UNDERWATER", "UNDERWATER"
-    );
+    ));
 
-    public static final List<String> locationTagsEm = List.of(
+    public static final List<String> locationTagsEm = Collections.unmodifiableList(Arrays.asList(
             "ROUTE 101",
             "ROUTE 102", "ROUTE 102", "ROUTE 102",
             "ROUTE 103", "ROUTE 103", "ROUTE 103",
@@ -1250,9 +1250,9 @@ public class Gen3Constants {
             "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE",
             "ALTERING CAVE", "ALTERING CAVE", "ALTERING CAVE",
             "METEOR FALLS"
-    );
+    ));
 
-    public static final List<String> locationTagsFRLG = List.of(
+    public static final List<String> locationTagsFRLG = Collections.unmodifiableList(Arrays.asList(
             "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS", "TANOBY CHAMBERS",
             "TANOBY CHAMBERS", "TANOBY CHAMBERS",
             "VIRIDIAN FOREST",
@@ -1333,9 +1333,10 @@ public class Gen3Constants {
             "FIVE ISLAND", "FIVE ISLAND",
             "ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE","ALTERING CAVE",
             "ALTERING CAVE","ALTERING CAVE","ALTERING CAVE"
-    );
+    ));
 
-    public static final List<String> locationTagsTraverseOrderRSE = List.of("ROUTE 101", "ROUTE 103",
+    public static final List<String> locationTagsTraverseOrderRSE = Collections.unmodifiableList(Arrays.asList(
+            "ROUTE 101", "ROUTE 103",
             "ROUTE 102", "PETALBURG CITY", "ROUTE 104", "PETALBURG WOODS", "ROUTE 116", "RUSTURF TUNNEL",
             "DEWFORD TOWN", "GRANITE CAVE", "ROUTE 109", "SLATEPORT CITY", "ROUTE 110", "ALTERING CAVE",
             "MAUVILLE CITY", "NEW MAUVILLE", "ROUTE 117", "ROUTE 111", "MIRAGE TOWER", "ROUTE 112", "FIERY PATH",
@@ -1345,9 +1346,11 @@ public class Gen3Constants {
             "SEAFLOOR CAVERN", "ROUTE 126", "SOOTOPOLIS CITY", "CAVE OF ORIGIN", "ROUTE 129", "ROUTE 130", "ROUTE 131",
             "PACIFIDLOG TOWN", "ROUTE 132", "ROUTE 133", "ROUTE 134", "ROUTE 105", "ROUTE 106", "ROUTE 107",
             "ROUTE 108", "ABANDONED SHIP", "EVER GRANDE CITY", "VICTORY ROAD", "SKY PILLAR", "DESERT UNDERPASS",
-            "ARTISAN CAVE");
+            "ARTISAN CAVE"
+    ));
 
-    public static final List<String> locationTagsTraverseOrderFRLG = List.of("PALLET TOWN", "ROUTE 1",
+    public static final List<String> locationTagsTraverseOrderFRLG = Collections.unmodifiableList(Arrays.asList(
+            "PALLET TOWN", "ROUTE 1",
             "VIRIDIAN CITY", "ROUTE 22", "ROUTE 2", "VIRIDIAN FOREST", "ROUTE 3", "MT. MOON", "ROUTE 4",
             "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "ROUTE 6", "VERMILION CITY", "S.S. ANNE", "ROUTE 11",
             "DIGLETT'S CAVE", "ROUTE 9", "ROUTE 10", "ROCK TUNNEL", "ROUTE 8", "ROUTE 7", "CELADON CITY",
@@ -1358,7 +1361,8 @@ public class Gen3Constants {
             "ICEFALL CAVE", "WATER PATH", "GREEN PATH", "PATTERN BUSH", "RUIN VALLEY", "OUTCAST ISLAND",
             "ALTERING CAVE", "FIVE ISLAND", "FIVE ISLE MEADOW", "MEMORIAL PILLAR", "WATER LABYRINTH", "RESORT GORGEOUS",
             "LOST CAVE", "TRAINER TOWER", "CANYON ENTRANCE", "SEVAULT CANYON", "TANOBY RUINS", "TANOBY CHAMBERS",
-            "CERULEAN CAVE");
+            "CERULEAN CAVE"
+    ));
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
         if (encounterAreas.size() != locationTags.size()) {
@@ -1372,19 +1376,27 @@ public class Gen3Constants {
         }
     }
 
+
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType) {
-        List<String> locationTags = switch (romType) {
-            case 0, 1 -> locationTagsRS;
-            case 2 -> locationTagsEm;
-            case 3 -> locationTagsFRLG;
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
-        int[] postGameAreas = switch (romType) {
-            case 0, 1 -> rsPostGameEncounterAreas;
-            case 2 -> emPostGameEncounterAreas;
-            case 3 -> frlgPostGameEncounterAreas;
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
+        List<String> locationTags;
+        int[] postGameAreas;
+        switch (romType) {
+            case 0:
+            case 1:
+                locationTags = locationTagsRS;
+                postGameAreas = rsPostGameEncounterAreas;
+                break;
+            case 2:
+                locationTags = locationTagsEm;
+                postGameAreas = emPostGameEncounterAreas;
+                break;
+            case 3:
+                locationTags = locationTagsFRLG;
+                postGameAreas = frlgPostGameEncounterAreas;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value for romType: " + romType);
+        }
         tagEncounterAreas(encounterAreas, locationTags, postGameAreas);
     }
 

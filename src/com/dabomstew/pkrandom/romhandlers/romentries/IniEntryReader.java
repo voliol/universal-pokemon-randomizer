@@ -234,8 +234,11 @@ public abstract class IniEntryReader<T extends IniEntry> {
             addArrayValue(valuePair);
         } else {
             switch (defaultReadMode) {
-                case INT -> addIntValue(valuePair);
-                case STRING -> addStringValue(valuePair);
+                case INT:
+                    addIntValue(valuePair);
+                    break;
+                case STRING:
+                    addStringValue(valuePair); break;
             }
         }
     }

@@ -132,7 +132,7 @@ public class PalettePartDescription {
 	 *                 descriptions are not compatible with sibling colors.
 	 */
 	public PalettePartDescription(String unparsed) {
-		isBlank = unparsed.isBlank();
+		isBlank = unparsed.matches("\\s*");
 		List<String> tokens = splitIntoTokens(unparsed);
 		parseTokens(tokens);
 	}

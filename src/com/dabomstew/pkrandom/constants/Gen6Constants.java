@@ -427,7 +427,7 @@ public class Gen6Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>(Gen5Constants.typeBoostingItems);
-        map.put(Type.FAIRY, List.of(Items.pixiePlate));
+        map.put(Type.FAIRY, Collections.singletonList(Items.pixiePlate));
         return Collections.unmodifiableMap(map);
     }
 
@@ -435,10 +435,10 @@ public class Gen6Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen5Constants.moveBoostingItems);
-        map.put(Moves.drainingKiss, List.of(Items.bigRoot));
+        map.put(Moves.drainingKiss, Collections.singletonList(Items.bigRoot));
         map.put(Moves.infestation, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.oblivionWing, List.of(Items.bigRoot));
-        map.put(Moves.parabolicCharge, List.of(Items.bigRoot));
+        map.put(Moves.oblivionWing, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.parabolicCharge, Collections.singletonList(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
 
@@ -447,10 +447,10 @@ public class Gen6Constants {
     private static Map<Integer, List<Integer>> initializeAbilityBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen5Constants.abilityBoostingItems);
         // Weather from abilities changed in Gen VI, so these items become relevant.
-        map.put(Abilities.drizzle, List.of(Items.dampRock));
-        map.put(Abilities.drought, List.of(Items.heatRock));
-        map.put(Abilities.sandStream, List.of(Items.smoothRock));
-        map.put(Abilities.snowWarning, List.of(Items.icyRock));
+        map.put(Abilities.drizzle, Collections.singletonList(Items.dampRock));
+        map.put(Abilities.drought, Collections.singletonList(Items.heatRock));
+        map.put(Abilities.sandStream, Collections.singletonList(Items.smoothRock));
+        map.put(Abilities.snowWarning, Collections.singletonList(Items.icyRock));
         return Collections.unmodifiableMap(map);
     }
 
@@ -1004,9 +1004,9 @@ public class Gen6Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
 
         opShopItems = new ArrayList<>();
 
@@ -1015,13 +1015,13 @@ public class Gen6Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().toList());
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.blueFlute, Items.shoalShell).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
     }
 
     public static ItemList getAllowedItems(int romType) {
@@ -1359,11 +1359,18 @@ public class Gen6Constants {
     }
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType) {
-        int[] postGameAreas = switch (romType) {
-            case Type_XY -> xyPostGameEncounterAreas;
-            case Type_ORAS -> orasPostGameEncounterAreas;
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
+        int[] postGameAreas;
+        switch (romType) {
+            case Type_XY:
+                postGameAreas = xyPostGameEncounterAreas;
+                break;
+            case Type_ORAS:
+                postGameAreas = orasPostGameEncounterAreas;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value for romType: " + romType);
+        }
+        ;
         tagEncounterAreas(encounterAreas, postGameAreas);
     }
 

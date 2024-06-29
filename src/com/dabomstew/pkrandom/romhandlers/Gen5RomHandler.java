@@ -815,7 +815,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 Gen5Constants.locationTagsTraverseOrderBW : Gen5Constants.locationTagsTraverseOrderBW2;
         return getEncounters(useTimeOfDay).stream()
                 .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -1783,7 +1783,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             List<Pokemon> allowedHiddenHollowPokemon = new ArrayList<>();
             allowedHiddenHollowPokemon.addAll(Arrays.asList(Arrays.copyOfRange(pokes,1,494)));
             allowedHiddenHollowPokemon.addAll(
-                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).toList());
+                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).collect(Collectors.toList()));
 
             try {
                 NARCArchive hhNARC = this.readNARC(romEntry.getFile("HiddenHollows"));
@@ -2674,19 +2674,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         EvolutionType et = Gen5Constants.evolutionTypeFromIndex(method);
                         if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
                         int extraInfo = readWord(evoEntry, evo * 6 + 2);
-                        Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
+                        Evolution evol = new Evolution(pk, pokes[species], et, extraInfo);
                         if (!pk.getEvolutionsFrom().contains(evol)) {
                             pk.getEvolutionsFrom().add(evol);
                             pokes[species].getEvolutionsTo().add(evol);
-                        }
-                    }
-                }
-                // Split evos shouldn't carry stats unless the evo is Nincada's
-                // In that case, we should have Ninjask carry stats
-                if (pk.getEvolutionsFrom().size() > 1) {
-                    for (Evolution e : pk.getEvolutionsFrom()) {
-                        if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
-                            e.setCarryStats(false);
                         }
                     }
                 }
@@ -2810,7 +2801,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             evo.setType(EvolutionType.LEVEL_ITEM_DAY);
                             // now add an extra evo for
                             // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
                         }
@@ -2889,7 +2880,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         } else {
                             // Add an extra evo for Happiness at Night
                             addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEvolutions.add(extraEntry);
                         }
@@ -2903,7 +2894,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         } else {
                             // Add an extra evo for Happiness at Day
                             addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEvolutions.add(extraEntry);
                         }
@@ -2913,7 +2904,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         if (evo.getFrom().getEvolutionsFrom().stream().noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_NIGHT && e.getExtraInfo() == item)) {
                             // Add an extra evo for Level w/ Item During Night
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
                         }
@@ -2923,7 +2914,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         if (evo.getFrom().getEvolutionsFrom().stream().noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_DAY && e.getExtraInfo() == item)) {
                             // Add an extra evo for Level w/ Item During Day
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEvolutions.add(extraEntry);
                         }

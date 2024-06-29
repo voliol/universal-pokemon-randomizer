@@ -11,6 +11,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class EvolutionRandomizer extends Randomizer {
 
@@ -155,7 +156,7 @@ public class EvolutionRandomizer extends Randomizer {
                 // A list containing a single dummy object; ensures we always go through all Pokemon exactly once.
                 // "originalEvos" of course becomes a misnomer here, and because it is but a dummy object,
                 // it should NEVER be used except for iteration.
-                return List.of(new Evolution(from, from, false, EvolutionType.LEVEL, 0));
+                return Collections.singletonList(new Evolution(from, from, EvolutionType.LEVEL, 0));
             } else {
                 return allOriginalEvos.get(from);
             }
@@ -188,10 +189,10 @@ public class EvolutionRandomizer extends Randomizer {
         private Evolution prepareNewEvolution(Pokemon from, Evolution evo, Pokemon picked) {
             Evolution newEvo;
             if (evolveEveryLevel) {
-                newEvo = new Evolution(from, picked, false, EvolutionType.LEVEL, 1);
+                newEvo = new Evolution(from, picked, EvolutionType.LEVEL, 1);
                 newEvo.setLevel(1);
             } else {
-                newEvo = new Evolution(from, picked, evo.isCarryStats(), evo.getType(), evo.getExtraInfo());
+                newEvo = new Evolution(from, picked, evo.getType(), evo.getExtraInfo());
             }
             if (newEvo.getType() == EvolutionType.LEVEL_FEMALE_ESPURR) {
                 newEvo.setType(EvolutionType.LEVEL_FEMALE_ONLY);
@@ -251,7 +252,7 @@ public class EvolutionRandomizer extends Randomizer {
         }
 
         private boolean isAlreadyChosenAsOtherSplitEvo(Pokemon from, Pokemon to) {
-            return from.getEvolutionsFrom().stream().map(Evolution::getTo).toList().contains(to);
+            return from.getEvolutionsFrom().stream().map(Evolution::getTo).collect(Collectors.toList()).contains(to);
         }
 
         /**
@@ -263,7 +264,7 @@ public class EvolutionRandomizer extends Randomizer {
          * @return True if there is an evolution cycle, else false
          */
         private boolean createsCycle(Pokemon from, Pokemon to) {
-            Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
+            Evolution tempEvo = new Evolution(from, to, EvolutionType.NONE, 0);
             from.getEvolutionsFrom().add(tempEvo);
             Set<Pokemon> visited = new HashSet<>();
             Set<Pokemon> recStack = new HashSet<>();
@@ -333,7 +334,7 @@ public class EvolutionRandomizer extends Randomizer {
         }
 
         private boolean isAnOriginalEvo(Pokemon from, Pokemon to) {
-            boolean isAnOriginalEvo = allOriginalEvos.get(from).stream().map(Evolution::getTo).toList().contains(to);
+            boolean isAnOriginalEvo = allOriginalEvos.get(from).stream().map(Evolution::getTo).collect(Collectors.toList()).contains(to);
             // Hard-coded Cosmoem case, since the other-version evolution doesn't actually
             // exist within the game's data, but we don't want Cosmoem to evolve into Lunala in Sun, still.
             if (from.getNumber() == Species.cosmoem) {

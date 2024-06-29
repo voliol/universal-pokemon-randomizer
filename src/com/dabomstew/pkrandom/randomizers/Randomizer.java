@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.randomizers;
 
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.cueh.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.services.RestrictedPokemonService;

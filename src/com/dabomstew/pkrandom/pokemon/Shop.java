@@ -49,7 +49,8 @@ public class Shop {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Shop other) {
+        if (o instanceof Shop) {
+            Shop other = (Shop) o;
             return Objects.equals(items, other.items) && Objects.equals(name, other.name) && isMainGame == other.isMainGame;
         }
         return false;

@@ -25,14 +25,11 @@ package com.dabomstew.pkrandom.exceptions;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.Serial;
-
 public class RandomizationException extends RuntimeException {
     public RandomizationException(String text) {
         super(text);
     }
 
-    @Serial
     private static final long serialVersionUID = -771695719222719664L;
 
 }

@@ -411,7 +411,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         int extraInfo = readWord(evoEntry, evo * 8 + 2);
                         int forme = evoEntry[evo * 8 + 6];
                         int level = evoEntry[evo * 8 + 7];
-                        Evolution evol = new Evolution(pk, getPokemonForEncounter(species,forme), true, et, extraInfo);
+                        Evolution evol = new Evolution(pk, getPokemonForEncounter(species,forme), et, extraInfo);
                         evol.setForme(forme);
                         evol.setLevel(level);
                         if (et.usesLevel()) {
@@ -461,21 +461,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 // so if the Pokemon is Nincada, then let's and put it as one of its evolutions
                 if (pk.getNumber() == Species.nincada) {
                     Pokemon shedinja = pokes[Species.shedinja];
-                    Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
+                    Evolution evol = new Evolution(pk, shedinja, EvolutionType.LEVEL_IS_EXTRA, 20);
                     evol.setForme(-1);
                     evol.setLevel(20);
                     pk.getEvolutionsFrom().add(evol);
                     shedinja.getEvolutionsTo().add(evol);
-                }
-
-                // Split evos shouldn't carry stats unless the evo is Nincada's
-                // In that case, we should have Ninjask carry stats
-                if (pk.getEvolutionsFrom().size() > 1) {
-                    for (Evolution e : pk.getEvolutionsFrom()) {
-                        if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
-                            e.setCarryStats(false);
-                        }
-                    }
                 }
             }
         } catch (IOException e) {
@@ -1386,7 +1376,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // them. This code distinguishes them by appending the number of times they've appeared previously to
             // the area name.
             if (i > 0) {
-                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).toList();
+                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
                 if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
                     int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
                     String updatedLocation = goodLocationList.get(i) + " (" + (numberOfUsages + 1) + ")";
@@ -1880,7 +1870,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<TotemPokemon> totems = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
 
             // Static encounters
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
@@ -1922,7 +1912,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
             Iterator<TotemPokemon> totemIter = totemPokemon.iterator();
 
             // Static encounters
@@ -1986,8 +1976,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> skipIndices = new ArrayList<>( // Arrays.stream.toList() is immutable so we have to wrap it.
-                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList());
-            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList()));
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
 
             // Gifts, start at 3 to skip the starters
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -2128,8 +2118,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             unlinkStaticEncounters(staticPokemon);
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> skipIndices = new ArrayList<>(
-                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList());
-            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList()));
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             // Gifts, start at 3 to skip the starters
@@ -2596,7 +2586,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                             evo.setType(EvolutionType.LEVEL_ITEM_DAY);
                             // now add an extra evo for
                             // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEntry.setForme(evo.getForme());
                             extraEvolutions.add(extraEntry);
@@ -2658,12 +2648,12 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     }
                     if (romEntry.getRomType() == Gen7Constants.Type_SM) {
                         if (evo.getType() == EvolutionType.LEVEL_SNOWY) {
-                            extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL, 35);
                             extraEntry.setForme(evo.getForme());
                             addEvoUpdateCondensed(easierEvolutionUpdates, extraEntry, true);
                         } else if (evo.getType() == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
-                            extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL, 35);
                             extraEntry.setForme(evo.getForme());
                             addEvoUpdateCondensed(easierEvolutionUpdates, extraEntry, true);
@@ -2696,7 +2686,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         } else {
                             // Add an extra evo for Happiness at Night
                             addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEntry.setForme(evo.getForme());
                             extraEvolutions.add(extraEntry);
@@ -2711,7 +2701,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         } else {
                             // Add an extra evo for Happiness at Day
                             addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEntry.setForme(evo.getForme());
                             extraEvolutions.add(extraEntry);
@@ -2722,7 +2712,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         if (evo.getFrom().getEvolutionsFrom().stream().noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_NIGHT && e.getExtraInfo() == item)) {
                             // Add an extra evo for Level w/ Item During Night
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEntry.setForme(evo.getForme());
                             extraEvolutions.add(extraEntry);
@@ -2733,7 +2723,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         if (evo.getFrom().getEvolutionsFrom().stream().noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_DAY && e.getExtraInfo() == item)) {
                             // Add an extra evo for Level w/ Item During Day
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEntry.setForme(evo.getForme());
                             extraEvolutions.add(extraEntry);
