@@ -817,7 +817,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         // there is data here
                         EncounterArea thisArea = new EncounterArea();
                         thisArea.setRate(rate);
-                        thisArea.setOffset(rootOffset);
+                        thisArea.setMapIndex(rootOffset);
                         thisArea.setDisplayName((a == 1 ? "Surfing" : "Grass/Cave") + " on " + mapNames[mapID]);
                         if (mapID >= Gen1Constants.towerMapsStartIndex && mapID <= Gen1Constants.towerMapsEndIndex) {
                             thisArea.banPokemon(ghostMarowak);
@@ -834,7 +834,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 }
             } else {
                 for (EncounterArea area : encounterAreas) {
-                    if (area.getOffset() == offset) {
+                    if (area.getMapIndex() == offset) {
                         area.setDisplayName(area.getDisplayName() + ", " + mapNames[mapID]);
                     }
                 }
@@ -908,7 +908,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     usedSROffsets.add(areaOffset);
                     EncounterArea area = new EncounterArea();
                     area.setDisplayName("Super Rod Fishing on " + mapNames[map]);
-                    area.setOffset(areaOffset);
+                    area.setMapIndex(areaOffset);
                     int pokesInArea = rom[areaOffset++] & 0xFF;
                     for (int encN = 0; encN < pokesInArea; encN++) {
                         Encounter enc = new Encounter();
@@ -921,7 +921,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     encounterAreas.add(area);
                 } else {
                     for (EncounterArea area : encounterAreas) {
-                        if (area.getOffset() == areaOffset) {
+                        if (area.getMapIndex() == areaOffset) {
                             area.setDisplayName(area.getDisplayName() + ", " + mapNames[map]);
                         }
                     }

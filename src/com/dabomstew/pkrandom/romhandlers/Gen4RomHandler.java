@@ -1283,7 +1283,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				EncounterArea grassArea = new EncounterArea(readEncountersDPPt(b, 4, 12));
 				grassArea.setDisplayName(mapName + " Grass/Cave");
 				grassArea.setRate(grassRate);
-				grassArea.setOffset(c);
+				grassArea.setMapIndex(c);
 				encounterAreas.add(grassArea);
 
 				// Time of day replacements?
@@ -1305,7 +1305,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				EncounterArea condsArea = new EncounterArea();
 				condsArea.setDisplayName(mapName + " Swarm/Radar/GBA");
 				condsArea.setRate(grassRate);
-				condsArea.setOffset(c);
+				condsArea.setMapIndex(c);
 				for (int i = 0; i < 20; i++) {
 					if (i >= 2 && i <= 5) {
 						// Time of day slot, handled already
@@ -1338,7 +1338,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				EncounterArea seaArea = new EncounterArea(seaEncounters);
 				seaArea.setDisplayName(mapName + " " + Gen4Constants.dpptWaterSlotSetNames[i]);
-				seaArea.setOffset(c);
+				seaArea.setMapIndex(c);
 				seaArea.setRate(rate);
 				encounterAreas.add(seaArea);
 			}

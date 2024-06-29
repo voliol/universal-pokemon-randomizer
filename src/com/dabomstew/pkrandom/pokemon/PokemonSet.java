@@ -242,6 +242,33 @@ public class PokemonSet extends HashSet<Pokemon> {
     }
 
     /**
+     * Sorts all Pokemon in this set by type.
+     * Significantly faster than calling filterByType for each type.
+     * @param useOriginal Whether to use type data from before randomization.
+     * @param sortInto A Collection of the Types to sort by. Null values will be ignored.
+     *                 Types not contained within this collection will not be sorted by.
+     * @return A Map of Pokemon sorted by type. Every Type given will contain a PokemonSet, even if it is empty.
+     */
+    public Map<Type, PokemonSet> sortByType(boolean useOriginal, Collection<Type> sortInto) {
+        Set<Type> types = EnumSet.copyOf(sortInto);
+        Map<Type, PokemonSet> typeMap = new EnumMap<>(Type.class);
+        for(Type type : types) {
+            typeMap.put(type, new PokemonSet());
+        }
+
+        for(Pokemon poke : this) {
+            if(types.contains(poke.getPrimaryType(useOriginal))) {
+                typeMap.get(poke.getPrimaryType(useOriginal)).add(poke);
+            }
+            if(types.contains(poke.getSecondaryType(useOriginal))) {
+                typeMap.get(poke.getSecondaryType(useOriginal)).add(poke);
+            }
+        }
+
+        return typeMap;
+    }
+
+    /**
      * Finds if all Pokemon in this set share a type.
      * If two types are shared, will return the primary type of an arbitrary Pokemon in the set,
      * unless that type is Normal; in this case will return the secondary type.

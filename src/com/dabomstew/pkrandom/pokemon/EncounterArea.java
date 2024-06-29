@@ -31,9 +31,24 @@ public class EncounterArea extends ArrayList<Encounter> {
     private int rate;
     private final Set<Pokemon> bannedPokemon = new HashSet<>();
     private String displayName;
-    private int offset;
+
+    //The index of the map this area is contained in, as determined by the RomHandler.
+    //Note that not all RomHandlers currently set this variable,
+    //and of those that do, not all use it in the same way.
+    private int mapIndex;
 
     private String locationTag;
+
+    public enum EncounterType { WALKING, //e.g. grass, cave, seaweed, Horde encounters
+        SURFING, FISHING, //obvious
+        INTERACT, //e.g. headbutt trees, Rock Smash
+        AMBUSH, //e.g. flying pokemon, shaking trees
+        SPECIAL} //e.g. Poke Radar, DexNav Foreign encounter, SOS encounters
+
+    //The type of encounter this area is, as determined by the RomHandler.
+    //Note that currently, only ORAS sets this variable.
+    private EncounterType encounterType;
+
     private boolean postGame;
     // In some games, areas have both main game and post game encounters, following each other,
     // e.g. the fishing encounters in Gen 2. This attribute indicates the index for where the post game encounters
@@ -82,12 +97,12 @@ public class EncounterArea extends ArrayList<Encounter> {
         this.displayName = displayName;
     }
 
-    public int getOffset() {
-        return offset;
+    public int getMapIndex() {
+        return mapIndex;
     }
 
-    public void setOffset(int offset) {
-        this.offset = offset;
+    public void setMapIndex(int mapIndex) {
+        this.mapIndex = mapIndex;
     }
 
     public String getLocationTag() {
@@ -96,6 +111,14 @@ public class EncounterArea extends ArrayList<Encounter> {
 
     public void setLocationTag(String locationTag) {
         this.locationTag = locationTag;
+    }
+
+    public EncounterType getEncounterType() {
+        return encounterType;
+    }
+
+    public void setEncounterType(EncounterType type) {
+        this.encounterType = type;
     }
 
     public boolean isPostGame() {

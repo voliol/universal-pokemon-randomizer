@@ -75,13 +75,32 @@ public class EncounterRandomizer extends Randomizer {
         PokemonSet allowed = new PokemonSet(rPokeService.getPokemon(noLegendaries, allowAltFormes, false));
         allowed.removeAll(banned);
 
+
+
         InnerRandomizer ir = new InnerRandomizer(allowed, banned,
                 randomTypeThemes, keepTypeThemes, keepPrimaryType, catchEmAll, similarStrength, balanceShakingGrass);
         switch (mode) {
-            case RANDOM -> ir.randomEncounters(encounterAreas);
-            case AREA_MAPPING -> ir.area1to1Encounters(encounterAreas);
-            case LOCATION_MAPPING -> ir.location1to1Encounters(encounterAreas);
-            case GLOBAL_MAPPING -> ir.game1to1Encounters(encounterAreas);
+            case RANDOM:
+                if(romHandler.isORAS()) {
+                    //this mode crashes ORAS and needs special handling
+                    ir.area1to1Encounters(encounterAreas);
+                    ir.enhanceEncountersORAS(encounterAreas);
+                } else {
+                    ir.randomEncounters(encounterAreas);
+                }
+                break;
+            case AREA_MAPPING:
+                ir.area1to1Encounters(encounterAreas);
+                break;
+            case LOCATION_MAPPING:
+                ir.location1to1Encounters(encounterAreas);
+                break;
+            case GLOBAL_MAPPING:
+                ir.game1to1Encounters(encounterAreas);
+                break;
+            case FAMILY_MAPPING:
+                ir.gameFamilyToFamilyEncounters(encounterAreas);
+                break;
         }
 
         applyLevelModifier(levelModifier, encounterAreas);
@@ -152,10 +171,7 @@ public class EncounterRandomizer extends Randomizer {
             this.allowed = allowed;
             this.banned = banned;
             if (randomTypeThemes || keepTypeThemes || keepPrimaryType) {
-                this.allowedByType = new EnumMap<>(Type.class);
-                for (Type t : typeService.getTypes()) {
-                    allowedByType.put(t, allowed.filterByType(t));
-                }
+                this.allowedByType = allowed.sortByType(false, typeService.getTypes());
             }
             if (catchEmAll) {
                 refillRemainingPokemon();
@@ -223,6 +239,9 @@ public class EncounterRandomizer extends Randomizer {
         private List<EncounterArea> prepEncounterAreas(List<EncounterArea> unprepped) {
             if (useLocations) {
                 unprepped = flattenLocations(unprepped);
+            } else if (romHandler.isORAS()) {
+                //some modes crash in ORAS if the maps aren't flattened
+                unprepped = flattenEncounterTypesInMaps(unprepped);
             }
             // Shuffling the EncounterAreas leads to less predictable results for various modifiers.
             // Need to keep the original ordering around for saving though.
@@ -231,6 +250,11 @@ public class EncounterRandomizer extends Randomizer {
             return prepped;
         }
 
+        /**
+         * Given a List of EncounterAreas, merges those that have the same Location tag.
+         * @param unflattened The set of EncounterAreas to merge.
+         * @return A List of EncounterAreas with the specified areas merged.
+         */
         private List<EncounterArea> flattenLocations(List<EncounterArea> unflattened) {
             Map<String, List<EncounterArea>> grouped = groupAreasByLocation(unflattened);
             List<EncounterArea> flattenedLocations = new ArrayList<>();
@@ -243,9 +267,58 @@ public class EncounterRandomizer extends Randomizer {
             return flattenedLocations;
         }
 
+        /**
+         * Given a List of EncounterAreas, merges those that have the same map index and encounter type.
+         * @param unflattened The set of EncounterAreas to merge.
+         * @return A List of EncounterAreas with the specified areas merged.
+         */
+        private List<EncounterArea> flattenEncounterTypesInMaps(List<EncounterArea> unflattened) {
+            Map<Integer, List<EncounterArea>> grouped = groupAreasByMapIndex(unflattened);
+            List<EncounterArea> flattenedEncounters = new ArrayList<>();
+            int unnamed = 1;
+            for(List<EncounterArea> map : grouped.values()) {
+                Map<EncounterArea.EncounterType, List<EncounterArea>> mapGrouped =
+                        groupAreasByEncounterType(map);
+                String mapName = map.get(0).getLocationTag();
+                if(mapName == null) {
+                    mapName = "Unknown Map " + unnamed;
+                    unnamed++;
+                }
+                for(Map.Entry<EncounterArea.EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
+                    EncounterArea flattened = new EncounterArea();
+                    flattened.setDisplayName(mapName + typeEntry.getKey().name());
+                    typeEntry.getValue().forEach(flattened::addAll);
+                    flattenedEncounters.add(flattened);
+                }
+            }
+            return flattenedEncounters;
+        }
+
+        /**
+         * Given a List of EncounterAreas, groups those that have the same map index.
+         * @param ungrouped The set of EncounterAreas to group.
+         * @return A Map of mapIndexes to EncounterAreas.
+         */
+        private Map<Integer, List<EncounterArea>> groupAreasByMapIndex(List<EncounterArea> ungrouped) {
+            Map<Integer, List<EncounterArea>> grouped = new HashMap<>();
+            for (EncounterArea area : ungrouped) {
+                int index = area.getMapIndex();
+                if (!grouped.containsKey(index)) {
+                    grouped.put(index, new ArrayList<>());
+                }
+                grouped.get(index).add(area);
+            }
+            return grouped;
+        }
+
+        /**
+         * Given a List of EncounterAreas, groups those that have the same location tag.
+         * @param ungrouped The set of EncounterAreas to group.
+         * @return A Map of locationTags to EncounterAreas.
+         */
         private Map<String, List<EncounterArea>> groupAreasByLocation(List<EncounterArea> ungrouped) {
             Map<String, List<EncounterArea>> grouped = new HashMap<>();
-            int untagged = 0;
+            int untagged = 1;
             for (EncounterArea area : ungrouped) {
                 String tag = area.getLocationTag();
                 if (tag == null) {
@@ -256,6 +329,24 @@ public class EncounterRandomizer extends Randomizer {
                     grouped.put(tag, new ArrayList<>());
                 }
                 grouped.get(tag).add(area);
+            }
+            return grouped;
+        }
+
+        /**
+         * Given a List of EncounterAreas, groups those that have the same encounter type.
+         * @param ungrouped The set of EncounterAreas to group.
+         * @return A Map of encounterTypes to EncounterAreas.
+         */
+        private Map<EncounterArea.EncounterType, List<EncounterArea>>
+                        groupAreasByEncounterType(List<EncounterArea> ungrouped) {
+            Map<EncounterArea.EncounterType, List<EncounterArea>> grouped = new HashMap<>();
+            for (EncounterArea area : ungrouped) {
+                EncounterArea.EncounterType encType = area.getEncounterType();
+                if (!grouped.containsKey(encType)) {
+                    grouped.put(encType, new ArrayList<>());
+                }
+                grouped.get(encType).add(area);
             }
             return grouped;
         }

@@ -775,7 +775,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 List<Encounter> encounters = readEncounters(entry, startOffset + offset, amounts[i]);
                 EncounterArea area = new EncounterArea(encounters);
                 area.setRate(rate);
-                area.setOffset(idx);
+                area.setMapIndex(idx);
                 area.setDisplayName(mapName + " " + Gen5Constants.encounterTypeNames[i]);
                 encounterAreas.add(area);
             }
