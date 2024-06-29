@@ -336,7 +336,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         EvolutionType et = Gen6Constants.evolutionTypeFromIndex(method);
                         if (et.equals(EvolutionType.LEVEL_HIGH_BEAUTY)) continue; // Remove Feebas "split" evolution
                         int extraInfo = readWord(evoEntry, evo * 6 + 2);
-                        Evolution evol = new Evolution(pk, pokes[species], true, et, extraInfo);
+                        Evolution evol = new Evolution(pk, pokes[species], et, extraInfo);
                         if (!pk.getEvolutionsFrom().contains(evol)) {
                             pk.getEvolutionsFrom().add(evol);
                             if (!pk.isActuallyCosmetic()) pokes[species].getEvolutionsTo().add(evol);
@@ -347,19 +347,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 // if the Pokemon is Nincada, then let's put it as one of its evolutions
                 if (pk.getNumber() == Species.nincada) {
                     Pokemon shedinja = pokes[Species.shedinja];
-                    Evolution evol = new Evolution(pk, shedinja, false, EvolutionType.LEVEL_IS_EXTRA, 20);
+                    Evolution evol = new Evolution(pk, shedinja, EvolutionType.LEVEL_IS_EXTRA, 20);
                     pk.getEvolutionsFrom().add(evol);
                     shedinja.getEvolutionsTo().add(evol);
-                }
-
-                // Split evos shouldn't carry stats unless the evo is Nincada's
-                // In that case, we should have Ninjask carry stats
-                if (pk.getEvolutionsFrom().size() > 1) {
-                    for (Evolution e : pk.getEvolutionsFrom()) {
-                        if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
-                            e.setCarryStats(false);
-                        }
-                    }
                 }
             }
         } catch (IOException e) {
@@ -771,7 +761,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         Evolution prismScaleEvo = feebas.getEvolutionsFrom().get(0);
         Pokemon feebasEvolution = prismScaleEvo.getTo();
         int beautyNeededToEvolve = 170;
-        Evolution beautyEvolution = new Evolution(feebas, feebasEvolution, true,
+        Evolution beautyEvolution = new Evolution(feebas, feebasEvolution,
                 EvolutionType.LEVEL_HIGH_BEAUTY, beautyNeededToEvolve);
         feebas.getEvolutionsFrom().add(beautyEvolution);
         feebasEvolution.getEvolutionsTo().add(beautyEvolution);
@@ -2988,7 +2978,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                             evo.setType(EvolutionType.LEVEL_ITEM_DAY);
                             // now add an extra evo for
                             // Level up w/ Held Item at Night
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
                         }
@@ -3068,7 +3058,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         } else {
                             // Add an extra evo for Happiness at Night
                             addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.HAPPINESS_NIGHT, 0);
                             extraEvolutions.add(extraEntry);
                         }
@@ -3082,7 +3072,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         } else {
                             // Add an extra evo for Happiness at Day
                             addEvoUpdateHappiness(timeBasedEvolutionUpdates, evo);
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.HAPPINESS_DAY, 0);
                             extraEvolutions.add(extraEntry);
                         }
@@ -3092,7 +3082,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         if (evo.getFrom().getEvolutionsFrom().stream().noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_NIGHT && e.getExtraInfo() == item)) {
                             // Add an extra evo for Level w/ Item During Night
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
                         }
@@ -3102,7 +3092,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         if (evo.getFrom().getEvolutionsFrom().stream().noneMatch(e -> e.getType() == EvolutionType.LEVEL_ITEM_DAY && e.getExtraInfo() == item)) {
                             // Add an extra evo for Level w/ Item During Day
                             addEvoUpdateHeldItem(timeBasedEvolutionUpdates, evo, itemNames.get(item));
-                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(), true,
+                            Evolution extraEntry = new Evolution(evo.getFrom(), evo.getTo(),
                                     EvolutionType.LEVEL_ITEM_DAY, item);
                             extraEvolutions.add(extraEntry);
                         }

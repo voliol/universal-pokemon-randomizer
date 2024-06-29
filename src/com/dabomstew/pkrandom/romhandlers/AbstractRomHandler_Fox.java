@@ -6349,7 +6349,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
 
                         // Prevent evolution that exceeds stage limit
-                        Evolution tempEvo = new Evolution(fromPK, pk, false, EvolutionType.NONE, 0);
+                        Evolution tempEvo = new Evolution(fromPK, pk, EvolutionType.NONE, 0);
                         fromPK.evolutionsFrom.add(tempEvo);
                         pk.evolutionsTo.add(tempEvo);
                         boolean exceededLimit = false;
@@ -6430,7 +6430,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Step 4: add it to the new evos pool
-                    Evolution newEvo = new Evolution(fromPK, picked, ev.carryStats, ev.type, ev.extraInfo);
+                    Evolution newEvo = new Evolution(fromPK, picked, ev.type, ev.extraInfo);
                     boolean checkCosmetics = true;
                     if (picked.formeNumber > 0) {
                         newEvo.forme = picked.formeNumber;
@@ -6606,7 +6606,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 // Step 4: create new level 1 evo and add it to the new evos pool
-                Evolution newEvo = new Evolution(fromPK, picked, false, EvolutionType.LEVEL, 1);
+                Evolution newEvo = new Evolution(fromPK, picked, EvolutionType.LEVEL, 1);
                 newEvo.level = 1;
                 boolean checkCosmetics = true;
                 if (picked.formeNumber > 0) {
@@ -7119,7 +7119,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      * @return True if there is an evolution cycle, else false
      */
     private boolean evoCycleCheck(Pokemon from, Pokemon to) {
-        Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
+        Evolution tempEvo = new Evolution(from, to, EvolutionType.NONE, 0);
         from.evolutionsFrom.add(tempEvo);
         Set<Pokemon> visited = new HashSet<>();
         Set<Pokemon> recStack = new HashSet<>();

@@ -155,7 +155,7 @@ public class EvolutionRandomizer extends Randomizer {
                 // A list containing a single dummy object; ensures we always go through all Pokemon exactly once.
                 // "originalEvos" of course becomes a misnomer here, and because it is but a dummy object,
                 // it should NEVER be used except for iteration.
-                return List.of(new Evolution(from, from, false, EvolutionType.LEVEL, 0));
+                return List.of(new Evolution(from, from, EvolutionType.LEVEL, 0));
             } else {
                 return allOriginalEvos.get(from);
             }
@@ -188,10 +188,10 @@ public class EvolutionRandomizer extends Randomizer {
         private Evolution prepareNewEvolution(Pokemon from, Evolution evo, Pokemon picked) {
             Evolution newEvo;
             if (evolveEveryLevel) {
-                newEvo = new Evolution(from, picked, false, EvolutionType.LEVEL, 1);
+                newEvo = new Evolution(from, picked, EvolutionType.LEVEL, 1);
                 newEvo.setLevel(1);
             } else {
-                newEvo = new Evolution(from, picked, evo.isCarryStats(), evo.getType(), evo.getExtraInfo());
+                newEvo = new Evolution(from, picked, evo.getType(), evo.getExtraInfo());
             }
             if (newEvo.getType() == EvolutionType.LEVEL_FEMALE_ESPURR) {
                 newEvo.setType(EvolutionType.LEVEL_FEMALE_ONLY);
@@ -263,7 +263,7 @@ public class EvolutionRandomizer extends Randomizer {
          * @return True if there is an evolution cycle, else false
          */
         private boolean createsCycle(Pokemon from, Pokemon to) {
-            Evolution tempEvo = new Evolution(from, to, false, EvolutionType.NONE, 0);
+            Evolution tempEvo = new Evolution(from, to, EvolutionType.NONE, 0);
             from.getEvolutionsFrom().add(tempEvo);
             Set<Pokemon> visited = new HashSet<>();
             Set<Pokemon> recStack = new HashSet<>();

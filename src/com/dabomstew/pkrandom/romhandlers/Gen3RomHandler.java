@@ -2828,19 +2828,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         && evolvingTo <= numInternalPokes) {
                     int extraInfo = readWord(evoOffset + j * 8 + 2);
                     EvolutionType et = Gen3Constants.evolutionTypeFromIndex(method);
-                    Evolution evo = new Evolution(pk, pokesInternal[evolvingTo], true, et, extraInfo);
+                    Evolution evo = new Evolution(pk, pokesInternal[evolvingTo], et, extraInfo);
                     if (!pk.getEvolutionsFrom().contains(evo)) {
                         pk.getEvolutionsFrom().add(evo);
                         pokesInternal[evolvingTo].getEvolutionsTo().add(evo);
-                    }
-                }
-            }
-            // Split evos shouldn't carry stats unless the evo is Nincada's
-            // In that case, we should have Ninjask carry stats
-            if (pk.getEvolutionsFrom().size() > 1) {
-                for (Evolution e : pk.getEvolutionsFrom()) {
-                    if (e.getType() != EvolutionType.LEVEL_CREATE_EXTRA) {
-                        e.setCarryStats(false);
                     }
                 }
             }

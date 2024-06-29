@@ -25,9 +25,11 @@ import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.graphics.palettes.Color;
 import com.dabomstew.pkrandom.graphics.palettes.Gen2TypeColors;
 import com.dabomstew.pkrandom.graphics.palettes.Palette;
-import com.dabomstew.pkrandom.pokemon.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.cueh.BasicPokemonAction;
+import com.dabomstew.pkrandom.pokemon.cueh.CopyUpEvolutionsHelper;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.cueh.EvolvedPokemonAction;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.Random;
@@ -78,7 +80,7 @@ public class Gen2PaletteRandomizer extends PaletteRandomizer {
 		return palette;
 	}
 
-	private class BasicPokemonPaletteAction implements CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> {
+	private class BasicPokemonPaletteAction implements BasicPokemonAction<Pokemon> {
 
 		@Override
 		public void applyTo(Pokemon pk) {
@@ -95,7 +97,7 @@ public class Gen2PaletteRandomizer extends PaletteRandomizer {
 
 	}
 
-	private class EvolvedPokemonPaletteAction implements CopyUpEvolutionsHelper.EvolvedPokemonAction<Pokemon> {
+	private class EvolvedPokemonPaletteAction implements EvolvedPokemonAction<Pokemon> {
 
 		@Override
 		public void applyTo(Pokemon evFrom, Pokemon evTo, boolean toMonIsFinalEvo) {

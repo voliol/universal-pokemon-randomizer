@@ -2,6 +2,9 @@ package com.dabomstew.pkrandom.randomizers;
 
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.pokemon.cueh.BasicPokemonAction;
+import com.dabomstew.pkrandom.pokemon.cueh.CopyUpEvolutionsHelper;
+import com.dabomstew.pkrandom.pokemon.cueh.EvolvedPokemonAction;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.Random;
@@ -38,10 +41,10 @@ public class PokemonBaseStatRandomizer extends Randomizer {
         boolean megaEvolutionSanity = settings.isBaseStatsFollowMegaEvolutions();
         boolean assignEvoStatsRandomly = settings.isAssignEvoStatsRandomly();
 
-        CopyUpEvolutionsHelper.BasicPokemonAction<Pokemon> bpAction = pk -> pk.randomizeStatsWithinBST(random);
-        CopyUpEvolutionsHelper.EvolvedPokemonAction<Pokemon> randomEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
+        BasicPokemonAction<Pokemon> bpAction = pk -> pk.randomizeStatsWithinBST(random);
+        EvolvedPokemonAction<Pokemon> randomEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
                 .assignNewStatsForEvolution(evFrom, random);
-        CopyUpEvolutionsHelper.EvolvedPokemonAction<Pokemon> copyEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
+        EvolvedPokemonAction<Pokemon> copyEpAction = (evFrom, evTo, toMonIsFinalEvo) -> evTo
                 .copyRandomizedStatsUpEvolution(evFrom);
 
         copyUpEvolutionsHelper.apply(evolutionSanity, true, bpAction,

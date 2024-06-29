@@ -31,16 +31,13 @@ public class Evolution implements Comparable<Evolution> {
     private EvolutionType type;
     private int extraInfo;
 
-    private boolean carryStats;
-
     // only relevant for Gen 7
     private int forme;
     private int level = 0; // in generations pre gen 7, the extrainfo has the level
 
-    public Evolution(Pokemon from, Pokemon to, boolean carryStats, EvolutionType type, int extra) {
+    public Evolution(Pokemon from, Pokemon to, EvolutionType type, int extra) {
         this.from = from;
         this.to = to;
-        this.carryStats = carryStats;
         this.type = type;
         this.extraInfo = extra;
     }
@@ -83,14 +80,6 @@ public class Evolution implements Comparable<Evolution> {
 
     public void setExtraInfo(int extraInfo) {
         this.extraInfo = extraInfo;
-    }
-
-    public boolean isCarryStats() {
-        return carryStats;
-    }
-
-    public void setCarryStats(boolean carryStats) {
-        this.carryStats = carryStats;
     }
 
     public int getForme() {
@@ -148,9 +137,9 @@ public class Evolution implements Comparable<Evolution> {
     @Override
     public String toString() {
         return forme == 0 && level == 0 ?
-                String.format("(%s->%s, %s, extraInfo:%d, carryStats:%b)", from.fullName(), to.fullName(),
-                        type, extraInfo, carryStats) :
-                String.format("(%s->%s, %s, extraInfo:%d, carryStats:%b, forme:%d, level:%d)", from.fullName(), to.fullName(),
-                        type, extraInfo, carryStats, forme, level);
+                String.format("(%s->%s, %s, extraInfo:%d)", from.fullName(), to.fullName(),
+                        type, extraInfo) :
+                String.format("(%s->%s, %s, extraInfo:%d, forme:%d, level:%d)", from.fullName(), to.fullName(),
+                        type, extraInfo, forme, level);
     }
 }

@@ -424,7 +424,7 @@ public class PokemonSet extends HashSet<Pokemon> {
     /**
      * Returns all Pokemon in this set that evolve into no other Pokemon (in this set or otherwise).
      * @param useOriginal Whether to use the evolution data from before randomization.
-     * @return A PokemonSet containing all final Pokemon in this set.
+     * @return A PokemonSet containing all final-evo Pokemon in this set.
      */
     public PokemonSet filterFinalEvos(boolean useOriginal) {
         return this.filter(p -> p.getEvolvedPokemon(useOriginal).isEmpty());
@@ -444,11 +444,31 @@ public class PokemonSet extends HashSet<Pokemon> {
      * Returns all Pokemon in this set that both evolve from and to at least one other Pokemon.
      * The related Pokemon are not required to be in the set.
      * @param useOriginal Whether to use the evolution data from before randomization.
-     * @return A PokemonSet containing all non-evolving Pokemon in this set.
+     * @return A PokemonSet containing all middle-evo Pokemon in this set.
      */
     public PokemonSet filterMiddleEvos(boolean useOriginal) {
         return this.filter(p -> !p.getPreEvolvedPokemon(useOriginal).isEmpty() &&
                 !p.getEvolvedPokemon(useOriginal).isEmpty());
+    }
+
+    /**
+     * Returns all Pokemon in this set that evolve from a Pokemon which can evolve into two or more different Pokemon.
+     * The related Pokemon are not required to be in the set.
+     * @param useOriginal Whether to use the evolution data from before randomization.
+     * @return A PokemonSet containing all split-evo Pokemon in this set.
+     */
+    public PokemonSet filterSplitEvolutions(boolean useOriginal) {
+        // TODO: there was a notion in earlier code, of treating Ninjask only as a non-split evo
+        //  (or technically Pokemon which evolved through EvolutionType.LEVEL_CREATE_EXTRA).
+        //  Is this something we want to recreate?
+        return filter(p -> {
+            for (Pokemon pre : p.getPreEvolvedPokemon(useOriginal)) {
+                if (pre.getEvolvedPokemon(useOriginal).size() > 1) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     /**

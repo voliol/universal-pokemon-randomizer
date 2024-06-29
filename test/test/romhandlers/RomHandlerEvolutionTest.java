@@ -170,10 +170,10 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
             System.out.println(toStringWithTypes(pk) + " ->");
             for (Evolution evo : pk.getEvolutionsFrom()) {
                 System.out.print("\t" + toStringWithTypes(evo.getTo()));
-                if (evo.isCarryStats()) {
+                if (pk.getEvolutionsFrom().size() == 1) {
                     assertTrue(evo.getTo().hasSharedType(pk));
                 } else {
-                    System.out.print(" (no carry)");
+                    System.out.print("(split evo/no carry)");
                 }
                 System.out.println();
             }
