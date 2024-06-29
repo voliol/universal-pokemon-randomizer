@@ -62,7 +62,6 @@ public class EncounterRandomizer extends Randomizer {
         // - prep settings
         // - get encounters
         // - setup banned + allowed
-        // TODO: - do something special in ORAS, the code needed is found in old commits of AbstractRomHandler
         // - randomize inner
         // - apply level modifier
         // - set encounters
@@ -82,9 +81,8 @@ public class EncounterRandomizer extends Randomizer {
         switch (mode) {
             case RANDOM:
                 if(romHandler.isORAS()) {
-                    //this mode crashes ORAS and needs special handling
-                    ir.area1to1Encounters(encounterAreas);
-                    ir.enhanceEncountersORAS(encounterAreas);
+                    //this mode crashes ORAS and needs special handling to approximate
+                    ir.randomEncountersORAS(encounterAreas);
                 } else {
                     ir.randomEncounters(encounterAreas);
                 }
@@ -155,6 +153,9 @@ public class EncounterRandomizer extends Randomizer {
         private PokemonSet allowedForArea;
         private Map<Pokemon, Pokemon> areaMap;
         private PokemonSet allowedForReplacement;
+
+        //ORAS's DexNav will crash if the load is higher than this value.
+        final int ORAS_CRASH_THRESHOLD = 18;
 
         public InnerRandomizer(PokemonSet allowed, PokemonSet banned,
                                boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
@@ -236,6 +237,108 @@ public class EncounterRandomizer extends Randomizer {
             }
         }
 
+        /**
+         * Special case to approximate random encounters in ORAS, since they crash if the
+         * normal algorithm is used.
+         * @param encounterAreas The list of EncounterAreas to randomize.
+         */
+        private void randomEncountersORAS(List<EncounterArea> encounterAreas) {
+
+            List<EncounterArea> collapsedEncounters = flattenEncounterTypesInMaps(encounterAreas);
+            Map<Integer, List<EncounterArea>> areasByMapIndex = groupAreasByMapIndex(collapsedEncounters);
+            //Awkwardly, the grouping is run twice...
+
+            //sort out Rock Smash areas
+            List<EncounterArea> rockSmashAreas = new ArrayList<>();
+            List<EncounterArea> nonRockSmashAreas = new ArrayList<>();
+            for(Map.Entry<Integer, List<EncounterArea>> mapEntry : areasByMapIndex.entrySet()) {
+                Iterator<EncounterArea> mapIterator = mapEntry.getValue().iterator();
+                while(mapIterator.hasNext()) {
+                    EncounterArea area = mapIterator.next();
+                    if(area.getEncounterType() == EncounterArea.EncounterType.INTERACT) {
+                        //rock smash is the only INTERACT type in ORAS
+                        rockSmashAreas.add(area);
+                        mapIterator.remove();
+                    } else {
+                        nonRockSmashAreas.add(area);
+                    }
+                }
+            }
+
+            //Rock smash is not affected by the crashing, so we can run the standard RandomEncounters on it.
+            this.randomEncounters(rockSmashAreas);
+
+            //For other areas, we start with area mapping
+            this.area1to1Encounters(nonRockSmashAreas);
+            //and then see how many more Pokemon we can add
+            this.enhanceRandomEncountersORAS(areasByMapIndex);
+            //(nonRockSmashAreas and areasByMapIndex contain all the same areas, just organized differently.)
+        }
+
+        /**
+         * Given a list of areas, grouped by map index, which have already undergone area 1-to-1 mapping,
+         * adds as many distinct Pokemon to each map as possible without crashing ORAS's DexNav.
+         * @param areasByMapIndex The areas to randomize, grouped by map index.
+         */
+        private void enhanceRandomEncountersORAS(Map<Integer, List<EncounterArea>> areasByMapIndex) {
+            map1to1 = false;
+            useLocations = false;
+
+            List<Integer> mapIndices = new ArrayList<>(areasByMapIndex.keySet());
+            Collections.shuffle(mapIndices);
+
+            for(int mapIndex : mapIndices) {
+                List<EncounterArea> map = areasByMapIndex.get(mapIndex);
+
+                //set up a "queue" of encounters to randomize (to ensure loop termination)
+                Map<Integer, List<Encounter>> encountersToRandomize = new HashMap<>();
+                for(int i = 0; i < map.size(); i++) {
+                    encountersToRandomize.put(i, new ArrayList<>(map.get(i)));
+                }
+
+                while (getORASDexNavLoad(map) < ORAS_CRASH_THRESHOLD && !encountersToRandomize.isEmpty()){
+
+                    //choose a random encounter, and remove it from the "queue"
+                    int index = random.nextInt(map.size());
+                    List<Encounter> encsLeftInArea = encountersToRandomize.get(index);
+                    Encounter enc = encsLeftInArea.remove(random.nextInt(encsLeftInArea.size()));
+                    if(encsLeftInArea.isEmpty()) {
+                        encountersToRandomize.remove(index);
+                    }
+
+                    //check if there's another encounter with the same Pokemon - otherwise, this is a waste of time
+                    //(And, if we're using catchEmAll, a removal of a used Pokemon, which is bad.)
+                    boolean anotherExists = false;
+                    for(Encounter otherEnc : encsLeftInArea) {
+                        if(enc.getPokemon() == otherEnc.getPokemon()) {
+                            anotherExists = true;
+                            break;
+                        }
+                    }
+                    if(!anotherExists) {
+                        continue;
+                    }
+
+                    //now the standard replacement logic
+                    areaType = findExistingAreaType(map.get(index));
+                    allowedForArea = setupAllowedForArea();
+
+                    Pokemon replacement = pickReplacement(enc);
+                    enc.setPokemon(replacement);
+                    setFormeForEncounter(enc, replacement);
+
+                    if (catchEmAll) {
+                        removeFromRemaining(replacement);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Prepares the EncounterAreas for randomization by shuffling the order and flattening them if appropriate.
+         * @param unprepped The List of EncounterAreas to prepare.
+         * @return A new List of all the same Encounters, with the areas shuffled and possibly merged as appropriate.
+         */
         private List<EncounterArea> prepEncounterAreas(List<EncounterArea> unprepped) {
             if (useLocations) {
                 unprepped = flattenLocations(unprepped);
@@ -276,10 +379,10 @@ public class EncounterRandomizer extends Randomizer {
             Map<Integer, List<EncounterArea>> grouped = groupAreasByMapIndex(unflattened);
             List<EncounterArea> flattenedEncounters = new ArrayList<>();
             int unnamed = 1;
-            for(List<EncounterArea> map : grouped.values()) {
+            for(Map.Entry<Integer, List<EncounterArea>> mapEntry : grouped.entrySet()) {
                 Map<EncounterArea.EncounterType, List<EncounterArea>> mapGrouped =
-                        groupAreasByEncounterType(map);
-                String mapName = map.get(0).getLocationTag();
+                        groupAreasByEncounterType(mapEntry.getValue());
+                String mapName = mapEntry.getValue().get(0).getLocationTag();
                 if(mapName == null) {
                     mapName = "Unknown Map " + unnamed;
                     unnamed++;
@@ -287,6 +390,8 @@ public class EncounterRandomizer extends Randomizer {
                 for(Map.Entry<EncounterArea.EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
                     EncounterArea flattened = new EncounterArea();
                     flattened.setDisplayName(mapName + typeEntry.getKey().name());
+                    flattened.setEncounterType(typeEntry.getKey());
+                    flattened.setMapIndex(mapEntry.getKey());
                     typeEntry.getValue().forEach(flattened::addAll);
                     flattenedEncounters.add(flattened);
                 }
@@ -385,6 +490,15 @@ public class EncounterRandomizer extends Randomizer {
             return areaType;
         }
 
+        private Type findExistingAreaType(EncounterArea area) {
+            Type areaType = null;
+            if(keepTypeThemes || randomTypeThemes) {
+                PokemonSet inArea = area.getPokemonInArea();
+                areaType = inArea.getSharedType(false);
+            }
+            return areaType;
+        }
+
         private PokemonSet setupAllowedForArea() {
             if (areaType != null) {
                 return catchEmAll && !remainingByType.get(areaType).isEmpty()
@@ -392,12 +506,13 @@ public class EncounterRandomizer extends Randomizer {
             } else {
                 return catchEmAll ? remaining : allowed;
             }
+
+            //TODO: remove locally banned Pokemon
         }
 
         private Pokemon pickReplacement(Encounter enc) {
             allowedForReplacement = allowedForArea;
-            if (keepPrimaryType) {
-                //TODO: have keepThemes override keepPrimary rather than the opposite
+            if (keepPrimaryType && areaType == null) {
                 allowedForReplacement = getAllowedReplacementPreservePrimaryType(enc);
             }
 
@@ -547,6 +662,39 @@ public class EncounterRandomizer extends Randomizer {
                 expandRounds++;
             }
             return canPick.getRandomPokemon(random);
+        }
+
+        /**
+         * Given the EncounterAreas for a single map, calculates the DexNav load for that map.
+         * The DexNav crashes if this load is above ORAS_CRASH_THRESHOLD.
+         * @param areasInMap A List of EncounterAreas, all of which are from the same map.
+         * @return The DexNav load for that map.
+         */
+        private int getORASDexNavLoad(List<EncounterArea> areasInMap) {
+            //If the previous implementation is to be believed,
+            //the load is equal to the number of distinct Pokemon in each area summed.
+            //(Not the total number of unique Pokemon).
+            //I am not going to attempt to verify this (yet).
+            int load = 0;
+            for(EncounterArea area : areasInMap) {
+                if(area.getEncounterType() == EncounterArea.EncounterType.INTERACT) {
+                    //Rock Smash doesn't contribute to DexNav load.
+                    continue;
+                }
+
+                PokemonSet pokemonInArea = new PokemonSet();
+                for (Pokemon poke : area.getPokemonInArea()) {
+                    //Different formes of the same Pokemon do not contribute to load
+                    if(poke.isBaseForme()) {
+                        pokemonInArea.add(poke);
+                    } else {
+                        pokemonInArea.add(poke.getBaseForme());
+                    }
+                }
+
+                load += pokemonInArea.size();
+            }
+            return load;
         }
     }
 
