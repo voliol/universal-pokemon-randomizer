@@ -251,14 +251,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void addTrainerFrontPalettesToRomEntry() {
         int offset;
         switch (romEntry.getRomType()) {
-            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
-                    offset = Gen3Constants.rsTrainerFrontPalettesOffset;
-            case Gen3Constants.RomType_Em ->
-                    offset = Gen3Constants.emTrainerFrontPalettesOffset;
-            case Gen3Constants.RomType_FRLG ->
-                    offset = Gen3Constants.frlgTrainerFrontPalettesOffset;
-            default ->
-                    throw new RuntimeException("Invalid romType");
+            case Gen3Constants.RomType_Ruby:
+            case Gen3Constants.RomType_Sapp:
+                offset = Gen3Constants.rsTrainerFrontPalettesOffset;
+                break;
+            case Gen3Constants.RomType_Em:
+                offset = Gen3Constants.emTrainerFrontPalettesOffset;
+                break;
+            case Gen3Constants.RomType_FRLG:
+                offset = Gen3Constants.frlgTrainerFrontPalettesOffset;
+                break;
+            default:
+                throw new RuntimeException("Invalid romType");
         }
         addRelativeOffsetToRomEntry("TrainerFrontPalettes", "TrainerFrontImages", offset);
     }
@@ -266,14 +270,18 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void addTrainerBackPalettesToRomEntry() {
         int offset;
         switch (romEntry.getRomType()) {
-            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
-                    offset = Gen3Constants.rsTrainerBackPalettesOffset;
-            case Gen3Constants.RomType_Em ->
-                    offset = Gen3Constants.emTrainerBackPalettesOffset;
-            case Gen3Constants.RomType_FRLG ->
-                    offset = Gen3Constants.frlgTrainerBackPalettesOffset;
-            default ->
-                    throw new RuntimeException("Invalid romType");
+            case Gen3Constants.RomType_Ruby:
+            case Gen3Constants.RomType_Sapp:
+                offset = Gen3Constants.rsTrainerBackPalettesOffset;
+                break;
+            case Gen3Constants.RomType_Em:
+                offset = Gen3Constants.emTrainerBackPalettesOffset;
+                break;
+            case Gen3Constants.RomType_FRLG:
+                offset = Gen3Constants.frlgTrainerBackPalettesOffset;
+                break;
+            default:
+                throw new RuntimeException("Invalid romType");
         }
         addRelativeOffsetToRomEntry("TrainerBackPalettes", "TrainerBackImages", offset);
 
@@ -707,128 +715,166 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         switch (move.effectIndex) {
-            case Gen3Constants.noDamageAtkPlusOneEffect, Gen3Constants.damageUserAtkPlusOneEffect -> {
+            case Gen3Constants.noDamageAtkPlusOneEffect:
+            case Gen3Constants.damageUserAtkPlusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageDefPlusOneEffect, Gen3Constants.damageUserDefPlusOneEffect,
-                    Gen3Constants.defenseCurlEffect -> {
+            case Gen3Constants.noDamageDefPlusOneEffect:
+            case Gen3Constants.damageUserDefPlusOneEffect:
+            case Gen3Constants.defenseCurlEffect: {
                 move.statChanges[0].type = StatChangeType.DEFENSE;
                 move.statChanges[0].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageSpAtkPlusOneEffect, Gen3Constants.flatterEffect -> {
+            case Gen3Constants.noDamageSpAtkPlusOneEffect:
+            case Gen3Constants.flatterEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
                 move.statChanges[0].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageEvasionPlusOneEffect, Gen3Constants.minimizeEffect -> {
+            case Gen3Constants.noDamageEvasionPlusOneEffect:
+            case Gen3Constants.minimizeEffect: {
                 move.statChanges[0].type = StatChangeType.EVASION;
                 move.statChanges[0].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageAtkMinusOneEffect, Gen3Constants.damageAtkMinusOneEffect -> {
+            case Gen3Constants.noDamageAtkMinusOneEffect:
+            case Gen3Constants.damageAtkMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.noDamageDefMinusOneEffect, Gen3Constants.damageDefMinusOneEffect -> {
+            case Gen3Constants.noDamageDefMinusOneEffect:
+            case Gen3Constants.damageDefMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.DEFENSE;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.noDamageSpeMinusOneEffect, Gen3Constants.damageSpeMinusOneEffect -> {
+            case Gen3Constants.noDamageSpeMinusOneEffect:
+            case Gen3Constants.damageSpeMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.SPEED;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.noDamageAccuracyMinusOneEffect, Gen3Constants.damageAccuracyMinusOneEffect -> {
+            case Gen3Constants.noDamageAccuracyMinusOneEffect:
+            case Gen3Constants.damageAccuracyMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ACCURACY;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.noDamageEvasionMinusOneEffect -> {
+            case Gen3Constants.noDamageEvasionMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.EVASION;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.noDamageAtkPlusTwoEffect, Gen3Constants.swaggerEffect -> {
+            case Gen3Constants.noDamageAtkPlusTwoEffect:
+            case Gen3Constants.swaggerEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = 2;
+                break;
             }
-            case Gen3Constants.noDamageDefPlusTwoEffect -> {
+            case Gen3Constants.noDamageDefPlusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.DEFENSE;
                 move.statChanges[0].stages = 2;
+                break;
             }
-            case Gen3Constants.noDamageSpePlusTwoEffect -> {
+            case Gen3Constants.noDamageSpePlusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.SPEED;
                 move.statChanges[0].stages = 2;
+                break;
             }
-            case Gen3Constants.noDamageSpAtkPlusTwoEffect -> {
+            case Gen3Constants.noDamageSpAtkPlusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
                 move.statChanges[0].stages = 2;
+                break;
             }
-            case Gen3Constants.noDamageSpDefPlusTwoEffect -> {
+            case Gen3Constants.noDamageSpDefPlusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
                 move.statChanges[0].stages = 2;
+                break;
             }
-            case Gen3Constants.noDamageAtkMinusTwoEffect -> {
+            case Gen3Constants.noDamageAtkMinusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = -2;
+                break;
             }
-            case Gen3Constants.noDamageDefMinusTwoEffect -> {
+            case Gen3Constants.noDamageDefMinusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.DEFENSE;
                 move.statChanges[0].stages = -2;
+                break;
             }
-            case Gen3Constants.noDamageSpeMinusTwoEffect -> {
+            case Gen3Constants.noDamageSpeMinusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.SPEED;
                 move.statChanges[0].stages = -2;
+                break;
             }
-            case Gen3Constants.noDamageSpDefMinusTwoEffect -> {
+            case Gen3Constants.noDamageSpDefMinusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
                 move.statChanges[0].stages = -2;
+                break;
             }
-            case Gen3Constants.damageSpAtkMinusOneEffect -> {
+            case Gen3Constants.damageSpAtkMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.damageSpDefMinusOneEffect -> {
+            case Gen3Constants.damageSpDefMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
                 move.statChanges[0].stages = -1;
+                break;
             }
-            case Gen3Constants.damageUserAllPlusOneEffect -> {
+            case Gen3Constants.damageUserAllPlusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ALL;
                 move.statChanges[0].stages = 1;
+                break;
             }
-            case Gen3Constants.chargeEffect -> {
+            case Gen3Constants.chargeEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
                 move.statChanges[0].stages = 1;
+                break;
             }
-            case Gen3Constants.damageUserAtkAndDefMinusOneEffect, Gen3Constants.noDamageAtkAndDefMinusOneEffect -> {
+            case Gen3Constants.damageUserAtkAndDefMinusOneEffect:
+            case Gen3Constants.noDamageAtkAndDefMinusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = -1;
                 move.statChanges[1].type = StatChangeType.DEFENSE;
                 move.statChanges[1].stages = -1;
+                break;
             }
-            case Gen3Constants.damageUserSpAtkMinusTwoEffect -> {
+            case Gen3Constants.damageUserSpAtkMinusTwoEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
                 move.statChanges[0].stages = -2;
+                break;
             }
-            case Gen3Constants.noDamageDefAndSpDefPlusOneEffect -> {
+            case Gen3Constants.noDamageDefAndSpDefPlusOneEffect: {
                 move.statChanges[0].type = StatChangeType.DEFENSE;
                 move.statChanges[0].stages = 1;
                 move.statChanges[1].type = StatChangeType.SPECIAL_DEFENSE;
                 move.statChanges[1].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageAtkAndDefPlusOneEffect -> {
+            case Gen3Constants.noDamageAtkAndDefPlusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = 1;
                 move.statChanges[1].type = StatChangeType.DEFENSE;
                 move.statChanges[1].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageSpAtkAndSpDefPlusOneEffect -> {
+            case Gen3Constants.noDamageSpAtkAndSpDefPlusOneEffect: {
                 move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
                 move.statChanges[0].stages = 1;
                 move.statChanges[1].type = StatChangeType.SPECIAL_DEFENSE;
                 move.statChanges[1].stages = 1;
+                break;
             }
-            case Gen3Constants.noDamageAtkAndSpePlusOneEffect -> {
+            case Gen3Constants.noDamageAtkAndSpePlusOneEffect: {
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = 1;
                 move.statChanges[1].type = StatChangeType.SPEED;
                 move.statChanges[1].stages = 1;
+                break;
             }
         }
 
@@ -886,20 +932,40 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         }
 
         switch (move.effectIndex) {
-            case Gen3Constants.noDamageSleepEffect -> move.statusType = StatusType.SLEEP;
-            case Gen3Constants.damagePoisonEffect, Gen3Constants.noDamagePoisonEffect, Gen3Constants.twineedleEffect,
-                    Gen3Constants.poisonTailEffect ->
-                    move.statusType = StatusType.POISON;
-            case Gen3Constants.damageBurnEffect, Gen3Constants.damageBurnAndThawUserEffect,
-                    Gen3Constants.noDamageBurnEffect, Gen3Constants.blazeKickEffect ->
-                    move.statusType = StatusType.BURN;
-            case Gen3Constants.damageFreezeEffect -> move.statusType = StatusType.FREEZE;
-            case Gen3Constants.damageParalyzeEffect, Gen3Constants.noDamageParalyzeEffect, Gen3Constants.thunderEffect ->
-                    move.statusType = StatusType.PARALYZE;
-            case Gen3Constants.toxicEffect, Gen3Constants.poisonFangEffect -> move.statusType = StatusType.TOXIC_POISON;
-            case Gen3Constants.noDamageConfusionEffect, Gen3Constants.damageConfusionEffect,
-                    Gen3Constants.swaggerEffect, Gen3Constants.flatterEffect, Gen3Constants.teeterDanceEffect ->
-                    move.statusType = StatusType.CONFUSION;
+            case Gen3Constants.noDamageSleepEffect:
+                move.statusType = StatusType.SLEEP;
+                break;
+            case Gen3Constants.damagePoisonEffect:
+            case Gen3Constants.noDamagePoisonEffect:
+            case Gen3Constants.twineedleEffect:
+            case Gen3Constants.poisonTailEffect:
+                move.statusType = StatusType.POISON;
+                break;
+            case Gen3Constants.damageBurnEffect:
+            case Gen3Constants.damageBurnAndThawUserEffect:
+            case Gen3Constants.noDamageBurnEffect:
+            case Gen3Constants.blazeKickEffect:
+                move.statusType = StatusType.BURN;
+                break;
+            case Gen3Constants.damageFreezeEffect:
+                move.statusType = StatusType.FREEZE;
+                break;
+            case Gen3Constants.damageParalyzeEffect:
+            case Gen3Constants.noDamageParalyzeEffect:
+            case Gen3Constants.thunderEffect:
+                move.statusType = StatusType.PARALYZE;
+                break;
+            case Gen3Constants.toxicEffect:
+            case Gen3Constants.poisonFangEffect:
+                move.statusType = StatusType.TOXIC_POISON;
+                break;
+            case Gen3Constants.noDamageConfusionEffect:
+            case Gen3Constants.damageConfusionEffect:
+            case Gen3Constants.swaggerEffect:
+            case Gen3Constants.flatterEffect:
+            case Gen3Constants.teeterDanceEffect:
+                move.statusType = StatusType.CONFUSION;
+                break;
         }
 
         if (move.statusMoveType == StatusMoveType.DAMAGE) {
@@ -2638,7 +2704,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (hexString.length() % 2 != 0) {
             throw new IllegalArgumentException("hexString must have an even number of characters");
         }
-        writeBytes(offset, HexFormat.of().parseHex(hexString));
+        writeBytes(offset, RomFunctions.hexToBytes(hexString));
     }
 
     private void attemptObedienceEvolutionPatches() {
@@ -3994,13 +4060,24 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 int effectivenessInternal = rom[currentOffset + 2];
                 Type attacking = Gen3Constants.typeTable[attackingType];
                 Type defending = Gen3Constants.typeTable[defendingType];
-                Effectiveness effectiveness = switch (effectivenessInternal) {
-                    case 20 -> Effectiveness.DOUBLE;
-                    case 10 -> Effectiveness.NEUTRAL;
-                    case 5 -> Effectiveness.HALF;
-                    case 0 -> Effectiveness.ZERO;
-                    default -> null;
-                };
+                Effectiveness effectiveness;
+                switch (effectivenessInternal) {
+                    case 20:
+                        effectiveness = Effectiveness.DOUBLE;
+                        break;
+                    case 10:
+                        effectiveness = Effectiveness.NEUTRAL;
+                        break;
+                    case 5:
+                        effectiveness = Effectiveness.HALF;
+                        break;
+                    case 0:
+                        effectiveness = Effectiveness.ZERO;
+                        break;
+                    default:
+                        effectiveness = null;
+                        break;
+                }
                 if (effectiveness != null) {
                     typeTable.setEffectiveness(attacking, defending, effectiveness);
                 }
@@ -4038,14 +4115,20 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 if (eff != Effectiveness.NEUTRAL) {
                     ByteArrayOutputStream part = (defender == Type.GHOST && eff == Effectiveness.ZERO)
                             ? ghostImmunities : mainPart;
-                    byte effectivenessInternal = switch (eff) {
-                        case DOUBLE -> 20;
-                        case HALF -> 5;
-                        case ZERO -> 0;
-                        default -> 0;
+                    byte effectivenessInternal ;switch (eff) {
+                        case DOUBLE:
+                            effectivenessInternal = 20;
+                            break;
+                        case HALF:
+                            effectivenessInternal = 5;
+                            break;
+                        default:
+                            effectivenessInternal = 0;
+                            break;
                     };
-                    part.writeBytes(new byte[]{Gen3Constants.typeToByte(attacker),
-                            Gen3Constants.typeToByte(defender), effectivenessInternal});
+                    part.write(Gen3Constants.typeToByte(attacker));
+                    part.write(Gen3Constants.typeToByte(defender));
+                    part.write(effectivenessInternal);
                 }
             }
         }
@@ -4145,9 +4228,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
-        if (!(unchecked instanceof Gen3PlayerCharacterGraphics playerGraphics)) {
+        if (!(unchecked instanceof Gen3PlayerCharacterGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
+        Gen3PlayerCharacterGraphics playerGraphics = (Gen3PlayerCharacterGraphics) unchecked;
 
         if (romEntry.getRomType() != Gen3Constants.RomType_FRLG) {
             separateFrontAndBackPlayerPalettes();
@@ -4202,9 +4286,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void setRSECustomPlayerGraphics(Gen3PlayerCharacterGraphics unchecked, Settings.PlayerCharacterMod toReplace) {
-        if (!(unchecked instanceof RSEPlayerCharacterGraphics playerGraphics)) {
+        if (!(unchecked instanceof RSEPlayerCharacterGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
+        RSEPlayerCharacterGraphics playerGraphics = (RSEPlayerCharacterGraphics) unchecked;
+
         if (playerGraphics.hasSitJumpSprite()) {
             writePlayerSprite(playerGraphics.getSitJumpSprite(), toReplace, "SitJumpImage");
         }
@@ -4228,9 +4314,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void setFRLGCustomPlayerGraphics(Gen3PlayerCharacterGraphics unchecked, Settings.PlayerCharacterMod toReplace) {
-        if (!(unchecked instanceof FRLGPlayerCharacterGraphics playerGraphics)) {
+        if (!(unchecked instanceof FRLGPlayerCharacterGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
+        FRLGPlayerCharacterGraphics playerGraphics = (FRLGPlayerCharacterGraphics) unchecked;
+
         if (playerGraphics.hasItemSprite()) {
             writePlayerSprite(playerGraphics.getItemSprite(), toReplace, "ItemImage");
         }
@@ -4533,15 +4621,19 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     public String getPaletteFilesID() {
-        return switch (romEntry.getRomType()) {
-            case Gen3Constants.RomType_Ruby, Gen3Constants.RomType_Sapp ->
+        switch (romEntry.getRomType()) {
+            case Gen3Constants.RomType_Ruby:
+            case Gen3Constants.RomType_Sapp:
                 // TODO: look at Blastoise, Caterpie, Kadabra, Deoxys.
                 // otherwise all palettes are pretty much identical (in use).
-                    "E";
-            case Gen3Constants.RomType_Em -> "E";
-            case Gen3Constants.RomType_FRLG -> "FRLG";
-            default -> null;
-        };
+                return "E";
+            case Gen3Constants.RomType_Em:
+                return "E";
+            case Gen3Constants.RomType_FRLG:
+                return "FRLG";
+            default:
+                return null;
+        }
     }
 
     @Override

@@ -412,48 +412,84 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
 
         switch (move.effectIndex) {
-            case Gen1Constants.noDamageSleepEffect -> move.statusType = StatusType.SLEEP;
-            case Gen1Constants.damagePoison20PercentEffect, Gen1Constants.damagePoison40PercentEffect,
-                    Gen1Constants.noDamagePoisonEffect, Gen1Constants.twineedleEffect -> {
+            case Gen1Constants.noDamageSleepEffect:
+                move.statusType = StatusType.SLEEP;
+                break;
+            case Gen1Constants.damagePoison20PercentEffect:
+            case Gen1Constants.damagePoison40PercentEffect:
+            case Gen1Constants.noDamagePoisonEffect:
+            case Gen1Constants.twineedleEffect: {
                 move.statusType = StatusType.POISON;
                 if (move.number == Moves.toxic) {
                     move.statusType = StatusType.TOXIC_POISON;
                 }
+                break;
             }
-            case Gen1Constants.damageBurn10PercentEffect, Gen1Constants.damageBurn30PercentEffect ->
-                    move.statusType = StatusType.BURN;
-            case Gen1Constants.damageFreeze10PercentEffect, Gen1Constants.damageFreeze30PercentEffect ->
-                    move.statusType = StatusType.FREEZE;
-            case Gen1Constants.damageParalyze10PercentEffect, Gen1Constants.damageParalyze30PercentEffect,
-                    Gen1Constants.noDamageParalyzeEffect ->
-                    move.statusType = StatusType.PARALYZE;
-            case Gen1Constants.noDamageConfusionEffect, Gen1Constants.damageConfusionEffect ->
-                    move.statusType = StatusType.CONFUSION;
+            case Gen1Constants.damageBurn10PercentEffect:
+            case Gen1Constants.damageBurn30PercentEffect:
+                move.statusType = StatusType.BURN;
+                break;
+            case Gen1Constants.damageFreeze10PercentEffect:
+            case Gen1Constants.damageFreeze30PercentEffect:
+                move.statusType = StatusType.FREEZE;
+                break;
+            case Gen1Constants.damageParalyze10PercentEffect:
+            case Gen1Constants.damageParalyze30PercentEffect:
+            case Gen1Constants.noDamageParalyzeEffect:
+                move.statusType = StatusType.PARALYZE;
+                break;
+            case Gen1Constants.noDamageConfusionEffect:
+            case Gen1Constants.damageConfusionEffect:
+                move.statusType = StatusType.CONFUSION;
+                break;
         }
 
         if (move.statusMoveType == StatusMoveType.DAMAGE) {
             switch (move.effectIndex) {
-                case Gen1Constants.damageBurn10PercentEffect, Gen1Constants.damageFreeze10PercentEffect,
-                        Gen1Constants.damageParalyze10PercentEffect, Gen1Constants.damageConfusionEffect ->
-                        move.statusPercentChance = 10.0;
-                case Gen1Constants.damagePoison20PercentEffect, Gen1Constants.twineedleEffect ->
-                        move.statusPercentChance = 20.0;
-                case Gen1Constants.damageBurn30PercentEffect, Gen1Constants.damageFreeze30PercentEffect,
-                        Gen1Constants.damageParalyze30PercentEffect ->
-                        move.statusPercentChance = 30.0;
-                case Gen1Constants.damagePoison40PercentEffect -> move.statusPercentChance = 40.0;
+                case Gen1Constants.damageBurn10PercentEffect:
+                case Gen1Constants.damageFreeze10PercentEffect:
+                case Gen1Constants.damageParalyze10PercentEffect:
+                case Gen1Constants.damageConfusionEffect:
+                    move.statusPercentChance = 10.0;
+                    break;
+                case Gen1Constants.damagePoison20PercentEffect:
+                case Gen1Constants.twineedleEffect:
+                    move.statusPercentChance = 20.0;
+                    break;
+                case Gen1Constants.damageBurn30PercentEffect:
+                case Gen1Constants.damageFreeze30PercentEffect:
+                case Gen1Constants.damageParalyze30PercentEffect:
+                    move.statusPercentChance = 30.0;
+                    break;
+                case Gen1Constants.damagePoison40PercentEffect:
+                    move.statusPercentChance = 40.0;
+                    break;
             }
         }
     }
 
     private void loadMiscMoveInfoFromEffect(Move move) {
         switch (move.effectIndex) {
-            case Gen1Constants.flinch10PercentEffect -> move.flinchPercentChance = 10.0;
-            case Gen1Constants.flinch30PercentEffect -> move.flinchPercentChance = 30.0;
-            case Gen1Constants.damageAbsorbEffect, Gen1Constants.dreamEaterEffect -> move.absorbPercent = 50;
-            case Gen1Constants.damageRecoilEffect -> move.recoilPercent = 25;
-            case Gen1Constants.chargeEffect, Gen1Constants.flyEffect -> move.isChargeMove = true;
-            case Gen1Constants.hyperBeamEffect -> move.isRechargeMove = true;
+            case Gen1Constants.flinch10PercentEffect:
+                move.flinchPercentChance = 10.0;
+                break;
+            case Gen1Constants.flinch30PercentEffect:
+                move.flinchPercentChance = 30.0;
+                break;
+            case Gen1Constants.damageAbsorbEffect:
+            case Gen1Constants.dreamEaterEffect:
+                move.absorbPercent = 50;
+                break;
+            case Gen1Constants.damageRecoilEffect:
+                move.recoilPercent = 25;
+                break;
+            case Gen1Constants.chargeEffect:
+            case Gen1Constants.flyEffect:
+                move.isChargeMove = true;
+                break;
+            case Gen1Constants.hyperBeamEffect:
+                move.isRechargeMove = true;
+                break;
         }
 
         if (Gen1Constants.increasedCritMoves.contains(move.number)) {
@@ -1219,7 +1255,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 if (tr.trainerclass != trainerClassNum) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
-                baos.writeBytes(trainerToBytes(tr));
+                byte[] trainerBytes = trainerToBytes(tr);
+                baos.write(trainerBytes, 0, trainerBytes.length);
             }
 
             byte[] trainersOfClassBytes = baos.toByteArray();
@@ -1343,13 +1380,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             int effectivenessInternal = rom[currentOffset + 2];
             Type attacking = Gen1Constants.typeTable[attackingType];
             Type defending = Gen1Constants.typeTable[defendingType];
-            Effectiveness effectiveness = switch (effectivenessInternal) {
-                case 20 -> Effectiveness.DOUBLE;
-                case 10 -> Effectiveness.NEUTRAL;
-                case 5 -> Effectiveness.HALF;
-                case 0 -> Effectiveness.ZERO;
-                default -> null;
-            };
+            Effectiveness effectiveness;
+            switch (effectivenessInternal) {
+                case 20:
+                    effectiveness = Effectiveness.DOUBLE;
+                    break;
+                case 10:
+                    effectiveness = Effectiveness.NEUTRAL;
+                    break;
+                case 5:
+                    effectiveness = Effectiveness.HALF;
+                    break;
+                case 0:
+                    effectiveness = Effectiveness.ZERO;
+                    break;
+                default:
+                    effectiveness = null;
+                    break;
+            }
             if (effectiveness != null) {
                 typeTable.setEffectiveness(attacking, defending, effectiveness);
             }
@@ -1375,12 +1423,21 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             for (Type defender : typeTable.getTypes()) {
                 Effectiveness eff = typeTable.getEffectiveness(attacker, defender);
                 if (eff != Effectiveness.NEUTRAL) {
-                    byte effectivenessInternal = switch (eff) {
-                        case DOUBLE -> 20;
-                        case HALF -> 5;
-                        case ZERO -> 0;
-                        default -> 0;
-                    };
+                    byte effectivenessInternal;
+                    switch (eff) {
+                        case DOUBLE:
+                            effectivenessInternal = 20;
+                            break;
+                        case HALF:
+                            effectivenessInternal = 5;
+                            break;
+                        case ZERO:
+                            effectivenessInternal = 0;
+                            break;
+                        default:
+                            effectivenessInternal = 0;
+                            break;
+                    }
                     writeBytes(currentOffset, new byte[]{Gen1Constants.typeToByte(attacker),
                             Gen1Constants.typeToByte(defender), effectivenessInternal});
                     currentOffset += 3;
@@ -2595,14 +2652,16 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Evolution evo : pk.getEvolutionsFrom()) {
-            baos.writeBytes(evolutionToBytes(evo));
+            byte[] evoBytes = evolutionToBytes(evo);
+            baos.write(evoBytes, 0, evoBytes.length);
         }
         baos.write(GBConstants.evosAndMovesTerminator);
         List<MoveLearnt> moveset = movesets.get(pk.getNumber());
         for (int i = 0; i < moveset.size(); i++) {
             MoveLearnt ml = moveset.get(i);
             if (i <= 4 && ml.level == 1) continue;
-            baos.writeBytes(moveLearntToBytes(ml));
+            byte[] mlBytes = moveLearntToBytes(ml);
+            baos.write(mlBytes, 0, mlBytes.length);
         }
         baos.write(GBConstants.evosAndMovesTerminator);
         return baos.toByteArray();
@@ -2611,19 +2670,24 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(Gen1Constants.evolutionTypeToIndex(evo.getType()));
-        baos.writeBytes(evoTypeExtraInfoToBytes(evo));
+        byte[] extraInfoBytes = evoTypeExtraInfoToBytes(evo);
+        baos.write(extraInfoBytes, 0, extraInfoBytes.length);
         baos.write(pokeNumToRBYTable[evo.getTo().getNumber()]);
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.getType()) {
-            case LEVEL -> new byte[]{(byte) evo.getExtraInfo()};
-            case STONE -> new byte[]{(byte) evo.getExtraInfo(), 0x01}; // minimum level
-            case TRADE -> new byte[]{(byte) 0x01}; // minimum level
-            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
-                    "by Gen 1 games.");
-        };
+        switch (evo.getType()) {
+            case LEVEL:
+                return new byte[]{(byte) evo.getExtraInfo()};
+            case STONE:
+                return new byte[]{(byte) evo.getExtraInfo(), 0x01}; // minimum level
+            case TRADE:
+                return new byte[]{(byte) 0x01}; // minimum level
+            default:
+                throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
+                        "by Gen 1 games.");
+        }
     }
 
     private byte[] moveLearntToBytes(MoveLearnt ml) {
@@ -2642,9 +2706,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         if (toReplace != Settings.PlayerCharacterMod.PC1) {
             throw new IllegalArgumentException("Invalid toReplace. Only one player character in Gen 1.");
         }
-        if (!(unchecked instanceof GBCPlayerCharacterGraphics playerGraphics)) {
+        if (!(unchecked instanceof GBCPlayerCharacterGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
+        GBCPlayerCharacterGraphics playerGraphics = (GBCPlayerCharacterGraphics) unchecked;
 
         if (playerGraphics.hasFrontImage()) {
             rewritePlayerFrontImage(playerGraphics.getFrontImage());
@@ -2839,10 +2904,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
         public Gen1PokemonImageGetter(Pokemon pk) {
             super(pk);
-            if (!(pk instanceof Gen1Pokemon gen1Pk)) {
+            if (!(pk instanceof Gen1Pokemon)) {
                 throw new IllegalArgumentException("Argument \"pk\" is not a Gen1Pokemon");
             }
-            this.pk = gen1Pk;
+            this.pk = (Gen1Pokemon) pk;
         }
 
         @Override

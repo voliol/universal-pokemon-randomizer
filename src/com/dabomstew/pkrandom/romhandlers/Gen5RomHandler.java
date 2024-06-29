@@ -1908,11 +1908,18 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                 // this value overrides the genderRatio of the species.
                                 // The vanilla grottoes have some variance in genderRatios, but for simplicity's sake
                                 // we just set all Pokémon to 30% female, unless they are always female/male/genderless.
-                                int genderRatio = switch (se.pkmn.getGenderRatio()) {
-                                    case 0xFE -> 100; // female
-                                    case 0x00, 0xFF -> 0; // male, genderless
-                                    default -> 30;
-                                };
+                                int genderRatio;
+                                switch (se.pkmn.getGenderRatio()) {
+                                    case 0xFE: // female
+                                        genderRatio = 100;
+                                        break;
+                                    case 0x00: // male
+                                    case 0xFF: // genderless
+                                        genderRatio = 0;
+                                        break;
+                                    default:
+                                        genderRatio = 30;
+                                }
                                 hhEntry[version * 78 + raritySlot * 26 + 16 + group] = (byte) genderRatio;
                                 hhEntry[version * 78 + raritySlot * 26 + 20 + group] = (byte) se.forme; // forme
                                 hhEntry[version * 78 + raritySlot * 26 + 12 + group] = (byte) se.level;
@@ -2212,13 +2219,24 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (Type defender : typeTable.getTypes()) {
                     int offset = tableOffset + (Gen5Constants.typeToByte(attacker) * tableWidth) + Gen5Constants.typeToByte(defender);
                     int effectivenessInternal = battleOverlay[offset];
-                    Effectiveness effectiveness = switch (effectivenessInternal) {
-                        case 8 -> Effectiveness.DOUBLE;
-                        case 4 -> Effectiveness.NEUTRAL;
-                        case 2 -> Effectiveness.HALF;
-                        case 0 -> Effectiveness.ZERO;
-                        default -> null;
-                    };
+                    Effectiveness effectiveness;
+                    switch (effectivenessInternal) {
+                        case 8:
+                            effectiveness = Effectiveness.DOUBLE;
+                            break;
+                        case 4:
+                            effectiveness = Effectiveness.NEUTRAL;
+                            break;
+                        case 2:
+                            effectiveness = Effectiveness.HALF;
+                            break;
+                        case 0:
+                            effectiveness = Effectiveness.ZERO;
+                            break;
+                        default:
+                            effectiveness = null;
+                            break;
+                    }
                     typeTable.setEffectiveness(attacker, defender, effectiveness);
                 }
             }
@@ -2245,13 +2263,23 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (Type defender : typeTable.getTypes()) {
                     int offset = tableOffset + (Gen5Constants.typeToByte(attacker) * tableWidth) + Gen5Constants.typeToByte(defender);
                     Effectiveness effectiveness = typeTable.getEffectiveness(attacker, defender);
-                    byte effectivenessInternal = switch (effectiveness) {
-                        case DOUBLE -> 8;
-                        case NEUTRAL -> 4;
-                        case HALF -> 2;
-                        case ZERO -> 0;
-                        default -> 0;
-                    };
+                    byte effectivenessInternal;
+                    switch (effectiveness) {
+                        case DOUBLE:
+                            effectivenessInternal = 8;
+                            break;
+                        case NEUTRAL:
+                            effectivenessInternal = 4;
+                            break;
+                        case HALF:
+                            effectivenessInternal = 2;
+                            break;
+                        case ZERO:
+                            effectivenessInternal = 0;
+                            break;
+                        default:
+                            effectivenessInternal = 0;
+                    }
                     battleOverlay[offset] = effectivenessInternal;
                 }
             }
@@ -3902,7 +3930,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         int ability = this.getAbilityForTrainerPokemon(tp);
         if (ability == Abilities.levitate) {
-            items.removeAll(List.of(Items.shucaBerry));
+            items.remove(Items.shucaBerry);
         } else if (byType.get(Type.GROUND) == Effectiveness.DOUBLE || byType.get(Type.GROUND) == Effectiveness.QUADRUPLE) {
             items.add(Items.airBalloon);
         }
@@ -4040,13 +4068,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
     
     public String getPaletteFilesID() {
-        return switch (romEntry.getRomType()) {
-            case Gen5Constants.Type_BW -> "BW";
-            case Gen5Constants.Type_BW2 ->
+        switch (romEntry.getRomType()) {
+            case Gen5Constants.Type_BW:
+                return "BW";
+            case Gen5Constants.Type_BW2:
                 // TODO: check if this should be identical
-                    "BW";
-            default -> null;
-        };
+                return "BW";
+            default:
+                return null;
+        }
     }
 
     @Override

@@ -289,136 +289,177 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 
 		switch (move.effectIndex) {
-			case Gen4Constants.noDamageAtkPlusOneEffect, Gen4Constants.damageUserAtkPlusOneEffect -> {
+			case Gen4Constants.noDamageAtkPlusOneEffect:
+			case Gen4Constants.damageUserAtkPlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageDefPlusOneEffect, Gen4Constants.damageUserDefPlusOneEffect,
-					Gen4Constants.defenseCurlEffect -> {
+			case Gen4Constants.noDamageDefPlusOneEffect:
+			case Gen4Constants.damageUserDefPlusOneEffect:
+			case Gen4Constants.defenseCurlEffect: {
 				move.statChanges[0].type = StatChangeType.DEFENSE;
 				move.statChanges[0].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageSpAtkPlusOneEffect, Gen4Constants.flatterEffect,
-					Gen4Constants.damageUserSpAtkPlusOneEffect -> {
+			case Gen4Constants.noDamageSpAtkPlusOneEffect:
+			case Gen4Constants.flatterEffect:
+			case Gen4Constants.damageUserSpAtkPlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
 				move.statChanges[0].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageEvasionPlusOneEffect, Gen4Constants.minimizeEffect -> {
+			case Gen4Constants.noDamageEvasionPlusOneEffect:
+			case Gen4Constants.minimizeEffect: {
 				move.statChanges[0].type = StatChangeType.EVASION;
 				move.statChanges[0].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageAtkMinusOneEffect, Gen4Constants.damageAtkMinusOneEffect -> {
+			case Gen4Constants.noDamageAtkMinusOneEffect:
+			case Gen4Constants.damageAtkMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.noDamageDefMinusOneEffect, Gen4Constants.damageDefMinusOneEffect -> {
+			case Gen4Constants.noDamageDefMinusOneEffect:
+			case Gen4Constants.damageDefMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.DEFENSE;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.noDamageSpeMinusOneEffect, Gen4Constants.damageSpeMinusOneEffect,
-					Gen4Constants.damageUserSpeMinusOneEffect -> {
+			case Gen4Constants.noDamageSpeMinusOneEffect:
+			case Gen4Constants.damageSpeMinusOneEffect:
+			case Gen4Constants.damageUserSpeMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.SPEED;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.noDamageAccuracyMinusOneEffect, Gen4Constants.damageAccuracyMinusOneEffect -> {
+			case Gen4Constants.noDamageAccuracyMinusOneEffect:
+			case Gen4Constants.damageAccuracyMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ACCURACY;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.noDamageEvasionMinusOneEffect -> {
+			case Gen4Constants.noDamageEvasionMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.EVASION;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.noDamageAtkPlusTwoEffect, Gen4Constants.swaggerEffect -> {
+			case Gen4Constants.noDamageAtkPlusTwoEffect:
+			case Gen4Constants.swaggerEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = 2;
+				break;
 			}
-			case Gen4Constants.noDamageDefPlusTwoEffect -> {
+			case Gen4Constants.noDamageDefPlusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.DEFENSE;
 				move.statChanges[0].stages = 2;
+				break;
 			}
-			case Gen4Constants.noDamageSpePlusTwoEffect -> {
+			case Gen4Constants.noDamageSpePlusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.SPEED;
 				move.statChanges[0].stages = 2;
+				break;
 			}
-			case Gen4Constants.noDamageSpAtkPlusTwoEffect -> {
+			case Gen4Constants.noDamageSpAtkPlusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
 				move.statChanges[0].stages = 2;
+				break;
 			}
-			case Gen4Constants.noDamageSpDefPlusTwoEffect -> {
+			case Gen4Constants.noDamageSpDefPlusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[0].stages = 2;
+				break;
 			}
-			case Gen4Constants.noDamageAtkMinusTwoEffect -> {
+			case Gen4Constants.noDamageAtkMinusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = -2;
+				break;
 			}
-			case Gen4Constants.noDamageDefMinusTwoEffect -> {
+			case Gen4Constants.noDamageDefMinusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.DEFENSE;
 				move.statChanges[0].stages = -2;
+				break;
 			}
-			case Gen4Constants.noDamageSpeMinusTwoEffect -> {
+			case Gen4Constants.noDamageSpeMinusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.SPEED;
 				move.statChanges[0].stages = -2;
+				break;
 			}
-			case Gen4Constants.noDamageSpDefMinusTwoEffect, Gen4Constants.damageSpDefMinusTwoEffect -> {
+			case Gen4Constants.noDamageSpDefMinusTwoEffect:
+			case Gen4Constants.damageSpDefMinusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[0].stages = -2;
+				break;
 			}
-			case Gen4Constants.damageSpAtkMinusOneEffect -> {
+			case Gen4Constants.damageSpAtkMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.damageSpDefMinusOneEffect -> {
+			case Gen4Constants.damageSpDefMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[0].stages = -1;
+				break;
 			}
-			case Gen4Constants.damageUserAllPlusOneEffect -> {
+			case Gen4Constants.damageUserAllPlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ALL;
 				move.statChanges[0].stages = 1;
+				break;
 			}
-			case Gen4Constants.chargeEffect -> {
+			case Gen4Constants.chargeEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[0].stages = 1;
+				break;
 			}
-			case Gen4Constants.damageUserAtkAndDefMinusOneEffect, Gen4Constants.noDamageAtkAndDefMinusOneEffect -> {
+			case Gen4Constants.damageUserAtkAndDefMinusOneEffect:
+			case Gen4Constants.noDamageAtkAndDefMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = -1;
 				move.statChanges[1].type = StatChangeType.DEFENSE;
 				move.statChanges[1].stages = -1;
+				break;
 			}
-			case Gen4Constants.damageUserSpAtkMinusTwoEffect, Gen4Constants.noDamageSpAtkMinusTwoEffect -> {
+			case Gen4Constants.damageUserSpAtkMinusTwoEffect:
+			case Gen4Constants.noDamageSpAtkMinusTwoEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
 				move.statChanges[0].stages = -2;
+				break;
 			}
-			case Gen4Constants.noDamageDefAndSpDefPlusOneEffect -> {
+			case Gen4Constants.noDamageDefAndSpDefPlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.DEFENSE;
 				move.statChanges[0].stages = 1;
 				move.statChanges[1].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[1].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageAtkAndDefPlusOneEffect -> {
+			case Gen4Constants.noDamageAtkAndDefPlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = 1;
 				move.statChanges[1].type = StatChangeType.DEFENSE;
 				move.statChanges[1].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageSpAtkAndSpDefPlusOneEffect -> {
+			case Gen4Constants.noDamageSpAtkAndSpDefPlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
 				move.statChanges[0].stages = 1;
 				move.statChanges[1].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[1].stages = 1;
+				break;
 			}
-			case Gen4Constants.noDamageAtkAndSpePlusOneEffect -> {
+			case Gen4Constants.noDamageAtkAndSpePlusOneEffect: {
 				move.statChanges[0].type = StatChangeType.ATTACK;
 				move.statChanges[0].stages = 1;
 				move.statChanges[1].type = StatChangeType.SPEED;
 				move.statChanges[1].stages = 1;
+				break;
 			}
-			case Gen4Constants.damageUserDefAndSpDefMinusOneEffect -> {
+			case Gen4Constants.damageUserDefAndSpDefMinusOneEffect: {
 				move.statChanges[0].type = StatChangeType.DEFENSE;
 				move.statChanges[0].stages = -1;
 				move.statChanges[1].type = StatChangeType.SPECIAL_DEFENSE;
 				move.statChanges[1].stages = -1;
+				break;
 			}
 		}
 
@@ -1218,7 +1259,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         int starterHeldItemOffset = romEntry.getIntValue("StarterPokemonHeldItemOffset");
         byte[] file = scriptNarc.files.get(starterScriptNumber);
         int item = FileFunctions.read2ByteInt(file, starterHeldItemOffset);
-        return List.of(item);
+        return Collections.singletonList(item);
     }
 
     @Override
@@ -5247,13 +5288,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					int effectivenessInternal = battleOverlay[currentOffset + 2];
 					Type attacking = Gen4Constants.typeTable[attackingType];
 					Type defending = Gen4Constants.typeTable[defendingType];
-					Effectiveness effectiveness = switch (effectivenessInternal) {
-						case 20 -> Effectiveness.DOUBLE;
-						case 10 -> Effectiveness.NEUTRAL;
-						case 5 -> Effectiveness.HALF;
-						case 0 -> Effectiveness.ZERO;
-						default -> null;
-					};
+					Effectiveness effectiveness;
+					switch (effectivenessInternal) {
+						case 20:
+							effectiveness = Effectiveness.DOUBLE;
+							break;
+						case 10:
+							effectiveness = Effectiveness.NEUTRAL;
+							break;
+						case 5:
+							effectiveness = Effectiveness.HALF;
+							break;
+						case 0:
+							effectiveness = Effectiveness.ZERO;
+							break;
+						default:
+							effectiveness = null;
+							break;
+					}
+					;
 					if (effectiveness != null) {
 						typeTable.setEffectiveness(attacking, defending, effectiveness);
 					}
@@ -5304,14 +5357,21 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				if (eff != Effectiveness.NEUTRAL) {
 					ByteArrayOutputStream part = (defender == Type.GHOST && eff == Effectiveness.ZERO)
 							? ghostImmunities : mainPart;
-					byte effectivenessInternal = switch (eff) {
-						case DOUBLE -> 20;
-						case HALF -> 5;
-						case ZERO -> 0;
-						default -> 0;
-					};
-					part.writeBytes(new byte[]{Gen4Constants.typeToByte(attacker),
-							Gen4Constants.typeToByte(defender), effectivenessInternal});
+					byte effectivenessInternal;
+					switch (eff) {
+						case DOUBLE:
+							effectivenessInternal = 20;
+							break;
+						case HALF:
+							effectivenessInternal = 5;
+							break;
+						default:
+							effectivenessInternal = 0;
+							break;
+					}
+					part.write(Gen4Constants.typeToByte(attacker));
+					part.write(Gen4Constants.typeToByte(defender));
+					part.write(effectivenessInternal);
 				}
 			}
 		}
@@ -5393,45 +5453,42 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Integer> replaced = new ArrayList<>();
 		String newIndexToMusicPrefix;
 		int newIndexToMusicPoolOffset;
-		switch (romEntry.getRomType()) {
-			case Gen4Constants.Type_DP, Gen4Constants.Type_Plat -> {
-				int extendBy = romEntry.getIntValue("Arm9ExtensionSize");
-				arm9 = extendARM9(arm9, extendBy, romEntry.getStringValue("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
-				genericIPSPatch(arm9, "NewIndexToMusicTweak");
-				newIndexToMusicPrefix = romEntry.getStringValue("NewIndexToMusicPrefix");
-				newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+		if (romEntry.getRomType() == Gen4Constants.Type_HGSS) {
+			newIndexToMusicPrefix = romEntry.getStringValue("IndexToMusicPrefix");
+			newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+			if (newIndexToMusicPoolOffset > 0) {
 				newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
+
 				for (int oldStatic : specialMusicStaticChanges.keySet()) {
 					int i = newIndexToMusicPoolOffset;
-					int index = readWord(arm9, i);
+					int indexEtc = readWord(arm9, i);
+					int index = indexEtc & 0x3FF;
 					while (index != oldStatic || replaced.contains(i)) {
-						i += 4;
-						index = readWord(arm9, i);
+						i += 2;
+						indexEtc = readWord(arm9, i);
+						index = indexEtc & 0x3FF;
 					}
-					writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+					int newIndexEtc = specialMusicStaticChanges.get(oldStatic) | (indexEtc & 0xFC00);
+					writeWord(arm9, i, newIndexEtc);
 					replaced.add(i);
 				}
 			}
-			case Gen4Constants.Type_HGSS -> {
-				newIndexToMusicPrefix = romEntry.getStringValue("IndexToMusicPrefix");
-				newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
-				if (newIndexToMusicPoolOffset > 0) {
-					newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
-
-					for (int oldStatic : specialMusicStaticChanges.keySet()) {
-						int i = newIndexToMusicPoolOffset;
-						int indexEtc = readWord(arm9, i);
-						int index = indexEtc & 0x3FF;
-						while (index != oldStatic || replaced.contains(i)) {
-							i += 2;
-							indexEtc = readWord(arm9, i);
-							index = indexEtc & 0x3FF;
-						}
-						int newIndexEtc = specialMusicStaticChanges.get(oldStatic) | (indexEtc & 0xFC00);
-						writeWord(arm9, i, newIndexEtc);
-						replaced.add(i);
-					}
+		} else {
+			int extendBy = romEntry.getIntValue("Arm9ExtensionSize");
+			arm9 = extendARM9(arm9, extendBy, romEntry.getStringValue("TCMCopyingPrefix"), Gen4Constants.arm9Offset);
+			genericIPSPatch(arm9, "NewIndexToMusicTweak");
+			newIndexToMusicPrefix = romEntry.getStringValue("NewIndexToMusicPrefix");
+			newIndexToMusicPoolOffset = find(arm9, newIndexToMusicPrefix);
+			newIndexToMusicPoolOffset += newIndexToMusicPrefix.length() / 2;
+			for (int oldStatic : specialMusicStaticChanges.keySet()) {
+				int i = newIndexToMusicPoolOffset;
+				int index = readWord(arm9, i);
+				while (index != oldStatic || replaced.contains(i)) {
+					i += 4;
+					index = readWord(arm9, i);
 				}
+				writeWord(arm9, i, specialMusicStaticChanges.get(oldStatic));
+				replaced.add(i);
 			}
 		}
 	}
@@ -5559,7 +5616,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		int ability = this.getAbilityForTrainerPokemon(tp);
 		if (ability == Abilities.levitate) {
-			items.removeAll(List.of(Items.shucaBerry));
+			items.remove(Items.shucaBerry);
 		}
 
 		if (!consumableOnly) {
@@ -5812,10 +5869,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
 		int palStart;
 		switch (romEntry.getRomType()) {
-			case Gen4Constants.Type_DP -> palStart = manaphyEggImage + 1;
-			case Gen4Constants.Type_Plat -> palStart = 0; // TODO how does it look?
-			case Gen4Constants.Type_HGSS -> palStart = pichuImages + 4;
-			default -> palStart = 0;
+			case Gen4Constants.Type_DP : palStart = manaphyEggImage + 1;
+			case Gen4Constants.Type_Plat : palStart = 0; // TODO how does it look?
+			case Gen4Constants.Type_HGSS : palStart = pichuImages + 4;
+			default : palStart = 0;
 		}
 
 		System.out.println(i);
@@ -5887,13 +5944,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	}
 
 	public String getPaletteFilesID() {
-		return switch (romEntry.getRomType()) {
-			case Gen4Constants.Type_DP -> "DP";
-			case Gen4Constants.Type_Plat, Gen4Constants.Type_HGSS ->
+		switch (romEntry.getRomType()) {
+			case Gen4Constants.Type_DP:
+				return "DP";
+			case Gen4Constants.Type_Plat:
+			case Gen4Constants.Type_HGSS:
 				// TODO: check if this should be identical
-					"DP";
-			default -> null;
-		};
+				return "DP";
+			default:
+				return null;
+		}
 	}
 
 	@Override

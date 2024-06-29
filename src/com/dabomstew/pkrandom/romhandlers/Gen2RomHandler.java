@@ -470,17 +470,34 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         }
 
         switch (move.effectIndex) {
-            case Gen2Constants.noDamageSleepEffect -> move.statusType = StatusType.SLEEP;
-            case Gen2Constants.damagePoisonEffect, Gen2Constants.noDamagePoisonEffect, Gen2Constants.twineedleEffect ->
-                    move.statusType = StatusType.POISON;
-            case Gen2Constants.damageBurnEffect, Gen2Constants.damageBurnAndThawUserEffect ->
-                    move.statusType = StatusType.BURN;
-            case Gen2Constants.damageFreezeEffect -> move.statusType = StatusType.FREEZE;
-            case Gen2Constants.damageParalyzeEffect, Gen2Constants.noDamageParalyzeEffect, Gen2Constants.thunderEffect ->
-                    move.statusType = StatusType.PARALYZE;
-            case Gen2Constants.toxicEffect -> move.statusType = StatusType.TOXIC_POISON;
-            case Gen2Constants.noDamageConfusionEffect, Gen2Constants.damageConfusionEffect, Gen2Constants.swaggerEffect ->
-                    move.statusType = StatusType.CONFUSION;
+            case Gen2Constants.noDamageSleepEffect:
+                move.statusType = StatusType.SLEEP;
+                break;
+            case Gen2Constants.damagePoisonEffect:
+            case Gen2Constants.noDamagePoisonEffect:
+            case Gen2Constants.twineedleEffect:
+                move.statusType = StatusType.POISON;
+                break;
+            case Gen2Constants.damageBurnEffect:
+            case Gen2Constants.damageBurnAndThawUserEffect:
+                move.statusType = StatusType.BURN;
+                break;
+            case Gen2Constants.damageFreezeEffect:
+                move.statusType = StatusType.FREEZE;
+                break;
+            case Gen2Constants.damageParalyzeEffect:
+            case Gen2Constants.noDamageParalyzeEffect:
+            case Gen2Constants.thunderEffect:
+                move.statusType = StatusType.PARALYZE;
+                break;
+            case Gen2Constants.toxicEffect:
+                move.statusType = StatusType.TOXIC_POISON;
+                break;
+            case Gen2Constants.noDamageConfusionEffect:
+            case Gen2Constants.damageConfusionEffect:
+            case Gen2Constants.swaggerEffect:
+                move.statusType = StatusType.CONFUSION;
+                break;
         }
 
         if (move.statusMoveType == StatusMoveType.DAMAGE) {
@@ -493,18 +510,37 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     private void loadMiscMoveInfoFromEffect(Move move, double secondaryEffectChance) {
         switch (move.effectIndex) {
-            case Gen2Constants.flinchEffect, Gen2Constants.snoreEffect, Gen2Constants.twisterEffect,
-                    Gen2Constants.stompEffect ->
-                    move.flinchPercentChance = secondaryEffectChance;
-            case Gen2Constants.damageAbsorbEffect, Gen2Constants.dreamEaterEffect -> move.absorbPercent = 50;
-            case Gen2Constants.damageRecoilEffect -> move.recoilPercent = 25;
-            case Gen2Constants.flailAndReversalEffect, Gen2Constants.futureSightEffect ->
-                    move.criticalChance = CriticalChance.NONE;
-            case Gen2Constants.bindingEffect, Gen2Constants.trappingEffect -> move.isTrapMove = true;
-            case Gen2Constants.razorWindEffect, Gen2Constants.skyAttackEffect, Gen2Constants.skullBashEffect,
-                    Gen2Constants.solarbeamEffect, Gen2Constants.semiInvulnerableEffect ->
-                    move.isChargeMove = true;
-            case Gen2Constants.hyperBeamEffect -> move.isRechargeMove = true;
+            case Gen2Constants.flinchEffect:
+            case Gen2Constants.snoreEffect:
+            case Gen2Constants.twisterEffect:
+            case Gen2Constants.stompEffect:
+                move.flinchPercentChance = secondaryEffectChance;
+                break;
+            case Gen2Constants.damageAbsorbEffect:
+            case Gen2Constants.dreamEaterEffect:
+                move.absorbPercent = 50;
+                break;
+            case Gen2Constants.damageRecoilEffect:
+                move.recoilPercent = 25;
+                break;
+            case Gen2Constants.flailAndReversalEffect:
+            case Gen2Constants.futureSightEffect:
+                move.criticalChance = CriticalChance.NONE;
+                break;
+            case Gen2Constants.bindingEffect:
+            case Gen2Constants.trappingEffect:
+                move.isTrapMove = true;
+                break;
+            case Gen2Constants.razorWindEffect:
+            case Gen2Constants.skyAttackEffect:
+            case Gen2Constants.skullBashEffect:
+            case Gen2Constants.solarbeamEffect:
+            case Gen2Constants.semiInvulnerableEffect:
+                move.isChargeMove = true;
+                break;
+            case Gen2Constants.hyperBeamEffect:
+                move.isRechargeMove = true;
+                break;
         }
 
         if (Gen2Constants.increasedCritMoves.contains(move.number)) {
@@ -1108,7 +1144,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 if (tr.trainerclass != trainerClassNum) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
-                baos.writeBytes(trainerToBytes(tr));
+                byte[] trainerBytes = trainerToBytes(tr);
+                baos.write(trainerBytes, 0, trainerBytes.length);
             }
 
             byte[] trainersOfClassBytes = baos.toByteArray();
@@ -1123,10 +1160,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         // sometimes it's practical to use a baos
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        baos.writeBytes(trainerNameToBytes(trainer));
+        byte[] nameBytes = trainerNameToBytes(trainer);
+        baos.write(nameBytes, 0, nameBytes.length);
         baos.write(trainer.poketype);
         for (TrainerPokemon tp : trainer.pokemon) {
-            baos.writeBytes(trainerPokemonToBytes(tp, trainer));
+            byte[] tpBytes = trainerPokemonToBytes(tp, trainer);
+            baos.write(tpBytes, 0, tpBytes.length);
         }
         baos.write(Gen2Constants.trainerDataTerminator);
 
@@ -1719,7 +1758,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         baos.write(Gen2Constants.dialogueOptionInitByte);
         baos.write(options.length);
         for (String option : options) {
-            baos.writeBytes(translateString(option));
+            byte[] bytes = translateString(option);
+            baos.write(bytes, 0, bytes.length);
             baos.write(GBConstants.stringTerminator);
         }
         return baos.toByteArray();
@@ -2280,13 +2320,23 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 int effectivenessInternal = rom[currentOffset + 2];
                 Type attacking = Gen2Constants.typeTable[attackingType];
                 Type defending = Gen2Constants.typeTable[defendingType];
-                Effectiveness effectiveness = switch (effectivenessInternal) {
-                    case 20 -> Effectiveness.DOUBLE;
-                    case 10 -> Effectiveness.NEUTRAL;
-                    case 5 -> Effectiveness.HALF;
-                    case 0 -> Effectiveness.ZERO;
-                    default -> null;
-                };
+                Effectiveness effectiveness;
+                switch (effectivenessInternal) {
+                    case 20:
+                        effectiveness = Effectiveness.DOUBLE;
+                        break;
+                    case 10:
+                        effectiveness = Effectiveness.NEUTRAL;
+                        break;
+                    case 5:
+                        effectiveness = Effectiveness.HALF;
+                        break;
+                    case 0:
+                        effectiveness = Effectiveness.ZERO;
+                        break;
+                    default:
+                        effectiveness = null;
+                }
                 if (effectiveness != null) {
                     typeTable.setEffectiveness(attacking, defending, effectiveness);
                 }
@@ -2325,14 +2375,20 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 if (eff != Effectiveness.NEUTRAL) {
                     ByteArrayOutputStream part = (defender == Type.GHOST && eff == Effectiveness.ZERO)
                             ? ghostImmunities : mainPart;
-                    byte effectivenessInternal = switch (eff) {
-                        case DOUBLE -> 20;
-                        case HALF -> 5;
-                        case ZERO -> 0;
-                        default -> 0;
-                    };
-                    part.writeBytes(new byte[]{Gen2Constants.typeToByte(attacker),
-                            Gen2Constants.typeToByte(defender), effectivenessInternal});
+                    byte effectivenessInternal;
+                    switch (eff) {
+                        case DOUBLE : effectivenessInternal= 20;
+                            break;
+                        case HALF:
+                            effectivenessInternal = 5;
+                            break;
+                        default:
+                            effectivenessInternal = 0;
+                            break;
+                    }
+                    part.write(Gen2Constants.typeToByte(attacker));
+                    part.write(Gen2Constants.typeToByte(defender));
+                    part.write(effectivenessInternal);
                 }
             }
         }
@@ -2769,11 +2825,13 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private byte[] pokemonToEvosAndMovesLearntBytes(Pokemon pk) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Evolution evo : pk.getEvolutionsFrom()) {
-            baos.writeBytes(evolutionToBytes(evo));
+            byte[] evoBytes = evolutionToBytes(evo);
+            baos.write(evoBytes, 0, evoBytes.length);
         }
         baos.write(GBConstants.evosAndMovesTerminator);
         for (MoveLearnt ml : movesets.get(pk.getNumber())) {
-            baos.writeBytes(moveLearntToBytes(ml));
+            byte[] mlBytes = moveLearntToBytes(ml);
+            baos.write(mlBytes, 0, mlBytes.length);
         }
         baos.write(GBConstants.evosAndMovesTerminator);
         return baos.toByteArray();
@@ -2782,24 +2840,34 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private byte[] evolutionToBytes(Evolution evo) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(Gen2Constants.evolutionTypeToIndex(evo.getType()));
-        baos.writeBytes(evoTypeExtraInfoToBytes(evo));
+        byte[] extraInfoBytes = evoTypeExtraInfoToBytes(evo);
+        baos.write(extraInfoBytes, 0, extraInfoBytes.length);
         baos.write(evo.getTo().getNumber());
         return baos.toByteArray();
     }
 
     private byte[] evoTypeExtraInfoToBytes(Evolution evo) {
-        return switch (evo.getType()) {
-            case LEVEL, STONE, TRADE_ITEM -> new byte[]{(byte) evo.getExtraInfo()};
-            case TRADE -> new byte[]{(byte) 0xFF};
-            case HAPPINESS -> new byte[]{(byte) 0x01};
-            case HAPPINESS_DAY -> new byte[]{(byte) 0x02};
-            case HAPPINESS_NIGHT -> new byte[]{(byte) 0x03};
-            case LEVEL_ATTACK_HIGHER -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x01};
-            case LEVEL_DEFENSE_HIGHER -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x02};
-            case LEVEL_ATK_DEF_SAME -> new byte[]{(byte) evo.getExtraInfo(), (byte) 0x03};
-            default -> throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
-                    "by Gen 2 games.");
-        };
+         switch (evo.getType()) {
+             case LEVEL: case STONE: case TRADE_ITEM:
+                 return new byte[]{(byte) evo.getExtraInfo()};
+             case TRADE:
+                 return new byte[]{(byte) 0xFF};
+             case HAPPINESS:
+                 return new byte[]{(byte) 0x01};
+             case HAPPINESS_DAY:
+                 return new byte[]{(byte) 0x02};
+             case HAPPINESS_NIGHT:
+                 return new byte[]{(byte) 0x03};
+             case LEVEL_ATTACK_HIGHER:
+                 return new byte[]{(byte) evo.getExtraInfo(), (byte) 0x01};
+             case LEVEL_DEFENSE_HIGHER:
+                 return new byte[]{(byte) evo.getExtraInfo(), (byte) 0x02};
+             case LEVEL_ATK_DEF_SAME:
+                 return new byte[]{(byte) evo.getExtraInfo(), (byte) 0x03};
+             default:
+                 throw new IllegalStateException("EvolutionType " + evo.getType() + " is not supported " +
+                         "by Gen 2 games.");
+         }
     }
 
     private byte[] moveLearntToBytes(MoveLearnt ml) {
@@ -2989,9 +3057,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void setCustomPlayerGraphics(GraphicsPack unchecked, Settings.PlayerCharacterMod toReplace) {
-        if (!(unchecked instanceof Gen2PlayerCharacterGraphics playerGraphics)) {
+        if (!(unchecked instanceof Gen2PlayerCharacterGraphics)) {
             throw new IllegalArgumentException("Invalid playerGraphics");
         }
+        Gen2PlayerCharacterGraphics playerGraphics = (Gen2PlayerCharacterGraphics) unchecked;
 
         if (playerGraphics.hasFrontImage()) {
             rewritePlayerFrontImage(playerGraphics.getFrontImage(), toReplace);

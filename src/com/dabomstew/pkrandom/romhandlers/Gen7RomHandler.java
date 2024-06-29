@@ -1654,7 +1654,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     // In the case where two or more stats are tied for the highest stat, it randomly selects one.
     private int getAuraNumberForHighestStat(Pokemon boostedPokemon) {
 
-        List<Supplier<Integer>> statSuppliers = List.of(boostedPokemon::getAttack, boostedPokemon::getDefense,
+        List<Supplier<Integer>> statSuppliers = Arrays.asList(boostedPokemon::getAttack, boostedPokemon::getDefense,
                 boostedPokemon::getSpatk, boostedPokemon::getSpdef, boostedPokemon::getSpeed);
 
         // finds the highest stat(s)
@@ -3590,7 +3590,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
 
         int ability = this.getAbilityForTrainerPokemon(tp);
         if (ability == Abilities.levitate) {
-            items.removeAll(List.of(Items.shucaBerry));
+            items.remove(Items.shucaBerry);
         } else if (byType.get(Type.GROUND) == Effectiveness.DOUBLE || byType.get(Type.GROUND) == Effectiveness.QUADRUPLE) {
             items.add(Items.airBalloon);
         }

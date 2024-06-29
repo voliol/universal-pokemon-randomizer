@@ -74,12 +74,12 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
                 freeSpaceBetween(bank*GBConstants.bankSize, (bank+1)*GBConstants.bankSize - 1);
             } else {
                 // TODO: what is a good way to log this?
-                System.out.printf("""
-                        Bank 0x%2x was expected to be empty, but is not.
-                        This is a sign of a modified ROM which is not supported by the randomizer.
-                        The randomizer will handle it as well as it can, but be aware of the risk of
-                        the output being corrupted, or otherwise non-functional.
-                        """, bank);
+                System.out.printf(
+                        "Bank 0x%2x was expected to be empty, but is not.\n" +
+                        "This is a sign of a modified ROM which is not supported by the randomizer.\n" +
+                        "The randomizer will handle it as well as it can, but be aware of the risk of\n" +
+                        "the output being corrupted, or otherwise non-functional.",
+                        bank);
                 freeUnusedSpaceAtEndOfBank(bank, 0x100); // arbitrary large amount
             }
         }

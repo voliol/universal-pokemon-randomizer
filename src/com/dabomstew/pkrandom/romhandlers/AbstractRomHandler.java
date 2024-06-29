@@ -448,12 +448,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        return List.of(0);
+        return Collections.singletonList(0);
     }
 
     @Override
     public List<Integer> getAllConsumableHeldItems() {
-        return List.of(0);
+        return Collections.singletonList(0);
     }
 
     /**
@@ -463,7 +463,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      */
     @Override
     public List<Integer> getAllHeldItems() {
-        return List.of(0);
+        return Collections.singletonList(0);
     }
 
     @Override
