@@ -177,7 +177,7 @@ public class Gen4Constants {
         map.put(Type.GRASS, Arrays.asList(Items.miracleSeed, Items.meadowPlate, Items.roseIncense));
         map.put(Type.GROUND, Arrays.asList(Items.softSand, Items.earthPlate));
         map.put(Type.ICE, Arrays.asList(Items.neverMeltIce, Items.iciclePlate));
-        map.put(Type.NORMAL, List.of(Items.silkScarf));
+        map.put(Type.NORMAL, Collections.singletonList(Items.silkScarf));
         map.put(Type.POISON, Arrays.asList(Items.poisonBarb, Items.toxicPlate));
         map.put(Type.PSYCHIC, Arrays.asList(Items.twistedSpoon, Items.mindPlate, Items.oddIncense));
         map.put(Type.ROCK, Arrays.asList(Items.hardStone, Items.stonePlate, Items.rockIncense));
@@ -191,56 +191,56 @@ public class Gen4Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Moves.bounce, List.of(Items.powerHerb));
-        map.put(Moves.dig, List.of(Items.powerHerb));
-        map.put(Moves.dive, List.of(Items.powerHerb));
-        map.put(Moves.fly, List.of(Items.powerHerb));
-        map.put(Moves.razorWind, List.of(Items.powerHerb));
-        map.put(Moves.skullBash, List.of(Items.powerHerb));
-        map.put(Moves.skyAttack, List.of(Items.powerHerb));
-        map.put(Moves.solarBeam, List.of(Items.powerHerb));
+        map.put(Moves.bounce, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.dig, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.dive, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.fly, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.razorWind, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.skullBash, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.skyAttack, Collections.singletonList(Items.powerHerb));
+        map.put(Moves.solarBeam, Collections.singletonList(Items.powerHerb));
 
         map.put(Moves.fling, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.ironBall));
 
         map.put(Moves.trick, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.fullIncense, Items.laggingTail));
         map.put(Moves.switcheroo, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.fullIncense, Items.laggingTail));
 
-        map.put(Moves.trickRoom, List.of(Items.ironBall));
+        map.put(Moves.trickRoom, Collections.singletonList(Items.ironBall));
 
         map.put(Moves.facade, Arrays.asList(Items.toxicOrb, Items.flameOrb));
 
         map.put(Moves.psychoShift, Arrays.asList(Items.toxicOrb, Items.flameOrb));
 
-        map.put(Moves.lightScreen, List.of(Items.lightClay));
-        map.put(Moves.reflect, List.of(Items.lightClay));
+        map.put(Moves.lightScreen, Collections.singletonList(Items.lightClay));
+        map.put(Moves.reflect, Collections.singletonList(Items.lightClay));
 
-        map.put(Moves.hail, List.of(Items.icyRock));
+        map.put(Moves.hail, Collections.singletonList(Items.icyRock));
 
-        map.put(Moves.sandstorm, List.of(Items.smoothRock));
+        map.put(Moves.sandstorm, Collections.singletonList(Items.smoothRock));
 
-        map.put(Moves.sunnyDay, List.of(Items.heatRock));
+        map.put(Moves.sunnyDay, Collections.singletonList(Items.heatRock));
 
-        map.put(Moves.rainDance, List.of(Items.dampRock));
+        map.put(Moves.rainDance, Collections.singletonList(Items.dampRock));
 
-        map.put(Moves.bind, List.of(Items.gripClaw));
-        map.put(Moves.clamp, List.of(Items.gripClaw));
-        map.put(Moves.fireSpin, List.of(Items.gripClaw));
-        map.put(Moves.magmaStorm, List.of(Items.gripClaw));
-        map.put(Moves.outrage, List.of(Items.gripClaw));
-        map.put(Moves.sandTomb, List.of(Items.gripClaw));
-        map.put(Moves.uproar, List.of(Items.gripClaw));
-        map.put(Moves.whirlpool, List.of(Items.gripClaw));
-        map.put(Moves.wrap, List.of(Items.gripClaw));
+        map.put(Moves.bind, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.clamp, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.fireSpin, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.magmaStorm, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.outrage, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.sandTomb, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.uproar, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.whirlpool, Collections.singletonList(Items.gripClaw));
+        map.put(Moves.wrap, Collections.singletonList(Items.gripClaw));
 
-        map.put(Moves.absorb, List.of(Items.bigRoot));
-        map.put(Moves.aquaRing, List.of(Items.bigRoot));
-        map.put(Moves.drainPunch, List.of(Items.bigRoot));
-        map.put(Moves.dreamEater, List.of(Items.bigRoot));
-        map.put(Moves.gigaDrain, List.of(Items.bigRoot));
-        map.put(Moves.ingrain, List.of(Items.bigRoot));
-        map.put(Moves.leechLife, List.of(Items.bigRoot));
-        map.put(Moves.leechSeed, List.of(Items.bigRoot));
-        map.put(Moves.megaDrain, List.of(Items.bigRoot));
+        map.put(Moves.absorb, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.aquaRing, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.drainPunch, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.dreamEater, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.gigaDrain, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.ingrain, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.leechLife, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.leechSeed, Collections.singletonList(Items.bigRoot));
+        map.put(Moves.megaDrain, Collections.singletonList(Items.bigRoot));
 
         return Collections.unmodifiableMap(map);
     }
@@ -272,17 +272,17 @@ public class Gen4Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.dialga, List.of(Items.adamantOrb));
-        map.put(Species.palkia, List.of(Items.lustrousOrb));
-        map.put(Species.latias, List.of(Items.soulDew));
-        map.put(Species.latios, List.of(Items.soulDew));
+        map.put(Species.dialga, Collections.singletonList(Items.adamantOrb));
+        map.put(Species.palkia, Collections.singletonList(Items.lustrousOrb));
+        map.put(Species.latias, Collections.singletonList(Items.soulDew));
+        map.put(Species.latios, Collections.singletonList(Items.soulDew));
         map.put(Species.clamperl, Arrays.asList(Items.deepSeaTooth, Items.deepSeaScale));
-        map.put(Species.pikachu, List.of(Items.lightBall));
-        map.put(Species.chansey, List.of(Items.luckyPunch));
+        map.put(Species.pikachu, Collections.singletonList(Items.lightBall));
+        map.put(Species.chansey, Collections.singletonList(Items.luckyPunch));
         map.put(Species.ditto, Arrays.asList(Items.metalPowder, Items.quickPowder));
-        map.put(Species.cubone, List.of(Items.thickClub));
-        map.put(Species.marowak, List.of(Items.thickClub));
-        map.put(Species.farfetchd, List.of(Items.leek));
+        map.put(Species.cubone, Collections.singletonList(Items.thickClub));
+        map.put(Species.marowak, Collections.singletonList(Items.thickClub));
+        map.put(Species.farfetchd, Collections.singletonList(Items.leek));
         return Collections.unmodifiableMap(map);
     }
 
@@ -529,9 +529,10 @@ public class Gen4Constants {
     // Technically the property of being big or not is one of the sprites and not species,
     // but it just happens that all species with SOME overworld sprite that's big have all
     // their overworld sprites be big.
-    public static final List<Integer> hgssBigOverworldPokemon = List.of(Species.steelix, Species.lugia, Species.hoOh,
-            Species.wailord, Species.kyogre, Species.groudon, Species.rayquaza, Species.dialga, Species.palkia,
-            Species.regigigas, Species.giratina, Species.arceus);
+    public static final List<Integer> hgssBigOverworldPokemon = Collections.unmodifiableList(Arrays.asList(
+            Species.steelix, Species.lugia, Species.hoOh, Species.wailord, Species.kyogre, Species.groudon,
+            Species.rayquaza, Species.dialga, Species.palkia, Species.regigigas, Species.giratina, Species.arceus
+    ));
 
     /**
      * Maps {@link Species} IDs to the file indices of images found in the OtherPokemonGraphics NARC.<br>
@@ -840,15 +841,15 @@ public class Gen4Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
-        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
+        regularShopItems.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.rareBone);
         opShopItems.add(Items.luckyEgg);
     }
@@ -2407,7 +2408,7 @@ public class Gen4Constants {
     private static List<String> initLocationTagsPt() {
         List<String> locationTags = new ArrayList<>();
         locationTags.addAll(locationTagsDP.subList(0, 108));
-        locationTags.addAll(List.of("GREAT MARSH", "GREAT MARSH", "GREAT MARSH", "GREAT MARSH"));
+        locationTags.addAll(Arrays.asList("GREAT MARSH", "GREAT MARSH", "GREAT MARSH", "GREAT MARSH"));
         locationTags.addAll(locationTagsDP.subList(108, 561));
         return Collections.unmodifiableList(locationTags);
     }
@@ -2509,7 +2510,7 @@ public class Gen4Constants {
         addCopies(tags, 3, "VIRIDIAN FOREST");
         addCopies(tags, 29, "CERULEAN CAVE");
         // headbutt
-        tags.addAll(List.of("ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7",
+        tags.addAll(Arrays.asList("ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7",
                 "ROUTE 8", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 18", "ROUTE 22",
                 "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28", "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32",
                 "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37", "ROUTE 38", "ROUTE 39", "ROUTE 42",
@@ -2619,7 +2620,7 @@ public class Gen4Constants {
         addCopies(tags, 5, "VIRIDIAN FOREST");
         addCopies(tags, 35, "CERULEAN CAVE");
         // headbutt
-        tags.addAll(List.of("ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7",
+        tags.addAll(Arrays.asList("ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7",
                 "ROUTE 8", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 18", "ROUTE 22",
                 "ROUTE 25", "ROUTE 26", "ROUTE 27", "ROUTE 28", "ROUTE 29", "ROUTE 30", "ROUTE 31", "ROUTE 32",
                 "ROUTE 33", "ROUTE 34", "ROUTE 35", "ROUTE 36", "ROUTE 37", "ROUTE 38", "ROUTE 39", "ROUTE 42",
@@ -2639,7 +2640,7 @@ public class Gen4Constants {
     /**
      * Based on <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Diamond_and_Pearl/Walkthrough>this walkthrough</a>.
      */
-    public static final List<String> locationTagsTraverseOrderDPPt = List.of(
+    public static final List<String> locationTagsTraverseOrderDPPt = Collections.unmodifiableList(Arrays.asList(
             "TWINLEAF TOWN", "ROUTE 201", "LAKE VERITY", "ROUTE 202", "ROUTE 203", "OREBURGH GATE",
             "OREBURGH MINE", "ROUTE 204", "RAVAGED PATH", "VALLEY WINDWORKS", "ROUTE 205", "ETERNA FOREST",
             "OLD CHATEAU", "ETERNA CITY", "ROUTE 206", "WAYWARD CAVE", "ROUTE 207", "ROUTE 208", "ROUTE 209",
@@ -2650,13 +2651,13 @@ public class Gen4Constants {
             "SUNYSHORE CITY", "ROUTE 223", "VICTORY ROAD", "POKEMON LEAGUE", "ROUTE 224", "ROUTE 230", "ROUTE 229",
             "RESORT AREA", "ROUTE 228", "ROUTE 226", "ROUTE 227", "ROUTE 225", "STARK MOUNTAIN", "SNOWPOINT TEMPLE",
             "SENDOFF SPRING", "TURNBACK CAVE", "HONEY TREE", "UNKNOWN"
-    );
+    ));
 
     /**
      * Based on <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Gold_and_Silver/Walkthrough>this walkthrough</a>,
      * with Gen IV-only locations added.
      */
-    public static final List<String> locationTagsTraverseOrderHGSS = List.of(
+    public static final List<String> locationTagsTraverseOrderHGSS = Collections.unmodifiableList(Arrays.asList(
             "NEW BARK TOWN", "ROUTE 29", "ROUTE 46", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
             "VIOLET CITY", "SPROUT TOWER", "ROUTE 32", "RUINS OF ALPH", "UNION CAVE", "ROUTE 33", "AZALEA TOWN",
             "SLOWPOKE WELL", "ILEX FOREST", "ROUTE 34", "GOLDENROD CITY", "ROUTE 35", "NATIONAL PARK",
@@ -2672,7 +2673,7 @@ public class Gen4Constants {
             "VIRIDIAN CITY", "ROUTE 1", "PALLET TOWN",
             "ROUTE 21", "CINNABAR ISLAND", "ROUTE 20", "SEAFOAM ISLANDS", "ROUTE 19", "ROUTE 22", "ROUTE 28",
             "MT. SILVER", "MT. SILVER CAVE", "CERULEAN CAVE", "BUG CATCHING CONTEST"
-    );
+    ));
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags,
                                           int[] postGameAreas, int[] partialPostGameAreas) {
@@ -2691,24 +2692,28 @@ public class Gen4Constants {
     }
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
-        List<String> locationTags = switch (romType) {
-            case 0 -> locationTagsDP;
-            case 1 -> locationTagsPt;
-            case 2 -> (useTimeOfDay ? locationTagsUseTimeHGSS : locationTagsNoTimeHGSS);
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
-        int[] postGameAreas = switch (romType) {
-            case 0 -> dpPostGameEncounterAreas;
-            case 1 -> platPostGameEncounterAreas;
-            case 2 -> (useTimeOfDay ? hgssPostGameEncounterAreasTOD : hgssPostGameEncounterAreasNoTOD);
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
-        int[] partialPostGameAreas = switch (romType) {
-            case 0, 1 -> new int[0];
-            case 2 -> (useTimeOfDay ? hgssPartialPostGameTOD : hgssPartialPostGameNoTOD);
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
-
+        List<String> locationTags;
+        int[] postGameAreas;
+        int[] partialPostGameAreas;
+        switch (romType) {
+            case 0:
+                locationTags = locationTagsDP;
+                postGameAreas = dpPostGameEncounterAreas;
+                partialPostGameAreas = new int[0];
+                break;
+            case 1:
+                locationTags = locationTagsPt;
+                postGameAreas = platPostGameEncounterAreas;
+                partialPostGameAreas = new int[0];
+                break;
+            case 2:
+                locationTags = (useTimeOfDay ? locationTagsUseTimeHGSS : locationTagsNoTimeHGSS);
+                postGameAreas = (useTimeOfDay ? hgssPostGameEncounterAreasTOD : hgssPostGameEncounterAreasNoTOD);
+                partialPostGameAreas = (useTimeOfDay ? hgssPartialPostGameTOD : hgssPartialPostGameNoTOD);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value for romType: " + romType);
+        }
         tagEncounterAreas(encounterAreas, locationTags, postGameAreas, partialPostGameAreas);
     }
 

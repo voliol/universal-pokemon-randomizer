@@ -153,7 +153,7 @@ public class Gen2Constants {
 
     public static final byte shopItemsTerminator = (byte) 0xFF;
 
-    public static final List<String> shopNames = List.of(
+    public static final List<String> shopNames = Collections.unmodifiableList(Arrays.asList(
             "Cherrygrove Poké Mart (Before Pokédex)",
             "Cherrygrove Poké Mart (After Pokédex)",
             "Violet Poké Mart",
@@ -188,26 +188,35 @@ public class Gen2Constants {
             "Mt. Moon Square Shop",
             "Indigo Plateau Poké Mart",
             "Goldenrod Tunnel Herb Shop"
+    ));
+
+    // i.e. normal pokemarts + TM shops + shops that must be skipped for other reasons
+    public static final List<Integer> skipShops = Collections.unmodifiableList(Arrays.asList(
+            0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 29, 30, 32)
     );
 
-    public static final List<Integer> skipShops = List.of(0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16,
-            17, 18, 19, 20, 21, 22, 23, 24, 25, 29, 30, 32); // i.e. normal pokemarts + TM shops + shops that must be skipped for other reasons
-
-    public static final List<Integer> mainGameShops = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 33);
+    public static final List<Integer> mainGameShops = Collections.unmodifiableList(Arrays.asList(
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 32, 33
+    ));
 
     public static final int itemCount = 256, itemAttributesEntrySize = 7;
 
     // Held-while-traded evo items (upgrade etc.) are not considered because players are not expected to trade. Same as in Gen3Constants.
-    public static final List<Integer> evolutionItems = List.of(Gen2Items.sunStone, Gen2Items.moonStone,
-            Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone, Gen2Items.leafStone);
+    public static final List<Integer> evolutionItems = Collections.unmodifiableList(Arrays.asList(
+            Gen2Items.sunStone, Gen2Items.moonStone, Gen2Items.fireStone, Gen2Items.thunderstone, Gen2Items.waterStone,
+            Gen2Items.leafStone
+    ));
 
-    public static final List<Integer> xItems = List.of(Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
-            Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial);
+    public static final List<Integer> xItems = Collections.unmodifiableList(Arrays.asList(
+            Gen2Items.guardSpec, Gen2Items.direHit, Gen2Items.xAttack,
+            Gen2Items.xDefend, Gen2Items.xSpeed, Gen2Items.xAccuracy, Gen2Items.xSpecial
+    ));
 
-    public static final List<Integer> generalPurposeConsumableItems = List.of(Gen2Items.psnCureBerry,
-            Gen2Items.przCureBerry, Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry,
+    public static final List<Integer> generalPurposeConsumableItems = Collections.unmodifiableList(Arrays.asList(
+            Gen2Items.psnCureBerry, Gen2Items.przCureBerry, Gen2Items.burntBerry, Gen2Items.iceBerry, Gen2Items.bitterBerry,
             Gen2Items.mintBerry,Gen2Items.miracleBerry, Gen2Items.mysteryBerry, Gen2Items.berry, Gen2Items.goldBerry,
-            Gen2Items.berryJuice);
+            Gen2Items.berryJuice
+    ));
 
     public static final List<Integer> consumableHeldItems = setupConsumableHeldItems();
 
@@ -217,20 +226,21 @@ public class Gen2Constants {
         return Collections.unmodifiableList(consumableHeldItems);
     }
 
-    public static final List<Integer> generalPurposeItems = List.of(Gen2Items.brightPowder, Gen2Items.quickClaw,
-            Gen2Items.kingsRock, Gen2Items.smokeBall);
+    public static final List<Integer> generalPurposeItems = Collections.unmodifiableList(Arrays.asList(
+            Gen2Items.brightPowder, Gen2Items.quickClaw, Gen2Items.kingsRock, Gen2Items.smokeBall
+    ));
 
     public static final List<Integer> allHeldItems = setupAllHeldItems();
 
     private static List<Integer> setupAllHeldItems() {
         List<Integer> allHeldItems = new ArrayList<>(generalPurposeItems);
-        allHeldItems.addAll(List.of(
+        allHeldItems.addAll(Collections.unmodifiableList(Arrays.asList(
                 // type-boosting items
                 Gen2Items.blackbelt, Gen2Items.blackGlasses, Gen2Items.charcoal, Gen2Items.dragonScale,
                 Gen2Items.hardStone, Gen2Items.magnet, Gen2Items.metalCoat, Gen2Items.miracleSeed,
                 Gen2Items.mysticWater, Gen2Items.neverMeltIce, Gen2Items.pinkBow, Gen2Items.polkadotBow,
                 Gen2Items.sharpBeak, Gen2Items.silverPowder, Gen2Items.softSand, Gen2Items.spellTag,
-                Gen2Items.twistedSpoon));
+                Gen2Items.twistedSpoon)));
         allHeldItems.addAll(consumableHeldItems);
         return Collections.unmodifiableList(allHeldItems);
     }
@@ -239,23 +249,23 @@ public class Gen2Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>();
-        map.put(Type.BUG, List.of(Gen2Items.silverPowder));
-        map.put(Type.DARK, List.of(Gen2Items.blackGlasses));
-        map.put(Type.DRAGON, List.of(Gen2Items.dragonScale)); // NOT Dragon Fang due to a bug in the game's code
-        map.put(Type.ELECTRIC, List.of(Gen2Items.magnet));
-        map.put(Type.FIGHTING, List.of(Gen2Items.blackbelt));
-        map.put(Type.FIRE, List.of(Gen2Items.charcoal));
-        map.put(Type.FLYING, List.of(Gen2Items.sharpBeak));
-        map.put(Type.GHOST, List.of(Gen2Items.spellTag));
-        map.put(Type.GRASS, List.of(Gen2Items.miracleSeed));
-        map.put(Type.GROUND, List.of(Gen2Items.softSand));
-        map.put(Type.ICE, List.of(Gen2Items.neverMeltIce));
-        map.put(Type.NORMAL, List.of(Gen2Items.pinkBow, Gen2Items.polkadotBow));
-        map.put(Type.POISON, List.of(Gen2Items.poisonBarb));
-        map.put(Type.PSYCHIC, List.of(Gen2Items.twistedSpoon));
-        map.put(Type.ROCK, List.of(Gen2Items.hardStone));
-        map.put(Type.STEEL, List.of(Gen2Items.metalCoat));
-        map.put(Type.WATER, List.of(Gen2Items.mysticWater));
+        map.put(Type.BUG, Collections.singletonList(Gen2Items.silverPowder));
+        map.put(Type.DARK, Collections.singletonList(Gen2Items.blackGlasses));
+        map.put(Type.DRAGON, Collections.singletonList(Gen2Items.dragonScale)); // NOT Dragon Fang due to a bug in the game's code
+        map.put(Type.ELECTRIC, Collections.singletonList(Gen2Items.magnet));
+        map.put(Type.FIGHTING, Collections.singletonList(Gen2Items.blackbelt));
+        map.put(Type.FIRE, Collections.singletonList(Gen2Items.charcoal));
+        map.put(Type.FLYING, Collections.singletonList(Gen2Items.sharpBeak));
+        map.put(Type.GHOST, Collections.singletonList(Gen2Items.spellTag));
+        map.put(Type.GRASS, Collections.singletonList(Gen2Items.miracleSeed));
+        map.put(Type.GROUND, Collections.singletonList(Gen2Items.softSand));
+        map.put(Type.ICE, Collections.singletonList(Gen2Items.neverMeltIce));
+        map.put(Type.NORMAL, Arrays.asList(Gen2Items.pinkBow, Gen2Items.polkadotBow));
+        map.put(Type.POISON, Collections.singletonList(Gen2Items.poisonBarb));
+        map.put(Type.PSYCHIC, Collections.singletonList(Gen2Items.twistedSpoon));
+        map.put(Type.ROCK, Collections.singletonList(Gen2Items.hardStone));
+        map.put(Type.STEEL, Collections.singletonList(Gen2Items.metalCoat));
+        map.put(Type.WATER, Collections.singletonList(Gen2Items.mysticWater));
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
     }
@@ -264,25 +274,29 @@ public class Gen2Constants {
 
     private static Map<Integer, List<Integer>> initializeSpeciesBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Species.pikachu, List.of(Gen2Items.lightBall));
-        map.put(Species.chansey, List.of(Gen2Items.luckyPunch));
-        map.put(Species.ditto, List.of(Gen2Items.metalPowder));
-        map.put(Species.cubone, List.of(Gen2Items.thickClub));
-        map.put(Species.marowak, List.of(Gen2Items.thickClub));
-        map.put(Species.farfetchd, List.of(Gen2Items.stick));
+        map.put(Species.pikachu, Collections.singletonList(Gen2Items.lightBall));
+        map.put(Species.chansey, Collections.singletonList(Gen2Items.luckyPunch));
+        map.put(Species.ditto, Collections.singletonList(Gen2Items.metalPowder));
+        map.put(Species.cubone, Collections.singletonList(Gen2Items.thickClub));
+        map.put(Species.marowak, Collections.singletonList(Gen2Items.thickClub));
+        map.put(Species.farfetchd, Collections.singletonList(Gen2Items.stick));
         return Collections.unmodifiableMap(map);
     }
 
-    public static final List<Integer> regularShopItems = List.of(Gen2Items.pokeBall, Gen2Items.greatBall,
+    public static final List<Integer> regularShopItems = Collections.unmodifiableList(Arrays.asList(
+            Gen2Items.pokeBall, Gen2Items.greatBall,
             Gen2Items.ultraBall, Gen2Items.potion, Gen2Items.superPotion, Gen2Items.hyperPotion, Gen2Items.maxPotion,
             Gen2Items.antidote, Gen2Items.burnHeal, Gen2Items.iceHeal, Gen2Items.awakening, Gen2Items.parlyzHeal,
             Gen2Items.fullHeal, Gen2Items.fullRestore, Gen2Items.revive, Gen2Items.repel, Gen2Items.superRepel,
-            Gen2Items.maxRepel, Gen2Items.escapeRope);
+            Gen2Items.maxRepel, Gen2Items.escapeRope
+    ));
 
     // rare candy, lucky egg, and all the "valuable items"
-    public static final List<Integer> opShopItems = List.of(Gen2Items.rareCandy, Gen2Items.luckyEgg,
+    public static final List<Integer> opShopItems = Collections.unmodifiableList(Arrays.asList(
+            Gen2Items.rareCandy, Gen2Items.luckyEgg,
             Gen2Items.nugget, Gen2Items.tinyMushroom, Gen2Items.bigMushroom, Gen2Items.pearl, Gen2Items.bigPearl,
-            Gen2Items.stardust, Gen2Items.stardust, Gen2Items.brickPiece, Gen2Items.silverLeaf, Gen2Items.goldLeaf);
+            Gen2Items.stardust, Gen2Items.stardust, Gen2Items.brickPiece, Gen2Items.silverLeaf, Gen2Items.goldLeaf
+    ));
 
     public static ItemList allowedItems;
     public static ItemList nonBadItems;
@@ -425,25 +439,42 @@ public class Gen2Constants {
     public static final int nonNeutralEffectivenessCount = 110;
 
     public static int evolutionTypeToIndex(EvolutionType evolutionType) {
-        return switch (evolutionType) {
-            case LEVEL -> 1;
-            case STONE -> 2;
-            case TRADE, TRADE_ITEM -> 3;
-            case HAPPINESS, HAPPINESS_DAY, HAPPINESS_NIGHT -> 4;
-            case LEVEL_ATTACK_HIGHER, LEVEL_DEFENSE_HIGHER, LEVEL_ATK_DEF_SAME -> 5;
-            default -> -1;
-        };
+        switch (evolutionType) {
+            case LEVEL:
+                return 1;
+            case STONE:
+                return 2;
+            case TRADE:
+            case TRADE_ITEM:
+                return 3;
+            case HAPPINESS:
+            case HAPPINESS_DAY:
+            case HAPPINESS_NIGHT:
+                return 4;
+            case LEVEL_ATTACK_HIGHER:
+            case LEVEL_DEFENSE_HIGHER:
+            case LEVEL_ATK_DEF_SAME:
+                return 5;
+            default:
+                return -1;
+        }
     }
 
     public static EvolutionType evolutionTypeFromIndex(int index) {
-        return switch (index) {
-            case 1 -> EvolutionType.LEVEL;
-            case 2 -> EvolutionType.STONE;
-            case 3 -> EvolutionType.TRADE;
-            case 4 -> EvolutionType.HAPPINESS;
-            case 5 -> EvolutionType.LEVEL_ATTACK_HIGHER;
-            default -> EvolutionType.NONE;
-        };
+        switch (index) {
+            case 1:
+                return EvolutionType.LEVEL;
+            case 2:
+                return EvolutionType.STONE;
+            case 3:
+                return EvolutionType.TRADE;
+            case 4:
+                return EvolutionType.HAPPINESS;
+            case 5:
+                return EvolutionType.LEVEL_ATTACK_HIGHER;
+            default:
+                return EvolutionType.NONE;
+        }
     }
 
     public static void universalTrainerTags(List<Trainer> allTrainers) {
@@ -828,7 +859,7 @@ public class Gen2Constants {
             155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, //Fishing
     };
 
-    private static final List<String> locationTagsNoTimeGS = List.of(
+    private static final List<String> locationTagsNoTimeGS = Collections.unmodifiableList(Arrays.asList(
             // Johto cave/grass
             "SPROUT TOWER", "SPROUT TOWER",
             "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER",
@@ -901,7 +932,8 @@ public class Gen2Constants {
             "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS", "FISHING DRATINI 2",
             "FISHING WHIRL ISLANDS", "FISHING QWILFISH", "FISHING REMORAID",
             "HEADBUTT FOREST GS", "HEADBUTT FOREST GS", "HEADBUTT CANYON GS", "HEADBUTT CANYON GS", "ROCK SMASH",
-            "BUG CATCHING CONTEST");
+            "BUG CATCHING CONTEST"
+    ));
 
     private static final List<String> locationTagsUseTimeGS = initLocationTagsUseTimeGS();
 
@@ -925,14 +957,14 @@ public class Gen2Constants {
             }
         }
         locationTags.addAll(locationTagsNoTimeGS.subList(157, 170));
-        locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+        locationTags.addAll(Arrays.asList("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
                 "FISHING DRATINI 1", "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS",
                 "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
         locationTags.addAll(locationTagsNoTimeGS.subList(170, 176));
         return Collections.unmodifiableList(locationTags);
     }
 
-    private static final List<String> locationTagsNoTimeCrystal = List.of(
+    private static final List<String> locationTagsNoTimeCrystal = Collections.unmodifiableList(Arrays.asList(
             // Johto cave/grass
             "SPROUT TOWER", "SPROUT TOWER",
             "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER", "TIN TOWER",
@@ -1004,7 +1036,8 @@ public class Gen2Constants {
             "HEADBUTT CANYON C", "HEADBUTT CANYON C", "HEADBUTT TOWN", "HEADBUTT TOWN", "HEADBUTT ROUTE",
             "HEADBUTT ROUTE", "HEADBUTT KANTO", "HEADBUTT KANTO", "HEADBUTT LAKE", "HEADBUTT LAKE", "HEADBUTT FOREST C",
             "HEADBUTT FOREST C", "ROCK SMASH",
-            "BUG CATCHING CONTEST");
+            "BUG CATCHING CONTEST"
+    ));
 
     private static final List<String> locationTagsUseTimeCrystal = initLocationTagsUseTimeCrystal();
 
@@ -1028,7 +1061,7 @@ public class Gen2Constants {
             }
         }
         locationTags.addAll(locationTagsNoTimeCrystal.subList(155, 167));
-        locationTags.addAll(List.of("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
+        locationTags.addAll(Arrays.asList("FISHING SHORE", "FISHING OCEAN", "FISHING LAKE", "FISHING POND",
                 "FISHING DRATINI 1", "FISHING QWILFISH", "FISHING REMORAID", "FISHING GYARADOS",
                 "FISHING DRATINI 2", "FISHING WHIRL ISLANDS", "FISHING QWILFISH"));
         locationTags.addAll(locationTagsNoTimeCrystal.subList(167, 181));
@@ -1039,7 +1072,7 @@ public class Gen2Constants {
      * The order the player is "expected" to traverse locations. Based on
      * <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Gold_and_Silver/Walkthrough>this walkthrough</a>.
      */
-    public static final List<String> locationTagsTraverseOrder = List.of(
+    public static final List<String> locationTagsTraverseOrder = Collections.unmodifiableList(Arrays.asList(
             "NEW BARK TOWN", "ROUTE 29", "ROUTE 46", "CHERRYGROVE CITY", "ROUTE 30", "ROUTE 31", "DARK CAVE",
             "VIOLET CITY", "SPROUT TOWER", "ROUTE 32", "RUINS OF ALPH", "UNION CAVE", "ROUTE 33",
             "SLOWPOKE WELL", "ILEX FOREST", "ROUTE 34", "GOLDENROD CITY", "ROUTE 35", "NATIONAL PARK",
@@ -1059,7 +1092,7 @@ public class Gen2Constants {
             "HEADBUTT ROUTE", "HEADBUTT TOWN", "HEADBUTT KANTO", "HEADBUTT FOREST C", "HEADBUTT LAKE",
             "HEADBUTT CANYON C",
             "ROCK SMASH", "BUG CATCHING CONTEST"
-    );
+    ));
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags,
                                           int[] postGameAreas, int[] partialPostGameAreas, int[] partialPostGameCutoffs) {

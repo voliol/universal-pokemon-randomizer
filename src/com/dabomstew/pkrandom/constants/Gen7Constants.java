@@ -402,21 +402,21 @@ public class Gen7Constants {
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen6Constants.moveBoostingItems);
-        map.put(Moves.electricTerrain, List.of(Items.terrainExtender));
-        map.put(Moves.grassyTerrain, List.of(Items.terrainExtender));
-        map.put(Moves.mistyTerrain, List.of(Items.terrainExtender));
-        map.put(Moves.psychicTerrain, List.of(Items.terrainExtender));
-        map.put(Moves.strengthSap, List.of(Items.bigRoot));
+        map.put(Moves.electricTerrain, Collections.singletonList(Items.terrainExtender));
+        map.put(Moves.grassyTerrain, Collections.singletonList(Items.terrainExtender));
+        map.put(Moves.mistyTerrain, Collections.singletonList(Items.terrainExtender));
+        map.put(Moves.psychicTerrain, Collections.singletonList(Items.terrainExtender));
+        map.put(Moves.strengthSap, Collections.singletonList(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
     public static final Map<Integer, List<Integer>> abilityBoostingItems = initializeAbilityBoostingItems();
 
     private static Map<Integer, List<Integer>> initializeAbilityBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen6Constants.abilityBoostingItems);
-        map.put(Abilities.electricSurge, List.of(Items.terrainExtender));
-        map.put(Abilities.grassySurge, List.of(Items.terrainExtender));
-        map.put(Abilities.mistySurge, List.of(Items.terrainExtender));
-        map.put(Abilities.psychicSurge, List.of(Items.terrainExtender));
+        map.put(Abilities.electricSurge, Collections.singletonList(Items.terrainExtender));
+        map.put(Abilities.grassySurge, Collections.singletonList(Items.terrainExtender));
+        map.put(Abilities.mistySurge, Collections.singletonList(Items.terrainExtender));
+        map.put(Abilities.psychicSurge, Collections.singletonList(Items.terrainExtender));
         return Collections.unmodifiableMap(map);
     }
 
@@ -1086,9 +1086,9 @@ public class Gen7Constants {
 
         regularShopItemsSM = new ArrayList<>();
 
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().toList());
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().toList());
-        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().toList());
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.ultraBall, Items.pokeBall).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.potion, Items.revive).boxed().collect(Collectors.toList()));
+        regularShopItemsSM.addAll(IntStream.rangeClosed(Items.superRepel, Items.repel).boxed().collect(Collectors.toList()));
         regularShopItemsSM.add(Items.honey);
         regularShopItemsSM.add(Items.adrenalineOrb);
 
@@ -1102,12 +1102,12 @@ public class Gen7Constants {
         opShopItems.add(Items.berryJuice);
         opShopItems.add(Items.rareCandy);
         opShopItems.add(Items.oldGateau);
-        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.tinyMushroom, Items.nugget).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.rareBone);
-        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.lansatBerry, Items.rowapBerry).boxed().collect(Collectors.toList()));
         opShopItems.add(Items.luckyEgg);
         opShopItems.add(Items.prettyFeather);
-        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().toList());
+        opShopItems.addAll(IntStream.rangeClosed(Items.balmMushroom, Items.casteliacone).boxed().collect(Collectors.toList()));
     }
 
     public static ItemList getAllowedItems(int romType) {
@@ -1426,11 +1426,17 @@ public class Gen7Constants {
     }
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
-        int[] postGameAreas = switch (romType) {
-            case Type_SM -> (useTimeOfDay ? smPostGameEncounterAreasTOD : smPostGameEncounterAreasNoTOD);
-            case Type_USUM -> (useTimeOfDay ? usumPostGameEncounterAreasTOD : usumPostGameEncounterAreasNoTOD);
-            default -> throw new IllegalStateException("Unexpected value for romType: " + romType);
-        };
+        int[] postGameAreas;
+        switch (romType) {
+            case Type_SM:
+                postGameAreas = (useTimeOfDay ? smPostGameEncounterAreasTOD : smPostGameEncounterAreasNoTOD);
+                break;
+            case Type_USUM:
+                postGameAreas = (useTimeOfDay ? usumPostGameEncounterAreasTOD : usumPostGameEncounterAreasNoTOD);
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value for romType: " + romType);
+        }
         tagEncounterAreas(encounterAreas, postGameAreas);
     }
 

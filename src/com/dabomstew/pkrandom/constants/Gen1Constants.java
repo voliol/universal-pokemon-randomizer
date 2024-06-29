@@ -144,21 +144,29 @@ public class Gen1Constants {
     public static final int nonNeutralEffectivenessCount = 82;
 
     public static int evolutionTypeToIndex(EvolutionType evolutionType) {
-        return switch (evolutionType) {
-            case LEVEL -> 1;
-            case STONE -> 2;
-            case TRADE -> 3;
-            default -> -1;
-        };
+        switch (evolutionType) {
+            case LEVEL:
+                return 1;
+            case STONE:
+                return 2;
+            case TRADE:
+                return 3;
+            default:
+                return -1;
+        }
     }
 
     public static EvolutionType evolutionTypeFromIndex(int index) {
-        return switch (index) {
-            case 1 -> EvolutionType.LEVEL;
-            case 2 -> EvolutionType.STONE;
-            case 3 -> EvolutionType.TRADE;
-            default -> EvolutionType.NONE;
-        };
+        switch (index) {
+            case 1:
+                return EvolutionType.LEVEL;
+            case 2:
+                return EvolutionType.STONE;
+            case 3:
+                return EvolutionType.TRADE;
+            default:
+                return EvolutionType.NONE;
+        }
     }
 
     public static final ItemList allowedItems = setupAllowedItems();
@@ -418,7 +426,7 @@ public class Gen1Constants {
     };
 
     // the ones tagged "SUPER ROD N" are super rod encounters shared between several locations
-    private static final List<String> locationTagsRBG = List.of(
+    private static final List<String> locationTagsRBG = Collections.unmodifiableList(Arrays.asList(
             "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
             "ROUTE 10", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
             "ROUTE 19/20", "ROUTE 21", "ROUTE 21", "ROUTE 22", "ROUTE 23", "ROUTE 24", "ROUTE 25",
@@ -429,11 +437,11 @@ public class Gen1Constants {
             "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "CERULEAN CAVE", "CERULEAN CAVE",
             "CERULEAN CAVE", "ROCK TUNNEL",
             "OLD ROD", "GOOD ROD", "SUPER ROD 1", "SUPER ROD 2", "SUPER ROD 3", "SUPER ROD 4", "SUPER ROD 5",
-            "SUPER ROD 6", "SUPER ROD 7", "SUPER ROD 8", "SUPER ROD 9", "SUPER ROD 10");
+            "SUPER ROD 6", "SUPER ROD 7", "SUPER ROD 8", "SUPER ROD 9", "SUPER ROD 10"));
 
     // for whatever reason Japanese blue loads Route 19/20 as separate encounters,
     // the only difference to locationTagsRBG.
-    private static final List<String> locationTagsJapaneseBlue = List.of(
+    private static final List<String> locationTagsJapaneseBlue = Collections.unmodifiableList(Arrays.asList(
             "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 7", "ROUTE 8", "ROUTE 9",
             "ROUTE 10", "ROUTE 11", "ROUTE 12", "ROUTE 13", "ROUTE 14", "ROUTE 15", "ROUTE 16", "ROUTE 17", "ROUTE 18",
             "ROUTE 19", "ROUTE 20", "ROUTE 21", "ROUTE 21", "ROUTE 22", "ROUTE 23", "ROUTE 24", "ROUTE 25",
@@ -444,10 +452,10 @@ public class Gen1Constants {
             "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "CERULEAN CAVE", "CERULEAN CAVE",
             "CERULEAN CAVE", "ROCK TUNNEL",
             "OLD ROD", "GOOD ROD", "SUPER ROD 1", "SUPER ROD 2", "SUPER ROD 3", "SUPER ROD 4", "SUPER ROD 5",
-            "SUPER ROD 6", "SUPER ROD 7", "SUPER ROD 8", "SUPER ROD 9", "SUPER ROD 10");
+            "SUPER ROD 6", "SUPER ROD 7", "SUPER ROD 8", "SUPER ROD 9", "SUPER ROD 10"));
 
     // yellow has more specific super rod encounters
-    private static final List<String> locationTagsYellow = List.of(
+    private static final List<String> locationTagsYellow = Collections.unmodifiableList(Arrays.asList(
             "ROUTE 1", "ROUTE 2", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "ROUTE 6",
             "ROUTE 7", "ROUTE 8", "ROUTE 9",
             "ROUTE 10", "ROUTE 11", "ROUTE 12", "ROUTE 12", "ROUTE 13", "ROUTE 13",
@@ -465,13 +473,13 @@ public class Gen1Constants {
             "CINNABAR ISLAND", "ROUTE 4", "ROUTE 6", "ROUTE 24", "ROUTE 25", "ROUTE 10", "ROUTE 11", "ROUTE 12",
             "ROUTE 13", "ROUTE 17", "ROUTE 18", "ROUTE 19", "ROUTE 20", "ROUTE 21", "ROUTE 22", "ROUTE 23",
             "VERMILION CITY", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SAFARI ZONE", "SEAFOAM ISLANDS",
-            "SEAFOAM ISLANDS", "CERULEAN CAVE", "CERULEAN CAVE");
+            "SEAFOAM ISLANDS", "CERULEAN CAVE", "CERULEAN CAVE"));
 
     /**
      * The order the player is "expected" to traverse locations. Taken from
      * <a href=https://strategywiki.org/wiki/Pok%C3%A9mon_Red_and_Blue/Walkthrough>this walkthrough</a>.
      */
-    public static final List<String> locationTagsTraverseOrder = List.of(
+    public static final List<String> locationTagsTraverseOrder = Collections.unmodifiableList(Arrays.asList(
             "PALLET TOWN", "ROUTE 1", "VIRIDIAN CITY", "ROUTE 2", "ROUTE 22", "VIRIDIAN FOREST", "ROUTE 3",
             "MT.MOON", "ROUTE 4", "CERULEAN CITY", "ROUTE 24", "ROUTE 25", "ROUTE 5", "ROUTE 6", "VERMILION CITY",
             "ROUTE 11", "DIGLETT'S CAVE", "ROUTE 9", "ROUTE 10", "ROCK TUNNEL", "ROUTE 8", "ROUTE 7", "CELADON CITY",
@@ -489,7 +497,7 @@ public class Gen1Constants {
             "SUPER ROD 6", // safari zone
             "SUPER ROD 8", // route 19, route 20, route 21, seafoam islands
             "SUPER ROD 9" // route 23, cerulean cave
-    );
+    ));
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
         if (encounterAreas.size() != locationTags.size()) {
