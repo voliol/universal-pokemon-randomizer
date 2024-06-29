@@ -815,7 +815,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 Gen5Constants.locationTagsTraverseOrderBW : Gen5Constants.locationTagsTraverseOrderBW2;
         return getEncounters(useTimeOfDay).stream()
                 .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -1783,7 +1783,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             List<Pokemon> allowedHiddenHollowPokemon = new ArrayList<>();
             allowedHiddenHollowPokemon.addAll(Arrays.asList(Arrays.copyOfRange(pokes,1,494)));
             allowedHiddenHollowPokemon.addAll(
-                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).toList());
+                    Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).collect(Collectors.toList()));
 
             try {
                 NARCArchive hhNARC = this.readNARC(romEntry.getFile("HiddenHollows"));

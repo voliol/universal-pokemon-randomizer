@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,7 +47,7 @@ public class RomHandlerTest {
             names = paths.filter(Files::isRegularFile)
                     .map(p -> p.toFile().getName()).filter(s -> !s.endsWith(".txt"))
                     .map(s -> s.split(LAST_DOT_REGEX)[0])
-                    .toList();
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

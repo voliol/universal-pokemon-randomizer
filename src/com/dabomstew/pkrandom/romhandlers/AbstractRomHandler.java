@@ -44,6 +44,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An abstract base class for {@link RomHandler}s, with default implementations for many of the interface's methods.
@@ -340,7 +341,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<String> getTrainerNames() {
-        return getTrainers().stream().map(tr -> tr.name).toList();
+        return getTrainers().stream().map(tr -> tr.name).collect(Collectors.toList());
     }
 
     @Override

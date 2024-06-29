@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -58,7 +59,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
                 allEvos.entrySet().stream()
                         .filter(entry -> entry.getValue().size() != 0)
                         .sorted(comparator)
-                        .toList();
+                        .collect(Collectors.toList());
         for (Map.Entry<EvolutionType, List<Evolution>> entry : sorted) {
             System.out.println(entry.getValue().size() + "\t" + entry.getKey());
             for (Evolution evo : entry.getValue()) {
@@ -267,7 +268,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
         for (Pokemon pk : romHandler.getPokemonSet()) {
-            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).toList());
+            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).collect(Collectors.toList()));
         }
 
         Settings s = new Settings();
@@ -316,7 +317,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
         for (Pokemon pk : romHandler.getPokemonSet()) {
-            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).toList());
+            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).collect(Collectors.toList()));
         }
 
         Settings s = new Settings();
@@ -473,7 +474,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
         Map<Pokemon, List<Pokemon>> allEvosBefore = new HashMap<>();
         for (Pokemon pk : romHandler.getPokemonSet()) {
-            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).toList());
+            allEvosBefore.put(pk, pk.getEvolutionsFrom().stream().map(Evolution::getTo).collect(Collectors.toList()));
         }
 
         Settings s = new Settings();

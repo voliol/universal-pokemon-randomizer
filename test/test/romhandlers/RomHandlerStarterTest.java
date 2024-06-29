@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -370,7 +371,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
 
                 List<Pokemon> starters = romHandler.getStarters();
                 System.out.println(starters.stream().map(pk -> pk.getName() + " " + pk.getPrimaryType() +
-                        (pk.getSecondaryType() == null ? "" : " / " + pk.getSecondaryType())).toList());
+                        (pk.getSecondaryType() == null ? "" : " / " + pk.getSecondaryType())).collect(Collectors.toList()));
                 for (Pokemon starter : starters) {
                     assertTrue(starter.getPrimaryType() == t || starter.getSecondaryType() == t);
                 }

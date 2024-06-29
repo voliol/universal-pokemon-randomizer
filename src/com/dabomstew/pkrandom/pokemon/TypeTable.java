@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.dabomstew.pkrandom.pokemon.Effectiveness.*;
 
@@ -24,7 +25,7 @@ public class TypeTable {
      * @param types A list of all relevant {@link Type}s.
      */
     public TypeTable(List<Type> types) {
-        if (types.stream().distinct().toList().size() != types.size()) {
+        if (types.stream().distinct().count() != types.size()) {
             throw new IllegalArgumentException("Types must be unique");
         }
         this.types = Collections.unmodifiableList(types);

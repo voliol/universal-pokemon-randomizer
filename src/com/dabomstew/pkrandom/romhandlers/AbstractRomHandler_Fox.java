@@ -37,7 +37,7 @@ import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 
-public abstract class AbstractRomHandler implements RomHandler {
+public abstract class AbstractRomHandler_Fox implements RomHandler {
 
     private boolean restrictionsSet;
     protected List<Pokemon> mainPokemonList;

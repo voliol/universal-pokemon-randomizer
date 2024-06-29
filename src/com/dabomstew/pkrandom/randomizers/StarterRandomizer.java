@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class StarterRandomizer extends Randomizer {
 
@@ -318,7 +319,7 @@ public class StarterRandomizer extends Randomizer {
         List<Pokemon> romPokemon = romHandler.getPokemonInclFormes()
                 .stream()
                 .filter(pk -> pk == null || !pk.isActuallyCosmetic())
-                .toList();
+                .collect(Collectors.toList());
 
         for (int customStarter : starterIndices) {
             if (!(customStarter == 0)) {

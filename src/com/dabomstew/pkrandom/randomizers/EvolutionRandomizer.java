@@ -11,6 +11,7 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class EvolutionRandomizer extends Randomizer {
 
@@ -251,7 +252,7 @@ public class EvolutionRandomizer extends Randomizer {
         }
 
         private boolean isAlreadyChosenAsOtherSplitEvo(Pokemon from, Pokemon to) {
-            return from.getEvolutionsFrom().stream().map(Evolution::getTo).toList().contains(to);
+            return from.getEvolutionsFrom().stream().map(Evolution::getTo).collect(Collectors.toList()).contains(to);
         }
 
         /**
@@ -333,7 +334,7 @@ public class EvolutionRandomizer extends Randomizer {
         }
 
         private boolean isAnOriginalEvo(Pokemon from, Pokemon to) {
-            boolean isAnOriginalEvo = allOriginalEvos.get(from).stream().map(Evolution::getTo).toList().contains(to);
+            boolean isAnOriginalEvo = allOriginalEvos.get(from).stream().map(Evolution::getTo).collect(Collectors.toList()).contains(to);
             // Hard-coded Cosmoem case, since the other-version evolution doesn't actually
             // exist within the game's data, but we don't want Cosmoem to evolve into Lunala in Sun, still.
             if (from.getNumber() == Species.cosmoem) {

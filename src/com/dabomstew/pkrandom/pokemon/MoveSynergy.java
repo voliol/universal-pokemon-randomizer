@@ -31,6 +31,7 @@ import com.dabomstew.pkrandom.constants.Moves;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -45,28 +46,28 @@ public class MoveSynergy {
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.WATER && mv.category != MoveCategory.STATUS)
-                        .map(mv -> mv.number).toList());
+                        .map(mv -> mv.number).collect(Collectors.toList()));
                 break;
             case Abilities.drought:
             case Abilities.desolateLand:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.FIRE && mv.category != MoveCategory.STATUS)
-                        .map(mv -> mv.number).toList());
+                        .map(mv -> mv.number).collect(Collectors.toList()));
                 break;
             case Abilities.refrigerate:
                 if (pkType1 == Type.ICE || pkType2 == Type.ICE) {
                     synergisticMoves.addAll(moveList
                             .stream()
                             .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
-                            .map(mv -> mv.number).toList());
+                            .map(mv -> mv.number).collect(Collectors.toList()));
                 }
                 break;
             case Abilities.galeWings:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.FLYING)
-                        .map(mv -> mv.number).toList());
+                        .map(mv -> mv.number).collect(Collectors.toList()));
                 break;
             case Abilities.pixilate:
                 if (pkType1 == Type.FAIRY || pkType2 == Type.FAIRY) {
@@ -74,7 +75,7 @@ public class MoveSynergy {
                             .stream()
                             .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
                             .map(mv -> mv.number)
-                            .toList());
+                            .collect(Collectors.toList()));
                 }
                 break;
             case Abilities.aerilate:
@@ -83,7 +84,7 @@ public class MoveSynergy {
                             .stream()
                             .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
                             .map(mv -> mv.number)
-                            .toList());
+                            .collect(Collectors.toList()));
                 }
                 break;
             case Abilities.darkAura:
@@ -91,14 +92,14 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.type == Type.DARK && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.fairyAura:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.FAIRY && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.steelworker:
             case Abilities.steelySpirit:
@@ -106,7 +107,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.type == Type.STEEL && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.galvanize:
                 if (pkType1 == Type.ELECTRIC || pkType2 == Type.ELECTRIC) {
@@ -114,7 +115,7 @@ public class MoveSynergy {
                             .stream()
                             .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
                             .map(mv -> mv.number)
-                            .toList());
+                            .collect(Collectors.toList()));
                 }
                 break;
             case Abilities.electricSurge:
@@ -123,28 +124,28 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.type == Type.ELECTRIC && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.psychicSurge:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.PSYCHIC && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.grassySurge:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.GRASS && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.dragonsMaw:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.type == Type.DRAGON && mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
         }
 
@@ -163,17 +164,17 @@ public class MoveSynergy {
                     .stream()
                     .filter(mv -> mv.type == Type.FIRE && mv.category != MoveCategory.STATUS)
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
             case Abilities.drought -> antiSynergisticMoves.addAll(moveList
                     .stream()
                     .filter(mv -> mv.type == Type.WATER && mv.category != MoveCategory.STATUS)
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
             case Abilities.mistySurge -> antiSynergisticMoves.addAll(moveList
                     .stream()
                     .filter(mv -> mv.type == Type.DRAGON && mv.category != MoveCategory.STATUS)
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         return moveList
@@ -223,7 +224,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.hitratio > 0 && mv.hitratio <= 80)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.ownTempo:
             case Abilities.tangledFeet:
@@ -251,7 +252,7 @@ public class MoveSynergy {
                                 (mv.statusMoveType == StatusMoveType.DAMAGE && mv.statusPercentChance < 100) ||
                         mv.flinchPercentChance > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.swiftSwim:
             case Abilities.rainDish:
@@ -286,12 +287,12 @@ public class MoveSynergy {
                                 mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.hasSpecificStatChange(StatChangeType.ACCURACY, true))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.category == MoveCategory.PHYSICAL && mv.hitratio == perfectAccuracy)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.guts:
                 synergisticMoves.add(Moves.facade);
@@ -301,7 +302,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.recoilPercent > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.drought:
             case Abilities.desolateLand:
@@ -322,7 +323,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.isPunchMove)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.snowCloak:
             case Abilities.iceBody:
@@ -340,7 +341,7 @@ public class MoveSynergy {
                                 mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].stages > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.acupressure);
                 break;
             case Abilities.adaptability:
@@ -348,14 +349,14 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.category != MoveCategory.STATUS && (mv.type == pkType1 || mv.type == pkType2))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.skillLink:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.hitCount >= 3)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.sniper:
                 synergisticMoves.addAll(moveList
@@ -363,14 +364,14 @@ public class MoveSynergy {
                         .filter(mv -> mv.criticalChance == CriticalChance.INCREASED ||
                                 mv.criticalChance == CriticalChance.GUARANTEED)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.magicGuard:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.recoilPercent > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.mindBlown);
                 break;
             case Abilities.stall:
@@ -382,28 +383,28 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.criticalChance == CriticalChance.INCREASED)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.analytic:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.power > 0 && mv.priority < 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.noGuard:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.hitratio > 0 && mv.hitratio <= 70)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.technician:
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> (mv.power >= 40 && mv.power <= 60) || mv.hitCount > 1)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.slowStart:
                 synergisticMoves.add(Moves.transform);
@@ -428,7 +429,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.recoilPercent > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.jumpKick);
                 synergisticMoves.add(Moves.highJumpKick);
                 break;
@@ -437,7 +438,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.statusType == StatusType.SLEEP)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.sheerForce:
                 synergisticMoves.addAll(moveList
@@ -448,7 +449,7 @@ public class MoveSynergy {
                                 mv.statusMoveType == StatusMoveType.DAMAGE ||
                                 mv.flinchPercentChance > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.contrary:
                 synergisticMoves.addAll(moveList
@@ -456,7 +457,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER &&
                                 mv.statChanges[0].stages < 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.heavyMetal:
                 synergisticMoves.add(Moves.heatCrash);
@@ -472,7 +473,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.makesContact)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.regenerator:
                 synergisticMoves.add(Moves.uTurn);
@@ -484,7 +485,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.statusMoveType == StatusMoveType.NO_DAMAGE)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.destinyBond);
                 synergisticMoves.add(Moves.encore);
                 synergisticMoves.add(Moves.reflect);
@@ -523,7 +524,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.statusType == StatusType.POISON || mv.statusType == StatusType.TOXIC_POISON)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.banefulBunker);
                 break;
             case Abilities.liquidVoice:
@@ -532,7 +533,7 @@ public class MoveSynergy {
                             .stream()
                             .filter(mv -> mv.isSoundMove && mv.power > 0)
                             .map(mv -> mv.number)
-                            .toList());
+                            .collect(Collectors.toList()));
                 }
                 break;
             case Abilities.triage:
@@ -540,7 +541,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.absorbPercent > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.surgeSurfer:
                 synergisticMoves.add(Moves.electricTerrain);
@@ -551,7 +552,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.category == MoveCategory.STATUS &&
                                 (mv.statusType == StatusType.POISON || mv.statusType == StatusType.TOXIC_POISON))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
         }
 
@@ -572,7 +573,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.type == Type.FIRE &&
                                 mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 // fallthrough
             case Abilities.drizzle:
             case Abilities.sandStream:
@@ -594,7 +595,7 @@ public class MoveSynergy {
                                 mv.statChanges[0].type == StatChangeType.SPEED &&
                                 mv.statChanges[0].stages > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 antiSynergisticMoves.add(Moves.psychUp);
                 antiSynergisticMoves.add(Moves.haze);
                 break;
@@ -604,7 +605,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.type == Type.WATER &&
                                 mv.category != MoveCategory.STATUS)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 // fallthrough
             case Abilities.drought:
                 antiSynergisticMoves.add(Moves.thunder);
@@ -623,7 +624,7 @@ public class MoveSynergy {
                                 mv.hasSpecificStatChange(StatChangeType.EVASION, true) ||
                                 mv.hasSpecificStatChange(StatChangeType.EVASION, false))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.damp:
                 antiSynergisticMoves.add(Moves.selfDestruct);
@@ -652,7 +653,7 @@ public class MoveSynergy {
                                 mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].stages < 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.contrary:
                 antiSynergisticMoves.addAll(moveList
@@ -661,7 +662,7 @@ public class MoveSynergy {
                                 mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].stages > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 antiSynergisticMoves.add(Moves.shellSmash);
                 break;
             case Abilities.lightMetal:
@@ -673,7 +674,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == StatusType.SLEEP))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 antiSynergisticMoves.add(Moves.rest);
                 break;
             case Abilities.psychicSurge:
@@ -681,7 +682,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> (mv.priority > 0))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Abilities.mistySurge:
                 antiSynergisticMoves.addAll(moveList
@@ -694,7 +695,7 @@ public class MoveSynergy {
                                 mv.statusType == StatusType.POISON ||
                                 mv.statusType == StatusType.TOXIC_POISON)))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 antiSynergisticMoves.add(Moves.rest);
                 break;
             case Abilities.grassySurge:
@@ -802,7 +803,7 @@ public class MoveSynergy {
                     .stream()
                     .filter(mv -> mv.flinchPercentChance > 0 && mv.priority == 0)
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         if (mv1.flinchPercentChance > 0 && mv1.priority == 0) {
@@ -814,7 +815,7 @@ public class MoveSynergy {
                                     mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
                                     mv.hasSpecificStatChange(StatChangeType.SPEED, true)))
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         if (mv1.statChanges[0].stages >= 2 || mv1.statChanges[1].type != StatChangeType.NONE) {
@@ -842,7 +843,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> (mv.isTrapMove))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 // fallthrough
             case Moves.poisonPowder:
             case Moves.poisonGas:
@@ -857,7 +858,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.category == MoveCategory.STATUS &&
                                 (mv.statusType == StatusType.POISON || mv.statusType == StatusType.TOXIC_POISON))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.protect:
             case Moves.detect:
@@ -871,7 +872,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.statChanges[0].stages >= 2 || mv.statChanges[1].type != StatChangeType.NONE)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.shellSmash);
                 break;
             case Moves.willOWisp:
@@ -883,7 +884,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> (mv.hitratio <= 50))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.sunnyDay:
                 synergisticMoves.add(Moves.solarBlade);
@@ -900,7 +901,7 @@ public class MoveSynergy {
                                 (mv.hasSpecificStatChange(StatChangeType.ATTACK, false) ||
                                         mv.hasSpecificStatChange(StatChangeType.SPECIAL_ATTACK, false)))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.endure:
                 synergisticMoves.add(Moves.reversal);
@@ -912,7 +913,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.category != MoveCategory.STATUS && mv.priority > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.thunderWave:
             case Moves.glare:
@@ -921,12 +922,12 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.flinchPercentChance > 0)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.category == MoveCategory.STATUS && mv.statusType == StatusType.CONFUSION)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.hex);
                 break;
             case Moves.hail:
@@ -947,7 +948,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> (mv.isTrapMove))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.spikes:
             case Moves.stealthRock:
@@ -965,7 +966,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.criticalChance == CriticalChance.INCREASED)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.focusPunch:
             case Moves.dreamEater:
@@ -975,7 +976,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.statusMoveType == StatusMoveType.NO_DAMAGE &&
                                 mv.statusType == StatusType.SLEEP)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 break;
             case Moves.torment:
                 synergisticMoves.add(Moves.encore);
@@ -989,7 +990,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.statusMoveType == StatusMoveType.NO_DAMAGE &&
                                 mv.statusType != StatusType.CONFUSION)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.banefulBunker);
                 break;
             case Moves.storedPower:
@@ -997,7 +998,7 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> mv.statChanges[0].stages > 1 || mv.statChanges[1].type != StatChangeType.NONE)
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.acupressure);
                 synergisticMoves.add(Moves.shellSmash);
                 break;
@@ -1033,13 +1034,13 @@ public class MoveSynergy {
                                 .stream()
                                 .filter(entry -> entry.getValue() == Effectiveness.DOUBLE)
                                 .map(Map.Entry::getKey)
-                                .toList();
+                                .collect(Collectors.toList());
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.category != MoveCategory.STATUS &&
                                 superEffectiveAgainstNVE.contains(mv.type))
                         .map(mv -> mv.number)
-                        .toList());
+                        .collect(Collectors.toList()));
             }
         }
 
@@ -1048,12 +1049,12 @@ public class MoveSynergy {
                     .stream()
                     .filter(mv -> mv.category == MoveCategory.PHYSICAL)
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
             case Moves.nastyPlot, Moves.tailGlow -> synergisticMoves.addAll(moveList
                     .stream()
                     .filter(mv -> mv.category == MoveCategory.SPECIAL)
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         return moveList
@@ -1074,7 +1075,7 @@ public class MoveSynergy {
                             (mv.statusType == mv1.statusType ||
                                     (mv1.statusType != StatusType.CONFUSION && mv.statusType != StatusType.CONFUSION))))
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         switch (mv1.number) {
@@ -1139,7 +1140,7 @@ public class MoveSynergy {
                     .stream()
                     .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == mv1.type))
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         switch (mv1.number) {
@@ -1147,12 +1148,12 @@ public class MoveSynergy {
                     .stream()
                     .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == Type.FIRE))
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
             case Moves.mudSport -> antiSynergisticMoves.addAll(moveList
                     .stream()
                     .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == Type.ELECTRIC))
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
 
         return moveList
@@ -1170,7 +1171,7 @@ public class MoveSynergy {
                     .stream()
                     .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == StatusType.SLEEP))
                     .map(mv -> mv.number)
-                    .toList());
+                    .collect(Collectors.toList()));
         }
         return moveList
                 .stream()

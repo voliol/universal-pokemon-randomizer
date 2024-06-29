@@ -1768,7 +1768,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				Gen4Constants.locationTagsTraverseOrderHGSS : Gen4Constants.locationTagsTraverseOrderDPPt;
 		return getEncounters(useTimeOfDay).stream()
 				.sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-				.toList();
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -3372,7 +3372,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		List<Move> posMoves = moveIDs.stream().map(moveID -> moves[moveID])
 				.distinct()
 				.sorted(Comparator.comparingDouble(m -> calculateMoveStrength(m, pk)))
-				.toList();
+				.collect(Collectors.toList());
 		return posMoves.get(posMoves.size() - 1);
 	}
 
@@ -4268,8 +4268,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 	@Override
 	public Map<Integer, Shop> getShopItems() {
 		List<String> shopNames = Gen4Constants.getShopNames(romEntry.getRomType());
-		List<Integer> mainGameShops = Arrays.stream(romEntry.getArrayValue("MainGameShops")).boxed().toList();
-		List<Integer> skipShops = Arrays.stream(romEntry.getArrayValue("SkipShops")).boxed().toList();
+		List<Integer> mainGameShops = Arrays.stream(romEntry.getArrayValue("MainGameShops")).boxed().collect(Collectors.toList());
+		List<Integer> skipShops = Arrays.stream(romEntry.getArrayValue("SkipShops")).boxed().collect(Collectors.toList());
 		int shopCount = romEntry.getIntValue("ShopCount");
 		Map<Integer, Shop> shopItemsMap = new TreeMap<>();
 		String shopDataPrefix = romEntry.getStringValue("ShopDataPrefix");

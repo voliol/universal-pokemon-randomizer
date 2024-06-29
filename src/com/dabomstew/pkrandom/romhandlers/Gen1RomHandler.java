@@ -41,6 +41,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * {@link RomHandler} for Red, Blue, Yellow, Green.
@@ -934,7 +935,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
         return getEncounters(useTimeOfDay).stream()
                 .sorted(Comparator.comparingInt(a -> Gen1Constants.locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

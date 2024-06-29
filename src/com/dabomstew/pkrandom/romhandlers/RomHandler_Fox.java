@@ -36,7 +36,7 @@ import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.pokemon.*;
 
-public interface RomHandler {
+public interface RomHandler_Fox {
 
     abstract class Factory {
         public RomHandler create(Random random) {

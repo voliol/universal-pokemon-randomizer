@@ -893,7 +893,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -932,7 +932,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
             byte[] displayCRO = readFile(romEntry.getFile("StarterDisplay"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -1003,7 +1003,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -1029,7 +1029,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             byte[] staticCRO = readFile(romEntry.getFile("StaticPokemon"));
 
-            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+            List<Integer> starterIndices = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
 
             // Gift Pokemon
             int count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -2089,7 +2089,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 statics.add(se);
             }
 
-            List<Integer> skipStarters = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+            List<Integer> skipStarters = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
 
             // Gift Pokemon
             count = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());
@@ -2218,7 +2218,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
             }
 
-            List<Integer> skipStarters = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().toList();
+            List<Integer> skipStarters = Arrays.stream(romEntry.getArrayValue("StarterIndices")).boxed().collect(Collectors.toList());
 
             // Gift Pokemon
             int giftCount = Gen6Constants.getGiftPokemonCount(romEntry.getRomType());

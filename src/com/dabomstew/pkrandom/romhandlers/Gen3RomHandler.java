@@ -1446,7 +1446,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 Gen3Constants.locationTagsTraverseOrderFRLG : Gen3Constants.locationTagsTraverseOrderRSE;
         return getEncounters(useTimeOfDay).stream()
                 .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -2997,8 +2997,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     @Override
     public Map<Integer, Shop> getShopItems() {
         List<String> shopNames = Gen3Constants.getShopNames(romEntry.getRomType());
-        List<Integer> mainGameShops = Arrays.stream(romEntry.getArrayValue("MainGameShops")).boxed().toList();
-        List<Integer> skipShops = Arrays.stream(romEntry.getArrayValue("SkipShops")).boxed().toList();
+        List<Integer> mainGameShops = Arrays.stream(romEntry.getArrayValue("MainGameShops")).boxed().collect(Collectors.toList());
+        List<Integer> skipShops = Arrays.stream(romEntry.getArrayValue("SkipShops")).boxed().collect(Collectors.toList());
         Map<Integer, Shop> shopItemsMap = new TreeMap<>();
         int[] shopItemOffsets = romEntry.getArrayValue("ShopItemOffsets");
         for (int i = 0; i < shopItemOffsets.length; i++) {

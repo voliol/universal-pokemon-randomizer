@@ -516,8 +516,8 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
             if (eliteFourIndices.contains(tr.index)) {
                 System.out.println("-E4 Member-");
-                System.out.println("Non-local: " + nonLocal.stream().map(Pokemon::getName).toList());
-                System.out.println("Local: " + localWithRelatives.stream().map(Pokemon::getName).toList());
+                System.out.println("Non-local: " + nonLocal.stream().map(Pokemon::getName).collect(Collectors.toList()));
+                System.out.println("Local: " + localWithRelatives.stream().map(Pokemon::getName).collect(Collectors.toList()));
                 int nonLocalCount = 0;
                 for (TrainerPokemon tp : tr.pokemon) {
                     if (nonLocal.contains(tp.pokemon)) {

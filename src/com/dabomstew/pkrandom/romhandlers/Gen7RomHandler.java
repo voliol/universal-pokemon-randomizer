@@ -1376,7 +1376,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // them. This code distinguishes them by appending the number of times they've appeared previously to
             // the area name.
             if (i > 0) {
-                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).toList();
+                List<String> goodLocationUpToCurrent = goodLocationList.stream().limit(i - 1).collect(Collectors.toList());
                 if (!goodLocationList.get(i).isEmpty() && goodLocationUpToCurrent.contains(goodLocationList.get(i))) {
                     int numberOfUsages = Collections.frequency(goodLocationUpToCurrent, goodLocationList.get(i));
                     String updatedLocation = goodLocationList.get(i) + " (" + (numberOfUsages + 1) + ")";
@@ -1870,7 +1870,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         List<TotemPokemon> totems = new ArrayList<>();
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
 
             // Static encounters
             byte[] staticEncountersFile = staticGarc.files.get(1).get(0);
@@ -1912,7 +1912,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     public void setTotemPokemon(List<TotemPokemon> totemPokemon) {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
-            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList();
+            List<Integer> totemIndices = Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList());
             Iterator<TotemPokemon> totemIter = totemPokemon.iterator();
 
             // Static encounters
@@ -1976,8 +1976,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> skipIndices = new ArrayList<>( // Arrays.stream.toList() is immutable so we have to wrap it.
-                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList());
-            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList()));
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
 
             // Gifts, start at 3 to skip the starters
             byte[] giftsFile = staticGarc.files.get(0).get(0);
@@ -2118,8 +2118,8 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             unlinkStaticEncounters(staticPokemon);
             GARCArchive staticGarc = readGARC(romEntry.getFile("StaticPokemon"), true);
             List<Integer> skipIndices = new ArrayList<>(
-                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().toList());
-            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().toList());
+                    Arrays.stream(romEntry.getArrayValue("TotemPokemonIndices")).boxed().collect(Collectors.toList()));
+            skipIndices.addAll(Arrays.stream(romEntry.getArrayValue("AllyPokemonIndices")).boxed().collect(Collectors.toList()));
             Iterator<StaticEncounter> staticIter = staticPokemon.iterator();
 
             // Gifts, start at 3 to skip the starters
