@@ -37,7 +37,8 @@ public class MoveLearnt {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof MoveLearnt other) {
+        if (o instanceof MoveLearnt) {
+            MoveLearnt other = (MoveLearnt) o;
             return other.move == move && other.level == level;
         }
         return false;

@@ -58,8 +58,7 @@ public class Gen2PaletteRandomizer extends PaletteRandomizer {
 		this.shinyFromNormal = settings.isPokemonPalettesShinyFromNormal();
 		boolean evolutionSanity = settings.isPokemonPalettesFollowEvolutions();
 
-		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler.getPokemonSet());
-		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
+		copyUpEvolutionsHelper.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
 	}
 

@@ -160,21 +160,27 @@ public class MoveSynergy {
         List<Integer> antiSynergisticMoves = new ArrayList<>();
 
         switch (ability) {
-            case Abilities.drizzle -> antiSynergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> mv.type == Type.FIRE && mv.category != MoveCategory.STATUS)
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
-            case Abilities.drought -> antiSynergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> mv.type == Type.WATER && mv.category != MoveCategory.STATUS)
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
-            case Abilities.mistySurge -> antiSynergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> mv.type == Type.DRAGON && mv.category != MoveCategory.STATUS)
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
+            case Abilities.drizzle:
+                antiSynergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.type == Type.FIRE && mv.category != MoveCategory.STATUS)
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
+            case Abilities.drought:
+                antiSynergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.type == Type.WATER && mv.category != MoveCategory.STATUS)
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
+            case Abilities.mistySurge:
+                antiSynergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.type == Type.DRAGON && mv.category != MoveCategory.STATUS)
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
         }
 
         return moveList
@@ -1045,16 +1051,21 @@ public class MoveSynergy {
         }
 
         switch (mv1.number) {
-            case Moves.swordsDance -> synergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> mv.category == MoveCategory.PHYSICAL)
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
-            case Moves.nastyPlot, Moves.tailGlow -> synergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> mv.category == MoveCategory.SPECIAL)
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
+            case Moves.swordsDance:
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.category == MoveCategory.PHYSICAL)
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
+            case Moves.nastyPlot:
+            case Moves.tailGlow:
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.category == MoveCategory.SPECIAL)
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
         }
 
         return moveList
@@ -1079,33 +1090,43 @@ public class MoveSynergy {
         }
 
         switch (mv1.number) {
-            case Moves.protect -> {
+            case Moves.protect: {
                 antiSynergisticMoves.add(Moves.detect);
                 antiSynergisticMoves.add(Moves.banefulBunker);
                 antiSynergisticMoves.add(Moves.kingsShield);
+                break;
             }
-            case Moves.detect -> {
+            case Moves.detect: {
                 antiSynergisticMoves.add(Moves.protect);
                 antiSynergisticMoves.add(Moves.banefulBunker);
                 antiSynergisticMoves.add(Moves.kingsShield);
+                break;
             }
-            case Moves.kingsShield -> {
+            case Moves.kingsShield: {
                 antiSynergisticMoves.add(Moves.protect);
                 antiSynergisticMoves.add(Moves.detect);
                 antiSynergisticMoves.add(Moves.banefulBunker);
+                break;
             }
-            case Moves.banefulBunker -> {
+            case Moves.banefulBunker: {
                 antiSynergisticMoves.add(Moves.protect);
                 antiSynergisticMoves.add(Moves.detect);
                 antiSynergisticMoves.add(Moves.kingsShield);
+                break;
             }
-            case Moves.returnTheMoveNotTheKeyword -> antiSynergisticMoves.add(Moves.frustration);
-            case Moves.frustration -> antiSynergisticMoves.add(Moves.returnTheMoveNotTheKeyword);
-            case Moves.leechSeed, Moves.perishSong -> {
+            case Moves.returnTheMoveNotTheKeyword:
+                antiSynergisticMoves.add(Moves.frustration);
+                break;
+            case Moves.frustration:
+                antiSynergisticMoves.add(Moves.returnTheMoveNotTheKeyword);
+                break;
+            case Moves.leechSeed:
+            case Moves.perishSong: {
                 antiSynergisticMoves.add(Moves.whirlwind);
                 antiSynergisticMoves.add(Moves.roar);
                 antiSynergisticMoves.add(Moves.circleThrow);
                 antiSynergisticMoves.add(Moves.dragonTail);
+                break;
             }
         }
 
@@ -1144,16 +1165,20 @@ public class MoveSynergy {
         }
 
         switch (mv1.number) {
-            case Moves.waterSport -> antiSynergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == Type.FIRE))
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
-            case Moves.mudSport -> antiSynergisticMoves.addAll(moveList
-                    .stream()
-                    .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == Type.ELECTRIC))
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
+            case Moves.waterSport:
+                antiSynergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == Type.FIRE))
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
+            case Moves.mudSport:
+                antiSynergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> (mv.category != MoveCategory.STATUS && mv.type == Type.ELECTRIC))
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
         }
 
         return moveList
@@ -1166,12 +1191,18 @@ public class MoveSynergy {
     public static List<Move> requiresOtherMove(Move mv1, List<Move> moveList) {
         List<Integer> requiresMove = new ArrayList<>();
         switch (mv1.number) {
-            case Moves.spitUp, Moves.swallow -> requiresMove.add(Moves.stockpile);
-            case Moves.dreamEater, Moves.nightmare -> requiresMove.addAll(moveList
-                    .stream()
-                    .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == StatusType.SLEEP))
-                    .map(mv -> mv.number)
-                    .collect(Collectors.toList()));
+            case Moves.spitUp:
+            case Moves.swallow:
+                requiresMove.add(Moves.stockpile);
+                break;
+            case Moves.dreamEater:
+            case Moves.nightmare:
+                requiresMove.addAll(moveList
+                        .stream()
+                        .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == StatusType.SLEEP))
+                        .map(mv -> mv.number)
+                        .collect(Collectors.toList()));
+                break;
         }
         return moveList
                 .stream()

@@ -97,7 +97,8 @@ public abstract class AbstractGBCRomEntry extends AbstractGBRomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof AbstractGBCRomEntry gbcOther) {
+        if (other instanceof AbstractGBCRomEntry) {
+            AbstractGBCRomEntry gbcOther = (AbstractGBCRomEntry) other;
             extraTableFile = gbcOther.extraTableFile;
             if (getIntValue("CopyTMText") == 1) {
                 tmTexts.addAll(gbcOther.tmTexts);

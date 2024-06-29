@@ -33,16 +33,10 @@ import java.util.Random;
  * should be done elsewhere, with implementations of this class only handling
  * changes done to said palettes.
  */
-public abstract class PaletteRandomizer {
-
-	protected final RomHandler romHandler;
-	protected final Settings settings;
-	protected final Random random;
+public abstract class PaletteRandomizer extends Randomizer {
 
 	public PaletteRandomizer(RomHandler romHandler, Settings settings, Random random) {
-		this.romHandler = romHandler;
-		this.settings = settings;
-		this.random = random;
+		super(romHandler, settings, random);
 	}
 
 	public abstract void randomizePokemonPalettes();

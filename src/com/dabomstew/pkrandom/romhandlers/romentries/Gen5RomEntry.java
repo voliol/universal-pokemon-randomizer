@@ -48,25 +48,28 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
                 String[] segments = m.group().split("=");
                 String[] offsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 switch (segments[0]) {
-                    case "Species" -> {
+                    case "Species": {
                         speciesOverlayOffsets = new int[offsets.length];
                         for (int i = 0; i < speciesOverlayOffsets.length; i++) {
                             speciesOverlayOffsets[i] = IniEntryReader.parseInt(offsets[i]);
                         }
+                        break;
                     }
-                    case "Level" -> {
+                    case "Level": {
                         levelOverlayOffsets = new int[offsets.length];
                         for (int i = 0; i < levelOverlayOffsets.length; i++) {
                             levelOverlayOffsets[i] = IniEntryReader.parseInt(offsets[i]);
                         }
+                        break;
                     }
-                    case "Script" -> {
+                    case "Script": {
                         speciesScriptOffsets = new InFileEntry[offsets.length];
                         for (int i = 0; i < speciesScriptOffsets.length; i++) {
                             String[] parts = offsets[i].split(":");
                             speciesScriptOffsets[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]),
                                     IniEntryReader.parseInt(parts[1]));
                         }
+                        break;
                     }
                 }
             }
@@ -165,7 +168,8 @@ public class Gen5RomEntry extends AbstractDSRomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof Gen5RomEntry gen5Other) {
+        if (other instanceof Gen5RomEntry) {
+            Gen5RomEntry gen5Other = (Gen5RomEntry) other;
             offsetArrayEntries.putAll(gen5Other.offsetArrayEntries);
             if (isCopyStaticPokemon()) {
                 staticPokemonFakeBall.addAll(gen5Other.staticPokemonFakeBall);

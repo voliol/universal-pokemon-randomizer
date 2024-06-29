@@ -29,38 +29,59 @@ public enum ExpCurve {
     SLOW, MEDIUM_SLOW, MEDIUM_FAST, FAST, ERRATIC, FLUCTUATING;
 
     public static ExpCurve fromByte(byte curve) {
-        return switch (curve) {
-            case 0 -> MEDIUM_FAST;
-            case 1 -> ERRATIC;
-            case 2 -> FLUCTUATING;
-            case 3 -> MEDIUM_SLOW;
-            case 4 -> FAST;
-            case 5 -> SLOW;
-            default -> null;
-        };
+        switch (curve) {
+            case 0:
+                return MEDIUM_FAST;
+            case 1:
+                return ERRATIC;
+            case 2:
+                return FLUCTUATING;
+            case 3:
+                return MEDIUM_SLOW;
+            case 4:
+                return FAST;
+            case 5:
+                return SLOW;
+            default:
+                return null;
+        }
     }
 
     public byte toByte() {
-        return switch (this) {
-            case SLOW -> 5;
-            case MEDIUM_SLOW -> 3;
-            case MEDIUM_FAST -> 0;
-            case FAST -> 4;
-            case ERRATIC -> 1;
-            case FLUCTUATING -> 2;
-        };
+        switch (this) {
+            case SLOW:
+                return 5;
+            case MEDIUM_SLOW:
+                return 3;
+            case MEDIUM_FAST:
+                return 0;
+            case FAST:
+                return 4;
+            case ERRATIC:
+                return 1;
+            case FLUCTUATING:
+                return 2;
+        }
+        throw new RuntimeException("Should not get here");
     }
 
     @Override
     public String toString() {
-        return switch (this) {
-            case MEDIUM_FAST -> "Medium Fast";
-            case ERRATIC -> "Erratic";
-            case FLUCTUATING -> "Fluctuating";
-            case MEDIUM_SLOW -> "Medium Slow";
-            case FAST -> "Fast";
-            case SLOW -> "Slow";
-        };
+        switch (this) {
+            case MEDIUM_FAST:
+                return "Medium Fast";
+            case ERRATIC:
+                return "Erratic";
+            case FLUCTUATING:
+                return "Fluctuating";
+            case MEDIUM_SLOW:
+                return "Medium Slow";
+            case FAST:
+                return "Fast";
+            case SLOW:
+                return "Slow";
+        }
+        throw new RuntimeException("Should not get here");
     }
 
 }

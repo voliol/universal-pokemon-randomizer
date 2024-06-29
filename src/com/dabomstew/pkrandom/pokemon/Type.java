@@ -24,13 +24,13 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.services.TypeService;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-
-import com.dabomstew.pkrandom.RomFunctions;
-import com.dabomstew.pkrandom.romhandlers.AbstractRomHandler;
 
 public enum Type {
 
@@ -62,19 +62,25 @@ public enum Type {
      * TypeTable#getTypes() will eventually support custom types, this will not.
      */
     public static List<Type> getAllTypes(int generation) {
-        return switch (generation) {
-            case 1 -> GEN1;
-            case 2, 3, 4, 5 -> GEN2THROUGH5;
-            default -> GEN6PLUS;
-        };
+        switch (generation) {
+            case 1:
+                return GEN1;
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                return GEN2THROUGH5;
+            default:
+                return GEN6PLUS;
+        }
     }
 
     /**
-     * Deprecated for {@link AbstractRomHandler#randomType()}
+     * Deprecated for {@link TypeService#randomType(Random)}
      */
     @Deprecated
     public static Type randomType(Random random) {
-        System.out.println("Type.getAllTypes() is deprecated. Please use AbstractRomHandler#randomType() instead.");
+        System.out.println("Type.getAllTypes() is deprecated. Please use TypeService#randomType(Random) instead.");
         return VALUES.get(random.nextInt(SIZE));
     }
 

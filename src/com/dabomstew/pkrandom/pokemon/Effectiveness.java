@@ -74,11 +74,11 @@ public enum Effectiveness {
     }
 
     /**
-     * Deprecated for {@link TypeTable#notVeryEffective(Type)}
+     * Deprecated for {@link TypeTable#notVeryEffectiveWhenAttacking(Type)}
      */
     @Deprecated
     public static List<Type> notVeryEffective(Type attackingType, int generation, boolean effectivenessUpdated) {
-        System.out.println("Effectiveness.notVeryEffective(Type, int, boolean) is deprecated. Use TypeTable#notVeryEffective(Type) instead.");
+        System.out.println("Effectiveness.notVeryEffective(Type, int, boolean) is deprecated. Use TypeTable#notVeryEffectiveWhenAttacking(Type) instead.");
         Effectiveness[][] effectivenesses;
         if (generation == 1) {
             effectivenesses = effectivenessUpdated ? gen2Through5Table : gen1Table;
@@ -98,11 +98,11 @@ public enum Effectiveness {
     }
 
     /**
-     * Deprecated for {@link TypeTable#superEffective(Type)}
+     * Deprecated for {@link TypeTable#superEffectiveWhenAttacking(Type)}
      */
     @Deprecated
     public static List<Type> superEffective(Type attackingType, int generation, boolean effectivenessUpdated) {
-        System.out.println("Effectiveness.notVeryEffective(Type, int, boolean) is deprecated. Use TypeTable#superEffective(Type) instead.");
+        System.out.println("Effectiveness.notVeryEffective(Type, int, boolean) is deprecated. Use TypeTable#superEffectiveWhenAttacking(Type) instead.");
         Effectiveness[][] effectivenesses;
         if (generation == 1) {
             effectivenesses = effectivenessUpdated ? gen2Through5Table : gen1Table;

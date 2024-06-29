@@ -113,7 +113,8 @@ public abstract class Abstract3DSRomEntry extends RomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof Abstract3DSRomEntry threeDSOther) {
+        if (other instanceof Abstract3DSRomEntry) {
+            Abstract3DSRomEntry threeDSOther = (Abstract3DSRomEntry) other;
             linkedEncounters.addAll(threeDSOther.linkedEncounters);
             offsetArrayEntries.putAll(threeDSOther.offsetArrayEntries);
             files.putAll(threeDSOther.files);

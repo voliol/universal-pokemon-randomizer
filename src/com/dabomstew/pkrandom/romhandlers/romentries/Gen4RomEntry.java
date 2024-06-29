@@ -51,29 +51,32 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
                 String[] segments = m.group().split("=");
                 String[] offsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 switch (segments[0]) {
-                    case "Species" -> {
+                    case "Species" : {
                         speciesEntries = new InFileEntry[offsets.length];
                         for (int i = 0; i < speciesEntries.length; i++) {
                             String[] parts = offsets[i].split(":");
                             speciesEntries[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]),
                                     IniEntryReader.parseInt(parts[1]));
                         }
+                        break;
                     }
-                    case "Level" -> {
+                    case "Level" : {
                         levelEntries = new InFileEntry[offsets.length];
                         for (int i = 0; i < levelEntries.length; i++) {
                             String[] parts = offsets[i].split(":");
                             levelEntries[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]),
                                     IniEntryReader.parseInt(parts[1]));
                         }
+                        break;
                     }
-                    case "Text" -> {
+                    case "Text" : {
                         textEntries = new Gen4RomHandler.TextEntry[offsets.length];
                         for (int i = 0; i < textEntries.length; i++) {
                             String[] parts = offsets[i].split(":");
                             textEntries[i] = new Gen4RomHandler.TextEntry(IniEntryReader.parseInt(parts[0]),
                                     IniEntryReader.parseInt(parts[1]));
                         }
+                        break;
                     }
                 }
             }
@@ -92,33 +95,37 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
                 String[] segments = m.group().split("=");
                 String[] offsets = segments[1].substring(1, segments[1].length() - 1).split(",");
                 switch (segments[0]) {
-                    case "Species" -> {
+                    case "Species" : {
                         speciesCodeOffsets = new int[offsets.length];
                         for (int i = 0; i < speciesCodeOffsets.length; i++) {
                             speciesCodeOffsets[i] = IniEntryReader.parseInt(offsets[i]);
                         }
+                        break;
                     }
-                    case "Level" -> {
+                    case "Level" : {
                         levelCodeOffsets = new int[offsets.length];
                         for (int i = 0; i < levelCodeOffsets.length; i++) {
                             levelCodeOffsets[i] = IniEntryReader.parseInt(offsets[i]);
                         }
+                        break;
                     }
-                    case "Script" -> {
+                    case "Script" : {
                         speciesScriptOffsets = new InFileEntry[offsets.length];
                         for (int i = 0; i < speciesScriptOffsets.length; i++) {
                             String[] parts = offsets[i].split(":");
                             speciesScriptOffsets[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]),
                                     IniEntryReader.parseInt(parts[1]));
                         }
+                        break;
                     }
-                    case "Gender" -> {
+                    case "Gender" : {
                         genderOffsets = new InFileEntry[offsets.length];
                         for (int i = 0; i < genderOffsets.length; i++) {
                             String[] parts = offsets[i].split(":");
                             genderOffsets[i] = new InFileEntry(IniEntryReader.parseInt(parts[0]),
                                     IniEntryReader.parseInt(parts[1]));
                         }
+                        break;
                     }
                 }
             }
@@ -268,7 +275,8 @@ public class Gen4RomEntry extends AbstractDSRomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof Gen4RomEntry gen4Other) {
+        if (other instanceof Gen4RomEntry) {
+            Gen4RomEntry gen4Other = (Gen4RomEntry) other;
             if (isCopyStaticPokemon() && ignoreGameCornerStatics) {
                 removeStaticPokemonIf(staticPokemon -> staticPokemon instanceof Gen4RomHandler.StaticPokemonGameCorner);
             }

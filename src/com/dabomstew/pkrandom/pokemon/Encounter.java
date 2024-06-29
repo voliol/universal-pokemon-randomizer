@@ -96,10 +96,11 @@ public class Encounter {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof Encounter otherEnc) {
-            return level == otherEnc.level && maxLevel == otherEnc.maxLevel && pokemon.equals(otherEnc.pokemon)
-                    && formeNumber == otherEnc.formeNumber && isSOS == otherEnc.isSOS && sosType == otherEnc.sosType;
+    public boolean equals(Object o) {
+        if (o instanceof Encounter) {
+            Encounter other = (Encounter) o;
+            return level == other.level && maxLevel == other.maxLevel && pokemon.equals(other.pokemon)
+                    && formeNumber == other.formeNumber && isSOS == other.isSOS && sosType == other.sosType;
         }
         return false;
     }

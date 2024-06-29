@@ -48,8 +48,12 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
                     offsets[i] = IniEntryReader.parseInt(romOffsets[i]);
                 }
                 switch (segments[0]) {
-                    case "Species" -> speciesOffsets = offsets;
-                    case "Level" -> levelOffsets = offsets;
+                    case "Species":
+                        speciesOffsets = offsets;
+                        break;
+                    case "Level":
+                        levelOffsets = offsets;
+                        break;
                 }
             }
             return new Gen1RomHandler.StaticPokemon(speciesOffsets, levelOffsets);
@@ -107,7 +111,8 @@ public class Gen1RomEntry extends AbstractGBCRomEntry {
     @Override
     public void copyFrom(IniEntry other) {
         super.copyFrom(other);
-        if (other instanceof Gen1RomEntry gen1Other) {
+        if (other instanceof Gen1RomEntry) {
+            Gen1RomEntry gen1Other = (Gen1RomEntry) other;
             if (getIntValue("CopyStaticPokemon") == 1) {
                 staticPokemon.addAll(gen1Other.staticPokemon);
                 ghostMarowakOffsets = gen1Other.ghostMarowakOffsets;

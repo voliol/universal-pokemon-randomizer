@@ -95,8 +95,7 @@ public class Gen3to5PaletteRandomizer extends PaletteRandomizer {
 			throw new RandomizationException("Could not randomize palettes, unrecognized romtype.");
 		}
 
-		CopyUpEvolutionsHelper<Pokemon> cueh = new CopyUpEvolutionsHelper<>(romHandler.getPokemonSet());
-		cueh.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
+		copyUpEvolutionsHelper.apply(evolutionSanity, true, new BasicPokemonPaletteAction(),
 				new EvolvedPokemonPaletteAction());
 		List<PaletteDescription> paletteDescriptions = getPaletteDescriptions("pokePalettes");
 		populatePokemonPalettes(paletteDescriptions);

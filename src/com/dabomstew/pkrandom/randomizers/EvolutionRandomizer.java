@@ -156,7 +156,7 @@ public class EvolutionRandomizer extends Randomizer {
                 // A list containing a single dummy object; ensures we always go through all Pokemon exactly once.
                 // "originalEvos" of course becomes a misnomer here, and because it is but a dummy object,
                 // it should NEVER be used except for iteration.
-                return List.of(new Evolution(from, from, EvolutionType.LEVEL, 0));
+                return Collections.singletonList(new Evolution(from, from, EvolutionType.LEVEL, 0));
             } else {
                 return allOriginalEvos.get(from);
             }
