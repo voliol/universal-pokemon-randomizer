@@ -25,7 +25,7 @@ public class UpdaterTest extends RomHandlerTest {
         return andUpdateToGens.toArray(new String[0]);
     }
 
-    protected void printDiff(List<? extends Record> a, List<? extends Record> b) {
+    protected void printDiff(List<?> a, List<?> b) {
         boolean equals = true;
         if (a.size() != b.size()) throw new IllegalArgumentException("Input lists have non-equal sizes");
         for (int i = 0; i < a.size(); i++) {
