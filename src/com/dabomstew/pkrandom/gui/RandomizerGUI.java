@@ -2473,8 +2473,6 @@ public class RandomizerGUI {
             spRandomBasicRadioButton.setEnabled(true);
             if (romHandler.isYellow()) {
                 spComboBox3.setVisible(false);
-                spTypeFwgRadioButton.setVisible(false);
-                spTypeTriangleRadioButton.setVisible(false);
             }
             populateDropdowns();
 

@@ -144,7 +144,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public boolean hasStarterTypeTriangleSupport() {
-        return true;
+        return (starterCount() % 3 == 0);
     }
 
     @Override

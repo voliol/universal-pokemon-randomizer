@@ -771,10 +771,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return true;
     }
 
+    /*
     @Override
     public boolean hasStarterTypeTriangleSupport() {
         return !isYellow();
     }
+     */
 
     @Override
     public boolean hasStarterAltFormes() {
