@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -11,7 +12,7 @@ public class PokemonBaseStatUpdater extends Updater {
 
     // starts with two null-consumers so the indexing can be nicer,
     // and then four more since Gens 2-5 didn't change the base stats of any existing Pokemon
-    private final List<Consumer<List<Pokemon>>> updates = List.of(
+    private final List<Consumer<List<Pokemon>>> updates = Arrays.asList(
             l -> {}, l -> {},
             l -> {}, l -> {}, l -> {}, l -> {},
             this::gen6Updates, this::gen7Updates, this::gen8Updates, this::gen9Updates

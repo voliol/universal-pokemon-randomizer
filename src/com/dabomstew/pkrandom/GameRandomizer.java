@@ -110,13 +110,21 @@ public class GameRandomizer {
         this.tmhmtCompRandomizer = new TMHMTutorCompatibilityRandomizer(romHandler, settings, randomSource.getNonCosmetic());
         this.itemRandomizer = new ItemRandomizer(romHandler, settings, randomSource.getNonCosmetic());
         this.typeEffRandomizer = new TypeEffectivenessRandomizer(romHandler, settings, randomSource.getNonCosmetic());
-        this.paletteRandomizer =
-                switch (romHandler.generationOfPokemon()) {
-                    case 1 -> new Gen1PaletteRandomizer(romHandler, settings, randomSource.getCosmetic());
-                    case 2 -> new Gen2PaletteRandomizer(romHandler, settings, randomSource.getCosmetic());
-                    case 3, 4, 5 -> new Gen3to5PaletteRandomizer(romHandler, settings, randomSource.getCosmetic());
-                    default -> null;
-                };
+        switch (romHandler.generationOfPokemon()) {
+            case 1:
+                this.paletteRandomizer = new Gen1PaletteRandomizer(romHandler, settings, randomSource.getCosmetic());
+                break;
+            case 2:
+                this.paletteRandomizer = new Gen2PaletteRandomizer(romHandler, settings, randomSource.getCosmetic());
+                break;
+            case 3:
+            case 4:
+            case 5:
+                this.paletteRandomizer = new Gen3to5PaletteRandomizer(romHandler, settings, randomSource.getCosmetic());
+                break;
+            default:
+                this.paletteRandomizer = null;
+        }
         this.miscTweakRandomizer = new MiscTweakRandomizer(romHandler, settings, randomSource.getNonCosmetic());
     }
 
@@ -163,11 +171,17 @@ public class GameRandomizer {
         }
         if (settings.getTypeEffectivenessMod() != Settings.TypeEffectivenessMod.UNCHANGED) {
             switch (settings.getTypeEffectivenessMod()) {
-                case UNCHANGED -> {}
-                case RANDOM -> typeEffRandomizer.randomizeTypeEffectiveness(false);
-                case RANDOM_BALANCED -> typeEffRandomizer.randomizeTypeEffectiveness(true);
-                case KEEP_IDENTITIES -> typeEffRandomizer.randomizeTypeEffectivenessKeepIdentities();
-                case INVERSE -> typeEffRandomizer.invertTypeEffectiveness(settings.isInverseTypesRandomImmunities());
+                case RANDOM:
+                    typeEffRandomizer.randomizeTypeEffectiveness(false);
+                    break;
+                case RANDOM_BALANCED:
+                    typeEffRandomizer.randomizeTypeEffectiveness(true);
+                    break;
+                case KEEP_IDENTITIES:
+                    typeEffRandomizer.randomizeTypeEffectivenessKeepIdentities();
+                    break;
+                case INVERSE:
+                    typeEffRandomizer.invertTypeEffectiveness(settings.isInverseTypesRandomImmunities());
             }
         }
         if (typeEffUpdater.isUpdated() || typeEffRandomizer.isChangesMade()) {
@@ -245,9 +259,11 @@ public class GameRandomizer {
 
         // Base stat randomization
         switch (settings.getBaseStatisticsMod()) {
-            case SHUFFLE -> pokeBSRandomizer.shufflePokemonStats();
-            case RANDOM -> pokeBSRandomizer.randomizePokemonStats();
-            default -> {}
+            case SHUFFLE:
+                pokeBSRandomizer.shufflePokemonStats();
+                break;
+            case RANDOM:
+                pokeBSRandomizer.randomizePokemonStats();
         }
 
         // Abilities
@@ -373,10 +389,12 @@ public class GameRandomizer {
         // 5. Copy to cosmetic forms
 
         switch (settings.getTmsHmsCompatibilityMod()) {
-            case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> tmhmtCompRandomizer.randomizeTMHMCompatibility();
-            case FULL -> tmhmtCompRandomizer.fullTMHMCompatibility();
-            default -> {
-            }
+            case COMPLETELY_RANDOM:
+            case RANDOM_PREFER_TYPE:
+                tmhmtCompRandomizer.randomizeTMHMCompatibility();
+                break;
+            case FULL:
+                tmhmtCompRandomizer.fullTMHMCompatibility();
         }
 
         if (settings.isTmLevelUpMoveSanity()) {
@@ -421,9 +439,12 @@ public class GameRandomizer {
             // 4. Copy to cosmetic forms
 
             switch (settings.getMoveTutorsCompatibilityMod()) {
-                case COMPLETELY_RANDOM, RANDOM_PREFER_TYPE -> tmhmtCompRandomizer.randomizeMoveTutorCompatibility();
-                case FULL -> tmhmtCompRandomizer.fullMoveTutorCompatibility();
-                default -> {}
+                case COMPLETELY_RANDOM:
+                case RANDOM_PREFER_TYPE:
+                    tmhmtCompRandomizer.randomizeMoveTutorCompatibility();
+                    break;
+                case FULL:
+                    tmhmtCompRandomizer.fullMoveTutorCompatibility();
             }
 
             if (settings.isTutorLevelUpMoveSanity()) {
@@ -599,8 +620,9 @@ public class GameRandomizer {
 
         List<IngameTrade> oldTrades = romHandler.getIngameTrades();
         switch (settings.getInGameTradesMod()) {
-            case RANDOMIZE_GIVEN, RANDOMIZE_GIVEN_AND_REQUESTED -> tradeRandomizer.randomizeIngameTrades();
-            default -> {}
+            case RANDOMIZE_GIVEN:
+            case RANDOMIZE_GIVEN_AND_REQUESTED:
+                tradeRandomizer.randomizeIngameTrades();
         }
 
         if (tradeRandomizer.isChangesMade()) {
@@ -609,18 +631,22 @@ public class GameRandomizer {
 
         // Field Items
         switch (settings.getFieldItemsMod()) {
-            case SHUFFLE -> itemRandomizer.shuffleFieldItems();
-            case RANDOM, RANDOM_EVEN -> itemRandomizer.randomizeFieldItems();
-            default -> {
-            }
+            case SHUFFLE:
+                itemRandomizer.shuffleFieldItems();
+                break;
+            case RANDOM:
+            case RANDOM_EVEN:
+                itemRandomizer.randomizeFieldItems();
         }
 
         // Shops
 
         switch (settings.getShopItemsMod()) {
-            case SHUFFLE -> itemRandomizer.shuffleShopItems();
-            case RANDOM -> itemRandomizer.randomizeShopItems();
-            default -> {}
+            case SHUFFLE:
+                itemRandomizer.shuffleShopItems();
+                break;
+            case RANDOM:
+                itemRandomizer.randomizeShopItems();
         }
 
         if (itemRandomizer.isShopChangesMade()) {
@@ -676,10 +702,6 @@ public class GameRandomizer {
         return checkValue;
     }
 
-                wildsChanged = true;
-                break;
-            case FAMILY_MAPPING:
-                romHandler.gameFamilyToFamilyEncounters(settings);
     private int logMoveTutorMoves(PrintStream log, int checkValue, List<Integer> oldMtMoves) {
         log.println("--Move Tutor Moves--");
         List<Integer> newMtMoves = romHandler.getMoveTutorMoves();
@@ -1039,12 +1061,17 @@ public class GameRandomizer {
         // TODO: log starter held items
 
         switch (settings.getStartersMod()) {
-            case CUSTOM -> log.println("--Custom Starters--");
-            case COMPLETELY_RANDOM -> log.println("--Random Starters--");
-            case RANDOM_BASIC -> log.println("--Random Basic Starters--");
-            case RANDOM_WITH_TWO_EVOLUTIONS -> log.println("--Random 2-Evolution Starters--");
-            default -> {
-            }
+            case CUSTOM:
+                log.println("--Custom Starters--");
+                break;
+            case COMPLETELY_RANDOM:
+                log.println("--Random Starters--");
+                break;
+            case RANDOM_BASIC:
+                log.println("--Random Basic Starters--");
+                break;
+            case RANDOM_WITH_TWO_EVOLUTIONS:
+                log.println("--Random 2-Evolution Starters--");
         }
 
         List<Pokemon> starters = romHandler.getStarters();
@@ -1074,12 +1101,20 @@ public class GameRandomizer {
             for (Encounter e : area) {
                 StringBuilder sb = new StringBuilder();
                 if (e.isSOS()) {
-                    String stringToAppend = switch (e.getSosType()) {
-                        case RAIN -> "Rain SOS: ";
-                        case HAIL -> "Hail SOS: ";
-                        case SAND -> "Sand SOS: ";
-                        default -> "  SOS: ";
-                    };
+                    String stringToAppend;
+                    switch (e.getSosType()) {
+                        case RAIN:
+                            stringToAppend = "Rain SOS: ";
+                            break;
+                        case HAIL:
+                            stringToAppend = "Hail SOS: ";
+                            break;
+                        case SAND:
+                            stringToAppend = "Sand SOS: ";
+                            break;
+                        default:
+                            stringToAppend = "  SOS: ";
+                    }
                     sb.append(stringToAppend);
                 }
                 sb.append(e.getPokemon().fullName()).append(" Lv");

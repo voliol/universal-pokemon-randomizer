@@ -415,8 +415,12 @@ public class RomFunctions {
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
+    public static void main(String[] args) {
+        System.out.println("    abc\tdef  \t\t ghi\r\njkl".replaceAll("\\s",""));
+    }
+
     public static byte[] hexToBytes(String hex) {
-        hex = hex.replaceAll("\s","");
+        hex = hex.replaceAll("\\s","");
         int len = hex.length();
         if (len % 2 != 0) {
             throw new IllegalArgumentException("hex string is not of even length");

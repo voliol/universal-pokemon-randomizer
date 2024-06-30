@@ -457,11 +457,11 @@ public class GFXFunctions {
 		if (base == null) {
 			return false;
 		}
-		if (!(base.getColorModel()instanceof IndexColorModel indexed1)) {
+		if (!(base.getColorModel() instanceof IndexColorModel )) {
 			return false;
 		}
 
-		return allSameIndexedPalette(indexed1, flatten(bims));
+		return allSameIndexedPalette((IndexColorModel) base.getColorModel(), flatten(bims));
 	}
 
 	/**
@@ -476,9 +476,10 @@ public class GFXFunctions {
 		for (int i = 1; i < bims.length; i++) {
 			if (bims[i] != null) {
 
-				if (!(bims[i].getColorModel() instanceof IndexColorModel indexed2)) {
+				if (!(bims[i].getColorModel() instanceof IndexColorModel)) {
 					return false;
 				}
+				IndexColorModel indexed2 = (IndexColorModel) bims[i].getColorModel();
 				if (!sameRGBs(indexed1, indexed2)) {
 					return false;
 				}

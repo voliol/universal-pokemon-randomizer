@@ -92,7 +92,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     private void loadTextTable(String filename) {
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig(filename + ".tbl"), StandardCharsets.UTF_8);
+            Scanner sc = new Scanner(FileFunctions.openConfig(filename + ".tbl"), "UTF-8");
             while (sc.hasNextLine()) {
                 String q = sc.nextLine();
                 if (!q.trim().isEmpty()) {

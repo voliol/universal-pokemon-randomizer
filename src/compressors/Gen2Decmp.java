@@ -80,35 +80,40 @@ public class Gen2Decmp {
             }
 
             switch (cmd) {
-                case 0 -> {
+                case 0:
                     // Literal
                     System.arraycopy(data, address, output, out_idx, len);
                     out_idx += len;
                     address += len;
-                }
-                case 1 -> {
+                    break;
+                case 1:
                     // Iterate
                     byte repe = (byte) next();
                     for (int i = 0; i < len; i++) {
                         output[out_idx++] = repe;
                     }
-                }
-                case 2 -> {
+                    break;
+                case 2:
                     // Alternate
                     byte[] alts = {(byte) next(), (byte) next()};
                     for (int i = 0; i < len; i++) {
                         output[out_idx++] = alts[i & 1];
                     }
-                }
-                case 3 ->
+                    break;
+                case 3:
                     // Zero-fill
                     // Easy, since Java arrays are initialized to 0.
-                        out_idx += len;
-                case 4 ->
+                    out_idx += len;
+                    break;
+                case 4:
                     // Default repeat
-                        repeat();
-                case 5 -> repeat(1, bit_flipped);
-                case 6 -> repeat(-1, null);
+                    repeat();
+                    break;
+                case 5:
+                    repeat(1, bit_flipped);
+                    break;
+                case 6:
+                    repeat(-1, null);
             }
         }
 

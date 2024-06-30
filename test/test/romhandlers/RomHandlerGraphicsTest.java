@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,24 +43,24 @@ public class RomHandlerGraphicsTest extends RomHandlerTest {
     private static List<GraphicsPackEntry> initCPGEntries() {
         try {
             return GraphicsPackEntry.readAllFromFolder(TEST_CPG_PATH);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private GraphicsPack getCustomPlayerGraphics() {
-        GraphicsPack cpg;
         switch (romHandler.generationOfPokemon()) {
-            case 1 -> cpg = new Gen1PlayerCharacterGraphics(cpgEntries.get(0));
-            case 2 -> cpg = new Gen2PlayerCharacterGraphics(cpgEntries.get(1));
-            case 3 -> {
+            case 1:
+                return new Gen1PlayerCharacterGraphics(cpgEntries.get(0));
+            case 2:
+                return new Gen2PlayerCharacterGraphics(cpgEntries.get(1));
+            case 3:
                 Gen3RomHandler gen3RomHandler = (Gen3RomHandler) romHandler;
                 return gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG ?
                         new FRLGPlayerCharacterGraphics(cpgEntries.get(3)) :
                         new RSEPlayerCharacterGraphics(cpgEntries.get(2));
-            }
-            default -> cpg = null;
+            default:
+                return null;
         }
-        return cpg;
     }
 }

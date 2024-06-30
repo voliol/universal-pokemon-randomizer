@@ -228,7 +228,7 @@ public class FileFunctions {
     }
 
     private static int getFileChecksum(InputStream stream) {
-        Scanner sc = new Scanner(stream, StandardCharsets.UTF_8);
+        Scanner sc = new Scanner(stream, "UTF-8");
         CRC32 checksum = new CRC32();
         while (sc.hasNextLine()) {
             String line = sc.nextLine().trim();

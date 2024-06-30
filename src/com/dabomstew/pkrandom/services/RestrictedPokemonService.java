@@ -8,6 +8,8 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -167,10 +169,11 @@ public class RestrictedPokemonService {
             allInclAltFormes = PokemonSet.unmodifiable(allInclAltFormesFromRestrictions(restrictions));
             megaEvolutions = romHandler.getMegaEvolutions().stream()
                     .filter(mevo -> allInclAltFormes.contains(mevo.to))
-                    .collect(Collectors.toUnmodifiableSet());
+                    .collect(Collectors.toSet());
+            megaEvolutions = Collections.unmodifiableSet(megaEvolutions);
         } else {
             allInclAltFormes = PokemonSet.unmodifiable(romHandler.getPokemonSetInclFormes());
-            megaEvolutions = Set.copyOf(romHandler.getMegaEvolutions());
+            megaEvolutions = Collections.unmodifiableSet(new HashSet<>(romHandler.getMegaEvolutions()));
         }
 
         nonLegendariesInclAltFormes = PokemonSet.unmodifiable(allInclAltFormes.filter(pk -> !pk.isLegendary()));
@@ -211,7 +214,7 @@ public class RestrictedPokemonService {
 
         // If the user specified it, add all the evolutionary relatives for everything in the mainPokemonList
         if (restrictions.allow_evolutionary_relatives) {
-            allInclAltFormes.addEvolutionaryRelatives();
+            allInclAltFormes.addAllFamilies(allNonRestricted, true);
         }
 
         return allInclAltFormes;

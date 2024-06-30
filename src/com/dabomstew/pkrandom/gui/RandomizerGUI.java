@@ -48,6 +48,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -1080,7 +1081,11 @@ public class RandomizerGUI {
         // Setup verbose log
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream log;
-        log = new PrintStream(baos, false, StandardCharsets.UTF_8);
+        try {
+            log = new PrintStream(baos, false, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log = new PrintStream(baos);
+        }
 
         final PrintStream verboseLog = log;
 
@@ -3781,7 +3786,7 @@ public class RandomizerGUI {
         }
 
         try {
-            Scanner sc = new Scanner(fh, StandardCharsets.UTF_8);
+            Scanner sc = new Scanner(fh, "UTF-8");
             boolean isReadingUpdates = false;
             while (sc.hasNextLine()) {
                 String q = sc.nextLine().trim();
@@ -3853,7 +3858,7 @@ public class RandomizerGUI {
         }
 
         try {
-            PrintStream ps = new PrintStream(new FileOutputStream(fh), true, StandardCharsets.UTF_8);
+            PrintStream ps = new PrintStream(Files.newOutputStream(fh.toPath()), true, "UTF-8");
             ps.println("checkedcustomnames=true");
             ps.println("checkedcustomnames172=" + haveCheckedCustomNames);
             ps.println("unloadgameonsuccess=" + unloadGameOnSuccess);

@@ -7,6 +7,7 @@ import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class MoveUpdater extends Updater {
     private final Map<Integer, boolean[]> moveUpdates = new HashMap<>();
 
     // starts with two null-consumers so the indexing can be nicer
-    private final List<Consumer<List<Move>>> updates = List.of(
+    private final List<Consumer<List<Move>>> updates = Arrays.asList(
             l -> {}, l -> {},
             this::gen2Updates, this::gen3Updates, this::gen4Updates, this::gen5Updates,
             this::gen6Updates, this::gen7Updates, this::gen8Updates, this::gen9Updates

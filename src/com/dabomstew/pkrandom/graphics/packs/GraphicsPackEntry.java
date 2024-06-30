@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.romhandlers.romentries.IniEntry;
 import com.dabomstew.pkrandom.romhandlers.romentries.IniEntryReader;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public class GraphicsPackEntry extends IniEntry {
@@ -33,7 +34,7 @@ public class GraphicsPackEntry extends IniEntry {
         }
     }
 
-    public static List<GraphicsPackEntry> readAllFromFolder(String folderPath) throws FileNotFoundException {
+    public static List<GraphicsPackEntry> readAllFromFolder(String folderPath) throws IOException {
         GraphicsPackEntryReader reader = new GraphicsPackEntryReader(folderPath);
         return reader.readEntriesFromFile(folderPath + "/info.ini");
     }

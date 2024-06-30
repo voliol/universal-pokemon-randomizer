@@ -81,7 +81,7 @@ public class CustomNamesSet {
         // Read the block and translate it into a list of names.
         byte[] namesData = FileFunctions.readFullyIntoBuffer(in, size);
         List<String> names = new ArrayList<>();
-        Scanner sc = new Scanner(new ByteArrayInputStream(namesData), StandardCharsets.UTF_8);
+        Scanner sc = new Scanner(new ByteArrayInputStream(namesData),"UTF-8");
         while (sc.hasNextLine()) {
             String name = sc.nextLine().trim();
             if (!name.isEmpty()) {
@@ -175,7 +175,7 @@ public class CustomNamesSet {
 
         // Trainer Names
         if (FileFunctions.configExists(SysConstants.tnamesFile)) {
-            Scanner sc = new Scanner(FileFunctions.openConfig(SysConstants.tnamesFile), StandardCharsets.UTF_8);
+            Scanner sc = new Scanner(FileFunctions.openConfig(SysConstants.tnamesFile), "UTF-8");
             while (sc.hasNextLine()) {
                 String trainername = sc.nextLine().trim();
                 if (trainername.isEmpty()) {
@@ -195,7 +195,7 @@ public class CustomNamesSet {
 
         // Trainer Classes
         if (FileFunctions.configExists(SysConstants.tclassesFile)) {
-            Scanner sc = new Scanner(FileFunctions.openConfig(SysConstants.tclassesFile), StandardCharsets.UTF_8);
+            Scanner sc = new Scanner(FileFunctions.openConfig(SysConstants.tclassesFile), "UTF-8");
             while (sc.hasNextLine()) {
                 String trainerClassName = sc.nextLine().trim();
                 if (trainerClassName.isEmpty()) {
@@ -219,7 +219,7 @@ public class CustomNamesSet {
 
         // Nicknames
         if (FileFunctions.configExists(SysConstants.nnamesFile)) {
-            Scanner sc = new Scanner(FileFunctions.openConfig(SysConstants.nnamesFile), StandardCharsets.UTF_8);
+            Scanner sc = new Scanner(FileFunctions.openConfig(SysConstants.nnamesFile), "UTF-8");
             while (sc.hasNextLine()) {
                 String nickname = sc.nextLine().trim();
                 if (nickname.isEmpty()) {

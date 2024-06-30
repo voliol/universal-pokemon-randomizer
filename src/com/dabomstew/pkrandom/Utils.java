@@ -120,7 +120,7 @@ public class Utils {
         URL location = RandomizerGUI.class.getProtectionDomain().getCodeSource().getLocation();
         String file = location.getFile();
         String plusEncoded = file.replaceAll("\\+", "%2b");
-        return new File(java.net.URLDecoder.decode(plusEncoded, StandardCharsets.UTF_8));
+        return new File(java.net.URLDecoder.decode(plusEncoded, "UTF-8"));
     }
 
     public static class InvalidROMException extends Exception {

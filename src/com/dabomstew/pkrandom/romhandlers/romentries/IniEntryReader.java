@@ -2,8 +2,11 @@ package com.dabomstew.pkrandom.romhandlers.romentries;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -119,8 +122,8 @@ public abstract class IniEntryReader<T extends IniEntry> {
         this.fileName = fileName;
     }
 
-    public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
-        Scanner scanner = new Scanner(new FileInputStream(fileName), StandardCharsets.UTF_8);
+    public List<T> readEntriesFromFile(String fileName) throws IOException {
+        Scanner scanner = new Scanner(Files.newInputStream(Paths.get(fileName)), "UTF-8");
         setFileName(fileName);
         return readEntriesFromScanner(scanner);
     }

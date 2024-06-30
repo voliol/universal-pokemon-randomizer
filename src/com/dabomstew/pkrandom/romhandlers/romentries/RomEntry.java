@@ -39,7 +39,7 @@ public abstract class RomEntry extends IniEntry {
 
         @Override
         public List<T> readEntriesFromFile(String fileName) throws FileNotFoundException {
-            Scanner scanner = new Scanner(openConfig(fileName), StandardCharsets.UTF_8);
+            Scanner scanner = new Scanner(openConfig(fileName), "UTF-8");
             setFileName(fileName);
             return readEntriesFromScanner(scanner);
         }

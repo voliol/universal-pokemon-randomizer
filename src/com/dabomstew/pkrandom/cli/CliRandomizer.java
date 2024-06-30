@@ -45,7 +45,11 @@ public class CliRandomizer {
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream log;
-        log = new PrintStream(baos, false, StandardCharsets.UTF_8);
+        try {
+            log = new PrintStream(baos, false, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log = new PrintStream(baos);
+        }
 
         final PrintStream verboseLog = log;
 

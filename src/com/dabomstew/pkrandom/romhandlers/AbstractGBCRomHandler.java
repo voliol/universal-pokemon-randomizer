@@ -115,7 +115,7 @@ public abstract class AbstractGBCRomHandler extends AbstractGBRomHandler {
 
     protected void readTextTable(String name) {
         try {
-            Scanner sc = new Scanner(FileFunctions.openConfig(name + ".tbl"), StandardCharsets.UTF_8);
+            Scanner sc = new Scanner(FileFunctions.openConfig(name + ".tbl"), "UTF-8");
             while (sc.hasNextLine()) {
                 String q = sc.nextLine();
                 if (!q.trim().isEmpty()) {
