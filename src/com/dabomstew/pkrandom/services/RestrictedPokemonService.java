@@ -214,7 +214,7 @@ public class RestrictedPokemonService {
 
         // If the user specified it, add all the evolutionary relatives for everything in the mainPokemonList
         if (restrictions.allow_evolutionary_relatives) {
-            allInclAltFormes.addAllFamilies(allNonRestricted, true);
+            allInclAltFormes.addFullFamilies(false);
         }
 
         return allInclAltFormes;
