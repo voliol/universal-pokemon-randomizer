@@ -895,7 +895,7 @@ public class PokemonSet extends HashSet<Pokemon> {
         @Override
         public boolean add(Pokemon pk) {
             if (unmodifiable) {
-                throw new UnsupportedOperationException();
+                throw new UnmodifiableSetException();
             } else {
                 return super.add(pk);
             }
@@ -914,6 +914,29 @@ public class PokemonSet extends HashSet<Pokemon> {
         @Override
         public boolean removeIf(Predicate filter) {
             throw new UnmodifiableSetException();
+        }
+
+        // overriding the iterator is important to disable its remove()
+        @Override
+        public Iterator<Pokemon> iterator() {
+            return new Iterator<Pokemon>() {
+                private final Iterator<Pokemon> inner = UnmodifiablePokemonSet.super.iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return inner.hasNext();
+                }
+
+                @Override
+                public Pokemon next() {
+                    return inner.next();
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnmodifiableSetException();
+                }
+            };
         }
     }
     

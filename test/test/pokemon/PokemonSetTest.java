@@ -4,6 +4,7 @@ import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import org.junit.jupiter.api.Test;
 
+import javax.print.attribute.UnmodifiableSetException;
 import java.lang.reflect.Executable;
 import java.util.*;
 
@@ -105,7 +106,7 @@ public class PokemonSetTest {
         Pokemon b = new Pokemon(1);
         b.setName("B");
         PokemonSet pokes = PokemonSet.unmodifiable(Collections.singleton(a));
-        assertThrows(UnsupportedOperationException.class, () -> {pokes.add(b);});
+        assertThrows(UnmodifiableSetException.class, () -> {pokes.add(b);});
     }
 
     @Test
@@ -113,7 +114,7 @@ public class PokemonSetTest {
         Pokemon a = new Pokemon(0);
         a.setName("A");
         PokemonSet pokes = PokemonSet.unmodifiable(Collections.singleton(a));
-        assertThrows(UnsupportedOperationException.class, () -> {pokes.remove(a);});
+        assertThrows(UnmodifiableSetException.class, () -> {pokes.remove(a);});
     }
 
     @Test
@@ -121,10 +122,19 @@ public class PokemonSetTest {
         Pokemon a = new Pokemon(0);
         a.setName("A");
         PokemonSet pokes = PokemonSet.unmodifiable(Collections.singleton(a));
-        assertThrows(UnsupportedOperationException.class, () -> {
+        assertThrows(UnmodifiableSetException.class, () -> {
             Iterator<Pokemon> it = pokes.iterator();
             it.next();
             it.remove();
+            System.out.println(pokes); // in case nothing is thrown, shows whether the element was removed or not
         });
+    }
+
+    @Test
+    public void unmodifiableSetThrowsWhenClearing() {
+        Pokemon a = new Pokemon(0);
+        a.setName("A");
+        PokemonSet pokes = PokemonSet.unmodifiable(Collections.singleton(a));
+        assertThrows(UnmodifiableSetException.class, pokes::clear);
     }
 }
