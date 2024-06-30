@@ -1675,8 +1675,7 @@ public class RandomizerGUI {
         wpLocation1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.LOCATION_MAPPING);
         wpGlobal1To1RadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.GLOBAL_MAPPING);
         wpFamilyToFamilyRadioButton.setSelected(settings.getWildPokemonMod() == Settings.WildPokemonMod.FAMILY_MAPPING);
-        wpTRKeepThemesRadioButton
-                .setSelected(settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.KEEP_THEMES);
+        wpTRKeepThemesCheckBox.setSelected(settings.isKeepWildTypeThemes());
 
         wpTRNoneRadioButton.setSelected(settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.NONE);
         wpTRThemedAreasRadioButton.setSelected(settings.getWildPokemonTypeMod() == Settings.WildPokemonTypeMod.THEMED_AREAS);
@@ -2294,9 +2293,9 @@ public class RandomizerGUI {
         wpFamilyToFamilyRadioButton.setVisible(true);
         wpFamilyToFamilyRadioButton.setEnabled(false);
         wpFamilyToFamilyRadioButton.setSelected(false);
-        wpTRKeepThemesRadioButton.setVisible(true);
-        wpTRKeepThemesRadioButton.setEnabled(false);
-        wpTRKeepThemesRadioButton.setSelected(false);
+        wpTRKeepThemesCheckBox.setVisible(true);
+        wpTRKeepThemesCheckBox.setEnabled(false);
+        wpTRKeepThemesCheckBox.setSelected(false);
         wpUseTimeBasedEncountersCheckBox.setSelected(true);
 		wpSetMinimumCatchRateSlider.setVisible(true);
 		wpSetMinimumCatchRateSlider.setEnabled(false);
@@ -3336,7 +3335,7 @@ public class RandomizerGUI {
             wpTRNoneRadioButton.setEnabled(true);
             wpTRKeepPrimaryRadioButton.setEnabled(true);
             wpTRThemedAreasRadioButton.setEnabled(true);
-            wpTRKeepThemesRadioButton.setEnabled(true);
+            wpTRKeepThemesCheckBox.setEnabled(true);
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(true);
         } else if (wpArea1To1RadioButton.isSelected()) {
             wpSimilarStrengthCheckBox.setEnabled(true);
@@ -3344,31 +3343,29 @@ public class RandomizerGUI {
             wpTRNoneRadioButton.setEnabled(true);
             wpTRKeepPrimaryRadioButton.setEnabled(true);
             wpTRThemedAreasRadioButton.setEnabled(true);
-            wpTRKeepThemesRadioButton.setEnabled(true);
+            wpTRKeepThemesCheckBox.setEnabled(true);
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
         } else if (wpGlobal1To1RadioButton.isSelected() || wpFamilyToFamilyRadioButton.isSelected()) {
             wpCatchEmAllModeCheckBox.setEnabled(false);
             wpCatchEmAllModeCheckBox.setSelected(false);
-            wpARSimilarStrengthRadioButton.setEnabled(true);
+            wpSimilarStrengthCheckBox.setEnabled(true);
             if(wpTRThemedAreasRadioButton.isSelected()) {
                 wpTRNoneRadioButton.setSelected(true);
             }
             wpTRNoneRadioButton.setEnabled(true);
             wpTRKeepPrimaryRadioButton.setEnabled(true);
             wpTRThemedAreasRadioButton.setEnabled(false);
-            wpTRKeepThemesRadioButton.setEnabled(true);
+            wpTRKeepThemesCheckBox.setEnabled(true);
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
         } else {
             //is set to "unchanged"
-            wpARNoneRadioButton.setEnabled(false);
-            wpARNoneRadioButton.setSelected(true);
-            wpARSimilarStrengthRadioButton.setEnabled(false);
-            wpARCatchEmAllModeRadioButton.setEnabled(false);
+            wpSimilarStrengthCheckBox.setEnabled(false);
+            wpCatchEmAllModeCheckBox.setEnabled(false);
             wpTRNoneRadioButton.setSelected(true);
             wpTRNoneRadioButton.setEnabled(false);
             wpTRKeepPrimaryRadioButton.setEnabled(false);
             wpTRThemedAreasRadioButton.setEnabled(false);
-            wpTRKeepThemesRadioButton.setEnabled(false);
+            wpTRKeepThemesCheckBox.setEnabled(false);
             wpBalanceShakingGrassPokemonCheckBox.setEnabled(false);
         }
 

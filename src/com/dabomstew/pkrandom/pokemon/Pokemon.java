@@ -620,6 +620,14 @@ public class Pokemon implements Comparable<Pokemon> {
         this.baseForme = baseForme;
     }
 
+    /**
+     * Returns whether this Pokemon is a base forme.
+     * @return False if the Pokemon has a different base forme, true otherwise.
+     */
+    public boolean isBaseForme() {
+        return baseForme == null;
+    }
+
     public int getFormeNumber() {
         return formeNumber;
     }
