@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.randomizers;
 
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
@@ -156,6 +157,11 @@ public class EncounterRandomizer extends Randomizer {
 
         //ORAS's DexNav will crash if the load is higher than this value.
         final int ORAS_CRASH_THRESHOLD = 18;
+
+        //Similar Strength will keep expanding until it reaches the smaller of
+        //MINIMUM_POOL or total_pool / MINIMUM_POOL_FACTOR
+        final int SS_MINIMUM_POOL = 5;
+        final int SS_MINIMUM_POOL_FACTOR = 4;
 
         public InnerRandomizer(PokemonSet allowed, PokemonSet banned,
                                boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
@@ -364,7 +370,10 @@ public class EncounterRandomizer extends Randomizer {
             for (Map.Entry<String, List<EncounterArea>> locEntry : grouped.entrySet()) {
                 EncounterArea flattened = new EncounterArea();
                 flattened.setDisplayName("All of location " + locEntry.getKey());
-                locEntry.getValue().forEach(flattened::addAll);
+                for(EncounterArea area : locEntry.getValue()) {
+                    flattened.addAll(area);
+                    flattened.banAllPokemon(area.getBannedPokemon());
+                }
                 flattenedLocations.add(flattened);
             }
             return flattenedLocations;
@@ -392,7 +401,10 @@ public class EncounterRandomizer extends Randomizer {
                     flattened.setDisplayName(mapName + typeEntry.getKey().name());
                     flattened.setEncounterType(typeEntry.getKey());
                     flattened.setMapIndex(mapEntry.getKey());
-                    typeEntry.getValue().forEach(flattened::addAll);
+                    for(EncounterArea area : typeEntry.getValue()) {
+                        flattened.addAll(area);
+                        flattened.banAllPokemon(area.getBannedPokemon());
+                    }
                     flattenedEncounters.add(flattened);
                 }
             }
@@ -455,6 +467,8 @@ public class EncounterRandomizer extends Randomizer {
             }
             return grouped;
         }
+
+        //should the above functions instead be in EncounterArea?
 
         private Type pickAreaType(EncounterArea area) {
             Type picked = null;
@@ -604,62 +618,122 @@ public class EncounterRandomizer extends Randomizer {
             remaining = new PokemonSet(allowed);
             Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
-            PokemonSet extant = new PokemonSet();
-            encounterAreas.forEach(area -> area.forEach(enc -> extant.add(enc.getPokemon())));
+            Map<Pokemon, PokemonAreaInformation> pokemonWithAreaInfo =
+                    setupAreaInfoMap(encounterAreas, null);
+            //encounterAreas.forEach(area -> area.forEach(enc -> extant.add(enc.getPokemon())));
             // shuffle to not give certain Pokémon priority when picking replacements
             // matters for similar strength
-            List<Pokemon> shuffled = new ArrayList<>(extant);
+            List<PokemonAreaInformation> shuffled = new ArrayList<>(pokemonWithAreaInfo.values());
             Collections.shuffle(shuffled, random);
 
-            for (Pokemon current : shuffled) {
+            for (PokemonAreaInformation current : shuffled) {
                 Pokemon replacement = pickGame1to1Replacement(current);
-                translateMap.put(current, replacement);
+                translateMap.put(current.getPokemon(), replacement);
             }
 
             for (EncounterArea area : encounterAreas) {
                 for (Encounter enc : area) {
                     Pokemon replacement = translateMap.get(enc.getPokemon());
+                    if (area.getBannedPokemon().contains(replacement)) {
+                        // This should never happen, since we already checked all the areas' banned Pokemon.
+                        throw new RuntimeException("Chose a banned Pokemon " + replacement +
+                                " as replacement for " + enc.getPokemon() + "?! (Shouldn't be possible)");
+                    }
                     enc.setPokemon(replacement);
                     setFormeForEncounter(enc, replacement);
                 }
             }
         }
 
-        private Pokemon pickGame1to1Replacement(Pokemon current) {
-            Pokemon replacement = similarStrength ?
-                    pickWildPowerLvlReplacement(remaining, current, true, 100) :
-                    remaining.getRandomPokemon(random);
+        private Pokemon pickGame1to1Replacement(PokemonAreaInformation current) {
+            Type theme = null;
+            if(keepTypeThemes) {
+                theme = current.getTheme(keepPrimaryType);
+            } else if(keepPrimaryType) {
+                theme = current.getPokemon().getPrimaryType(true);
+            }
+
+            PokemonSet allowedForPokemon;
+            if(theme != null) {
+                allowedForPokemon = remainingByType.get(theme);
+            } else {
+                allowedForPokemon = remaining;
+            }
+            allowedForPokemon.removeAll(current.getBannedForReplacement());
+
+            Pokemon replacement = pickGame1to1ReplacementInner(current.pokemon, allowedForPokemon);
             // In case it runs out of unique Pokémon, picks something already mapped to.
             // Shouldn't happen unless restrictions are really harsh, normally [#allowed Pokémon] > [#Pokémon which appear in the wild]
             if (replacement == null) {
-                replacement = allowed.getRandomPokemon(random);
+                allowedForPokemon = theme != null ? allowedByType.get(theme) : allowed;
+                allowedForPokemon.removeAll(current.getBannedForReplacement());
+                replacement = pickGame1to1ReplacementInner(current.pokemon, allowedForPokemon);
             } else {
                 remaining.remove(replacement);
             }
             return replacement;
         }
 
+        private Pokemon pickGame1to1ReplacementInner(Pokemon pokemon, PokemonSet pool) {
+            return similarStrength ?
+                    pickWildPowerLvlReplacement(pool, pokemon, true, 100) :
+                    pool.getRandomPokemon(random);
+        }
+
+        /**
+         * Chooses a Pokemon similar in power level to the given Pokemon.
+         * @param pokemonPool The set of Pokemon to choose from.
+         * @param current The Pokemon to match the power level of.
+         * @param banSamePokemon Whether to disallow choosing the Pokemon the power level is matching to.
+         *                       Ignored if this is the only Pokemon in the pool.
+         * @param bstBalanceLevel A factor used to calculate a maximum BST using the formula 10 * level + 250.
+         *                        If the given Pokemon's BST is higher than the calculated value, looks for Pokemon
+         *                        of strength similar to the calculated value instead.
+         * @return A Pokemon of similar strength to the given Pokemon.
+         */
         private Pokemon pickWildPowerLvlReplacement(PokemonSet pokemonPool, Pokemon current, boolean banSamePokemon,
                                                     int bstBalanceLevel) {
-            // start with within 10% and add 5% either direction till we find
-            // something
+            PokemonSet availablePool = new PokemonSet(pokemonPool); //clone for draining
+            if(banSamePokemon) {
+                availablePool.remove(current);
+            }
+
+            if(availablePool.isEmpty()) {
+                if(pokemonPool.isEmpty()) {
+                    throw new RandomizationException("Attempted to choose a wild Pokemon from an empty set!");
+                } else {
+                    //if availablePool is empty, but pokemonPool isn't, the current Pokemon must be the only one.
+                    return current;
+                }
+            }
+
+            int minimumPool = Math.min(SS_MINIMUM_POOL, pokemonPool.size() / SS_MINIMUM_POOL_FACTOR);
+            if(minimumPool < 1) {
+                minimumPool = 1;
+            }
+            if (minimumPool >= availablePool.size()) {
+                //must use the whole pool
+                //(I think this only happens if there's exactly one Pokemon to choose.)
+                return availablePool.getRandomPokemon(random);
+            }
+
+            // start with within 10% and add 5% either direction until the pool is big enough
             int balancedBST = bstBalanceLevel * 10 + 250;
             int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
             int minTarget = currentBST - currentBST / 10;
             int maxTarget = currentBST + currentBST / 10;
             PokemonSet canPick = new PokemonSet();
-            int expandRounds = 0;
-            while (canPick.isEmpty() || (canPick.size() < 3 && expandRounds < 3)) {
-                for (Pokemon pk : pokemonPool) {
-                    if (pk.bstForPowerLevels() >= minTarget && pk.bstForPowerLevels() <= maxTarget
-                            && (!banSamePokemon || pk != current)
-                            && !canPick.contains(pk)) {
-                        canPick.add(pk);
+            while (canPick.size() < minimumPool) {
+                Iterator<Pokemon> itor = availablePool.iterator();
+                while (itor.hasNext()) {
+                    Pokemon poke = itor.next();
+                    if(poke.bstForPowerLevels() >= minTarget && poke.bstForPowerLevels() <= maxTarget) {
+                        canPick.add(poke);
+                        itor.remove();
                     }
                 }
                 minTarget -= currentBST / 20;
                 maxTarget += currentBST / 20;
-                expandRounds++;
             }
             return canPick.getRandomPokemon(random);
         }
@@ -695,6 +769,127 @@ public class EncounterRandomizer extends Randomizer {
                 load += pokemonInArea.size();
             }
             return load;
+        }
+
+        /**
+         * Given a set of EncounterAreas, creates a map of every Pokemon in the areas to
+         * information about the areas that Pokemon is contained in.
+         * If addAllPokemonTo is not null, also adds every Pokemon to it.
+         * @param areas The list of EncounterAreas to explore.
+         * @param addAllPokemonTo A PokemonSet to add every Pokemon found to. Can be null.
+         * @return A new Map containing information for every Pokemon in the areas.
+         */
+        private Map<Pokemon, PokemonAreaInformation> setupAreaInfoMap(List<EncounterArea> areas,
+                                                                      PokemonSet addAllPokemonTo) {
+            //TODO: flatten to encounter types in maps (for improved theme detection)
+            //(Need that information to be consistently populated first.)
+
+            Map<Pokemon, PokemonAreaInformation> areaInfoMap = new HashMap<>();
+            for(EncounterArea area : areas) {
+                Type areaTheme = pickAreaType(area);
+
+                if(area.getPokemonInArea().size() <= 1) {
+                    //a temporary measure to stop swarms from polluting the type pool.
+                    //TODO: remove this if block after adding flattening
+                    areaTheme = null;
+                }
+
+                for(Pokemon pokemon : area.getPokemonInArea()) {
+                    PokemonAreaInformation info = areaInfoMap.get(pokemon);
+                    if(info == null) {
+                        info = new PokemonAreaInformation(pokemon);
+                        areaInfoMap.put(pokemon, info);
+                    }
+                    info.addTypeTheme(areaTheme);
+                    info.banAll(area.getBannedPokemon());
+
+                    if(addAllPokemonTo != null) {
+                        addAllPokemonTo.add(pokemon);
+                    }
+                }
+            }
+            return areaInfoMap;
+        }
+
+        /**
+         * A class which stores some information about the areas a Pokemon was found in,
+         * in order to allow us to use this information later.
+         */
+        private class PokemonAreaInformation {
+            private Set<Type> possibleThemes;
+            private PokemonSet bannedForReplacement;
+            private Pokemon pokemon;
+
+            /**
+             * Creates a new RandomizationInformation with the given data.
+             * @param pk The Pokemon this RandomizationInformation is about.
+             */
+            PokemonAreaInformation(Pokemon pk) {
+                possibleThemes = EnumSet.noneOf(Type.class);
+                bannedForReplacement = new PokemonSet();
+                pokemon = pk;
+            }
+
+            /**
+             * Adds all Pokemon in the given collection to the set of Pokemon banned for replacement.
+             * @param banned The Collection of Pokemon to add.
+             */
+            public void banAll(Collection<Pokemon> banned) {
+                bannedForReplacement.addAll(banned);
+            }
+
+            /**
+             * Get the list of all Pokemon banned as replacements for this Pokemon.
+             * @return A new unmodifiable {@link PokemonSet} containing the banned Pokemon.
+             */
+            public PokemonSet getBannedForReplacement() {
+                return PokemonSet.unmodifiable(bannedForReplacement);
+            }
+
+            /**
+             * Adds the given type to the list of possible type themes for this Pokemon's replacement.
+             * If the given type is null, has no effect.
+             * @param theme The type to add.
+             */
+            public void addTypeTheme(Type theme) {
+                if(theme != null) {
+                    possibleThemes.add(theme);
+                }
+            }
+
+            /**
+             * Gets the type of this Pokemon's area theming.
+             * If there are two themes, it will always default to the original primary type.
+             * If there are no themes, it will default to the original primary only if defaultToPrimary is true;
+             * otherwise, it will default to null.
+             * @param defaultToPrimary Whether the type should default to the Pokemon's primary type
+             *                         if there are no themes.
+             * @return The type that should be used, or null for any type.
+             */
+            Type getTheme(boolean defaultToPrimary) {
+                int themeCount = possibleThemes.size();
+                if(themeCount == 0) {
+                    if(defaultToPrimary) {
+                        return pokemon.getPrimaryType(true);
+                    } else {
+                        return null;
+                    }
+                } else if(themeCount == 1) {
+                    return possibleThemes.iterator().next();
+                } else if(themeCount == 2) {
+                    return pokemon.getPrimaryType(true);
+                } else {
+                    throw new IllegalStateException("Too many themes for one Pokemon!");
+                }
+            }
+
+            /**
+             * Gets the Pokemon that this PokemonAreaInformation is about.
+             * @return The Pokemon.
+             */
+            public Pokemon getPokemon() {
+                return pokemon;
+            }
         }
     }
 
