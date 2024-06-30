@@ -40,7 +40,7 @@ public class RomHandlerMoveTest extends RomHandlerTest {
         System.out.println(romHandler.getMoves());
         for (Move m : romHandler.getMoves()) {
             if (m != null) {
-                assertFalse(m.name.isBlank());
+                assertFalse(m.name.replaceAll("\\s", "").isEmpty());
             }
         }
     }

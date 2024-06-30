@@ -11,8 +11,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,9 +77,16 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         pw.println(encounterAreasToMultilineString(useTimeOfDay));
         pw.close();
 
-        String orig = Files.readString(Path.of("test/resources/encounters/" + romHandler.getROMName() + ".txt"));
+        String orig = readFile("test/resources/encounters/" + romHandler.getROMName() + ".txt");
         assertEquals(orig.replaceAll("\r\n", "\n"),
                 sw.toString().replaceAll("\r\n", "\n"));
+    }
+
+    static String readFile(String path)
+            throws IOException
+    {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded, StandardCharsets.UTF_8);
     }
 
     private String encounterAreasToMultilineString(List<EncounterArea> encounterAreas) {
@@ -86,7 +94,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         sb.append("[EncounterAreas:");
         for (EncounterArea area : encounterAreas) {
             sb.append(String.format("\n\t[Name = %s, Rate = %d, Offset = %d,",
-                    area.getDisplayName(), area.getRate(), area.getOffset()));
+                    area.getDisplayName(), area.getRate(), area.getMapIndex()));
             sb.append(String.format("\n\t\tEncounters = %s", new ArrayList<>(area)));
             if (!area.getBannedPokemon().isEmpty()) {
                 sb.append(String.format("\n\t\tBanned = %s", area.getBannedPokemon()));
@@ -143,14 +151,14 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             return Gen1Constants.locationTagsTraverseOrder;
         } else if (romHandler instanceof Gen2RomHandler) {
             return Gen2Constants.locationTagsTraverseOrder;
-        } else if (romHandler instanceof Gen3RomHandler gen3RomHandler) {
-            return (gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG ?
+        } else if (romHandler instanceof Gen3RomHandler) {
+            return (((Gen3RomHandler) romHandler).getRomEntry().getRomType() == Gen3Constants.RomType_FRLG ?
                     Gen3Constants.locationTagsTraverseOrderFRLG : Gen3Constants.locationTagsTraverseOrderRSE);
-        } else if (romHandler instanceof Gen4RomHandler gen4RomHandler) {
-            return (gen4RomHandler.getRomEntry().getRomType() == Gen4Constants.Type_HGSS ?
+        } else if (romHandler instanceof Gen4RomHandler) {
+            return (((Gen4RomHandler) romHandler).getRomEntry().getRomType() == Gen4Constants.Type_HGSS ?
                     Gen4Constants.locationTagsTraverseOrderHGSS : Gen4Constants.locationTagsTraverseOrderDPPt);
-        } else if (romHandler instanceof Gen5RomHandler gen5RomHandler) {
-            return (gen5RomHandler.getRomEntry().getRomType() == Gen5Constants.Type_BW2 ?
+        } else if (romHandler instanceof Gen5RomHandler) {
+            return (((Gen5RomHandler) romHandler).getRomEntry().getRomType() == Gen5Constants.Type_BW2 ?
                     Gen5Constants.locationTagsTraverseOrderBW2 : Gen5Constants.locationTagsTraverseOrderBW);
         }
         return Collections.emptyList();
@@ -702,7 +710,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     private void catchEmAllCheck(PokemonSet allPokes) {
         PokemonSet catchable = new PokemonSet();
         for (EncounterArea area : romHandler.getEncounters(true)) {
-            catchable.addAll(PokemonSet.inArea(area));
+            catchable.addAll(area.getPokemonInArea());
         }
         PokemonSet notCatchable = new PokemonSet(allPokes);
         notCatchable.removeAll(catchable);
@@ -763,20 +771,20 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         for (EncounterArea area : romHandler.getEncounters(true)) {
             System.out.println("\n" + area.getDisplayName() + ":\n" + area);
             Pokemon firstPk = area.get(0).getPokemon();
-            PokemonSet allInArea = PokemonSet.inArea(area);
+            PokemonSet allInArea = area.getPokemonInArea();
 
-            Type primaryType = firstPk.getPrimaryType();
-            PokemonSet ofFirstType = PokemonSet.inArea(area).filterByType(primaryType);
+            Type primaryType = firstPk.getPrimaryType(false);
+            PokemonSet ofFirstType = area.getPokemonInArea().filterByType(primaryType, false);
             PokemonSet notOfFirstType = new PokemonSet(allInArea).filter(pk -> !ofFirstType.contains(pk));
             System.out.println(notOfFirstType);
 
             if (!notOfFirstType.isEmpty()) {
                 System.out.println("Not " + primaryType);
-                Type secondaryType = firstPk.getSecondaryType();
+                Type secondaryType = firstPk.getSecondaryType(false);
                 if (secondaryType == null) {
                     fail();
                 }
-                PokemonSet ofSecondaryType = PokemonSet.inArea(area).filterByType(secondaryType);
+                PokemonSet ofSecondaryType = area.getPokemonInArea().filterByType(secondaryType, false);
                 PokemonSet notOfSecondaryType = new PokemonSet(allInArea)
                         .filter(pk -> !ofSecondaryType.contains(pk));
                 System.out.println(notOfSecondaryType);
@@ -793,8 +801,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     }
 
     private String toNameAndTypesString(Pokemon pk) {
-        return pk.getName() + ", " + pk.getPrimaryType()
-                + (pk.getSecondaryType() == null ? "" : " / " + pk.getSecondaryType());
+        return pk.getName() + ", " + pk.getPrimaryType(false)
+                + (pk.getSecondaryType(false) == null ? "" : " / " + pk.getSecondaryType(false));
     }
 
     private void recordTypeThemeBefore(List<List<String>> beforeAreaStrings, Map<Integer, Type> typeThemedAreas) {
@@ -817,16 +825,16 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
     private Type getThemedAreaType(EncounterArea area) {
         Pokemon first = area.get(0).getPokemon();
-        Type primary = first.getOriginalPrimaryType();
-        Type secondary = first.getOriginalSecondaryType();
+        Type primary = first.getPrimaryType(true);
+        Type secondary = first.getSecondaryType(true);
         for (int i = 1; i < area.size(); i++) {
             Pokemon pk = area.get(i).getPokemon();
             if (secondary != null) {
-                if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
+                if (secondary != pk.getPrimaryType(true) && secondary != pk.getSecondaryType(true)) {
                     secondary = null;
                 }
             }
-            if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+            if (primary != pk.getPrimaryType(true) && primary != pk.getSecondaryType(true)) {
                 primary = secondary;
                 secondary = null;
             }
@@ -863,7 +871,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 for (Encounter enc : area) {
                     Pokemon pk = enc.getPokemon();
                     System.out.println("\t" + toNameAndTypesString(pk));
-                    assertTrue(pk.getPrimaryType() == theme || pk.getSecondaryType() == theme);
+                    assertTrue(pk.getPrimaryType(false) == theme || pk.getSecondaryType(false) == theme);
                 }
             } else {
                 System.out.println("Not Type Themed");
@@ -884,7 +892,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             for (Encounter enc : area) {
                 Pokemon pk = enc.getPokemon();
                 beforeStrings.add(toNameAndTypesString(pk));
-                beforeTypes.add(pk.getPrimaryType());
+                beforeTypes.add(pk.getPrimaryType(false));
             }
         }
     }
@@ -904,7 +912,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 Pokemon pk = area.get(j).getPokemon();
                 Type primary = beforePrimaryTypes.get(i).get(j);
                 System.out.println("\t" + toNameAndTypesString(pk));
-                assertTrue(pk.getPrimaryType() == primary || pk.getSecondaryType() == primary);
+                assertTrue(pk.getPrimaryType(false) == primary || pk.getSecondaryType(false) == primary);
             }
             System.out.println();
         }
@@ -972,8 +980,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         // for some reason fails with the Gen 3 Hoenn games
         // there's no obvious bug-related reason so I'm guessing they just have too few encounters/areas
-        if (romHandler instanceof Gen3RomHandler gen3RomHandler) {
-            assumeTrue(gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG);
+        if (romHandler instanceof Gen3RomHandler) {
+            assumeTrue(((Gen3RomHandler) romHandler).getRomEntry().getRomType() == Gen3Constants.RomType_FRLG);
         }
 
         List<List<String>> beforeAreaStrings = new ArrayList<>();
@@ -998,8 +1006,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         loadROM(romName);
         // for some reason fails with the Gen 3 Hoenn games
         // there's no obvious bug-related reason so I'm guessing they just have too few encounters/areas
-        if (romHandler instanceof Gen3RomHandler gen3RomHandler) {
-            assumeTrue(gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG);
+        if (romHandler instanceof Gen3RomHandler) {
+            assumeTrue(((Gen3RomHandler) romHandler).getRomEntry().getRomType() == Gen3Constants.RomType_FRLG);
         }
 
         List<List<String>> beforeAreaStrings = new ArrayList<>();
@@ -1310,8 +1318,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     public void location1to1EncountersCatchEmAllWorks(String romName) {
         loadROM(romName);
         // does not hold in BW1, presumably too few wild Pokémon species and too many in the national dex
-        if (romHandler instanceof Gen5RomHandler gen5RomHandler) {
-            assumeFalse(gen5RomHandler.getRomEntry().getRomType() == Gen5Constants.Type_BW);
+        if (romHandler instanceof Gen5RomHandler) {
+            assumeFalse(((Gen5RomHandler) romHandler).getRomEntry().getRomType() == Gen5Constants.Type_BW);
         }
         PokemonSet allPokes = romHandler.getPokemonSet();
         new EncounterRandomizer(romHandler, new Settings(), RND).randomizeEncounters(
@@ -1365,20 +1373,20 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
 
             System.out.println("\n" + area.getDisplayName() + ":\n" + area);
             Pokemon firstPk = area.get(0).getPokemon();
-            PokemonSet allInArea = PokemonSet.inArea(area);
+            PokemonSet allInArea = area.getPokemonInArea();
 
-            Type primaryType = firstPk.getPrimaryType();
-            PokemonSet ofFirstType = PokemonSet.inArea(area).filterByType(primaryType);
+            Type primaryType = firstPk.getPrimaryType(false);
+            PokemonSet ofFirstType = area.getPokemonInArea().filterByType(primaryType, false);
             PokemonSet notOfFirstType = new PokemonSet(allInArea).filter(pk -> !ofFirstType.contains(pk));
             System.out.println(notOfFirstType);
 
             if (!notOfFirstType.isEmpty()) {
                 System.out.println("Not " + primaryType);
-                Type secondaryType = firstPk.getSecondaryType();
+                Type secondaryType = firstPk.getSecondaryType(false);
                 if (secondaryType == null) {
                     fail();
                 }
-                PokemonSet ofSecondaryType = PokemonSet.inArea(area).filterByType(secondaryType);
+                PokemonSet ofSecondaryType = area.getPokemonInArea().filterByType(secondaryType, false);
                 PokemonSet notOfSecondaryType = new PokemonSet(allInArea)
                         .filter(pk -> !ofSecondaryType.contains(pk));
                 System.out.println(notOfSecondaryType);
@@ -1415,8 +1423,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     public void location1to1EncountersCatchEmAllANDRandomTypeThemesWorks(String romName) {
         loadROM(romName);
         // does not hold in RSE/BW1/BW2, presumably too few wild Pokémon species and too many in the national dex
-        if (romHandler instanceof Gen3RomHandler gen3RomHandler) {
-            assumeTrue(gen3RomHandler.getRomEntry().getRomType() == Gen3Constants.RomType_FRLG);
+        if (romHandler instanceof Gen3RomHandler) {
+            assumeTrue(((Gen3RomHandler) romHandler).getRomEntry().getRomType() == Gen3Constants.RomType_FRLG);
         }
         assumeFalse(romHandler instanceof Gen5RomHandler);
 

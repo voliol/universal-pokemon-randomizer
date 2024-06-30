@@ -109,15 +109,22 @@ public class RomHandlerMiscTest extends RomHandlerTest {
     }
 
     private int getPokemonCount() {
-        return switch (romHandler.generationOfPokemon()) {
-            case 1 -> Gen1Constants.pokemonCount;
-            case 2 -> Gen2Constants.pokemonCount;
-            case 3 -> Gen3Constants.pokemonCount;
-            case 4 -> Gen4Constants.pokemonCount;
-            case 5 -> Gen5Constants.pokemonCount;
-            case 6 -> Gen6Constants.pokemonCount;
-            default -> 0;
-        };
+        switch (romHandler.generationOfPokemon()) {
+            case 1:
+                return Gen1Constants.pokemonCount;
+            case 2:
+                return Gen2Constants.pokemonCount;
+            case 3:
+                return Gen3Constants.pokemonCount;
+            case 4:
+                return Gen4Constants.pokemonCount;
+            case 5:
+                return Gen5Constants.pokemonCount;
+            case 6:
+                return Gen6Constants.pokemonCount;
+            default:
+                return 0;
+        }
     }
 
     @ParameterizedTest
@@ -167,7 +174,7 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
         rPokeService.setRestrictions(settings);
         for (Pokemon pk : rPokeService.getAll(false)) {
-            PokemonSet related = PokemonSet.related(pk);
+            PokemonSet related = pk.getFamily(false);
             boolean anyFromRightGen = false;
             for (Pokemon relative : related) {
                 if (relative.getNumber() <= Gen1Constants.pokemonCount) {
@@ -194,7 +201,7 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         rPokeService.setRestrictions(settings);
         PokemonSet restrictedPokemon = rPokeService.getAll(false);
         for (Pokemon pk : restrictedPokemon) {
-            PokemonSet related = PokemonSet.related(pk);
+            PokemonSet related = pk.getFamily(false);
             String fromRightGen = null;
             String fromWrongGen = null;
             for (Pokemon relative : related) {
@@ -225,7 +232,7 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         RestrictedPokemonService rPokeService = romHandler.getRestrictedPokemonService();
         rPokeService.setRestrictions(settings);
         for (Pokemon pk : rPokeService.getAll(false)) {
-            PokemonSet related = PokemonSet.related(pk);
+            PokemonSet related = pk.getFamily(false);
             boolean anyFromRightGen = false;
             for (Pokemon relative : related) {
                 if (relative.getNumber() <= Gen1Constants.pokemonCount) {
@@ -252,7 +259,7 @@ public class RomHandlerMiscTest extends RomHandlerTest {
         rPokeService.setRestrictions(settings);
         PokemonSet restrictedPokemon = rPokeService.getAll(false);
         for (Pokemon pk : restrictedPokemon) {
-            PokemonSet related = PokemonSet.related(pk);
+            PokemonSet related = pk.getFamily(false);
             Pokemon fromRightGen = null;
             Pokemon fromWrongGen = null;
             for (Pokemon relative : related) {

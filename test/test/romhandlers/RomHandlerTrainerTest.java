@@ -2,13 +2,11 @@ package test.romhandlers;
 
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.constants.Gen3Constants;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.PokemonTypeRandomizer;
 import com.dabomstew.pkrandom.randomizers.TrainerPokemonRandomizer;
 import com.dabomstew.pkrandom.romhandlers.AbstractGBRomHandler;
-import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -399,16 +397,16 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
     private Type getThemedTrainerType(Trainer tr) {
         Pokemon first = tr.pokemon.get(0).pokemon;
-        Type primary = first.getOriginalPrimaryType();
-        Type secondary = first.getOriginalSecondaryType();
+        Type primary = first.getPrimaryType(true);
+        Type secondary = first.getSecondaryType(true);
         for (int i = 1; i < tr.pokemon.size(); i++) {
             Pokemon pk = tr.pokemon.get(i).pokemon;
             if (secondary != null) {
-                if (secondary != pk.getOriginalPrimaryType() && secondary != pk.getOriginalSecondaryType()) {
+                if (secondary != pk.getPrimaryType(true) && secondary != pk.getSecondaryType(true)) {
                     secondary = null;
                 }
             }
-            if (primary != pk.getOriginalPrimaryType() && primary != pk.getOriginalSecondaryType()) {
+            if (primary != pk.getPrimaryType(true) && primary != pk.getSecondaryType(true)) {
                 primary = secondary;
                 secondary = null;
             }
@@ -443,7 +441,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
                 for (TrainerPokemon tp : tr.pokemon) {
                     Pokemon pk = tp.pokemon;
                     System.out.println("\t" + pk);
-                    assertTrue(pk.getPrimaryType() == theme || pk.getSecondaryType() == theme);
+                    assertTrue(pk.getPrimaryType(false) == theme || pk.getSecondaryType(false) == theme);
                 }
             } else {
                 System.out.println("Not Type Themed");
@@ -463,9 +461,9 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
         PokemonSet localWithRelatives = new PokemonSet();
         for (EncounterArea area : romHandler.getEncounters(true)) {
-            for (Pokemon pk : PokemonSet.inArea(area)) {
+            for (Pokemon pk : area.getPokemonInArea()) {
                 if (!localWithRelatives.contains(pk)) {
-                    localWithRelatives.addAll(PokemonSet.related(pk));
+                    localWithRelatives.addAll(pk.getFamily(false));
                 }
             }
         }
@@ -503,7 +501,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
         PokemonSet localWithRelatives = new PokemonSet();
         romHandler.getMainGameWildPokemon(true)
-                .forEach(pk -> localWithRelatives.addAll(PokemonSet.related(pk)));
+                .forEach(pk -> localWithRelatives.addAll(pk.getFamily(false)));
 
         PokemonSet all = romHandler.getPokemonSet();
         PokemonSet nonLocal = new PokemonSet(all);

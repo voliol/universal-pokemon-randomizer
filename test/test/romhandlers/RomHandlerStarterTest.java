@@ -174,11 +174,11 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         Pokemon waterStarter = starters.get(1);
         Pokemon grassStarter = starters.get(2);
         System.out.println("Fire Starter: " + fireStarter);
-        assertTrue(fireStarter.getPrimaryType() == Type.FIRE || fireStarter.getSecondaryType() == Type.FIRE);
+        assertTrue(fireStarter.getPrimaryType(false) == Type.FIRE || fireStarter.getSecondaryType(false) == Type.FIRE);
         System.out.println("Water Starter: " + waterStarter);
-        assertTrue(waterStarter.getPrimaryType() == Type.WATER || waterStarter.getSecondaryType() == Type.WATER);
+        assertTrue(waterStarter.getPrimaryType(false) == Type.WATER || waterStarter.getSecondaryType(false) == Type.WATER);
         System.out.println("Grass Starter: " + grassStarter);
-        assertTrue(grassStarter.getPrimaryType() == Type.GRASS || grassStarter.getSecondaryType() == Type.GRASS);
+        assertTrue(grassStarter.getPrimaryType(false) == Type.GRASS || grassStarter.getSecondaryType(false) == Type.GRASS);
     }
 
     @ParameterizedTest
@@ -245,10 +245,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         // nothing more sophisticated
         System.out.println("Is " + attacker.getName() + " super-effective against " + defender.getName() + " ?");
         boolean isSuperEffective =
-                isSuperEffectiveAgainst(attacker.getPrimaryType(), defender.getPrimaryType(), generation) ||
-                isSuperEffectiveAgainst(attacker.getPrimaryType(), defender.getSecondaryType(), generation) ||
-                isSuperEffectiveAgainst(attacker.getSecondaryType(), defender.getPrimaryType(), generation) ||
-                isSuperEffectiveAgainst(attacker.getSecondaryType(), defender.getSecondaryType(), generation);
+                isSuperEffectiveAgainst(attacker.getPrimaryType(false), defender.getPrimaryType(false), generation) ||
+                isSuperEffectiveAgainst(attacker.getPrimaryType(false), defender.getSecondaryType(false), generation) ||
+                isSuperEffectiveAgainst(attacker.getSecondaryType(false), defender.getPrimaryType(false), generation) ||
+                isSuperEffectiveAgainst(attacker.getSecondaryType(false), defender.getSecondaryType(false), generation);
         System.out.println(isSuperEffective + "\n");
         return isSuperEffective;
     }
@@ -311,16 +311,16 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     }
 
     private boolean sharesTypes(Pokemon a, Pokemon b) {
-        if (a.getPrimaryType() == b.getPrimaryType()) {
+        if (a.getPrimaryType(false) == b.getPrimaryType(false)) {
             return true;
         }
-        if (b.getSecondaryType() != null) {
-            if (a.getPrimaryType() == b.getSecondaryType()) {
+        if (b.getSecondaryType(false) != null) {
+            if (a.getPrimaryType(false) == b.getSecondaryType(false)) {
                 return true;
             }
         }
-        if (a.getSecondaryType() != null) {
-            return a.getSecondaryType() == b.getPrimaryType() || a.getSecondaryType() == b.getSecondaryType();
+        if (a.getSecondaryType(false) != null) {
+            return a.getSecondaryType(false) == b.getPrimaryType(false) || a.getSecondaryType(false) == b.getSecondaryType(false);
         }
         return false;
     }
@@ -370,10 +370,10 @@ public class RomHandlerStarterTest extends RomHandlerTest {
                 new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
                 List<Pokemon> starters = romHandler.getStarters();
-                System.out.println(starters.stream().map(pk -> pk.getName() + " " + pk.getPrimaryType() +
-                        (pk.getSecondaryType() == null ? "" : " / " + pk.getSecondaryType())).collect(Collectors.toList()));
+                System.out.println(starters.stream().map(pk -> pk.getName() + " " + pk.getPrimaryType(false) +
+                        (pk.getSecondaryType(false) == null ? "" : " / " + pk.getSecondaryType(false))).collect(Collectors.toList()));
                 for (Pokemon starter : starters) {
-                    assertTrue(starter.getPrimaryType() == t || starter.getSecondaryType() == t);
+                    assertTrue(starter.getPrimaryType(false) == t || starter.getSecondaryType(false) == t);
                 }
             }
         }

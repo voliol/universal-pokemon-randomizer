@@ -145,7 +145,8 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
 
     private void checkForNoCycles(Pokemon curr, Pokemon start, int depth) {
         for (Evolution evo : curr.getEvolutionsFrom()) {
-            System.out.println(" ".repeat(depth) + evo.getTo().getName());
+            System.out.print(new String(new char[depth]).replaceAll("\0", " "));
+            System.out.println(evo.getTo().getName());
             assertNotEquals(start, evo.getTo());
             checkForNoCycles(evo.getTo(), start, depth + 1);
         }
@@ -182,7 +183,7 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
     }
 
     private String toStringWithTypes(Pokemon pk) {
-        return pk.getName() + "(" + pk.getPrimaryType() + (pk.getSecondaryType() == null ? "" : "/" + pk.getSecondaryType()) + ")";
+        return pk.getName() + "(" + pk.getPrimaryType(false) + (pk.getSecondaryType(false) == null ? "" : "/" + pk.getSecondaryType(false)) + ")";
     }
 
     @ParameterizedTest
@@ -195,8 +196,8 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
         for (Evolution evo : eeveeBefore.getEvolutionsFrom()) {
             Pokemon before = new Pokemon(0);
             before.setName(evo.getTo().getName());
-            before.setPrimaryType(evo.getTo().getPrimaryType());
-            before.setSecondaryType(evo.getTo().getSecondaryType());
+            before.setPrimaryType(evo.getTo().getPrimaryType(false));
+            before.setSecondaryType(evo.getTo().getSecondaryType(false));
             beforeEvos.add(before);
         }
 
@@ -238,7 +239,8 @@ public class RomHandlerEvolutionTest extends RomHandlerTest {
     }
 
     private int evoStagesAfter(Pokemon pk, int count) {
-        System.out.println(" ".repeat(count-1) + pk.getName());
+        System.out.print(new String(new char[count - 1]).replaceAll("\0", " "));
+        System.out.println(pk.getName());
         int max = count++;
         for (Evolution evo : pk.getEvolutionsFrom()) {
             max = Math.max(max, evoStagesAfter(evo.getTo(), count));

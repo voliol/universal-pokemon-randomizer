@@ -32,6 +32,7 @@ public class RomHandlerStaticsTest extends RomHandlerTest {
         System.out.println(statics);
         List<StaticEncounter> before = deepCopy(statics);
         romHandler.setStaticPokemon(statics);
+        // TODO: go through the statics more detailed to find the difference
         assertEquals(before, romHandler.getStaticPokemon());
     }
 
