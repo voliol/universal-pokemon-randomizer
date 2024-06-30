@@ -7,9 +7,8 @@ import com.dabomstew.pkrandom.randomizers.StaticPokemonRandomizer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,8 +31,62 @@ public class RomHandlerStaticsTest extends RomHandlerTest {
         System.out.println(statics);
         List<StaticEncounter> before = deepCopy(statics);
         romHandler.setStaticPokemon(statics);
-        // TODO: go through the statics more detailed to find the difference
-        assertEquals(before, romHandler.getStaticPokemon());
+        List<StaticEncounter> after = romHandler.getStaticPokemon();
+        for (int i = 0; i < before.size(); i++) {
+            if (after.size() != before.size()) {
+                throw new RuntimeException("size mismatch, before:" + before.size() + " after:" + after.size());
+            }
+            System.out.println("Before:");
+            System.out.println(toLongString(before.get(i), false));
+            System.out.println("After:");
+            System.out.println(toLongString(after.get(i), false));
+            System.out.println();
+            assertEquals(before.get(i), after.get(i));
+        }
+    }
+
+    private String toLongString(StaticEncounter se, boolean isLinkedEncounter) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(se.pkmn.fullName());
+        sb.append(" forme=").append(se.forme);
+        sb.append(" level=").append(se.level);
+        if (se.maxLevel > 0) {
+            sb.append(" maxLevel=").append(se.maxLevel);
+        }
+        sb.append(" isEgg=").append(se.isEgg);
+        sb.append(" resetMoves=").append(se.resetMoves);
+        sb.append(" restrictedPool=").append(se.restrictedPool);
+
+        sb.append(" restrictedList=");
+        if (se.restrictedList == null) {
+            sb.append("null");
+        } else {
+            sb.append("(");
+            sb.append(se.restrictedList.stream()
+                    .map(Pokemon::fullName)
+                    .collect(Collectors.joining(",")));
+            sb.append(")");
+        }
+
+        sb.append(" linkedEncounters=");
+        if (se.linkedEncounters == null) {
+            sb.append("null");
+        } else if (se.linkedEncounters.isEmpty()) {
+            sb.append("[]");
+        } else {
+            if (isLinkedEncounter) {
+                throw new IllegalArgumentException("linkedEncounter should not have linkedEncounters of its own!");
+            }
+            sb.append("[\n");
+            for (StaticEncounter linked : se.linkedEncounters) {
+                sb.append("\t");
+                sb.append(toLongString(linked, true));
+                sb.append("\n");
+            }
+            sb.append("]");
+        }
+
+        return sb.toString();
     }
 
     @ParameterizedTest

@@ -70,11 +70,14 @@ public class StaticEncounter {
         for (StaticEncounter oldLinked : original.linkedEncounters) {
             StaticEncounter newLinked = new StaticEncounter();
             newLinked.pkmn = oldLinked.pkmn;
+            newLinked.forme = oldLinked.forme;
             newLinked.level = oldLinked.level;
             newLinked.maxLevel = oldLinked.maxLevel;
             newLinked.heldItem = oldLinked.heldItem;
             newLinked.isEgg = oldLinked.isEgg;
             newLinked.resetMoves = oldLinked.resetMoves;
+            newLinked.restrictedPool = oldLinked.restrictedPool;
+            newLinked.restrictedList = new ArrayList<>(oldLinked.restrictedList);
             this.linkedEncounters.add(newLinked);
         }
     }
