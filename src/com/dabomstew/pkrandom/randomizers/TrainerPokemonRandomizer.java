@@ -71,7 +71,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
 
         // Set up Pokemon pool
         cachedByType = new TreeMap<>();
-        cachedAll = rPokeService.getPokemon(noLegendaries, includeFormes, false);
+        cachedAll = new PokemonSet(rPokeService.getPokemon(noLegendaries, includeFormes, false));
 
         if (useLocalPokemon) {
             PokemonSet localWithRelatives =

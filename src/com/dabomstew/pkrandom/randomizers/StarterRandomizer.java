@@ -105,7 +105,7 @@ public class StarterRandomizer extends Randomizer {
      * @throws RandomizationException if no type has the needed number of Pokemon.
      */
     private Type chooseTypeForStarters(int numStartersNeeded, Map<Type, PokemonSet> availableByType) {
-        List<Type> types = typeService.getTypes();
+        List<Type> types = new ArrayList<>(typeService.getTypes());
         Collections.shuffle(types);
 
         for (Type type : types) {
