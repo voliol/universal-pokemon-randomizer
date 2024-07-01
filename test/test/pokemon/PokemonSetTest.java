@@ -2,6 +2,8 @@ package test.pokemon;
 
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
+import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.services.TypeService;
 import org.junit.jupiter.api.Test;
 
 import javax.print.attribute.UnmodifiableSetException;
@@ -136,5 +138,72 @@ public class PokemonSetTest {
         a.setName("A");
         PokemonSet pokes = PokemonSet.unmodifiable(Collections.singleton(a));
         assertThrows(UnmodifiableSetException.class, pokes::clear);
+    }
+
+    @Test
+    public void sortByTypesWorks() {
+        PokemonSet pokes = new PokemonSet();
+        Random random = new Random();
+        List<Type> types = Type.getAllTypes(7);
+        for(int i = 0; i < 1000; i++){
+            Pokemon pokemon = new Pokemon(i);
+            pokemon.setName("Random" + i);
+            pokemon.setPrimaryType(types.get(random.nextInt(types.size())));
+            if(random.nextBoolean()) {
+                pokemon.setSecondaryType(types.get(random.nextInt(types.size())));
+            }
+            pokes.add(pokemon);
+        }
+
+        Map<Type, PokemonSet> pokesByTypes = pokes.sortByType(false);
+        for(Type type : types) {
+            PokemonSet pokemonOfType = pokesByTypes.get(type);
+            if(pokemonOfType != null) {
+                for (Pokemon pokemon : pokemonOfType) {
+                    assertTrue(pokemon.hasType(type, false));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void sortByTypesWorksWithChangedTypes() {
+        PokemonSet pokes = new PokemonSet();
+        Random random = new Random();
+        List<Type> types = Type.getAllTypes(7);
+        for(int i = 0; i < 1000; i++){
+            Pokemon pokemon = new Pokemon(i);
+            pokemon.setName("Random" + i);
+            pokemon.setPrimaryType(types.get(random.nextInt(types.size())));
+            if(random.nextBoolean()) {
+                pokemon.setSecondaryType(types.get(random.nextInt(types.size())));
+            } else {
+                pokemon.setSecondaryType(null);
+            }
+
+            pokemon.setPrimaryType(types.get(random.nextInt(types.size())));
+            if(random.nextBoolean()) {
+                pokemon.setSecondaryType(types.get(random.nextInt(types.size())));
+            } else {
+                pokemon.setSecondaryType(null);
+            }
+            pokes.add(pokemon);
+        }
+
+        Map<Type, PokemonSet> pokesByTypes = pokes.sortByType(false);
+        for(Type type : types) {
+            PokemonSet pokemonOfType = pokesByTypes.get(type);
+            for (Pokemon pokemon : pokemonOfType) {
+                assertTrue(pokemon.hasType(type, false));
+            }
+        }
+
+        pokesByTypes = pokes.sortByType(true);
+        for(Type type : types) {
+            PokemonSet pokemonOfType = pokesByTypes.get(type);
+            for (Pokemon pokemon : pokemonOfType) {
+                assertTrue(pokemon.hasType(type, true));
+            }
+        }
     }
 }
