@@ -80,7 +80,7 @@ public enum Type {
      */
     @Deprecated
     public static Type randomType(Random random) {
-        System.out.println("Type.getAllTypes() is deprecated. Please use TypeService#randomType(Random) instead.");
+        System.out.println("Type.randomType() is deprecated. Please use TypeService#randomType(Random) instead.");
         return VALUES.get(random.nextInt(SIZE));
     }
 
