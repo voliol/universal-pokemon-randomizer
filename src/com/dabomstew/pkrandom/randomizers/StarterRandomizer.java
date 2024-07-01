@@ -130,7 +130,7 @@ public class StarterRandomizer extends Randomizer {
             typesInOrder = Arrays.asList(Type.FIRE, Type.WATER, Type.GRASS);
         } else {
             //the order is Grass, Fire, Water
-            typesInOrder = Arrays.asList(Type.WATER, Type.GRASS, Type.FIRE);
+            typesInOrder = Arrays.asList(Type.GRASS, Type.FIRE, Type.WATER);
         }
 
         return chooseStartersOfTypes(choosableByType, typesInOrder);
@@ -188,8 +188,13 @@ public class StarterRandomizer extends Randomizer {
         List<Pokemon> chosenStarters = new ArrayList<>();
 
         for (Type type : types) {
-            PokemonSet pokemonOfType = new PokemonSet(availablePokemonByType.get(type));
-            //clone so we can safely drain it
+            PokemonSet pokemonOfType;
+            if(availablePokemonByType.get(type) != null) {
+                pokemonOfType = new PokemonSet(availablePokemonByType.get(type));
+                //clone so we can safely drain it
+            } else {
+                throw new RandomizationException("No valid starters of type " + type + "found!");
+            }
 
             boolean noPick = true;
             while (noPick && !pokemonOfType.isEmpty()) {
@@ -221,6 +226,10 @@ public class StarterRandomizer extends Randomizer {
      * @return A new {@link List} containing each starter chosen. (Not a PokemonSet so that the order remains random.)
      */
     private List<Pokemon> chooseStartersBasic(int numberPicks, PokemonSet available) {
+        if(available.size() < numberPicks) {
+            throw new RandomizationException("Not enough starters to choose from!");
+        }
+
         List<Pokemon> picks = new ArrayList<>();
         //List rather than set so the order isn't deterministic
         while (picks.size() < numberPicks) {
@@ -250,7 +259,7 @@ public class StarterRandomizer extends Randomizer {
 
         while (picks.size() < numberPicks) {
             Pokemon picked = available.getRandomPokemon(random);
-            alreadyPicked.add(picked);
+            picks.add(picked);
             available.remove(picked);
             available.removeIf(poke -> poke.hasType(picked.getPrimaryType(false), false)
                     || poke.hasType(picked.getSecondaryType(false), false));

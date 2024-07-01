@@ -138,7 +138,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         s.setStartersTypeMod(false, true, false, false, false);
         new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
-        fwgCheck();
+        fwgCheck(getGenerationNumberOf(romName));
     }
 
     @ParameterizedTest
@@ -151,7 +151,7 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         s.setStartersTypeMod(false, true, false, false, false);
         new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
-        fwgCheck();
+        fwgCheck(getGenerationNumberOf(romName));
     }
 
     @ParameterizedTest
@@ -164,15 +164,25 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         s.setStartersTypeMod(false, true, false, false, false);
         new StarterRandomizer(romHandler, s, RND).randomizeStarters();
 
-        fwgCheck();
+        fwgCheck(getGenerationNumberOf(romName));
     }
 
-    private void fwgCheck() {
+    private void fwgCheck(int generation) {
         List<Pokemon> starters = romHandler.getStarters();
-        // they should always be in this order
-        Pokemon fireStarter = starters.get(0);
-        Pokemon waterStarter = starters.get(1);
-        Pokemon grassStarter = starters.get(2);
+        Pokemon fireStarter;
+        Pokemon waterStarter;
+        Pokemon grassStarter;
+        if(generation <= 2) {
+            //early games start with Fire
+            fireStarter = starters.get(0);
+            waterStarter = starters.get(1);
+            grassStarter = starters.get(2);
+        } else {
+            //later games start with Grass
+            grassStarter = starters.get(0);
+            fireStarter = starters.get(1);
+            waterStarter = starters.get(2);
+        }
         System.out.println("Fire Starter: " + fireStarter);
         assertTrue(fireStarter.getPrimaryType(false) == Type.FIRE || fireStarter.getSecondaryType(false) == Type.FIRE);
         System.out.println("Water Starter: " + waterStarter);
@@ -229,15 +239,25 @@ public class RomHandlerStarterTest extends RomHandlerTest {
     }
 
     private void typeTriangleCheck(int generation) {
-        // Checks only for type triangles going in the same direction as the vanilla starter's triangle
-        // (or technically, how the vanilla starters are read by the randomizer),
-        // since triangles in the other direction might mess up rival effectiveness
         List<Pokemon> starters = romHandler.getStarters();
         System.out.println(starters + "\n");
 
+        typeTriangleCheckInner(starters, generation);
+    }
+
+    private void typeTriangleCheckInner(List<Pokemon> starters, int generation) {
+        // Checks only for type triangles going in the same direction as the vanilla starter's triangle
+        // (or technically, how the vanilla starters are read by the randomizer),
+        // since triangles in the other direction might mess up rival effectiveness
         assertTrue(isSuperEffectiveAgainst(starters.get(1), starters.get(0), generation));
         assertTrue(isSuperEffectiveAgainst(starters.get(2), starters.get(1), generation));
         assertTrue(isSuperEffectiveAgainst(starters.get(0), starters.get(2), generation));
+
+        if(starters.size() > 3) {
+            //recurse to check the later triangles too
+            List<Pokemon> nextSet = starters.subList(3, starters.size());
+            typeTriangleCheckInner(nextSet, generation);
+        }
     }
 
     private boolean isSuperEffectiveAgainst(Pokemon attacker, Pokemon defender, int generation) {
@@ -336,11 +356,11 @@ public class RomHandlerStarterTest extends RomHandlerTest {
         singleTypeCheck(s);
     }
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void singleTypeWorksWithRandomWithTwoEvos(String romName) {
-        // fails on all vanilla games afaik, due to there being only Machop and Timburr that fulfill this for Fighting.
+        // fails on all vanilla games before gen 4, as until then there are only two for Dragon.
+        assumeTrue(getGenerationNumberOf(romName) >= 4);
         loadROM(romName);
         Settings s = new Settings();
         s.setStartersMod(false, false, false, true, false);
