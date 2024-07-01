@@ -406,20 +406,20 @@ public class EncounterRandomizer extends Randomizer {
             Map<Integer, List<EncounterArea>> grouped = groupAreasByMapIndex(unflattened);
             List<EncounterArea> flattenedEncounters = new ArrayList<>();
             int unnamed = 1;
-            for(Map.Entry<Integer, List<EncounterArea>> mapEntry : grouped.entrySet()) {
+            for (Map.Entry<Integer, List<EncounterArea>> mapEntry : grouped.entrySet()) {
                 Map<EncounterArea.EncounterType, List<EncounterArea>> mapGrouped =
                         groupAreasByEncounterType(mapEntry.getValue());
                 String mapName = mapEntry.getValue().get(0).getLocationTag();
-                if(mapName == null) {
+                if (mapName == null) {
                     mapName = "Unknown Map " + unnamed;
                     unnamed++;
                 }
-                for(Map.Entry<EncounterArea.EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
+                for (Map.Entry<EncounterArea.EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
                     EncounterArea flattened = new EncounterArea();
                     flattened.setDisplayName(mapName + typeEntry.getKey().name());
                     flattened.setEncounterType(typeEntry.getKey());
                     flattened.setMapIndex(mapEntry.getKey());
-                    for(EncounterArea area : typeEntry.getValue()) {
+                    for (EncounterArea area : typeEntry.getValue()) {
                         flattened.addAll(area);
                         flattened.banAllPokemon(area.getBannedPokemon());
                     }

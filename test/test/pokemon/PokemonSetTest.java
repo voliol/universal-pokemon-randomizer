@@ -3,11 +3,9 @@ package test.pokemon;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.PokemonSet;
 import com.dabomstew.pkrandom.pokemon.Type;
-import com.dabomstew.pkrandom.services.TypeService;
 import org.junit.jupiter.api.Test;
 
 import javax.print.attribute.UnmodifiableSetException;
-import java.lang.reflect.Executable;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;

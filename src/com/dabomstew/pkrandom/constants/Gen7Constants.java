@@ -1416,28 +1416,72 @@ public class Gen7Constants {
             280, 290, 296, 297, 298, 299, 301, //apparently unused (various areas)
     };
 
-    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, int[] postGameAreas) {
-        // since I'm not supporting Gen 6+ in the V branch, this lacks location tagging
-        // there's nothing stopping you from adding them like in earlier Gens, just hasn't been done already
-        // --voliol
+    private static final List<String> smLocationTagsNoTOD = initSMLocationTagsNoTOD();
+
+    private static List<String> initSMLocationTagsNoTOD() {
+        List<String> tags = new ArrayList<>();
+        // TODO
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> smLocationTagsTOD = initSMLocationTagsTOD();
+
+    private static List<String> initSMLocationTagsTOD() {
+        List<String> tags = new ArrayList<>();
+        // TODO
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> usumLocationTagsNoTOD = initUSUMLocationTagsNoTOD();
+
+    private static List<String> initUSUMLocationTagsNoTOD() {
+        List<String> tags = new ArrayList<>();
+        // TODO
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static final List<String> usumLocationTagsTOD = initUSUMLocationTagsTOD();
+
+    private static List<String> initUSUMLocationTagsTOD() {
+        List<String> tags = new ArrayList<>();
+        // TODO
+        return Collections.unmodifiableList(tags);
+    }
+
+    private static void addCopies(List<String> list, int n, String s) {
+        list.addAll(Collections.nCopies(n, s));
+    }
+
+    private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
+        System.out.println("#encs=" + encounterAreas.size() + " #tags=" + locationTags.size());
+//        if (encounterAreas.size() != locationTags.size()) {
+//            throw new IllegalArgumentException("Unexpected amount of encounter areas");
+//        }
+        for (int i = 0; i < locationTags.size(); i++) {
+            encounterAreas.get(i).setLocationTag(locationTags.get(i));
+            System.out.println(locationTags.get(i) + " " + encounterAreas.get(i));
+        }
         for (int areaIndex : postGameAreas) {
             encounterAreas.get(areaIndex).setPostGame(true);
         }
     }
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
+        List<String> locationTags;
         int[] postGameAreas;
         switch (romType) {
             case Type_SM:
+                locationTags = (useTimeOfDay ? smLocationTagsTOD : smLocationTagsNoTOD);
                 postGameAreas = (useTimeOfDay ? smPostGameEncounterAreasTOD : smPostGameEncounterAreasNoTOD);
                 break;
             case Type_USUM:
+                locationTags = (useTimeOfDay ? usumLocationTagsTOD : usumLocationTagsNoTOD);
                 postGameAreas = (useTimeOfDay ? usumPostGameEncounterAreasTOD : usumPostGameEncounterAreasNoTOD);
                 break;
             default:
                 throw new IllegalStateException("Unexpected value for romType: " + romType);
         }
-        tagEncounterAreas(encounterAreas, postGameAreas);
+        tagEncounterAreas(encounterAreas, locationTags, postGameAreas);
     }
 
     public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {

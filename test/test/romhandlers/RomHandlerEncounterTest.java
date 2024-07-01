@@ -1589,4 +1589,47 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         powerLevelsCheck(before, after);
     }
 
+    private static final List<String> encounterTerminators = Arrays.asList(
+            "Grass/Cave", "Yellow Flowers", "Red Flowers", "Purple Flowers", "Rough Terrain/Tall Grass", "Long Grass",
+            "Surf",
+            "Common Horde", "Uncommon Horde", "Rare Horde", "DexNav Foreign Encounter",
+            "Old Rod", "Good Rod", "Super Rod",
+            "Rock Smash"
+    );
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void generateTags(String romName) {
+        loadROM(romName);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(true);
+
+        String lastTag = "";
+        int count = 0;
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            String tag = encounterAreas.get(i).getDisplayName();
+            tag = simplifyTag(tag);
+
+            if (!tag.equals(lastTag) || i == encounterAreas.size() - 1) {
+                System.out.println("\t\t" + "addCopies(tags, " + count + ", \"" + lastTag + "\");");
+                lastTag = tag;
+                count = 1;
+            } else {
+                count++;
+            }
+        }
+
+    }
+
+    private static String simplifyTag(String tag) {
+        for (String terminator : encounterTerminators) {
+            if (tag.endsWith(terminator)) {
+                tag = tag.replace(terminator, "");
+                break;
+            }
+        }
+        tag = tag.split(", Table")[0]; // for Gen 7
+        tag = tag.trim().toUpperCase();
+        return tag;
+    }
+
 }
