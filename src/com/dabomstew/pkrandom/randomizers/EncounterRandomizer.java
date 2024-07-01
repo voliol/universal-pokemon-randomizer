@@ -239,7 +239,7 @@ public class EncounterRandomizer extends Randomizer {
                     if (catchEmAll) {
                         removeFromRemaining(replacement);
                         if (allowedForArea.isEmpty()) {
-                            refillAllowedForArea();
+                            allowedForArea = setupAllowedForArea();
                         }
                     }
                 }
@@ -313,6 +313,12 @@ public class EncounterRandomizer extends Randomizer {
                     //choose a random encounter, and remove it from the "queue"
                     int index = random.nextInt(map.size());
                     List<Encounter> encsLeftInArea = encountersToRandomize.get(index);
+                    while (encsLeftInArea == null) {
+                        //keep trying until we hit one that's not empty.
+                        //(The loop should terminate... eventually...)
+                        index = random.nextInt(map.size());
+                        encsLeftInArea = encountersToRandomize.get(index);
+                    }
                     Encounter enc = encsLeftInArea.remove(random.nextInt(encsLeftInArea.size()));
                     if(encsLeftInArea.isEmpty()) {
                         encountersToRandomize.remove(index);
@@ -341,6 +347,9 @@ public class EncounterRandomizer extends Randomizer {
 
                     if (catchEmAll) {
                         removeFromRemaining(replacement);
+                        if(allowedForArea.isEmpty()) {
+                            allowedForArea = setupAllowedForArea();
+                        }
                     }
                 }
             }
@@ -593,6 +602,7 @@ public class EncounterRandomizer extends Randomizer {
 
         /**
          * Removes the given Pokemon from "remaining" and all variants that are in use.
+         * If remaining is empty after removing, refills it.
          * @param replacement The Pokemon to remove.
          */
         private void removeFromRemaining(Pokemon replacement) {
@@ -612,13 +622,10 @@ public class EncounterRandomizer extends Randomizer {
                     }
                 }
             }
-        }
 
-        private void refillAllowedForArea() {
-            if (remaining.isEmpty()) {
+            if(remaining.isEmpty()) {
                 refillRemainingPokemon();
             }
-            allowedForArea = areaType != null ? allowedByType.get(areaType) : remaining;
         }
 
         private void enforceMultipleSpecies(EncounterArea area) {
@@ -854,7 +861,7 @@ public class EncounterRandomizer extends Randomizer {
 
         private Pokemon pickGame1to1Replacement(PokemonAreaInformation current) {
             Type theme = current.getTheme(keepPrimaryType);
-            if(theme == null) {
+            if(theme != null) {
                 allowedForReplacement = remainingByType.get(theme);
             } else {
                 allowedForReplacement = remaining;
