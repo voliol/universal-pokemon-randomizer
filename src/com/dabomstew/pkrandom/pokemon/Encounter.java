@@ -54,6 +54,9 @@ public class Encounter {
     public Pokemon getPokemon() {
         return pokemon;
     }
+    //TODO: determine which uses of this need base forme, have those call pokemon.baseForme
+    //(Thus allowing us to store the actually-used forme here,
+    //solving some problems)
 
     public void setPokemon(Pokemon pokemon) {
         this.pokemon = pokemon;

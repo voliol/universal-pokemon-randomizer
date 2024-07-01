@@ -1113,6 +1113,7 @@ public class EncounterRandomizer extends Randomizer {
         } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
             enc.setFormeNumber(enc.getFormeNumber() + pk.getCosmeticFormNumber(this.random.nextInt(pk.getCosmeticForms())));
         }
+        //TODO: instead of this function, have encounter store the actual forme used and call basePokemon when needed
     }
 
     public void changeCatchRates() {
