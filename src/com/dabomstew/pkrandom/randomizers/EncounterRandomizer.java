@@ -257,22 +257,20 @@ public class EncounterRandomizer extends Randomizer {
         private void randomEncountersORAS(List<EncounterArea> encounterAreas) {
 
             List<EncounterArea> collapsedEncounters = flattenEncounterTypesInMaps(encounterAreas);
-            Map<Integer, List<EncounterArea>> areasByMapIndex = groupAreasByMapIndex(collapsedEncounters);
+            List<List<EncounterArea>> maps = new ArrayList<>(groupAreasByMapIndex(collapsedEncounters).values());
+            Collections.shuffle(maps, random);
             //Awkwardly, the grouping is run twice...
 
             //sort out Rock Smash areas
             List<EncounterArea> rockSmashAreas = new ArrayList<>();
-            List<EncounterArea> nonRockSmashAreas = new ArrayList<>();
-            for(Map.Entry<Integer, List<EncounterArea>> mapEntry : areasByMapIndex.entrySet()) {
-                Iterator<EncounterArea> mapIterator = mapEntry.getValue().iterator();
+            for(List<EncounterArea> map : maps) {
+                Iterator<EncounterArea> mapIterator = map.iterator();
                 while(mapIterator.hasNext()) {
                     EncounterArea area = mapIterator.next();
                     if(area.getEncounterType() == EncounterArea.EncounterType.INTERACT) {
                         //rock smash is the only INTERACT type in ORAS
                         rockSmashAreas.add(area);
                         mapIterator.remove();
-                    } else {
-                        nonRockSmashAreas.add(area);
                     }
                 }
             }
@@ -280,79 +278,84 @@ public class EncounterRandomizer extends Randomizer {
             //Rock smash is not affected by the crashing, so we can run the standard RandomEncounters on it.
             this.randomEncounters(rockSmashAreas);
 
-            //For other areas, we start with area mapping
-            this.area1to1Encounters(nonRockSmashAreas);
-            //and then see how many more Pokemon we can add
-            this.enhanceRandomEncountersORAS(areasByMapIndex);
-            //(nonRockSmashAreas and areasByMapIndex contain all the same areas, just organized differently.)
+            //For other areas, run it by map
+            //(They're already shuffled)
+            for(List<EncounterArea> map : maps) {
+                randomizeMapORAS(map);
+            }
         }
 
         /**
-         * Given a list of areas, grouped by map index, which have already undergone area 1-to-1 mapping,
-         * adds as many distinct Pokemon to each map as possible without crashing ORAS's DexNav.
-         * @param areasByMapIndex The areas to randomize, grouped by map index.
+         * Given a list of EncounterAreas, all on the same map, randomizes them with as many
+         * different Pokemon as it can without crashing.
+         * @param map The map to randomize.
          */
-        private void enhanceRandomEncountersORAS(Map<Integer, List<EncounterArea>> areasByMapIndex) {
+        private void randomizeMapORAS(List<EncounterArea> map) {
+
+            class EncounterWithData {
+                //fully functional and anatomically correct *is shot*
+                int areaIndex;
+                Pokemon originalPokemon;
+                Encounter encounter;
+            }
+
+            //log original Pokemon
+            List<EncounterWithData> encounters = new ArrayList<>();
+            for(int i = 0; i < map.size(); i++){
+                EncounterArea area = map.get(i);
+                for(Encounter enc : area) {
+                    EncounterWithData data = new EncounterWithData();
+                    data.encounter = enc;
+                    data.originalPokemon = enc.getPokemon();
+                    data.areaIndex = i;
+                    encounters.add(data);
+                }
+            }
+
+            //do area 1-to-1 to make sure everything gets SOME randomization
+            this.area1to1Encounters(map);
+
+            //set to the proper settings, in case it matters
             map1to1 = false;
             useLocations = false;
 
-            List<Integer> mapIndices = new ArrayList<>(areasByMapIndex.keySet());
-            Collections.shuffle(mapIndices);
+            //then do more randomizing!
+            Collections.shuffle(encounters, random);
+            while(getORASDexNavLoad(map) < ORAS_CRASH_THRESHOLD && !encounters.isEmpty()) {
 
-            for(int mapIndex : mapIndices) {
-                List<EncounterArea> map = areasByMapIndex.get(mapIndex);
+                EncounterWithData encData = encounters.remove(0);
 
-                //set up a "queue" of encounters to randomize (to ensure loop termination)
-                Map<Integer, List<Encounter>> encountersToRandomize = new HashMap<>();
-                for(int i = 0; i < map.size(); i++) {
-                    encountersToRandomize.put(i, new ArrayList<>(map.get(i)));
+                Encounter enc = encData.encounter;
+                //check if there's another encounter with the same Pokemon - otherwise, this is a waste of time
+                //(And, if we're using catchEmAll, a removal of a used Pokemon, which is bad.)
+                boolean anotherExists = false;
+                for(EncounterWithData otherEncData : encounters) {
+                    if(enc.getPokemon() == otherEncData.encounter.getPokemon()) {
+                        anotherExists = true;
+                        break;
+                    }
+                }
+                if(!anotherExists) {
+                    continue;
                 }
 
-                while (getORASDexNavLoad(map) < ORAS_CRASH_THRESHOLD && !encountersToRandomize.isEmpty()){
+                //now the standard replacement logic
+                areaType = findExistingAreaType(map.get(encData.areaIndex));
+                allowedForArea = setupAllowedForArea();
 
-                    //choose a random encounter, and remove it from the "queue"
-                    int index = random.nextInt(map.size());
-                    List<Encounter> encsLeftInArea = encountersToRandomize.get(index);
-                    while (encsLeftInArea == null) {
-                        //keep trying until we hit one that's not empty.
-                        //(The loop should terminate... eventually...)
-                        index = random.nextInt(map.size());
-                        encsLeftInArea = encountersToRandomize.get(index);
-                    }
-                    Encounter enc = encsLeftInArea.remove(random.nextInt(encsLeftInArea.size()));
-                    if(encsLeftInArea.isEmpty()) {
-                        encountersToRandomize.remove(index);
-                    }
+                //reset the Pokemon
+                //(Matters for keep primary, similar strength)
+                enc.setPokemon(encData.originalPokemon);
 
-                    //check if there's another encounter with the same Pokemon - otherwise, this is a waste of time
-                    //(And, if we're using catchEmAll, a removal of a used Pokemon, which is bad.)
-                    boolean anotherExists = false;
-                    for(Encounter otherEnc : encsLeftInArea) {
-                        if(enc.getPokemon() == otherEnc.getPokemon()) {
-                            anotherExists = true;
-                            break;
-                        }
-                    }
-                    if(!anotherExists) {
-                        continue;
-                    }
+                Pokemon replacement = pickReplacement(enc);
+                enc.setPokemon(replacement);
+                setFormeForEncounter(enc, replacement);
 
-                    //now the standard replacement logic
-                    areaType = findExistingAreaType(map.get(index));
-                    allowedForArea = setupAllowedForArea();
-
-                    Pokemon replacement = pickReplacement(enc);
-                    enc.setPokemon(replacement);
-                    setFormeForEncounter(enc, replacement);
-
-                    if (catchEmAll) {
-                        removeFromRemaining(replacement);
-                        if(allowedForArea.isEmpty()) {
-                            allowedForArea = setupAllowedForArea();
-                        }
-                    }
+                if (catchEmAll) {
+                    removeFromRemaining(replacement);
                 }
             }
+
         }
 
         /**
