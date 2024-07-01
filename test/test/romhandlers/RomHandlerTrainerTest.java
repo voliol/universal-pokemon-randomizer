@@ -388,6 +388,8 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
             // the rival in yellow is forced to always have eevee, which causes a mess if eevee's type is randomized
             if (tr.tag != null && tr.tag.contains("RIVAL") && romHandler.isYellow()) continue;
 
+            //TODO: check trainers for gym type themes
+
             Type theme = getThemedTrainerType(tr);
             if (theme != null) {
                 typeThemedTrainers.put(tr, theme);
