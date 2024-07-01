@@ -1478,7 +1478,7 @@ public class Gen6Constants {
         addCopies(tags, 9, "MIRAGE MOUNTAIN");
         addCopies(tags, 12, "MIRAGE CAVE");
         addCopies(tags, 5, "MT. PYRE");
-        addCopies(tags, 3, "SOOTOPOLIS CITY");
+        addCopies(tags, 4, "SOOTOPOLIS CITY");
         return Collections.unmodifiableList(tags);
     }
 

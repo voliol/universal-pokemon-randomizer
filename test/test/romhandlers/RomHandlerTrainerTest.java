@@ -3,6 +3,7 @@ package test.romhandlers;
 import com.dabomstew.pkrandom.RomFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.randomizers.PokemonTypeRandomizer;
 import com.dabomstew.pkrandom.randomizers.TrainerPokemonRandomizer;
@@ -457,19 +458,13 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
     public void useLocalPokemonGuaranteesLocalPokemonOnly(String romName) {
         loadROM(romName);
         Settings s = new Settings();
-        s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
+        s.setTrainersMod(Settings.TrainersMod.RANDOM);
         s.setTrainersUseLocalPokemon(true);
+        s.setUseTimeBasedEncounters(true);
         new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
-        PokemonSet localWithRelatives = new PokemonSet();
-        for (EncounterArea area : romHandler.getEncounters(true)) {
-            for (Pokemon pk : area.getPokemonInArea()) {
-                if (!localWithRelatives.contains(pk)) {
-                    localWithRelatives.addAll(pk.getFamily(false));
-                }
-            }
-        }
-
+        PokemonSet localWithRelatives = romHandler.getMainGameWildPokemon(s.isUseTimeBasedEncounters())
+                        .buildFullFamilies(false);
         PokemonSet all = romHandler.getPokemonSet();
         PokemonSet nonLocal = new PokemonSet(all);
         nonLocal.removeAll(localWithRelatives);
@@ -496,15 +491,14 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
 
         loadROM(romName);
         Settings s = new Settings();
-        s.setTrainersMod(false, true, false, false, false, false, false); // RANDOM
+        s.setTrainersMod(Settings.TrainersMod.RANDOM);
         s.setTrainersUseLocalPokemon(true);
-        s.setEliteFourUniquePokemonNumber(wantedNonLocal); // should be at least 4 non-local Pokemon in each game
+        s.setEliteFourUniquePokemonNumber(wantedNonLocal);
+        s.setUseTimeBasedEncounters(true); // should be at least 4 non-local Pokemon in each game
         new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
 
-        PokemonSet localWithRelatives = new PokemonSet();
-        romHandler.getMainGameWildPokemon(true)
-                .forEach(pk -> localWithRelatives.addAll(pk.getFamily(false)));
-
+        PokemonSet localWithRelatives = romHandler.getMainGameWildPokemon(s.isUseTimeBasedEncounters())
+                .buildFullFamilies(false);
         PokemonSet all = romHandler.getPokemonSet();
         PokemonSet nonLocal = new PokemonSet(all);
         nonLocal.removeAll(localWithRelatives);

@@ -416,7 +416,7 @@ public class EncounterRandomizer extends Randomizer {
                 }
                 for (Map.Entry<EncounterArea.EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
                     EncounterArea flattened = new EncounterArea();
-                    flattened.setDisplayName(mapName + typeEntry.getKey().name());
+                    flattened.setDisplayName(mapName + "-" + typeEntry.getKey().name());
                     flattened.setEncounterType(typeEntry.getKey());
                     flattened.setMapIndex(mapEntry.getKey());
                     for (EncounterArea area : typeEntry.getValue()) {

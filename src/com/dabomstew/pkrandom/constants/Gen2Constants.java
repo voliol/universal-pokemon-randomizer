@@ -720,7 +720,7 @@ public class Gen2Constants {
     };
 
     private static final int[] partialPostGameCutoffsTOD = new int[] {
-            6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, // main fishing
+            6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, // main fishing
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // time-specific
     };
 
