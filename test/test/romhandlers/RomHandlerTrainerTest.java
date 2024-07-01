@@ -606,6 +606,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void elite4MembersWithMultipleBattlesGetSameTypeThemeForAll(String romName) {
+        //with random type themes
         loadROM(romName);
 
         Settings s = new Settings();
@@ -620,6 +621,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
                     e4Types.put(memberTag, new ArrayList<>());
                 }
                 e4Types.get(memberTag).add(getThemedTrainerType(tr));
+                //TODO: add handling for double-theme battles (e.g. all pokemon are Fire-Fighting)
             }
         }
 

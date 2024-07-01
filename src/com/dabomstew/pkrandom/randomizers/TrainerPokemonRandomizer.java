@@ -229,6 +229,7 @@ public class TrainerPokemonRandomizer extends Randomizer {
                 eliteFourExceptions.removeAll(cachedAll); // i.e. retains only non-local pokes
             }
         }
+        //TODO: choose all Elite 4 Unique Pokemon before other Elite 4 Pokemon
 
         List<Integer> mainPlaythroughTrainers = romHandler.getMainPlaythroughTrainers();
 
