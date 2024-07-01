@@ -563,7 +563,7 @@ public class RomHandlerTrainerTest extends RomHandlerTest {
         loadROM(romName);
 
         Settings s = new Settings();
-        s.setTrainersUseLocalPokemon(true);
+        //s.setTrainersUseLocalPokemon(true);
         s.setEliteFourUniquePokemonNumber(1);
         s.setTrainersMod(false, false, false, false, true);
         new TrainerPokemonRandomizer(romHandler, s, RND).randomizeTrainerPokes();
