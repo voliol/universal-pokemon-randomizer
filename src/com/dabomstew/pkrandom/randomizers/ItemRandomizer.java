@@ -204,11 +204,11 @@ public class ItemRandomizer extends Randomizer {
         possibleItems.removeAll(guaranteedItems);
 
         Stack<Integer> remaining = new Stack<>();
-        Collections.shuffle(remaining);
+        Collections.shuffle(remaining, random);
         for (int i = 0; i < shopItemCount; i++) {
             if (remaining.isEmpty()) {
                 remaining.addAll(possibleItems);
-                Collections.shuffle(remaining);
+                Collections.shuffle(remaining, random);
             }
             newItems.add(remaining.pop());
         }

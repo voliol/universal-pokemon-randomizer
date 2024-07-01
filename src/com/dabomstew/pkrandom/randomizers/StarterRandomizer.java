@@ -106,7 +106,7 @@ public class StarterRandomizer extends Randomizer {
      */
     private Type chooseTypeForStarters(int numStartersNeeded, Map<Type, PokemonSet> availableByType) {
         List<Type> types = new ArrayList<>(typeService.getTypes());
-        Collections.shuffle(types);
+        Collections.shuffle(types, random);
 
         for (Type type : types) {
             if(availableByType.get(type).size() > numStartersNeeded) {
@@ -150,7 +150,7 @@ public class StarterRandomizer extends Randomizer {
         }
         // to pick randomly from
         List<List<Type>> typeTriangleList = new ArrayList<>(typeTriangles);
-        Collections.shuffle(typeTriangleList);
+        Collections.shuffle(typeTriangleList, random);
 
         List<Pokemon> picks = null;
 
