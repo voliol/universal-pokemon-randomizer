@@ -105,7 +105,7 @@ public class Gen3Constants {
 
     public static final Type[] typeTable = constructTypeTable();
 
-    public static final int grassSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
+    public static final int walkingSlots = 12, surfingSlots = 5, rockSmashSlots = 5, fishingSlots = 10;
 
     public static final byte[] vanillaMovesLearntTerminator = new byte[] {(byte) 0xFF, (byte) 0xFF},
             jamboMovesLearntTerminator = new byte[] {0x00, 0x00, (byte) 0xFF};
