@@ -29,7 +29,7 @@ public class RomHandlerTest {
     private static final String TEST_CPG_PATH = "test/players";
 
     public static String[] getRomNames() {
-        return Roms.getRoms(new int[]{7}, new Roms.Region[]{Roms.Region.USA}, false);
+        return Roms.getRoms(new int[]{1, 2, 3, 4, 5, 6, 7}, new Roms.Region[]{Roms.Region.USA}, false);
     }
 
     public static String[] getAllRomNames() {

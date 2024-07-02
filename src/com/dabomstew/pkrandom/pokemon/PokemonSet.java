@@ -652,7 +652,7 @@ public class PokemonSet extends HashSet<Pokemon> {
      */
     public boolean isInEvoCycle(Pokemon pokemon, boolean useOriginal) {
         PokemonSet currentStage = new PokemonSet();
-        currentStage.add(pokemon);
+        currentStage.addAll(pokemon.getEvolvedPokemon(useOriginal));
         PokemonSet checked = new PokemonSet();
 
         while(!currentStage.isEmpty()) {
@@ -870,6 +870,21 @@ public class PokemonSet extends HashSet<Pokemon> {
      */
     public PokemonSet filterNonCosmetic() {
         return filter(p -> !p.isActuallyCosmetic());
+    }
+
+    public String toStringShort() {
+        StringBuilder string = new StringBuilder("[");
+        Iterator<Pokemon> itor = this.iterator();
+        while(itor.hasNext()) {
+            Pokemon pokemon = itor.next();
+            string.append(pokemon.getName()).append(pokemon.isBaseForme() ? "" : pokemon.getFormeSuffix());
+            if(itor.hasNext()) {
+                //friggin' loop-and-a-half
+                string.append(", ");
+            }
+        }
+        string.append("]");
+        return string.toString();
     }
 
     //End Various Functions

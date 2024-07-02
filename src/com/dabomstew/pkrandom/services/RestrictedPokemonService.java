@@ -184,6 +184,13 @@ public class RestrictedPokemonService {
         nonLegendaries = PokemonSet.unmodifiable(nonLegendariesInclAltFormes.filter(pk -> !altFormes.contains(pk)));
         legendaries = PokemonSet.unmodifiable(legendariesInclAltFormes.filter(pk -> !altFormes.contains(pk)));
         ultraBeasts = PokemonSet.unmodifiable(ultraBeastsInclAltFormes.filter(pk -> !altFormes.contains(pk)));
+
+        //While this doesn't seem like the ideal place to put this,
+        //it's the least bad one I can think of at this time.
+        //TODO: place this somewhere more sensible.
+        for(Pokemon poke : allInclAltFormes) {
+            poke.saveOriginalData();
+        }
     }
 
     private PokemonSet allInclAltFormesFromRestrictions(GenRestrictions restrictions) {
