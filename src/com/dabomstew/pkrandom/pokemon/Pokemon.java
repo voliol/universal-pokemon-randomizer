@@ -253,7 +253,11 @@ public class Pokemon implements Comparable<Pokemon> {
      */
     public PokemonSet getEvolvedPokemon(boolean useOriginal) {
         if(useOriginal) {
-            return new PokemonSet(this.originalEvolvedForms);
+            if(this.originalEvolvedForms == null) {
+                return new PokemonSet();
+            } else {
+                return new PokemonSet(this.originalEvolvedForms);
+            }
         } else {
             PokemonSet evolvedPokemon = new PokemonSet();
             for (Evolution evo : evolutionsFrom) {
@@ -267,11 +271,15 @@ public class Pokemon implements Comparable<Pokemon> {
      * Gets all Pokemon that can evolve directly into this Pokemon.
      * Does not include Mega Evolution.
      * @param useOriginal Whether to use the evolution data from before randomization.
-     * @return A PokemonSet containing all pre-evolved forms of this Pokemon.
+     * @return A new PokemonSet containing all pre-evolved forms of this Pokemon.
      */
     public PokemonSet getPreEvolvedPokemon(boolean useOriginal) {
         if(useOriginal) {
-            return new PokemonSet(this.originalPreEvolvedForms);
+            if(this.originalPreEvolvedForms == null) {
+                return new PokemonSet();
+            } else {
+                return new PokemonSet(this.originalPreEvolvedForms);
+            }
         } else {
             PokemonSet evolvedPokemon = new PokemonSet();
             for (Evolution evo : evolutionsTo) {
@@ -487,8 +495,8 @@ public class Pokemon implements Comparable<Pokemon> {
     public void saveOriginalData() {
         //originalPrimaryType = primaryType;
         //originalSecondaryType = secondaryType;
-        originalEvolvedForms = getEvolvedPokemon(false);
-        originalPreEvolvedForms = getPreEvolvedPokemon(false);
+        originalEvolvedForms = PokemonSet.unmodifiable(getEvolvedPokemon(false));
+        originalPreEvolvedForms = PokemonSet.unmodifiable(getPreEvolvedPokemon(false));
     }
 
     public void copyBaseFormeBaseStats(Pokemon baseForme) {
@@ -970,6 +978,7 @@ public class Pokemon implements Comparable<Pokemon> {
      * E.g. if the Pokémon is Gloom, this would return a List with two elements, one being the Evolution from
      * Gloom to Vileplume, and the other being the Evolution from Gloom to Bellossom.
      */
+    //oh, gods. why is that how it works?!?!?!
     public List<Evolution> getEvolutionsFrom() {
         return evolutionsFrom;
     }

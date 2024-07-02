@@ -171,8 +171,8 @@ public class EncounterRandomizer extends Randomizer {
         public InnerRandomizer(PokemonSet allowed, PokemonSet banned,
                                boolean randomTypeThemes, boolean keepTypeThemes, boolean keepPrimaryType,
                                boolean catchEmAll, boolean similarStrength, boolean balanceShakingGrass) {
-            if ((randomTypeThemes || keepTypeThemes) && keepPrimaryType) {
-                throw new IllegalArgumentException("Can't use keepPrimaryType with randomTypeThemes and/or keepTypeThemes.");
+            if (randomTypeThemes && keepPrimaryType) {
+                throw new IllegalArgumentException("Can't use keepPrimaryType with randomTypeThemes.");
             }
             this.randomTypeThemes = randomTypeThemes;
             this.keepTypeThemes = keepTypeThemes;
@@ -650,7 +650,7 @@ public class EncounterRandomizer extends Randomizer {
         // quite different functionally from the other random encounter methods,
         // but still grouped in this inner class due to conceptual cohesion
         public void game1to1Encounters(List<EncounterArea> encounterAreas) {
-            remaining = new PokemonSet(allowed);
+            refillRemainingPokemon();
             Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
             setupAreaInfoMap(encounterAreas, null);
@@ -675,7 +675,7 @@ public class EncounterRandomizer extends Randomizer {
          * @param encounterAreas The EncounterAreas to randomize.
          */
         public void gameFamilyToFamilyEncounters(List<EncounterArea> encounterAreas) {
-            remaining = new PokemonSet(allowed);
+            refillRemainingPokemon();
             Map<Pokemon, Pokemon> translateMap = new HashMap<>();
 
             PokemonSet pokemonToRandomize = new PokemonSet();

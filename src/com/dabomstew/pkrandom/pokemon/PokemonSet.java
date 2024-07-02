@@ -652,7 +652,7 @@ public class PokemonSet extends HashSet<Pokemon> {
      */
     public boolean isInEvoCycle(Pokemon pokemon, boolean useOriginal) {
         PokemonSet currentStage = new PokemonSet();
-        currentStage.add(pokemon);
+        currentStage.addAll(pokemon.getEvolvedPokemon(useOriginal));
         PokemonSet checked = new PokemonSet();
 
         while(!currentStage.isEmpty()) {
