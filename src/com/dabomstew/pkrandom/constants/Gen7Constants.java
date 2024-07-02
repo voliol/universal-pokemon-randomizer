@@ -2063,14 +2063,21 @@ public class Gen7Constants {
 
         if (encounterAreas.size() != locationTags.size()) {
             throw new IllegalArgumentException("Unexpected amount of encounter areas");
-        } //*/
+        }
         if(locationTags.size() != encounterTypes.size()) {
             throw new IllegalArgumentException("Location and encounter type lists do not match! (" +
                     locationTags.size() + " vs " + encounterTypes.size() + ")");
-        } //*/
+        }
         for (int i = 0; i < locationTags.size(); i++) {
-            encounterAreas.get(i).setLocationTag(locationTags.get(i));
-            encounterAreas.get(i).setEncounterType(encounterTypes.get(i));
+            EncounterArea area = encounterAreas.get(i);
+            area.setLocationTag(locationTags.get(i));
+            area.setEncounterType(encounterTypes.get(i));
+
+            //The Gen 7 display names kinda suck, so let's enhance them with encounter types
+            String displayName = area.getDisplayName();
+            displayName = displayName.replaceFirst(", Table",
+                    " " + encounterTypes.get(i).name().toLowerCase() + ", Table");
+            area.setDisplayName(displayName);
             //System.out.println(locationTags.get(i) + " " + encounterAreas.get(i));
         }
         for (int areaIndex : postGameAreas) {
