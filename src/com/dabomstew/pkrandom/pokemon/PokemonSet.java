@@ -872,6 +872,21 @@ public class PokemonSet extends HashSet<Pokemon> {
         return filter(p -> !p.isActuallyCosmetic());
     }
 
+    public String toStringShort() {
+        StringBuilder string = new StringBuilder("[");
+        Iterator<Pokemon> itor = this.iterator();
+        while(itor.hasNext()) {
+            Pokemon pokemon = itor.next();
+            string.append(pokemon.getName()).append(pokemon.isBaseForme() ? "" : pokemon.getFormeSuffix());
+            if(itor.hasNext()) {
+                //friggin' loop-and-a-half
+                string.append(", ");
+            }
+        }
+        string.append("]");
+        return string.toString();
+    }
+
     //End Various Functions
     
     //Subclass

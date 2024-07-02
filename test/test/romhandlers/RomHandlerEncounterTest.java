@@ -1597,29 +1597,6 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             "Rock Smash"
     );
 
-    @ParameterizedTest
-    @MethodSource("getRomNames")
-    public void generateTags(String romName) {
-        loadROM(romName);
-        List<EncounterArea> encounterAreas = romHandler.getEncounters(true);
-
-        String lastTag = "";
-        int count = 0;
-        for (int i = 0; i < encounterAreas.size(); i++) {
-            String tag = encounterAreas.get(i).getDisplayName();
-            tag = simplifyTag(tag);
-
-            if (!tag.equals(lastTag) || i == encounterAreas.size() - 1) {
-                System.out.println("\t\t" + "addCopies(tags, " + count + ", \"" + lastTag + "\");");
-                lastTag = tag;
-                count = 1;
-            } else {
-                count++;
-            }
-        }
-
-    }
-
     private static String simplifyTag(String tag) {
         for (String terminator : encounterTerminators) {
             if (tag.endsWith(terminator)) {
@@ -1629,7 +1606,66 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         }
         tag = tag.split(", Table")[0]; // for Gen 7
         tag = tag.trim().toUpperCase();
+
+        tag = tag.replace('’', '\''); //apostrophes, not single quote
+
         return tag;
+    }
+
+    @ParameterizedTest
+    @MethodSource("getRomNames")
+    public void locationTagsAndDisplayNamesMatchUp(String romName) {
+        loadROM(romName);
+        List<EncounterArea> encounterAreas = romHandler.getEncounters(false);
+
+        String lastTag = "NOT A LOCATION TAG";
+        int count = 0;
+        for (int i = 0; i < encounterAreas.size(); i++) {
+            EncounterArea area = encounterAreas.get(i);
+            String areaTag = area.getLocationTag();
+            if (!areaTag.equals(lastTag)) {
+                System.out.println("\t Start location: " + areaTag + "; Index: " + i);
+                lastTag = areaTag;
+                count = 1;
+            } else {
+                count++;
+            }
+            if(area.getEncounterType() != null) {
+                System.out.println("\t\t\t " + count + " " + area.getEncounterType().name()
+                        + " " + area.getPokemonInArea().toStringShort() + " " + area.getDisplayName());
+            } else {
+                System.out.println("\t\t\t " + count
+                        + " " + area.getPokemonInArea().toStringShort() + " " + area.getDisplayName());
+            }
+
+            String simplifiedDisplayName = simplifyTag(area.getDisplayName());
+            checkLocationTagAgainstDisplayName(areaTag, simplifiedDisplayName);
+        }
+
+    }
+
+    private void checkLocationTagAgainstDisplayName(String locationTag, String displayName) {
+
+        //switch for special cases
+        switch(locationTag) {
+            case "UNUSED":
+                //doesn't need to match anything
+                break;
+            case "HAU'OLI CITY":
+                assertTrue(displayName.contains(locationTag) || displayName.contains("HAU'OLI OUTSKIRTS")
+                        || displayName.contains("TRAINERS' SCHOOL"));
+                break;
+            case "ROUTE 2":
+                assertTrue(displayName.contains(locationTag) || displayName.contains("BERRY FIELDS"));
+                break;
+            case "PANIOLA TOWN":
+                assertTrue(displayName.contains("PANIOLA"));
+                break;
+            default:
+                assertTrue(displayName.contains(locationTag));
+                break;
+        }
+
     }
 
 }
