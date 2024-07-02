@@ -364,15 +364,21 @@ public class EncounterRandomizer extends Randomizer {
          * @return A new List of all the same Encounters, with the areas shuffled and possibly merged as appropriate.
          */
         private List<EncounterArea> prepEncounterAreas(List<EncounterArea> unprepped) {
+            // Clone the original set, so that we don't mess up saving
+            List<EncounterArea> prepped = new ArrayList<>(unprepped);
+
+            prepped.removeIf(area -> area.getEncounterType() == EncounterArea.EncounterType.UNUSED
+                    || area.getLocationTag().equals("UNUSED"));
+            //don't randomize unused areas
+            //mostly important for catch 'em all
+
             if (useLocations) {
-                unprepped = flattenLocations(unprepped);
+                prepped = flattenLocations(prepped);
             } else if (romHandler.isORAS()) {
                 //some modes crash in ORAS if the maps aren't flattened
-                unprepped = flattenEncounterTypesInMaps(unprepped);
+                prepped = flattenEncounterTypesInMaps(prepped);
             }
             // Shuffling the EncounterAreas leads to less predictable results for various modifiers.
-            // Need to keep the original ordering around for saving though.
-            List<EncounterArea> prepped = new ArrayList<>(unprepped);
             Collections.shuffle(prepped, random);
             return prepped;
         }
@@ -1113,7 +1119,7 @@ public class EncounterRandomizer extends Randomizer {
         } else if (!checkCosmetics && pk.getCosmeticForms() > 0) {
             enc.setFormeNumber(enc.getFormeNumber() + pk.getCosmeticFormNumber(this.random.nextInt(pk.getCosmeticForms())));
         }
-        //TODO: instead of this function, have encounter store the actual forme used and call basePokemon when needed
+        //TODO: instead of (most of) this function, have encounter store the actual forme used and call basePokemon when needed
     }
 
     public void changeCatchRates() {
