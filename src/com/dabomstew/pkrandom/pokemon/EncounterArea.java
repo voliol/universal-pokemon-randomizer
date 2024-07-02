@@ -39,14 +39,6 @@ public class EncounterArea extends ArrayList<Encounter> {
 
     private String locationTag;
 
-    public enum EncounterType { WALKING, //e.g. grass, cave, seaweed(unfortunately), Horde encounters, shaking grass
-        SURFING, FISHING, //obvious
-        INTERACT, //e.g. headbutt trees, Rock Smash
-        AMBUSH, //e.g. flying pokemon, shaking trees
-        SPECIAL, //e.g. Poke Radar, DexNav Foreign encounter, Hoenn/Sinnoh Sound
-        UNUSED //obvious
-    } //SOS encounters are included in the same area as their non-SOS origin, so aren't included as a type
-
     //The type of encounter this area is, as determined by the RomHandler.
     //Note that currently, only ORAS sets this variable.
     private EncounterType encounterType;
@@ -153,7 +145,8 @@ public class EncounterArea extends ArrayList<Encounter> {
 
     @Override
     public String toString() {
-        return "Encounters [Name = " + displayName + ", Rate = " + rate + ", Encounters = " + super.toString() + "]";
+        return "Encounters [Name = " + displayName + ", Rate = " + rate + ", EncounterType = " + encounterType +
+                ", Encounters = " + super.toString() + "]";
     }
 
     //Helper functions

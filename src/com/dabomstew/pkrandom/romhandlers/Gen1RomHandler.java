@@ -858,6 +858,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         thisArea.setRate(rate);
                         thisArea.setMapIndex(rootOffset);
                         thisArea.setDisplayName((a == 1 ? "Surfing" : "Grass/Cave") + " on " + mapNames[mapID]);
+                        thisArea.setEncounterType(a == 1 ? EncounterType.SURFING : EncounterType.WALKING);
                         if (mapID >= Gen1Constants.towerMapsStartIndex && mapID <= Gen1Constants.towerMapsEndIndex) {
                             thisArea.banPokemon(ghostMarowak);
                         }
@@ -892,6 +893,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int oldRodOffset = romEntry.getIntValue("OldRodOffset");
         EncounterArea area = new EncounterArea();
         area.setDisplayName("Old Rod Fishing");
+        area.setEncounterType(EncounterType.FISHING);
         Encounter oldRodEnc = new Encounter();
         oldRodEnc.setLevel(rom[oldRodOffset + 2] & 0xFF);
         oldRodEnc.setPokemon(pokes[pokeRBYToNumTable[rom[oldRodOffset + 1] & 0xFF]]);
@@ -905,6 +907,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         int goodRodOffset = romEntry.getIntValue("GoodRodOffset");
         EncounterArea area = new EncounterArea();
         area.setDisplayName("Good Rod Fishing");
+        area.setEncounterType(EncounterType.FISHING);
         for (int slot = 0; slot < 2; slot++) {
             Encounter enc = new Encounter();
             enc.setLevel(rom[goodRodOffset + slot * 2] & 0xFF);
@@ -925,6 +928,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 int map = rom[superRodOffset++] & 0xFF;
                 EncounterArea area = new EncounterArea();
                 area.setDisplayName("Super Rod Fishing on " + mapNames[map]);
+                area.setEncounterType(EncounterType.FISHING);
                 for (int encN = 0; encN < Gen1Constants.yellowSuperRodTableSize; encN++) {
                     Encounter enc = new Encounter();
                     enc.setLevel(rom[superRodOffset + 1] & 0xFF);
@@ -947,6 +951,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                     usedSROffsets.add(areaOffset);
                     EncounterArea area = new EncounterArea();
                     area.setDisplayName("Super Rod Fishing on " + mapNames[map]);
+                    area.setEncounterType(EncounterType.FISHING);
                     area.setMapIndex(areaOffset);
                     int pokesInArea = rom[areaOffset++] & 0xFF;
                     for (int encN = 0; encN < pokesInArea; encN++) {

@@ -267,7 +267,7 @@ public class EncounterRandomizer extends Randomizer {
                 Iterator<EncounterArea> mapIterator = map.iterator();
                 while(mapIterator.hasNext()) {
                     EncounterArea area = mapIterator.next();
-                    if(area.getEncounterType() == EncounterArea.EncounterType.INTERACT) {
+                    if(area.getEncounterType() == EncounterType.INTERACT) {
                         //rock smash is the only INTERACT type in ORAS
                         rockSmashAreas.add(area);
                         mapIterator.remove();
@@ -367,7 +367,7 @@ public class EncounterRandomizer extends Randomizer {
             // Clone the original set, so that we don't mess up saving
             List<EncounterArea> prepped = new ArrayList<>(unprepped);
 
-            prepped.removeIf(area -> area.getEncounterType() == EncounterArea.EncounterType.UNUSED
+            prepped.removeIf(area -> area.getEncounterType() == EncounterType.UNUSED
                     || area.getLocationTag().equals("UNUSED"));
             //don't randomize unused areas
             //mostly important for catch 'em all
@@ -413,14 +413,14 @@ public class EncounterRandomizer extends Randomizer {
             List<EncounterArea> flattenedEncounters = new ArrayList<>();
             int unnamed = 1;
             for (Map.Entry<Integer, List<EncounterArea>> mapEntry : grouped.entrySet()) {
-                Map<EncounterArea.EncounterType, List<EncounterArea>> mapGrouped =
+                Map<EncounterType, List<EncounterArea>> mapGrouped =
                         groupAreasByEncounterType(mapEntry.getValue());
                 String mapName = mapEntry.getValue().get(0).getLocationTag();
                 if (mapName == null) {
                     mapName = "Unknown Map " + unnamed;
                     unnamed++;
                 }
-                for (Map.Entry<EncounterArea.EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
+                for (Map.Entry<EncounterType, List<EncounterArea>> typeEntry : mapGrouped.entrySet()) {
                     EncounterArea flattened = new EncounterArea();
                     flattened.setDisplayName(mapName + "-" + typeEntry.getKey().name());
                     flattened.setEncounterType(typeEntry.getKey());
@@ -479,11 +479,11 @@ public class EncounterRandomizer extends Randomizer {
          * @param ungrouped The set of EncounterAreas to group.
          * @return A Map of encounterTypes to EncounterAreas.
          */
-        private Map<EncounterArea.EncounterType, List<EncounterArea>>
+        private Map<EncounterType, List<EncounterArea>>
                         groupAreasByEncounterType(List<EncounterArea> ungrouped) {
-            Map<EncounterArea.EncounterType, List<EncounterArea>> grouped = new HashMap<>();
+            Map<EncounterType, List<EncounterArea>> grouped = new HashMap<>();
             for (EncounterArea area : ungrouped) {
-                EncounterArea.EncounterType encType = area.getEncounterType();
+                EncounterType encType = area.getEncounterType();
                 if (!grouped.containsKey(encType)) {
                     grouped.put(encType, new ArrayList<>());
                 }
@@ -967,7 +967,7 @@ public class EncounterRandomizer extends Randomizer {
             //I am not going to attempt to verify this (yet).
             int load = 0;
             for(EncounterArea area : areasInMap) {
-                if(area.getEncounterType() == EncounterArea.EncounterType.INTERACT) {
+                if(area.getEncounterType() == EncounterType.INTERACT) {
                     //Rock Smash doesn't contribute to DexNav load.
                     continue;
                 }

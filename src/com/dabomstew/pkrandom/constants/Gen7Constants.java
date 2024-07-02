@@ -1525,166 +1525,166 @@ public class Gen7Constants {
         return Collections.unmodifiableList(tags);
     }
 
-    private static final List<EncounterArea.EncounterType> smEncounterTypesTOD = initSMEncounterTypesTOD();
+    private static final List<EncounterType> smEncounterTypesTOD = initSMEncounterTypesTOD();
 
-    private static List<EncounterArea.EncounterType> initSMEncounterTypesTOD() {
-        List<EncounterArea.EncounterType> tags = new ArrayList<>();
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Route 1 / Melemele Sea
-        addCopies(tags, 10, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 10, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //Hau'oli City
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Route 3 / Kala'e Bay
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT); //Considering berry piles INTERACT not AMBUSH
-        addCopies(tags, 10, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 2
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Ten Carat Hill
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Hau'oli Cemetery
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Melemele Meadow
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Seaward Cave
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT); //Berry Fields
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Verdant Cavern
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Trainers' School
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //Route 4
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING); //Paniola Town
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH); //Route 5
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //Route 6
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING); //Route 7
-        addCopies(tags, 12, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //Route 8
-        addCopies(tags, 8, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 10, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.FISHING); //Route 9
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //Hano Beach
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Memorial Hill
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Akala Outskirts
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //Diglett's Tunnel
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 10, EncounterArea.EncounterType.WALKING); //Wela Volcano Park
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Brooklet Hill
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 24, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING); //Brooklet Totem's Den
-        addCopies(tags, 14, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Lush Jungle
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Paniola Ranch
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //Malie City (Outer Cape)
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 10
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 12 / Secluded Shore
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 20, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING); //Route 13
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Tapu Village
-        addCopies(tags, 12, EncounterArea.EncounterType.FISHING); //Route 14
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 15/16
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 17
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //Route 11
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Haina Desert
-        addCopies(tags, 12, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 8, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //ULA'ULA MEADOW
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //MALIE GARDEN
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //MOUNT HOKULANI
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //BLUSH MOUNTAIN
-        addCopies(tags, 10, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //MOUNT LANAKILA
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //THRIFTY MEGAMART
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING); //SEAFOLK VILLAGE
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI WILDS
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //PONI BREAKER COAST
-        addCopies(tags, 8, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //ANCIENT PONI PATH
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //PONI GROVE
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI PLAINS
-        addCopies(tags, 12, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 28, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //PONI COAST
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI GAUNTLET
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI MEADOW
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 16, EncounterArea.EncounterType.WALKING); //VAST PONI CANYON
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //RESOLUTION CAVE
-        addCopies(tags, 8, EncounterArea.EncounterType.UNUSED); //EXEGGUTOR ISLAND
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
+    private static List<EncounterType> initSMEncounterTypesTOD() {
+        List<EncounterType> tags = new ArrayList<>();
+        addCopies(tags, 8, EncounterType.WALKING); //Route 1 / Melemele Sea
+        addCopies(tags, 10, EncounterType.FISHING);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.SURFING);
+        addCopies(tags, 10, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.UNUSED);
+        addCopies(tags, 12, EncounterType.WALKING); //Hau'oli City
+        addCopies(tags, 4, EncounterType.WALKING); //Route 3 / Kala'e Bay
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT); //Considering berry piles INTERACT not AMBUSH
+        addCopies(tags, 10, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 6, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 2
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.WALKING); //Ten Carat Hill
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.WALKING); //Hau'oli Cemetery
+        addCopies(tags, 2, EncounterType.WALKING); //Melemele Meadow
+        addCopies(tags, 2, EncounterType.WALKING); //Seaward Cave
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT); //Berry Fields
+        addCopies(tags, 2, EncounterType.WALKING); //Verdant Cavern
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING); //Trainers' School
+        addCopies(tags, 12, EncounterType.WALKING); //Route 4
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 4, EncounterType.FISHING); //Paniola Town
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 6, EncounterType.AMBUSH); //Route 5
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 6, EncounterType.WALKING); //Route 6
+        addCopies(tags, 2, EncounterType.SURFING); //Route 7
+        addCopies(tags, 12, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.AMBUSH); //Route 8
+        addCopies(tags, 8, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 10, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.FISHING); //Route 9
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH); //Hano Beach
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.WALKING); //Memorial Hill
+        addCopies(tags, 2, EncounterType.WALKING); //Akala Outskirts
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH); //Diglett's Tunnel
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 10, EncounterType.WALKING); //Wela Volcano Park
+        addCopies(tags, 2, EncounterType.WALKING); //Brooklet Hill
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 24, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.SURFING); //Brooklet Totem's Den
+        addCopies(tags, 14, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.WALKING); //Lush Jungle
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 8, EncounterType.WALKING); //Paniola Ranch
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 6, EncounterType.WALKING); //Malie City (Outer Cape)
+        addCopies(tags, 2, EncounterType.WALKING); //Route 10
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 12 / Secluded Shore
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 20, EncounterType.WALKING);
+        addCopies(tags, 6, EncounterType.FISHING); //Route 13
+        addCopies(tags, 2, EncounterType.WALKING); //Tapu Village
+        addCopies(tags, 12, EncounterType.FISHING); //Route 14
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 15/16
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 17
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 12, EncounterType.WALKING); //Route 11
+        addCopies(tags, 8, EncounterType.WALKING); //Haina Desert
+        addCopies(tags, 12, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 8, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.WALKING); //ULA'ULA MEADOW
+        addCopies(tags, 2, EncounterType.WALKING); //MALIE GARDEN
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.UNUSED);
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING); //MOUNT HOKULANI
+        addCopies(tags, 4, EncounterType.WALKING); //BLUSH MOUNTAIN
+        addCopies(tags, 10, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING); //MOUNT LANAKILA
+        addCopies(tags, 2, EncounterType.WALKING); //THRIFTY MEGAMART
+        addCopies(tags, 4, EncounterType.FISHING); //SEAFOLK VILLAGE
+        addCopies(tags, 2, EncounterType.WALKING); //PONI WILDS
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 6, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.INTERACT);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH); //PONI BREAKER COAST
+        addCopies(tags, 8, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING); //ANCIENT PONI PATH
+        addCopies(tags, 12, EncounterType.WALKING); //PONI GROVE
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.WALKING); //PONI PLAINS
+        addCopies(tags, 12, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 28, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.AMBUSH); //PONI COAST
+        addCopies(tags, 2, EncounterType.WALKING); //PONI GAUNTLET
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.WALKING); //PONI MEADOW
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 16, EncounterType.WALKING); //VAST PONI CANYON
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.AMBUSH);
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.WALKING); //RESOLUTION CAVE
+        addCopies(tags, 8, EncounterType.UNUSED); //EXEGGUTOR ISLAND
+        addCopies(tags, 4, EncounterType.WALKING);
         return Collections.unmodifiableList(tags);
     }
 
@@ -1797,171 +1797,171 @@ public class Gen7Constants {
         return Collections.unmodifiableList(tags);
     }
 
-    private static final List<EncounterArea.EncounterType> usumEncounterTypesTOD = initUSUMEncounterTypesTOD();
+    private static final List<EncounterType> usumEncounterTypesTOD = initUSUMEncounterTypesTOD();
 
-    private static List<EncounterArea.EncounterType> initUSUMEncounterTypesTOD() {
-        List<EncounterArea.EncounterType> tags = new ArrayList<>();
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //Route 1 / Melemele Sea
-        addCopies(tags, 10, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 10, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.UNUSED); //Hau'oli City
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Route 3 / Kala'e Bay
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT); //Considering berry piles INTERACT not AMBUSH
-        addCopies(tags, 10, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 2
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Ten Carat Hill
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Hau'oli Cemetery
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Melemele Meadow
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Seaward Cave
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT); //Berry Fields
-        addCopies(tags, 2, EncounterArea.EncounterType.SPECIAL); //SANDY CAVE
+    private static List<EncounterType> initUSUMEncounterTypesTOD() {
+        List<EncounterType> tags = new ArrayList<>();
+        addCopies(tags, 6, EncounterType.WALKING); //Route 1 / Melemele Sea
+        addCopies(tags, 10, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 12, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 10, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.UNUSED); //Hau'oli City
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.WALKING); //Route 3 / Kala'e Bay
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT); //Considering berry piles INTERACT not AMBUSH
+        addCopies(tags, 10, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 6, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 2
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.WALKING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.WALKING); //Ten Carat Hill
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.WALKING); //Hau'oli Cemetery
+        addCopies(tags, 2, EncounterType.WALKING); //Melemele Meadow
+        addCopies(tags, 2, EncounterType.WALKING); //Seaward Cave
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT); //Berry Fields
+        addCopies(tags, 2, EncounterType.SPECIAL); //SANDY CAVE
         //same tables used for both walking and surfing
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Verdant Cavern
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Trainers' School
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //Route 4
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING); //Paniola Town
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH); //Route 5
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //Route 6
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING); //Route 7
-        addCopies(tags, 12, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //Route 8
-        addCopies(tags, 8, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 10, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.FISHING); //Route 9
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //Hano Beach
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH); //DIVIDING PEAK TUNNEL
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Memorial Hill
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Akala Outskirts
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //Diglett's Tunnel
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 10, EncounterArea.EncounterType.WALKING); //Wela Volcano Park
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Brooklet Hill
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 22, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING); //Brooklet Totem's Den
-        addCopies(tags, 14, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //Lush Jungle
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Paniola Ranch
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //Malie City (Outer Cape)
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 10
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 4, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 22, EncounterArea.EncounterType.WALKING); //Route 12
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING); //Route 13
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Tapu Village
-        addCopies(tags, 12, EncounterArea.EncounterType.FISHING); //Route 14
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 15/16
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //Route 17
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //Route 11
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT); //ULA'ULA BEACH
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //Haina Desert
-        addCopies(tags, 12, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 8, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //ULA'ULA MEADOW
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //MALIE GARDEN
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 4, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 8, EncounterArea.EncounterType.WALKING); //MOUNT HOKULANI
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //BLUSH MOUNTAIN
-        addCopies(tags, 8, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED); //RUINS OF ABUNDANCE
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING); //MOUNT LANAKILA
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //THRIFTY MEGAMART
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING); //SEAFOLK VILLAGE
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI WILDS
-        addCopies(tags, 6, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 14, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING); //PONI BREAKER COAST
-        addCopies(tags, 6, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 8, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING); //ANCIENT PONI PATH
-        addCopies(tags, 12, EncounterArea.EncounterType.WALKING); //PONI GROVE
-        addCopies(tags, 2, EncounterArea.EncounterType.UNUSED);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI PLAINS
-        addCopies(tags, 12, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.INTERACT);
-        addCopies(tags, 28, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 2, EncounterArea.EncounterType.AMBUSH); //PONI COAST
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI GAUNTLET
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING); //PONI MEADOW
-        addCopies(tags, 4, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 6, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 16, EncounterArea.EncounterType.WALKING); //VAST PONI CANYON
-        addCopies(tags, 2, EncounterArea.EncounterType.SURFING);
-        addCopies(tags, 4, EncounterArea.EncounterType.AMBUSH);
-        addCopies(tags, 6, EncounterArea.EncounterType.FISHING);
-        addCopies(tags, 2, EncounterArea.EncounterType.WALKING);
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING); //RESOLUTION CAVE
-        addCopies(tags, 4, EncounterArea.EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.WALKING); //Verdant Cavern
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING); //Trainers' School
+        addCopies(tags, 12, EncounterType.WALKING); //Route 4
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 4, EncounterType.FISHING); //Paniola Town
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 6, EncounterType.AMBUSH); //Route 5
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 6, EncounterType.WALKING); //Route 6
+        addCopies(tags, 2, EncounterType.SURFING); //Route 7
+        addCopies(tags, 12, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.AMBUSH); //Route 8
+        addCopies(tags, 8, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 10, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.FISHING); //Route 9
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH); //Hano Beach
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.AMBUSH);
+        addCopies(tags, 6, EncounterType.AMBUSH); //DIVIDING PEAK TUNNEL
+        addCopies(tags, 4, EncounterType.WALKING); //Memorial Hill
+        addCopies(tags, 2, EncounterType.WALKING); //Akala Outskirts
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH); //Diglett's Tunnel
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 10, EncounterType.WALKING); //Wela Volcano Park
+        addCopies(tags, 2, EncounterType.WALKING); //Brooklet Hill
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 22, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.SURFING); //Brooklet Totem's Den
+        addCopies(tags, 14, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.WALKING); //Lush Jungle
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 8, EncounterType.WALKING); //Paniola Ranch
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 6, EncounterType.WALKING); //Malie City (Outer Cape)
+        addCopies(tags, 2, EncounterType.WALKING); //Route 10
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 4, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 22, EncounterType.WALKING); //Route 12
+        addCopies(tags, 6, EncounterType.FISHING); //Route 13
+        addCopies(tags, 2, EncounterType.WALKING); //Tapu Village
+        addCopies(tags, 12, EncounterType.FISHING); //Route 14
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 15/16
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.WALKING); //Route 17
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 12, EncounterType.WALKING); //Route 11
+        addCopies(tags, 2, EncounterType.INTERACT); //ULA'ULA BEACH
+        addCopies(tags, 8, EncounterType.WALKING); //Haina Desert
+        addCopies(tags, 12, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.WALKING);
+        addCopies(tags, 8, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.WALKING); //ULA'ULA MEADOW
+        addCopies(tags, 2, EncounterType.WALKING); //MALIE GARDEN
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 4, EncounterType.UNUSED);
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 8, EncounterType.WALKING); //MOUNT HOKULANI
+        addCopies(tags, 2, EncounterType.WALKING); //BLUSH MOUNTAIN
+        addCopies(tags, 8, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.UNUSED); //RUINS OF ABUNDANCE
+        addCopies(tags, 14, EncounterType.WALKING); //MOUNT LANAKILA
+        addCopies(tags, 2, EncounterType.WALKING); //THRIFTY MEGAMART
+        addCopies(tags, 4, EncounterType.FISHING); //SEAFOLK VILLAGE
+        addCopies(tags, 2, EncounterType.WALKING); //PONI WILDS
+        addCopies(tags, 6, EncounterType.INTERACT);
+        addCopies(tags, 14, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.SURFING); //PONI BREAKER COAST
+        addCopies(tags, 6, EncounterType.AMBUSH);
+        addCopies(tags, 8, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING); //ANCIENT PONI PATH
+        addCopies(tags, 12, EncounterType.WALKING); //PONI GROVE
+        addCopies(tags, 2, EncounterType.UNUSED);
+        addCopies(tags, 2, EncounterType.WALKING); //PONI PLAINS
+        addCopies(tags, 12, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.INTERACT);
+        addCopies(tags, 28, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.AMBUSH);
+        addCopies(tags, 2, EncounterType.AMBUSH); //PONI COAST
+        addCopies(tags, 2, EncounterType.WALKING); //PONI GAUNTLET
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 2, EncounterType.WALKING); //PONI MEADOW
+        addCopies(tags, 4, EncounterType.FISHING);
+        addCopies(tags, 6, EncounterType.WALKING);
+        addCopies(tags, 16, EncounterType.WALKING); //VAST PONI CANYON
+        addCopies(tags, 2, EncounterType.SURFING);
+        addCopies(tags, 4, EncounterType.AMBUSH);
+        addCopies(tags, 6, EncounterType.FISHING);
+        addCopies(tags, 2, EncounterType.WALKING);
+        addCopies(tags, 4, EncounterType.WALKING); //RESOLUTION CAVE
+        addCopies(tags, 4, EncounterType.WALKING);
         return Collections.unmodifiableList(tags);
     }
 
@@ -2009,16 +2009,16 @@ public class Gen7Constants {
         return Collections.unmodifiableList(tags);
     }
 
-    private static final List<EncounterArea.EncounterType> smEncounterTypesNoTOD = initSMEncounterTypesNoTOD();
+    private static final List<EncounterType> smEncounterTypesNoTOD = initSMEncounterTypesNoTOD();
 
-    private static List<EncounterArea.EncounterType> initSMEncounterTypesNoTOD() {
+    private static List<EncounterType> initSMEncounterTypesNoTOD() {
         //SM are convenient in that EVERY encounter has both day and night mode.
         //So, to convert from ToD to NoToD... just remove half of them
         //(...this would probably be better to do the other way around...
         // but I've already made the ToD version and the whole point of this is to keep from having to
         // convert the whole thing)
-        List<EncounterArea.EncounterType> tags = new ArrayList<>(smEncounterTypesTOD);
-        Iterator<EncounterArea.EncounterType> itor = tags.iterator();
+        List<EncounterType> tags = new ArrayList<>(smEncounterTypesTOD);
+        Iterator<EncounterType> itor = tags.iterator();
         while (itor.hasNext()) {
             itor.next();
             if (!itor.hasNext()) {
@@ -2031,16 +2031,16 @@ public class Gen7Constants {
         return Collections.unmodifiableList(tags);
     }
 
-    private static final List<EncounterArea.EncounterType> usumEncounterTypesNoTOD = initUSUMEncounterTypesNoTOD();
+    private static final List<EncounterType> usumEncounterTypesNoTOD = initUSUMEncounterTypesNoTOD();
 
-    private static List<EncounterArea.EncounterType> initUSUMEncounterTypesNoTOD() {
+    private static List<EncounterType> initUSUMEncounterTypesNoTOD() {
         //SM are convenient in that EVERY encounter has both day and night mode.
         //So, to convert from ToD to NoToD... just remove half of them
         //(...this would probably be better to do the other way around...
         // but I've already made the ToD version and the whole point of this is to keep from having to
         // convert the whole thing)
-        List<EncounterArea.EncounterType> tags = new ArrayList<>(usumEncounterTypesTOD);
-        Iterator<EncounterArea.EncounterType> itor = tags.iterator();
+        List<EncounterType> tags = new ArrayList<>(usumEncounterTypesTOD);
+        Iterator<EncounterType> itor = tags.iterator();
         while (itor.hasNext()) {
             itor.next();
             if (!itor.hasNext()) {
@@ -2058,7 +2058,7 @@ public class Gen7Constants {
     }
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags,
-                                          List<EncounterArea.EncounterType> encounterTypes, int[] postGameAreas) {
+                                          List<EncounterType> encounterTypes, int[] postGameAreas) {
         System.out.println("#encs=" + encounterAreas.size() + " #tags=" + locationTags.size());
 
         if (encounterAreas.size() != locationTags.size()) {
@@ -2087,7 +2087,7 @@ public class Gen7Constants {
 
     public static void tagEncounterAreas(List<EncounterArea> encounterAreas, int romType, boolean useTimeOfDay) {
         List<String> locationTags;
-        List<EncounterArea.EncounterType> encounterTypes;
+        List<EncounterType> encounterTypes;
         int[] postGameAreas;
         switch (romType) {
             case Type_SM:

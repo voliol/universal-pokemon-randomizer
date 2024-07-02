@@ -1228,14 +1228,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             if (grassArea.size() > 0) {
                 grassArea.setDisplayName(mapName + " Grass/Cave");
                 grassArea.setMapIndex(i);
-                grassArea.setEncounterType(EncounterArea.EncounterType.WALKING);
+                grassArea.setEncounterType(EncounterType.WALKING);
                 encounterAreas.add(grassArea);
             }
             EncounterArea longGrassArea = readEncounterArea(encounterData, 48, 12);
             if (longGrassArea.size() > 0) {
                 longGrassArea.setDisplayName(mapName + " Long Grass");
                 longGrassArea.setMapIndex(i);
-                longGrassArea.setEncounterType(EncounterArea.EncounterType.WALKING);
+                longGrassArea.setEncounterType(EncounterType.WALKING);
                 encounterAreas.add(longGrassArea);
             }
 
@@ -1244,7 +1244,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             if (dexNavForeignArea.size() > 0) {
                 dexNavForeignArea.setDisplayName(mapName + " DexNav Foreign Encounter");
                 dexNavForeignArea.setMapIndex(i);
-                dexNavForeignArea.setEncounterType(EncounterArea.EncounterType.SPECIAL);
+                dexNavForeignArea.setEncounterType(EncounterType.SPECIAL);
                 encounterAreas.add(dexNavForeignArea);
             }
 
@@ -1253,14 +1253,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             if (surfArea.size() > 0) {
                 surfArea.setDisplayName(mapName + " Surf");
                 surfArea.setMapIndex(i);
-                surfArea.setEncounterType(EncounterArea.EncounterType.SURFING);
+                surfArea.setEncounterType(EncounterType.SURFING);
                 encounterAreas.add(surfArea);
             }
             EncounterArea rockSmashArea = readEncounterArea(encounterData, 128, 5);
             if (rockSmashArea.size() > 0) {
                 rockSmashArea.setDisplayName(mapName + " Rock Smash");
                 rockSmashArea.setMapIndex(i);
-                rockSmashArea.setEncounterType(EncounterArea.EncounterType.INTERACT);
+                rockSmashArea.setEncounterType(EncounterType.INTERACT);
                 encounterAreas.add(rockSmashArea);
             }
 
@@ -1269,21 +1269,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             if (oldRodArea.size() > 0) {
                 oldRodArea.setDisplayName(mapName + " Old Rod");
                 oldRodArea.setMapIndex(i);
-                oldRodArea.setEncounterType(EncounterArea.EncounterType.FISHING);
+                oldRodArea.setEncounterType(EncounterType.FISHING);
                 encounterAreas.add(oldRodArea);
             }
             EncounterArea goodRodArea = readEncounterArea(encounterData, 160, 3);
             if (goodRodArea.size() > 0) {
                 goodRodArea.setDisplayName(mapName + " Good Rod");
                 goodRodArea.setMapIndex(i);
-                goodRodArea.setEncounterType(EncounterArea.EncounterType.FISHING);
+                goodRodArea.setEncounterType(EncounterType.FISHING);
                 encounterAreas.add(goodRodArea);
             }
             EncounterArea superRodArea = readEncounterArea(encounterData, 172, 3);
             if (superRodArea.size() > 0) {
                 superRodArea.setDisplayName(mapName + " Super Rod");
                 superRodArea.setMapIndex(i);
-                superRodArea.setEncounterType(EncounterArea.EncounterType.FISHING);
+                superRodArea.setEncounterType(EncounterType.FISHING);
                 encounterAreas.add(superRodArea);
             }
 
@@ -1292,21 +1292,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             if (hordeCommonArea.size() > 0) {
                 hordeCommonArea.setDisplayName(mapName + " Common Horde");
                 hordeCommonArea.setMapIndex(i);
-                hordeCommonArea.setEncounterType(EncounterArea.EncounterType.WALKING);
+                hordeCommonArea.setEncounterType(EncounterType.WALKING);
                 encounterAreas.add(hordeCommonArea);
             }
             EncounterArea hordeUncommonArea = readEncounterArea(encounterData, 204, 5);
             if (hordeUncommonArea.size() > 0) {
                 hordeUncommonArea.setDisplayName(mapName + " Uncommon Horde");
                 hordeUncommonArea.setMapIndex(i);
-                hordeUncommonArea.setEncounterType(EncounterArea.EncounterType.WALKING);
+                hordeUncommonArea.setEncounterType(EncounterType.WALKING);
                 encounterAreas.add(hordeUncommonArea);
             }
             EncounterArea hordeRareArea = readEncounterArea(encounterData, 224, 5);
             if (hordeRareArea.size() > 0) {
                 hordeRareArea.setDisplayName(mapName + " Rare Horde");
                 hordeRareArea.setMapIndex(i);
-                hordeRareArea.setEncounterType(EncounterArea.EncounterType.WALKING);
+                hordeRareArea.setEncounterType(EncounterType.WALKING);
                 encounterAreas.add(hordeRareArea);
             }
         }
