@@ -128,7 +128,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
     @ParameterizedTest
     @MethodSource("getRomNames")
     public void allLocationTagsAreFoundInTraverseOrder(String romName) {
-        assumeTrue(getGenerationNumberOf(romName) <= 5);
+        assumeTrue(getGenerationNumberOf(romName) <= 6);
         loadROM(romName);
         Set<String> inOrder = new HashSet<>(getLocationTagsTraverseOrder());
         Set<String> used = new HashSet<>();
@@ -160,6 +160,9 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
         } else if (romHandler instanceof Gen5RomHandler) {
             return (((Gen5RomHandler) romHandler).getRomEntry().getRomType() == Gen5Constants.Type_BW2 ?
                     Gen5Constants.locationTagsTraverseOrderBW2 : Gen5Constants.locationTagsTraverseOrderBW);
+        } else if (romHandler instanceof Gen6RomHandler) {
+            return (((Gen6RomHandler) romHandler).getRomEntry().getRomType() == Gen6Constants.Type_ORAS ?
+                    Gen6Constants.locationTagsTraverseOrderORAS : Gen6Constants.locationTagsTraverseOrderXY);
         }
         return Collections.emptyList();
     }

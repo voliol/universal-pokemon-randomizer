@@ -1364,6 +1364,15 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public List<EncounterArea> getSortedEncounters(boolean useTimeOfDay) {
+        List<String> locationTagsTraverseOrder = romEntry.getRomType() == Gen6Constants.Type_XY ?
+                Gen6Constants.locationTagsTraverseOrderXY : Gen6Constants.locationTagsTraverseOrderORAS;
+        return getEncounters(useTimeOfDay).stream()
+                .sorted(Comparator.comparingInt(a -> locationTagsTraverseOrder.indexOf(a.getLocationTag())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void setEncounters(boolean useTimeOfDay, List<EncounterArea> encounterAreas) {
         try {
             if (romEntry.getRomType() == Gen6Constants.Type_ORAS) {
@@ -4078,7 +4087,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    protected Gen6RomEntry getRomEntry() {
+    public Gen6RomEntry getRomEntry() {
         return romEntry;
     }
 }

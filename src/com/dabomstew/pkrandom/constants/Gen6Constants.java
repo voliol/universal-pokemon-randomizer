@@ -1384,7 +1384,7 @@ public class Gen6Constants {
         addCopies(tags, 2, "GLITTERING CAVE");
         addCopies(tags, 16, "REFLECTION CAVE");
         addCopies(tags, 24, "FROST CAVERN");
-        addCopies(tags, 9, "POKÉMON VILLAGE");
+        addCopies(tags, 9, "POKEMON VILLAGE");
         addCopies(tags, 30, "VICTORY ROAD");
         addCopies(tags, 4, "CONNECTING CAVE");
         addCopies(tags, 23, "TERMINUS CAVE");
@@ -1469,7 +1469,10 @@ public class Gen6Constants {
         addCopies(tags, 21, "SCORCHED SLAB");
         addCopies(tags, 4, "TEAM MAGMA HIDEOUT");
         addCopies(tags, 4, "SKY PILLAR");
-        addCopies(tags, 9, "MIRAGE FOREST"); // TODO: different Mirage Forests etc. should count as different locations
+        // mirage island/forest/cave/mountain each appear in multiple places,
+        // but e.g. the mirage forests all look alike and have similar wild encounters,
+        // so we treat island/forest/cave/mountain as four locations and not more
+        addCopies(tags, 9, "MIRAGE FOREST");
         addCopies(tags, 10, "MIRAGE ISLAND");
         addCopies(tags, 1, "MIRAGE MOUNTAIN");
         addCopies(tags, 4, "BATTLE RESORT");
@@ -1485,6 +1488,37 @@ public class Gen6Constants {
     private static void addCopies(List<String> list, int n, String s) {
         list.addAll(Collections.nCopies(n, s));
     }
+
+    /**
+     * Based on
+     * <a href=https://bulbapedia.bulbagarden.net/wiki/Appendix:X_and_Y_walkthrough>this walkthrough</a>.
+     */
+    public static final List<String> locationTagsTraverseOrderXY = Collections.unmodifiableList(Arrays.asList(
+            "ROUTE 2", "SANTALUNE FOREST", "ROUTE 3", "ROUTE 4", "ROUTE 5", "ROUTE 6", "PARFUM PALACE", "ROUTE 7",
+            "CONNECTING CAVE", "ROUTE 8", "AMBRETTE TOWN", "ROUTE 9", "GLITTERING CAVE", "CYLLAGE CITY", "ROUTE 10",
+            "ROUTE 11", "REFLECTION CAVE", "SHALOUR CITY", "ROUTE 12", "AZURE BAY", "ROUTE 13", "ROUTE 14",
+            "LAVERRE CITY", "ROUTE 15", "LOST HOTEL", "ROUTE 16", "FROST CAVERN", "ROUTE 17", "ROUTE 18",
+            "COURIWAY TOWN", "ROUTE 19", "ROUTE 20", "POKEMON VILLAGE", "ROUTE 21", "ROUTE 22", "VICTORY ROAD",
+            "TERMINUS CAVE"
+    ));
+
+    /**
+     * Based on
+     * <a href=https://bulbapedia.bulbagarden.net/wiki/Appendix:Omega_Ruby_and_Alpha_Sapphire_walkthrough>this walkthrough</a>,
+     * with ROUTE 105 & 108 moved down since you can't explore them at all until later.
+     */
+    public static final List<String> locationTagsTraverseOrderORAS = Collections.unmodifiableList(Arrays.asList(
+            "ROUTE 101", "ROUTE 103", "ROUTE 102", "PETALBURG CITY", "ROUTE 104", "PETALBURG WOODS", "ROUTE 116",
+            "RUSTURF TUNNEL", "DEWFORD TOWN", "ROUTE 106", "ROUTE 107", "GRANITE CAVE", "ROUTE 109",
+            "SLATEPORT CITY", "ROUTE 110", "ROUTE 117", "ROUTE 111", "ROUTE 112", "FIERY PATH", "ROUTE 113",
+            "ROUTE 114", "METEOR FALLS", "ROUTE 115", "JAGGED PASS", "ROUTE 118", "ROUTE 119", "ROUTE 120", "ROUTE 121",
+            "SAFARI ZONE", "ROUTE 122", "MT. PYRE", "ROUTE 123", "LILYCOVE CITY", "TEAM AQUA HIDEOUT",
+            "TEAM MAGMA HIDEOUT", "ROUTE 124", "MOSSDEEP CITY", "ROUTE 125", "SHOAL CAVE", "ROUTE 127", "ROUTE 128",
+            "SEAFLOOR CAVERN", "ROUTE 126", "SOOTOPOLIS CITY", "CAVE OF ORIGIN", "NEW MAUVILLE", "ROUTE 129",
+            "ROUTE 130", "ROUTE 131", "PACIFIDLOG TOWN", "ROUTE 132", "ROUTE 133", "ROUTE 134", "SEALED CHAMBER",
+            "ROUTE 105", "ROUTE 108", "SEA MAUVILLE", "SCORCHED SLAB", "EVER GRANDE CITY", "MIRAGE ISLAND",
+            "MIRAGE FOREST", "MIRAGE CAVE", "MIRAGE MOUNTAIN", "VICTORY ROAD", "SKY PILLAR", "BATTLE RESORT"
+    ));
 
     private static void tagEncounterAreas(List<EncounterArea> encounterAreas, List<String> locationTags, int[] postGameAreas) {
         if (encounterAreas.size() != locationTags.size()) {
