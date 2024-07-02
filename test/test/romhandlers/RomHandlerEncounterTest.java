@@ -813,7 +813,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             beforeAreaStrings.add(beforeStrings);
             beforeStrings.add(area.toString());
             for (Encounter enc : area) {
-                beforeStrings.add(toNameAndTypesString(enc.getPokemon()));
+                Pokemon pk = romHandler.getAltFormeOfPokemon(enc.getPokemon(), enc.getFormeNumber());
+                beforeStrings.add(toNameAndTypesString(pk));
             }
 
             Type theme = getThemedAreaType(area);
@@ -869,7 +870,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 System.out.println("Type Theme: " + theme);
                 System.out.println("After: " + area);
                 for (Encounter enc : area) {
-                    Pokemon pk = enc.getPokemon();
+                    Pokemon pk = romHandler.getAltFormeOfPokemon(enc.getPokemon(), enc.getFormeNumber());
                     System.out.println("\t" + toNameAndTypesString(pk));
                     assertTrue(pk.getPrimaryType(false) == theme || pk.getSecondaryType(false) == theme);
                 }
@@ -890,7 +891,7 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             List<Type> beforeTypes = new ArrayList<>();
             beforePrimaryTypes.add(beforeTypes);
             for (Encounter enc : area) {
-                Pokemon pk = enc.getPokemon();
+                Pokemon pk = romHandler.getAltFormeOfPokemon(enc.getPokemon(), enc.getFormeNumber());
                 beforeStrings.add(toNameAndTypesString(pk));
                 beforeTypes.add(pk.getPrimaryType(false));
             }
@@ -909,7 +910,8 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
             EncounterArea area = encounterAreas.get(i);
             System.out.println("After: " + area);
             for (int j = 0; j < area.size(); j++) {
-                Pokemon pk = area.get(j).getPokemon();
+                Encounter enc = area.get(j);
+                Pokemon pk = romHandler.getAltFormeOfPokemon(enc.getPokemon(), enc.getFormeNumber());
                 Type primary = beforePrimaryTypes.get(i).get(j);
                 System.out.println("\t" + toNameAndTypesString(pk));
                 assertTrue(pk.getPrimaryType(false) == primary || pk.getSecondaryType(false) == primary);
@@ -1128,8 +1130,10 @@ public class RomHandlerEncounterTest extends RomHandlerTest {
                 Iterator<Encounter> beforeEncIterator = beforeArea.iterator();
                 Iterator<Encounter> afterEncIterator = afterArea.iterator();
                 while (beforeEncIterator.hasNext()) {
-                    Pokemon beforePk = beforeEncIterator.next().getPokemon();
-                    Pokemon afterPk = afterEncIterator.next().getPokemon();
+                    Encounter beforeEnc = afterEncIterator.next();
+                    Pokemon beforePk = romHandler.getAltFormeOfPokemon(beforeEnc.getPokemon(), beforeEnc.getFormeNumber());
+                    Encounter afterEnc = afterEncIterator.next();
+                    Pokemon afterPk = romHandler.getAltFormeOfPokemon(afterEnc.getPokemon(), afterEnc.getFormeNumber());
 
                     if (!map.containsKey(beforePk)) {
                         map.put(beforePk, afterPk);
