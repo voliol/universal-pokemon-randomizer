@@ -595,8 +595,11 @@ public class Gen4Constants {
 
     public static final String[] hgssTimeOfDayNames = new String[] { "Morning", "Day", "Night" };
 
-    public static final String[] hgssNonGrassSetNames = new String[] { "", "Surfing", "Rock Smash", "Old Rod",
+    public static final String[] hgssNonWalkingAreaNames = new String[] { "", "Surfing", "Rock Smash", "Old Rod",
             "Good Rod", "Super Rod" };
+    public static final EncounterType[] hgssNonWalkingAreaTypes = new EncounterType[]{EncounterType.UNUSED,
+            EncounterType.SURFING, EncounterType.INTERACT, EncounterType.FISHING, EncounterType.FISHING,
+            EncounterType.FISHING};
     public static final int hgssGoodRodReplacementIndex = 3, hgssSuperRodReplacementIndex = 1;
 
     public static final double stabMultiplier = 1.5;

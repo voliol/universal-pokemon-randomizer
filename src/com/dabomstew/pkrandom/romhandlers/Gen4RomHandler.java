@@ -1318,14 +1318,15 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				wildMapNames.put(c, "? Unknown ?");
 			}
 			String mapName = wildMapNames.get(c);
-			int grassRate = readLong(b, 0);
-			if (grassRate != 0) {
+			int walkingRate = readLong(b, 0);
+			if (walkingRate != 0) {
 				// up to 4
-				EncounterArea grassArea = new EncounterArea(readEncountersDPPt(b, 4, 12));
-				grassArea.setDisplayName(mapName + " Grass/Cave");
-				grassArea.setRate(grassRate);
-				grassArea.setMapIndex(c);
-				encounterAreas.add(grassArea);
+				EncounterArea walkingArea = new EncounterArea(readEncountersDPPt(b, 4, 12));
+				walkingArea.setDisplayName(mapName + " Grass/Cave");
+				walkingArea.setEncounterType(EncounterType.WALKING);
+				walkingArea.setRate(walkingRate);
+				walkingArea.setMapIndex(c);
+				encounterAreas.add(walkingArea);
 
 				// Time of day replacements?
 				if (useTimeOfDay) {
@@ -1334,9 +1335,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
 							Pokemon pk = pokes[pknum];
 							Encounter enc = new Encounter();
-							enc.setLevel(grassArea.get(Gen4Constants.dpptAlternateSlots[i + 2]).getLevel());
+							enc.setLevel(walkingArea.get(Gen4Constants.dpptAlternateSlots[i + 2]).getLevel());
 							enc.setPokemon(pk);
-							grassArea.add(enc);
+							walkingArea.add(enc);
 						}
 					}
 				}
@@ -1345,7 +1346,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				// Other conditional replacements (swarm, radar, GBA)
 				EncounterArea condsArea = new EncounterArea();
 				condsArea.setDisplayName(mapName + " Swarm/Radar/GBA");
-				condsArea.setRate(grassRate);
+				condsArea.setEncounterType(EncounterType.SPECIAL);
+				condsArea.setRate(walkingRate);
 				condsArea.setMapIndex(c);
 				for (int i = 0; i < 20; i++) {
 					if (i >= 2 && i <= 5) {
@@ -1357,7 +1359,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 					if (pknum >= 1 && pknum <= Gen4Constants.pokemonCount) {
 						Pokemon pk = pokes[pknum];
 						Encounter enc = new Encounter();
-						enc.setLevel(grassArea.get(Gen4Constants.dpptAlternateSlots[i]).getLevel());
+						enc.setLevel(walkingArea.get(Gen4Constants.dpptAlternateSlots[i]).getLevel());
 						enc.setPokemon(pk);
 						condsArea.add(enc);
 					}
@@ -1379,6 +1381,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 				EncounterArea seaArea = new EncounterArea(seaEncounters);
 				seaArea.setDisplayName(mapName + " " + Gen4Constants.dpptWaterSlotSetNames[i]);
+				seaArea.setEncounterType(i == 0 ? EncounterType.SURFING : EncounterType.FISHING);
 				seaArea.setMapIndex(c);
 				seaArea.setRate(rate);
 				encounterAreas.add(seaArea);
@@ -1409,6 +1412,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 		area.setDisplayName("Mt. Coronet Feebas Tiles");
+		area.setEncounterType(EncounterType.FISHING);
 		encounterAreas.add(area);
 	}
 
@@ -1438,6 +1442,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				}
 			}
 			area.setDisplayName("Honey Tree Group " + (i + 1));
+			area.setEncounterType(EncounterType.INTERACT);
 			encounterAreas.add(area);
 		}
 	}
@@ -1461,6 +1466,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 		}
 		area.setDisplayName("Trophy Garden Rotating Pokemon (via Mr. Backlot)");
+		area.setEncounterType(EncounterType.WALKING);
 		area.setForceMultipleSpecies(true); // prevents a possible softlock
 		encounterAreas.add(area);
 	}
@@ -1500,6 +1506,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			}
 			String pokedexStatus = i == 0 ? "(Post-National Dex)" : "(Pre-National Dex)";
 			area.setDisplayName("Great Marsh Rotating Pokemon " + pokedexStatus);
+			area.setEncounterType(EncounterType.WALKING);
 			encounterAreas.add(area);
 		}
 	}
@@ -1575,31 +1582,33 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			rates[4] = b[4] & 0xFF;
 			rates[5] = b[5] & 0xFF;
 			// Up to 8 after the rates
-			// Grass has to be handled on its own because the levels
+			// Walking has to be handled on its own because the levels
 			// are reused for every time of day
-			int[] grassLevels = new int[12];
+			int[] walkingLevels = new int[12];
 			for (int i = 0; i < 12; i++) {
-				grassLevels[i] = b[8 + i] & 0xFF;
+				walkingLevels[i] = b[8 + i] & 0xFF;
 			}
 			// Up to 20 now (12 for levels)
-			Pokemon[][] grassPokes = new Pokemon[3][12];
-			grassPokes[0] = readPokemonHGSS(b, 20, 12);
-			grassPokes[1] = readPokemonHGSS(b, 44, 12);
-			grassPokes[2] = readPokemonHGSS(b, 68, 12);
+			Pokemon[][] walkingPokes = new Pokemon[3][12];
+			walkingPokes[0] = readPokemonHGSS(b, 20, 12);
+			walkingPokes[1] = readPokemonHGSS(b, 44, 12);
+			walkingPokes[2] = readPokemonHGSS(b, 68, 12);
 			// Up to 92 now (12*2*3 for pokemon)
 			if (rates[0] != 0) {
 				if (!useTimeOfDay) {
 					// Just write "day" encounters
-					EncounterArea grassArea = new EncounterArea(stitchEncsToLevels(grassPokes[1], grassLevels));
-					grassArea.setRate(rates[0]);
-					grassArea.setDisplayName(mapName + " Grass/Cave");
-					encounterAreas.add(grassArea);
+					EncounterArea walkingArea = new EncounterArea(stitchEncsToLevels(walkingPokes[1], walkingLevels));
+					walkingArea.setRate(rates[0]);
+					walkingArea.setDisplayName(mapName + " Grass/Cave");
+					walkingArea.setEncounterType(EncounterType.WALKING);
+					encounterAreas.add(walkingArea);
 				} else {
 					for (int i = 0; i < 3; i++) {
-						EncounterArea grassArea = new EncounterArea(stitchEncsToLevels(grassPokes[i], grassLevels));
-						grassArea.setRate(rates[0]);
-						grassArea.setDisplayName(mapName + " " + Gen4Constants.hgssTimeOfDayNames[i] + " Grass/Cave");
-						encounterAreas.add(grassArea);
+						EncounterArea walkingArea = new EncounterArea(stitchEncsToLevels(walkingPokes[i], walkingLevels));
+						walkingArea.setRate(rates[0]);
+						walkingArea.setDisplayName(mapName + " " + Gen4Constants.hgssTimeOfDayNames[i] + " Grass/Cave");
+						walkingArea.setEncounterType(EncounterType.WALKING);
+						encounterAreas.add(walkingArea);
 					}
 				}
 			}
@@ -1609,6 +1618,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// Hoenn/Sinnoh Radio
 			EncounterArea radioArea = readOptionalEncounterAreaHGSS(b, 92, 4);
 			radioArea.setDisplayName(mapName + " Hoenn/Sinnoh Radio");
+			radioArea.setEncounterType(EncounterType.SPECIAL);
 			if (radioArea.size() > 0) {
 				encounterAreas.add(radioArea);
 			}
@@ -1622,7 +1632,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 				if (rates[i] != 0) {
 					// Valid area.
 					EncounterArea seaArea = new EncounterArea(seaEncounters);
-					seaArea.setDisplayName(mapName + " " + Gen4Constants.hgssNonGrassSetNames[i]);
+					seaArea.setDisplayName(mapName + " " + Gen4Constants.hgssNonWalkingAreaNames[i]);
+					seaArea.setEncounterType(Gen4Constants.hgssNonWalkingAreaTypes[i]);
 					seaArea.setRate(rates[i]);
 					encounterAreas.add(seaArea);
 				}
@@ -1631,18 +1642,22 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			// Swarms
 			EncounterArea swarmArea = readOptionalEncounterAreaHGSS(b, offset, 2);
 			swarmArea.setDisplayName(mapName + " Swarms");
+			swarmArea.setEncounterType(EncounterType.WALKING);
 			if (swarmArea.size() > 0) {
 				encounterAreas.add(swarmArea);
 			}
+
 			// TODO: Disable these... somehow when useTimeOfDay == false. It's tricky since I don't know what
 			//  encounters are being replaced in the usual fishing area/how it works
 			EncounterArea nightFishingReplacementArea = readOptionalEncounterAreaHGSS(b, offset + 4, 1);
 			nightFishingReplacementArea.setDisplayName(mapName + " Night Fishing Replacement");
+			nightFishingReplacementArea.setEncounterType(EncounterType.FISHING);
 			if (nightFishingReplacementArea.size() > 0) {
 				encounterAreas.add(nightFishingReplacementArea);
 			}
 			EncounterArea fishingSwarmsArea = readOptionalEncounterAreaHGSS(b, offset + 6, 1);
 			fishingSwarmsArea.setDisplayName(mapName + " Fishing Swarm");
+			fishingSwarmsArea.setEncounterType(EncounterType.FISHING);
 			if (fishingSwarmsArea.size() > 0) {
 				encounterAreas.add(fishingSwarmsArea);
 			}
@@ -1674,6 +1689,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			String mapName = headbuttMapNames.get(c);
 			EncounterArea area = readHeadbuttEncounterAreaHGSS(b, 4, 18);
 			area.setDisplayName(mapName + " Headbutt");
+			area.setEncounterType(EncounterType.INTERACT);
 
 			// Map 24 is an unused version of Route 16, but it still has valid headbutt
 			// encounter data.
@@ -1689,21 +1705,25 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		byte[] bccEncountersData = readFile(bccEncountersFile);
 		EncounterArea preNationalDexArea = readBCCEncounterAreaHGSS(bccEncountersData, 0, 10);
 		preNationalDexArea.setDisplayName("Bug Catching Contest (Pre-National Dex)");
+		preNationalDexArea.setEncounterType(EncounterType.WALKING);
 		if (preNationalDexArea.size() > 0) {
 			encounterAreas.add(preNationalDexArea);
 		}
 		EncounterArea postNationalDexTuesArea = readBCCEncounterAreaHGSS(bccEncountersData, 80, 10);
 		postNationalDexTuesArea.setDisplayName("Bug Catching Contest (Post-National Dex, Tuesdays)");
+		postNationalDexTuesArea.setEncounterType(EncounterType.WALKING);
 		if (postNationalDexTuesArea.size() > 0) {
 			encounterAreas.add(postNationalDexTuesArea);
 		}
 		EncounterArea postNationalDexThursArea = readBCCEncounterAreaHGSS(bccEncountersData, 160, 10);
 		postNationalDexThursArea.setDisplayName("Bug Catching Contest (Post-National Dex, Thursdays)");
+		postNationalDexThursArea.setEncounterType(EncounterType.WALKING);
 		if (postNationalDexThursArea.size() > 0) {
 			encounterAreas.add(postNationalDexThursArea);
 		}
 		EncounterArea postNationalDexSatArea = readBCCEncounterAreaHGSS(bccEncountersData, 240, 10);
 		postNationalDexSatArea.setDisplayName("Bug Catching Contest (Post-National Dex, Saturdays)");
+		postNationalDexSatArea.setEncounterType(EncounterType.WALKING);
 		if (postNationalDexSatArea.size() > 0) {
 			encounterAreas.add(postNationalDexSatArea);
 		}
@@ -1841,11 +1861,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		// https://github.com/magical/pokemon-encounters/blob/master/nds/encounters-gen4-sinnoh.py
 		// for the structure for this.
 		for (byte[] b : encounterData.files) {
-			int grassRate = readLong(b, 0);
-			if (grassRate != 0) {
-				// grass encounters are a-go
-				EncounterArea grassArea = areaIterator.next();
-				writeEncountersDPPt(b, 4, grassArea, 12);
+			int walkingRate = readLong(b, 0);
+			if (walkingRate != 0) {
+				// walking encounters are a-go
+				EncounterArea walkingArea = areaIterator.next();
+				writeEncountersDPPt(b, 4, walkingArea, 12);
 
 				// Time of day encounters?
 				int todEncounterSlot = 12;
@@ -1855,11 +1875,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 						// Valid time of day slot
 						if (useTimeOfDay) {
 							// Get custom randomized encounter
-							Pokemon pk = grassArea.get(todEncounterSlot++).getPokemon();
+							Pokemon pk = walkingArea.get(todEncounterSlot++).getPokemon();
 							writeLong(b, 108 + 4 * i, pk.getNumber());
 						} else {
 							// Copy the original slot's randomized encounter
-							Pokemon pk = grassArea.get(Gen4Constants.dpptAlternateSlots[i + 2]).getPokemon();
+							Pokemon pk = walkingArea.get(Gen4Constants.dpptAlternateSlots[i + 2]).getPokemon();
 							writeLong(b, 108 + 4 * i, pk.getNumber());
 						}
 					}
@@ -2042,20 +2062,20 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 			rates[4] = b[4] & 0xFF;
 			rates[5] = b[5] & 0xFF;
 			// Up to 20 after the rates & levels
-			// Grass has to be handled on its own because the levels
+			// Walking has to be handled on its own because the levels
 			// are reused for every time of day
 			if (rates[0] != 0) {
-				EncounterArea grassArea = areaIterator.next();
-				writeGrassEncounterLevelsHGSS(b, 8, grassArea);
-				writePokemonHGSS(b, 20, grassArea);
+				EncounterArea walkingArea = areaIterator.next();
+				writeWalkingEncounterLevelsHGSS(b, 8, walkingArea);
+				writePokemonHGSS(b, 20, walkingArea);
 				// either use the same area x3 for day, morning, night or get new ones for the latter 2
 				if (!useTimeOfDay) {
-					writePokemonHGSS(b, 44, grassArea);
-					writePokemonHGSS(b, 68, grassArea);
+					writePokemonHGSS(b, 44, walkingArea);
+					writePokemonHGSS(b, 68, walkingArea);
 				} else {
 					for (int i = 1; i < 3; i++) {
-						grassArea = areaIterator.next();
-						writePokemonHGSS(b, 20 + i * 24, grassArea);
+						walkingArea = areaIterator.next();
+						writePokemonHGSS(b, 20 + i * 24, walkingArea);
 					}
 				}
 			}
@@ -2145,7 +2165,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 		}
 	}
 
-	private void writeGrassEncounterLevelsHGSS(byte[] data, int offset, List<Encounter> encounters) {
+	private void writeWalkingEncounterLevelsHGSS(byte[] data, int offset, List<Encounter> encounters) {
 		int encLength = encounters.size();
 		for (int i = 0; i < encLength; i++) {
 			data[offset + i] = (byte) encounters.get(i).getLevel();
