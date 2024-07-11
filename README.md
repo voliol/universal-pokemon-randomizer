@@ -1,5 +1,7 @@
 Universal Pokemon Randomizer ZX - V branch
 
+**This branch is no longer getting updates. [See UPR FVX for continued development.](https://github.com/upr-fvx/universal-pokemon-randomizer-fvx)**
+
 Continuously based on the UPR ZX, by Ajarmar, with significant contributions from darkeye, cleartonic,
 in turn based on the Universal Pokemon Randomizer by Dabomstew
 
